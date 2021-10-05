@@ -6,7 +6,7 @@ import { map, shareReplay } from 'rxjs/operators';
 @Component({
   selector: 'bd-navigation',
   template: `
-    <mat-sidenav-container class="sidenav-container" fullscreen>
+    <mat-sidenav-container class="h-full" fullscreen>
       <mat-sidenav
         #drawer
         class="sidenav"
@@ -36,10 +36,6 @@ import { map, shareReplay } from 'rxjs/operators';
   `,
   styles: [
     `
-      .sidenav-container {
-        height: 100%;
-      }
-
       .sidenav {
         width: 200px;
       }
