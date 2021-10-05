@@ -27,6 +27,12 @@
     ]
   },
   "projects": {
+    "bulldozer-application-features-navigation": {
+      "tags": []
+    },
+    "bulldozer-application-shell": {
+      "tags": []
+    },
     "bulldozer-client": {
       "tags": []
     },

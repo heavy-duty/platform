@@ -1,6 +1,58 @@
 {
   "version": 2,
   "projects": {
+    "bulldozer-application-features-navigation": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/features/navigation",
+      "sourceRoot": "libs/bulldozer/application/features/navigation/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/features/navigation"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/features/navigation/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/features/navigation/src/**/*.ts",
+              "libs/bulldozer/application/features/navigation/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-application-shell": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/shell",
+      "sourceRoot": "libs/bulldozer/application/shell/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/application/shell"],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/shell/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/shell/src/**/*.ts",
+              "libs/bulldozer/application/shell/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "bulldozer-client": {
       "projectType": "application",
       "root": "apps/bulldozer-client",
