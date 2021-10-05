@@ -1,38 +1,11 @@
 {
   "version": 2,
   "projects": {
-    "bulldozer": {
-      "root": "apps/bulldozer",
-      "projectType": "application",
-      "targets": {
-        "build": {
-          "executor": "@danmt/nx-anchor:build",
-          "options": {
-            "projectPath": "apps/bulldozer",
-            "monitor": true
-          }
-        },
-        "test": {
-          "executor": "@danmt/nx-anchor:test",
-          "options": {
-            "projectPath": "apps/bulldozer",
-            "monitor": true
-          }
-        },
-        "deploy": {
-          "executor": "@danmt/nx-anchor:deploy",
-          "options": {
-            "projectPath": "apps/bulldozer",
-            "monitor": true
-          }
-        }
-      }
-    },
     "bulldozer-application-data-access": {
       "projectType": "library",
       "root": "libs/bulldozer/application/data-access",
       "sourceRoot": "libs/bulldozer/application/data-access/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -53,38 +26,11 @@
         }
       }
     },
-    "bulldozer-application-features-connect-wallet": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/features/connect-wallet",
-      "sourceRoot": "libs/bulldozer/application/features/connect-wallet/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/features/connect-wallet"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/features/connect-wallet/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/features/connect-wallet/src/**/*.ts",
-              "libs/bulldozer/application/features/connect-wallet/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-application-features-edit-application": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-application",
       "sourceRoot": "libs/bulldozer/application/features/edit-application/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -111,7 +57,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-argument",
       "sourceRoot": "libs/bulldozer/application/features/edit-argument/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -138,7 +84,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-attribute",
       "sourceRoot": "libs/bulldozer/application/features/edit-attribute/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -165,7 +111,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-basic-account",
       "sourceRoot": "libs/bulldozer/application/features/edit-basic-account/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -192,7 +138,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-collection",
       "sourceRoot": "libs/bulldozer/application/features/edit-collection/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -219,7 +165,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-instruction",
       "sourceRoot": "libs/bulldozer/application/features/edit-instruction/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -246,7 +192,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-program-account",
       "sourceRoot": "libs/bulldozer/application/features/edit-program-account/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -273,7 +219,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-signer-account",
       "sourceRoot": "libs/bulldozer/application/features/edit-signer-account/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -296,38 +242,11 @@
         }
       }
     },
-    "bulldozer-application-features-navigation": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/features/navigation",
-      "sourceRoot": "libs/bulldozer/application/features/navigation/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/features/navigation"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/features/navigation/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/features/navigation/src/**/*.ts",
-              "libs/bulldozer/application/features/navigation/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-application-features-view-application": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/view-application",
       "sourceRoot": "libs/bulldozer/application/features/view-application/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -354,7 +273,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/view-collection",
       "sourceRoot": "libs/bulldozer/application/features/view-collection/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -381,7 +300,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/features/view-instruction",
       "sourceRoot": "libs/bulldozer/application/features/view-instruction/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -433,7 +352,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/ui/components/page-header",
       "sourceRoot": "libs/bulldozer/application/ui/components/page-header/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -460,7 +379,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/utils/pipes/obscure-address",
       "sourceRoot": "libs/bulldozer/application/utils/pipes/obscure-address/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -487,7 +406,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/utils/pipes/sanitize-url",
       "sourceRoot": "libs/bulldozer/application/utils/pipes/sanitize-url/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -514,7 +433,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/utils/services/active-breakpoint",
       "sourceRoot": "libs/bulldozer/application/utils/services/active-breakpoint/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -667,7 +586,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/data-access",
       "sourceRoot": "libs/bulldozer/data-access/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -688,11 +607,88 @@
         }
       }
     },
+    "bulldozer-features-connect-wallet": {
+      "projectType": "library",
+      "root": "libs/bulldozer/features/connect-wallet",
+      "sourceRoot": "libs/bulldozer/features/connect-wallet/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/features/connect-wallet"],
+          "options": {
+            "jestConfig": "libs/bulldozer/features/connect-wallet/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/features/connect-wallet/src/**/*.ts",
+              "libs/bulldozer/features/connect-wallet/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-features-navigation": {
+      "projectType": "library",
+      "root": "libs/bulldozer/features/navigation",
+      "sourceRoot": "libs/bulldozer/features/navigation/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/features/navigation"],
+          "options": {
+            "jestConfig": "libs/bulldozer/features/navigation/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/features/navigation/src/**/*.ts",
+              "libs/bulldozer/features/navigation/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-programs": {
+      "root": "apps/bulldozer-programs",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@danmt/nx-anchor:build",
+          "options": {
+            "projectPath": "apps/bulldozer-programs",
+            "monitor": true
+          }
+        },
+        "test": {
+          "executor": "@danmt/nx-anchor:test",
+          "options": {
+            "projectPath": "apps/bulldozer-programs",
+            "monitor": true
+          }
+        },
+        "deploy": {
+          "executor": "@danmt/nx-anchor:deploy",
+          "options": {
+            "projectPath": "apps/bulldozer-programs",
+            "monitor": true
+          }
+        }
+      }
+    },
     "bulldozer-shell": {
       "projectType": "library",
       "root": "libs/bulldozer/shell",
       "sourceRoot": "libs/bulldozer/shell/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",

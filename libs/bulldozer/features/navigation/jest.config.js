@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'bulldozer-application-features-connect-wallet',
-  preset: '../../../../../jest.preset.js',
+  displayName: 'bulldozer-features-navigation',
+  preset: '../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -8,8 +8,7 @@ module.exports = {
       stringifyContentPathRegex: '\\.(html|svg)$',
     },
   },
-  coverageDirectory:
-    '../../../../../coverage/libs/bulldozer/application/features/connect-wallet',
+  coverageDirectory: '../../../../coverage/libs/bulldozer/features/navigation',
   transform: {
     '^.+\\.(ts|js|html)$': 'jest-preset-angular',
   },

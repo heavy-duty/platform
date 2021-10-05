@@ -2,7 +2,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
-import { ConnectWalletComponent } from '@heavy-duty/bulldozer/application/features/connect-wallet';
+import { ConnectWalletComponent } from '@heavy-duty/bulldozer/features/connect-wallet';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';

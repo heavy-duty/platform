@@ -27,11 +27,7 @@
     ]
   },
   "projects": {
-    "bulldozer": {},
     "bulldozer-application-data-access": {
-      "tags": []
-    },
-    "bulldozer-application-features-connect-wallet": {
       "tags": []
     },
     "bulldozer-application-features-edit-application": {
@@ -56,9 +52,6 @@
       "tags": []
     },
     "bulldozer-application-features-edit-signer-account": {
-      "tags": []
-    },
-    "bulldozer-application-features-navigation": {
       "tags": []
     },
     "bulldozer-application-features-view-application": {
@@ -93,6 +86,15 @@
       "implicitDependencies": ["bulldozer-client"]
     },
     "bulldozer-data-access": {
+      "tags": []
+    },
+    "bulldozer-features-connect-wallet": {
+      "tags": []
+    },
+    "bulldozer-features-navigation": {
+      "tags": []
+    },
+    "bulldozer-programs": {
       "tags": []
     },
     "bulldozer-shell": {

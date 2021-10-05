@@ -1,0 +1,1088 @@
+{
+  "version": "0.0.0",
+  "name": "bulldozer",
+  "instructions": [
+    {
+      "name": "createApplication",
+      "accounts": [
+        {
+          "name": "application",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateApplication",
+      "accounts": [
+        {
+          "name": "application",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteApplication",
+      "accounts": [
+        {
+          "name": "application",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createCollection",
+      "accounts": [
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateCollection",
+      "accounts": [
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteCollection",
+      "accounts": [
+        {
+          "name": "collection",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createCollectionAttribute",
+      "accounts": [
+        {
+          "name": "attribute",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "modifier",
+          "type": "u8"
+        },
+        {
+          "name": "size",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateCollectionAttribute",
+      "accounts": [
+        {
+          "name": "attribute",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "modifier",
+          "type": "u8"
+        },
+        {
+          "name": "size",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteCollectionAttribute",
+      "accounts": [
+        {
+          "name": "attribute",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createInstruction",
+      "accounts": [
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateInstruction",
+      "accounts": [
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstruction",
+      "accounts": [
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createInstructionArgument",
+      "accounts": [
+        {
+          "name": "argument",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "modifier",
+          "type": "u8"
+        },
+        {
+          "name": "size",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionArgument",
+      "accounts": [
+        {
+          "name": "argument",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "modifier",
+          "type": "u8"
+        },
+        {
+          "name": "size",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstructionArgument",
+      "accounts": [
+        {
+          "name": "argument",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createInstructionBasicAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionBasicAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "collection",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstructionBasicAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "createInstructionProgramAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionProgramAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "program",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstructionProgramAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Application",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Collection",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "CollectionAttribute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "collection",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "AttributeKind"
+            }
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "defined": "AttributeKindModifier"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Instruction",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionArgument",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "AttributeKind"
+            }
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "defined": "AttributeKindModifier"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionBasicAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "collection",
+            "type": "publicKey"
+          },
+          {
+            "name": "markAttribute",
+            "type": {
+              "defined": "MarkAttribute"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionSignerAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "markAttribute",
+            "type": {
+              "defined": "MarkAttribute"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionProgramAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": {
+              "array": ["u8", 32]
+            }
+          },
+          {
+            "name": "program",
+            "type": "publicKey"
+          }
+        ]
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "AttributeKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "U8",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "U16",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "U32",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "U64",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "U128",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Pubkey",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "AttributeKindModifier",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Array",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Vector",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u8"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "MarkAttribute",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Init",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Mut",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Zero",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 300,
+      "name": "InvalidAttributeKind",
+      "msg": "Invalid attribute kind"
+    },
+    {
+      "code": 301,
+      "name": "InvalidAttributeModifier",
+      "msg": "Invalid attribute modifier"
+    },
+    {
+      "code": 302,
+      "name": "InvalidMarkAttribute",
+      "msg": "Invalid mark attribute"
+    }
+  ]
+}

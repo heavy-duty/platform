@@ -1,4 +1,4 @@
-# bulldozer
+# bulldozer-programs
 
 ## Running tests
 

@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "heavy-duty",
+            "prefix": "bd",
             "style": "kebab-case"
           }
         ]

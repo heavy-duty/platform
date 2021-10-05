@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
-  selector: 'bd-shell',
-  template: ` <bd-navigation> shells </bd-navigation> `,
+  selector: 'bd-application-shell',
+  template: `<router-outlet></router-outlet>`,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellComponent {}
+export class ApplicationShellComponent {}
