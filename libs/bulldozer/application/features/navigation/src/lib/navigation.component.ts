@@ -15,7 +15,9 @@ import { map, shareReplay } from 'rxjs/operators';
         [mode]="(isHandset$ | async) ? 'over' : 'side'"
         [opened]="(isHandset$ | async) === false"
       >
-        <mat-toolbar></mat-toolbar>
+        <figure class="mt-4 w-full flex justify-center">
+          <img src="assets/images/logo.png" class="w-4/6" />
+        </figure>
         <mat-nav-list></mat-nav-list>
       </mat-sidenav>
       <mat-sidenav-content>
