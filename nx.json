@@ -14,12 +14,7 @@
     "default": {
       "runner": "@nrwl/workspace/tasks-runners/default",
       "options": {
-        "cacheableOperations": [
-          "build",
-          "lint",
-          "test",
-          "e2e"
-        ]
+        "cacheableOperations": ["build", "lint", "test", "e2e"]
       }
     }
   },
@@ -31,5 +26,19 @@
       }
     ]
   },
-  "projects": {}
+  "projects": {
+    "bulldozer-application-features-navigation": {
+      "tags": []
+    },
+    "bulldozer-application-shell": {
+      "tags": []
+    },
+    "bulldozer-client": {
+      "tags": []
+    },
+    "bulldozer-client-e2e": {
+      "tags": [],
+      "implicitDependencies": ["bulldozer-client"]
+    }
+  }
 }

@@ -1,0 +1,66 @@
+// utilities
+$success-bgcolor: #059669;
+$warning-bgcolor: #fbbf24;
+$error-bgcolor: #dc2626;
+
+$white-text-color: white;
+$black-text-color: black;
+
+@mixin snackbar-span {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+@mixin snackbar($background-color, $color, $span-content-text) {
+  background-color: $background-color !important;
+  color: $color !important;
+
+  .mat-simple-snackbar > span {
+    &::before {
+      @include snackbar-span;
+      content: $span-content-text; // TO DO: review
+    }
+  }
+}
+// end utilities
+
+body {
+  margin: 0;
+  --success-color: $success-bgcolor;
+  --warning-color: $warning-bgcolor;
+  --error-color: $error-bgcolor;
+}
+
+.smooth-transition * {
+  //refact
+  transition: background 0.3s;
+}
+
+.success-snackbar {
+  @include snackbar($success-bgcolor, $white-text-color, 'Hooray 🎉!');
+}
+
+.bg-success {
+  background-color: $success-bgcolor !important;
+}
+
+.warning-snackbar {
+  @include snackbar($warning-bgcolor, $black-text-color, 'Wee-oww 🚨!');
+}
+
+.bg-warning {
+  background-color: $warning-bgcolor !important;
+}
+
+.error-snackbar {
+  @include snackbar($error-bgcolor, $white-text-color, 'Upss 🚧!');
+}
+
+.bg-error {
+  background-color: $error-bgcolor !important;
+}
+
+input[readonly] {
+  pointer-events: none;
+}

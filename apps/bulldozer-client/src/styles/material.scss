@@ -1,0 +1,132 @@
+@use '~@angular/material' as mat;
+
+@import './themes/default-themes.scss';
+@import '~@angular/material/theming';
+
+@import 'https://fonts.googleapis.com/css?family=Material+Icons';
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400&display=swap');
+
+@include mat.core($fontConfig);
+
+$theme: set-light-theme($theme-primary, $theme-accent, $theme-warn);
+$darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
+
+// Theme Init
+@include angular-material-theme($theme);
+
+.darkMode {
+  @include angular-material-theme($darkTheme);
+}
+
+// Specific component overrides, pieces that are not in line with the general theming
+
+// Handle buttons appropriately, with respect to line-height
+.mat-raised-button,
+.mat-stroked-button,
+.mat-flat-button {
+  padding: 0 1.15em;
+  margin: 0 0.65em;
+  min-width: 3em;
+  line-height: 36.4px;
+}
+
+.mat-standard-chip {
+  padding: 0.5em 0.85em;
+  min-height: 2.5em;
+}
+
+.material-icons {
+  font-size: 24px;
+  font-family: 'Material Icons', 'Material Icons';
+  .mat-badge-content {
+    font-family: 'Roboto';
+  }
+}
+
+// Custom
+//// Handle buttons appropriately, with respect to line-height
+.mat-raised-button,
+.mat-stroked-button,
+.mat-flat-button {
+  padding: 0 1.15em;
+  margin: 0 0.65em;
+  min-width: 3em;
+  line-height: 36.4px;
+}
+
+.mat-standard-chip {
+  padding: 0.5em 0.85em;
+  min-height: 2.5em;
+}
+
+.material-icons {
+  font-size: 24px;
+  font-family: 'Material Icons', 'Material Icons';
+  .mat-badge-content {
+    font-family: 'Roboto';
+  }
+}
+
+mat-icon {
+  vertical-align: middle;
+}
+
+.mat-form-field {
+  margin-bottom: 0.5rem;
+}
+
+.mat-form-field-wrapper {
+  margin-bottom: -1.25em;
+}
+
+.mat-dialog-container {
+  padding: 1rem !important;
+}
+
+.mat-sidenav {
+  .mat-nav-list {
+    padding: 0 !important;
+
+    .mat-list-item-content {
+      padding: 0 !important;
+
+      .mat-list-text {
+        height: 100%;
+
+        .mat-line {
+          padding-left: 1rem;
+          height: 100%;
+          display: flex;
+          align-items: center;
+        }
+      }
+    }
+  }
+
+  .mat-expansion-panel-body {
+    padding: 0;
+  }
+
+  .mat-expansion-panel {
+    border-radius: 0 !important;
+  }
+
+  .mat-expansion-panel-header {
+    padding: 0rem !important;
+    padding-left: 1rem !important;
+    height: 3rem !important;
+
+    .mat-expanded {
+      height: 3rem !important;
+    }
+  }
+}
+
+.mat-tab-link a {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  padding-left: 1rem;
+  text-align: left;
+  height: 100%;
+}
