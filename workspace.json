@@ -1,7 +1,145 @@
 {
   "version": 2,
-  "projects": {},
+  "projects": {
+    "bulldozer-client": {
+      "projectType": "application",
+      "root": "apps/bulldozer-client",
+      "sourceRoot": "apps/bulldozer-client/src",
+      "prefix": "bd",
+      "targets": {
+        "build": {
+          "executor": "@angular-devkit/build-angular:browser",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/apps/bulldozer-client",
+            "index": "apps/bulldozer-client/src/index.html",
+            "main": "apps/bulldozer-client/src/main.ts",
+            "polyfills": "apps/bulldozer-client/src/polyfills.ts",
+            "tsConfig": "apps/bulldozer-client/tsconfig.app.json",
+            "inlineStyleLanguage": "scss",
+            "assets": [
+              "apps/bulldozer-client/src/favicon.ico",
+              "apps/bulldozer-client/src/assets"
+            ],
+            "styles": ["apps/bulldozer-client/src/styles.scss"],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "500kb",
+                  "maximumError": "1mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2kb",
+                  "maximumError": "4kb"
+                }
+              ],
+              "fileReplacements": [
+                {
+                  "replace": "apps/bulldozer-client/src/environments/environment.ts",
+                  "with": "apps/bulldozer-client/src/environments/environment.prod.ts"
+                }
+              ],
+              "outputHashing": "all"
+            },
+            "development": {
+              "buildOptimizer": false,
+              "optimization": false,
+              "vendorChunk": true,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "serve": {
+          "executor": "@angular-devkit/build-angular:dev-server",
+          "configurations": {
+            "production": {
+              "browserTarget": "bulldozer-client:build:production"
+            },
+            "development": {
+              "browserTarget": "bulldozer-client:build:development"
+            }
+          },
+          "defaultConfiguration": "development"
+        },
+        "extract-i18n": {
+          "executor": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "bulldozer-client:build"
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "apps/bulldozer-client/src/**/*.ts",
+              "apps/bulldozer-client/src/**/*.html"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/apps/bulldozer-client"],
+          "options": {
+            "jestConfig": "apps/bulldozer-client/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "bulldozer-client-e2e": {
+      "root": "apps/bulldozer-client-e2e",
+      "sourceRoot": "apps/bulldozer-client-e2e/src",
+      "projectType": "application",
+      "targets": {
+        "e2e": {
+          "executor": "@nrwl/cypress:cypress",
+          "options": {
+            "cypressConfig": "apps/bulldozer-client-e2e/cypress.json",
+            "devServerTarget": "bulldozer-client:serve:development",
+            "tsConfig": "apps/bulldozer-client-e2e/tsconfig.json"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "bulldozer-client:serve:production"
+            }
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["apps/bulldozer-client-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
+    }
+  },
   "cli": {
-    "defaultCollection": "@nrwl/workspace"
-  }
+    "defaultCollection": "@nrwl/angular"
+  },
+  "generators": {
+    "@nrwl/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
+    },
+    "@nrwl/angular:library": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
+    },
+    "@nrwl/angular:component": {
+      "style": "scss"
+    }
+  },
+  "defaultProject": "bulldozer-client"
 }
