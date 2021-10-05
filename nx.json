@@ -27,10 +27,19 @@
     ]
   },
   "projects": {
+    "bulldozer-application-features-connect-wallet": {
+      "tags": []
+    },
     "bulldozer-application-features-navigation": {
       "tags": []
     },
     "bulldozer-application-shell": {
+      "tags": []
+    },
+    "bulldozer-application-utils-pipes-obscure-address": {
+      "tags": []
+    },
+    "bulldozer-application-utils-pipes-sanitize-url": {
       "tags": []
     },
     "bulldozer-client": {
@@ -39,6 +48,9 @@
     "bulldozer-client-e2e": {
       "tags": [],
       "implicitDependencies": ["bulldozer-client"]
+    },
+    "shared-utils-operators": {
+      "tags": []
     }
   }
 }

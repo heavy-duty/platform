@@ -1,8 +1,10 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { ShellComponent } from './shell.component';
+import { ConnectionStore, WalletStore } from '@danmt/wallet-adapter-angular';
 import { NavigationModule } from '@heavy-duty/bulldozer/application/features/navigation';
+
+import { ShellComponent } from './shell.component';
 
 @NgModule({
   imports: [
@@ -12,5 +14,6 @@ import { NavigationModule } from '@heavy-duty/bulldozer/application/features/nav
   ],
   declarations: [ShellComponent],
   exports: [ShellComponent],
+  providers: [WalletStore, ConnectionStore],
 })
 export class ShellModule {}

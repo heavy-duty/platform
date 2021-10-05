@@ -1,6 +1,33 @@
 {
   "version": 2,
   "projects": {
+    "bulldozer-application-features-connect-wallet": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/features/connect-wallet",
+      "sourceRoot": "libs/bulldozer/application/features/connect-wallet/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/features/connect-wallet"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/features/connect-wallet/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/features/connect-wallet/src/**/*.ts",
+              "libs/bulldozer/application/features/connect-wallet/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "bulldozer-application-features-navigation": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/navigation",
@@ -48,6 +75,60 @@
             "lintFilePatterns": [
               "libs/bulldozer/application/shell/src/**/*.ts",
               "libs/bulldozer/application/shell/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-application-utils-pipes-obscure-address": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/utils/pipes/obscure-address",
+      "sourceRoot": "libs/bulldozer/application/utils/pipes/obscure-address/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/utils/pipes/obscure-address"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/utils/pipes/obscure-address/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/utils/pipes/obscure-address/src/**/*.ts",
+              "libs/bulldozer/application/utils/pipes/obscure-address/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-application-utils-pipes-sanitize-url": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/utils/pipes/sanitize-url",
+      "sourceRoot": "libs/bulldozer/application/utils/pipes/sanitize-url/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/utils/pipes/sanitize-url"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/utils/pipes/sanitize-url/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/utils/pipes/sanitize-url/src/**/*.ts",
+              "libs/bulldozer/application/utils/pipes/sanitize-url/src/**/*.html"
             ]
           }
         }
@@ -175,6 +256,28 @@
           "outputs": ["{options.outputFile}"],
           "options": {
             "lintFilePatterns": ["apps/bulldozer-client-e2e/**/*.{js,ts}"]
+          }
+        }
+      }
+    },
+    "shared-utils-operators": {
+      "root": "libs/shared/utils/operators",
+      "sourceRoot": "libs/shared/utils/operators/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/shared/utils/operators/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/utils/operators"],
+          "options": {
+            "jestConfig": "libs/shared/utils/operators/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }

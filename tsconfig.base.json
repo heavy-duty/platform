@@ -15,11 +15,23 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@heavy-duty/bulldozer/application/features/connect-wallet": [
+        "libs/bulldozer/application/features/connect-wallet/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/navigation": [
         "libs/bulldozer/application/features/navigation/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/shell": [
         "libs/bulldozer/application/shell/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/application/utils/pipes/obscure-address": [
+        "libs/bulldozer/application/utils/pipes/obscure-address/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/application/utils/pipes/sanitize-url": [
+        "libs/bulldozer/application/utils/pipes/sanitize-url/src/index.ts"
+      ],
+      "@heavy-duty/shared/utils/operators": [
+        "libs/shared/utils/operators/src/index.ts"
       ]
     }
   },
