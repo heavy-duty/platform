@@ -663,6 +663,56 @@
         }
       }
     },
+    "bulldozer-data-access": {
+      "projectType": "library",
+      "root": "libs/bulldozer/data-access",
+      "sourceRoot": "libs/bulldozer/data-access/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/data-access"],
+          "options": {
+            "jestConfig": "libs/bulldozer/data-access/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/data-access/src/**/*.ts",
+              "libs/bulldozer/data-access/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-shell": {
+      "projectType": "library",
+      "root": "libs/bulldozer/shell",
+      "sourceRoot": "libs/bulldozer/shell/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/shell"],
+          "options": {
+            "jestConfig": "libs/bulldozer/shell/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/shell/src/**/*.ts",
+              "libs/bulldozer/shell/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "shared-utils-operators": {
       "root": "libs/shared/utils/operators",
       "sourceRoot": "libs/shared/utils/operators/src",

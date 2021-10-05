@@ -72,6 +72,10 @@
       "@heavy-duty/bulldozer/application/utils/services/active-breakpoint": [
         "libs/bulldozer/application/utils/services/active-breakpoint/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/data-access": [
+        "libs/bulldozer/data-access/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/shell": ["libs/bulldozer/shell/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
         "libs/shared/utils/operators/src/index.ts"
       ]

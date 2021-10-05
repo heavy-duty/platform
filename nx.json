@@ -92,6 +92,12 @@
       "tags": [],
       "implicitDependencies": ["bulldozer-client"]
     },
+    "bulldozer-data-access": {
+      "tags": []
+    },
+    "bulldozer-shell": {
+      "tags": []
+    },
     "shared-utils-operators": {
       "tags": []
     }
