@@ -8,7 +8,7 @@
       "prefix": "bd",
       "targets": {
         "build": {
-          "executor": "@angular-devkit/build-angular:browser",
+          "executor": "@angular-builders/custom-webpack:browser",
           "outputs": ["{options.outputPath}"],
           "options": {
             "outputPath": "dist/apps/bulldozer-client",
@@ -22,7 +22,13 @@
               "apps/bulldozer-client/src/assets"
             ],
             "styles": ["apps/bulldozer-client/src/styles.scss"],
-            "scripts": []
+            "scripts": [],
+            "customWebpackConfig": {
+              "path": "apps/bulldozer-client/webpack.config.js",
+              "mergeStrategies": {
+                "externals": "replace"
+              }
+            }
           },
           "configurations": {
             "production": {
@@ -58,7 +64,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "executor": "@angular-devkit/build-angular:dev-server",
+          "executor": "@angular-builders/custom-webpack:dev-server",
           "configurations": {
             "production": {
               "browserTarget": "bulldozer-client:build:production"
