@@ -1,6 +1,33 @@
 {
   "version": 2,
   "projects": {
+    "bulldozer": {
+      "root": "apps/bulldozer",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@danmt/nx-anchor:build",
+          "options": {
+            "projectPath": "apps/bulldozer",
+            "monitor": true
+          }
+        },
+        "test": {
+          "executor": "@danmt/nx-anchor:test",
+          "options": {
+            "projectPath": "apps/bulldozer",
+            "monitor": true
+          }
+        },
+        "deploy": {
+          "executor": "@danmt/nx-anchor:deploy",
+          "options": {
+            "projectPath": "apps/bulldozer",
+            "monitor": true
+          }
+        }
+      }
+    },
     "bulldozer-application-features-connect-wallet": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/connect-wallet",

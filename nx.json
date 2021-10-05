@@ -27,6 +27,7 @@
     ]
   },
   "projects": {
+    "bulldozer": {},
     "bulldozer-application-features-connect-wallet": {
       "tags": []
     },
