@@ -101,9 +101,11 @@ import { filter, map, startWith } from 'rxjs/operators';
                 </h3>
                 <p>Kind: {{ attribute.data.kind.name }}.</p>
                 <p>
-                  Modifier: {{ attribute.data.modifier.name }} ({{
-                    attribute.data.modifier.size
-                  }}).
+                  Modifier: {{ attribute.data.modifier.name }}.
+
+                  <ng-container *ngIf="attribute.data.modifier.id !== 0">
+                    (size of {{ attribute.data.modifier.size }})
+                  </ng-container>
                 </p>
               </mat-card>
             </mat-grid-tile>
