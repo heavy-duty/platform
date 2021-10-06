@@ -1,13 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectionStore } from '@danmt/wallet-adapter-angular';
+import { ConnectionStore, WalletStore } from '@danmt/wallet-adapter-angular';
+import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-shell',
-  template: `
-    <bd-navigation>
-      <router-outlet></router-outlet>
-    </bd-navigation>
-  `,
+  template: ` <router-outlet></router-outlet> `,
+  providers: [ProgramStore, ConnectionStore, WalletStore],
 })
 export class ShellComponent implements OnInit {
   constructor(private readonly _connectionStore: ConnectionStore) {}

@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'bulldozer-features-navigation',
-  preset: '../../../../jest.preset.js',
+  displayName: 'bulldozer-application-ui-directives-page-header',
+  preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -8,7 +8,8 @@ module.exports = {
       stringifyContentPathRegex: '\\.(html|svg)$',
     },
   },
-  coverageDirectory: '../../../../coverage/libs/bulldozer/features/navigation',
+  coverageDirectory:
+    '../../../../../../coverage/libs/bulldozer/application/ui/directives/page-header',
   transform: {
     '^.+\\.(ts|js|html)$': 'jest-preset-angular',
   },

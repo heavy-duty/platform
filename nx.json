@@ -54,6 +54,9 @@
     "bulldozer-application-features-edit-signer-account": {
       "tags": []
     },
+    "bulldozer-application-features-navigation": {
+      "tags": []
+    },
     "bulldozer-application-features-view-application": {
       "tags": []
     },
@@ -66,7 +69,7 @@
     "bulldozer-application-shell": {
       "tags": []
     },
-    "bulldozer-application-ui-components-page-header": {
+    "bulldozer-application-ui-directives-page-header": {
       "tags": []
     },
     "bulldozer-application-utils-pipes-obscure-address": {
@@ -89,9 +92,6 @@
       "tags": []
     },
     "bulldozer-features-connect-wallet": {
-      "tags": []
-    },
-    "bulldozer-features-navigation": {
       "tags": []
     },
     "bulldozer-programs": {

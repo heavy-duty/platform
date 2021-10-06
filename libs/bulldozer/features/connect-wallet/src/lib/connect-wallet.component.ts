@@ -1,7 +1,7 @@
-import { Component, HostBinding } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { Component, HostBinding, Inject } from '@angular/core';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSelectionListChange } from '@angular/material/list';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { Wallet } from '@solana/wallet-adapter-wallets';
 
 @Component({
   selector: 'bd-connect-wallet',
@@ -13,7 +13,7 @@ import { WalletStore } from '@danmt/wallet-adapter-angular';
       (selectionChange)="onSelectionChange($event)"
     >
       <mat-list-option
-        *ngFor="let wallet of wallets$ | ngrxPush; last as isLast"
+        *ngFor="let wallet of data.wallets; last as isLast"
         [value]="wallet.name"
         [ngClass]="{
           'bottom-separator': !isLast
@@ -38,17 +38,18 @@ import { WalletStore } from '@danmt/wallet-adapter-angular';
 })
 export class ConnectWalletComponent {
   @HostBinding('class') class = 'block w-64 relative';
-  readonly wallets$ = this._walletStore.wallets$;
 
   constructor(
-    private readonly _walletStore: WalletStore,
-    private readonly _matDialogRef: MatDialogRef<ConnectWalletComponent>
+    private readonly _matDialogRef: MatDialogRef<ConnectWalletComponent>,
+    @Inject(MAT_DIALOG_DATA)
+    public data: {
+      wallets: Wallet[];
+    }
   ) {}
 
   onSelectionChange({ options }: MatSelectionListChange): void {
     const [option] = options;
 
-    this._walletStore.selectWallet(option.value || null);
-    this._matDialogRef.close();
+    this._matDialogRef.close(option.value || null);
   }
 }

@@ -1,1 +1,1 @@
-export * from './lib/active-breakpoint.module';
+export * from './lib/active-breakpoint.service';

@@ -42,6 +42,9 @@
       "@heavy-duty/bulldozer/application/features/edit-signer-account": [
         "libs/bulldozer/application/features/edit-signer-account/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/navigation": [
+        "libs/bulldozer/application/features/navigation/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/view-application": [
         "libs/bulldozer/application/features/view-application/src/index.ts"
       ],
@@ -54,8 +57,8 @@
       "@heavy-duty/bulldozer/application/shell": [
         "libs/bulldozer/application/shell/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/ui/components/page-header": [
-        "libs/bulldozer/application/ui/components/page-header/src/index.ts"
+      "@heavy-duty/bulldozer/application/ui/directives/page-header": [
+        "libs/bulldozer/application/ui/directives/page-header/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/utils/pipes/obscure-address": [
         "libs/bulldozer/application/utils/pipes/obscure-address/src/index.ts"
@@ -71,9 +74,6 @@
       ],
       "@heavy-duty/bulldozer/features/connect-wallet": [
         "libs/bulldozer/features/connect-wallet/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/features/navigation": [
-        "libs/bulldozer/features/navigation/src/index.ts"
       ],
       "@heavy-duty/bulldozer/shell": ["libs/bulldozer/shell/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
