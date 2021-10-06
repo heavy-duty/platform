@@ -27,14 +27,49 @@
     ]
   },
   "projects": {
-    "bulldozer": {},
-    "bulldozer-application-features-connect-wallet": {
+    "bulldozer-application-data-access": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-application": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-argument": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-attribute": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-basic-account": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-collection": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-instruction": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-program-account": {
+      "tags": []
+    },
+    "bulldozer-application-features-edit-signer-account": {
       "tags": []
     },
     "bulldozer-application-features-navigation": {
       "tags": []
     },
+    "bulldozer-application-features-view-application": {
+      "tags": []
+    },
+    "bulldozer-application-features-view-collection": {
+      "tags": []
+    },
+    "bulldozer-application-features-view-instruction": {
+      "tags": []
+    },
     "bulldozer-application-shell": {
+      "tags": []
+    },
+    "bulldozer-application-ui-directives-page-header": {
       "tags": []
     },
     "bulldozer-application-utils-pipes-obscure-address": {
@@ -43,12 +78,27 @@
     "bulldozer-application-utils-pipes-sanitize-url": {
       "tags": []
     },
+    "bulldozer-application-utils-services-active-breakpoint": {
+      "tags": []
+    },
     "bulldozer-client": {
       "tags": []
     },
     "bulldozer-client-e2e": {
       "tags": [],
       "implicitDependencies": ["bulldozer-client"]
+    },
+    "bulldozer-data-access": {
+      "tags": []
+    },
+    "bulldozer-features-connect-wallet": {
+      "tags": []
+    },
+    "bulldozer-programs": {
+      "tags": []
+    },
+    "bulldozer-shell": {
+      "tags": []
     },
     "shared-utils-operators": {
       "tags": []

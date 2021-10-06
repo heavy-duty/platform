@@ -1,11 +1,16 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
-import { ConnectWalletComponent } from '@heavy-duty/bulldozer/application/features/connect-wallet';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import {
+  ApplicationStore,
+  CollectionStore,
+  InstructionStore,
+} from '@heavy-duty/bulldozer/application/data-access';
+import {
+  Application,
+  Collection,
+  Instruction,
+} from '@heavy-duty/bulldozer/data-access';
+
+import { NavigationStore } from './navigation.store';
 
 @Component({
   selector: 'bd-navigation',
@@ -19,10 +24,44 @@ import { map, shareReplay } from 'rxjs/operators';
         [mode]="(isHandset$ | async) ? 'over' : 'side'"
         [opened]="(isHandset$ | async) === false"
       >
-        <figure class="mt-4 w-full flex justify-center">
-          <img src="assets/images/logo.png" class="w-4/6" />
-        </figure>
-        <mat-nav-list></mat-nav-list>
+        <div class="h-full flex flex-col">
+          <div class="flex-grow overflow-auto">
+            <figure class="mt-4 w-full flex justify-center">
+              <img src="assets/images/logo.png" class="w-4/6" />
+            </figure>
+
+            <mat-accordion
+              *ngIf="application$ | ngrxPush"
+              displayMode="flat"
+              togglePosition="before"
+              multi
+            >
+              <bd-collection-selector
+                [connected]="connected$ | ngrxPush"
+                [collections]="collections$ | ngrxPush"
+                (createCollection)="onCreateCollection()"
+                (updateCollection)="onUpdateCollection($event)"
+                (deleteCollection)="onDeleteCollection($event)"
+              ></bd-collection-selector>
+              <bd-instruction-selector
+                [connected]="connected$ | ngrxPush"
+                [instructions]="instructions$ | ngrxPush"
+                (createInstruction)="onCreateInstruction()"
+                (updateInstruction)="onUpdateInstruction($event)"
+                (deleteInstruction)="onDeleteInstruction($event)"
+              ></bd-instruction-selector>
+            </mat-accordion>
+          </div>
+
+          <bd-application-selector
+            [connected]="connected$ | ngrxPush"
+            [application]="application$ | ngrxPush"
+            [applications]="applications$ | ngrxPush"
+            (createApplication)="onCreateApplication()"
+            (updateApplication)="onUpdateApplication($event)"
+            (deleteApplication)="onDeleteApplication($event)"
+          ></bd-application-selector>
+        </div>
       </mat-sidenav>
       <mat-sidenav-content>
         <mat-toolbar color="primary">
@@ -79,33 +118,66 @@ import { map, shareReplay } from 'rxjs/operators';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [NavigationStore],
 })
 export class NavigationComponent {
-  readonly isHandset$: Observable<boolean> = this._breakpointObserver
-    .observe(Breakpoints.Handset)
-    .pipe(
-      map((result) => result.matches),
-      shareReplay()
-    );
-  readonly connected$ = this._walletStore.connected$;
-  readonly address$ = this._walletStore.publicKey$.pipe(
-    isNotNullOrUndefined,
-    map((publicKey) => publicKey.toBase58())
-  );
+  readonly isHandset$ = this._navigationStore.isHandset$;
+  readonly connected$ = this._navigationStore.connected$;
+  readonly address$ = this._navigationStore.address$;
+  readonly wallets$ = this._navigationStore.wallets$;
+  readonly applications$ = this._navigationStore.applications$;
+  readonly application$ = this._applicationStore.application$;
+  readonly collections$ = this._collectionStore.collections$;
+  readonly instructions$ = this._instructionStore.instructions$;
 
   constructor(
-    private readonly _breakpointObserver: BreakpointObserver,
-    private readonly _walletStore: WalletStore,
-    private readonly _matDialog: MatDialog
+    private readonly _navigationStore: NavigationStore,
+    private readonly _applicationStore: ApplicationStore,
+    private readonly _collectionStore: CollectionStore,
+    private readonly _instructionStore: InstructionStore
   ) {}
 
   onConnect() {
-    this._matDialog.open(ConnectWalletComponent);
+    this._navigationStore.connectWallet();
   }
 
   onDisconnect() {
-    if (confirm('Are you sure?')) {
-      this._walletStore.disconnect().subscribe();
-    }
+    this._navigationStore.disconnectWallet();
+  }
+
+  onCreateApplication() {
+    this._applicationStore.createApplication();
+  }
+
+  onUpdateApplication(application: Application) {
+    this._applicationStore.updateApplication(application);
+  }
+
+  onDeleteApplication(applicationId: string) {
+    this._applicationStore.deleteApplication(applicationId);
+  }
+
+  onCreateCollection() {
+    this._collectionStore.createCollection();
+  }
+
+  onUpdateCollection(collection: Collection) {
+    this._collectionStore.updateCollection(collection);
+  }
+
+  onDeleteCollection(collectionId: string) {
+    this._collectionStore.deleteCollection(collectionId);
+  }
+
+  onCreateInstruction() {
+    this._instructionStore.createInstruction();
+  }
+
+  onUpdateInstruction(instruction: Instruction) {
+    this._instructionStore.updateInstruction(instruction);
+  }
+
+  onDeleteInstruction(instructionId: string) {
+    this._instructionStore.deleteInstruction(instructionId);
   }
 }

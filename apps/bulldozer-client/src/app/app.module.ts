@@ -20,9 +20,7 @@ import { AppComponent } from './app.component';
         {
           path: '',
           loadChildren: () =>
-            import('@heavy-duty/bulldozer/application/shell').then(
-              (m) => m.ShellModule
-            ),
+            import('@heavy-duty/bulldozer/shell').then((m) => m.ShellModule),
         },
       ],
       { initialNavigation: 'enabledBlocking' }
