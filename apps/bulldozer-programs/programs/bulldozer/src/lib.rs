@@ -570,7 +570,7 @@ impl AttributeKindModifier {
         match index {
             0 => Ok(AttributeKindModifier::None { id: 0, size: 1 }),
             1 => Ok(AttributeKindModifier::Array { id: 1, size: size }),
-            2 => Ok(AttributeKindModifier::Vector { id: 2, size: 1 }),
+            2 => Ok(AttributeKindModifier::Vector { id: 2, size: size }),
             _ => Err(ErrorCode::InvalidAttributeModifier.into()),
         }
     }

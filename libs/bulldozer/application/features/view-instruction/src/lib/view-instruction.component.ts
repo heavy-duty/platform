@@ -105,11 +105,7 @@ import { filter, map, startWith } from 'rxjs/operators';
                   </mat-menu>
                 </h3>
                 <p>Kind: {{ argument.data.kind.name }}.</p>
-                <p>
-                  Modifier: {{ argument.data.modifier.name }} ({{
-                    argument.data.modifier.size
-                  }}).
-                </p>
+                <p>Modifier: {{ argument.data.modifier.name }}.</p>
               </mat-card>
             </mat-grid-tile>
           </mat-grid-list>

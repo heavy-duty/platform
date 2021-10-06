@@ -238,7 +238,7 @@ describe('bulldozer', () => {
       const attributeName = 'attr2_name';
       const attributeKind = 1;
       const attributeModifier = 2;
-      const attributeSize = 1;
+      const attributeSize = 5;
       // act
       await program.rpc.updateCollectionAttribute(
         attributeName,
@@ -453,7 +453,7 @@ describe('bulldozer', () => {
       // arrange
       const argumentName = 'new-name';
       const argumentKind = 2;
-      const argumentSize = 1;
+      const argumentSize = 5;
       const argumentModifier = 2;
       // act
       await program.rpc.updateInstructionArgument(
