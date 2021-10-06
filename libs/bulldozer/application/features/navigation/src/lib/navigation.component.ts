@@ -125,7 +125,7 @@ export class NavigationComponent {
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
   readonly wallets$ = this._navigationStore.wallets$;
-  readonly applications$ = this._applicationStore.applications$;
+  readonly applications$ = this._navigationStore.applications$;
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
