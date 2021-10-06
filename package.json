@@ -31,6 +31,7 @@
     "@solana/wallet-adapter-wallets": "^0.10.1",
     "@solana/web3.js": "^1.28.0",
     "handlebars": "^4.7.7",
+    "monaco-editor": "^0.28.1",
     "ngx-monaco-editor": "^12.0.0",
     "rxjs": "~6.6.0",
     "tslib": "^2.0.0",

@@ -1,6 +1,7 @@
 import { LayoutModule } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatExpansionModule } from '@angular/material/expansion';
@@ -15,6 +16,7 @@ import { WalletUiModule } from '@danmt/wallet-adapter-angular-material-ui';
 import { DarkThemeModule } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
+import { MonacoEditorModule } from 'ngx-monaco-editor';
 
 import { ApplicationSelectorComponent } from './application-selector.component';
 import { CollectionSelectorComponent } from './collection-selector.component';
@@ -39,6 +41,8 @@ import { NavigationComponent } from './navigation.component';
     WalletUiModule,
     ObscureAddressModule,
     DarkThemeModule,
+    FormsModule,
+    MonacoEditorModule.forRoot(),
   ],
   declarations: [
     NavigationComponent,

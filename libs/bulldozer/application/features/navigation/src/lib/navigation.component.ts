@@ -13,6 +13,8 @@ import {
 import { NavigationStore } from './navigation.store';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 
+import { currentMetadataCode } from '@heavy-duty/code-generator';
+
 @Component({
   selector: 'bd-navigation',
   template: `
@@ -133,6 +135,13 @@ export class NavigationComponent {
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
   readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
+  readonly codeTemplate$ = currentMetadataCode;
+
+  readonly editorOptions = {
+    theme: 'vs-dark',
+    language: 'rust',
+    automaticLayout: true,
+  };
 
   constructor(
     private readonly _navigationStore: NavigationStore,
