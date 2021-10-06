@@ -1,10 +1,10 @@
 import { Directive, Input } from '@angular/core';
 
 @Directive({
-  selector: '[heavyDutyDarkTheme]',
+  selector: '[dbDarkTheme]',
 })
 export class DarkThemeDirective {
-  @Input('heavyDutyDarkTheme') set darkThemeValue(value: boolean | null) {
+  @Input('dbDarkTheme') set darkThemeValue(value: boolean | null) {
     if (value !== null) {
       this.setDarkTheme(value);
     }

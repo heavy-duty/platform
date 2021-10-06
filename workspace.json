@@ -379,7 +379,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/ui/dark-theme",
       "sourceRoot": "libs/bulldozer/application/ui/dark-theme/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",

@@ -11,4 +11,4 @@ import { DarkThemeService } from './dark-theme.service';
   providers: [DarkThemeService],
   exports: [DarkThemeDirective],
 })
-export class HeavyDutyDarkThemeModule {}
+export class DarkThemeModule {}

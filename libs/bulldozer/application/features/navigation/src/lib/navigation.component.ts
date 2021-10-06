@@ -39,7 +39,7 @@ import {DarkThemeService} from '@heavy-duty/bulldozer/application/ui/dark-theme'
                 <mat-slide-toggle
                   class="mr-1"
                   (change)="toggleDarkMode(!$event.checked)"
-                  [heavyDutyDarkTheme]="isDarkThemeEnabled$ | async"
+                  [dbDarkTheme]="isDarkThemeEnabled$ | async"
                   [checked]="(isDarkThemeEnabled$ | async) === false"
                 >
                 </mat-slide-toggle>
