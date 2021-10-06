@@ -741,6 +741,28 @@
         }
       }
     },
+    "code-generator": {
+      "root": "libs/code-generator",
+      "sourceRoot": "libs/code-generator/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/code-generator/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/code-generator"],
+          "options": {
+            "jestConfig": "libs/code-generator/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
     "shared-utils-operators": {
       "root": "libs/shared/utils/operators",
       "sourceRoot": "libs/shared/utils/operators/src",

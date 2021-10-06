@@ -103,6 +103,9 @@
     "bulldozer-shell": {
       "tags": []
     },
+    "code-generator": {
+      "tags": []
+    },
     "shared-utils-operators": {
       "tags": []
     }
