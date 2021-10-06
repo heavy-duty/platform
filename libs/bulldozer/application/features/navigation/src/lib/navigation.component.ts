@@ -11,6 +11,7 @@ import {
 } from '@heavy-duty/bulldozer/data-access';
 
 import { NavigationStore } from './navigation.store';
+import {DarkThemeService} from '@heavy-duty/bulldozer/application/ui/dark-theme';
 
 @Component({
   selector: 'bd-navigation',
@@ -29,6 +30,22 @@ import { NavigationStore } from './navigation.store';
             <figure class="mt-4 w-full flex justify-center">
               <img src="assets/images/logo.png" class="w-4/6" />
             </figure>
+            <h2 class="mt-4 text-center">BULLDOZER</h2>
+            <mat-nav-list>
+              <div
+                class="w-full mb-6 flex justify-center items-center"
+              >
+                <mat-icon class="mr-1">bedtime</mat-icon>
+                <mat-slide-toggle
+                  class="mr-1"
+                  (change)="toggleDarkMode(!$event.checked)"
+                  [bdDarkTheme]="isDarkThemeEnabled$ | async"
+                  [checked]="(isDarkThemeEnabled$ | async) === false"
+                >
+                </mat-slide-toggle>
+                <mat-icon>brightness_5</mat-icon>
+              </div>
+            </mat-nav-list>
 
             <mat-accordion
               *ngIf="application$ | ngrxPush"
@@ -129,12 +146,14 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
+  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore
+    private readonly _instructionStore: InstructionStore,
+    private readonly _themeService: DarkThemeService
   ) {}
 
   onConnect() {
@@ -180,4 +199,8 @@ export class NavigationComponent {
   onDeleteInstruction(instructionId: string) {
     this._instructionStore.deleteInstruction(instructionId);
   }
+
+  toggleDarkMode(isDarkThemeEnabled: boolean) {
+    this._themeService.setDarkTheme(isDarkThemeEnabled);
+  }  
 }

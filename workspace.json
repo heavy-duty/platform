@@ -375,6 +375,31 @@
         }
       }
     },
+    "bulldozer-application-ui-dark-theme": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/ui/dark-theme",
+      "sourceRoot": "libs/bulldozer/application/ui/dark-theme/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/application/ui/dark-theme"],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/ui/dark-theme/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/ui/dark-theme/src/**/*.ts",
+              "libs/bulldozer/application/ui/dark-theme/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "bulldozer-application-ui-directives-page-header": {
       "projectType": "library",
       "root": "libs/bulldozer/application/ui/directives/page-header",
