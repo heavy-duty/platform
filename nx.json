@@ -69,6 +69,9 @@
     "bulldozer-application-shell": {
       "tags": []
     },
+    "bulldozer-application-ui-dark-theme": {
+      "tags": []
+    },
     "bulldozer-application-ui-directives-page-header": {
       "tags": []
     },

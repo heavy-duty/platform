@@ -57,6 +57,9 @@
       "@heavy-duty/bulldozer/application/shell": [
         "libs/bulldozer/application/shell/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/ui/dark-theme": [
+        "libs/bulldozer/application/ui/dark-theme/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/ui/directives/page-header": [
         "libs/bulldozer/application/ui/directives/page-header/src/index.ts"
       ],

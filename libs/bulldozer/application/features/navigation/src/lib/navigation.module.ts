@@ -8,8 +8,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
+import { HeavyDutyDarkThemeModule } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
 
@@ -26,6 +28,7 @@ import { NavigationComponent } from './navigation.component';
     MatButtonModule,
     MatDialogModule,
     MatExpansionModule,
+    MatSlideToggleModule,
     MatIconModule,
     MatListModule,
     MatMenuModule,
@@ -33,6 +36,7 @@ import { NavigationComponent } from './navigation.component';
     MatToolbarModule,
     ReactiveComponentModule,
     ObscureAddressModule,
+    HeavyDutyDarkThemeModule
   ],
   declarations: [
     NavigationComponent,
