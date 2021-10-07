@@ -528,7 +528,10 @@
               "apps/bulldozer-client/src/favicon.ico",
               "apps/bulldozer-client/src/assets"
             ],
-            "styles": ["apps/bulldozer-client/src/styles.scss"],
+            "styles": [
+              "apps/bulldozer-client/src/styles.scss",
+              "node_modules/@danmt/wallet-adapter-angular-material-ui/src/style.css"
+            ],
             "scripts": [],
             "customWebpackConfig": {
               "path": "apps/bulldozer-client/webpack.config.js",
