@@ -1,12 +1,12 @@
 import {
-  Component,
   ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
   Input,
   Output,
-  EventEmitter,
 } from '@angular/core';
-import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { generateRustCode } from '@heavy-duty/code-generator';
+import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
+import { Application } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-application-selector',
@@ -48,7 +48,7 @@ import { generateRustCode } from '@heavy-duty/code-generator';
           <mat-menu #applicationOptionsMenu="matMenu">
             <button
               mat-menu-item
-              (click)="onViewCodeApplication(application.id)"
+              (click)="openCodeEditor()"
               [disabled]="connected === false"
             >
               <mat-icon>code</mat-icon>
@@ -86,7 +86,9 @@ export class ApplicationSelectorComponent {
   @Output() updateApplication = new EventEmitter<Application>();
   @Output() deleteApplication = new EventEmitter<string>();
 
-  constructor(private readonly _programStore: ProgramStore) {}
+  constructor(
+    private readonly _codeEditorSettings: CodeEditorSettingsService
+  ) {}
 
   onCreateApplication(event: Event) {
     event.stopPropagation();
@@ -94,20 +96,8 @@ export class ApplicationSelectorComponent {
     this.createApplication.emit();
   }
 
-  onViewCodeApplication(applicationId: string) {
-    // const resp = this._programStore.getApplicationMetadata(applicationId);
-    // resp.subscribe( (data) => {
-    //   console.log(data.application);
-    //   console.log(data.collections);
-    //   console.log(data.collectionsAttribute);
-    //   const metadata = {
-    //     application: data.application,
-    //     collections: data.collections,
-    //     collectionAttributes: data.collectionsAttribute
-    //   }
-    //   generateRustCode(metadata);
-    // })
-    console.log(applicationId);
+  openCodeEditor() {
+    this._codeEditorSettings.setCodeEditorVisibility(true);
   }
 
   onEditApplication(application: Application) {

@@ -75,6 +75,9 @@
       "@heavy-duty/bulldozer/application/utils/services/active-breakpoint": [
         "libs/bulldozer/application/utils/services/active-breakpoint/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/utils/services/code-editor-settings": [
+        "libs/bulldozer/application/utils/services/code-editor-settings/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/data-access": [
         "libs/bulldozer/data-access/src/index.ts"
       ],

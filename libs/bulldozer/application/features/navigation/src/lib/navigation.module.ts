@@ -10,11 +10,13 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { WalletUiModule } from '@danmt/wallet-adapter-angular-material-ui';
 import { DarkThemeModule } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
+import { CodeEditorSettingsModule } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { MonacoEditorModule } from 'ngx-monaco-editor';
 
@@ -35,12 +37,14 @@ import { NavigationComponent } from './navigation.component';
     MatIconModule,
     MatListModule,
     MatMenuModule,
+    MatTabsModule,
     MatSidenavModule,
     MatToolbarModule,
     ReactiveComponentModule,
     WalletUiModule,
     ObscureAddressModule,
     DarkThemeModule,
+    CodeEditorSettingsModule,
     FormsModule,
     MonacoEditorModule.forRoot(),
   ],

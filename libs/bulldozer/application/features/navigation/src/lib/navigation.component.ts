@@ -4,17 +4,17 @@ import {
   CollectionStore,
   InstructionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
+import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import {
   Application,
   Collection,
   Instruction,
 } from '@heavy-duty/bulldozer/data-access';
-
-import { NavigationStore } from './navigation.store';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
-
 import { currentMetadataCode } from '@heavy-duty/code-generator';
 import { map } from 'rxjs/operators';
+
+import { NavigationStore } from './navigation.store';
 
 @Component({
   selector: 'bd-navigation',
@@ -30,7 +30,7 @@ import { map } from 'rxjs/operators';
       >
         <div class="h-full flex flex-col">
           <div class="flex-grow overflow-auto">
-            <figure class="mt-4 w-full flex justify-center">
+            <figure class="pt-4 pb-4 w-full flex justify-center bg-white">
               <img src="assets/images/logo.png" class="w-4/6" />
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
@@ -102,7 +102,20 @@ import { map } from 'rxjs/operators';
           <div class="flex-auto">
             <ng-content></ng-content>
           </div>
-          <div class="flex-1 overflow-hidden" *ngIf="application$ | ngrxPush">
+          <div
+            class="code-editor-container overflow-hidden"
+            [ngClass]="{ closed: !(isCodeEditorVisible$ | ngrxPush) }"
+          >
+            <nav mat-tab-nav-bar class="nav-toolbar-code-editor">
+              <div class="toolbar-code-editor flex justify-end w-full">
+                <div
+                  class="flex items-center cursor-pointer pr-4"
+                  (click)="closeCodeEditor()"
+                >
+                  <mat-icon>close</mat-icon>
+                </div>
+              </div>
+            </nav>
             <ngx-monaco-editor
               class="custom-monaco-editor"
               [options]="editorOptions$ | ngrxPush"
@@ -121,6 +134,28 @@ import { map } from 'rxjs/operators';
 
       .sidenav .mat-toolbar {
         background: inherit;
+      }
+
+      .mat-toolbar.mat-primary {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+      }
+
+      .code-editor-container {
+        flex: 1 1 0% !important;
+      }
+
+      .code-editor-container.closed {
+        flex: 0 !important;
+      }
+
+      .nav-toolbar-code-editor {
+        border-left: 1px solid gray;
+      }
+
+      .toolbar-code-editor {
+        height: 48px !important;
       }
     `,
   ],
@@ -144,13 +179,15 @@ export class NavigationComponent {
       automaticLayout: true,
     }))
   );
+  readonly isCodeEditorVisible$ = this._codeEditorSettings.isCodeEditorVisible$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _themeService: DarkThemeService,
+    private readonly _codeEditorSettings: CodeEditorSettingsService
   ) {}
 
   onCreateApplication() {
@@ -191,5 +228,9 @@ export class NavigationComponent {
 
   toggleDarkMode(isDarkThemeEnabled: boolean) {
     this._themeService.setDarkTheme(isDarkThemeEnabled);
+  }
+
+  closeCodeEditor() {
+    this._codeEditorSettings.setCodeEditorVisibility(false);
   }
 }

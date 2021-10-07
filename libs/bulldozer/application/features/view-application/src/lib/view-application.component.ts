@@ -4,7 +4,7 @@ import {
   ApplicationStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
@@ -39,11 +39,11 @@ import { filter, map } from 'rxjs/operators';
           </div>
         </div>
         <div
-          *ngIf="tabs$ | ngrxPush"
           class="flex items-center cursor-pointer"
-          (click)="onViewCodeApplication()"
+          (click)="openCodeEditor()"
         >
-          <mat-icon>code</mat-icon> <span class="pl-2 pr-4">View code</span>
+          <mat-icon>code</mat-icon>
+          <span class="pl-2 pr-4">View code</span>
         </div>
       </div>
     </nav>
@@ -62,7 +62,7 @@ export class ViewApplicationComponent implements OnInit {
     private readonly _applicationStore: ApplicationStore,
     private readonly _route: ActivatedRoute,
     private readonly _tabsStore: TabsStore,
-    private readonly _programStore: ProgramStore
+    private readonly _codeEditorSettings: CodeEditorSettingsService
   ) {}
 
   ngOnInit() {
@@ -80,12 +80,7 @@ export class ViewApplicationComponent implements OnInit {
     this._tabsStore.closeTab(tabId);
   }
 
-  onViewCodeApplication() {
-    // const resp = this._programStore.getApplicationMetadata(applicationId);
-    // resp.subscribe((data) => {
-    //   console.log(data);
-    //   //generateRustCode(metadata);
-    // });
-    console.log('aaa');
+  openCodeEditor() {
+    this._codeEditorSettings.setCodeEditorVisibility(true);
   }
 }
