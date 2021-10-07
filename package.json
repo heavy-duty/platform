@@ -42,6 +42,8 @@
     "@angular-eslint/template-parser": "~12.3.0",
     "@angular/compiler-cli": "^12.2.9",
     "@angular/language-service": "^12.2.9",
+    "@commitlint/cli": "^13.2.0",
+    "@commitlint/config-conventional": "^13.2.0",
     "@danmt/nx-anchor": "0.0.6",
     "@ngneat/tailwind": "^7.0.3",
     "@nrwl/cli": "12.9.0",
