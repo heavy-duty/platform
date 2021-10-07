@@ -66,5 +66,9 @@ input[readonly] {
 }
 
 .custom-monaco-editor {
-  height: 300px !important;
+  height: calc(100vh - 64px) !important;
+}
+
+.editor-container {
+  height: 100% !important;
 }

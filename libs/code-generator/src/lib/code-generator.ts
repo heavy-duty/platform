@@ -10,38 +10,38 @@ const _metadatacode = new BehaviorSubject<string>('Your code will be here');
 const formatMetadata = (metadata: IMetadata) => {
   try {
     const collectionsMetadata = metadata.collections.map((collection) => {
-      const formatedInstructions = metadata.instructions
-        .filter((instruction) => instruction.data.collection === collection.id)
-        .map((instruction) => {
-          const resp = {
-            name: formatName(instruction.data.name),
-            arguments: metadata.instructionArguments
-              .filter(
-                (argument) => argument.data.instruction === instruction.id
-              )
-              .map((argument) => {
-                return {
-                  id: argument.id,
-                  data: {
-                    ...argument.data,
-                    name: formatName(argument.data.name),
-                  },
-                };
-              }),
-            accounts: metadata.instructionAccounts
-              .filter((account) => account.data.instruction === instruction.id)
-              .map((account) => {
-                return {
-                  id: account.id,
-                  data: {
-                    ...account.data,
-                    name: formatName(account.data.name),
-                  },
-                };
-              }),
-          };
-          return resp;
-        });
+      // const formatedInstructions = metadata.instructions
+      //   .filter((instruction) => instruction.data.collection === collection.id)
+      //   .map((instruction) => {
+      //     const resp = {
+      //       name: formatName(instruction.data.name),
+      //       arguments: metadata.instructionArguments
+      //         .filter(
+      //           (argument) => argument.data.instruction === instruction.id
+      //         )
+      //         .map((argument) => {
+      //           return {
+      //             id: argument.id,
+      //             data: {
+      //               ...argument.data,
+      //               name: formatName(argument.data.name),
+      //             },
+      //           };
+      //         }),
+      //       accounts: metadata.instructionAccounts
+      //         .filter((account) => account.data.instruction === instruction.id)
+      //         .map((account) => {
+      //           return {
+      //             id: account.id,
+      //             data: {
+      //               ...account.data,
+      //               name: formatName(account.data.name),
+      //             },
+      //           };
+      //         }),
+      //     };
+      //     return resp;
+      //   });
 
       const formatedCollection = {
         name: formatName(collection.data.name),
@@ -56,7 +56,7 @@ const formatMetadata = (metadata: IMetadata) => {
               },
             };
           }),
-        instructions: formatedInstructions,
+        // instructions: formatedInstructions,
       };
       return formatedCollection;
     });

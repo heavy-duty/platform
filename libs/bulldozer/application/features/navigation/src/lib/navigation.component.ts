@@ -14,6 +14,7 @@ import { NavigationStore } from './navigation.store';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 
 import { currentMetadataCode } from '@heavy-duty/code-generator';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'bd-navigation',
@@ -136,12 +137,16 @@ export class NavigationComponent {
   readonly instructions$ = this._instructionStore.instructions$;
   readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
   readonly codeTemplate$ = currentMetadataCode;
+  readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map(
+      (isDarkThemeEnabled) => ({
+        theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+        language: 'rust',
+        automaticLayout: true,
+      })
+    )
+  );
 
-  readonly editorOptions = {
-    theme: 'vs-dark',
-    language: 'rust',
-    automaticLayout: true,
-  };
 
   constructor(
     private readonly _navigationStore: NavigationStore,

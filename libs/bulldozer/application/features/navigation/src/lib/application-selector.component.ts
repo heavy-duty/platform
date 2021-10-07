@@ -5,7 +5,8 @@ import {
   Output,
   EventEmitter,
 } from '@angular/core';
-import { Application } from '@heavy-duty/bulldozer/data-access';
+import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { generateRustCode } from '@heavy-duty/code-generator';
 
 @Component({
   selector: 'bd-application-selector',
@@ -47,6 +48,14 @@ import { Application } from '@heavy-duty/bulldozer/data-access';
           <mat-menu #applicationOptionsMenu="matMenu">
             <button
               mat-menu-item
+              (click)="onViewCodeApplication(application.id)"
+              [disabled]="connected === false"
+            >
+              <mat-icon>code</mat-icon>
+              <span>View code</span>
+            </button>
+            <button
+              mat-menu-item
               (click)="onEditApplication(application)"
               [disabled]="connected === false"
             >
@@ -77,10 +86,27 @@ export class ApplicationSelectorComponent {
   @Output() updateApplication = new EventEmitter<Application>();
   @Output() deleteApplication = new EventEmitter<string>();
 
+  constructor(private readonly _programStore: ProgramStore) {}
+
   onCreateApplication(event: Event) {
     event.stopPropagation();
     event.preventDefault();
     this.createApplication.emit();
+  }
+
+  onViewCodeApplication(applicationId: string) {
+    const resp = this._programStore.getApplicationMetadata(applicationId);
+    resp.subscribe( (data) => {
+      console.log(data.application);
+      console.log(data.collections);
+      console.log(data.collectionsAttribute);
+      const metadata = {
+        application: data.application,
+        collections: data.collections,
+        collectionAttributes: data.collectionsAttribute
+      }
+      generateRustCode(metadata);
+    })
   }
 
   onEditApplication(application: Application) {
