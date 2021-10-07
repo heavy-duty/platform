@@ -1,4 +1,4 @@
-import {IFormatedName} from './types';
+import { IFormatedName } from './types';
 
 export const toCamelCase = (str: string) => {
   return str

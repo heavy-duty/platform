@@ -38,7 +38,11 @@ import { filter, map } from 'rxjs/operators';
             </button>
           </div>
         </div>
-        <div *ngIf="tabs$ | ngrxPush" class="flex items-center cursor-pointer" (click)="onViewCodeApplication()">
+        <div
+          *ngIf="tabs$ | ngrxPush"
+          class="flex items-center cursor-pointer"
+          (click)="onViewCodeApplication()"
+        >
           <mat-icon>code</mat-icon> <span class="pl-2 pr-4">View code</span>
         </div>
       </div>
@@ -82,6 +86,6 @@ export class ViewApplicationComponent implements OnInit {
     //   console.log(data);
     //   //generateRustCode(metadata);
     // });
-    console.log("aaa")
+    console.log('aaa');
   }
 }

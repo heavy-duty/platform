@@ -19,7 +19,8 @@ export interface CollectionAttribute {
   data: CollectionAttributeInfo;
 }
 
-export interface CollectionAttributeInfoExt extends Omit<CollectionAttributeInfo, 'name'>{
+export interface CollectionAttributeInfoExt
+  extends Omit<CollectionAttributeInfo, 'name'> {
   name: IFormatedName;
 }
 
@@ -47,7 +48,8 @@ export interface InstructionArgument {
   data: InstructionArgumentInfo;
 }
 
-export interface InstructionArgumentInfoExt extends Omit<InstructionArgumentInfo, 'name'> {
+export interface InstructionArgumentInfoExt
+  extends Omit<InstructionArgumentInfo, 'name'> {
   name: IFormatedName;
 }
 
@@ -71,7 +73,8 @@ export interface InstructionAccount {
   data: InstructionAccountInfo;
 }
 
-export interface InstructionAccountInfoExt extends  Omit<InstructionAccountInfo, 'name'> {
+export interface InstructionAccountInfoExt
+  extends Omit<InstructionAccountInfo, 'name'> {
   name: IFormatedName;
 }
 
@@ -90,7 +93,7 @@ export interface IProgramAppCollections {
   }[];
 }
 
-export interface IProgramAppCollectionsExt { 
+export interface IProgramAppCollectionsExt {
   name: IFormatedName;
   attributes: CollectionAttributeExt[];
   instructions: {
@@ -168,4 +171,3 @@ export interface IGenerateFileResponse {
   status: boolean;
   data?: string;
 }
-

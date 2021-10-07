@@ -138,15 +138,12 @@ export class NavigationComponent {
   readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
   readonly codeTemplate$ = currentMetadataCode;
   readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
-    map(
-      (isDarkThemeEnabled) => ({
-        theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-        language: 'rust',
-        automaticLayout: true,
-      })
-    )
+    map((isDarkThemeEnabled) => ({
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      language: 'rust',
+      automaticLayout: true,
+    }))
   );
-
 
   constructor(
     private readonly _navigationStore: NavigationStore,

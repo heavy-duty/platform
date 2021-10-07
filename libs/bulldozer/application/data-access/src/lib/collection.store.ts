@@ -47,11 +47,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     this.collectionId$,
     this.attributes$,
     (collections, collectionId, attributes) => {
-
-      const collection = collections.find((collection) => collection.id === collectionId)
+      const collection = collections.find(
+        (collection) => collection.id === collectionId
+      );
 
       // return getCollectionRustCode(collection,attributes);
-      return "x";
+      return 'x';
     }
   );
 
