@@ -94,7 +94,19 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
             color="accent"
           ></wallet-multi-button>
         </mat-toolbar>
-        <ng-content></ng-content>
+
+        <div class="flex">
+          <div class="flex-auto">
+            <ng-content></ng-content>
+          </div>
+          <div class="flex-1 overflow-hidden" *ngIf="application$ | ngrxPush">
+            <ngx-monaco-editor
+              class="custom-monaco-editor"
+              [options]="editorOptions$ | ngrxPush"
+              [ngModel]="codeTemplate$ | ngrxPush"
+            ></ngx-monaco-editor>
+          </div>
+        </div>
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
