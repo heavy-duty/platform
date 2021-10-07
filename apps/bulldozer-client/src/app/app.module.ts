@@ -6,6 +6,8 @@ import { WALLET_CONFIG } from '@danmt/wallet-adapter-angular';
 import {
   getPhantomWallet,
   getSolletWallet,
+  getSlopeWallet,
+  getSolflareWallet,
 } from '@solana/wallet-adapter-wallets';
 
 import { AppComponent } from './app.component';
@@ -30,7 +32,12 @@ import { AppComponent } from './app.component';
     {
       provide: WALLET_CONFIG,
       useValue: {
-        wallets: [getPhantomWallet(), getSolletWallet()],
+        wallets: [
+          getPhantomWallet(),
+          getSolletWallet(),
+          getSlopeWallet(),
+          getSolflareWallet(),
+        ],
         autoConnect: true,
       },
     },

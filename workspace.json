@@ -659,31 +659,6 @@
         }
       }
     },
-    "bulldozer-features-connect-wallet": {
-      "projectType": "library",
-      "root": "libs/bulldozer/features/connect-wallet",
-      "sourceRoot": "libs/bulldozer/features/connect-wallet/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/bulldozer/features/connect-wallet"],
-          "options": {
-            "jestConfig": "libs/bulldozer/features/connect-wallet/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/features/connect-wallet/src/**/*.ts",
-              "libs/bulldozer/features/connect-wallet/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-programs": {
       "root": "apps/bulldozer-programs",
       "projectType": "application",

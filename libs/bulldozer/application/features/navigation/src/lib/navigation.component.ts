@@ -11,7 +11,7 @@ import {
 } from '@heavy-duty/bulldozer/data-access';
 
 import { NavigationStore } from './navigation.store';
-import {DarkThemeService} from '@heavy-duty/bulldozer/application/ui/dark-theme';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 
 @Component({
   selector: 'bd-navigation',
@@ -32,9 +32,7 @@ import {DarkThemeService} from '@heavy-duty/bulldozer/application/ui/dark-theme'
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
             <mat-nav-list>
-              <div
-                class="w-full mb-6 flex justify-center items-center"
-              >
+              <div class="w-full mb-6 flex justify-center items-center">
                 <mat-icon class="mr-1">bedtime</mat-icon>
                 <mat-slide-toggle
                   class="mr-1"
@@ -91,27 +89,10 @@ import {DarkThemeService} from '@heavy-duty/bulldozer/application/ui/dark-theme'
           >
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
-          <ng-container *ngrxLet="connected$; let connected">
-            <div *ngIf="!connected" class="ml-auto">
-              <button mat-raised-button color="accent" (click)="onConnect()">
-                Connect
-              </button>
-            </div>
-
-            <div *ngIf="connected" class="ml-auto flex items-center">
-              <ng-container *ngIf="address$ | ngrxPush as address">
-                {{ address | obscureAddress }}
-              </ng-container>
-              <button
-                mat-raised-button
-                color="warn"
-                class="ml-4"
-                (click)="onDisconnect()"
-              >
-                Disconnect
-              </button>
-            </div>
-          </ng-container>
+          <wallet-multi-button
+            class="ml-auto"
+            color="accent"
+          ></wallet-multi-button>
         </mat-toolbar>
         <ng-content></ng-content>
       </mat-sidenav-content>
@@ -141,7 +122,6 @@ export class NavigationComponent {
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
-  readonly wallets$ = this._navigationStore.wallets$;
   readonly applications$ = this._navigationStore.applications$;
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
@@ -155,14 +135,6 @@ export class NavigationComponent {
     private readonly _instructionStore: InstructionStore,
     private readonly _themeService: DarkThemeService
   ) {}
-
-  onConnect() {
-    this._navigationStore.connectWallet();
-  }
-
-  onDisconnect() {
-    this._navigationStore.disconnectWallet();
-  }
 
   onCreateApplication() {
     this._applicationStore.createApplication();
@@ -202,5 +174,5 @@ export class NavigationComponent {
 
   toggleDarkMode(isDarkThemeEnabled: boolean) {
     this._themeService.setDarkTheme(isDarkThemeEnabled);
-  }  
+  }
 }

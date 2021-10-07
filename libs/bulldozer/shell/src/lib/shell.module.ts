@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { ConnectionStore, WalletStore } from '@danmt/wallet-adapter-angular';
 
 import { ShellComponent } from './shell.component';
 
@@ -28,5 +29,6 @@ import { ShellComponent } from './shell.component';
       },
     ]),
   ],
+  providers: [ConnectionStore, WalletStore],
 })
 export class ShellModule {}
