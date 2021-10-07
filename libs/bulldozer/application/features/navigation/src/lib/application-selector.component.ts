@@ -95,18 +95,19 @@ export class ApplicationSelectorComponent {
   }
 
   onViewCodeApplication(applicationId: string) {
-    const resp = this._programStore.getApplicationMetadata(applicationId);
-    resp.subscribe( (data) => {
-      console.log(data.application);
-      console.log(data.collections);
-      console.log(data.collectionsAttribute);
-      const metadata = {
-        application: data.application,
-        collections: data.collections,
-        collectionAttributes: data.collectionsAttribute
-      }
-      generateRustCode(metadata);
-    })
+    // const resp = this._programStore.getApplicationMetadata(applicationId);
+    // resp.subscribe( (data) => {
+    //   console.log(data.application);
+    //   console.log(data.collections);
+    //   console.log(data.collectionsAttribute);
+    //   const metadata = {
+    //     application: data.application,
+    //     collections: data.collections,
+    //     collectionAttributes: data.collectionsAttribute
+    //   }
+    //   generateRustCode(metadata);
+    // })
+    console.log(applicationId);
   }
 
   onEditApplication(application: Application) {
