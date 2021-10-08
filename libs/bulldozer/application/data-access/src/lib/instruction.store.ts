@@ -237,7 +237,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly createInstructionArgument = this.effect((action$) =>
+  readonly createArgument = this.effect((action$) =>
     action$.pipe(
       exhaustMap(() =>
         this._matDialog
@@ -276,7 +276,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateInstructionArgument = this.effect(
+  readonly updateArgument = this.effect(
     (argument$: Observable<InstructionArgument>) =>
       argument$.pipe(
         exhaustMap((argument) =>
@@ -308,21 +308,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly deleteInstructionArgument = this.effect(
-    (argumentId$: Observable<string>) =>
-      argumentId$.pipe(
-        concatMap((argumentId) =>
-          this._programStore.deleteInstructionArgument(argumentId).pipe(
-            tapResponse(
-              () => this._reload.next(null),
-              (error) => this._error.next(error)
-            )
+  readonly deleteArgument = this.effect((argumentId$: Observable<string>) =>
+    argumentId$.pipe(
+      concatMap((argumentId) =>
+        this._programStore.deleteInstructionArgument(argumentId).pipe(
+          tapResponse(
+            () => this._reload.next(null),
+            (error) => this._error.next(error)
           )
         )
       )
+    )
   );
 
-  readonly createInstructionBasicAccount = this.effect((action$) =>
+  readonly createBasicAccount = this.effect((action$) =>
     action$.pipe(
       concatMap(() =>
         of(null).pipe(withLatestFrom(this._collectionStore.collections$))
@@ -363,7 +362,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateInstructionBasicAccount = this.effect(
+  readonly updateBasicAccount = this.effect(
     (account$: Observable<InstructionBasicAccount>) =>
       account$.pipe(
         concatMap((account) =>
@@ -397,21 +396,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly deleteInstructionBasicAccount = this.effect(
-    (accountId$: Observable<string>) =>
-      accountId$.pipe(
-        concatMap((accountId) =>
-          this._programStore.deleteInstructionBasicAccount(accountId).pipe(
-            tapResponse(
-              () => this._reload.next(null),
-              (error) => this._error.next(error)
-            )
+  readonly deleteBasicAccount = this.effect((accountId$: Observable<string>) =>
+    accountId$.pipe(
+      concatMap((accountId) =>
+        this._programStore.deleteInstructionBasicAccount(accountId).pipe(
+          tapResponse(
+            () => this._reload.next(null),
+            (error) => this._error.next(error)
           )
         )
       )
+    )
   );
 
-  readonly createInstructionSignerAccount = this.effect((action$) =>
+  readonly createSignerAccount = this.effect((action$) =>
     action$.pipe(
       exhaustMap(() =>
         this._matDialog
@@ -444,7 +442,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateInstructionSignerAccount = this.effect(
+  readonly updateSignerAccount = this.effect(
     (account$: Observable<InstructionSignerAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
@@ -474,21 +472,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly deleteInstructionSignerAccount = this.effect(
-    (accountId$: Observable<string>) =>
-      accountId$.pipe(
-        concatMap((accountId) =>
-          this._programStore.deleteInstructionSignerAccount(accountId).pipe(
-            tapResponse(
-              () => this._reload.next(null),
-              (error) => this._error.next(error)
-            )
+  readonly deleteSignerAccount = this.effect((accountId$: Observable<string>) =>
+    accountId$.pipe(
+      concatMap((accountId) =>
+        this._programStore.deleteInstructionSignerAccount(accountId).pipe(
+          tapResponse(
+            () => this._reload.next(null),
+            (error) => this._error.next(error)
           )
         )
       )
+    )
   );
 
-  readonly createInstructionProgramAccount = this.effect((action$) =>
+  readonly createProgramAccount = this.effect((action$) =>
     action$.pipe(
       exhaustMap(() =>
         this._matDialog
@@ -529,7 +526,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateInstructionProgramAccount = this.effect(
+  readonly updateProgramAccount = this.effect(
     (account$: Observable<InstructionProgramAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
@@ -563,7 +560,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly deleteInstructionProgramAccount = this.effect(
+  readonly deleteProgramAccount = this.effect(
     (accountId$: Observable<string>) =>
       accountId$.pipe(
         concatMap((accountId) =>

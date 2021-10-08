@@ -63,6 +63,9 @@
       "@heavy-duty/bulldozer/application/ui/directives/page-header": [
         "libs/bulldozer/application/ui/directives/page-header/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/ui/directives/section-header": [
+        "libs/bulldozer/application/ui/directives/section-header/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/utils/pipes/obscure-address": [
         "libs/bulldozer/application/utils/pipes/obscure-address/src/index.ts"
       ],

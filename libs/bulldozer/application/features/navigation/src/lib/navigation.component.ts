@@ -79,7 +79,7 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
         </div>
       </mat-sidenav>
       <mat-sidenav-content>
-        <mat-toolbar color="primary">
+        <mat-toolbar color="primary" class="shadow-xl sticky top-0 z-10">
           <button
             type="button"
             aria-label="Toggle sidenav"
@@ -106,12 +106,6 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
 
       .sidenav .mat-toolbar {
         background: inherit;
-      }
-
-      .mat-toolbar.mat-primary {
-        position: sticky;
-        top: 0;
-        z-index: 1;
       }
     `,
   ],
