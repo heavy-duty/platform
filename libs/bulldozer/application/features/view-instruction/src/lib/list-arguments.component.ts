@@ -11,7 +11,7 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
   selector: 'bd-list-arguments',
   template: `
     <section>
-      <mat-card class="mb-4">
+      <mat-card>
         <header bdSectionHeader>
           <h2>Arguments</h2>
           <p>Visualize the list of arguments and manage them.</p>
@@ -61,7 +61,7 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
               <mat-menu #argumentMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateInstructionArgument(argument)"
+                  (click)="onUpdateArgument(argument)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
@@ -69,7 +69,7 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionArgument(argument.id)"
+                  (click)="onDeleteArgument(argument.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -95,11 +95,11 @@ export class ListArgumentsComponent {
   @Output() updateArgument = new EventEmitter<InstructionArgument>();
   @Output() deleteArgument = new EventEmitter<string>();
 
-  onUpdateInstructionArgument(argument: InstructionArgument) {
+  onUpdateArgument(argument: InstructionArgument) {
     this.updateArgument.emit(argument);
   }
 
-  onDeleteInstructionArgument(argumentId: string) {
+  onDeleteArgument(argumentId: string) {
     this.deleteArgument.emit(argumentId);
   }
 }

@@ -47,6 +47,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 
     <main>
       <bd-list-arguments
+        class="block mb-4"
         [connected]="connected$ | ngrxPush"
         [arguments]="arguments$ | ngrxPush"
         (updateArgument)="onUpdateArgument($event)"
@@ -54,6 +55,7 @@ import { filter, map, startWith } from 'rxjs/operators';
       ></bd-list-arguments>
 
       <bd-list-accounts
+        class="block mb-16"
         [connected]="connected$ | ngrxPush"
         [accountsCount]="accountsCount$ | ngrxPush"
         [basicAccounts]="basicAccounts$ | ngrxPush"

@@ -15,7 +15,7 @@ import {
   selector: 'bd-list-accounts',
   template: `
     <section>
-      <mat-card class="mb-16">
+      <mat-card>
         <header bdSectionHeader>
           <h2>Accounts</h2>
           <p>Visualize the list of accounts and manage them.</p>
@@ -70,7 +70,7 @@ import {
               <mat-menu #basicAccountMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateInstructionBasicAccount(account)"
+                  (click)="onUpdateBasicAccount(account)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
@@ -78,7 +78,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionBasicAccount(account.id)"
+                  (click)="onDeleteBasicAccount(account.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -120,7 +120,7 @@ import {
               <mat-menu #signerAccountMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateInstructionSignerAccount(account)"
+                  (click)="onUpdateSignerAccount(account)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
@@ -128,7 +128,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionSignerAccount(account.id)"
+                  (click)="onDeleteSignerAccount(account.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -170,7 +170,7 @@ import {
               <mat-menu #programAccountMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateInstructionProgramAccount(account)"
+                  (click)="onUpdateProgramAccount(account)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
@@ -178,7 +178,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionProgramAccount(account.id)"
+                  (click)="onDeleteProgramAccount(account.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -212,27 +212,27 @@ export class ListAccountsComponent {
     new EventEmitter<InstructionProgramAccount>();
   @Output() deleteProgramAccount = new EventEmitter<string>();
 
-  onUpdateInstructionBasicAccount(account: InstructionBasicAccount) {
+  onUpdateBasicAccount(account: InstructionBasicAccount) {
     this.updateBasicAccount.emit(account);
   }
 
-  onDeleteInstructionBasicAccount(accountId: string) {
+  onDeleteBasicAccount(accountId: string) {
     this.deleteBasicAccount.emit(accountId);
   }
 
-  onUpdateInstructionSignerAccount(account: InstructionSignerAccount) {
+  onUpdateSignerAccount(account: InstructionSignerAccount) {
     this.updateSignerAccount.emit(account);
   }
 
-  onDeleteInstructionSignerAccount(accountId: string) {
+  onDeleteSignerAccount(accountId: string) {
     this.deleteSignerAccount.emit(accountId);
   }
 
-  onUpdateInstructionProgramAccount(account: InstructionProgramAccount) {
+  onUpdateProgramAccount(account: InstructionProgramAccount) {
     this.updateProgramAccount.emit(account);
   }
 
-  onDeleteInstructionProgramAccount(accountId: string) {
+  onDeleteProgramAccount(accountId: string) {
     this.deleteProgramAccount.emit(accountId);
   }
 }
