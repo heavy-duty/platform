@@ -3,15 +3,16 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatGridListModule } from '@angular/material/grid-list';
 import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSelectModule } from '@angular/material/select';
 import { RouterModule } from '@angular/router';
 import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
+import { SectionHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/section-header';
 import { ReactiveComponentModule } from '@ngrx/component';
 
+import { CollectionMenuComponent } from './collection-menu.component';
+import { ListAttributesComponent } from './list-attributes.component';
 import { ViewCollectionComponent } from './view-collection.component';
 
 @NgModule({
@@ -23,14 +24,17 @@ import { ViewCollectionComponent } from './view-collection.component';
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
-    MatExpansionModule,
-    MatGridListModule,
     MatIconModule,
+    MatListModule,
     MatMenuModule,
-    MatSelectModule,
     ReactiveComponentModule,
     PageHeaderModule,
+    SectionHeaderModule,
   ],
-  declarations: [ViewCollectionComponent],
+  declarations: [
+    ViewCollectionComponent,
+    ListAttributesComponent,
+    CollectionMenuComponent,
+  ],
 })
 export class ViewCollectionModule {}
