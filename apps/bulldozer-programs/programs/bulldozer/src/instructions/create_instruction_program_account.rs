@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::collections::{Application, Instruction, InstructionProgramAccount};
-use crate::utils::{parse_string};
+use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
 #[instruction(name: String)]
@@ -25,7 +25,7 @@ pub fn handler(ctx: Context<CreateInstructionProgramAccount>, name: String) -> P
     ctx.accounts.account.authority = ctx.accounts.authority.key();
     ctx.accounts.account.application = ctx.accounts.application.key();
     ctx.accounts.account.instruction = ctx.accounts.instruction.key();
-    ctx.accounts.account.name = parse_string(name);
+    ctx.accounts.account.name = vectorize_string(name, 32);
     ctx.accounts.account.program = ctx.accounts.program.key();
     Ok(())
 }

@@ -24,9 +24,7 @@ export const ApplicationParser = (
   return {
     id: publicKey.toBase58(),
     data: {
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       authority: account.authority.toBase58(),
     },
   };
@@ -47,9 +45,7 @@ export const CollectionParser = (
     data: {
       application: account.application.toBase58(),
       authority: account.authority.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
     },
   };
 };
@@ -73,9 +69,7 @@ export const CollectionAttributeParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       collection: account.collection.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       kind: {
         id: Object.values(account.kind)[0].id,
         name: Object.keys(account.kind)[0],
@@ -105,9 +99,7 @@ export const InstructionParser = (
     data: {
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
     },
   };
 };
@@ -131,9 +123,7 @@ export const InstructionArgumentParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       kind: {
         id: Object.values(account.kind)[0].id,
         name: Object.keys(account.kind)[0],
@@ -167,9 +157,7 @@ export const InstructionBasicAccountParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       collection: account.collection.toBase58(),
       markAttribute: {
         id: Object.values(account.markAttribute)[0].id,
@@ -197,9 +185,7 @@ export const InstructionSignerAccountParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       markAttribute: {
         id: Object.values(account.markAttribute)[0].id,
         name: Object.keys(account.markAttribute)[0],
@@ -226,9 +212,7 @@ export const InstructionProgramAccountParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(
-        new Uint8Array(account.name.filter((segment) => segment !== 0))
-      ),
+      name: utils.bytes.utf8.decode(account.name),
       program: account.program.toBase58(),
     },
   };

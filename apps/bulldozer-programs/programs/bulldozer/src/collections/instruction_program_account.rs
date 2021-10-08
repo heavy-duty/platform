@@ -5,7 +5,7 @@ pub struct InstructionProgramAccount {
     pub authority: Pubkey,
     pub application: Pubkey,
     pub instruction: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
     // program associated to the account
     pub program: Pubkey,
 }

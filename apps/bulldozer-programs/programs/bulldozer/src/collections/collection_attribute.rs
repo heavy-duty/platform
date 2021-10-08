@@ -6,7 +6,7 @@ pub struct CollectionAttribute {
     pub authority: Pubkey,
     pub application: Pubkey,
     pub collection: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
     pub kind: AttributeKind,
     pub modifier: AttributeKindModifier,
 }

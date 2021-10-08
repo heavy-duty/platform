@@ -6,7 +6,7 @@ pub struct InstructionBasicAccount {
     pub authority: Pubkey,
     pub application: Pubkey,
     pub instruction: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
     // collection associated to the account
     pub collection: Pubkey,
     pub mark_attribute: MarkAttribute,

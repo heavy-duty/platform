@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use crate::collections::{Application, Instruction, InstructionSignerAccount};
 use crate::enums::{MarkAttribute};
-use crate::utils::{parse_string};
+use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
 #[instruction(name: String, mark_attribute: u8)]
@@ -24,7 +24,7 @@ pub fn handler(ctx: Context<CreateInstructionSignerAccount>, name: String, mark_
     ctx.accounts.account.authority = ctx.accounts.authority.key();
     ctx.accounts.account.application = ctx.accounts.application.key();
     ctx.accounts.account.instruction = ctx.accounts.instruction.key();
-    ctx.accounts.account.name = parse_string(name);
+    ctx.accounts.account.name = vectorize_string(name, 32);
     ctx.accounts.account.mark_attribute = MarkAttribute::from_index(mark_attribute)?;
     Ok(())
 }

@@ -26,14 +26,7 @@ describe('bulldozer', () => {
         application.publicKey
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        applicationName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), applicationName);
     });
 
     it('should update account', async () => {
@@ -50,14 +43,7 @@ describe('bulldozer', () => {
       const account = await program.account.application.fetch(
         application.publicKey
       );
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        applicationName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), applicationName);
     });
 
     it('should delete account', async () => {
@@ -110,14 +96,7 @@ describe('bulldozer', () => {
         collection.publicKey
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        collectionName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), collectionName);
     });
 
     it('should update account', async () => {
@@ -134,14 +113,7 @@ describe('bulldozer', () => {
       const account = await program.account.collection.fetch(
         collection.publicKey
       );
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        collectionName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), collectionName);
     });
 
     it('should delete account', async () => {
@@ -215,14 +187,7 @@ describe('bulldozer', () => {
         attribute.publicKey
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        attributeName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), attributeName);
       assert.ok('u8' in account.kind);
       assert.equal(account.kind.u8.id, attributeKind);
       assert.equal(account.kind.u8.size, 1);
@@ -259,14 +224,7 @@ describe('bulldozer', () => {
       const account = await program.account.collectionAttribute.fetch(
         attribute.publicKey
       );
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        attributeName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), attributeName);
       assert.ok('u16' in account.kind);
       assert.equal(account.kind.u16.id, attributeKind);
       assert.equal(account.kind.u16.size, 2);
@@ -325,14 +283,7 @@ describe('bulldozer', () => {
         instruction.publicKey
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        instructionName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), instructionName);
       assert.ok(account.application.equals(application.publicKey));
     });
 
@@ -350,14 +301,7 @@ describe('bulldozer', () => {
       const account = await program.account.instruction.fetch(
         instruction.publicKey
       );
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        instructionName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), instructionName);
     });
 
     it('should delete account', async () => {
@@ -431,14 +375,7 @@ describe('bulldozer', () => {
         instructionArgument.publicKey
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        argumentName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), argumentName);
       assert.ok('u16' in account.kind);
       assert.equal(account.kind.u16.id, argumentKind);
       assert.equal(account.kind.u16.size, 2);
@@ -472,14 +409,7 @@ describe('bulldozer', () => {
       const account = await program.account.instructionArgument.fetch(
         instructionArgument.publicKey
       );
-      assert.equal(
-        utils.bytes.utf8.decode(
-          new Uint8Array(
-            account.name.filter((segment: number) => segment !== 0)
-          )
-        ),
-        argumentName
-      );
+      assert.equal(utils.bytes.utf8.decode(account.name), argumentName);
       assert.ok('u32' in account.kind);
       assert.equal(account.kind.u32.id, argumentKind);
       assert.equal(account.kind.u32.size, 4);

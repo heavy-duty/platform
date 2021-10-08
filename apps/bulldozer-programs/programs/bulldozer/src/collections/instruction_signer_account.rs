@@ -6,6 +6,6 @@ pub struct InstructionSignerAccount {
     pub authority: Pubkey,
     pub application: Pubkey,
     pub instruction: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
     pub mark_attribute: MarkAttribute,
 }

@@ -6,7 +6,7 @@ pub struct InstructionArgument {
     pub authority: Pubkey,
     pub application: Pubkey,
     pub instruction: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
     pub kind: AttributeKind,
     pub modifier: AttributeKindModifier,
 }

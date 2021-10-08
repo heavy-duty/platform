@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::collections::{Application};
-use crate::utils::{parse_string};
+use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
 #[instruction(name: String)]
@@ -18,7 +18,7 @@ pub struct CreateApplication<'info> {
 
 pub fn handler(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
     msg!("Create application");
-    ctx.accounts.application.name = parse_string(name);
+    ctx.accounts.application.name = vectorize_string(name, 32);
     ctx.accounts.application.authority = ctx.accounts.authority.key();
     Ok(())
 }

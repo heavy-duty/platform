@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::collections::{Instruction};
-use crate::utils::{parse_string};
+use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
 #[instruction(name: String)]
@@ -12,6 +12,6 @@ pub struct UpdateInstruction<'info> {
 
 pub fn handler(ctx: Context<UpdateInstruction>, name: String) -> ProgramResult {
     msg!("Update instruction");
-    ctx.accounts.instruction.name = parse_string(name);
+    ctx.accounts.instruction.name = vectorize_string(name, 32);
     Ok(())
 }

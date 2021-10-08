@@ -4,5 +4,5 @@ use anchor_lang::prelude::*;
 pub struct Instruction {
     pub authority: Pubkey,
     pub application: Pubkey,
-    pub name: [u8; 32],
+    pub name: Vec<u8>,
 }

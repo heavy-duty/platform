@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use crate::collections::{Application, Collection};
-use crate::utils::{parse_string};
+use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
 #[instruction(name: String)]
@@ -19,7 +19,7 @@ pub struct CreateCollection<'info> {
 
 pub fn handler(ctx: Context<CreateCollection>, name: String) -> ProgramResult {
     msg!("Create collection");
-    ctx.accounts.collection.name = parse_string(name);
+    ctx.accounts.collection.name = vectorize_string(name, 32);
     ctx.accounts.collection.authority = ctx.accounts.authority.key();
     ctx.accounts.collection.application = ctx.accounts.application.key();
     Ok(())
