@@ -75,6 +75,9 @@
     "bulldozer-application-ui-directives-page-header": {
       "tags": []
     },
+    "bulldozer-application-ui-directives-section-header": {
+      "tags": []
+    },
     "bulldozer-application-utils-pipes-obscure-address": {
       "tags": []
     },
