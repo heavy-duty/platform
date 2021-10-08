@@ -13,6 +13,7 @@ import {
   InstructionSignerAccount,
   ProgramStore,
 } from '@heavy-duty/bulldozer/data-access';
+import { generateInstructionsRustCode } from '@heavy-duty/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { SystemProgram } from '@solana/web3.js';
@@ -79,6 +80,18 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     (accounts) => accounts.length
   );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
+  readonly rustCode$ = this.select(
+    this.instructions$,
+    this.instructionId$,
+    this.arguments$,
+    (instructions, instructionId, iarguments) => {
+      const instruction = instructions.find(
+        (collection) => collection.id === instructionId
+      );
+
+      generateInstructionsRustCode(instruction, iarguments);
+    }
+  );
 
   constructor(
     private readonly _programStore: ProgramStore,
@@ -173,7 +186,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly selectInstruction = this.effect(
     (instructionId$: Observable<string | null>) =>
       instructionId$.pipe(
-        tap((instructionId) => this.patchState({ instructionId }))
+        tap((instructionId) => this.patchState({ instructionId })),
+        tap(() => this.rustCode$.subscribe())
       )
   );
 

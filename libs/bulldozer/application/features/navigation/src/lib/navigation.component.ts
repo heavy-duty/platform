@@ -155,7 +155,7 @@ import { NavigationStore } from './navigation.store';
       }
 
       .toolbar-code-editor {
-        height: 48px !important;
+        min-height: 48px !important;
       }
     `,
   ],
@@ -177,6 +177,7 @@ export class NavigationComponent {
       theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
       language: 'rust',
       automaticLayout: true,
+      readOnly: true,
     }))
   );
   readonly isCodeEditorVisible$ = this._codeEditorSettings.isCodeEditorVisible$;

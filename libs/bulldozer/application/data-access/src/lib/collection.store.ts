@@ -7,6 +7,7 @@ import {
   CollectionAttribute,
   ProgramStore,
 } from '@heavy-duty/bulldozer/data-access';
+import { generateCollectionRustCode } from '@heavy-duty/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
@@ -51,8 +52,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         (collection) => collection.id === collectionId
       );
 
-      // return getCollectionRustCode(collection,attributes);
-      return 'x';
+      generateCollectionRustCode(collection, attributes);
     }
   );
 
@@ -99,7 +99,8 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly selectCollection = this.effect(
     (collectionId$: Observable<string | null>) =>
       collectionId$.pipe(
-        tap((collectionId) => this.patchState({ collectionId }))
+        tap((collectionId) => this.patchState({ collectionId })),
+        tap(() => this.rustCode$.subscribe())
       )
   );
 

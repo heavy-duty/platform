@@ -7,6 +7,7 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
 
+import { generateProgramRustCode } from '@heavy-duty/code-generator';
 interface ViewModel {
   applicationId: string | null;
   applications: Application[];
@@ -57,7 +58,14 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly selectApplication = this.effect(
     (applicationId$: Observable<string>) =>
       applicationId$.pipe(
-        tap((applicationId) => this.patchState({ applicationId }))
+        tap((applicationId) => this.patchState({ applicationId })),
+        tap((applicationId) =>
+          this._programStore
+            .getApplicationMetadata(applicationId)
+            .subscribe((data) => {
+              generateProgramRustCode(data);
+            })
+        )
       )
   );
 

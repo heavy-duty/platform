@@ -11,7 +11,7 @@ import { filter, map } from 'rxjs/operators';
   selector: 'bd-view-application',
   template: `
     <nav mat-tab-nav-bar>
-      <div class="flex justify-between w-full">
+      <div class="flex justify-between w-full nav-tabs">
         <div class="flex items-center p-0">
           <div
             mat-tab-link
@@ -50,6 +50,13 @@ import { filter, map } from 'rxjs/operators';
 
     <router-outlet></router-outlet>
   `,
+  styles: [
+    `
+      .nav-tabs {
+        min-height: 48px !important;
+      }
+    `,
+  ],
   providers: [TabsStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
