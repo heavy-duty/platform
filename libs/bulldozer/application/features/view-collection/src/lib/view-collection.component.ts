@@ -10,59 +10,82 @@ import {
   CollectionStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'bd-view-collection',
   template: `
-    <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
-      <h1>
-        {{ collection.data.name }}
-        <button
-          mat-icon-button
-          color="primary"
-          aria-label="Reload collection"
-          (click)="onReload()"
+    <div class="flex">
+      <div class="p-4 w-1/2">
+        <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
+          <h1>
+            {{ collection.data.name }}
+            <button
+              mat-icon-button
+              color="primary"
+              aria-label="Reload collection"
+              (click)="onReload()"
+            >
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </h1>
+          <p>Visualize all the details about this collection.</p>
+        </header>
+
+        <bd-collection-menu
+          [connected]="connected$ | ngrxPush"
+          (createAttribute)="onCreateAttribute()"
         >
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </h1>
-      <p>Visualize all the details about this collection.</p>
-    </header>
+        </bd-collection-menu>
 
-    <bd-collection-menu
-      [connected]="connected$ | ngrxPush"
-      (createAttribute)="onCreateAttribute()"
-    >
-    </bd-collection-menu>
-
-    <main>
-      <bd-list-attributes
-        class="block mb-16"
-        [connected]="connected$ | ngrxPush"
-        [attributes]="attributes$ | ngrxPush"
-        (updateAttribute)="onUpdateAttribute($event)"
-        (deleteAttribute)="onDeleteAttribute($event)"
-      >
-      </bd-list-attributes>
-    </main>
+        <main>
+          <bd-list-attributes
+            class="block mb-16"
+            [connected]="connected$ | ngrxPush"
+            [attributes]="attributes$ | ngrxPush"
+            (updateAttribute)="onUpdateAttribute($event)"
+            (deleteAttribute)="onDeleteAttribute($event)"
+          >
+          </bd-list-attributes>
+        </main>
+      </div>
+      <div class="w-1/2">
+        <bd-code-editor
+          [customClass]="'custom-monaco-editor'"
+          [template]="rustCodeCollection$ | ngrxPush"
+          [options]="editorOptions$ | ngrxPush"
+        ></bd-code-editor>
+      </div>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewCollectionComponent implements OnInit {
-  @HostBinding('class') class = 'block p-4';
+  @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._tabsStore.tab$;
   readonly attributes$ = this._collectionStore.attributes$;
+  readonly rustCodeCollection$ = this._collectionStore.rustCode$;
+  readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      language: 'rust',
+      automaticLayout: true,
+      readOnly: true,
+      fontSize: 16,
+    }))
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
     private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
-    private readonly _collectionStore: CollectionStore
+    private readonly _collectionStore: CollectionStore,
+    private readonly _themeService: DarkThemeService
   ) {}
 
   ngOnInit() {

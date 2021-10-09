@@ -10,6 +10,7 @@ import { RouterModule } from '@angular/router';
 import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
 import { SectionHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/section-header';
 import { ReactiveComponentModule } from '@ngrx/component';
+import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/code-editor';
 
 import { CollectionMenuComponent } from './collection-menu.component';
 import { ListAttributesComponent } from './list-attributes.component';
@@ -23,6 +24,7 @@ import { ViewCollectionComponent } from './view-collection.component';
     ]),
     MatButtonModule,
     MatCardModule,
+    CodeEditorModule,
     MatDialogModule,
     MatIconModule,
     MatListModule,

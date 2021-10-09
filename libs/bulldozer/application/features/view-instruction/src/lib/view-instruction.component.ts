@@ -10,6 +10,7 @@ import {
   InstructionStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
   InstructionArgument,
   InstructionBasicAccount,
@@ -21,61 +22,77 @@ import { filter, map, startWith } from 'rxjs/operators';
 @Component({
   selector: 'bd-view-instruction',
   template: `
-    <header bdPageHeader *ngIf="instruction$ | ngrxPush as instruction">
-      <h1>
-        {{ instruction.data.name }}
-        <button
-          mat-icon-button
-          color="primary"
-          aria-label="Reload instruction"
-          (click)="onReload()"
+    <div class="flex">
+      <div class="p-4 w-2/4">
+        <header bdPageHeader *ngIf="instruction$ | ngrxPush as instruction">
+          <h1>
+            {{ instruction.data.name }}
+            <button
+              mat-icon-button
+              color="primary"
+              aria-label="Reload instruction"
+              (click)="onReload()"
+            >
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </h1>
+          <p>Visualize all the details about this instruction.</p>
+        </header>
+
+        <bd-instruction-menu
+          [connected]="connected$ | ngrxPush"
+          (createArgument)="onCreateArgument()"
+          (createBasicAccount)="onCreateBasicAccount()"
+          (createSignerAccount)="onCreateSignerAccount()"
+          (createProgramAccount)="onCreateProgramAccount()"
         >
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </h1>
-      <p>Visualize all the details about this instruction.</p>
-    </header>
+        </bd-instruction-menu>
 
-    <bd-instruction-menu
-      [connected]="connected$ | ngrxPush"
-      (createArgument)="onCreateArgument()"
-      (createBasicAccount)="onCreateBasicAccount()"
-      (createSignerAccount)="onCreateSignerAccount()"
-      (createProgramAccount)="onCreateProgramAccount()"
-    >
-    </bd-instruction-menu>
+        <main>
+          <bd-list-arguments
+            class="block mb-4"
+            [connected]="connected$ | ngrxPush"
+            [arguments]="arguments$ | ngrxPush"
+            (updateArgument)="onUpdateArgument($event)"
+            (deleteArgument)="onDeleteArgument($event)"
+          ></bd-list-arguments>
 
-    <main>
-      <bd-list-arguments
-        class="block mb-4"
-        [connected]="connected$ | ngrxPush"
-        [arguments]="arguments$ | ngrxPush"
-        (updateArgument)="onUpdateArgument($event)"
-        (deleteArgument)="onDeleteArgument($event)"
-      ></bd-list-arguments>
-
-      <bd-list-accounts
-        class="block mb-16"
-        [connected]="connected$ | ngrxPush"
-        [accountsCount]="accountsCount$ | ngrxPush"
-        [basicAccounts]="basicAccounts$ | ngrxPush"
-        [signerAccounts]="signerAccounts$ | ngrxPush"
-        [programAccounts]="programAccounts$ | ngrxPush"
-        (updateBasicAccount)="onUpdateBasicAccount($event)"
-        (deleteBasicAccount)="onDeleteBasicAccount($event)"
-        (updateSignerAccount)="onUpdateSignerAccount($event)"
-        (deleteSignerAccount)="onDeleteSignerAccount($event)"
-        (updateProgramAccount)="onUpdateProgramAccount($event)"
-        (deleteProgramAccount)="onDeleteProgramAccount($event)"
-      >
-      </bd-list-accounts>
-    </main>
+          <bd-list-accounts
+            class="block mb-16"
+            [connected]="connected$ | ngrxPush"
+            [accountsCount]="accountsCount$ | ngrxPush"
+            [basicAccounts]="basicAccounts$ | ngrxPush"
+            [signerAccounts]="signerAccounts$ | ngrxPush"
+            [programAccounts]="programAccounts$ | ngrxPush"
+            (updateBasicAccount)="onUpdateBasicAccount($event)"
+            (deleteBasicAccount)="onDeleteBasicAccount($event)"
+            (updateSignerAccount)="onUpdateSignerAccount($event)"
+            (deleteSignerAccount)="onDeleteSignerAccount($event)"
+            (updateProgramAccount)="onUpdateProgramAccount($event)"
+            (deleteProgramAccount)="onDeleteProgramAccount($event)"
+          >
+          </bd-list-accounts>
+        </main>
+      </div>
+      <div class="w-2/4">
+        <bd-code-editor
+          [customClass]="'bd-border-bottom custom-monaco-editor-splited'"
+          [template]="rustContextCodeInstruction$ | ngrxPush"
+          [options]="contextEditorOptions$ | ngrxPush"
+        ></bd-code-editor>
+        <bd-code-editor
+          [customClass]="'custom-monaco-editor-splited'"
+          [template]="rustHandlerCodeInstruction$ | ngrxPush"
+          [options]="handlerEditorOptions$ | ngrxPush"
+        ></bd-code-editor>
+      </div>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewInstructionComponent implements OnInit {
-  @HostBinding('class') class = 'block p-4';
+  @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly instruction$ = this._tabsStore.tab$;
   readonly arguments$ = this._instructionStore.arguments$;
@@ -83,13 +100,39 @@ export class ViewInstructionComponent implements OnInit {
   readonly signerAccounts$ = this._instructionStore.signerAccounts$;
   readonly programAccounts$ = this._instructionStore.programAccounts$;
   readonly accountsCount$ = this._instructionStore.accountsCount$;
+  readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+    map((templates) => templates && templates.context)
+  );
+  readonly rustHandlerCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+    map((templates) => templates && templates.handler)
+  );
+  readonly commonEditorOptions = {
+    language: 'rust',
+    automaticLayout: true,
+    fontSize: 16,
+  };
+  readonly contextEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      ...this.commonEditorOptions,
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      readOnly: true,
+    }))
+  );
+  readonly handlerEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      ...this.commonEditorOptions,
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      readOnly: false,
+    }))
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
     private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
-    private readonly _instructionStore: InstructionStore
+    private readonly _instructionStore: InstructionStore,
+    private readonly _themeService: DarkThemeService
   ) {}
 
   ngOnInit() {

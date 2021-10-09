@@ -5,7 +5,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { Idl, Program, Provider } from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { combineLatest, defer, from } from 'rxjs';
-import { concatMap, map, take, tap } from 'rxjs/operators';
+import { concatMap, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
   ApplicationParser,
@@ -951,6 +951,66 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             })
           )
         )
+      )
+    );
+  }
+
+  getApplicationMetadata(applicationId: string) {
+    const filters = [{ memcmp: { bytes: applicationId, offset: 40 } }];
+
+    return this.reader$.pipe(
+      isNotNullOrUndefined,
+      switchMap((reader) =>
+        combineLatest([
+          this.getApplication(applicationId),
+          this.getCollections(applicationId),
+          from(
+            defer(() => reader.account.collectionAttribute.all(filters))
+          ).pipe(
+            map((programArguments) =>
+              programArguments.map(({ publicKey, account }) =>
+                CollectionAttributeParser(publicKey, account)
+              )
+            )
+          ),
+          this.getInstructions(applicationId),
+          from(
+            defer(() => reader.account.instructionArgument.all(filters))
+          ).pipe(
+            map((programArguments) =>
+              programArguments.map(({ publicKey, account }) =>
+                InstructionArgumentParser(publicKey, account)
+              )
+            )
+          ),
+          from(
+            defer(() => reader.account.instructionBasicAccount.all(filters))
+          ).pipe(
+            map((programArguments) =>
+              programArguments.map(({ publicKey, account }) =>
+                InstructionBasicAccountParser(publicKey, account)
+              )
+            )
+          ),
+          from(
+            defer(() => reader.account.instructionProgramAccount.all(filters))
+          ).pipe(
+            map((programArguments) =>
+              programArguments.map(({ publicKey, account }) =>
+                InstructionProgramAccountParser(publicKey, account)
+              )
+            )
+          ),
+          from(
+            defer(() => reader.account.instructionSignerAccount.all(filters))
+          ).pipe(
+            map((programArguments) =>
+              programArguments.map(({ publicKey, account }) =>
+                InstructionSignerAccountParser(publicKey, account)
+              )
+            )
+          ),
+        ])
       )
     );
   }

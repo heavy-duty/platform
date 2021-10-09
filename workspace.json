@@ -26,6 +26,33 @@
         }
       }
     },
+    "bulldozer-application-features-code-editor": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/features/code-editor",
+      "sourceRoot": "libs/bulldozer/application/features/code-editor/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/features/code-editor"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/features/code-editor/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/features/code-editor/src/**/*.ts",
+              "libs/bulldozer/application/features/code-editor/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "bulldozer-application-features-edit-application": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-application",
@@ -553,7 +580,12 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "apps/bulldozer-client/src/favicon.ico",
-              "apps/bulldozer-client/src/assets"
+              "apps/bulldozer-client/src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/monaco-editor",
+                "output": "assets/monaco-editor"
+              }
             ],
             "styles": [
               "apps/bulldozer-client/src/styles.scss",
@@ -737,6 +769,28 @@
               "libs/bulldozer/shell/src/**/*.ts",
               "libs/bulldozer/shell/src/**/*.html"
             ]
+          }
+        }
+      }
+    },
+    "code-generator": {
+      "root": "libs/code-generator",
+      "sourceRoot": "libs/code-generator/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["libs/code-generator/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/code-generator"],
+          "options": {
+            "jestConfig": "libs/code-generator/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }

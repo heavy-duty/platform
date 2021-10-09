@@ -38,6 +38,7 @@ import { filter, map } from 'rxjs/operators';
 
     <router-outlet></router-outlet>
   `,
+  styles: [],
   providers: [TabsStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

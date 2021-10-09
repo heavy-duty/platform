@@ -30,6 +30,9 @@
     "bulldozer-application-data-access": {
       "tags": []
     },
+    "bulldozer-application-features-code-editor": {
+      "tags": []
+    },
     "bulldozer-application-features-edit-application": {
       "tags": []
     },
@@ -101,6 +104,9 @@
       "tags": []
     },
     "bulldozer-shell": {
+      "tags": []
+    },
+    "code-generator": {
       "tags": []
     },
     "shared-utils-operators": {

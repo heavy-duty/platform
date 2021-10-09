@@ -4,6 +4,7 @@ import {
   CollectionStore,
   InstructionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
   Application,
   Collection,
@@ -11,7 +12,6 @@ import {
 } from '@heavy-duty/bulldozer/data-access';
 
 import { NavigationStore } from './navigation.store';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 
 @Component({
   selector: 'bd-navigation',
@@ -27,7 +27,7 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
       >
         <div class="h-full flex flex-col">
           <div class="flex-grow overflow-auto">
-            <figure class="mt-4 w-full flex justify-center">
+            <figure class="pt-4 pb-4 w-full flex justify-center bg-white">
               <img src="assets/images/logo.png" class="w-4/6" />
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
@@ -94,6 +94,7 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
             color="accent"
           ></wallet-multi-button>
         </mat-toolbar>
+
         <ng-content></ng-content>
       </mat-sidenav-content>
     </mat-sidenav-container>
@@ -104,8 +105,10 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
         width: 200px;
       }
 
-      .sidenav .mat-toolbar {
-        background: inherit;
+      .mat-toolbar.mat-primary {
+        position: sticky;
+        top: 0;
+        z-index: 1;
       }
     `,
   ],
