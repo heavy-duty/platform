@@ -1,4 +1,5 @@
 @use '~@angular/material' as mat;
+@use '~@angular/cdk';
 
 @import './themes/default-themes.scss';
 @import '~@angular/material/theming';
@@ -125,4 +126,15 @@ mat-icon {
   padding-left: 1rem;
   text-align: left;
   height: 100%;
+}
+
+.darkMode {
+  *.cdk-keyboard-focused {
+    background-color: rgba(250, 250, 250, 0.42) !important;
+  }
+
+  .mat-accent.mat-button-disabled {
+    color: black !important;
+    background-color: rgba(250, 250, 250, 0.42) !important;
+  }
 }
