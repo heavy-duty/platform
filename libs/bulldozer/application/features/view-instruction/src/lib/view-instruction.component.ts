@@ -99,13 +99,11 @@ export class ViewInstructionComponent implements OnInit {
   readonly signerAccounts$ = this._instructionStore.signerAccounts$;
   readonly programAccounts$ = this._instructionStore.programAccounts$;
   readonly accountsCount$ = this._instructionStore.accountsCount$;
-  readonly rustCodeInstruction$ =
-    this._instructionStore.rustCode$.pipe(isNotNullOrUndefined);
-  readonly rustStaticCodeInstruction$ = this.rustCodeInstruction$.pipe(
-    map((templates) => templates.static)
+  readonly rustStaticCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+    map((templates) => templates && templates.context)
   );
-  readonly rustDynamicCodeInstruction$ = this.rustCodeInstruction$.pipe(
-    map((templates) => templates.dynamic)
+  readonly rustDynamicCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+    map((templates) => templates && templates.handler)
   );
 
   constructor(

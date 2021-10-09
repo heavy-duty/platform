@@ -3,6 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { generateProgramRustCode } from '@heavy-duty/code-generator';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
@@ -18,12 +19,14 @@ interface ViewModel {
   applicationId: string | null;
   applications: Application[];
   error: unknown | null;
+  rustCode: string | null;
 }
 
 const initialState = {
   applicationId: null,
   applications: [],
   error: null,
+  rustCode: null,
 };
 
 @Injectable()
@@ -40,9 +43,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     (applications, applicationId) =>
       applications.find(({ id }) => id === applicationId) || null
   );
-  readonly rustCode$ = this.select(this.applicationId$, (applicationId) => {
-    return this._programStore.getApplicationMetadata(applicationId || '');
-  }).pipe(map((data) => generateProgramRustCode(data)));
+  readonly rustCode$ = this.select(({ rustCode }) => rustCode);
 
   constructor(
     private readonly _programStore: ProgramStore,
@@ -60,6 +61,21 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             (error) => this._error.next(error)
           )
         )
+      )
+    )
+  );
+
+  readonly loadRustCode$ = this.effect(() =>
+    this.applicationId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((applicationId) =>
+        this._programStore
+          .getApplicationMetadata(applicationId)
+          .pipe(
+            tap((metadata) =>
+              this.patchState({ rustCode: generateProgramRustCode(metadata) })
+            )
+          )
       )
     )
   );

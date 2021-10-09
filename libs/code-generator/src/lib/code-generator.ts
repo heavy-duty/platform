@@ -152,11 +152,11 @@ export const generateInstructionsRustCode = (
   );
 
   const templates = {
-    static: generateRustCode(
+    context: generateRustCode(
       { instruction: formatedInstructions },
       getTemplateByType('instructions_program')
     ),
-    dynamic: generateRustCode(
+    handler: generateRustCode(
       { instruction: formatedInstructions },
       getTemplateByType('instructions_body_program')
     ),
