@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@heavy-duty/arweave": ["libs/arweave/src/index.ts"],
       "@heavy-duty/bulldozer/application/data-access": [
         "libs/bulldozer/application/data-access/src/index.ts"
       ],

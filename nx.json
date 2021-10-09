@@ -27,6 +27,12 @@
     ]
   },
   "projects": {
+    "bulldozer-arweave-code-upload": {
+      "tags": []
+    },
+    "arweave": {
+      "tags": []
+    },
     "bulldozer-application-data-access": {
       "tags": []
     },
