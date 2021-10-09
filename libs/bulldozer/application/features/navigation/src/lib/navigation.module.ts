@@ -9,7 +9,6 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTabsModule } from '@angular/material/tabs';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { WalletUiModule } from '@danmt/wallet-adapter-angular-material-ui';
@@ -21,7 +20,6 @@ import { ApplicationSelectorComponent } from './application-selector.component';
 import { CollectionSelectorComponent } from './collection-selector.component';
 import { InstructionSelectorComponent } from './instruction-selector.component';
 import { NavigationComponent } from './navigation.component';
-import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/code-editor';
 
 @NgModule({
   imports: [
@@ -35,8 +33,6 @@ import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/cod
     MatIconModule,
     MatListModule,
     MatMenuModule,
-    MatTabsModule,
-    CodeEditorModule,
     MatSidenavModule,
     MatToolbarModule,
     ReactiveComponentModule,

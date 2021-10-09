@@ -10,13 +10,13 @@ import {
   InstructionStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
   InstructionArgument,
   InstructionBasicAccount,
   InstructionProgramAccount,
   InstructionSignerAccount,
 } from '@heavy-duty/bulldozer/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -77,12 +77,13 @@ import { filter, map, startWith } from 'rxjs/operators';
       <div class="w-2/4">
         <bd-code-editor
           [customClass]="'bd-border-bottom custom-monaco-editor-splited'"
-          [template]="rustStaticCodeInstruction$ | ngrxPush"
-          [readOnly]="true"
+          [template]="rustContextCodeInstruction$ | ngrxPush"
+          [options]="contextEditorOptions$ | ngrxPush"
         ></bd-code-editor>
         <bd-code-editor
           [customClass]="'custom-monaco-editor-splited'"
-          [template]="rustDynamicCodeInstruction$ | ngrxPush"
+          [template]="rustHandlerCodeInstruction$ | ngrxPush"
+          [options]="handlerEditorOptions$ | ngrxPush"
         ></bd-code-editor>
       </div>
     </div>
@@ -99,11 +100,31 @@ export class ViewInstructionComponent implements OnInit {
   readonly signerAccounts$ = this._instructionStore.signerAccounts$;
   readonly programAccounts$ = this._instructionStore.programAccounts$;
   readonly accountsCount$ = this._instructionStore.accountsCount$;
-  readonly rustStaticCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+  readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.context)
   );
-  readonly rustDynamicCodeInstruction$ = this._instructionStore.rustCode$.pipe(
+  readonly rustHandlerCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.handler)
+  );
+  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
+  readonly commonEditorOptions = {
+    language: 'rust',
+    automaticLayout: true,
+    fontSize: 16,
+  };
+  readonly contextEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      ...this.commonEditorOptions,
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      readOnly: true,
+    }))
+  );
+  readonly handlerEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      ...this.commonEditorOptions,
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      readOnly: false,
+    }))
   );
 
   constructor(
@@ -111,7 +132,8 @@ export class ViewInstructionComponent implements OnInit {
     private readonly _router: Router,
     private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
-    private readonly _instructionStore: InstructionStore
+    private readonly _instructionStore: InstructionStore,
+    private readonly _themeService: DarkThemeService
   ) {}
 
   ngOnInit() {

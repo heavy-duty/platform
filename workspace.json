@@ -562,33 +562,6 @@
         }
       }
     },
-    "bulldozer-application-utils-services-code-editor-settings": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/utils/services/code-editor-settings",
-      "sourceRoot": "libs/bulldozer/application/utils/services/code-editor-settings/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/utils/services/code-editor-settings"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/utils/services/code-editor-settings/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/utils/services/code-editor-settings/src/**/*.ts",
-              "libs/bulldozer/application/utils/services/code-editor-settings/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-client": {
       "projectType": "application",
       "root": "apps/bulldozer-client",

@@ -10,45 +10,35 @@ import { filter, map } from 'rxjs/operators';
   selector: 'bd-view-application',
   template: `
     <nav mat-tab-nav-bar>
-      <div class="flex justify-between w-full nav-tabs">
-        <div class="flex items-center p-0">
-          <div
-            mat-tab-link
-            class="flex items-center justify-between p-0"
-            *ngFor="let tab of tabs$ | ngrxPush"
-            [active]="(selectedTab$ | ngrxPush) === tab.id"
-          >
-            <a
-              [routerLink]="[
-                '/applications',
-                tab.data.application,
-                tab.kind,
-                tab.id
-              ]"
-            >
-              {{ tab.data.name }}
-            </a>
-            <button
-              mat-icon-button
-              (click)="onCloseTab($event, tab.id)"
-              [attr.aria-label]="'Close ' + tab.data.name + ' tab'"
-            >
-              <mat-icon>close</mat-icon>
-            </button>
-          </div>
-        </div>
+      <div
+        mat-tab-link
+        class="flex items-center justify-between p-0"
+        *ngFor="let tab of tabs$ | ngrxPush"
+        [active]="(selectedTab$ | ngrxPush) === tab.id"
+      >
+        <a
+          [routerLink]="[
+            '/applications',
+            tab.data.application,
+            tab.kind,
+            tab.id
+          ]"
+        >
+          {{ tab.data.name }}
+        </a>
+        <button
+          mat-icon-button
+          (click)="onCloseTab($event, tab.id)"
+          [attr.aria-label]="'Close ' + tab.data.name + ' tab'"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
     </nav>
 
     <router-outlet></router-outlet>
   `,
-  styles: [
-    `
-      .nav-tabs {
-        min-height: 48px !important;
-      }
-    `,
-  ],
+  styles: [],
   providers: [TabsStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

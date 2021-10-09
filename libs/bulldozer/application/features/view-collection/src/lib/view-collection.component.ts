@@ -10,6 +10,7 @@ import {
   CollectionStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
 
@@ -17,7 +18,7 @@ import { filter, map, startWith } from 'rxjs/operators';
   selector: 'bd-view-collection',
   template: `
     <div class="flex">
-      <div class="p-4 w-2/4">
+      <div class="p-4 w-1/2">
         <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
           <h1>
             {{ collection.data.name }}
@@ -50,11 +51,11 @@ import { filter, map, startWith } from 'rxjs/operators';
           </bd-list-attributes>
         </main>
       </div>
-      <div class="w-2/4">
+      <div class="w-1/2">
         <bd-code-editor
           [customClass]="'custom-monaco-editor'"
           [template]="rustCodeCollection$ | ngrxPush"
-          [readOnly]="true"
+          [options]="editorOptions$ | ngrxPush"
         ></bd-code-editor>
       </div>
     </div>
@@ -68,13 +69,24 @@ export class ViewCollectionComponent implements OnInit {
   readonly collection$ = this._tabsStore.tab$;
   readonly attributes$ = this._collectionStore.attributes$;
   readonly rustCodeCollection$ = this._collectionStore.rustCode$;
+  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
+  readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) => ({
+      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+      language: 'rust',
+      automaticLayout: true,
+      readOnly: true,
+      fontSize: 16,
+    }))
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
     private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
-    private readonly _collectionStore: CollectionStore
+    private readonly _collectionStore: CollectionStore,
+    private readonly _themeService: DarkThemeService
   ) {}
 
   ngOnInit() {

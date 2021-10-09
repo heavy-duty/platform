@@ -105,10 +105,6 @@ import { NavigationStore } from './navigation.store';
         width: 200px;
       }
 
-      .sidenav .mat-toolbar {
-        background: inherit;
-      }
-
       .mat-toolbar.mat-primary {
         position: sticky;
         top: 0;
