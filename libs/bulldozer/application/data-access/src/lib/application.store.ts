@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
-
+import { generateProgramRustCode } from '@heavy-duty/code-generator';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
@@ -14,7 +14,6 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import { generateProgramRustCode } from '@heavy-duty/code-generator';
 interface ViewModel {
   applicationId: string | null;
   applications: Application[];
@@ -42,10 +41,8 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
       applications.find(({ id }) => id === applicationId) || null
   );
   readonly rustCode$ = this.select(this.applicationId$, (applicationId) => {
-    return this._programStore
-      .getApplicationMetadata(applicationId || '')
-      .pipe(map((data) => generateProgramRustCode(data)));
-  });
+    return this._programStore.getApplicationMetadata(applicationId || '');
+  }).pipe(map((data) => generateProgramRustCode(data)));
 
   constructor(
     private readonly _programStore: ProgramStore,
