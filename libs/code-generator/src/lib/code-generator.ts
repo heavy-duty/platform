@@ -28,6 +28,8 @@ const formatProgramMetadata = (metadata: IMetadata) => {
       return collectionsMetadata;
     });
 
+    const formatedInstructionAccounts = [2];
+
     const formatedInstructions = metadata.instructions.map((instruction) => ({
       name: formatName(instruction.data.name),
       arguments: metadata.instructionArguments
@@ -41,10 +43,11 @@ const formatProgramMetadata = (metadata: IMetadata) => {
             },
           };
         }),
+      accounts: formatedInstructionAccounts,
     }));
 
     if (!metadata.application) {
-      throw new Error('No application given.');
+      throw new Error('No application metadata given.');
     }
 
     const formatedMetadata = {
@@ -103,6 +106,14 @@ const getTemplateByType = (type: string): string => {
   }
 };
 
+const generateRustCode = (formatedMetadataObj: any, collectionType: string) => {
+  const template = Handlebars.compile(collectionType);
+  const compiledTemplated = template(formatedMetadataObj);
+  const programFile = compiledTemplated;
+
+  _metadatacode.next(programFile);
+};
+
 export const generateCollectionRustCode = (
   collection: any,
   attributes: any
@@ -111,11 +122,10 @@ export const generateCollectionRustCode = (
 
   const formatedCollection = formatCollectionMetadata(collection, attributes);
 
-  const template = Handlebars.compile(getTemplateByType('collections_program'));
-  const compiledTemplated = template({ collection: formatedCollection });
-  const programFile = compiledTemplated;
-
-  _metadatacode.next(programFile);
+  generateRustCode(
+    { collection: formatedCollection },
+    getTemplateByType('collections_program')
+  );
 };
 
 export const generateInstructionsRustCode = (
@@ -124,15 +134,15 @@ export const generateInstructionsRustCode = (
 ) => {
   if (!instruction) return; // Im doing something wrong :thinking:
 
-  const formatedCollection = formatInstructionMetadata(instruction, iarguments);
+  const formatedInstructions = formatInstructionMetadata(
+    instruction,
+    iarguments
+  );
 
-  const template = Handlebars.compile(
+  generateRustCode(
+    { instruction: formatedInstructions },
     getTemplateByType('instructions_program')
   );
-  const compiledTemplated = template({ instruction: formatedCollection });
-  const programFile = compiledTemplated;
-
-  _metadatacode.next(programFile);
 };
 
 export const generateProgramRustCode = (rawMetadata: any) => {
@@ -150,15 +160,15 @@ export const generateProgramRustCode = (rawMetadata: any) => {
 
     console.log('GENERANDO USANDO ESTO -> ', metadata);
 
-    const formatedMetadata = formatProgramMetadata(
+    // Temporal. TODO: Add correct typing to whole library
+    const formatedProgram = formatProgramMetadata(
       metadata as unknown as IMetadata
     );
 
-    const template = Handlebars.compile(getTemplateByType('full_program'));
-    const compiledTemplated = template({ program: formatedMetadata });
-    const programFile = compiledTemplated;
-
-    _metadatacode.next(programFile);
+    generateRustCode(
+      { program: formatedProgram },
+      getTemplateByType('full_program')
+    );
   } catch (e) {
     throw new Error(e as string);
   }

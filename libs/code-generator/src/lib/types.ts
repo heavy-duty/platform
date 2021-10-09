@@ -145,6 +145,9 @@ export interface IMetadata {
   instructions: CollectionInstruction[];
   instructionArguments: InstructionArgument[];
   instructionAccounts: InstructionAccount[];
+  instructionAccountsBasic: any;
+  instructionAccountsProgram: any;
+  instructionAccountsSigner: any;
 }
 
 export interface IProgramMetadata {
