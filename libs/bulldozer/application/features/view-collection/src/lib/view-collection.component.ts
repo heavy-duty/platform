@@ -16,46 +16,58 @@ import { filter, map, startWith } from 'rxjs/operators';
 @Component({
   selector: 'bd-view-collection',
   template: `
-    <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
-      <h1>
-        {{ collection.data.name }}
-        <button
-          mat-icon-button
-          color="primary"
-          aria-label="Reload collection"
-          (click)="onReload()"
+    <div class="flex">
+      <div class="p-4 w-2/4">
+        <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
+          <h1>
+            {{ collection.data.name }}
+            <button
+              mat-icon-button
+              color="primary"
+              aria-label="Reload collection"
+              (click)="onReload()"
+            >
+              <mat-icon>refresh</mat-icon>
+            </button>
+          </h1>
+          <p>Visualize all the details about this collection.</p>
+        </header>
+
+        <bd-collection-menu
+          [connected]="connected$ | ngrxPush"
+          (createAttribute)="onCreateAttribute()"
         >
-          <mat-icon>refresh</mat-icon>
-        </button>
-      </h1>
-      <p>Visualize all the details about this collection.</p>
-    </header>
+        </bd-collection-menu>
 
-    <bd-collection-menu
-      [connected]="connected$ | ngrxPush"
-      (createAttribute)="onCreateAttribute()"
-    >
-    </bd-collection-menu>
-
-    <main>
-      <bd-list-attributes
-        class="block mb-16"
-        [connected]="connected$ | ngrxPush"
-        [attributes]="attributes$ | ngrxPush"
-        (updateAttribute)="onUpdateAttribute($event)"
-        (deleteAttribute)="onDeleteAttribute($event)"
-      >
-      </bd-list-attributes>
-    </main>
+        <main>
+          <bd-list-attributes
+            class="block mb-16"
+            [connected]="connected$ | ngrxPush"
+            [attributes]="attributes$ | ngrxPush"
+            (updateAttribute)="onUpdateAttribute($event)"
+            (deleteAttribute)="onDeleteAttribute($event)"
+          >
+          </bd-list-attributes>
+        </main>
+      </div>
+      <div class="w-2/4">
+        <bd-code-editor
+          [customClass]="'custom-monaco-editor'"
+          [template]="rustCodeCollection$ | ngrxPush"
+          [readOnly]="true"
+        ></bd-code-editor>
+      </div>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewCollectionComponent implements OnInit {
-  @HostBinding('class') class = 'block p-4';
+  @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._tabsStore.tab$;
   readonly attributes$ = this._collectionStore.attributes$;
+  readonly rustCodeCollection$ = this._collectionStore.rustCode$;
 
   constructor(
     private readonly _route: ActivatedRoute,

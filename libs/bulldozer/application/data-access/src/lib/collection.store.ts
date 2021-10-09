@@ -52,7 +52,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         (collection) => collection.id === collectionId
       );
 
-      generateCollectionRustCode(collection, attributes);
+      return generateCollectionRustCode(collection, attributes);
     }
   );
 
@@ -99,8 +99,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly selectCollection = this.effect(
     (collectionId$: Observable<string | null>) =>
       collectionId$.pipe(
-        tap((collectionId) => this.patchState({ collectionId })),
-        tap(() => this.rustCode$.subscribe())
+        tap((collectionId) => this.patchState({ collectionId }))
       )
   );
 

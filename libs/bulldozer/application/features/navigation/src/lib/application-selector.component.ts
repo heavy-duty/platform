@@ -5,7 +5,6 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import { Application } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
@@ -48,14 +47,6 @@ import { Application } from '@heavy-duty/bulldozer/data-access';
           <mat-menu #applicationOptionsMenu="matMenu">
             <button
               mat-menu-item
-              (click)="openCodeEditor()"
-              [disabled]="connected === false"
-            >
-              <mat-icon>code</mat-icon>
-              <span>View code</span>
-            </button>
-            <button
-              mat-menu-item
               (click)="onEditApplication(application)"
               [disabled]="connected === false"
             >
@@ -86,18 +77,10 @@ export class ApplicationSelectorComponent {
   @Output() updateApplication = new EventEmitter<Application>();
   @Output() deleteApplication = new EventEmitter<string>();
 
-  constructor(
-    private readonly _codeEditorSettings: CodeEditorSettingsService
-  ) {}
-
   onCreateApplication(event: Event) {
     event.stopPropagation();
     event.preventDefault();
     this.createApplication.emit();
-  }
-
-  openCodeEditor() {
-    this._codeEditorSettings.setCodeEditorVisibility(true);
   }
 
   onEditApplication(application: Application) {

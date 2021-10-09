@@ -1,12 +1,9 @@
 import * as Handlebars from 'handlebars';
-import { BehaviorSubject } from 'rxjs';
 
 import { __rust_template, __collections_template } from './templates';
 import { __instructions_template } from './templates/__instructions_program';
 import { IMetadata } from './types';
 import { formatName } from './utils';
-
-const _metadatacode = new BehaviorSubject<string>('Your code will be here');
 
 const formatProgramMetadata = (metadata: IMetadata) => {
   try {
@@ -111,7 +108,7 @@ const generateRustCode = (formatedMetadataObj: any, collectionType: string) => {
   const compiledTemplated = template(formatedMetadataObj);
   const programFile = compiledTemplated;
 
-  _metadatacode.next(programFile);
+  return programFile;
 };
 
 export const generateCollectionRustCode = (
@@ -122,7 +119,7 @@ export const generateCollectionRustCode = (
 
   const formatedCollection = formatCollectionMetadata(collection, attributes);
 
-  generateRustCode(
+  return generateRustCode(
     { collection: formatedCollection },
     getTemplateByType('collections_program')
   );
@@ -139,7 +136,7 @@ export const generateInstructionsRustCode = (
     iarguments
   );
 
-  generateRustCode(
+  return generateRustCode(
     { instruction: formatedInstructions },
     getTemplateByType('instructions_program')
   );
@@ -165,7 +162,7 @@ export const generateProgramRustCode = (rawMetadata: any) => {
       metadata as unknown as IMetadata
     );
 
-    generateRustCode(
+    return generateRustCode(
       { program: formatedProgram },
       getTemplateByType('full_program')
     );
@@ -173,5 +170,3 @@ export const generateProgramRustCode = (rawMetadata: any) => {
     throw new Error(e as string);
   }
 };
-
-export const currentMetadataCode = _metadatacode.asObservable();

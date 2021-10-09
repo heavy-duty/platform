@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
+import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/code-editor';
 import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
 import { SectionHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/section-header';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
@@ -37,6 +38,7 @@ import { ViewInstructionComponent } from './view-instruction.component';
     ObscureAddressModule,
     PageHeaderModule,
     SectionHeaderModule,
+    CodeEditorModule,
   ],
   declarations: [
     ViewInstructionComponent,

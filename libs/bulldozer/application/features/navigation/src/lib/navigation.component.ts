@@ -5,14 +5,11 @@ import {
   InstructionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
-import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import {
   Application,
   Collection,
   Instruction,
 } from '@heavy-duty/bulldozer/data-access';
-import { currentMetadataCode } from '@heavy-duty/code-generator';
-import { map } from 'rxjs/operators';
 
 import { NavigationStore } from './navigation.store';
 
@@ -98,31 +95,7 @@ import { NavigationStore } from './navigation.store';
           ></wallet-multi-button>
         </mat-toolbar>
 
-        <div class="flex">
-          <div class="flex-auto">
-            <ng-content></ng-content>
-          </div>
-          <div
-            class="code-editor-container overflow-hidden"
-            [ngClass]="{ closed: !(isCodeEditorVisible$ | ngrxPush) }"
-          >
-            <nav mat-tab-nav-bar class="nav-toolbar-code-editor">
-              <div class="toolbar-code-editor flex justify-end w-full">
-                <div
-                  class="flex items-center cursor-pointer pr-4"
-                  (click)="closeCodeEditor()"
-                >
-                  <mat-icon>close</mat-icon>
-                </div>
-              </div>
-            </nav>
-            <ngx-monaco-editor
-              class="custom-monaco-editor"
-              [options]="editorOptions$ | ngrxPush"
-              [ngModel]="codeTemplate$ | ngrxPush"
-            ></ngx-monaco-editor>
-          </div>
-        </div>
+        <ng-content></ng-content>
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
@@ -171,24 +144,13 @@ export class NavigationComponent {
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
   readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
-  readonly codeTemplate$ = currentMetadataCode;
-  readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
-    map((isDarkThemeEnabled) => ({
-      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-      language: 'rust',
-      automaticLayout: true,
-      readOnly: true,
-    }))
-  );
-  readonly isCodeEditorVisible$ = this._codeEditorSettings.isCodeEditorVisible$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore,
-    private readonly _themeService: DarkThemeService,
-    private readonly _codeEditorSettings: CodeEditorSettingsService
+    private readonly _themeService: DarkThemeService
   ) {}
 
   onCreateApplication() {
@@ -229,9 +191,5 @@ export class NavigationComponent {
 
   toggleDarkMode(isDarkThemeEnabled: boolean) {
     this._themeService.setDarkTheme(isDarkThemeEnabled);
-  }
-
-  closeCodeEditor() {
-    this._codeEditorSettings.setCodeEditorVisibility(false);
   }
 }

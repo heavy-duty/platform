@@ -89,7 +89,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         (collection) => collection.id === instructionId
       );
 
-      generateInstructionsRustCode(instruction, iarguments);
+      return generateInstructionsRustCode(instruction, iarguments);
     }
   );
 
@@ -186,8 +186,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly selectInstruction = this.effect(
     (instructionId$: Observable<string | null>) =>
       instructionId$.pipe(
-        tap((instructionId) => this.patchState({ instructionId })),
-        tap(() => this.rustCode$.subscribe())
+        tap((instructionId) => this.patchState({ instructionId }))
       )
   );
 

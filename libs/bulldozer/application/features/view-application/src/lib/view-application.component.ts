@@ -4,7 +4,6 @@ import {
   ApplicationStore,
   TabsStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { CodeEditorSettingsService } from '@heavy-duty/bulldozer/application/utils/services/code-editor-settings';
 import { filter, map } from 'rxjs/operators';
 
 @Component({
@@ -38,13 +37,6 @@ import { filter, map } from 'rxjs/operators';
             </button>
           </div>
         </div>
-        <div
-          class="flex items-center cursor-pointer"
-          (click)="openCodeEditor()"
-        >
-          <mat-icon>code</mat-icon>
-          <span class="pl-2 pr-4">View code</span>
-        </div>
       </div>
     </nav>
 
@@ -68,8 +60,7 @@ export class ViewApplicationComponent implements OnInit {
   constructor(
     private readonly _applicationStore: ApplicationStore,
     private readonly _route: ActivatedRoute,
-    private readonly _tabsStore: TabsStore,
-    private readonly _codeEditorSettings: CodeEditorSettingsService
+    private readonly _tabsStore: TabsStore
   ) {}
 
   ngOnInit() {
@@ -85,9 +76,5 @@ export class ViewApplicationComponent implements OnInit {
     event.stopPropagation();
     event.preventDefault();
     this._tabsStore.closeTab(tabId);
-  }
-
-  openCodeEditor() {
-    this._codeEditorSettings.setCodeEditorVisibility(true);
   }
 }

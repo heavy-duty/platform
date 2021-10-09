@@ -5,7 +5,14 @@ import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
 
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
+import {
+  concatMap,
+  exhaustMap,
+  filter,
+  map,
+  switchMap,
+  tap,
+} from 'rxjs/operators';
 
 import { generateProgramRustCode } from '@heavy-duty/code-generator';
 interface ViewModel {
@@ -34,6 +41,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     (applications, applicationId) =>
       applications.find(({ id }) => id === applicationId) || null
   );
+  readonly rustCode$ = this.select(this.applicationId$, (applicationId) => {
+    return this._programStore
+      .getApplicationMetadata(applicationId || '')
+      .pipe(map((data) => generateProgramRustCode(data)));
+  });
 
   constructor(
     private readonly _programStore: ProgramStore,
@@ -58,14 +70,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly selectApplication = this.effect(
     (applicationId$: Observable<string>) =>
       applicationId$.pipe(
-        tap((applicationId) => this.patchState({ applicationId })),
-        tap((applicationId) =>
-          this._programStore
-            .getApplicationMetadata(applicationId)
-            .subscribe((data) => {
-              generateProgramRustCode(data);
-            })
-        )
+        tap((applicationId) => this.patchState({ applicationId }))
       )
   );
 

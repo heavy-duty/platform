@@ -18,6 +18,9 @@
       "@heavy-duty/bulldozer/application/data-access": [
         "libs/bulldozer/application/data-access/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/code-editor": [
+        "libs/bulldozer/application/features/code-editor/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/edit-application": [
         "libs/bulldozer/application/features/edit-application/src/index.ts"
       ],
