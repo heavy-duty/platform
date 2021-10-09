@@ -106,7 +106,6 @@ export class ViewInstructionComponent implements OnInit {
   readonly rustHandlerCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.handler)
   );
-  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
   readonly commonEditorOptions = {
     language: 'rust',
     automaticLayout: true,

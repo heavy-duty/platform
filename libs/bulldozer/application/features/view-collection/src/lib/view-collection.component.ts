@@ -69,7 +69,6 @@ export class ViewCollectionComponent implements OnInit {
   readonly collection$ = this._tabsStore.tab$;
   readonly attributes$ = this._collectionStore.attributes$;
   readonly rustCodeCollection$ = this._collectionStore.rustCode$;
-  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
   readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) => ({
       theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',

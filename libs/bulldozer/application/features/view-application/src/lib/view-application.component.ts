@@ -45,7 +45,6 @@ import { filter, map } from 'rxjs/operators';
 export class ViewApplicationComponent implements OnInit {
   readonly tabs$ = this._tabsStore.tabs$;
   readonly selectedTab$ = this._tabsStore.selected$;
-  readonly applicationId$ = this._applicationStore.applicationId$;
 
   constructor(
     private readonly _applicationStore: ApplicationStore,

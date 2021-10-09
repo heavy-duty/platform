@@ -110,22 +110,6 @@ import { NavigationStore } from './navigation.store';
         top: 0;
         z-index: 1;
       }
-
-      .code-editor-container {
-        flex: 1 1 0% !important;
-      }
-
-      .code-editor-container.closed {
-        flex: 0 !important;
-      }
-
-      .nav-toolbar-code-editor {
-        border-left: 1px solid gray;
-      }
-
-      .toolbar-code-editor {
-        min-height: 48px !important;
-      }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
