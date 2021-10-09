@@ -16,6 +16,7 @@ import {
   InstructionProgramAccount,
   InstructionSignerAccount,
 } from '@heavy-duty/bulldozer/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -75,13 +76,13 @@ import { filter, map, startWith } from 'rxjs/operators';
       </div>
       <div class="w-2/4">
         <bd-code-editor
-          [customClass]="'custom-monaco-editor-splited'"
-          [template]="rustCodeInstruction$ | ngrxPush"
+          [customClass]="'bd-border-bottom custom-monaco-editor-splited'"
+          [template]="rustStaticCodeInstruction$ | ngrxPush"
           [readOnly]="true"
         ></bd-code-editor>
         <bd-code-editor
           [customClass]="'custom-monaco-editor-splited'"
-          [template]="'AQUI EDITAS TU'"
+          [template]="rustDynamicCodeInstruction$ | ngrxPush"
         ></bd-code-editor>
       </div>
     </div>
@@ -98,7 +99,14 @@ export class ViewInstructionComponent implements OnInit {
   readonly signerAccounts$ = this._instructionStore.signerAccounts$;
   readonly programAccounts$ = this._instructionStore.programAccounts$;
   readonly accountsCount$ = this._instructionStore.accountsCount$;
-  readonly rustCodeInstruction$ = this._instructionStore.rustCode$;
+  readonly rustCodeInstruction$ =
+    this._instructionStore.rustCode$.pipe(isNotNullOrUndefined);
+  readonly rustStaticCodeInstruction$ = this.rustCodeInstruction$.pipe(
+    map((templates) => templates.static)
+  );
+  readonly rustDynamicCodeInstruction$ = this.rustCodeInstruction$.pipe(
+    map((templates) => templates.dynamic)
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,

@@ -1,11 +1,11 @@
-export const __instructions_template = `// So we’re doing something complicated here, 
-// long enough that we need
-// multiple lines of comments to do it! Hmm,
-// hopefully, this comment will
-// explain what’s going on.
+export const __instructions_template = `// Aqui pueden ir algunas instrucciones, 
+// para el usuario, de manera de guiarlo
+
+use anchor_lang::prelude::*;
+use crate::collections::Nombre_Coleccion;
 
 #[derive(Accounts)]
-#[instruction({{#each instruction.arguments}}{{#if @first}}{{else}}, {{/if}}{{this.data.name.pascalCase}}: {{this.data.kind.name}}{{/each}})]
+#[instruction({{#each instruction.arguments}}{{#if @first}}{{else}}, {{/if}}{{this.data.name.camelCase}}: {{this.data.kind.name}}{{/each}})]
 pub struct {{instruction.name.pascalCase}}<'info>{
     #[account(
 

@@ -2,8 +2,21 @@ import * as Handlebars from 'handlebars';
 
 import { __rust_template, __collections_template } from './templates';
 import { __instructions_template } from './templates/__instructions_program';
+import { __instructions_body_template } from './templates/__instructions_body_program';
 import { IMetadata } from './types';
 import { formatName } from './utils';
+
+// TODO: Move later
+Handlebars.registerHelper('switch', function (this: any, value, options) {
+  this.switch_value = value;
+  return options.fn(this);
+});
+
+Handlebars.registerHelper('case', function (this: any, value, options) {
+  if (value == this.switch_value) {
+    return options.fn(this);
+  }
+});
 
 const formatProgramMetadata = (metadata: IMetadata) => {
   try {
@@ -98,6 +111,8 @@ const getTemplateByType = (type: string): string => {
       return __collections_template;
     case 'instructions_program':
       return __instructions_template;
+    case 'instructions_body_program':
+      return __instructions_body_template;
     default:
       return __rust_template;
   }
@@ -116,7 +131,7 @@ export const generateCollectionRustCode = (
   attributes: any
 ) => {
   if (!collection) return; // Im doing something wrong :thinking:
-
+  console.log(collection, attributes);
   const formatedCollection = formatCollectionMetadata(collection, attributes);
 
   return generateRustCode(
@@ -136,10 +151,18 @@ export const generateInstructionsRustCode = (
     iarguments
   );
 
-  return generateRustCode(
-    { instruction: formatedInstructions },
-    getTemplateByType('instructions_program')
-  );
+  const templates = {
+    static: generateRustCode(
+      { instruction: formatedInstructions },
+      getTemplateByType('instructions_program')
+    ),
+    dynamic: generateRustCode(
+      { instruction: formatedInstructions },
+      getTemplateByType('instructions_body_program')
+    ),
+  };
+
+  return templates;
 };
 
 export const generateProgramRustCode = (rawMetadata: any) => {

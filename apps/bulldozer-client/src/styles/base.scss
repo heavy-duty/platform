@@ -73,6 +73,10 @@ input[readonly] {
   height: calc(50vh - 77px) !important;
 }
 
+.bd-border-bottom {
+  border-bottom: 2px solid gray;
+}
+
 .editor-container {
   height: 100% !important;
 }

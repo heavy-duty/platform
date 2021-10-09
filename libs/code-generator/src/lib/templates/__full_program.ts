@@ -1,8 +1,5 @@
-export const __rust_template = `// So we’re doing something complicated here, 
-// long enough that we need
-// multiple lines of comments to do it! Hmm,
-// hopefully, this comment will
-// explain what’s going on.
+export const __rust_template = `// Aqui pueden ir algunas instrucciones, 
+// para el usuario, de manera de guiarlo
 
 use anchor_lang::prelude::*;
 
