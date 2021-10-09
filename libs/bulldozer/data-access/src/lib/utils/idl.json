@@ -487,87 +487,6 @@
       "args": []
     },
     {
-      "name": "createInstructionSignerAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "application",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instruction",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "markAttribute",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "updateInstructionSignerAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "markAttribute",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "deleteInstructionSignerAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
       "name": "createInstructionProgramAccount",
       "accounts": [
         {
@@ -649,6 +568,87 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "createInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "markAttribute",
+          "type": "u8"
+        }
+      ]
+    },
+    {
+      "name": "deleteInstructionSignerAccount",
+      "accounts": [
+        {
+          "name": "account",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -663,9 +663,7 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           }
         ]
       }
@@ -685,9 +683,7 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           }
         ]
       }
@@ -711,9 +707,7 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           },
           {
             "name": "kind",
@@ -745,9 +739,7 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           }
         ]
       }
@@ -771,9 +763,7 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           },
           {
             "name": "kind",
@@ -809,45 +799,11 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           },
           {
             "name": "collection",
             "type": "publicKey"
-          },
-          {
-            "name": "markAttribute",
-            "type": {
-              "defined": "MarkAttribute"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "InstructionSignerAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "application",
-            "type": "publicKey"
-          },
-          {
-            "name": "instruction",
-            "type": "publicKey"
-          },
-          {
-            "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
           },
           {
             "name": "markAttribute",
@@ -877,13 +833,41 @@
           },
           {
             "name": "name",
-            "type": {
-              "array": ["u8", 32]
-            }
+            "type": "bytes"
           },
           {
             "name": "program",
             "type": "publicKey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionSignerAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "markAttribute",
+            "type": {
+              "defined": "MarkAttribute"
+            }
           }
         ]
       }
@@ -1084,5 +1068,8 @@
       "name": "InvalidMarkAttribute",
       "msg": "Invalid mark attribute"
     }
-  ]
+  ],
+  "metadata": {
+    "address": "E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4"
+  }
 }

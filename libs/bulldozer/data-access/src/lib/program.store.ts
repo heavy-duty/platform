@@ -849,11 +849,13 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             ])
           )
         ).pipe(
+          tap((a) => console.log(a)),
           map((programArguments) =>
             programArguments.map(({ publicKey, account }) =>
               InstructionArgumentParser(publicKey, account)
             )
-          )
+          ),
+          tap((a) => console.log(a))
         )
       )
     );
