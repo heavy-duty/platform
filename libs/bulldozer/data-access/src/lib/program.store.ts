@@ -824,29 +824,11 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             )
           ),
           from(
-            defer(() => reader.account.instructionBasicAccount.all(filters))
+            defer(() => reader.account.instructionAccount.all(filters))
           ).pipe(
             map((programArguments) =>
               programArguments.map(({ publicKey, account }) =>
-                InstructionBasicAccountParser(publicKey, account)
-              )
-            )
-          ),
-          from(
-            defer(() => reader.account.instructionProgramAccount.all(filters))
-          ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
-                InstructionProgramAccountParser(publicKey, account)
-              )
-            )
-          ),
-          from(
-            defer(() => reader.account.instructionSignerAccount.all(filters))
-          ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
-                InstructionSignerAccountParser(publicKey, account)
+                InstructionAccountParser(publicKey, account)
               )
             )
           ),

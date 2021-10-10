@@ -20,8 +20,8 @@ import { filter, map, startWith } from 'rxjs/operators';
 @Component({
   selector: 'bd-view-instruction',
   template: `
-    <div class="flex">
-      <div class="p-4 w-2/4 bd-custom-height-layout overflow-auto">
+    <div class="flex w-full">
+      <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
         <header bdPageHeader *ngIf="instruction$ | ngrxPush as instruction">
           <h1>
             {{ instruction.data.name }}
@@ -66,6 +66,20 @@ import { filter, map, startWith } from 'rxjs/operators';
           >
           </bd-list-accounts>
         </main>
+      </div>
+      <div class="w-1/2 ">
+        <div class="bd-custom-height-layout overflow-hidden">
+          <bd-code-editor
+            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
+            [template]="rustContextCodeInstruction$ | ngrxPush"
+            [options]="contextEditorOptions$ | ngrxPush"
+          ></bd-code-editor>
+          <bd-code-editor
+            [customClass]="'bd-custom-monaco-editor-splited'"
+            [template]="rustHandlerCodeInstruction$ | ngrxPush"
+            [options]="handlerEditorOptions$ | ngrxPush"
+          ></bd-code-editor>
+        </div>
       </div>
     </div>
   `,
