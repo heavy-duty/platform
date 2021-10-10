@@ -8,7 +8,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { WalletUiModule } from '@danmt/wallet-adapter-angular-material-ui';
@@ -29,7 +28,6 @@ import { NavigationComponent } from './navigation.component';
     MatButtonModule,
     MatDialogModule,
     MatExpansionModule,
-    MatSlideToggleModule,
     MatIconModule,
     MatListModule,
     MatMenuModule,
