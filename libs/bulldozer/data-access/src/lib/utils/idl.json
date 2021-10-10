@@ -396,7 +396,7 @@
       "args": []
     },
     {
-      "name": "createInstructionBasicAccount",
+      "name": "createInstructionAccount",
       "accounts": [
         {
           "name": "account",
@@ -405,11 +405,6 @@
         },
         {
           "name": "application",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "collection",
           "isMut": false,
           "isSigner": false
         },
@@ -435,207 +430,70 @@
           "type": "string"
         },
         {
-          "name": "markAttribute",
+          "name": "kind",
           "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "updateInstructionBasicAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
         },
         {
-          "name": "collection",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "markAttribute",
+          "name": "modifier",
           "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "deleteInstructionBasicAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
         },
         {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createInstructionProgramAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "application",
-          "isMut": false,
-          "isSigner": false
+          "name": "space",
+          "type": {
+            "option": "u16"
+          }
         },
         {
           "name": "program",
-          "isMut": false,
-          "isSigner": false
-        },
+          "type": {
+            "option": "publicKey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "updateInstructionAccount",
+      "accounts": [
         {
-          "name": "instruction",
-          "isMut": false,
+          "name": "account",
+          "isMut": true,
           "isSigner": false
         },
         {
           "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
           "isMut": false,
-          "isSigner": false
+          "isSigner": true
         }
       ],
       "args": [
         {
           "name": "name",
           "type": "string"
-        }
-      ]
-    },
-    {
-      "name": "updateInstructionProgramAccount",
-      "accounts": [
+        },
         {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
+          "name": "kind",
+          "type": "u8"
+        },
+        {
+          "name": "modifier",
+          "type": "u8"
+        },
+        {
+          "name": "space",
+          "type": {
+            "option": "u16"
+          }
         },
         {
           "name": "program",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
+          "type": {
+            "option": "publicKey"
+          }
         }
       ]
     },
     {
-      "name": "deleteInstructionProgramAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "createInstructionSignerAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "application",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "instruction",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": true,
-          "isSigner": true
-        },
-        {
-          "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "markAttribute",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "updateInstructionSignerAccount",
-      "accounts": [
-        {
-          "name": "account",
-          "isMut": true,
-          "isSigner": false
-        },
-        {
-          "name": "authority",
-          "isMut": false,
-          "isSigner": true
-        }
-      ],
-      "args": [
-        {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "markAttribute",
-          "type": "u8"
-        }
-      ]
-    },
-    {
-      "name": "deleteInstructionSignerAccount",
+      "name": "deleteInstructionAccount",
       "accounts": [
         {
           "name": "account",
@@ -745,6 +603,72 @@
       }
     },
     {
+      "name": "InstructionAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "defined": "AccountKind"
+            }
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "defined": "AccountModifier"
+            }
+          },
+          {
+            "name": "collection",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "program",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "payer",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "close",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "space",
+            "type": {
+              "option": "u16"
+            }
+          }
+        ]
+      }
+    },
+    {
       "name": "InstructionArgument",
       "type": {
         "kind": "struct",
@@ -779,101 +703,88 @@
           }
         ]
       }
-    },
-    {
-      "name": "InstructionBasicAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "application",
-            "type": "publicKey"
-          },
-          {
-            "name": "instruction",
-            "type": "publicKey"
-          },
-          {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "collection",
-            "type": "publicKey"
-          },
-          {
-            "name": "markAttribute",
-            "type": {
-              "defined": "MarkAttribute"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "name": "InstructionProgramAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "application",
-            "type": "publicKey"
-          },
-          {
-            "name": "instruction",
-            "type": "publicKey"
-          },
-          {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "program",
-            "type": "publicKey"
-          }
-        ]
-      }
-    },
-    {
-      "name": "InstructionSignerAccount",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "authority",
-            "type": "publicKey"
-          },
-          {
-            "name": "application",
-            "type": "publicKey"
-          },
-          {
-            "name": "instruction",
-            "type": "publicKey"
-          },
-          {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "markAttribute",
-            "type": {
-              "defined": "MarkAttribute"
-            }
-          }
-        ]
-      }
     }
   ],
   "types": [
+    {
+      "name": "AccountKind",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Basic",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Program",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Signer",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountModifier",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "None",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Init",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Mut",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          },
+          {
+            "name": "Zero",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              }
+            ]
+          }
+        ]
+      }
+    },
     {
       "name": "AttributeKind",
       "type": {
@@ -1006,50 +917,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "MarkAttribute",
-      "type": {
-        "kind": "enum",
-        "variants": [
-          {
-            "name": "None",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "Init",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "Mut",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "Zero",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          }
-        ]
-      }
     }
   ],
   "errors": [
@@ -1067,6 +934,46 @@
       "code": 302,
       "name": "InvalidMarkAttribute",
       "msg": "Invalid mark attribute"
+    },
+    {
+      "code": 303,
+      "name": "InvalidAccountKind",
+      "msg": "Invalid account kind"
+    },
+    {
+      "code": 304,
+      "name": "InvalidAccountModifier",
+      "msg": "Invalid account modifier"
+    },
+    {
+      "code": 305,
+      "name": "MissingCollectionAccount",
+      "msg": "Missing Collection Account"
+    },
+    {
+      "code": 306,
+      "name": "MissingPayerAccount",
+      "msg": "Invalid Collection Account"
+    },
+    {
+      "code": 307,
+      "name": "MissingSpace",
+      "msg": "Invalid Payer Account"
+    },
+    {
+      "code": 308,
+      "name": "MissingProgram",
+      "msg": "Invalid Close Account"
+    },
+    {
+      "code": 309,
+      "name": "MissingAccount",
+      "msg": "Missing Account"
+    },
+    {
+      "code": 310,
+      "name": "InvalidAccount",
+      "msg": "Invalid Account"
     }
   ],
   "metadata": {

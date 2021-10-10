@@ -1,10 +1,18 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  Inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
   Collection,
-  InstructionBasicAccount,
+  InstructionAccount,
 } from '@heavy-duty/bulldozer/data-access';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'bd-edit-basic-account',
@@ -16,7 +24,7 @@ import {
     <form
       [formGroup]="accountGroup"
       class="flex flex-col gap-4"
-      (ngSubmit)="onEditBasicAccount()"
+      (ngSubmit)="onEditAccount()"
     >
       <mat-form-field
         class="w-full"
@@ -44,6 +52,20 @@ import {
       <mat-form-field
         class="w-full"
         appearance="fill"
+        hintLabel="Select a modifier."
+      >
+        <mat-label>Modifier</mat-label>
+        <mat-select formControlName="modifier">
+          <mat-option [value]="0">None</mat-option>
+          <mat-option [value]="1">Init</mat-option>
+          <mat-option [value]="2">Mut</mat-option>
+        </mat-select>
+        <mat-error *ngIf="submitted">The modifier is required.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field
+        class="w-full"
+        appearance="fill"
         hintLabel="Select a collection."
       >
         <mat-label>Collection</mat-label>
@@ -60,18 +82,63 @@ import {
       </mat-form-field>
 
       <mat-form-field
+        *ngIf="modifierControl.value === 1"
         class="w-full"
         appearance="fill"
-        hintLabel="Select a mark attribute."
+        hintLabel="Enter the space."
+        autocomplete="off"
       >
-        <mat-label>Mark attribute</mat-label>
-        <mat-select formControlName="markAttribute">
-          <mat-option [value]="0">None</mat-option>
-          <mat-option [value]="1">Init</mat-option>
-          <mat-option [value]="2">Mut</mat-option>
-          <mat-option [value]="3">Zero</mat-option>
+        <mat-label>Space</mat-label>
+        <input
+          matInput
+          formControlName="space"
+          required
+          type="number"
+          max="65536"
+        />
+        <mat-error *ngIf="submitted && spaceControl.errors?.required"
+          >The space is mandatory.</mat-error
+        >
+        <mat-error *ngIf="submitted && spaceControl.errors?.max"
+          >Maximum is 65536.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field
+        *ngIf="modifierControl.value === 1"
+        class="w-full"
+        appearance="fill"
+        hintLabel="Select a payer."
+      >
+        <mat-label>Payer</mat-label>
+        <mat-select formControlName="payer">
+          <mat-option
+            *ngFor="let account of data?.accounts"
+            [value]="account.id"
+          >
+            {{ account.data.name }} |
+            {{ account.id | obscureAddress }}
+          </mat-option>
         </mat-select>
-        <mat-error *ngIf="submitted">The mark attribute is required.</mat-error>
+        <mat-error *ngIf="submitted">The payer is required.</mat-error>
+      </mat-form-field>
+
+      <mat-form-field
+        *ngIf="modifierControl.value === 2"
+        class="w-full"
+        appearance="fill"
+        hintLabel="Select target for close."
+      >
+        <mat-label>Close</mat-label>
+        <mat-select formControlName="close">
+          <mat-option
+            *ngFor="let account of data?.accounts"
+            [value]="account.id"
+          >
+            {{ account.data.name }} |
+            {{ account.id | obscureAddress }}
+          </mat-option>
+        </mat-select>
       </mat-form-field>
 
       <button
@@ -94,55 +161,99 @@ import {
     </button>
   `,
 })
-export class EditBasicAccountComponent implements OnInit {
+export class EditBasicAccountComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
+  private readonly _destroy = new Subject();
+  readonly destroy$ = this._destroy.asObservable();
   submitted = false;
   readonly accountGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
+    modifier: new FormControl(0, { validators: [Validators.required] }),
     collection: new FormControl(null, { validators: [Validators.required] }),
-    markAttribute: new FormControl(0, { validators: [Validators.required] }),
+    space: new FormControl(null),
+    payer: new FormControl(null),
+    close: new FormControl(null),
   });
   get nameControl() {
     return this.accountGroup.get('name') as FormControl;
   }
+  get modifierControl() {
+    return this.accountGroup.get('modifier') as FormControl;
+  }
   get collectionControl() {
     return this.accountGroup.get('collection') as FormControl;
   }
-  get markAttributeControl() {
-    return this.accountGroup.get('markAttribute') as FormControl;
+  get spaceControl() {
+    return this.accountGroup.get('space') as FormControl;
+  }
+  get payerControl() {
+    return this.accountGroup.get('payer') as FormControl;
+  }
+  get closeControl() {
+    return this.accountGroup.get('close') as FormControl;
   }
 
   constructor(
     private readonly _matDialogRef: MatDialogRef<EditBasicAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionBasicAccount;
+      account?: InstructionAccount;
       collections: Collection[];
+      accounts: InstructionAccount[];
     }
   ) {}
 
   ngOnInit() {
+    this.modifierControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((modifier) => {
+        if (modifier === 1) {
+          this.spaceControl.setValidators([
+            Validators.required,
+            Validators.max(65536),
+          ]);
+          this.payerControl.setValidators([Validators.required]);
+        } else {
+          this.spaceControl.clearValidators();
+          this.payerControl.clearValidators();
+        }
+
+        this.spaceControl.updateValueAndValidity();
+        this.payerControl.updateValueAndValidity();
+      });
+
     if (this.data?.account) {
       this.accountGroup.setValue(
         {
           name: this.data.account.data.name,
+          modifier: this.data.account.data.modifier.id,
           collection: this.data.account.data.collection,
-          markAttribute: this.data.account.data.markAttribute.id,
+          space: this.data.account.data.space,
+          payer: this.data.account.data.payer,
+          close: this.data.account.data.close,
         },
         { emitEvent: false }
       );
     }
   }
 
-  async onEditBasicAccount() {
+  ngOnDestroy() {
+    this._destroy.next();
+    this._destroy.complete();
+  }
+
+  async onEditAccount() {
     this.submitted = true;
     this.accountGroup.markAllAsTouched();
 
     if (this.accountGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
-        markAttribute: this.markAttributeControl.value,
+        modifier: this.modifierControl.value,
         collection: this.collectionControl.value,
+        space: this.spaceControl.value,
+        payer: this.payerControl.value,
+        close: this.closeControl.value,
       });
     }
   }

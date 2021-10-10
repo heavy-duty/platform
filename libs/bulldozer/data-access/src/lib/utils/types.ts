@@ -82,53 +82,32 @@ export interface InstructionArgument {
   data: InstructionArgumentInfo;
 }
 
-export interface InstructionBasicAccountInfo {
-  authority: string;
-  application: string;
-  instruction: string;
-  name: string;
-  collection: string;
-  markAttribute: {
-    id: number;
-    name: string;
-  };
-}
-
-export interface InstructionBasicAccount {
-  id: string;
-  data: InstructionBasicAccountInfo;
-}
-
-export interface InstructionSignerAccountInfo {
-  authority: string;
-  application: string;
-  instruction: string;
-  name: string;
-  markAttribute: {
-    id: number;
-    name: string;
-  };
-}
-
-export interface InstructionSignerAccount {
-  id: string;
-  data: InstructionSignerAccountInfo;
-}
-
-export interface InstructionProgramAccountInfo {
-  authority: string;
-  application: string;
-  instruction: string;
-  name: string;
-  program: string;
-}
-
-export interface InstructionProgramAccount {
-  id: string;
-  data: InstructionProgramAccountInfo;
-}
-
 export interface Program {
   id: string;
   name: string;
+}
+
+export interface InstructionAccountInfo {
+  authority: string;
+  application: string;
+  instruction: string;
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+  };
+  modifier: {
+    id: number;
+    name: string;
+  };
+  collection: string | null;
+  program: string | null;
+  space: number | null;
+  payer: string | null;
+  close: string | null;
+}
+
+export interface InstructionAccount {
+  id: string;
+  data: InstructionAccountInfo;
 }

@@ -7,10 +7,8 @@ import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/f
 import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
 import {
   Instruction,
+  InstructionAccount,
   InstructionArgument,
-  InstructionBasicAccount,
-  InstructionProgramAccount,
-  InstructionSignerAccount,
   ProgramStore,
 } from '@heavy-duty/bulldozer/data-access';
 import { generateInstructionsRustCode } from '@heavy-duty/code-generator';
@@ -34,18 +32,14 @@ interface ViewModel {
   instructionId: string | null;
   instructions: Instruction[];
   arguments: InstructionArgument[];
-  basicAccounts: InstructionBasicAccount[];
-  signerAccounts: InstructionSignerAccount[];
-  programAccounts: InstructionProgramAccount[];
+  accounts: InstructionAccount[];
 }
 
 const initialState: ViewModel = {
   instructionId: null,
   instructions: [],
   arguments: [],
-  basicAccounts: [],
-  signerAccounts: [],
-  programAccounts: [],
+  accounts: [],
 };
 
 @Injectable()
@@ -57,27 +51,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly instructions$ = this.select(({ instructions }) => instructions);
   readonly arguments$ = this.select(
     ({ arguments: instructionArguments }) => instructionArguments
-  );
-  readonly basicAccounts$ = this.select(({ basicAccounts }) => basicAccounts);
-  readonly signerAccounts$ = this.select(
-    ({ signerAccounts }) => signerAccounts
-  );
-  readonly programAccounts$ = this.select(
-    ({ programAccounts }) => programAccounts
-  );
-  readonly accounts$ = this.select(
-    this.basicAccounts$,
-    this.signerAccounts$,
-    this.programAccounts$,
-    (basicAccounts, signerAccounts, programAccounts) => [
-      ...basicAccounts,
-      ...signerAccounts,
-      ...programAccounts,
-    ]
-  );
-  readonly accountsCount$ = this.select(
-    this.accounts$,
-    (accounts) => accounts.length
   );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly rustCode$ = this.select(
@@ -92,6 +65,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       return generateInstructionsRustCode(instruction, iarguments);
     }
   );
+  readonly accounts$ = this.select(({ accounts }) => accounts);
 
   constructor(
     private readonly _programStore: ProgramStore,
@@ -135,47 +109,15 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadBasicAccounts = this.effect(() =>
+  readonly loadAccounts = this.effect(() =>
     combineLatest([
       this.instructionId$.pipe(isNotNullOrUndefined),
       this.reload$,
     ]).pipe(
       switchMap(([instructionId]) =>
-        this._programStore.getInstructionBasicAccounts(instructionId).pipe(
+        this._programStore.getInstructionAccounts(instructionId).pipe(
           tapResponse(
-            (basicAccounts) => this.patchState({ basicAccounts }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly loadSignerAccounts = this.effect(() =>
-    combineLatest([
-      this.instructionId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([instructionId]) =>
-        this._programStore.getInstructionSignerAccounts(instructionId).pipe(
-          tapResponse(
-            (signerAccounts) => this.patchState({ signerAccounts }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly loadProgramAccounts = this.effect(() =>
-    combineLatest([
-      this.instructionId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([instructionId]) =>
-        this._programStore.getInstructionProgramAccounts(instructionId).pipe(
-          tapResponse(
-            (programAccounts) => this.patchState({ programAccounts }),
+            (accounts) => this.patchState({ accounts }),
             (error) => this._error.next(error)
           )
         )
@@ -334,14 +276,29 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
+  readonly deleteAccount = this.effect((accountId$: Observable<string>) =>
+    accountId$.pipe(
+      concatMap((accountId) =>
+        this._programStore.deleteInstructionAccount(accountId).pipe(
+          tapResponse(
+            () => this._reload.next(null),
+            (error) => this._error.next(error)
+          )
+        )
+      )
+    )
+  );
+
   readonly createBasicAccount = this.effect((action$) =>
     action$.pipe(
       concatMap(() =>
-        of(null).pipe(withLatestFrom(this._collectionStore.collections$))
+        of(null).pipe(
+          withLatestFrom(this._collectionStore.collections$, this.accounts$)
+        )
       ),
-      exhaustMap(([, collections]) =>
+      exhaustMap(([, collections, accounts]) =>
         this._matDialog
-          .open(EditBasicAccountComponent, { data: { collections } })
+          .open(EditBasicAccountComponent, { data: { collections, accounts } })
           .afterClosed()
           .pipe(
             filter((data) => data),
@@ -351,17 +308,22 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             ),
             concatMap(
               ([
-                { name, markAttribute, collection },
+                { name, modifier, collection, space, payer },
                 applicationId,
                 instructionId,
               ]) =>
                 this._programStore
-                  .createInstructionBasicAccount(
+                  .createInstructionAccount(
                     applicationId,
                     instructionId,
                     name,
+                    0,
+                    modifier,
+                    space,
+                    null,
                     collection,
-                    markAttribute
+                    payer,
+                    null
                   )
                   .pipe(
                     tapResponse(
@@ -376,26 +338,33 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateBasicAccount = this.effect(
-    (account$: Observable<InstructionBasicAccount>) =>
+    (account$: Observable<InstructionAccount>) =>
       account$.pipe(
         concatMap((account) =>
-          of(account).pipe(withLatestFrom(this._collectionStore.collections$))
+          of(account).pipe(
+            withLatestFrom(this._collectionStore.collections$, this.accounts$)
+          )
         ),
-        exhaustMap(([account, collections]) =>
+        exhaustMap(([account, collections, accounts]) =>
           this._matDialog
             .open(EditBasicAccountComponent, {
-              data: { account, collections },
+              data: { account, collections, accounts },
             })
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, markAttribute, collection }) =>
+              concatMap(({ name, modifier, collection, space, payer }) =>
                 this._programStore
-                  .updateInstructionBasicAccount(
+                  .updateInstructionAccount(
                     account.id,
                     name,
+                    0,
+                    modifier,
+                    space,
+                    null,
                     collection,
-                    markAttribute
+                    payer,
+                    null
                   )
                   .pipe(
                     tapResponse(
@@ -407,19 +376,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             )
         )
       )
-  );
-
-  readonly deleteBasicAccount = this.effect((accountId$: Observable<string>) =>
-    accountId$.pipe(
-      concatMap((accountId) =>
-        this._programStore.deleteInstructionBasicAccount(accountId).pipe(
-          tapResponse(
-            () => this._reload.next(null),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
   );
 
   readonly createSignerAccount = this.effect((action$) =>
@@ -434,21 +390,26 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(
-              ([{ name, markAttribute }, applicationId, instructionId]) =>
-                this._programStore
-                  .createInstructionSignerAccount(
-                    applicationId,
-                    instructionId,
-                    name,
-                    markAttribute
+            concatMap(([{ name, modifier }, applicationId, instructionId]) =>
+              this._programStore
+                .createInstructionAccount(
+                  applicationId,
+                  instructionId,
+                  name,
+                  2,
+                  modifier,
+                  null,
+                  null,
+                  null,
+                  null,
+                  null
+                )
+                .pipe(
+                  tapResponse(
+                    () => this._reload.next(null),
+                    (error) => this._error.next(error)
                   )
-                  .pipe(
-                    tapResponse(
-                      () => this._reload.next(null),
-                      (error) => this._error.next(error)
-                    )
-                  )
+                )
             )
           )
       )
@@ -456,7 +417,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateSignerAccount = this.effect(
-    (account$: Observable<InstructionSignerAccount>) =>
+    (account$: Observable<InstructionAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog
@@ -466,12 +427,18 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, markAttribute }) =>
+              concatMap(({ name, modifier }) =>
                 this._programStore
-                  .updateInstructionSignerAccount(
+                  .updateInstructionAccount(
                     account.id,
                     name,
-                    markAttribute
+                    2,
+                    modifier,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
                   )
                   .pipe(
                     tapResponse(
@@ -483,19 +450,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             )
         )
       )
-  );
-
-  readonly deleteSignerAccount = this.effect((accountId$: Observable<string>) =>
-    accountId$.pipe(
-      concatMap((accountId) =>
-        this._programStore.deleteInstructionSignerAccount(accountId).pipe(
-          tapResponse(
-            () => this._reload.next(null),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
   );
 
   readonly createProgramAccount = this.effect((action$) =>
@@ -521,11 +475,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             ),
             concatMap(([{ name, program }, applicationId, instructionId]) =>
               this._programStore
-                .createInstructionProgramAccount(
+                .createInstructionAccount(
                   applicationId,
                   instructionId,
                   name,
-                  program
+                  1,
+                  0,
+                  null,
+                  program,
+                  null,
+                  null,
+                  null
                 )
                 .pipe(
                   tapResponse(
@@ -540,7 +500,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateProgramAccount = this.effect(
-    (account$: Observable<InstructionProgramAccount>) =>
+    (account$: Observable<InstructionAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog
@@ -560,7 +520,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               filter((data) => data),
               concatMap(({ name, program }) =>
                 this._programStore
-                  .updateInstructionProgramAccount(account.id, name, program)
+                  .updateInstructionAccount(
+                    account.id,
+                    name,
+                    1,
+                    0,
+                    null,
+                    program,
+                    null,
+                    null,
+                    null
+                  )
                   .pipe(
                     tapResponse(
                       () => this._reload.next(null),
@@ -569,20 +539,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
               )
             )
-        )
-      )
-  );
-
-  readonly deleteProgramAccount = this.effect(
-    (accountId$: Observable<string>) =>
-      accountId$.pipe(
-        concatMap((accountId) =>
-          this._programStore.deleteInstructionProgramAccount(accountId).pipe(
-            tapResponse(
-              () => this._reload.next(null),
-              (error) => this._error.next(error)
-            )
-          )
         )
       )
   );

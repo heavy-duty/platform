@@ -1,7 +1,7 @@
 import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { InstructionSignerAccount } from '@heavy-duty/bulldozer/data-access';
+import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-edit-signer-account',
@@ -41,16 +41,15 @@ import { InstructionSignerAccount } from '@heavy-duty/bulldozer/data-access';
       <mat-form-field
         class="w-full"
         appearance="fill"
-        hintLabel="Select a mark attribute."
+        hintLabel="Select a modifier."
       >
-        <mat-label>Mark attribute</mat-label>
-        <mat-select formControlName="markAttribute">
+        <mat-label>Modifier</mat-label>
+        <mat-select formControlName="modifier">
           <mat-option [value]="0">None</mat-option>
           <mat-option [value]="1">Init</mat-option>
           <mat-option [value]="2">Mut</mat-option>
-          <mat-option [value]="3">Zero</mat-option>
         </mat-select>
-        <mat-error *ngIf="submitted">The mark attribute is required.</mat-error>
+        <mat-error *ngIf="submitted">The modifier is required.</mat-error>
       </mat-form-field>
 
       <button
@@ -78,20 +77,20 @@ export class EditSignerAccountComponent implements OnInit {
   submitted = false;
   readonly accountGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
-    markAttribute: new FormControl(0, { validators: [Validators.required] }),
+    modifier: new FormControl(0, { validators: [Validators.required] }),
   });
   get nameControl() {
     return this.accountGroup.get('name') as FormControl;
   }
-  get markAttributeControl() {
-    return this.accountGroup.get('markAttribute') as FormControl;
+  get modifierControl() {
+    return this.accountGroup.get('modifier') as FormControl;
   }
 
   constructor(
     private readonly _matDialogRef: MatDialogRef<EditSignerAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionSignerAccount;
+      account?: InstructionAccount;
     }
   ) {}
 
@@ -100,7 +99,7 @@ export class EditSignerAccountComponent implements OnInit {
       this.accountGroup.setValue(
         {
           name: this.data.account.data.name,
-          markAttribute: this.data.account.data.markAttribute.id,
+          modifier: this.data.account.data.modifier.id,
         },
         { emitEvent: false }
       );
@@ -114,7 +113,7 @@ export class EditSignerAccountComponent implements OnInit {
     if (this.accountGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
-        markAttribute: this.markAttributeControl.value,
+        modifier: this.modifierControl.value,
       });
     }
   }

@@ -1,15 +1,13 @@
 import { utils } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
 
+import { InstructionAccount } from '.';
 import {
   Application,
   Collection,
   CollectionAttribute,
   Instruction,
   InstructionArgument,
-  InstructionBasicAccount,
-  InstructionProgramAccount,
-  InstructionSignerAccount,
 } from './types';
 
 interface RawApplication {
@@ -138,19 +136,24 @@ export const InstructionArgumentParser = (
   };
 };
 
-interface RawInstructionBasicAccount {
+interface RawInstructionAccount {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
   name: Uint8Array;
-  collection: PublicKey;
-  markAttribute: { [key: string]: { id: number; name: string } };
+  kind: { [key: string]: { id: number; name: string } };
+  modifier: { [key: string]: { id: number; name: string } };
+  collection: PublicKey | null;
+  program: PublicKey | null;
+  space: number | null;
+  payer: PublicKey | null;
+  close: PublicKey | null;
 }
 
-export const InstructionBasicAccountParser = (
+export const InstructionAccountParser = (
   publicKey: PublicKey,
-  account: RawInstructionBasicAccount
-): InstructionBasicAccount => {
+  account: RawInstructionAccount
+): InstructionAccount => {
   return {
     id: publicKey.toBase58(),
     data: {
@@ -158,62 +161,19 @@ export const InstructionBasicAccountParser = (
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
       name: utils.bytes.utf8.decode(account.name),
-      collection: account.collection.toBase58(),
-      markAttribute: {
-        id: Object.values(account.markAttribute)[0].id,
-        name: Object.keys(account.markAttribute)[0],
+      kind: {
+        id: Object.values(account.kind)[0].id,
+        name: Object.keys(account.kind)[0],
       },
-    },
-  };
-};
-
-interface RawInstructionSignerAccount {
-  authority: PublicKey;
-  application: PublicKey;
-  instruction: PublicKey;
-  name: Uint8Array;
-  markAttribute: { [key: string]: { id: number; name: string } };
-}
-
-export const InstructionSignerAccountParser = (
-  publicKey: PublicKey,
-  account: RawInstructionSignerAccount
-): InstructionSignerAccount => {
-  return {
-    id: publicKey.toBase58(),
-    data: {
-      authority: account.authority.toBase58(),
-      application: account.application.toBase58(),
-      instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
-      markAttribute: {
-        id: Object.values(account.markAttribute)[0].id,
-        name: Object.keys(account.markAttribute)[0],
+      modifier: {
+        id: Object.values(account.modifier)[0].id,
+        name: Object.keys(account.modifier)[0],
       },
-    },
-  };
-};
-
-interface RawInstructionProgramAccount {
-  authority: PublicKey;
-  application: PublicKey;
-  instruction: PublicKey;
-  name: Uint8Array;
-  program: PublicKey;
-}
-
-export const InstructionProgramAccountParser = (
-  publicKey: PublicKey,
-  account: RawInstructionProgramAccount
-): InstructionProgramAccount => {
-  return {
-    id: publicKey.toBase58(),
-    data: {
-      authority: account.authority.toBase58(),
-      application: account.application.toBase58(),
-      instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
-      program: account.program.toBase58(),
+      collection: account.collection && account.collection.toBase58(),
+      program: account.program && account.program.toBase58(),
+      close: account.close && account.close.toBase58(),
+      payer: account.payer && account.payer.toBase58(),
+      space: account.space,
     },
   };
 };

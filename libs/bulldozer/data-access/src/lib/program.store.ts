@@ -14,11 +14,9 @@ import {
   CollectionParser,
   DummyWallet,
   idl,
+  InstructionAccountParser,
   InstructionArgumentParser,
-  InstructionBasicAccountParser,
   InstructionParser,
-  InstructionProgramAccountParser,
-  InstructionSignerAccountParser,
 } from './utils';
 
 interface ViewModel {
@@ -515,21 +513,21 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  getInstructionBasicAccounts(instructionId: string) {
+  getInstructionAccounts(instructionId: string) {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
       concatMap((reader) =>
         from(
           defer(() =>
-            reader.account.instructionBasicAccount.all([
+            reader.account.instructionAccount.all([
               { memcmp: { bytes: instructionId, offset: 72 } },
             ])
           )
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              InstructionBasicAccountParser(publicKey, account)
+              InstructionAccountParser(publicKey, account)
             )
           )
         )
@@ -537,12 +535,17 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  createInstructionBasicAccount(
+  createInstructionAccount(
     applicationId: string,
     instructionId: string,
     accountName: string,
-    collectionId: string,
-    accountMarkAttribute: number
+    accountKind: number,
+    accountModifier: number,
+    accountSpace: number | null,
+    accountProgram: string | null,
+    accountCollection: string | null,
+    accountPayer: string | null,
+    accountClose: string | null
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -554,120 +557,12 @@ export class ProgramStore extends ComponentStore<ViewModel> {
 
         return from(
           defer(() =>
-            writer.rpc.createInstructionBasicAccount(
+            writer.rpc.createInstructionAccount(
               accountName,
-              accountMarkAttribute,
-              {
-                accounts: {
-                  authority: walletPublicKey,
-                  application: new PublicKey(applicationId),
-                  instruction: new PublicKey(instructionId),
-                  account: account.publicKey,
-                  collection: new PublicKey(collectionId),
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [account],
-              }
-            )
-          )
-        );
-      })
-    );
-  }
-
-  updateInstructionBasicAccount(
-    accountId: string,
-    accountName: string,
-    collectionId: string,
-    accountMarkAttribute: number
-  ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionBasicAccount(
-              accountName,
-              accountMarkAttribute,
-              {
-                accounts: {
-                  authority: walletPublicKey,
-                  account: new PublicKey(accountId),
-                  collection: new PublicKey(collectionId),
-                },
-              }
-            )
-          )
-        )
-      )
-    );
-  }
-
-  deleteInstructionBasicAccount(accountId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstructionBasicAccount({
-              accounts: {
-                authority: walletPublicKey,
-                account: new PublicKey(accountId),
-              },
-            })
-          )
-        )
-      )
-    );
-  }
-
-  getInstructionSignerAccounts(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instructionSignerAccount.all([
-              { memcmp: { bytes: instructionId, offset: 72 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionSignerAccountParser(publicKey, account)
-            )
-          )
-        )
-      )
-    );
-  }
-
-  createInstructionSignerAccount(
-    applicationId: string,
-    instructionId: string,
-    accountName: string,
-    accountMarkAttribute: number
-  ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const account = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createInstructionSignerAccount(
-              accountName,
-              accountMarkAttribute,
+              accountKind,
+              accountModifier,
+              accountSpace,
+              accountProgram && new PublicKey(accountProgram),
               {
                 accounts: {
                   authority: walletPublicKey,
@@ -677,6 +572,26 @@ export class ProgramStore extends ComponentStore<ViewModel> {
                   systemProgram: SystemProgram.programId,
                 },
                 signers: [account],
+                remainingAccounts: [
+                  accountCollection &&
+                    accountKind === 0 && {
+                      pubkey: new PublicKey(accountCollection),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                  accountPayer &&
+                    accountKind === 0 && {
+                      pubkey: new PublicKey(accountPayer),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                  accountClose &&
+                    accountKind === 1 && {
+                      pubkey: new PublicKey(accountClose),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                ].filter((account) => account),
               }
             )
           )
@@ -685,10 +600,16 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  updateInstructionSignerAccount(
+  updateInstructionAccount(
     accountId: string,
     accountName: string,
-    accountMarkAttribute: number
+    accountKind: number,
+    accountModifier: number,
+    accountSpace: number | null,
+    accountProgram: string | null,
+    accountCollection: string | null,
+    accountPayer: string | null,
+    accountClose: string | null
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -698,14 +619,37 @@ export class ProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateInstructionSignerAccount(
+            writer.rpc.updateInstructionAccount(
               accountName,
-              accountMarkAttribute,
+              accountKind,
+              accountModifier,
+              accountSpace,
+              accountProgram && new PublicKey(accountProgram),
               {
                 accounts: {
                   authority: walletPublicKey,
                   account: new PublicKey(accountId),
                 },
+                remainingAccounts: [
+                  accountCollection &&
+                    accountKind === 0 && {
+                      pubkey: new PublicKey(accountCollection),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                  accountPayer &&
+                    accountKind === 0 && {
+                      pubkey: new PublicKey(accountPayer),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                  accountClose &&
+                    accountKind === 1 && {
+                      pubkey: new PublicKey(accountClose),
+                      isWritable: false,
+                      isSigner: false,
+                    },
+                ].filter((account) => account),
               }
             )
           )
@@ -714,7 +658,7 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionSignerAccount(accountId: string) {
+  deleteInstructionAccount(accountId: string) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
       this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
@@ -723,109 +667,7 @@ export class ProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.deleteInstructionSignerAccount({
-              accounts: {
-                authority: walletPublicKey,
-                account: new PublicKey(accountId),
-              },
-            })
-          )
-        )
-      )
-    );
-  }
-
-  getInstructionProgramAccounts(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instructionProgramAccount.all([
-              { memcmp: { bytes: instructionId, offset: 72 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionProgramAccountParser(publicKey, account)
-            )
-          )
-        )
-      )
-    );
-  }
-
-  createInstructionProgramAccount(
-    applicationId: string,
-    instructionId: string,
-    accountName: string,
-    programId: string
-  ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const account = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createInstructionProgramAccount(accountName, {
-              accounts: {
-                authority: walletPublicKey,
-                application: new PublicKey(applicationId),
-                instruction: new PublicKey(instructionId),
-                account: account.publicKey,
-                program: new PublicKey(programId),
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [account],
-            })
-          )
-        );
-      })
-    );
-  }
-
-  updateInstructionProgramAccount(
-    accountId: string,
-    accountName: string,
-    programId: string
-  ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionProgramAccount(accountName, {
-              accounts: {
-                authority: walletPublicKey,
-                account: new PublicKey(accountId),
-                program: new PublicKey(programId),
-              },
-            })
-          )
-        )
-      )
-    );
-  }
-
-  deleteInstructionProgramAccount(accountId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstructionProgramAccount({
+            writer.rpc.deleteInstructionAccount({
               accounts: {
                 authority: walletPublicKey,
                 account: new PublicKey(accountId),
@@ -849,13 +691,11 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             ])
           )
         ).pipe(
-          tap((a) => console.log(a)),
           map((programArguments) =>
             programArguments.map(({ publicKey, account }) =>
               InstructionArgumentParser(publicKey, account)
             )
-          ),
-          tap((a) => console.log(a))
+          )
         )
       )
     );
@@ -984,29 +824,11 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             )
           ),
           from(
-            defer(() => reader.account.instructionBasicAccount.all(filters))
+            defer(() => reader.account.instructionAccount.all(filters))
           ).pipe(
             map((programArguments) =>
               programArguments.map(({ publicKey, account }) =>
-                InstructionBasicAccountParser(publicKey, account)
-              )
-            )
-          ),
-          from(
-            defer(() => reader.account.instructionProgramAccount.all(filters))
-          ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
-                InstructionProgramAccountParser(publicKey, account)
-              )
-            )
-          ),
-          from(
-            defer(() => reader.account.instructionSignerAccount.all(filters))
-          ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
-                InstructionSignerAccountParser(publicKey, account)
+                InstructionAccountParser(publicKey, account)
               )
             )
           ),
