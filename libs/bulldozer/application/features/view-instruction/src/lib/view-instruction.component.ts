@@ -23,7 +23,7 @@ import { filter, map, startWith } from 'rxjs/operators';
   selector: 'bd-view-instruction',
   template: `
     <div class="flex">
-      <div class="p-4 w-2/4">
+      <div class="p-4 w-2/4 bd-custom-height-layout overflow-auto">
         <header bdPageHeader *ngIf="instruction$ | ngrxPush as instruction">
           <h1>
             {{ instruction.data.name }}
@@ -74,14 +74,14 @@ import { filter, map, startWith } from 'rxjs/operators';
           </bd-list-accounts>
         </main>
       </div>
-      <div class="w-2/4">
+      <div class="w-2/4 bd-custom-height-layout overflow-hidden">
         <bd-code-editor
-          [customClass]="'bd-border-bottom custom-monaco-editor-splited'"
+          [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
           [template]="rustContextCodeInstruction$ | ngrxPush"
           [options]="contextEditorOptions$ | ngrxPush"
         ></bd-code-editor>
         <bd-code-editor
-          [customClass]="'custom-monaco-editor-splited'"
+          [customClass]="'bd-custom-monaco-editor-splited'"
           [template]="rustHandlerCodeInstruction$ | ngrxPush"
           [options]="handlerEditorOptions$ | ngrxPush"
         ></bd-code-editor>
@@ -110,6 +110,7 @@ export class ViewInstructionComponent implements OnInit {
     language: 'rust',
     automaticLayout: true,
     fontSize: 16,
+    wordWrap: true,
   };
   readonly contextEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) => ({

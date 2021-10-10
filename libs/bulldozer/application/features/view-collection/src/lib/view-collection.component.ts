@@ -18,7 +18,7 @@ import { filter, map, startWith } from 'rxjs/operators';
   selector: 'bd-view-collection',
   template: `
     <div class="flex">
-      <div class="p-4 w-1/2">
+      <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
         <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
           <h1>
             {{ collection.data.name }}
@@ -51,9 +51,9 @@ import { filter, map, startWith } from 'rxjs/operators';
           </bd-list-attributes>
         </main>
       </div>
-      <div class="w-1/2">
+      <div class="w-1/2 bd-custom-height-layout overflow-hidden">
         <bd-code-editor
-          [customClass]="'custom-monaco-editor'"
+          [customClass]="'bd-custom-monaco-editor'"
           [template]="rustCodeCollection$ | ngrxPush"
           [options]="editorOptions$ | ngrxPush"
         ></bd-code-editor>
