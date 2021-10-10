@@ -76,6 +76,13 @@ describe('instruction account', () => {
           systemProgram: SystemProgram.programId,
         },
         signers: [instructionAccount],
+        remainingAccounts: [
+          {
+            pubkey: collection.publicKey,
+            isWritable: false,
+            isSigner: false,
+          },
+        ],
       }
     );
     // assert
@@ -90,9 +97,48 @@ describe('instruction account', () => {
     assert.equal(account.modifier.none.id, instructionAccountModifier);
     assert.ok(account.instruction.equals(instruction.publicKey));
     assert.ok(account.application.equals(application.publicKey));
+    assert.ok(account.collection.equals(collection.publicKey));
     assert.equal(account.program, null);
     assert.equal(account.payer, null);
     assert.equal(account.close, null);
+    assert.equal(account.space, null);
+  });
+
+  it('should remove collection when updating to kind different than basic', async () => {
+    // arrange
+    const instructionAccountName = 'data';
+    const instructionAccountKind = 1;
+    const instructionAccountModifier = 0;
+    const instructionAccountSpace = null;
+    const instructionAccountProgram = SystemProgram.programId;
+    // act
+    await program.rpc.updateInstructionAccount(
+      instructionAccountName,
+      instructionAccountKind,
+      instructionAccountModifier,
+      instructionAccountSpace,
+      instructionAccountProgram,
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          account: instructionAccount.publicKey,
+        },
+      }
+    );
+    // assert
+    const account = await program.account.instructionAccount.fetch(
+      instructionAccount.publicKey
+    );
+    assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+    assert.equal(utils.bytes.utf8.decode(account.name), instructionAccountName);
+    assert.ok('program' in account.kind);
+    assert.equal(account.kind.program.id, instructionAccountKind);
+    assert.ok('none' in account.modifier);
+    assert.equal(account.modifier.none.id, instructionAccountModifier);
+    assert.ok(account.instruction.equals(instruction.publicKey));
+    assert.ok(account.application.equals(application.publicKey));
+    assert.ok(account.program.equals(SystemProgram.programId));
+    assert.equal(account.collection, null);
     assert.equal(account.space, null);
     console.log(account);
   });

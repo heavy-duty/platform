@@ -13,4 +13,8 @@ pub enum ErrorCode {
     InvalidAccountKind,
     #[msg("Invalid account modifier")]
     InvalidAccountModifier,
+    #[msg("Missing Collection Account")]
+    MissingCollectionAccount,
+    #[msg("Invalid Collection Account")]
+    InvalidCollectionAccount,
 }
