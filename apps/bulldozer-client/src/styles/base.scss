@@ -65,18 +65,20 @@ input[readonly] {
   pointer-events: none;
 }
 
-.custom-monaco-editor {
-  height: calc(100vh - 155px) !important;
+.bd-custom-monaco-editor {
+  height: calc(100vh - 96px) !important;
 }
 
-.custom-monaco-editor-splited {
-  height: calc(50vh - 77px) !important;
+.bd-custom-monaco-editor-splited {
+  height: calc(50vh - 57px) !important;
 }
 
 .bd-border-bottom {
   border-bottom: 2px solid gray;
 }
 
-.editor-container {
-  height: 100% !important;
+.bd-custom-height-layout {
+  height: calc(
+    100vh - 113px
+  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
 }
