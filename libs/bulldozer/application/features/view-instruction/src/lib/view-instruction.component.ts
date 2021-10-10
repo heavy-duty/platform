@@ -110,6 +110,7 @@ export class ViewInstructionComponent implements OnInit {
     language: 'rust',
     automaticLayout: true,
     fontSize: 16,
+    wordWrap: true,
   };
   readonly contextEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) => ({
