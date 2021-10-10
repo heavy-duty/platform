@@ -106,8 +106,6 @@ pub mod bulldozer {
     space: Option<u16>,
     program: Option<Pubkey>,
   ) -> ProgramResult {
-    msg!("KIND: {}", kind);
-    msg!("MODIFIER: {}", modifier);
     instructions::create_instruction_account::handler(ctx, name, kind, modifier, space, program)
   }
 
@@ -124,69 +122,5 @@ pub mod bulldozer {
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
     instructions::delete_instruction_account::handler(ctx)
-  }
-
-  pub fn create_instruction_basic_account(
-    ctx: Context<CreateInstructionBasicAccount>,
-    name: String,
-    mark_attribute: u8,
-  ) -> ProgramResult {
-    instructions::create_instruction_basic_account::handler(ctx, name, mark_attribute)
-  }
-
-  pub fn update_instruction_basic_account(
-    ctx: Context<UpdateInstructionBasicAccount>,
-    name: String,
-    mark_attribute: u8,
-  ) -> ProgramResult {
-    instructions::update_instruction_basic_account::handler(ctx, name, mark_attribute)
-  }
-
-  pub fn delete_instruction_basic_account(
-    ctx: Context<DeleteInstructionBasicAccount>,
-  ) -> ProgramResult {
-    instructions::delete_instruction_basic_account::handler(ctx)
-  }
-
-  pub fn create_instruction_program_account(
-    ctx: Context<CreateInstructionProgramAccount>,
-    name: String,
-  ) -> ProgramResult {
-    instructions::create_instruction_program_account::handler(ctx, name)
-  }
-
-  pub fn update_instruction_program_account(
-    ctx: Context<UpdateInstructionProgramAccount>,
-    name: String,
-  ) -> ProgramResult {
-    instructions::update_instruction_program_account::handler(ctx, name)
-  }
-
-  pub fn delete_instruction_program_account(
-    ctx: Context<DeleteInstructionProgramAccount>,
-  ) -> ProgramResult {
-    instructions::delete_instruction_program_account::handler(ctx)
-  }
-
-  pub fn create_instruction_signer_account(
-    ctx: Context<CreateInstructionSignerAccount>,
-    name: String,
-    mark_attribute: u8,
-  ) -> ProgramResult {
-    instructions::create_instruction_signer_account::handler(ctx, name, mark_attribute)
-  }
-
-  pub fn update_instruction_signer_account(
-    ctx: Context<UpdateInstructionSignerAccount>,
-    name: String,
-    mark_attribute: u8,
-  ) -> ProgramResult {
-    instructions::update_instruction_signer_account::handler(ctx, name, mark_attribute)
-  }
-
-  pub fn delete_instruction_signer_account(
-    ctx: Context<DeleteInstructionSignerAccount>,
-  ) -> ProgramResult {
-    instructions::delete_instruction_signer_account::handler(ctx)
   }
 }
