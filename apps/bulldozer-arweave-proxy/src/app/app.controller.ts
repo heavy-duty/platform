@@ -7,9 +7,9 @@ import { FunctionBodyDTO } from './dto/function-body.dto.';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @Post('/storeInstructionBody')
+  @Post('/instruction-body')
   async storeInstructionBody(@Body() body: FunctionBodyDTO) {
-    const txId = await this.appService.storeInstructionBody(body.functionBody);
+    const txId = await this.appService.storeInstructionBody(body.code);
     return txId;
   }
 }

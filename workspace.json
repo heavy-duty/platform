@@ -1,57 +1,6 @@
 {
   "version": 2,
   "projects": {
-    "bulldozer-arweave-code-upload": {
-      "root": "apps/bulldozer-arweave-code-upload",
-      "sourceRoot": "apps/bulldozer-arweave-code-upload/src",
-      "projectType": "application",
-      "targets": {
-        "build": {
-          "executor": "@nrwl/node:build",
-          "outputs": ["{options.outputPath}"],
-          "options": {
-            "outputPath": "dist/apps/bulldozer-arweave-code-upload",
-            "main": "apps/bulldozer-arweave-code-upload/src/main.ts",
-            "tsConfig": "apps/bulldozer-arweave-code-upload/tsconfig.app.json",
-            "assets": ["apps/bulldozer-arweave-code-upload/src/assets"]
-          },
-          "configurations": {
-            "production": {
-              "optimization": true,
-              "extractLicenses": true,
-              "inspect": false,
-              "fileReplacements": [
-                {
-                  "replace": "apps/bulldozer-arweave-code-upload/src/environments/environment.ts",
-                  "with": "apps/bulldozer-arweave-code-upload/src/environments/environment.prod.ts"
-                }
-              ]
-            }
-          }
-        },
-        "serve": {
-          "executor": "@nrwl/node:execute",
-          "options": {
-            "buildTarget": "bulldozer-arweave-code-upload:build"
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
-          "options": {
-            "lintFilePatterns": ["apps/bulldozer-arweave-code-upload/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/apps/bulldozer-arweave-code-upload"],
-          "options": {
-            "jestConfig": "apps/bulldozer-arweave-code-upload/jest.config.js",
-            "passWithNoTests": true
-          }
-        }
-      }
-    },
     "arweave": {
       "root": "libs/arweave",
       "sourceRoot": "libs/arweave/src",
@@ -631,6 +580,57 @@
               "libs/bulldozer/application/utils/services/active-breakpoint/src/**/*.ts",
               "libs/bulldozer/application/utils/services/active-breakpoint/src/**/*.html"
             ]
+          }
+        }
+      }
+    },
+    "bulldozer-arweave-proxy": {
+      "root": "apps/bulldozer-arweave-proxy",
+      "sourceRoot": "apps/bulldozer-arweave-proxy/src",
+      "projectType": "application",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/node:build",
+          "outputs": ["{options.outputPath}"],
+          "options": {
+            "outputPath": "dist/apps/bulldozer-arweave-proxy",
+            "main": "apps/bulldozer-arweave-proxy/src/main.ts",
+            "tsConfig": "apps/bulldozer-arweave-proxy/tsconfig.app.json",
+            "assets": ["apps/bulldozer-arweave-proxy/src/assets"]
+          },
+          "configurations": {
+            "production": {
+              "optimization": true,
+              "extractLicenses": true,
+              "inspect": false,
+              "fileReplacements": [
+                {
+                  "replace": "apps/bulldozer-arweave-proxy/src/environments/environment.ts",
+                  "with": "apps/bulldozer-arweave-proxy/src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "executor": "@nrwl/node:execute",
+          "options": {
+            "buildTarget": "bulldozer-arweave-proxy:build"
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": ["apps/bulldozer-arweave-proxy/**/*.ts"]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/apps/bulldozer-arweave-proxy"],
+          "options": {
+            "jestConfig": "apps/bulldozer-arweave-proxy/jest.config.js",
+            "passWithNoTests": true
           }
         }
       }

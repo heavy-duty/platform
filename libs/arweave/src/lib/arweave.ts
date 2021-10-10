@@ -5,7 +5,6 @@ import TestWeave from 'testweave-sdk';
 const test_wallet = 'MlV6DeOtRmakDOf6vgOBlif795tcWimgyPsYYNQ8q1Y';
 
 export const init = async () => {
-  console.log('DETRON DE', Arweave);
   const arweave: Arweave = Arweave.init({
     host: 'localhost',
     protocol: 'http',
@@ -30,21 +29,19 @@ export const saveData = async (
 ) => {
   const transaction = await arweave.createTransaction({ data: data }, wallet);
 
-  transaction.addTag('Content-Type', 'text/plain');
   await arweave.transactions.sign(transaction, wallet);
   await arweave.transactions.post(transaction);
-  console.log('transaction create: ', transaction);
+
   await testWeave.mine();
 
-  const status = await arweave.transactions.getStatus(transaction.id);
-  console.log('Data Saved with follow status: ', status);
+  await arweave.transactions.getStatus(transaction.id);
 
   return transaction.id;
 };
 
 export const getLastData = async (arweave: Arweave) => {
   const lastId = await arweave.wallets.getLastTransactionID(test_wallet);
-  console.log('lastID', lastId);
+
   const message = await arweave.transactions.getData(lastId, {
     decode: true,
     string: true,
@@ -54,6 +51,5 @@ export const getLastData = async (arweave: Arweave) => {
 };
 
 export const ArweaveSdk = () => {
-  console.log('this is arweave');
   return 'arweave-sdk';
 };

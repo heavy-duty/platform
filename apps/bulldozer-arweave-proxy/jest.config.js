@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'bulldozer-arweave-code-upload',
+  displayName: 'bulldozer-arweave-proxy',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -11,5 +11,5 @@ module.exports = {
     '^.+\\.[tj]s$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/apps/bulldozer-arweave-code-upload',
+  coverageDirectory: '../../coverage/apps/bulldozer-arweave-proxy',
 };

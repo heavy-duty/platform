@@ -1,0 +1,100 @@
+{
+	"info": {
+		"_postman_id": "93cc6cbb-6020-4581-84d1-75f508948839",
+		"name": "Arweave",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get Transaction By ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://localhost/tx/IY_ayB3WeAxKTd3SbjjYufJ1MiCtHCXBfBFniJmb9IQ",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"tx",
+						"IY_ayB3WeAxKTd3SbjjYufJ1MiCtHCXBfBFniJmb9IQ"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/info",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store string",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"code\": \"// Aqui pueden ir algunas instrucciones, \\n// para el usuario, de manera de guiarlo\\n\\npub fn handler(ctx: Context<CreateAnimal>, name:u32, owners:[u32;5]) -> ProgramResult {\\n    msg!(\\\"Creado en demo con daniel 11\\\");\\n\\n    // your code...\\n\\n\\n    Ok(())\\n}\\n\"  \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3333/api/instruction-body",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3333",
+					"path": [
+						"api",
+						"instruction-body"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Transaction Data By ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost/r97fTHD_OcaWpcTnGznVSZF0IeTTFLZgMufhH-cpapg",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"path": [
+						"r97fTHD_OcaWpcTnGznVSZF0IeTTFLZgMufhH-cpapg"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

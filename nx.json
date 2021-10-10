@@ -27,9 +27,6 @@
     ]
   },
   "projects": {
-    "bulldozer-arweave-code-upload": {
-      "tags": []
-    },
     "arweave": {
       "tags": []
     },
@@ -94,6 +91,9 @@
       "tags": []
     },
     "bulldozer-application-utils-services-active-breakpoint": {
+      "tags": []
+    },
+    "bulldozer-arweave-proxy": {
       "tags": []
     },
     "bulldozer-client": {
