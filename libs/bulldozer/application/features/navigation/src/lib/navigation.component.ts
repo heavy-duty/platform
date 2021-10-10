@@ -32,7 +32,7 @@ import { NavigationStore } from './navigation.store';
             <h2 class="mt-4 text-center">BULLDOZER</h2>
             <mat-nav-list>
               <div class="w-full mb-6 flex justify-center items-center">
-                <bd-dark-theme-switch></bd-dark-theme-switch>
+                <!-- <bd-dark-theme-switch></bd-dark-theme-switch> -->
               </div>
             </mat-nav-list>
 
@@ -84,6 +84,9 @@ import { NavigationStore } from './navigation.store';
             class="ml-auto bd-custom-color"
             color="accent"
           ></wallet-multi-button>
+          <div class="ml-6">
+            <bd-dark-theme-switch></bd-dark-theme-switch>
+          </div>
         </mat-toolbar>
 
         <ng-content></ng-content>
