@@ -132,3 +132,28 @@ export interface Program {
   id: string;
   name: string;
 }
+
+export interface InstructionAccountInfo {
+  authority: string;
+  application: string;
+  instruction: string;
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+  };
+  modifier: {
+    id: number;
+    name: string;
+  };
+  collection: string | null;
+  program: string | null;
+  space: number | null;
+  payer: string | null;
+  close: string | null;
+}
+
+export interface InstructionAccount {
+  id: string;
+  data: InstructionAccountInfo;
+}
