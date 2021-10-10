@@ -9,4 +9,8 @@ pub struct InstructionAccount {
     pub name: Vec<u8>,
     pub kind: AccountKind,
     pub modifier: AccountModifier,
+    pub program: Option<Pubkey>,
+    pub payer: Option<Pubkey>,
+    pub close: Option<Pubkey>,
+    pub space: Option<u16>,
 }

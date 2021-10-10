@@ -58,11 +58,15 @@ describe('instruction account', () => {
     const instructionAccountName = 'data';
     const instructionAccountKind = 0;
     const instructionAccountModifier = 0;
+    const instructionAccountSpace = null;
+    const instructionAccountProgram = null;
     // act
     await program.rpc.createInstructionAccount(
       instructionAccountName,
       instructionAccountKind,
       instructionAccountModifier,
+      instructionAccountSpace,
+      instructionAccountProgram,
       {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -86,5 +90,10 @@ describe('instruction account', () => {
     assert.equal(account.modifier.none.id, instructionAccountModifier);
     assert.ok(account.instruction.equals(instruction.publicKey));
     assert.ok(account.application.equals(application.publicKey));
+    assert.equal(account.program, null);
+    assert.equal(account.payer, null);
+    assert.equal(account.close, null);
+    assert.equal(account.space, null);
+    console.log(account);
   });
 });

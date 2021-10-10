@@ -4,12 +4,12 @@ use crate::enums::{AccountKind, AccountModifier};
 use crate::utils::{vectorize_string};
 
 #[derive(Accounts)]
-#[instruction(name: String, kind: u8, modifier: u8)]
+#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>, program: Option<Pubkey>)]
 pub struct CreateInstructionAccount<'info> {
     #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32 + 32 + 32 + 32 + 2
+        space = 8 + 32 + 32 + 32 + 32 + 32 + 2 + 33 + 33 + 33 + 3
     )]
     pub account: Box<Account<'info, InstructionAccount>>,
     pub application: Box<Account<'info, Application>>,
@@ -19,7 +19,7 @@ pub struct CreateInstructionAccount<'info> {
     pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<CreateInstructionAccount>, name: String, kind: u8, modifier: u8) -> ProgramResult {
+pub fn handler(ctx: Context<CreateInstructionAccount>, name: String, kind: u8, modifier: u8, space: Option<u16>, program: Option<Pubkey>) -> ProgramResult {
     msg!("Create instruction basic account");
     ctx.accounts.account.authority = ctx.accounts.authority.key();
     ctx.accounts.account.application = ctx.accounts.application.key();
@@ -27,5 +27,7 @@ pub fn handler(ctx: Context<CreateInstructionAccount>, name: String, kind: u8, m
     ctx.accounts.account.name = vectorize_string(name, 32);
     ctx.accounts.account.kind = AccountKind::from_index(kind)?;
     ctx.accounts.account.modifier = AccountModifier::from_index(modifier)?;
+    ctx.accounts.account.space = space;
+    ctx.accounts.account.program = program;
     Ok(())
 }
