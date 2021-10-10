@@ -373,7 +373,7 @@ describe('instruction account', () => {
           error = err;
         }
         // assert
-        assert.equal(error.code, 309);
+        assert.equal(error.code, 307);
       });
     });
 
@@ -588,7 +588,7 @@ describe('instruction account', () => {
         error = err;
       }
       // assert
-      assert.equal(error.code, 311);
+      assert.equal(error.code, 308);
     });
 
     it('should create', async () => {

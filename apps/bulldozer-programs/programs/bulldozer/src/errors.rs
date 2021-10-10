@@ -16,15 +16,13 @@ pub enum ErrorCode {
   #[msg("Missing Collection Account")]
   MissingCollectionAccount,
   #[msg("Invalid Collection Account")]
-  InvalidCollectionAccount,
-  #[msg("Missing Payer Account")]
   MissingPayerAccount,
   #[msg("Invalid Payer Account")]
-  InvalidPayerAccount,
-  #[msg("Missing Space")]
   MissingSpace,
   #[msg("Invalid Close Account")]
-  InvalidCloseAccount,
-  #[msg("Missing Program")]
   MissingProgram,
+  #[msg("Missing Account")]
+  MissingAccount,
+  #[msg("Invalid Account")]
+  InvalidAccount,
 }
