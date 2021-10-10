@@ -99,10 +99,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               this._programStore.createApplication(name).pipe(
                 tapResponse(
                   () => this._reload.next(null),
-                  (error) => {
-                    console.log('do I even get here?', error);
-                    this._error.next(error);
-                  }
+                  (error) => this._error.next(error)
                 )
               )
             )

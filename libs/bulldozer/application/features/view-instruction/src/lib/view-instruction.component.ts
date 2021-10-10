@@ -12,10 +12,8 @@ import {
 } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
+  InstructionAccount,
   InstructionArgument,
-  InstructionBasicAccount,
-  InstructionProgramAccount,
-  InstructionSignerAccount,
 } from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
 
@@ -60,31 +58,14 @@ import { filter, map, startWith } from 'rxjs/operators';
           <bd-list-accounts
             class="block mb-16"
             [connected]="connected$ | ngrxPush"
-            [accountsCount]="accountsCount$ | ngrxPush"
-            [basicAccounts]="basicAccounts$ | ngrxPush"
-            [signerAccounts]="signerAccounts$ | ngrxPush"
-            [programAccounts]="programAccounts$ | ngrxPush"
+            [accounts]="accounts$ | ngrxPush"
             (updateBasicAccount)="onUpdateBasicAccount($event)"
-            (deleteBasicAccount)="onDeleteBasicAccount($event)"
             (updateSignerAccount)="onUpdateSignerAccount($event)"
-            (deleteSignerAccount)="onDeleteSignerAccount($event)"
             (updateProgramAccount)="onUpdateProgramAccount($event)"
-            (deleteProgramAccount)="onDeleteProgramAccount($event)"
+            (deleteAccount)="onDeleteAccount($event)"
           >
           </bd-list-accounts>
         </main>
-      </div>
-      <div class="w-2/4 bd-custom-height-layout overflow-hidden">
-        <bd-code-editor
-          [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
-          [template]="rustContextCodeInstruction$ | ngrxPush"
-          [options]="contextEditorOptions$ | ngrxPush"
-        ></bd-code-editor>
-        <bd-code-editor
-          [customClass]="'bd-custom-monaco-editor-splited'"
-          [template]="rustHandlerCodeInstruction$ | ngrxPush"
-          [options]="handlerEditorOptions$ | ngrxPush"
-        ></bd-code-editor>
       </div>
     </div>
   `,
@@ -96,10 +77,6 @@ export class ViewInstructionComponent implements OnInit {
   readonly connected$ = this._walletStore.connected$;
   readonly instruction$ = this._tabsStore.tab$;
   readonly arguments$ = this._instructionStore.arguments$;
-  readonly basicAccounts$ = this._instructionStore.basicAccounts$;
-  readonly signerAccounts$ = this._instructionStore.signerAccounts$;
-  readonly programAccounts$ = this._instructionStore.programAccounts$;
-  readonly accountsCount$ = this._instructionStore.accountsCount$;
   readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.context)
   );
@@ -126,6 +103,7 @@ export class ViewInstructionComponent implements OnInit {
       readOnly: false,
     }))
   );
+  readonly accounts$ = this._instructionStore.accounts$;
 
   constructor(
     private readonly _route: ActivatedRoute,
@@ -176,35 +154,27 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createBasicAccount();
   }
 
-  onUpdateBasicAccount(account: InstructionBasicAccount) {
+  onUpdateBasicAccount(account: InstructionAccount) {
     this._instructionStore.updateBasicAccount(account);
-  }
-
-  onDeleteBasicAccount(accountId: string) {
-    this._instructionStore.deleteBasicAccount(accountId);
   }
 
   onCreateSignerAccount() {
     this._instructionStore.createSignerAccount();
   }
 
-  onUpdateSignerAccount(account: InstructionSignerAccount) {
+  onUpdateSignerAccount(account: InstructionAccount) {
     this._instructionStore.updateSignerAccount(account);
-  }
-
-  onDeleteSignerAccount(accountId: string) {
-    this._instructionStore.deleteSignerAccount(accountId);
   }
 
   onCreateProgramAccount() {
     this._instructionStore.createProgramAccount();
   }
 
-  onUpdateProgramAccount(account: InstructionProgramAccount) {
+  onUpdateProgramAccount(account: InstructionAccount) {
     this._instructionStore.updateProgramAccount(account);
   }
 
-  onDeleteProgramAccount(accountId: string) {
-    this._instructionStore.deleteProgramAccount(accountId);
+  onDeleteAccount(accountId: string) {
+    this._instructionStore.deleteAccount(accountId);
   }
 }

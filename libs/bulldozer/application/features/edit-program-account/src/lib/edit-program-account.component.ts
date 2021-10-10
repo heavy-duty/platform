@@ -1,10 +1,7 @@
 import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-  InstructionProgramAccount,
-  Program,
-} from '@heavy-duty/bulldozer/data-access';
+import { InstructionAccount, Program } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-edit-program-account',
@@ -97,7 +94,7 @@ export class EditProgramAccountComponent implements OnInit {
     private readonly _matDialogRef: MatDialogRef<EditProgramAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionProgramAccount;
+      account?: InstructionAccount;
       programs: Program[];
     }
   ) {}

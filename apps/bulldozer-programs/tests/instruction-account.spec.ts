@@ -541,7 +541,6 @@ describe('instruction account', () => {
         const account = await program.account.instructionAccount.fetch(
           instructionAccount.publicKey
         );
-        console.log(account);
         assert.ok('signer' in account.kind);
         assert.equal(account.kind.signer.id, instructionAccountKind);
         assert.ok('none' in account.modifier);

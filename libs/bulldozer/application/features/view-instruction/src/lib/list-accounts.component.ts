@@ -5,11 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import {
-  InstructionBasicAccount,
-  InstructionProgramAccount,
-  InstructionSignerAccount,
-} from '@heavy-duty/bulldozer/data-access';
+import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-list-accounts',
@@ -22,26 +18,42 @@ import {
         </header>
 
         <mat-list
+          *ngIf="accounts !== null && accounts.length > 0; else emptyList"
           role="list"
-          *ngIf="accountsCount !== null && accountsCount > 0; else emptyList"
         >
           <mat-list-item
             role="listitem"
-            *ngFor="let account of basicAccounts"
+            *ngFor="let account of accounts"
             class="h-20 bg-black bg-opacity-10 mb-2 last:mb-0"
           >
             <div class="flex items-center gap-4 w-full">
               <div
                 class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
+                [ngSwitch]="account.data.kind.id"
               >
-                <mat-icon>description</mat-icon>
+                <mat-icon *ngSwitchCase="0">description</mat-icon>
+                <mat-icon *ngSwitchCase="1">group_work</mat-icon>
+                <mat-icon *ngSwitchCase="2">rate_review</mat-icon>
               </div>
 
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
                   {{ account.data.name }}
+
+                  <span
+                    class="text-xs font-thin"
+                    [ngSwitch]="account.data.modifier.id"
+                  >
+                    <ng-container *ngSwitchCase="1">
+                      ({{ account.data.modifier.name }}: space
+                      {{ account.data.space }})
+                    </ng-container>
+                    <ng-container *ngSwitchCase="2">
+                      ({{ account.data.modifier.name }})
+                    </ng-container>
+                  </span>
                 </h3>
-                <p class="text-xs mb-0 italic">
+                <p class="text-xs mb-0 italic" *ngIf="account.data.collection">
                   Collection:
                   <a
                     class="underline text-accent"
@@ -54,23 +66,32 @@ import {
                     >{{ account.data.collection | obscureAddress }}</a
                   >
                 </p>
-                <p class="text-xs mb-0 italic">
-                  Constraints: {{ account.data.markAttribute.name }}
+                <p class="text-xs mb-0 italic" *ngIf="account.data.program">
+                  Program:
+                  {{ account.data.program | obscureAddress }}
+                </p>
+                <p class="text-xs mb-0 italic" *ngIf="account.data.close">
+                  Close:
+                  {{ account.data.close | obscureAddress }}
+                </p>
+                <p class="text-xs mb-0 italic" *ngIf="account.data.payer">
+                  Payer:
+                  {{ account.data.payer | obscureAddress }}
                 </p>
               </div>
 
               <button
                 mat-mini-fab
                 color="primary"
-                aria-label="Basic account menu"
-                [matMenuTriggerFor]="basicAccountMenu"
+                aria-label="Account menu"
+                [matMenuTriggerFor]="accountMenu"
               >
                 <mat-icon>more_horiz</mat-icon>
               </button>
-              <mat-menu #basicAccountMenu="matMenu">
+              <mat-menu #accountMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateBasicAccount(account)"
+                  (click)="onUpdateAccount(account)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
@@ -78,107 +99,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteBasicAccount(account.id)"
-                  [disabled]="!connected"
-                >
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete account</span>
-                </button>
-              </mat-menu>
-            </div>
-          </mat-list-item>
-
-          <mat-list-item
-            role="listitem"
-            *ngFor="let account of signerAccounts"
-            class="h-20 bg-black bg-opacity-10 mb-2 last:mb-0"
-          >
-            <div class="flex items-center gap-4 w-full">
-              <div
-                class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
-              >
-                <mat-icon>rate_review</mat-icon>
-              </div>
-
-              <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ account.data.name }}
-                </h3>
-                <p class="text-xs mb-0 italic">
-                  Constraints: {{ account.data.markAttribute.name }}
-                </p>
-              </div>
-
-              <button
-                mat-mini-fab
-                color="primary"
-                aria-label="Signer account menu"
-                [matMenuTriggerFor]="signerAccountMenu"
-              >
-                <mat-icon>more_horiz</mat-icon>
-              </button>
-              <mat-menu #signerAccountMenu="matMenu">
-                <button
-                  mat-menu-item
-                  (click)="onUpdateSignerAccount(account)"
-                  [disabled]="!connected"
-                >
-                  <mat-icon>edit</mat-icon>
-                  <span>Update account</span>
-                </button>
-                <button
-                  mat-menu-item
-                  (click)="onDeleteSignerAccount(account.id)"
-                  [disabled]="!connected"
-                >
-                  <mat-icon>delete</mat-icon>
-                  <span>Delete account</span>
-                </button>
-              </mat-menu>
-            </div>
-          </mat-list-item>
-
-          <mat-list-item
-            role="listitem"
-            *ngFor="let account of programAccounts"
-            class="h-20 bg-black bg-opacity-10 mb-2 last:mb-0"
-          >
-            <div class="flex items-center gap-4 w-full">
-              <div
-                class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
-              >
-                <mat-icon>group_work</mat-icon>
-              </div>
-
-              <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ account.data.name }}
-                </h3>
-                <p class="text-xs mb-0 italic">
-                  Program: {{ account.data.program | obscureAddress }}
-                </p>
-              </div>
-
-              <button
-                mat-mini-fab
-                color="primary"
-                aria-label="Program account menu"
-                [matMenuTriggerFor]="programAccountMenu"
-              >
-                <mat-icon>more_horiz</mat-icon>
-              </button>
-              <mat-menu #programAccountMenu="matMenu">
-                <button
-                  mat-menu-item
-                  (click)="onUpdateProgramAccount(account)"
-                  [disabled]="!connected"
-                >
-                  <mat-icon>edit</mat-icon>
-                  <span>Update account</span>
-                </button>
-                <button
-                  mat-menu-item
-                  (click)="onDeleteProgramAccount(account.id)"
+                  (click)="onDeleteAccount(account.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -200,39 +121,27 @@ import {
 })
 export class ListAccountsComponent {
   @Input() connected: boolean | null = null;
-  @Input() basicAccounts: InstructionBasicAccount[] | null = null;
-  @Input() signerAccounts: InstructionSignerAccount[] | null = null;
-  @Input() programAccounts: InstructionProgramAccount[] | null = null;
-  @Input() accountsCount: number | null = null;
-  @Output() updateBasicAccount = new EventEmitter<InstructionBasicAccount>();
-  @Output() deleteBasicAccount = new EventEmitter<string>();
-  @Output() updateSignerAccount = new EventEmitter<InstructionSignerAccount>();
-  @Output() deleteSignerAccount = new EventEmitter<string>();
-  @Output() updateProgramAccount =
-    new EventEmitter<InstructionProgramAccount>();
-  @Output() deleteProgramAccount = new EventEmitter<string>();
+  @Input() accounts: InstructionAccount[] | null = null;
+  @Output() updateBasicAccount = new EventEmitter<InstructionAccount>();
+  @Output() updateSignerAccount = new EventEmitter<InstructionAccount>();
+  @Output() updateProgramAccount = new EventEmitter<InstructionAccount>();
+  @Output() updateAccount = new EventEmitter<InstructionAccount>();
+  @Output() deleteAccount = new EventEmitter<string>();
 
-  onUpdateBasicAccount(account: InstructionBasicAccount) {
-    this.updateBasicAccount.emit(account);
+  onUpdateAccount(account: InstructionAccount) {
+    switch (account.data.kind.id) {
+      case 0:
+        return this.updateBasicAccount.emit(account);
+      case 1:
+        return this.updateProgramAccount.emit(account);
+      case 2:
+        return this.updateSignerAccount.emit(account);
+      default:
+        return null;
+    }
   }
 
-  onDeleteBasicAccount(accountId: string) {
-    this.deleteBasicAccount.emit(accountId);
-  }
-
-  onUpdateSignerAccount(account: InstructionSignerAccount) {
-    this.updateSignerAccount.emit(account);
-  }
-
-  onDeleteSignerAccount(accountId: string) {
-    this.deleteSignerAccount.emit(accountId);
-  }
-
-  onUpdateProgramAccount(account: InstructionProgramAccount) {
-    this.updateProgramAccount.emit(account);
-  }
-
-  onDeleteProgramAccount(accountId: string) {
-    this.deleteProgramAccount.emit(accountId);
+  onDeleteAccount(accountId: string) {
+    this.deleteAccount.emit(accountId);
   }
 }
