@@ -6,11 +6,12 @@ import { map } from 'rxjs/operators';
   selector: 'bd-dark-theme-switch',
   template: `
     <button
+      color="accent"
       mat-mini-fab
-      color="primary"
       aria-label="Dark theme switch"
       [bdDarkTheme]="isDarkThemeEnabled$ | async"
       (click)="toggleDarkMode()"
+      [ngStyle]="buttonDynamicStyle$ | async"
     >
       <mat-icon>{{ currentIconSelected$ | async }}</mat-icon>
     </button>
@@ -21,7 +22,12 @@ export class DarkThemeSwitchComponent {
   readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
   readonly currentIconSelected$ = this.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) =>
-      isDarkThemeEnabled ? 'brightness_5' : 'bedtime'
+      isDarkThemeEnabled ? 'light_mode' : 'dark_mode'
+    )
+  );
+  readonly buttonDynamicStyle$ = this.isDarkThemeEnabled$.pipe(
+    map((isDarkThemeEnabled) =>
+      isDarkThemeEnabled ? { color: 'white' } : { color: 'black' }
     )
   );
 
