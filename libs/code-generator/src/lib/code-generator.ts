@@ -1,11 +1,6 @@
 import * as Handlebars from 'handlebars';
 
-import { __rust_template, __collections_template } from './templates';
-import { __instructions_template } from './templates/__instructions_program';
-import { __instructions_body_template } from './templates/__instructions_body_program';
-import { formatName } from './utils';
 import {
-  IApplication,
   ICollection,
   ICollectionAttribute,
   IInstrucction,
@@ -13,6 +8,10 @@ import {
   IInstructionAccount,
   IMetadata,
 } from '..';
+import { __collections_template, __rust_template } from './templates';
+import { __instructions_body_template } from './templates/__instructions_handler_program';
+import { __instructions_template } from './templates/__instructions_context_program';
+import { formatName } from './utils';
 
 // TODO: Move later
 Handlebars.registerHelper('switch', function (this: any, value, options) {
@@ -25,22 +24,6 @@ Handlebars.registerHelper('case', function (this: any, value, options) {
     return options.fn(this);
   }
 });
-
-const formatInstructionsArguments = (
-  instructionId: string,
-  instructionArguments: IInstrucctionArgument[]
-) =>
-  instructionArguments
-    .filter((argument) => argument.data.instruction === instructionId)
-    .map((argument) => {
-      return {
-        id: argument.id,
-        data: {
-          ...argument.data,
-          name: formatName(argument.data.name),
-        },
-      };
-    });
 
 const formatProgramMetadata = (metadata: IMetadata) => {
   try {
@@ -108,12 +91,42 @@ const formatCollectionMetadata = (
     }),
 });
 
+const formatInstructionsArguments = (
+  instructionId: string,
+  instructionArguments: IInstrucctionArgument[]
+) =>
+  instructionArguments
+    .filter((argument) => argument.data.instruction === instructionId)
+    .map((argument) => ({
+      id: argument.id,
+      data: {
+        ...argument.data,
+        name: formatName(argument.data.name),
+      },
+    }));
+
+const formatInstructionsAccounts = (
+  instructionId: string,
+  instructionAccounts: IInstructionAccount[]
+) =>
+  instructionAccounts
+    .filter((account) => account.data.instruction === instructionId)
+    .map((account) => ({
+      id: account.id,
+      data: {
+        ...account.data,
+        name: formatName(account.data.name),
+      },
+    }));
+
 const formatInstructionMetadata = (
   instruction: IInstrucction,
-  instructionArguments: IInstrucctionArgument[]
+  instructionArguments: IInstrucctionArgument[],
+  instructionAccounts: IInstructionAccount[]
 ) => ({
   name: formatName(instruction.data.name),
   arguments: formatInstructionsArguments(instruction.id, instructionArguments),
+  accounts: formatInstructionsAccounts(instruction.id, instructionAccounts),
 });
 
 const getTemplateByType = (type: string): string => {
@@ -154,16 +167,17 @@ export const generateCollectionRustCode = (
 
 export const generateInstructionsRustCode = (
   instruction: IInstrucction,
-  instructionArguments: IInstrucctionArgument[]
+  instructionArguments: IInstrucctionArgument[],
+  instructionAccounts: IInstructionAccount[]
 ) => {
-  console.log(instruction, instructionArguments);
   if (!instruction) return; // Im doing something wrong :thinking:
 
   const formatedInstructions = formatInstructionMetadata(
     instruction,
-    instructionArguments
+    instructionArguments,
+    instructionAccounts
   );
-
+  console.log('Instrucciones', formatedInstructions);
   const templates = {
     context: generateRustCode(
       { instruction: formatedInstructions },
@@ -188,8 +202,6 @@ export const generateProgramRustCode = (rawMetadata: any) => {
       instructionArguments: rawMetadata[4],
       instructionAccounts: rawMetadata[5],
     };
-
-    console.log('GENERANDO USANDO ESTO -> ', metadata);
 
     // Temporal. TODO: Add correct typing to whole library
     const formatedProgram = formatProgramMetadata(metadata);

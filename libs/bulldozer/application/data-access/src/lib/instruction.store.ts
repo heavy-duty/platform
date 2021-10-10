@@ -80,6 +80,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly arguments$ = this.select(
     ({ arguments: instructionArguments }) => instructionArguments
   );
+  readonly accounts$ = this.select(({ accounts }) => accounts);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(({ instruction }) => instruction);
   readonly instructionBody$ = this.select(
@@ -89,11 +90,15 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly rustCode$ = this.select(
     this.instruction$,
     this.arguments$,
-    (instruction, instructionArguments) =>
+    this.accounts$,
+    (instruction, instructionArguments, instructionsAccounts) =>
       instruction &&
-      generateInstructionsRustCode(instruction, instructionArguments)
+      generateInstructionsRustCode(
+        instruction,
+        instructionArguments,
+        instructionsAccounts as any
+      )
   );
-  readonly accounts$ = this.select(({ accounts }) => accounts);
 
   constructor(
     private readonly _programStore: ProgramStore,

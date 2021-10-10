@@ -65,6 +65,10 @@ export interface IInstrucctionArgument {
 export interface IInstructionAccount {
   id: string;
   data: {
+    authority: string;
+    application: string;
+    instruction: string;
+    name: string;
     kind: {
       id: number;
       name: string;
@@ -73,12 +77,11 @@ export interface IInstructionAccount {
       id: number;
       name: string;
     };
-    collection: string;
-    program: string;
-    payer: string; // Accuont ID de la misma instruccion.
-    close: string; // Accuont ID de la misma instruccion.
-    space: number;
-    name: string;
+    collection: string | null;
+    program: string | null;
+    space: number | null;
+    payer: string | null;
+    close: string | null;
   };
 }
 
