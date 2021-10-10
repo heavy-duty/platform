@@ -122,6 +122,10 @@ pub mod bulldozer {
     instructions::update_instruction_account::handler(ctx, name, kind, modifier, space, program)
   }
 
+  pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
+    instructions::delete_instruction_account::handler(ctx)
+  }
+
   pub fn create_instruction_basic_account(
     ctx: Context<CreateInstructionBasicAccount>,
     name: String,

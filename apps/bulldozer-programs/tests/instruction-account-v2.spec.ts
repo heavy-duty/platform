@@ -181,6 +181,52 @@ describe('instruction account', () => {
       assert.equal(account.collection, null);
     });
 
+    it('should delete', async () => {
+      // arrange
+      const instructionAccount = Keypair.generate();
+      const instructionAccountName = 'data';
+      const instructionAccountKind = 2;
+      const instructionAccountModifier = 0;
+      const instructionAccountSpace = null;
+      const instructionAccountProgram = null;
+      // act
+      await program.rpc.createInstructionAccount(
+        instructionAccountName,
+        instructionAccountKind,
+        instructionAccountModifier,
+        instructionAccountSpace,
+        instructionAccountProgram,
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [instructionAccount],
+          remainingAccounts: [
+            {
+              pubkey: collection.publicKey,
+              isWritable: false,
+              isSigner: false,
+            },
+          ],
+        }
+      );
+      await program.rpc.deleteInstructionAccount({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          account: instructionAccount.publicKey,
+        },
+      });
+      // assert
+      const account = await program.account.instructionAccount.fetchNullable(
+        instructionAccount.publicKey
+      );
+      assert.equal(account, null);
+    });
+
     describe('with init modifier', () => {
       const instructionAccount = Keypair.generate();
       const instructionPayerAccount = Keypair.generate();

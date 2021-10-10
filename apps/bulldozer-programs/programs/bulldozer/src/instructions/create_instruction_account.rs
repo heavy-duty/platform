@@ -28,7 +28,7 @@ pub fn handler(
   space: Option<u16>,
   program: Option<Pubkey>,
 ) -> ProgramResult {
-  msg!("Create instruction basic account");
+  msg!("Create instruction account");
   ctx.accounts.account.authority = ctx.accounts.authority.key();
   ctx.accounts.account.application = ctx.accounts.application.key();
   ctx.accounts.account.instruction = ctx.accounts.instruction.key();
