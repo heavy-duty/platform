@@ -9,4 +9,8 @@ pub enum ErrorCode {
     InvalidAttributeModifier,
     #[msg("Invalid mark attribute")]
     InvalidMarkAttribute,
+    #[msg("Invalid account kind")]
+    InvalidAccountKind,
+    #[msg("Invalid account modifier")]
+    InvalidAccountModifier,
 }

@@ -74,6 +74,10 @@ pub mod bulldozer {
         instructions::delete_instruction_argument::handler(ctx)
     }
 
+    pub fn create_instruction_account(ctx: Context<CreateInstructionAccount>, name: String, kind: u8, modifier: u8) -> ProgramResult {
+        instructions::create_instruction_account::handler(ctx, name, kind, modifier)
+    }
+
     pub fn create_instruction_basic_account(ctx: Context<CreateInstructionBasicAccount>, name: String, mark_attribute: u8) -> ProgramResult {
         instructions::create_instruction_basic_account::handler(ctx, name, mark_attribute)
     }
