@@ -25,4 +25,6 @@ pub enum ErrorCode {
   MissingSpace,
   #[msg("Invalid Close Account")]
   InvalidCloseAccount,
+  #[msg("Missing Program")]
+  MissingProgram,
 }

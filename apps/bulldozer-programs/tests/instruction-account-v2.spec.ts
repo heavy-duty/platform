@@ -552,4 +552,141 @@ describe('instruction account', () => {
       });
     });
   });
+
+  describe('program account', () => {
+    const instructionAccount = Keypair.generate();
+
+    it('should fail when creating without program', async () => {
+      // arrange
+      const instructionAccount = Keypair.generate();
+      const instructionAccountName = 'data';
+      const instructionAccountKind = 1;
+      const instructionAccountModifier = 0;
+      const instructionAccountSpace = null;
+      const instructionAccountProgram = null;
+      let error: ProgramError;
+      // act
+      try {
+        await program.rpc.createInstructionAccount(
+          instructionAccountName,
+          instructionAccountKind,
+          instructionAccountModifier,
+          instructionAccountSpace,
+          instructionAccountProgram,
+          {
+            accounts: {
+              authority: program.provider.wallet.publicKey,
+              application: application.publicKey,
+              instruction: instruction.publicKey,
+              account: instructionAccount.publicKey,
+              systemProgram: SystemProgram.programId,
+            },
+            signers: [instructionAccount],
+          }
+        );
+      } catch (err) {
+        error = err;
+      }
+      // assert
+      assert.equal(error.code, 311);
+    });
+
+    it('should create', async () => {
+      // arrange
+      const instructionAccountName = 'data';
+      const instructionAccountKind = 1;
+      const instructionAccountModifier = 0;
+      const instructionAccountSpace = null;
+      const instructionAccountProgram = SystemProgram.programId;
+      // act
+      await program.rpc.createInstructionAccount(
+        instructionAccountName,
+        instructionAccountKind,
+        instructionAccountModifier,
+        instructionAccountSpace,
+        instructionAccountProgram,
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [instructionAccount],
+        }
+      );
+      // assert
+      const account = await program.account.instructionAccount.fetch(
+        instructionAccount.publicKey
+      );
+      assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+      assert.equal(
+        utils.bytes.utf8.decode(account.name),
+        instructionAccountName
+      );
+      assert.ok('program' in account.kind);
+      assert.equal(account.kind.program.id, instructionAccountKind);
+      assert.ok('none' in account.modifier);
+      assert.equal(account.modifier.none.id, instructionAccountModifier);
+      assert.ok(account.instruction.equals(instruction.publicKey));
+      assert.ok(account.application.equals(application.publicKey));
+      assert.ok(account.program.equals(instructionAccountProgram));
+      assert.equal(account.collection, null);
+      assert.equal(account.payer, null);
+      assert.equal(account.close, null);
+      assert.equal(account.space, null);
+    });
+  });
+
+  describe('signer account', () => {
+    const instructionAccount = Keypair.generate();
+
+    it('should create', async () => {
+      // arrange
+      const instructionAccountName = 'data';
+      const instructionAccountKind = 2;
+      const instructionAccountModifier = 0;
+      const instructionAccountSpace = null;
+      const instructionAccountProgram = null;
+      // act
+      await program.rpc.createInstructionAccount(
+        instructionAccountName,
+        instructionAccountKind,
+        instructionAccountModifier,
+        instructionAccountSpace,
+        instructionAccountProgram,
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [instructionAccount],
+        }
+      );
+      // assert
+      const account = await program.account.instructionAccount.fetch(
+        instructionAccount.publicKey
+      );
+      assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+      assert.equal(
+        utils.bytes.utf8.decode(account.name),
+        instructionAccountName
+      );
+      assert.ok('signer' in account.kind);
+      assert.equal(account.kind.signer.id, instructionAccountKind);
+      assert.ok('none' in account.modifier);
+      assert.equal(account.modifier.none.id, instructionAccountModifier);
+      assert.ok(account.instruction.equals(instruction.publicKey));
+      assert.ok(account.application.equals(application.publicKey));
+      assert.equal(account.program, null);
+      assert.equal(account.collection, null);
+      assert.equal(account.payer, null);
+      assert.equal(account.close, null);
+      assert.equal(account.space, null);
+    });
+  });
 });

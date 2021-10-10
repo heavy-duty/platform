@@ -40,6 +40,12 @@ pub fn handler(
   if kind == 0 {
     let collection = get_collection_account(ctx.remaining_accounts)?;
     ctx.accounts.account.collection = Some(collection.key());
+  } else if kind == 1 {
+    ctx.accounts.account.collection = None;
+    ctx.accounts.account.program = match program {
+      None => return Err(ErrorCode::MissingProgram.into()),
+      program => program,
+    }
   } else {
     ctx.accounts.account.collection = None;
   }
