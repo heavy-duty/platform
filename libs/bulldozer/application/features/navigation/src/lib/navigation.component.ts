@@ -90,7 +90,7 @@ import { NavigationStore } from './navigation.store';
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
           <wallet-multi-button
-            class="ml-auto"
+            class="ml-auto bd-custom-color"
             color="accent"
           ></wallet-multi-button>
         </mat-toolbar>
