@@ -106,6 +106,8 @@ pub mod bulldozer {
     space: Option<u16>,
     program: Option<Pubkey>,
   ) -> ProgramResult {
+    msg!("KIND: {}", kind);
+    msg!("MODIFIER: {}", modifier);
     instructions::create_instruction_account::handler(ctx, name, kind, modifier, space, program)
   }
 
