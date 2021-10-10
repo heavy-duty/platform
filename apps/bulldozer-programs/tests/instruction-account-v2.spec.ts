@@ -387,5 +387,123 @@ describe('instruction account', () => {
         assert.equal(account.space, null);
       });
     });
+
+    describe('with mut modifier and close constraint', () => {
+      const instructionAccount = Keypair.generate();
+      const instructionCloseAccount = Keypair.generate();
+
+      before(async () => {
+        await program.rpc.createInstructionAccount(
+          'authority',
+          2,
+          0,
+          null,
+          null,
+          {
+            accounts: {
+              authority: program.provider.wallet.publicKey,
+              application: application.publicKey,
+              instruction: instruction.publicKey,
+              account: instructionCloseAccount.publicKey,
+              systemProgram: SystemProgram.programId,
+            },
+            signers: [instructionCloseAccount],
+          }
+        );
+      });
+
+      it('should create', async () => {
+        // arrange
+        const instructionAccountName = 'data';
+        const instructionAccountKind = 0;
+        const instructionAccountModifier = 2;
+        const instructionAccountSpace = null;
+        const instructionAccountProgram = null;
+        // act
+        await program.rpc.createInstructionAccount(
+          instructionAccountName,
+          instructionAccountKind,
+          instructionAccountModifier,
+          instructionAccountSpace,
+          instructionAccountProgram,
+          {
+            accounts: {
+              authority: program.provider.wallet.publicKey,
+              application: application.publicKey,
+              instruction: instruction.publicKey,
+              account: instructionAccount.publicKey,
+              systemProgram: SystemProgram.programId,
+            },
+            signers: [instructionAccount],
+            remainingAccounts: [
+              {
+                pubkey: collection.publicKey,
+                isWritable: false,
+                isSigner: false,
+              },
+              {
+                pubkey: instructionCloseAccount.publicKey,
+                isWritable: false,
+                isSigner: false,
+              },
+            ],
+          }
+        );
+        // assert
+        const account = await program.account.instructionAccount.fetch(
+          instructionAccount.publicKey
+        );
+        assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+        assert.equal(
+          utils.bytes.utf8.decode(account.name),
+          instructionAccountName
+        );
+        assert.ok('basic' in account.kind);
+        assert.equal(account.kind.basic.id, instructionAccountKind);
+        assert.ok('mut' in account.modifier);
+        assert.equal(account.modifier.mut.id, instructionAccountModifier);
+        assert.ok(account.instruction.equals(instruction.publicKey));
+        assert.ok(account.application.equals(application.publicKey));
+        assert.ok(account.collection.equals(collection.publicKey));
+        assert.ok(account.close.equals(instructionCloseAccount.publicKey));
+        assert.equal(account.program, null);
+        assert.equal(account.space, null);
+      });
+
+      it('should remove close when changing the modifier', async () => {
+        // arrange
+        const instructionAccountName = 'data';
+        const instructionAccountKind = 2;
+        const instructionAccountModifier = 0;
+        const instructionAccountSpace = null;
+        const instructionAccountProgram = null;
+        // act
+        await program.rpc.updateInstructionAccount(
+          instructionAccountName,
+          instructionAccountKind,
+          instructionAccountModifier,
+          instructionAccountSpace,
+          instructionAccountProgram,
+          {
+            accounts: {
+              authority: program.provider.wallet.publicKey,
+              account: instructionAccount.publicKey,
+            },
+          }
+        );
+        // assert
+        const account = await program.account.instructionAccount.fetch(
+          instructionAccount.publicKey
+        );
+        console.log(account);
+        assert.ok('signer' in account.kind);
+        assert.equal(account.kind.signer.id, instructionAccountKind);
+        assert.ok('none' in account.modifier);
+        assert.equal(account.modifier.none.id, instructionAccountModifier);
+        assert.equal(account.close, null);
+        assert.equal(account.program, null);
+        assert.equal(account.space, null);
+      });
+    });
   });
 });

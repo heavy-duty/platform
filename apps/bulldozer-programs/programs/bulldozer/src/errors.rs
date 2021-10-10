@@ -23,4 +23,6 @@ pub enum ErrorCode {
   InvalidPayerAccount,
   #[msg("Missing Space")]
   MissingSpace,
+  #[msg("Invalid Close Account")]
+  InvalidCloseAccount,
 }

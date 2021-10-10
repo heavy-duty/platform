@@ -54,9 +54,20 @@ pub fn handler(
       None => return Err(ErrorCode::MissingSpace.into()),
     };
     ctx.accounts.account.space = Some(space);
+    ctx.accounts.account.close = None;
+  } else if modifier == 2 {
+    let close = get_close_account(ctx.remaining_accounts)?;
+    ctx.accounts.account.close = match close {
+      Some(account) => Some(account.key()),
+      _ => None,
+    };
+
+    ctx.accounts.account.payer = None;
+    ctx.accounts.account.space = None;
   } else {
     ctx.accounts.account.payer = None;
     ctx.accounts.account.space = None;
+    ctx.accounts.account.close = None;
   }
 
   Ok(())
@@ -77,18 +88,32 @@ fn get_collection_account<'info>(
   }
 }
 
-type MaybeAccountAccount<'info> =
+type MaybeInstructionAccount<'info> =
   std::result::Result<Account<'info, InstructionAccount>, ProgramError>;
 
 fn get_payer_account<'info>(
   remaining_accounts: &[AccountInfo<'info>],
-) -> MaybeAccountAccount<'info> {
+) -> MaybeInstructionAccount<'info> {
   let maybe_account: Option<&AccountInfo> = remaining_accounts.get(1);
-  let maybe_decoded_account: Option<MaybeAccountAccount<'info>> =
+  let maybe_decoded_account: Option<MaybeInstructionAccount<'info>> =
     maybe_account.map(Account::try_from);
   match maybe_decoded_account {
     Some(Err(_)) => return Err(ErrorCode::InvalidPayerAccount.into()),
     None => return Err(ErrorCode::MissingPayerAccount.into()),
     Some(account) => account,
+  }
+}
+
+type MaybeCloseAccount<'info> =
+  std::result::Result<Option<Account<'info, InstructionAccount>>, ProgramError>;
+
+fn get_close_account<'info>(remaining_accounts: &[AccountInfo<'info>]) -> MaybeCloseAccount<'info> {
+  let maybe_account: Option<&AccountInfo> = remaining_accounts.get(1);
+  let maybe_decoded_account: Option<MaybeInstructionAccount<'info>> =
+    maybe_account.map(Account::try_from);
+  match maybe_decoded_account {
+    Some(Ok(account)) => Ok(Some(account)),
+    Some(Err(_)) => return Err(ErrorCode::InvalidCloseAccount.into()),
+    None => Ok(None),
   }
 }
