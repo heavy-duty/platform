@@ -4,7 +4,6 @@ import {
   CollectionStore,
   InstructionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
   Application,
   Collection,
@@ -33,15 +32,7 @@ import { NavigationStore } from './navigation.store';
             <h2 class="mt-4 text-center">BULLDOZER</h2>
             <mat-nav-list>
               <div class="w-full mb-6 flex justify-center items-center">
-                <mat-icon class="mr-1">bedtime</mat-icon>
-                <mat-slide-toggle
-                  class="mr-1"
-                  (change)="toggleDarkMode(!$event.checked)"
-                  [bdDarkTheme]="isDarkThemeEnabled$ | async"
-                  [checked]="(isDarkThemeEnabled$ | async) === false"
-                >
-                </mat-slide-toggle>
-                <mat-icon>brightness_5</mat-icon>
+                <!-- <bd-dark-theme-switch></bd-dark-theme-switch> -->
               </div>
             </mat-nav-list>
 
@@ -90,9 +81,12 @@ import { NavigationStore } from './navigation.store';
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
           <wallet-multi-button
-            class="ml-auto"
+            class="ml-auto bd-custom-color"
             color="accent"
           ></wallet-multi-button>
+          <div class="ml-6">
+            <bd-dark-theme-switch></bd-dark-theme-switch>
+          </div>
         </mat-toolbar>
 
         <ng-content></ng-content>
@@ -123,14 +117,12 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
-  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _instructionStore: InstructionStore
   ) {}
 
   onCreateApplication() {
@@ -167,9 +159,5 @@ export class NavigationComponent {
 
   onDeleteInstruction(instructionId: string) {
     this._instructionStore.deleteInstruction(instructionId);
-  }
-
-  toggleDarkMode(isDarkThemeEnabled: boolean) {
-    this._themeService.setDarkTheme(isDarkThemeEnabled);
   }
 }

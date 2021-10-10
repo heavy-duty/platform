@@ -14,4 +14,10 @@ export class DarkThemeService {
     this._darkTheme.next(isDarkThemeOn);
     localStorage.setItem('darkTheme', isDarkThemeOn.toString());
   }
+
+  toggleDarkTheme() {
+    const currentStatus = this._darkTheme.value;
+    this._darkTheme.next(!currentStatus);
+    localStorage.setItem('darkTheme', (!currentStatus).toString());
+  }
 }
