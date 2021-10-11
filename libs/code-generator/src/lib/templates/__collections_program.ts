@@ -1,7 +1,4 @@
-export const __collections_template = `// Aqui pueden ir algunas instrucciones, 
-// para el usuario, de manera de guiarlo
-
-use anchor_lang::prelude::*;
+export const __collections_template = `use anchor_lang::prelude::*;
 
 #[account]
 pub struct {{collection.name.pascalCase}} {

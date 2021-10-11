@@ -1,7 +1,4 @@
-export const __rust_template = `// Aqui pueden ir algunas instrucciones, 
-// para el usuario, de manera de guiarlo
-
-use anchor_lang::prelude::*;
+export const __rust_template = `use anchor_lang::prelude::*;
 
 declare_id!("{{program.id}}");
 

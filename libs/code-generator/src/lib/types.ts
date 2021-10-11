@@ -62,7 +62,7 @@ export interface IInstrucctionArgument {
   };
 }
 
-export interface IInstructionAccount {
+export interface IInstructionAccountInfo {
   id: string;
   data: {
     authority: string;
@@ -84,6 +84,28 @@ export interface IInstructionAccount {
     close: string | null;
   };
 }
+export interface IInstructionAccount {
+  id: string;
+  data: {
+    authority: string;
+    application: string;
+    instruction: string;
+    name: string;
+    kind: {
+      id: number;
+      name: string;
+    };
+    modifier: {
+      id: number;
+      name: string;
+    };
+    collection: ICollection | null;
+    program: string | null;
+    space: number | null;
+    payer: IInstructionAccountInfo | null;
+    close: string | null;
+  };
+}
 
 export interface IApplication {
   id: string;
@@ -100,8 +122,12 @@ export interface IMetadata {
   instructions: IInstrucction[];
   instructionArguments: IInstrucctionArgument[];
   instructionAccounts: IInstructionAccount[];
+}
 
-  // instructionAccountsBasic: rawMetadata[5];
-  // instructionAccountsProgram: rawMetadata[6];
-  // instructionAccountsSigner: rawMetadata[7];
+export interface IGenerateRustCode {
+  [key: string]: any; // TODO:  fix to support only
+  // { collection: formatedCollection },
+  // { instruction: formatedInstructions },
+  // { instruction: formatedInstructions },
+  // { program: formatedProgram },
 }

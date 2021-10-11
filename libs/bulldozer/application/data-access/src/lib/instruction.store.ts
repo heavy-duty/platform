@@ -96,7 +96,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       generateInstructionsRustCode(
         instruction,
         instructionArguments,
-        instructionsAccounts as any
+        instructionsAccounts
       )
   );
 

@@ -3,15 +3,13 @@ import * as Handlebars from 'handlebars';
 import {
   ICollection,
   ICollectionAttribute,
+  IGenerateRustCode,
   IInstrucction,
   IInstrucctionArgument,
   IInstructionAccount,
   IMetadata,
 } from '..';
-import { __collections_template, __rust_template } from './templates';
-import { __instructions_body_template } from './templates/__instructions_handler_program';
-import { __instructions_template } from './templates/__instructions_context_program';
-import { formatName } from './utils';
+import { formatName, getTemplateByType } from './utils';
 
 // TODO: Move later
 Handlebars.registerHelper('switch', function (this: any, value, options) {
@@ -24,6 +22,7 @@ Handlebars.registerHelper('case', function (this: any, value, options) {
     return options.fn(this);
   }
 });
+//
 
 const formatProgramMetadata = (metadata: IMetadata) => {
   try {
@@ -129,22 +128,10 @@ const formatInstructionMetadata = (
   accounts: formatInstructionsAccounts(instruction.id, instructionAccounts),
 });
 
-const getTemplateByType = (type: string): string => {
-  switch (type) {
-    case 'full_program':
-      return __rust_template;
-    case 'collections_program':
-      return __collections_template;
-    case 'instructions_program':
-      return __instructions_template;
-    case 'instructions_body_program':
-      return __instructions_body_template;
-    default:
-      return __rust_template;
-  }
-};
-
-const generateRustCode = (formatedMetadataObj: any, collectionType: string) => {
+const generateRustCode = (
+  formatedMetadataObj: IGenerateRustCode,
+  collectionType: string
+) => {
   const template = Handlebars.compile(collectionType);
   const compiledTemplated = template(formatedMetadataObj);
   const programFile = compiledTemplated;

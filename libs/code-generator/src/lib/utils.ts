@@ -1,4 +1,10 @@
 import { IFormatedName } from './types';
+import {
+  __collections_template,
+  __rust_template,
+  __instructions_body_template,
+  __instructions_template,
+} from './templates';
 
 export const toCamelCase = (str: string) => {
   return str
@@ -31,4 +37,19 @@ export const formatName = (str: string): IFormatedName => {
     camelCase: toCamelCase(str),
     pascalCase: toPascalCase(str),
   };
+};
+
+export const getTemplateByType = (type: string): string => {
+  switch (type) {
+    case 'full_program':
+      return __rust_template;
+    case 'collections_program':
+      return __collections_template;
+    case 'instructions_program':
+      return __instructions_template;
+    case 'instructions_body_program':
+      return __instructions_body_template;
+    default:
+      return __rust_template;
+  }
 };
