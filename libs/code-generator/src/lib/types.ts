@@ -1,167 +1,3 @@
-export interface CollectionAttributeInfo {
-  authority: string;
-  application: string;
-  collection: string;
-  name: string;
-  kind: {
-    name: string;
-    size: number;
-  };
-  modifier: {
-    name: string;
-    size: number;
-  };
-  bump: number;
-}
-
-export interface CollectionAttribute {
-  id: string;
-  data: CollectionAttributeInfo;
-}
-
-export interface CollectionAttributeInfoExt
-  extends Omit<CollectionAttributeInfo, 'name'> {
-  name: IFormatedName;
-}
-
-export interface CollectionAttributeExt {
-  id: string;
-  data: CollectionAttributeInfoExt;
-}
-
-export interface InstructionArgumentInfo {
-  authority: string;
-  application: string;
-  collection: string;
-  instruction: string;
-  name: string;
-  kind: string;
-  modifier: {
-    name: string;
-    size: number;
-  };
-  bump: number;
-}
-
-export interface InstructionArgument {
-  id: string;
-  data: InstructionArgumentInfo;
-}
-
-export interface InstructionArgumentInfoExt
-  extends Omit<InstructionArgumentInfo, 'name'> {
-  name: IFormatedName;
-}
-
-export interface InstructionArgumentExt {
-  id: string;
-  data: InstructionArgumentInfoExt;
-}
-
-export interface InstructionAccountInfo {
-  authority: string;
-  application: string;
-  collection: string;
-  instruction: string;
-  name: string;
-  kind: string;
-  bump: number;
-}
-
-export interface InstructionAccount {
-  id: string;
-  data: InstructionAccountInfo;
-}
-
-export interface InstructionAccountInfoExt
-  extends Omit<InstructionAccountInfo, 'name'> {
-  name: IFormatedName;
-}
-
-export interface InstructionAccountExt {
-  id: string;
-  data: InstructionAccountInfoExt;
-}
-
-export interface IProgramAppCollections {
-  name: string;
-  attributes: CollectionAttribute[];
-  instructions: {
-    name: string;
-    arguments: InstructionArgument[];
-    accounts: InstructionAccount[];
-  }[];
-}
-
-export interface IProgramAppCollectionsExt {
-  name: IFormatedName;
-  attributes: CollectionAttributeExt[];
-  instructions: {
-    name: IFormatedName;
-    arguments: InstructionArgumentExt[];
-    accounts: InstructionAccountExt[];
-  }[];
-}
-
-export interface ApplicationInfo {
-  authority: string;
-  name: string;
-}
-
-export interface Application {
-  id: string;
-  data: ApplicationInfo;
-}
-
-export interface CollectionInfo {
-  authority: string;
-  application: string;
-  name: string;
-  bump: number;
-}
-
-export interface Collection {
-  id: string;
-  data: CollectionInfo;
-}
-
-export interface CollectionInstructionInfo {
-  authority: string;
-  application: string;
-  collection: string;
-  name: string;
-  bump: number;
-}
-
-export interface CollectionInstruction {
-  id: string;
-  data: CollectionInstructionInfo;
-}
-
-export interface IMetadata {
-  application: Application;
-  collections: Collection[];
-  collectionAttributes: CollectionAttribute[];
-  instructions: CollectionInstruction[];
-  instructionArguments: InstructionArgument[];
-  instructionAccounts: InstructionAccount[];
-  instructionAccountsBasic: any;
-  instructionAccountsProgram: any;
-  instructionAccountsSigner: any;
-}
-
-export interface IProgramMetadata {
-  name: string;
-  id: string;
-  collections: IProgramAppCollections[];
-}
-
-export interface IProgramMetadataExt {
-  id: string;
-  name: IFormatedName;
-  collections: IProgramAppCollectionsExt[];
-}
-
 export interface IFormatedName {
   snakeCase: string;
   normalCase: string;
@@ -169,8 +5,129 @@ export interface IFormatedName {
   pascalCase: string;
 }
 
-// pruebaaaa
-export interface IGenerateFileResponse {
-  status: boolean;
-  data?: string;
+export interface ICollectionAttribute {
+  id: string;
+  data: {
+    application: string;
+    authority: string;
+    collection: string;
+    kind: {
+      id: number;
+      name: string;
+      size: number;
+    };
+    modifier: {
+      id: number;
+      name: string;
+      size: number;
+    };
+    name: string;
+  };
+}
+export interface ICollection {
+  id: string;
+  data: {
+    application: string;
+    authority: string;
+    name: string;
+  };
+}
+
+export interface IInstrucction {
+  id: string;
+  data: {
+    application: string;
+    authority: string;
+    name: string;
+  };
+}
+
+export interface IInstrucctionArgument {
+  id: string;
+  data: {
+    authority: string;
+    application: string;
+    instruction: string;
+    name: string;
+    kind: {
+      id: number;
+      name: string;
+      size: number;
+    };
+    modifier: {
+      id: number;
+      name: string;
+      size: number;
+    };
+  };
+}
+
+export interface IInstructionAccountInfo {
+  id: string;
+  data: {
+    authority: string;
+    application: string;
+    instruction: string;
+    name: string;
+    kind: {
+      id: number;
+      name: string;
+    };
+    modifier: {
+      id: number;
+      name: string;
+    };
+    collection: string | null;
+    program: string | null;
+    space: number | null;
+    payer: string | null;
+    close: string | null;
+  };
+}
+export interface IInstructionAccount {
+  id: string;
+  data: {
+    authority: string;
+    application: string;
+    instruction: string;
+    name: string;
+    kind: {
+      id: number;
+      name: string;
+    };
+    modifier: {
+      id: number;
+      name: string;
+    };
+    collection: ICollection | null;
+    program: string | null;
+    space: number | null;
+    payer: IInstructionAccountInfo | null;
+    close: IInstructionAccountInfo | null;
+  };
+}
+
+export interface IApplication {
+  id: string;
+  data: {
+    name: string;
+    authority: string;
+  };
+}
+
+export interface IMetadata {
+  application: IApplication;
+  collections: ICollection[];
+  collectionAttributes: ICollectionAttribute[];
+  instructions: IInstrucction[];
+  instructionArguments: IInstrucctionArgument[];
+  instructionAccounts: IInstructionAccount[];
+}
+
+export interface IGenerateRustCode {
+  [key: string]: any; // TODO:  fix to support only
+  // { collection: formatedCollection },
+  // { instruction: formatedInstructions },
+  // { instruction: formatedInstructions },
+  // { program: formatedProgram },
 }

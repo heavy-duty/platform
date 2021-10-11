@@ -1,10 +1,15 @@
 import * as Handlebars from 'handlebars';
 
-import { __rust_template, __collections_template } from './templates';
-import { __instructions_template } from './templates/__instructions_program';
-import { __instructions_body_template } from './templates/__instructions_body_program';
-import { IMetadata } from './types';
-import { formatName } from './utils';
+import {
+  ICollection,
+  ICollectionAttribute,
+  IGenerateRustCode,
+  IInstrucction,
+  IInstrucctionArgument,
+  IInstructionAccount,
+  IMetadata,
+} from '..';
+import { formatName, getTemplateByType } from './utils';
 
 // TODO: Move later
 Handlebars.registerHelper('switch', function (this: any, value, options) {
@@ -17,6 +22,7 @@ Handlebars.registerHelper('case', function (this: any, value, options) {
     return options.fn(this);
   }
 });
+//
 
 const formatProgramMetadata = (metadata: IMetadata) => {
   try {
@@ -42,17 +48,10 @@ const formatProgramMetadata = (metadata: IMetadata) => {
 
     const formatedInstructions = metadata.instructions.map((instruction) => ({
       name: formatName(instruction.data.name),
-      arguments: metadata.instructionArguments
-        .filter((argument) => argument.data.instruction === instruction.id)
-        .map((argument) => {
-          return {
-            id: argument.id,
-            data: {
-              ...argument.data,
-              name: formatName(argument.data.name),
-            },
-          };
-        }),
+      arguments: formatInstructionsArguments(
+        instruction.id,
+        metadata.instructionArguments
+      ),
       accounts: formatedInstructionAccounts,
     }));
 
@@ -73,11 +72,14 @@ const formatProgramMetadata = (metadata: IMetadata) => {
   }
 };
 
-const formatCollectionMetadata = (collection: any, attributes: any) => ({
+const formatCollectionMetadata = (
+  collection: ICollection,
+  attributes: ICollectionAttribute[]
+) => ({
   name: formatName(collection.data.name),
   attributes: attributes
-    .filter((attribute: any) => attribute.data.collection === collection.id)
-    .map((attribute: any) => {
+    .filter((attribute) => attribute.data.collection === collection.id)
+    .map((attribute) => {
       return {
         id: attribute.id,
         data: {
@@ -88,37 +90,92 @@ const formatCollectionMetadata = (collection: any, attributes: any) => ({
     }),
 });
 
-const formatInstructionMetadata = (instruction: any, iarguments: any) => ({
-  name: formatName(instruction.data.name),
-  arguments: iarguments
-    .filter((argument: any) => argument.data.instruction === instruction.id)
-    .map((argument: any) => {
+const formatInstructionsArguments = (
+  instructionId: string,
+  instructionArguments: IInstrucctionArgument[]
+) =>
+  instructionArguments
+    .filter((argument) => argument.data.instruction === instructionId)
+    .map((argument) => ({
+      id: argument.id,
+      data: {
+        ...argument.data,
+        name: formatName(argument.data.name),
+      },
+    }));
+
+const formatInstructionsAccounts = (
+  instructionId: string,
+  instructionAccounts: IInstructionAccount[]
+) =>
+  instructionAccounts
+    .filter((account) => account.data.instruction === instructionId)
+    .map((account) => {
+      let payer = null,
+        collection = null,
+        modifier = null,
+        close = null;
+      if (account.data.payer) {
+        payer = {
+          ...account.data.payer,
+          data: {
+            ...account.data.payer?.data,
+            name: formatName(account.data.payer?.data?.name),
+          },
+        };
+      }
+
+      if (account.data.collection) {
+        collection = {
+          ...account.data.collection,
+          data: {
+            ...account.data.collection?.data,
+            name: formatName(account.data.collection?.data?.name),
+          },
+        };
+      }
+
+      if (account.data.close) {
+        close = {
+          ...account.data.close,
+          data: {
+            ...account.data.close?.data,
+            name: formatName(account.data.close?.data?.name),
+          },
+        };
+      }
+
+      if (account.data.modifier.name !== 'none') {
+        modifier = account.data.modifier;
+      }
+
       return {
-        id: argument.id,
+        id: account.id,
         data: {
-          ...argument.data,
-          name: formatName(argument.data.name),
+          ...account.data,
+          collection: collection,
+          modifier: modifier,
+          close,
+          payer: payer,
+          name: formatName(account.data.name),
         },
       };
-    }),
+    });
+
+const formatInstructionMetadata = (
+  instruction: IInstrucction,
+  instructionArguments: IInstrucctionArgument[],
+  instructionAccounts: IInstructionAccount[]
+) => ({
+  name: formatName(instruction.data.name),
+  arguments: formatInstructionsArguments(instruction.id, instructionArguments),
+  accounts: formatInstructionsAccounts(instruction.id, instructionAccounts),
 });
 
-const getTemplateByType = (type: string): string => {
-  switch (type) {
-    case 'full_program':
-      return __rust_template;
-    case 'collections_program':
-      return __collections_template;
-    case 'instructions_program':
-      return __instructions_template;
-    case 'instructions_body_program':
-      return __instructions_body_template;
-    default:
-      return __rust_template;
-  }
-};
-
-const generateRustCode = (formatedMetadataObj: any, collectionType: string) => {
+const generateRustCode = (
+  formatedMetadataObj: IGenerateRustCode,
+  collectionType: string
+) => {
   const template = Handlebars.compile(collectionType);
   const compiledTemplated = template(formatedMetadataObj);
   const programFile = compiledTemplated;
@@ -127,11 +184,10 @@ const generateRustCode = (formatedMetadataObj: any, collectionType: string) => {
 };
 
 export const generateCollectionRustCode = (
-  collection: any,
-  attributes: any
+  collection: ICollection,
+  attributes: ICollectionAttribute[]
 ) => {
   if (!collection) return; // Im doing something wrong :thinking:
-  console.log(collection, attributes);
   const formatedCollection = formatCollectionMetadata(collection, attributes);
 
   return generateRustCode(
@@ -141,16 +197,17 @@ export const generateCollectionRustCode = (
 };
 
 export const generateInstructionsRustCode = (
-  instruction: any,
-  iarguments: any
+  instruction: IInstrucction,
+  instructionArguments: IInstrucctionArgument[],
+  instructionAccounts: IInstructionAccount[]
 ) => {
   if (!instruction) return; // Im doing something wrong :thinking:
 
   const formatedInstructions = formatInstructionMetadata(
     instruction,
-    iarguments
+    instructionArguments,
+    instructionAccounts
   );
-
   const templates = {
     context: generateRustCode(
       { instruction: formatedInstructions },
@@ -173,17 +230,11 @@ export const generateProgramRustCode = (rawMetadata: any) => {
       collectionAttributes: rawMetadata[2],
       instructions: rawMetadata[3],
       instructionArguments: rawMetadata[4],
-      instructionAccountsBasic: rawMetadata[5],
-      instructionAccountsProgram: rawMetadata[6],
-      instructionAccountsSigner: rawMetadata[7],
+      instructionAccounts: rawMetadata[5],
     };
 
-    console.log('GENERANDO USANDO ESTO -> ', metadata);
-
     // Temporal. TODO: Add correct typing to whole library
-    const formatedProgram = formatProgramMetadata(
-      metadata as unknown as IMetadata
-    );
+    const formatedProgram = formatProgramMetadata(metadata);
 
     return generateRustCode(
       { program: formatedProgram },

@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/application/data-access';
+import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
   selector: 'bd-list-accounts',
@@ -73,7 +73,9 @@ import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/application/d
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.close">
                   Close:
-                  {{ account.data.close | obscureAddress }}
+                  {{ account.data.close.data.name }} ({{
+                    account.data.close.id | obscureAddress
+                  }})
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.payer">
                   Payer:

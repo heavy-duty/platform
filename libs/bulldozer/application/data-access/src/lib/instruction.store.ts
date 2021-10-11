@@ -6,10 +6,9 @@ import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/feat
 import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
 import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
 import {
-  Collection,
   Instruction,
-  InstructionAccount,
   InstructionArgument,
+  PopulatedInstructionAccount,
   ProgramStore,
 } from '@heavy-duty/bulldozer/data-access';
 import { generateInstructionsRustCode } from '@heavy-duty/code-generator';
@@ -28,31 +27,6 @@ import {
 
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
-
-export interface PopulatedInstructionAccountInfo {
-  authority: string;
-  application: string;
-  instruction: string;
-  name: string;
-  kind: {
-    id: number;
-    name: string;
-  };
-  modifier: {
-    id: number;
-    name: string;
-  };
-  collection: Collection | null;
-  program: string | null;
-  space: number | null;
-  payer: InstructionAccount | null;
-  close: string | null;
-}
-
-export interface PopulatedInstructionAccount {
-  id: string;
-  data: PopulatedInstructionAccountInfo;
-}
 
 interface ViewModel {
   instructionId: string | null;
@@ -80,6 +54,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly arguments$ = this.select(
     ({ arguments: instructionArguments }) => instructionArguments
   );
+  readonly accounts$ = this.select(({ accounts }) => accounts);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(({ instruction }) => instruction);
   readonly instructionBody$ = this.select(
@@ -89,11 +64,15 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly rustCode$ = this.select(
     this.instruction$,
     this.arguments$,
-    (instruction, instructionArguments) =>
+    this.accounts$,
+    (instruction, instructionArguments, instructionsAccounts) =>
       instruction &&
-      generateInstructionsRustCode(instruction, instructionArguments)
+      generateInstructionsRustCode(
+        instruction,
+        instructionArguments,
+        instructionsAccounts
+      )
   );
-  readonly accounts$ = this.select(({ accounts }) => accounts);
 
   constructor(
     private readonly _programStore: ProgramStore,
@@ -155,12 +134,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   account.data.payer &&
                   accounts.find(({ id }) => id === account.data.payer);
 
+                const close =
+                  account.data.close &&
+                  accounts.find(({ id }) => id === account.data.close);
+
                 return {
                   ...account,
                   data: {
                     ...account.data,
                     collection: collection || null,
                     payer: payer || null,
+                    close: close || null,
                   },
                 };
               }),
@@ -376,7 +360,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             ),
             concatMap(
               ([
-                { name, modifier, collection, space, payer },
+                { name, modifier, collection, space, payer, close },
                 applicationId,
                 instructionId,
               ]) =>
@@ -391,7 +375,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     null,
                     collection,
                     payer,
-                    null
+                    close
                   )
                   .pipe(
                     tapResponse(
@@ -421,7 +405,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, modifier, collection, space, payer }) =>
+              concatMap(({ name, modifier, collection, space, payer, close }) =>
                 this._programStore
                   .updateInstructionAccount(
                     account.id,
@@ -432,7 +416,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     null,
                     collection,
                     payer,
-                    null
+                    close
                   )
                   .pipe(
                     tapResponse(
