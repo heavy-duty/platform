@@ -607,7 +607,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
                       isSigner: false,
                     },
                   accountClose &&
-                    accountKind === 1 && {
+                    accountKind === 0 &&
+                    accountModifier === 2 && {
                       pubkey: new PublicKey(accountClose),
                       isWritable: false,
                       isSigner: false,
