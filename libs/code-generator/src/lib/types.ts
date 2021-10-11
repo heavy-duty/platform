@@ -103,7 +103,7 @@ export interface IInstructionAccount {
     program: string | null;
     space: number | null;
     payer: IInstructionAccountInfo | null;
-    close: string | null;
+    close: IInstructionAccountInfo | null;
   };
 }
 

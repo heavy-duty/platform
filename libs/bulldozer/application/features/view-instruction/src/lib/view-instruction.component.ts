@@ -6,12 +6,12 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
-import {
-  InstructionStore,
-  PopulatedInstructionAccount,
-} from '@heavy-duty/bulldozer/application/data-access';
+import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
-import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
+import {
+  InstructionArgument,
+  PopulatedInstructionAccount,
+} from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({

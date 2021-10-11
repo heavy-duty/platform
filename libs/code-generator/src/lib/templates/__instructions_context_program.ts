@@ -17,10 +17,13 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     #[account(
         {{this.data.modifier.name}},
         {{#if this.data.space}}
-        space = 8 + {{this.data.space}}, 
+        space = 8 + {{this.data.space}},
         {{/if}}
         {{#if this.data.payer}}
         payer = {{this.data.payer.data.name.camelCase}},
+        {{/if}}
+        {{#if this.data.close}}
+        close = {{this.data.close.data.name.camelCase}},
         {{/if}}
     )]
     {{/if}}
@@ -31,7 +34,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     #[account(
         {{this.data.modifier.name}},
         {{#if this.data.space}}
-        space = 8 + {{this.data.space}}, 
+        space = 8 + {{this.data.space}},
         {{/if}}
         {{#if this.data.payer}}
         payer = {{this.data.payer.data.name.camelCase}},

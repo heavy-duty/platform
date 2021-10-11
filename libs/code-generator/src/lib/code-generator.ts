@@ -113,7 +113,8 @@ const formatInstructionsAccounts = (
     .map((account) => {
       let payer = null,
         collection = null,
-        modifier = null;
+        modifier = null,
+        close = null;
       if (account.data.payer) {
         payer = {
           ...account.data.payer,
@@ -134,6 +135,16 @@ const formatInstructionsAccounts = (
         };
       }
 
+      if (account.data.close) {
+        close = {
+          ...account.data.close,
+          data: {
+            ...account.data.close?.data,
+            name: formatName(account.data.close?.data?.name),
+          },
+        };
+      }
+
       if (account.data.modifier.name !== 'none') {
         modifier = account.data.modifier;
       }
@@ -144,6 +155,7 @@ const formatInstructionsAccounts = (
           ...account.data,
           collection: collection,
           modifier: modifier,
+          close,
           payer: payer,
           name: formatName(account.data.name),
         },

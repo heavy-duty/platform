@@ -9,7 +9,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import {
   Collection,
-  InstructionAccount,
+  PopulatedInstructionAccount,
 } from '@heavy-duty/bulldozer/data-access';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -197,9 +197,9 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditBasicAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionAccount;
+      account?: PopulatedInstructionAccount;
       collections: Collection[];
-      accounts: InstructionAccount[];
+      accounts: PopulatedInstructionAccount[];
     }
   ) {}
 
@@ -227,10 +227,10 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
         {
           name: this.data.account.data.name,
           modifier: this.data.account.data.modifier.id,
-          collection: this.data.account.data.collection,
+          collection: this.data.account.data.collection?.id || null,
           space: this.data.account.data.space,
-          payer: this.data.account.data.payer,
-          close: this.data.account.data.close,
+          payer: this.data.account.data.payer?.id || null,
+          close: this.data.account.data.close?.id || null,
         },
         { emitEvent: false }
       );

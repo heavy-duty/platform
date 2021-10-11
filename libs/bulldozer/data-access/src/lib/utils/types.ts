@@ -112,3 +112,28 @@ export interface InstructionAccount {
   id: string;
   data: InstructionAccountInfo;
 }
+
+export interface PopulatedInstructionAccountInfo {
+  authority: string;
+  application: string;
+  instruction: string;
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+  };
+  modifier: {
+    id: number;
+    name: string;
+  };
+  collection: Collection | null;
+  program: string | null;
+  space: number | null;
+  payer: InstructionAccount | null;
+  close: InstructionAccount | null;
+}
+
+export interface PopulatedInstructionAccount {
+  id: string;
+  data: PopulatedInstructionAccountInfo;
+}

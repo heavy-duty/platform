@@ -659,13 +659,13 @@ export class ProgramStore extends ComponentStore<ViewModel> {
                       isSigner: false,
                     },
                   accountPayer &&
-                    accountKind === 0 && {
+                    accountModifier === 1 && {
                       pubkey: new PublicKey(accountPayer),
                       isWritable: false,
                       isSigner: false,
                     },
                   accountClose &&
-                    accountKind === 1 && {
+                    accountModifier === 2 && {
                       pubkey: new PublicKey(accountClose),
                       isWritable: false,
                       isSigner: false,
