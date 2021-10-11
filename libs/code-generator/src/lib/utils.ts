@@ -30,7 +30,8 @@ export const toSnakeCase = (str: string) => {
     .join('_');
 };
 
-export const formatName = (str: string): IFormatedName => {
+export const formatName = (str: string | undefined): IFormatedName | null => {
+  if (!str) return null;
   return {
     snakeCase: toSnakeCase(str),
     normalCase: str,

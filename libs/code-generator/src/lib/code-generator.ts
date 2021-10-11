@@ -110,13 +110,39 @@ const formatInstructionsAccounts = (
 ) =>
   instructionAccounts
     .filter((account) => account.data.instruction === instructionId)
-    .map((account) => ({
-      id: account.id,
-      data: {
-        ...account.data,
-        name: formatName(account.data.name),
-      },
-    }));
+    .map((account) => {
+      let payer = null,
+        collection = null;
+      if (account.data.payer) {
+        payer = {
+          ...account.data.payer,
+          data: {
+            ...account.data.payer?.data,
+            name: formatName(account.data.payer?.data?.name),
+          },
+        };
+      }
+
+      if (account.data.collection) {
+        collection = {
+          ...account.data.collection,
+          data: {
+            ...account.data.collection?.data,
+            name: formatName(account.data.collection?.data?.name),
+          },
+        };
+      }
+
+      return {
+        id: account.id,
+        data: {
+          ...account.data,
+          collection: collection,
+          payer: payer,
+          name: formatName(account.data.name),
+        },
+      };
+    });
 
 const formatInstructionMetadata = (
   instruction: IInstrucction,

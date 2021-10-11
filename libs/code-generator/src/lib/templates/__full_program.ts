@@ -1,4 +1,7 @@
-export const __rust_template = `use anchor_lang::prelude::*;
+export const __rust_template = ` // THIS TEMPLETE IS DEPRECATED AND MUST BE UPDATED 
+// WITH THE OTHERS TEMPLATES DO NOT USE.
+
+use anchor_lang::prelude::*;
 
 declare_id!("{{program.id}}");
 
