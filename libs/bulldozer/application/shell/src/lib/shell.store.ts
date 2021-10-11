@@ -25,7 +25,10 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
         this._matSnackBar
           .open(
             error instanceof Error ? error.name : (error as string),
-            'Close'
+            'Close',
+            {
+              panelClass: `error-snackbar`,
+            }
           )
           .afterDismissed()
           .pipe(tap(() => this.patchState({ notificationOpen: false })))

@@ -31,6 +31,7 @@ export class ApplicationShellComponent implements OnInit {
     private readonly _applicationShellStore: ApplicationShellStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
+    private readonly _instructionStore: InstructionStore,
     private readonly _walletStore: WalletStore
   ) {}
 
@@ -39,6 +40,7 @@ export class ApplicationShellComponent implements OnInit {
       merge(
         this._applicationStore.error$,
         this._collectionStore.error$,
+        this._instructionStore.error$,
         this._walletStore.error$
       ).pipe(isNotNullOrUndefined)
     );
