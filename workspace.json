@@ -773,6 +773,31 @@
         }
       }
     },
+    "code-file-manager": {
+      "projectType": "library",
+      "root": "libs/code-file-manager",
+      "sourceRoot": "libs/code-file-manager/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/code-file-manager"],
+          "options": {
+            "jestConfig": "libs/code-file-manager/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/code-file-manager/src/**/*.ts",
+              "libs/code-file-manager/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
     "code-generator": {
       "root": "libs/code-generator",
       "sourceRoot": "libs/code-generator/src",

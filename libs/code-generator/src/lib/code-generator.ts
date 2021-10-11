@@ -36,35 +36,33 @@ Handlebars.registerHelper('gt', function (this: any, a, b, options) {
 });
 //
 
-const formatProgramMetadata = (metadata: IMetadata) => {
+// TODO: Move interfaces
+const formatProgramMetadata = (
+  metadata: IMetadata
+): { collections: string[]; instructions: string[] } => {
   try {
-    const formatedCollection = metadata.collections.map((collection) => {
-      const collectionsMetadata = {
-        name: formatName(collection.data.name),
-        attributes: metadata.collectionAttributes
-          .filter((attribute) => attribute.data.collection === collection.id)
-          .map((attribute) => {
-            return {
-              id: attribute.id,
-              data: {
-                ...attribute.data,
-                name: formatName(attribute.data.name),
-              },
-            };
-          }),
-      };
-      return collectionsMetadata;
-    });
-
-    const formatedInstructionAccounts = [2];
-
-    const formatedInstructions = metadata.instructions.map((instruction) => ({
-      name: formatName(instruction.data.name),
-      arguments: formatInstructionsArguments(
-        instruction.id,
-        metadata.instructionArguments
+    const formatedCollection: {
+      collection: ICollection;
+      attributes: ICollectionAttribute[];
+    }[] = metadata.collections.map((collection) => ({
+      collection: collection,
+      attributes: metadata.collectionAttributes.filter(
+        (attribute) => attribute.data.collection === collection.id
       ),
-      accounts: formatedInstructionAccounts,
+    }));
+
+    const formatedInstructions: {
+      instruction: IInstrucction;
+      iarguments: IInstrucctionArgument[];
+      accounts: IInstructionAccount[];
+    }[] = metadata.instructions.map((instruction) => ({
+      instruction: instruction,
+      iarguments: metadata.instructionArguments.filter(
+        (argument) => argument.data.instruction === instruction.id
+      ),
+      accounts: metadata.instructionAccounts.filter(
+        (accounts) => accounts.data.instruction === instruction.id
+      ),
     }));
 
     if (!metadata.application) {
@@ -77,8 +75,16 @@ const formatProgramMetadata = (metadata: IMetadata) => {
       collections: formatedCollection,
       instructions: formatedInstructions,
     };
-
-    return formatedMetadata;
+    console.log(formatedInstructions);
+    return {
+      collections: formatedCollection.map(({ collection, attributes }) =>
+        generateCollectionRustCode(collection, attributes)
+      ),
+      instructions: formatedInstructions.map(
+        ({ instruction, iarguments, accounts }) =>
+          generateInstructionsRustCode(instruction, iarguments, accounts)
+      ),
+    };
   } catch (e) {
     throw new Error(e as string);
   }
@@ -199,7 +205,7 @@ export const generateCollectionRustCode = (
   collection: ICollection,
   attributes: ICollectionAttribute[]
 ) => {
-  if (!collection) return; // Im doing something wrong :thinking:
+  if (!collection) return ''; // Im doing something wrong :thinking:
   const formatedCollection = formatCollectionMetadata(collection, attributes);
 
   return generateRustCode(
@@ -213,7 +219,7 @@ export const generateInstructionsRustCode = (
   instructionArguments: IInstrucctionArgument[],
   instructionAccounts: IInstructionAccount[]
 ) => {
-  if (!instruction) return; // Im doing something wrong :thinking:
+  if (!instruction) return ''; // Im doing something wrong :thinking:
 
   const formatedInstructions = formatInstructionMetadata(
     instruction,
@@ -227,24 +233,16 @@ export const generateInstructionsRustCode = (
         : collections,
     new Map([])
   );
-
-  const templates = {
-    context: generateRustCode(
-      {
-        instruction: formatedInstructions,
-        collections: Array.from(collections.values()),
-      },
-      getTemplateByType('instructions_program')
-    ),
-    handler: generateRustCode(
-      { instruction: formatedInstructions },
-      getTemplateByType('instructions_body_program')
-    ),
-  };
-
-  return templates;
+  return generateRustCode(
+    {
+      instruction: formatedInstructions,
+      collections: Array.from(collections.values()),
+    },
+    getTemplateByType('instructions_program')
+  );
 };
 
+// TODO: Remove Temporal 'any'. Add correct typing to whole library
 export const generateProgramRustCode = (rawMetadata: any) => {
   try {
     const metadata = {
@@ -255,14 +253,10 @@ export const generateProgramRustCode = (rawMetadata: any) => {
       instructionArguments: rawMetadata[4],
       instructionAccounts: rawMetadata[5],
     };
-
-    // Temporal. TODO: Add correct typing to whole library
+    console.log(metadata);
     const formatedProgram = formatProgramMetadata(metadata);
 
-    return generateRustCode(
-      { program: formatedProgram },
-      getTemplateByType('full_program')
-    );
+    return formatedProgram;
   } catch (e) {
     throw new Error(e as string);
   }

@@ -2,8 +2,8 @@ import { IFormatedName } from './types';
 import {
   __collections_template,
   __rust_template,
-  __instructions_body_template,
-  __instructions_template,
+  __instructions_context_program,
+  __instructions_handler_program,
 } from './templates';
 
 export const toCamelCase = (str: string) => {
@@ -46,10 +46,10 @@ export const getTemplateByType = (type: string): string => {
       return __rust_template;
     case 'collections_program':
       return __collections_template;
-    case 'instructions_program':
-      return __instructions_template;
-    case 'instructions_body_program':
-      return __instructions_body_template;
+    case 'instructions_handler_template':
+      return __instructions_handler_program;
+    case 'instructions_context_program':
+      return __instructions_context_program;
     default:
       return __rust_template;
   }

@@ -13,14 +13,17 @@ interface ViewModel {
   applicationId: string | null;
   applications: Application[];
   error: unknown | null;
-  rustCode: string | null;
+  rustCodeArray: {
+    collections: string[];
+    instructions: string[];
+  } | null;
 }
 
 const initialState = {
   applicationId: null,
   applications: [],
   error: null,
-  rustCode: null,
+  rustCodeArray: null,
 };
 
 @Injectable()
@@ -37,7 +40,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     (applications, applicationId) =>
       applications.find(({ id }) => id === applicationId) || null
   );
-  readonly rustCode$ = this.select(({ rustCode }) => rustCode);
+  readonly rustCode$ = this.select(({ rustCodeArray }) => rustCodeArray);
 
   constructor(
     private readonly _matDialog: MatDialog,
@@ -64,13 +67,13 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     this.applicationId$.pipe(
       isNotNullOrUndefined,
       switchMap((applicationId) =>
-        this._programStore
-          .getApplicationMetadata(applicationId)
-          .pipe(
-            tap((metadata) =>
-              this.patchState({ rustCode: generateProgramRustCode(metadata) })
-            )
+        this._programStore.getApplicationMetadata(applicationId).pipe(
+          tap((metadata) =>
+            this.patchState({
+              rustCodeArray: generateProgramRustCode(metadata),
+            })
           )
+        )
       )
     )
   );

@@ -30,12 +30,6 @@ import { NavigationStore } from './navigation.store';
               <img src="assets/images/logo.png" class="w-4/6" />
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
-            <mat-nav-list>
-              <div class="w-full mb-6 flex justify-center items-center">
-                <!-- <bd-dark-theme-switch></bd-dark-theme-switch> -->
-              </div>
-            </mat-nav-list>
-
             <mat-accordion
               *ngIf="application$ | ngrxPush"
               displayMode="flat"
@@ -58,7 +52,14 @@ import { NavigationStore } from './navigation.store';
               ></bd-instruction-selector>
             </mat-accordion>
           </div>
-
+          <mat-nav-list togglePosition="afer">
+            <div class="w-full mb-6 flex justify-center items-center">
+              <bd-download-code [template]="rustCode$ | async">
+                Download code
+                <mat-icon>file_download</mat-icon>
+              </bd-download-code>
+            </div>
+          </mat-nav-list>
           <bd-application-selector
             [connected]="connected$ | ngrxPush"
             [application]="application$ | ngrxPush"
@@ -117,6 +118,7 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
+  readonly rustCode$ = this._applicationStore.rustCode$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
