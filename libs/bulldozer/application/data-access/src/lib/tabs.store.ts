@@ -98,6 +98,13 @@ export class TabsStore extends ComponentStore<ViewModel> {
     )
   );
 
+  closeTabsOnApplicationChange = this.effect(() =>
+    this._applicationStore.applicationId$.pipe(
+      isNotNullOrUndefined,
+      tap(() => this.patchState({ selected: null, tabs: [] }))
+    )
+  );
+
   clearTabs = this.updater((state) => ({
     ...state,
     tabs: [],
