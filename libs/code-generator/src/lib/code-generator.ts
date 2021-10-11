@@ -112,7 +112,8 @@ const formatInstructionsAccounts = (
     .filter((account) => account.data.instruction === instructionId)
     .map((account) => {
       let payer = null,
-        collection = null;
+        collection = null,
+        modifier = null;
       if (account.data.payer) {
         payer = {
           ...account.data.payer,
@@ -133,11 +134,16 @@ const formatInstructionsAccounts = (
         };
       }
 
+      if (account.data.modifier.name !== 'none') {
+        modifier = account.data.modifier;
+      }
+
       return {
         id: account.id,
         data: {
           ...account.data,
           collection: collection,
+          modifier: modifier,
           payer: payer,
           name: formatName(account.data.name),
         },
@@ -190,7 +196,6 @@ export const generateInstructionsRustCode = (
     instructionArguments,
     instructionAccounts
   );
-  console.log('Instrucciones', formatedInstructions);
   const templates = {
     context: generateRustCode(
       { instruction: formatedInstructions },

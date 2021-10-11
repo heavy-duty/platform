@@ -13,7 +13,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#each instruction.accounts}}
     {{#switch this.data.kind.id}}
     {{#case '0'}}
-    
+    {{#if this.data.modifier.name }}
     #[account(
         {{this.data.modifier.name}}
         {{#if this.data.space}}
@@ -23,10 +23,11 @@ pub struct {{instruction.name.pascalCase}}<'info>{
         payer = {{this.data.payer.data.name.camelCase}},
         {{/if}}
     )]
+    {{/if}}
     pub {{this.data.name.snakeCase}}: Box<Account<'info,{{this.data.collection.data.name.pascalCase}}>>,
     {{/case}}
     {{#case '2'}}
-
+    {{#if this.data.modifier.name }}
     #[account(
         {{this.data.modifier.name}}
         {{#if this.data.space}}
@@ -36,9 +37,15 @@ pub struct {{instruction.name.pascalCase}}<'info>{
         payer = {{this.data.payer.data.name.camelCase}},
         {{/if}}
     )]
+    {{/if}}
     pub {{this.data.name.snakeCase}}: Signer<'info>,
     {{/case}}
     {{#case '1'}}
+    {{#if this.data.modifier.name }}
+    #[account(
+        {{this.data.modifier.name}}
+    )]
+    {{/if}}
     pub {{this.data.name.snakeCase}}: Program<'info, System>,
     {{/case}}{{/switch}}{{/each}}
 }`;
