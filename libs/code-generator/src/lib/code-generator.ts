@@ -22,6 +22,18 @@ Handlebars.registerHelper('case', function (this: any, value, options) {
     return options.fn(this);
   }
 });
+
+Handlebars.registerHelper('eq', function (this: any, a, b, options) {
+  if (a == b) {
+    return options.fn(this);
+  }
+});
+
+Handlebars.registerHelper('gt', function (this: any, a, b, options) {
+  if (a > b) {
+    return options.fn(this);
+  }
+});
 //
 
 const formatProgramMetadata = (metadata: IMetadata) => {
@@ -208,9 +220,20 @@ export const generateInstructionsRustCode = (
     instructionArguments,
     instructionAccounts
   );
+  const collections = formatedInstructions.accounts.reduce(
+    (collections, account) =>
+      account.data.collection && account.data.collection.data.name !== null
+        ? collections.set(account.data.collection.id, account.data.collection)
+        : collections,
+    new Map([])
+  );
+
   const templates = {
     context: generateRustCode(
-      { instruction: formatedInstructions },
+      {
+        instruction: formatedInstructions,
+        collections: Array.from(collections.values()),
+      },
       getTemplateByType('instructions_program')
     ),
     handler: generateRustCode(

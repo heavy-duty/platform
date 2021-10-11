@@ -1,11 +1,10 @@
 export const __instructions_template = `use anchor_lang::prelude::*;
-{{#each instruction.accounts}}
-{{#switch this.data.kind.id}}
-{{#case '0'}}
-use crate::collections::{{this.data.collection.data.name.pascalCase}};
-{{/case}}
-{{/switch}}
-{{/each}}
+{{#eq collections.length 1}}
+use crate::collections::{{collections.[0].data.name.pascalCase}};
+{{/eq}}
+{{#gt collections.length 1}}
+use crate::collections::{ {{~#each collections}}{{#if @first}}{{else}}, {{/if}}{{this.data.name.pascalCase}}{{/each~}} };
+{{/gt}}
 
 #[derive(Accounts)]
 {{#if instruction.arguments.length}}
