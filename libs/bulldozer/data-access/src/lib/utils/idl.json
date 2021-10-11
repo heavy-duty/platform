@@ -283,6 +283,27 @@
       ]
     },
     {
+      "name": "updateInstructionBody",
+      "accounts": [
+        {
+          "name": "instruction",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": [
+        {
+          "name": "body",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "deleteInstruction",
       "accounts": [
         {
@@ -597,6 +618,10 @@
           },
           {
             "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "body",
             "type": "bytes"
           }
         ]

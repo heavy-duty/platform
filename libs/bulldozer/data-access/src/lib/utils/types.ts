@@ -53,6 +53,7 @@ export interface InstructionInfo {
   authority: string;
   application: string;
   name: string;
+  body: string;
 }
 
 export interface Instruction {

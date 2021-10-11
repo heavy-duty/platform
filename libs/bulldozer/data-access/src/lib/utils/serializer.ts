@@ -86,6 +86,7 @@ interface RawInstruction {
   authority: PublicKey;
   application: PublicKey;
   name: Uint8Array;
+  body: Uint8Array;
 }
 
 export const InstructionParser = (
@@ -98,6 +99,7 @@ export const InstructionParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       name: utils.bytes.utf8.decode(account.name),
+      body: utils.bytes.utf8.decode(account.body),
     },
   };
 };

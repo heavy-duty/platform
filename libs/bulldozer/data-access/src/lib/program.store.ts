@@ -492,6 +492,27 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
+  updateInstructionBody(instructionId: string, instructionBody: string) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) =>
+        from(
+          defer(() =>
+            writer.rpc.updateInstructionBody(instructionBody, {
+              accounts: {
+                instruction: new PublicKey(instructionId),
+                authority: walletPublicKey,
+              },
+            })
+          )
+        )
+      )
+    );
+  }
+
   deleteInstruction(instructionId: string) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
