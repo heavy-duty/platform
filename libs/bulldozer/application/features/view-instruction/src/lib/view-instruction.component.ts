@@ -8,13 +8,10 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
 import {
   InstructionStore,
-  TabsStore,
+  PopulatedInstructionAccount,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
-import {
-  InstructionAccount,
-  InstructionArgument,
-} from '@heavy-duty/bulldozer/data-access';
+import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -89,8 +86,9 @@ import { filter, map, startWith } from 'rxjs/operators';
 export class ViewInstructionComponent implements OnInit {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
-  readonly instruction$ = this._tabsStore.tab$;
+  readonly instruction$ = this._instructionStore.instruction$;
   readonly arguments$ = this._instructionStore.arguments$;
+  readonly accounts$ = this._instructionStore.accounts$;
   readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.context)
   );
@@ -117,12 +115,10 @@ export class ViewInstructionComponent implements OnInit {
       readOnly: false,
     }))
   );
-  readonly accounts$ = this._instructionStore.accounts$;
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
-    private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
     private readonly _instructionStore: InstructionStore,
     private readonly _themeService: DarkThemeService
@@ -168,7 +164,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createBasicAccount();
   }
 
-  onUpdateBasicAccount(account: InstructionAccount) {
+  onUpdateBasicAccount(account: PopulatedInstructionAccount) {
     this._instructionStore.updateBasicAccount(account);
   }
 
@@ -176,7 +172,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createSignerAccount();
   }
 
-  onUpdateSignerAccount(account: InstructionAccount) {
+  onUpdateSignerAccount(account: PopulatedInstructionAccount) {
     this._instructionStore.updateSignerAccount(account);
   }
 
@@ -184,7 +180,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createProgramAccount();
   }
 
-  onUpdateProgramAccount(account: InstructionAccount) {
+  onUpdateProgramAccount(account: PopulatedInstructionAccount) {
     this._instructionStore.updateProgramAccount(account);
   }
 

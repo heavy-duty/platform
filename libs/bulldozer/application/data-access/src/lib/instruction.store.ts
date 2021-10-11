@@ -6,6 +6,7 @@ import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/feat
 import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
 import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
 import {
+  Collection,
   Instruction,
   InstructionAccount,
   InstructionArgument,
@@ -28,15 +29,42 @@ import {
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
 
+export interface PopulatedInstructionAccountInfo {
+  authority: string;
+  application: string;
+  instruction: string;
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+  };
+  modifier: {
+    id: number;
+    name: string;
+  };
+  collection: Collection | null;
+  program: string | null;
+  space: number | null;
+  payer: InstructionAccount | null;
+  close: string | null;
+}
+
+export interface PopulatedInstructionAccount {
+  id: string;
+  data: PopulatedInstructionAccountInfo;
+}
+
 interface ViewModel {
   instructionId: string | null;
+  instruction: Instruction | null;
   instructions: Instruction[];
   arguments: InstructionArgument[];
-  accounts: InstructionAccount[];
+  accounts: PopulatedInstructionAccount[];
 }
 
 const initialState: ViewModel = {
   instructionId: null,
+  instruction: null,
   instructions: [],
   arguments: [],
   accounts: [],
@@ -53,17 +81,13 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     ({ arguments: instructionArguments }) => instructionArguments
   );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
+  readonly instruction$ = this.select(({ instruction }) => instruction);
   readonly rustCode$ = this.select(
-    this.instructions$,
-    this.instructionId$,
+    this.instruction$,
     this.arguments$,
-    (instructions, instructionId, iarguments) => {
-      const instruction = instructions.find(
-        (collection) => collection.id === instructionId
-      );
-
-      return generateInstructionsRustCode(instruction, iarguments);
-    }
+    (instruction, instructionArguments) =>
+      instruction &&
+      generateInstructionsRustCode(instruction, instructionArguments)
   );
   readonly accounts$ = this.select(({ accounts }) => accounts);
 
@@ -92,33 +116,41 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadArguments = this.effect(() =>
+  readonly loadInstruction = this.effect(() =>
     combineLatest([
       this.instructionId$.pipe(isNotNullOrUndefined),
+      this._collectionStore.collections$,
       this.reload$,
     ]).pipe(
-      switchMap(([instructionId]) =>
-        this._programStore.getInstructionArguments(instructionId).pipe(
-          tapResponse(
-            (instructionArguments) =>
-              this.patchState({ arguments: instructionArguments }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
+      switchMap(([instructionId, collections]) =>
+        combineLatest([
+          this._programStore.getInstruction(instructionId),
+          this._programStore.getInstructionArguments(instructionId),
+          this._programStore.getInstructionAccounts(instructionId),
+        ]).pipe(
+          tap(([instruction, instructionArguments, accounts]) =>
+            this.patchState({
+              instruction: instruction,
+              accounts: accounts.map((account) => {
+                const collection =
+                  account.data.collection &&
+                  collections.find(({ id }) => id === account.data.collection);
 
-  readonly loadAccounts = this.effect(() =>
-    combineLatest([
-      this.instructionId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([instructionId]) =>
-        this._programStore.getInstructionAccounts(instructionId).pipe(
-          tapResponse(
-            (accounts) => this.patchState({ accounts }),
-            (error) => this._error.next(error)
+                const payer =
+                  account.data.payer &&
+                  accounts.find(({ id }) => id === account.data.payer);
+
+                return {
+                  ...account,
+                  data: {
+                    ...account.data,
+                    collection: collection || null,
+                    payer: payer || null,
+                  },
+                };
+              }),
+              arguments: instructionArguments,
+            })
           )
         )
       )
@@ -338,7 +370,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateBasicAccount = this.effect(
-    (account$: Observable<InstructionAccount>) =>
+    (account$: Observable<PopulatedInstructionAccount>) =>
       account$.pipe(
         concatMap((account) =>
           of(account).pipe(
@@ -417,7 +449,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateSignerAccount = this.effect(
-    (account$: Observable<InstructionAccount>) =>
+    (account$: Observable<PopulatedInstructionAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog
@@ -500,7 +532,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateProgramAccount = this.effect(
-    (account$: Observable<InstructionAccount>) =>
+    (account$: Observable<PopulatedInstructionAccount>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog

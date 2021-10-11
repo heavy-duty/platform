@@ -9,27 +9,20 @@ import { filter, map } from 'rxjs/operators';
 @Component({
   selector: 'bd-view-application',
   template: `
-    <nav mat-tab-nav-bar>
+    <nav mat-tab-nav-bar *ngIf="applicationId$ | ngrxPush as applicationId">
       <div
         mat-tab-link
         class="flex items-center justify-between p-0"
         *ngFor="let tab of tabs$ | ngrxPush"
         [active]="(selectedTab$ | ngrxPush) === tab.id"
       >
-        <a
-          [routerLink]="[
-            '/applications',
-            tab.data.application,
-            tab.kind,
-            tab.id
-          ]"
-        >
-          {{ tab.data.name }}
+        <a [routerLink]="['/applications', applicationId, tab.kind, tab.id]">
+          {{ tab.title }}
         </a>
         <button
           mat-icon-button
           (click)="onCloseTab($event, tab.id)"
-          [attr.aria-label]="'Close ' + tab.data.name + ' tab'"
+          [attr.aria-label]="'Close ' + tab.title + ' tab'"
         >
           <mat-icon>close</mat-icon>
         </button>
@@ -43,6 +36,7 @@ import { filter, map } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewApplicationComponent implements OnInit {
+  readonly applicationId$ = this._applicationStore.applicationId$;
   readonly tabs$ = this._tabsStore.tabs$;
   readonly selectedTab$ = this._tabsStore.selected$;
 

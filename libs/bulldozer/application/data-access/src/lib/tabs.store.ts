@@ -1,12 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  Collection,
-  Instruction,
-  ProgramStore,
-} from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { ComponentStore } from '@ngrx/component-store';
 import { Observable, of, Subject } from 'rxjs';
 import { concatMap, filter, tap, withLatestFrom } from 'rxjs/operators';
 
@@ -16,8 +11,13 @@ import { InstructionStore } from './instruction.store';
 
 export type TabKind = 'collections' | 'instructions';
 
+export interface Tab {
+  kind: TabKind;
+  id: string;
+}
+
 interface ViewModel {
-  tabs: ({ kind: TabKind } & (Collection | Instruction))[];
+  tabs: Tab[];
   selected: string | null;
 }
 
@@ -30,7 +30,20 @@ const initialState: ViewModel = {
 export class TabsStore extends ComponentStore<ViewModel> {
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
-  readonly tabs$ = this.select(({ tabs }) => tabs);
+  readonly tabs$ = this.select(
+    this.select(({ tabs }) => tabs),
+    this._collectionStore.collections$,
+    this._instructionStore.instructions$,
+    (tabs, collections, instructions) =>
+      tabs.map((tab) => ({
+        ...tab,
+        title:
+          tab.kind === 'collections'
+            ? collections.find(({ id }) => id === tab.id)?.data.name
+            : instructions.find(({ id }) => id === tab.id)?.data.name,
+      }))
+  );
+
   readonly selected$ = this.select(({ selected }) => selected, {
     debounce: true,
   });
@@ -41,7 +54,6 @@ export class TabsStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _programStore: ProgramStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore,
@@ -57,20 +69,11 @@ export class TabsStore extends ComponentStore<ViewModel> {
       concatMap((collectionId) =>
         of(collectionId).pipe(
           withLatestFrom(this.tabs$),
-          filter(
-            ([collectionId, tabs]) =>
-              !tabs.some(({ id }) => id === collectionId)
-          )
-        )
-      ),
-      concatMap(([collectionId, tabs]) =>
-        this._programStore.getCollection(collectionId).pipe(
-          tapResponse(
-            (collection) =>
-              this.patchState({
-                tabs: [...tabs, { ...collection, kind: 'collections' }],
-              }),
-            (error) => this._error.next(error)
+          filter(([, tabs]) => !tabs.some(({ id }) => id === collectionId)),
+          tap(([, tabs]) =>
+            this.patchState({
+              tabs: [...tabs, { id: collectionId, kind: 'collections' }],
+            })
           )
         )
       )
@@ -84,20 +87,11 @@ export class TabsStore extends ComponentStore<ViewModel> {
       concatMap((instructionId) =>
         of(instructionId).pipe(
           withLatestFrom(this.tabs$),
-          filter(
-            ([instructionId, tabs]) =>
-              !tabs.some(({ id }) => id === instructionId)
-          )
-        )
-      ),
-      concatMap(([instructionId, tabs]) =>
-        this._programStore.getInstruction(instructionId).pipe(
-          tapResponse(
-            (instruction) =>
-              this.patchState({
-                tabs: [...tabs, { ...instruction, kind: 'instructions' }],
-              }),
-            (error) => this._error.next(error)
+          filter(([, tabs]) => !tabs.some(({ id }) => id === instructionId)),
+          tap(([, tabs]) =>
+            this.patchState({
+              tabs: [...tabs, { id: instructionId, kind: 'instructions' }],
+            })
           )
         )
       )
