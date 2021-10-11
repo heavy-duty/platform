@@ -238,7 +238,7 @@ export const generateInstructionsRustCode = (
       instruction: formatedInstructions,
       collections: Array.from(collections.values()),
     },
-    getTemplateByType('instructions_program')
+    getTemplateByType('instructions_context_program')
   );
 };
 

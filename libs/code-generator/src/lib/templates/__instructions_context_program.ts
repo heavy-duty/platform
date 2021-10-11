@@ -1,4 +1,4 @@
-export const __instructions_template = `use anchor_lang::prelude::*;
+export const __instructions_context_program = `use anchor_lang::prelude::*;
 {{#eq collections.length 1}}
 use crate::collections::{{collections.[0].data.name.pascalCase}};
 {{/eq}}

@@ -72,7 +72,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         instruction,
         instructionArguments,
         instructionsAccounts
-      )?.context
+      )
   );
 
   constructor(
