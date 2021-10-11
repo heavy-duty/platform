@@ -15,7 +15,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#case '0'}}
     {{#if this.data.modifier.name }}
     #[account(
-        {{this.data.modifier.name}}
+        {{this.data.modifier.name}},
         {{#if this.data.space}}
         space = 8 + {{this.data.space}}, 
         {{/if}}
@@ -29,7 +29,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#case '2'}}
     {{#if this.data.modifier.name }}
     #[account(
-        {{this.data.modifier.name}}
+        {{this.data.modifier.name}},
         {{#if this.data.space}}
         space = 8 + {{this.data.space}}, 
         {{/if}}
