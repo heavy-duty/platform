@@ -70,6 +70,13 @@ pub mod bulldozer {
     instructions::update_instruction::handler(ctx, name)
   }
 
+  pub fn update_instruction_body(
+    ctx: Context<UpdateInstructionBody>,
+    body: String,
+  ) -> ProgramResult {
+    instructions::update_instruction_body::handler(ctx, body)
+  }
+
   pub fn delete_instruction(ctx: Context<DeleteInstruction>) -> ProgramResult {
     instructions::delete_instruction::handler(ctx)
   }

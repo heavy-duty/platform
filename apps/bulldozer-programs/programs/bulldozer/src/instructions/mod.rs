@@ -16,6 +16,7 @@ pub mod update_collection_attribute;
 pub mod update_instruction;
 pub mod update_instruction_account;
 pub mod update_instruction_argument;
+pub mod update_instruction_body;
 
 pub use create_application::*;
 pub use create_collection::*;
@@ -35,3 +36,4 @@ pub use update_collection_attribute::*;
 pub use update_instruction::*;
 pub use update_instruction_account::*;
 pub use update_instruction_argument::*;
+pub use update_instruction_body::*;
