@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
+import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/application/data-access';
 
 @Component({
   selector: 'bd-list-accounts',
@@ -55,15 +55,16 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
                 </h3>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.collection">
                   Collection:
+                  {{ account.data.collection.data.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
                       '/applications',
                       account.data.application,
                       'collections',
-                      account.data.collection
+                      account.data.collection.id
                     ]"
-                    >{{ account.data.collection | obscureAddress }}</a
+                    >{{ account.data.collection.id | obscureAddress }}</a
                   >
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.program">
@@ -76,7 +77,9 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.payer">
                   Payer:
-                  {{ account.data.payer | obscureAddress }}
+                  {{ account.data.payer.data.name }} ({{
+                    account.data.payer.id | obscureAddress
+                  }})
                 </p>
               </div>
 
@@ -121,14 +124,17 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/data-access';
 })
 export class ListAccountsComponent {
   @Input() connected: boolean | null = null;
-  @Input() accounts: InstructionAccount[] | null = null;
-  @Output() updateBasicAccount = new EventEmitter<InstructionAccount>();
-  @Output() updateSignerAccount = new EventEmitter<InstructionAccount>();
-  @Output() updateProgramAccount = new EventEmitter<InstructionAccount>();
-  @Output() updateAccount = new EventEmitter<InstructionAccount>();
+  @Input() accounts: PopulatedInstructionAccount[] | null = null;
+  @Output() updateBasicAccount =
+    new EventEmitter<PopulatedInstructionAccount>();
+  @Output() updateSignerAccount =
+    new EventEmitter<PopulatedInstructionAccount>();
+  @Output() updateProgramAccount =
+    new EventEmitter<PopulatedInstructionAccount>();
+  @Output() updateAccount = new EventEmitter<PopulatedInstructionAccount>();
   @Output() deleteAccount = new EventEmitter<string>();
 
-  onUpdateAccount(account: InstructionAccount) {
+  onUpdateAccount(account: PopulatedInstructionAccount) {
     switch (account.data.kind.id) {
       case 0:
         return this.updateBasicAccount.emit(account);

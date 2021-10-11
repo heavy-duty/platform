@@ -6,14 +6,7 @@ import { generateProgramRustCode } from '@heavy-duty/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import {
-  concatMap,
-  exhaustMap,
-  filter,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
 
 interface ViewModel {
   applicationId: string | null;

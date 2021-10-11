@@ -23,14 +23,16 @@ import {
 import { ApplicationStore } from './application.store';
 
 interface ViewModel {
-  collections: Collection[];
   collectionId: string | null;
+  collection: Collection | null;
+  collections: Collection[];
   attributes: CollectionAttribute[];
 }
 
 const initialState = {
-  collections: [],
   collectionId: null,
+  collection: null,
+  collections: [],
   attributes: [],
 };
 
@@ -42,18 +44,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly reload$ = this._reload.asObservable();
   readonly collections$ = this.select(({ collections }) => collections);
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
+  readonly collection$ = this.select(({ collection }) => collection);
   readonly attributes$ = this.select(({ attributes }) => attributes);
   readonly rustCode$ = this.select(
-    this.collections$,
-    this.collectionId$,
+    this.collection$,
     this.attributes$,
-    (collections, collectionId, attributes) => {
-      const collection = collections.find(
-        (collection) => collection.id === collectionId
-      );
-
-      return generateCollectionRustCode(collection, attributes);
-    }
+    (collection, attributes) =>
+      collection && generateCollectionRustCode(collection, attributes)
   );
 
   constructor(
@@ -66,10 +63,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly loadCollections = this.effect(() =>
     combineLatest([
-      this.reload$,
       this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+      this.reload$,
     ]).pipe(
-      switchMap(([, applicationId]) =>
+      switchMap(([applicationId]) =>
         this._programStore.getCollections(applicationId).pipe(
           tapResponse(
             (collections) => this.patchState({ collections }),
@@ -80,15 +77,19 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadAttributes = this.effect(() =>
+  readonly loadCollection = this.effect(() =>
     combineLatest([
-      this.reload$,
       this.collectionId$.pipe(isNotNullOrUndefined),
+      this.reload$,
     ]).pipe(
-      concatMap(([, collectionId]) =>
-        this._programStore.getCollectionAttributes(collectionId).pipe(
+      switchMap(([collectionId]) =>
+        combineLatest([
+          this._programStore.getCollection(collectionId),
+          this._programStore.getCollectionAttributes(collectionId),
+        ]).pipe(
           tapResponse(
-            (attributes) => this.patchState({ attributes }),
+            ([collection, attributes]) =>
+              this.patchState({ collection, attributes }),
             (error) => this._error.next(error)
           )
         )

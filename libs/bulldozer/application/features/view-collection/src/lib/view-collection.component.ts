@@ -6,10 +6,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
-import {
-  CollectionStore,
-  TabsStore,
-} from '@heavy-duty/bulldozer/application/data-access';
+import { CollectionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -66,7 +63,7 @@ import { filter, map, startWith } from 'rxjs/operators';
 export class ViewCollectionComponent implements OnInit {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
-  readonly collection$ = this._tabsStore.tab$;
+  readonly collection$ = this._collectionStore.collection$;
   readonly attributes$ = this._collectionStore.attributes$;
   readonly rustCodeCollection$ = this._collectionStore.rustCode$;
   readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
@@ -82,7 +79,6 @@ export class ViewCollectionComponent implements OnInit {
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
-    private readonly _tabsStore: TabsStore,
     private readonly _walletStore: WalletStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _themeService: DarkThemeService
