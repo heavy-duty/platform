@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import {
@@ -54,9 +55,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
+    private readonly _matDialog: MatDialog,
+    private readonly _matSnackBar: MatSnackBar,
     private readonly _programStore: ProgramStore,
-    private readonly _applicationStore: ApplicationStore,
-    private readonly _matDialog: MatDialog
+    private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
   }
@@ -117,7 +119,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             concatMap(([{ name }, applicationId]) =>
               this._programStore.createCollection(applicationId, name).pipe(
                 tapResponse(
-                  () => this._reload.next(null),
+                  () => {
+                    this._reload.next(null);
+                    this._matSnackBar.open('Collection created', 'Close', {
+                      panelClass: 'success-snackbar',
+                      duration: 3000,
+                    });
+                  },
                   (error) => this._error.next(error)
                 )
               )
@@ -138,7 +146,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               concatMap(({ name }) =>
                 this._programStore.updateCollection(collection.id, name).pipe(
                   tapResponse(
-                    () => this._reload.next(null),
+                    () => {
+                      this._reload.next(null);
+                      this._matSnackBar.open('Collection updated', 'Close', {
+                        panelClass: 'success-snackbar',
+                        duration: 3000,
+                      });
+                    },
                     (error) => this._error.next(error)
                   )
                 )
@@ -153,7 +167,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       concatMap((collectionId) =>
         this._programStore.deleteCollection(collectionId).pipe(
           tapResponse(
-            () => this._reload.next(null),
+            () => {
+              this._reload.next(null);
+              this._matSnackBar.open('Collection deleted', 'Close', {
+                panelClass: 'success-snackbar',
+                duration: 3000,
+              });
+            },
             (error) => this._error.next(error)
           )
         )
@@ -189,7 +209,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => this._reload.next(null),
+                    () => {
+                      this._reload.next(null);
+                      this._matSnackBar.open('Attribute created', 'Close', {
+                        panelClass: 'success-snackbar',
+                        duration: 3000,
+                      });
+                    },
                     (error) => this._error.next(error)
                   )
                 )
@@ -221,7 +247,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => this._reload.next(null),
+                      () => {
+                        this._reload.next(null);
+                        this._matSnackBar.open('Attribute updated', 'Close', {
+                          panelClass: 'success-snackbar',
+                          duration: 3000,
+                        });
+                      },
                       (error) => this._error.next(error)
                     )
                   )
@@ -237,7 +269,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         concatMap((attributeId) =>
           this._programStore.deleteCollectionAttribute(attributeId).pipe(
             tapResponse(
-              () => this._reload.next(null),
+              () => {
+                this._reload.next(null);
+                this._matSnackBar.open('Attribute deleted', 'Close', {
+                  panelClass: 'success-snackbar',
+                  duration: 3000,
+                });
+              },
               (error) => this._error.next(error)
             )
           )

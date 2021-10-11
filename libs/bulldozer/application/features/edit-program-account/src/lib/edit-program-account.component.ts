@@ -1,6 +1,7 @@
 import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { InstructionAccount, Program } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
@@ -91,6 +92,7 @@ export class EditProgramAccountComponent implements OnInit {
   }
 
   constructor(
+    private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditProgramAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
@@ -119,6 +121,11 @@ export class EditProgramAccountComponent implements OnInit {
       this._matDialogRef.close({
         name: this.nameControl.value,
         program: this.programControl.value,
+      });
+    } else {
+      this._matSnackBar.open('Invalid information', 'close', {
+        panelClass: 'warning-snackbar',
+        duration: 5000,
       });
     }
   }

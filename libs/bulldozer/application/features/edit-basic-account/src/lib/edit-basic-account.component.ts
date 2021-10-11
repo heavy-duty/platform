@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
   PopulatedInstructionAccount,
@@ -194,6 +195,7 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
   }
 
   constructor(
+    private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditBasicAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
@@ -254,6 +256,11 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
         space: this.spaceControl.value,
         payer: this.payerControl.value,
         close: this.closeControl.value,
+      });
+    } else {
+      this._matSnackBar.open('Invalid information', 'close', {
+        panelClass: 'warning-snackbar',
+        duration: 5000,
       });
     }
   }

@@ -1,6 +1,7 @@
 import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
 
 @Component({
@@ -138,6 +139,7 @@ export class EditAttributeComponent implements OnInit {
   }
 
   constructor(
+    private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditAttributeComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: { attribute?: CollectionAttribute }
@@ -167,6 +169,11 @@ export class EditAttributeComponent implements OnInit {
         kind: this.kindControl.value,
         modifier: this.modifierControl.value,
         size: this.sizeControl.value,
+      });
+    } else {
+      this._matSnackBar.open('Invalid information', 'close', {
+        panelClass: 'warning-snackbar',
+        duration: 5000,
       });
     }
   }

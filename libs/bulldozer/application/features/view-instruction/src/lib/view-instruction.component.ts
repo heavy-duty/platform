@@ -68,7 +68,7 @@ import { filter, map, startWith } from 'rxjs/operators';
         <div class="bd-custom-height-layout overflow-hidden">
           <bd-code-editor
             [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
-            [template]="rustContextCodeInstruction$ | ngrxPush"
+            [template]="instructionContext$ | ngrxPush"
             [options]="contextEditorOptions$ | ngrxPush"
           ></bd-code-editor>
 
@@ -103,11 +103,9 @@ export class ViewInstructionComponent implements OnInit {
   readonly connected$ = this._walletStore.connected$;
   readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionBody$ = this._instructionStore.instructionBody$;
+  readonly instructionContext$ = this._instructionStore.instructionContext$;
   readonly arguments$ = this._instructionStore.arguments$;
   readonly accounts$ = this._instructionStore.accounts$;
-  readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
-    map((templates) => templates && templates.context)
-  );
   readonly commonEditorOptions = {
     language: 'rust',
     automaticLayout: true,
