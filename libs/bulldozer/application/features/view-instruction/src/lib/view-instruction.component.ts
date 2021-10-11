@@ -64,17 +64,32 @@ import { filter, map, startWith } from 'rxjs/operators';
           </bd-list-accounts>
         </main>
       </div>
-      <div class="w-1/2 ">
+      <div class="w-1/2">
         <div class="bd-custom-height-layout overflow-hidden">
           <bd-code-editor
             [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
             [template]="rustContextCodeInstruction$ | ngrxPush"
             [options]="contextEditorOptions$ | ngrxPush"
           ></bd-code-editor>
+
+          <div *ngIf="connected$ | ngrxPush" class="w-full flex justify-end">
+            <p class="ml-2 mb-0">
+              Remember to save the changes below:
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="onSaveInstructionBody()"
+              >
+                Save
+              </button>
+            </p>
+          </div>
+
           <bd-code-editor
             [customClass]="'bd-custom-monaco-editor-splited'"
-            [template]="rustHandlerCodeInstruction$ | ngrxPush"
+            [template]="instructionBody$ | ngrxPush"
             [options]="handlerEditorOptions$ | ngrxPush"
+            (codeChange)="onUpdateInstructionBody($event)"
           ></bd-code-editor>
         </div>
       </div>
@@ -87,13 +102,11 @@ export class ViewInstructionComponent implements OnInit {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly instruction$ = this._instructionStore.instruction$;
+  readonly instructionBody$ = this._instructionStore.instructionBody$;
   readonly arguments$ = this._instructionStore.arguments$;
   readonly accounts$ = this._instructionStore.accounts$;
   readonly rustContextCodeInstruction$ = this._instructionStore.rustCode$.pipe(
     map((templates) => templates && templates.context)
-  );
-  readonly rustHandlerCodeInstruction$ = this._instructionStore.rustCode$.pipe(
-    map((templates) => templates && templates.handler)
   );
   readonly commonEditorOptions = {
     language: 'rust',
@@ -146,6 +159,14 @@ export class ViewInstructionComponent implements OnInit {
 
   onReload() {
     this._instructionStore.reload();
+  }
+
+  onUpdateInstructionBody(body: string) {
+    this._instructionStore.updateInstructionBody(body);
+  }
+
+  onSaveInstructionBody() {
+    this._instructionStore.saveInstructionBody();
   }
 
   onCreateArgument() {

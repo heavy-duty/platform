@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
 @Component({
   selector: 'bd-code-editor',
@@ -7,6 +7,7 @@ import { Component, Input } from '@angular/core';
       class="{{ customClass }}"
       [options]="options"
       [ngModel]="template"
+      (ngModelChange)="onChange($event)"
     ></ngx-monaco-editor>
   `,
   styles: [],
@@ -21,4 +22,9 @@ export class CodeEditorComponent {
     readOnly: false,
     fontSize: 16,
   };
+  @Output() codeChange = new EventEmitter<string>();
+
+  onChange(event: string) {
+    this.codeChange.emit(event);
+  }
 }

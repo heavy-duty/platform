@@ -24,7 +24,7 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
       switchMap((error) =>
         this._matSnackBar
           .open(
-            error instanceof Error ? error.message : (error as string),
+            error instanceof Error ? error.name : (error as string),
             'Close'
           )
           .afterDismissed()

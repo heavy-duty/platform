@@ -82,6 +82,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(({ instruction }) => instruction);
+  readonly instructionBody$ = this.select(
+    this.instruction$,
+    (instruction) => instruction && instruction.data.body
+  );
   readonly rustCode$ = this.select(
     this.instruction$,
     this.arguments$,
@@ -99,6 +103,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
   }
+
+  readonly updateInstructionBody = this.updater((state, body: string) => ({
+    ...state,
+    instruction: state.instruction && {
+      ...state.instruction,
+      data: {
+        ...state.instruction.data,
+        body,
+      },
+    },
+  }));
 
   readonly loadInstructions = this.effect(() =>
     combineLatest([
@@ -208,6 +223,27 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             )
         )
       )
+  );
+
+  readonly saveInstructionBody = this.effect((action$) =>
+    action$.pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this.instruction$.pipe(isNotNullOrUndefined),
+            (_, instruction) => instruction
+          )
+        )
+      ),
+      concatMap(({ id, data: { body } }) =>
+        this._programStore.updateInstructionBody(id, body).pipe(
+          tapResponse(
+            () => this._reload.next(null),
+            (error) => this._error.next(error)
+          )
+        )
+      )
+    )
   );
 
   readonly deleteInstruction = this.effect(

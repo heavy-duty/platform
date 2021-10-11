@@ -8,7 +8,7 @@ pub struct CreateInstruction<'info> {
   #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32 + 32
+        space = 8 + 32 + 32 + 32 + 2000
     )]
   pub instruction: Box<Account<'info, Instruction>>,
   pub application: Box<Account<'info, Application>>,
@@ -19,8 +19,9 @@ pub struct CreateInstruction<'info> {
 
 pub fn handler(ctx: Context<CreateInstruction>, name: String) -> ProgramResult {
   msg!("Create instruction");
-  ctx.accounts.instruction.name = vectorize_string(name, 32);
   ctx.accounts.instruction.authority = ctx.accounts.authority.key();
   ctx.accounts.instruction.application = ctx.accounts.application.key();
+  ctx.accounts.instruction.name = vectorize_string(name, 32);
+  ctx.accounts.instruction.body = Vec::<u8>::new();
   Ok(())
 }
