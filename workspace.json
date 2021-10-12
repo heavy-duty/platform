@@ -562,6 +562,56 @@
         }
       }
     },
+    "bulldozer-application-utils-services-code-generator": {
+      "root": "libs/bulldozer/application/utils/services/code-generator",
+      "sourceRoot": "libs/bulldozer/application/utils/services/code-generator/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/utils/services/code-generator/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/utils/services/code-generator"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/utils/services/code-generator/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "bulldozer-application-utils-types": {
+      "root": "libs/bulldozer/application/utils/types",
+      "sourceRoot": "libs/bulldozer/application/utils/types/src",
+      "projectType": "library",
+      "targets": {
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "outputs": ["{options.outputFile}"],
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/utils/types/**/*.ts"
+            ]
+          }
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/bulldozer/application/utils/types"],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/utils/types/jest.config.js",
+            "passWithNoTests": true
+          }
+        }
+      }
+    },
     "bulldozer-client": {
       "projectType": "application",
       "root": "apps/bulldozer-client",
@@ -769,53 +819,6 @@
               "libs/bulldozer/shell/src/**/*.ts",
               "libs/bulldozer/shell/src/**/*.html"
             ]
-          }
-        }
-      }
-    },
-    "code-file-manager": {
-      "projectType": "library",
-      "root": "libs/code-file-manager",
-      "sourceRoot": "libs/code-file-manager/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/code-file-manager"],
-          "options": {
-            "jestConfig": "libs/code-file-manager/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/code-file-manager/src/**/*.ts",
-              "libs/code-file-manager/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
-    "code-generator": {
-      "root": "libs/code-generator",
-      "sourceRoot": "libs/code-generator/src",
-      "projectType": "library",
-      "targets": {
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "outputs": ["{options.outputFile}"],
-          "options": {
-            "lintFilePatterns": ["libs/code-generator/**/*.ts"]
-          }
-        },
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": ["coverage/libs/code-generator"],
-          "options": {
-            "jestConfig": "libs/code-generator/jest.config.js",
-            "passWithNoTests": true
           }
         }
       }

@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/data-access';
+import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-list-accounts',
@@ -126,17 +126,16 @@ import { PopulatedInstructionAccount } from '@heavy-duty/bulldozer/data-access';
 })
 export class ListAccountsComponent {
   @Input() connected: boolean | null = null;
-  @Input() accounts: PopulatedInstructionAccount[] | null = null;
-  @Output() updateBasicAccount =
-    new EventEmitter<PopulatedInstructionAccount>();
+  @Input() accounts: InstructionAccountExtended[] | null = null;
+  @Output() updateBasicAccount = new EventEmitter<InstructionAccountExtended>();
   @Output() updateSignerAccount =
-    new EventEmitter<PopulatedInstructionAccount>();
+    new EventEmitter<InstructionAccountExtended>();
   @Output() updateProgramAccount =
-    new EventEmitter<PopulatedInstructionAccount>();
-  @Output() updateAccount = new EventEmitter<PopulatedInstructionAccount>();
+    new EventEmitter<InstructionAccountExtended>();
+  @Output() updateAccount = new EventEmitter<InstructionAccountExtended>();
   @Output() deleteAccount = new EventEmitter<string>();
 
-  onUpdateAccount(account: PopulatedInstructionAccount) {
+  onUpdateAccount(account: InstructionAccountExtended) {
     switch (account.data.kind.id) {
       case 0:
         return this.updateBasicAccount.emit(account);

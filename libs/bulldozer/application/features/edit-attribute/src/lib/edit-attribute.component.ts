@@ -2,7 +2,7 @@ import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
+import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-edit-attribute',

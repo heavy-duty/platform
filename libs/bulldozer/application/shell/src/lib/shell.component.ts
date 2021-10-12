@@ -13,7 +13,7 @@ import { ApplicationShellStore } from './shell.store';
 @Component({
   selector: 'bd-application-shell',
   template: `
-    <bd-navigation>
+    <bd-navigation (downloadCode)="onDownloadCode()">
       <router-outlet></router-outlet>
     </bd-navigation>
   `,
@@ -44,5 +44,9 @@ export class ApplicationShellComponent implements OnInit {
         this._walletStore.error$
       ).pipe(isNotNullOrUndefined)
     );
+  }
+
+  onDownloadCode() {
+    this._applicationShellStore.downloadCode();
   }
 }

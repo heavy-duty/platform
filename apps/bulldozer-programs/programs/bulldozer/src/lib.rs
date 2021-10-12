@@ -1,10 +1,10 @@
 use anchor_lang::prelude::*;
 
-pub mod collections;
-pub mod enums;
-pub mod errors;
+mod collections;
+mod enums;
+mod errors;
 mod instructions;
-pub mod utils;
+mod utils;
 
 use instructions::*;
 

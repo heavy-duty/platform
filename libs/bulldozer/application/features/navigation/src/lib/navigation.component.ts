@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import {
   ApplicationStore,
   CollectionStore,
@@ -8,7 +13,7 @@ import {
   Application,
   Collection,
   Instruction,
-} from '@heavy-duty/bulldozer/data-access';
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 import { NavigationStore } from './navigation.store';
 
@@ -54,10 +59,14 @@ import { NavigationStore } from './navigation.store';
           </div>
           <mat-nav-list togglePosition="afer">
             <div class="w-full mb-6 flex justify-center items-center">
-              <bd-download-code [template]="rustCode$ | async">
+              <button
+                *ngIf="application$ | ngrxPush"
+                mat-button
+                color="accent"
+                (click)="onDownload()"
+              >
                 Download code
-                <mat-icon>file_download</mat-icon>
-              </bd-download-code>
+              </button>
             </div>
           </mat-nav-list>
           <bd-application-selector
@@ -111,6 +120,7 @@ import { NavigationStore } from './navigation.store';
   providers: [NavigationStore],
 })
 export class NavigationComponent {
+  @Output() downloadCode = new EventEmitter();
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
@@ -118,7 +128,6 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;
-  readonly rustCode$ = this._applicationStore.rustCode$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
@@ -161,5 +170,9 @@ export class NavigationComponent {
 
   onDeleteInstruction(instructionId: string) {
     this._instructionStore.deleteInstruction(instructionId);
+  }
+
+  onDownload() {
+    this.downloadCode.emit();
   }
 }

@@ -6,35 +6,44 @@ import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/featu
 import {
   Collection,
   CollectionAttribute,
-  ProgramStore,
-} from '@heavy-duty/bulldozer/data-access';
-import { generateCollectionRustCode } from '@heavy-duty/code-generator';
+} from '@heavy-duty/bulldozer/application/utils/types';
+import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  Observable,
+  of,
+  Subject,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
+  map,
   switchMap,
   tap,
+  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
 import { ApplicationStore } from './application.store';
 
-interface ViewModel {
-  collectionId: string | null;
-  collection: Collection | null;
-  collections: Collection[];
+export interface CollectionExtension {
   attributes: CollectionAttribute[];
 }
 
-const initialState = {
+interface ViewModel {
+  collectionId: string | null;
+  collections: (Collection & CollectionExtension)[];
+}
+
+const initialState: ViewModel = {
   collectionId: null,
-  collection: null,
   collections: [],
-  attributes: [],
 };
 
 @Injectable()
@@ -45,13 +54,19 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly reload$ = this._reload.asObservable();
   readonly collections$ = this.select(({ collections }) => collections);
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
-  readonly collection$ = this.select(({ collection }) => collection);
-  readonly attributes$ = this.select(({ attributes }) => attributes);
+  readonly collection$ = this.select(
+    this.collections$,
+    this.collectionId$,
+    (collections, collectionId) =>
+      collections.find(({ id }) => id === collectionId) || null
+  );
+  readonly attributes$ = this.select(
+    this.collection$,
+    (collection) => collection && collection.attributes
+  );
   readonly rustCode$ = this.select(
     this.collection$,
-    this.attributes$,
-    (collection, attributes) =>
-      collection && generateCollectionRustCode(collection, attributes)
+    (collection) => collection && generateCollectionCode(collection)
   );
 
   constructor(
@@ -69,32 +84,24 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       this.reload$,
     ]).pipe(
       switchMap(([applicationId]) =>
-        this._programStore.getCollections(applicationId).pipe(
-          tapResponse(
-            (collections) => this.patchState({ collections }),
-            (error) => this._error.next(error)
-          )
+        this._programStore.getCollections(applicationId)
+      ),
+      switchMap((collections) =>
+        from(collections).pipe(
+          switchMap((collection) =>
+            this._programStore.getCollectionAttributes(collection.id).pipe(
+              map((attributes) => ({
+                ...collection,
+                attributes,
+              }))
+            )
+          ),
+          toArray()
         )
-      )
-    )
-  );
-
-  readonly loadCollection = this.effect(() =>
-    combineLatest([
-      this.collectionId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([collectionId]) =>
-        combineLatest([
-          this._programStore.getCollection(collectionId),
-          this._programStore.getCollectionAttributes(collectionId),
-        ]).pipe(
-          tapResponse(
-            ([collection, attributes]) =>
-              this.patchState({ collection, attributes }),
-            (error) => this._error.next(error)
-          )
-        )
+      ),
+      tapResponse(
+        (collections) => this.patchState({ collections }),
+        (error) => this._error.next(error)
       )
     )
   );

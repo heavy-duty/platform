@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Collection } from '@heavy-duty/bulldozer/data-access';
+import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-collection-selector',

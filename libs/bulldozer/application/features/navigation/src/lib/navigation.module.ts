@@ -20,8 +20,6 @@ import { CollectionSelectorComponent } from './collection-selector.component';
 import { InstructionSelectorComponent } from './instruction-selector.component';
 import { NavigationComponent } from './navigation.component';
 
-import { CodeFileManagerModule } from '@heavy-duty/code-file-manager';
-
 @NgModule({
   imports: [
     CommonModule,
@@ -39,7 +37,6 @@ import { CodeFileManagerModule } from '@heavy-duty/code-file-manager';
     WalletUiModule,
     ObscureAddressModule,
     DarkThemeModule,
-    CodeFileManagerModule,
   ],
   declarations: [
     NavigationComponent,

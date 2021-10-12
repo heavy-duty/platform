@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionArgument } from '@heavy-duty/bulldozer/data-access';
+import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-list-arguments',
