@@ -1,4 +1,4 @@
-export const __rust_template = ` // THIS TEMPLETE IS DEPRECATED AND MUST BE UPDATED 
+export const __full_program = ` // THIS TEMPLETE IS DEPRECATED AND MUST BE UPDATED 
 // WITH THE OTHERS TEMPLATES DO NOT USE.
 
 use anchor_lang::prelude::*;

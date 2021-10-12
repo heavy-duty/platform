@@ -1,15 +1,8 @@
-export const __mod_program_template = `
-mod application;
-mod collection;
-mod collection_attribute;
-mod instruction;
-mod instruction_account;
-mod instruction_argument;
+export const __mod_program = `{{#each collectionOrInstruction}}
+mod {{this.name}};
+{{/each}}
 
-pub use application::*;
-pub use collection::*;
-pub use collection_attribute::*;
-pub use instruction::*;
-pub use instruction_account::*;
-pub use instruction_argument::*;
+{{#each collectionOrInstruction}}
+pub use {{this.name}}::*;
+{{/each}}
 `;

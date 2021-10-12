@@ -3,6 +3,7 @@ import * as Handlebars from 'handlebars';
 import {
   ICollection,
   ICollectionAttribute,
+  IFormatedFullProgram,
   IGenerateRustCode,
   IInstrucction,
   IInstrucctionArgument,
@@ -37,9 +38,7 @@ Handlebars.registerHelper('gt', function (this: any, a, b, options) {
 //
 
 // TODO: Move interfaces
-const formatProgramMetadata = (
-  metadata: IMetadata
-): { collections: string[]; instructions: string[] } => {
+const formatProgramMetadata = (metadata: IMetadata): IFormatedFullProgram => {
   try {
     const formatedCollection: {
       collection: ICollection;
@@ -75,15 +74,43 @@ const formatProgramMetadata = (
       collections: formatedCollection,
       instructions: formatedInstructions,
     };
-    console.log(formatedInstructions);
+
     return {
-      collections: formatedCollection.map(({ collection, attributes }) =>
-        generateCollectionRustCode(collection, attributes)
-      ),
+      collections: formatedCollection.map(({ collection, attributes }) => ({
+        template: generateCollectionRustCode(collection, attributes),
+        fileName: formatName(collection.data.name)?.snakeCase + '.rs',
+      })),
       instructions: formatedInstructions.map(
-        ({ instruction, iarguments, accounts }) =>
-          generateInstructionsRustCode(instruction, iarguments, accounts)
+        ({ instruction, iarguments, accounts }) => ({
+          template: generateInstructionsRustCode(
+            instruction,
+            iarguments,
+            accounts
+          ),
+          fileName: formatName(instruction.data.name)?.snakeCase + '.rs',
+        })
       ),
+      collectionsMod: {
+        template: generateRustCode(
+          {
+            collectionOrInstruction: formatedCollection.map((collectionInfo) =>
+              formatName(collectionInfo.collection.data.name)
+            ),
+          },
+          getTemplateByType('mod')
+        ),
+      },
+      instructionsMod: {
+        template: generateRustCode(
+          {
+            collectionOrInstruction: formatedInstructions.map(
+              (instrucctionInfo) =>
+                formatName(instrucctionInfo.instruction.data.name)
+            ),
+          },
+          getTemplateByType('mod')
+        ),
+      },
     };
   } catch (e) {
     throw new Error(e as string);
@@ -253,8 +280,8 @@ export const generateProgramRustCode = (rawMetadata: any) => {
       instructionArguments: rawMetadata[4],
       instructionAccounts: rawMetadata[5],
     };
-    console.log(metadata);
     const formatedProgram = formatProgramMetadata(metadata);
+    console.log(formatedProgram);
 
     return formatedProgram;
   } catch (e) {

@@ -1,4 +1,6 @@
 import { Component, Input } from '@angular/core';
+import { IFormatedFullProgram } from '@heavy-duty/code-generator';
+
 import { CodeFileManagerService } from './code-file-manager.service';
 
 @Component({
@@ -11,8 +13,7 @@ import { CodeFileManagerService } from './code-file-manager.service';
   styles: [],
 })
 export class DownloadCodeComponent {
-  @Input() template: { collections: string[]; instructions: string[] } | null =
-    null;
+  @Input() template: IFormatedFullProgram | null = null;
 
   constructor(private readonly _codeFileManagerSvc: CodeFileManagerService) {}
 

@@ -3,7 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { generateProgramRustCode } from '@heavy-duty/code-generator';
+import {
+  generateProgramRustCode,
+  IFormatedFullProgram,
+} from '@heavy-duty/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
@@ -13,10 +16,7 @@ interface ViewModel {
   applicationId: string | null;
   applications: Application[];
   error: unknown | null;
-  rustCodeArray: {
-    collections: string[];
-    instructions: string[];
-  } | null;
+  rustCodeArray: IFormatedFullProgram | null;
 }
 
 const initialState = {

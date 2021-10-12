@@ -1,38 +1,32 @@
 import { Injectable } from '@angular/core';
-import * as JSZip from 'jszip';
+import { IFormatedFullProgram } from '@heavy-duty/code-generator';
 import { saveAs } from 'file-saver';
+import * as JSZip from 'jszip';
 
 @Injectable()
 export class CodeFileManagerService {
-  // zipFile: JSZip = new JSZip();
-
-  constructor() {
-    console.log(JSZip());
-  }
-
-  generateSampleFile(templates: {
-    collections: string[];
-    instructions: string[];
-  }) {
+  generateSampleFile(templates: IFormatedFullProgram) {
     console.log(templates);
     const zip = new JSZip();
-    zip.file('prgoram.rs', 'data');
+    zip.file('lib.rs', 'data');
 
     // Creating collection folder and files
     const collectionFolder = zip.folder('collections');
 
-    templates.collections.forEach((template, index) => {
-      collectionFolder?.file('collection_' + index + '.rs', template);
+    templates.collections.forEach((collection) => {
+      collectionFolder?.file(collection.fileName, collection.template);
     });
+    collectionFolder?.file('mod.rs', templates.collectionsMod.template);
 
     // Creating instructions folder and files
     const instructionsFolder = zip.folder('instrucctions');
-    templates.instructions.forEach((template, index) => {
-      instructionsFolder?.file('instruction_' + index + '.rs', template);
+    templates.instructions.forEach((instruction) => {
+      instructionsFolder?.file(instruction.fileName, instruction.template);
     });
+    instructionsFolder?.file('mod.rs', templates.instructionsMod.template);
 
+    // Save a download file
     zip.generateAsync({ type: 'blob' }).then(function (content) {
-      // see FileSaver.js
       saveAs(content, 'program.code.zip');
     });
   }

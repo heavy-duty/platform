@@ -1,4 +1,4 @@
-export const __collections_template = `use anchor_lang::prelude::*;
+export const __collections_program = `use anchor_lang::prelude::*;
 
 #[account]
 pub struct {{collection.name.pascalCase}} {
