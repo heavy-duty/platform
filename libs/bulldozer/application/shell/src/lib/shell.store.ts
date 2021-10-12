@@ -3,8 +3,15 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
 import {
+  ApplicationActionTypes,
   ApplicationStore,
+  CollectionActions,
+  CollectionActionTypes,
+  CollectionDeleted,
   CollectionStore,
+  InstructionActions,
+  InstructionActionTypes,
+  InstructionDeleted,
   InstructionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
@@ -15,14 +22,7 @@ import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';
 import { WalletError } from '@solana/wallet-adapter-base';
 import { merge, Observable, of, Subject } from 'rxjs';
-import {
-  concatMap,
-  filter,
-  map,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { concatMap, filter, map, tap, withLatestFrom } from 'rxjs/operators';
 
 export type TabKind = 'collections' | 'instructions';
 
@@ -123,6 +123,26 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     )
   );
 
+  readonly closeTabOnCollectionDelete = this.effect(() =>
+    this._collectionStore.events$.pipe(
+      filter<CollectionActions, CollectionDeleted>(
+        (event): event is CollectionDeleted =>
+          event.type === CollectionActionTypes.CollectionDeleted
+      ),
+      tap(({ payload }) => this.closeTab(payload))
+    )
+  );
+
+  readonly closeTabOnInstructionDelete = this.effect(() =>
+    this._instructionStore.events$.pipe(
+      filter<InstructionActions, InstructionDeleted>(
+        (event): event is InstructionDeleted =>
+          event.type === InstructionActionTypes.InstructionDeleted
+      ),
+      tap(({ payload }) => this.closeTab(payload))
+    )
+  );
+
   readonly closeTabsOnApplicationChange = this.effect(() =>
     this._applicationStore.applicationId$.pipe(
       isNotNullOrUndefined,
@@ -189,13 +209,50 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
       this._instructionStore.error$,
       this._walletStore.error$
     ).pipe(
-      switchMap((error) =>
-        this._matSnackBar
-          .open(this.getErrorMessage(error), 'Close', {
-            panelClass: `error-snackbar`,
-          })
-          .afterDismissed()
+      tap((error) =>
+        this._matSnackBar.open(this.getErrorMessage(error), 'Close', {
+          panelClass: `error-snackbar`,
+        })
       )
+    )
+  );
+
+  readonly notifyApplicationSuccess = this.effect(() =>
+    this._applicationStore.events$.pipe(
+      filter((event) => event.type !== ApplicationActionTypes.ApplicationInit),
+      tap((event) => {
+        this._applicationStore.reload();
+        this._matSnackBar.open(event.type, 'Close', {
+          panelClass: `success-snackbar`,
+          duration: 3000,
+        });
+      })
+    )
+  );
+
+  readonly notifyCollectionSuccess = this.effect(() =>
+    this._collectionStore.events$.pipe(
+      filter((event) => event.type !== CollectionActionTypes.CollectionInit),
+      tap((event) => {
+        this._collectionStore.reload();
+        this._matSnackBar.open(event.type, 'Close', {
+          panelClass: `success-snackbar`,
+          duration: 3000,
+        });
+      })
+    )
+  );
+
+  readonly notifyInstructionSuccess = this.effect(() =>
+    this._instructionStore.events$.pipe(
+      filter((event) => event.type !== InstructionActionTypes.InstructionInit),
+      tap((event) => {
+        this._instructionStore.reload();
+        this._matSnackBar.open(event.type, 'Close', {
+          panelClass: `success-snackbar`,
+          duration: 3000,
+        });
+      })
     )
   );
 

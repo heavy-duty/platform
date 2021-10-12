@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { EditBasicAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-basic-account';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
@@ -36,6 +35,20 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
+import {
+  InstructionAccountCreated,
+  InstructionAccountDeleted,
+  InstructionAccountUpdated,
+  InstructionActions,
+  InstructionArgumentCreated,
+  InstructionArgumentDeleted,
+  InstructionArgumentUpdated,
+  InstructionBodyUpdated,
+  InstructionCreated,
+  InstructionDeleted,
+  InstructionInit,
+  InstructionUpdated,
+} from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
 
@@ -55,6 +68,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly error$ = this._error.asObservable();
   private readonly _reload = new BehaviorSubject(null);
   readonly reload$ = this._reload.asObservable();
+  private readonly _events = new BehaviorSubject<InstructionActions>(
+    new InstructionInit()
+  );
+  readonly events$ = this._events.asObservable();
   readonly instructions$ = this.select(({ instructions }) => instructions);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(
@@ -82,7 +99,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _matSnackBar: MatSnackBar,
     private readonly _programStore: ProgramStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore
@@ -185,13 +201,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             concatMap(([{ name }, applicationId]) =>
               this._programStore.createInstruction(applicationId, name).pipe(
                 tapResponse(
-                  () => {
-                    this._reload.next(null);
-                    this._matSnackBar.open('Instruction created', 'Close', {
-                      panelClass: 'success-snackbar',
-                      duration: 3000,
-                    });
-                  },
+                  () => this._events.next(new InstructionCreated()),
                   (error) => this._error.next(error)
                 )
               )
@@ -213,13 +223,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               concatMap(({ name }) =>
                 this._programStore.updateInstruction(instruction.id, name).pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open('Instruction updated', 'Close', {
-                        panelClass: 'success-snackbar',
-                        duration: 3000,
-                      });
-                    },
+                    () =>
+                      this._events.next(new InstructionUpdated(instruction.id)),
                     (error) => this._error.next(error)
                   )
                 )
@@ -242,13 +247,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap(({ id, data: { body } }) =>
         this._programStore.updateInstructionBody(id, body).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Instruction body updated', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionBodyUpdated(id)),
             (error) => this._error.next(error)
           )
         )
@@ -262,13 +261,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         concatMap((instructionId) =>
           this._programStore.deleteInstruction(instructionId).pipe(
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._matSnackBar.open('Instruction deleted', 'Close', {
-                  panelClass: 'success-snackbar',
-                  duration: 3000,
-                });
-              },
+              () => this._events.next(new InstructionDeleted(instructionId)),
               (error) => this._error.next(error)
             )
           )
@@ -305,13 +298,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open('Argument created', 'Close', {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        });
-                      },
+                      () => this._events.next(new InstructionArgumentCreated()),
                       (error) => this._error.next(error)
                     )
                   )
@@ -343,13 +330,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open('Argument updated', 'Close', {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        });
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionArgumentUpdated(argument.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -364,13 +348,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap((argumentId) =>
         this._programStore.deleteInstructionArgument(argumentId).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Argument deleted', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionArgumentDeleted(argumentId)),
             (error) => this._error.next(error)
           )
         )
@@ -383,13 +361,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap((accountId) =>
         this._programStore.deleteInstructionAccount(accountId).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Account deleted', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionAccountDeleted(accountId)),
             (error) => this._error.next(error)
           )
         )
@@ -438,17 +410,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Basic account created',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () => this._events.next(new InstructionAccountCreated()),
                       (error) => this._error.next(error)
                     )
                   )
@@ -492,17 +454,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Basic account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -540,17 +495,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open(
-                        'Signer account created',
-                        'Close',
-                        {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        }
-                      );
-                    },
+                    () => this._events.next(new InstructionAccountCreated()),
                     (error) => this._error.next(error)
                   )
                 )
@@ -586,17 +531,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Signer account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -643,17 +581,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open(
-                        'Program account created',
-                        'Close',
-                        {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        }
-                      );
-                    },
+                    () => this._events.next(new InstructionAccountCreated()),
                     (error) => this._error.next(error)
                   )
                 )
@@ -697,17 +625,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Program account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
