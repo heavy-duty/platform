@@ -8,13 +8,11 @@ export const formatCollection = (collection: CollectionExtended) => ({
     collection.attributes &&
     collection.attributes
       .filter((attribute) => attribute.data.collection === collection.id)
-      .map((attribute) => {
-        return {
-          id: attribute.id,
-          data: {
-            ...attribute.data,
-            name: formatName(attribute.data.name),
-          },
-        };
-      }),
+      .map((attribute) => ({
+        id: attribute.id,
+        data: {
+          ...attribute.data,
+          name: formatName(attribute.data.name),
+        },
+      })),
 });

@@ -5,11 +5,9 @@ import {
   toSnakeCase,
 } from '../utils';
 
-export const formatName = (str: string): FormattedName => {
-  return {
-    snakeCase: toSnakeCase(str),
-    normalCase: str,
-    camelCase: toCamelCase(str),
-    pascalCase: toPascalCase(str),
-  };
-};
+export const formatName = (str: string): FormattedName => ({
+  snakeCase: toSnakeCase(str),
+  normalCase: str,
+  camelCase: toCamelCase(str),
+  pascalCase: toPascalCase(str),
+});

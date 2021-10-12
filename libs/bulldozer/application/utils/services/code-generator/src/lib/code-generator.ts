@@ -13,7 +13,6 @@ import {
   CollectionExtended,
   InstructionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
-import { Console } from 'console';
 
 // TODO: Move later
 registerHandleBarsHelpers();
@@ -59,10 +58,9 @@ export const generateApplicationCode = (
   application: Application,
   instructions: InstructionExtended[]
 ) => {
-  console.log(instructions);
   return generateCode(
     {
-      program: {
+      application: {
         id: application.id,
         name: formatName(application.data.name),
         instructions: instructions.map((instruction) => ({
@@ -112,42 +110,70 @@ export const generateApplicationMetadata = (
   };
 };
 
-export const generateApplicationZip = (templates: ApplicationMetadata) => {
+export const generateApplicationZip = (
+  application: Application,
+  metadata: ApplicationMetadata
+) => {
   const zip = new JSZip();
+  const applicationName = formatName(application.data.name);
+
+  zip.file('.gitignore', getTemplateByType('gitignore'));
+  zip.file('.prettierrc.json', getTemplateByType('prettierrc'));
+  zip.file(
+    'Anchor.toml',
+    generateCode({ applicationName }, getTemplateByType('anchor'))
+  );
+  zip.file('Cargo.toml', getTemplateByType('cargo'));
+  zip.file(
+    'README.md',
+    generateCode({ applicationName }, getTemplateByType('readme'))
+  );
+  zip.file('tsconfig.json', getTemplateByType('tsconfig'));
 
   // Creating migrations folder and file
   const migrationsFolder = zip.folder('migrations');
   migrationsFolder?.file('deploy.js', getTemplateByType('migrations.deploy'));
 
+  // Creating tests folder and file
+  const testsFolder = zip.folder('tests');
+  testsFolder?.file(
+    `${metadata.application.fileName}.spec.js`,
+    getTemplateByType('tests.deploy')
+  );
+
   // Creating program folder and adding main files
-  const programFolderDir = 'programs/' + templates.application.fileName;
+  const programFolderDir = 'programs/' + metadata.application.fileName;
   const programFolder = zip.folder(programFolderDir);
-  programFolder?.file('xargo.js', getTemplateByType('program.xargo'));
+  programFolder?.file('Xargo.toml', getTemplateByType('program.xargo'));
+  programFolder?.file(
+    'Cargo.toml',
+    generateCode({ applicationName }, getTemplateByType('program.cargo'))
+  );
 
   const programFolderSrcDir = programFolderDir + '/src';
   const programFolderSrc = zip.folder(programFolderSrcDir);
-  programFolderSrc?.file('lib.rs', templates.application.template);
+  programFolderSrc?.file('lib.rs', metadata.application.template);
 
   // Creating collection folder and files
   const collectionFolder = zip.folder(programFolderSrcDir + '/collections');
 
-  templates.collections.forEach((collection) => {
+  metadata.collections.forEach((collection) => {
     collectionFolder?.file(collection.fileName + '.rs', collection.template);
   });
-  collectionFolder?.file('mod.rs', templates.collectionsMod.template);
+  collectionFolder?.file('mod.rs', metadata.collectionsMod.template);
 
   // Creating instructions folder and files
   const instructionsFolder = zip.folder(programFolderSrcDir + '/instructions');
-  templates.instructions.forEach((instruction) => {
+  metadata.instructions.forEach((instruction) => {
     instructionsFolder?.file(
       instruction.fileName + '.rs',
       instruction.template
     );
   });
-  instructionsFolder?.file('mod.rs', templates.instructionsMod.template);
+  instructionsFolder?.file('mod.rs', metadata.instructionsMod.template);
 
   // Save a download file
   zip.generateAsync({ type: 'blob' }).then(function (content) {
-    saveAs(content, templates.application.fileName + '-program.zip');
+    saveAs(content, metadata.application.fileName + '-program.zip');
   });
 };

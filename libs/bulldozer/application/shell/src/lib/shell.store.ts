@@ -268,16 +268,17 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
           map(
             ([, application, collections, instructions]) =>
               application &&
-              generateApplicationMetadata(
+              generateApplicationZip(
                 application,
-                collections,
-                instructions
+                generateApplicationMetadata(
+                  application,
+                  collections,
+                  instructions
+                )
               )
           )
         )
-      ),
-      isNotNullOrUndefined,
-      tap((applicationMetadata) => generateApplicationZip(applicationMetadata))
+      )
     )
   );
 
