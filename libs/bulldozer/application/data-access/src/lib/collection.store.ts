@@ -120,6 +120,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .open(EditCollectionComponent)
           .afterClosed()
           .pipe(
+            filter((data) => data),
             withLatestFrom(
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
