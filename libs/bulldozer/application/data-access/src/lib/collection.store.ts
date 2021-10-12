@@ -24,6 +24,7 @@ import {
   exhaustMap,
   filter,
   map,
+  mergeMap,
   switchMap,
   tap,
   toArray,
@@ -84,16 +85,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       this.reload$,
     ]).pipe(
       switchMap(([applicationId]) =>
-        this._programStore.getCollections(applicationId)
-      ),
-      switchMap((collections) =>
-        from(collections).pipe(
-          switchMap((collection) =>
-            this._programStore.getCollectionAttributes(collection.id).pipe(
-              map((attributes) => ({
-                ...collection,
-                attributes,
-              }))
+        this._programStore.getCollections(applicationId).pipe(
+          concatMap((collections) =>
+            from(collections).pipe(
+              mergeMap((collection) =>
+                this._programStore.getCollectionAttributes(collection.id).pipe(
+                  map((attributes) => ({
+                    ...collection,
+                    attributes,
+                  }))
+                )
+              )
             )
           ),
           toArray()
