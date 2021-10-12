@@ -4,6 +4,8 @@ import {
   __instructions_context_program,
   __instructions_handler_program,
   __mod_program,
+  __migrations_deploy,
+  __program_xargo,
 } from '../templates';
 
 export const getTemplateByType = (type: string): string => {
@@ -18,6 +20,10 @@ export const getTemplateByType = (type: string): string => {
       return __instructions_context_program;
     case 'mod':
       return __mod_program;
+    case 'migrations.deploy':
+      return __migrations_deploy;
+    case 'program.xargo':
+      return __program_xargo;
     default:
       return __full_program;
   }

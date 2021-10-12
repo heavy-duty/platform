@@ -15,7 +15,7 @@ export interface CodeGeneratorParameters {
 }
 
 export interface ApplicationMetadata {
-  application: { template: string };
+  application: { template: string; fileName: string };
   collections: { template: string; fileName: string }[];
   instructions: { template: string; fileName: string }[];
   collectionsMod: { template: string };

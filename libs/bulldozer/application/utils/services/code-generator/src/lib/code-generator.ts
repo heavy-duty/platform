@@ -93,14 +93,15 @@ export const generateApplicationMetadata = (
   return {
     application: {
       template: generateApplicationCode(application, instructions),
+      fileName: formatName(application.data.name).camelCase,
     },
     collections: collections.map((collection) => ({
       template: generateCollectionCode(collection),
-      fileName: formatName(collection.data.name).snakeCase + '.rs',
+      fileName: formatName(collection.data.name).snakeCase,
     })),
     instructions: instructions.map((instruction) => ({
       template: generateInstructionCode(instruction),
-      fileName: formatName(instruction.data.name).snakeCase + '.rs',
+      fileName: formatName(instruction.data.name).snakeCase,
     })),
     collectionsMod: {
       template: generateModCode(collections),
@@ -113,25 +114,40 @@ export const generateApplicationMetadata = (
 
 export const generateApplicationZip = (templates: ApplicationMetadata) => {
   const zip = new JSZip();
-  zip.file('lib.rs', templates.application.template);
+
+  // Creating migrations folder and file
+  const migrationsFolder = zip.folder('migrations');
+  migrationsFolder?.file('deploy.js', getTemplateByType('migrations.deploy'));
+
+  // Creating program folder and adding main files
+  const programFolderDir = 'programs/' + templates.application.fileName;
+  const programFolder = zip.folder(programFolderDir);
+  programFolder?.file('xargo.js', getTemplateByType('program.xargo'));
+
+  const programFolderSrcDir = programFolderDir + '/src';
+  const programFolderSrc = zip.folder(programFolderSrcDir);
+  programFolderSrc?.file('lib.rs', templates.application.template);
 
   // Creating collection folder and files
-  const collectionFolder = zip.folder('collections');
+  const collectionFolder = zip.folder(programFolderSrcDir + '/collections');
 
   templates.collections.forEach((collection) => {
-    collectionFolder?.file(collection.fileName, collection.template);
+    collectionFolder?.file(collection.fileName + '.rs', collection.template);
   });
   collectionFolder?.file('mod.rs', templates.collectionsMod.template);
 
   // Creating instructions folder and files
-  const instructionsFolder = zip.folder('instructions');
+  const instructionsFolder = zip.folder(programFolderSrcDir + '/instructions');
   templates.instructions.forEach((instruction) => {
-    instructionsFolder?.file(instruction.fileName, instruction.template);
+    instructionsFolder?.file(
+      instruction.fileName + '.rs',
+      instruction.template
+    );
   });
   instructionsFolder?.file('mod.rs', templates.instructionsMod.template);
 
   // Save a download file
   zip.generateAsync({ type: 'blob' }).then(function (content) {
-    saveAs(content, 'program.code.zip');
+    saveAs(content, templates.application.fileName + '-program.zip');
   });
 };
