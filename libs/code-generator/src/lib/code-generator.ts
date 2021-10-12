@@ -40,21 +40,14 @@ Handlebars.registerHelper('gt', function (this: any, a, b, options) {
 // TODO: Move interfaces
 const formatProgramMetadata = (metadata: IMetadata): IFormatedFullProgram => {
   try {
-    const formatedCollection: {
-      collection: ICollection;
-      attributes: ICollectionAttribute[];
-    }[] = metadata.collections.map((collection) => ({
+    const formatedCollection = metadata.collections.map((collection) => ({
       collection: collection,
       attributes: metadata.collectionAttributes.filter(
         (attribute) => attribute.data.collection === collection.id
       ),
     }));
 
-    const formatedInstructions: {
-      instruction: IInstrucction;
-      iarguments: IInstrucctionArgument[];
-      accounts: IInstructionAccount[];
-    }[] = metadata.instructions.map((instruction) => ({
+    const formatedInstructions = metadata.instructions.map((instruction) => ({
       instruction: instruction,
       iarguments: metadata.instructionArguments.filter(
         (argument) => argument.data.instruction === instruction.id
@@ -68,14 +61,35 @@ const formatProgramMetadata = (metadata: IMetadata): IFormatedFullProgram => {
       throw new Error('No application metadata given.');
     }
 
-    const formatedMetadata = {
-      id: metadata.application.id,
-      name: formatName(metadata.application.data.name),
-      collections: formatedCollection,
-      instructions: formatedInstructions,
-    };
-
     return {
+      application: {
+        template: generateRustCode(
+          {
+            program: {
+              id: metadata.application.id,
+              name: formatName(metadata.application.data.name),
+              instructions: formatedInstructions.map((formatedInstruction) => ({
+                ...formatedInstruction,
+                instruction: {
+                  ...formatedInstruction.instruction,
+                  data: {
+                    ...formatedInstruction.instruction.data,
+                    name: formatName(formatedInstruction.instruction.data.name),
+                  },
+                },
+                iarguments: formatedInstruction.iarguments.map((iargument) => ({
+                  ...iargument,
+                  data: {
+                    ...iargument.data,
+                    name: formatName(iargument.data.name),
+                  },
+                })),
+              })),
+            },
+          },
+          getTemplateByType('full_program')
+        ),
+      },
       collections: formatedCollection.map(({ collection, attributes }) => ({
         template: generateCollectionRustCode(collection, attributes),
         fileName: formatName(collection.data.name)?.snakeCase + '.rs',

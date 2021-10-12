@@ -3,8 +3,5 @@ export const __instructions_handler_program = `pub fn handler(ctx: Context<{{ins
 
     // your code...
 
-
     Ok(())
-}
-
-`;
+}`;

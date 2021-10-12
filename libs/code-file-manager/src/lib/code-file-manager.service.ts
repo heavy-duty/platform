@@ -8,7 +8,7 @@ export class CodeFileManagerService {
   generateSampleFile(templates: IFormatedFullProgram) {
     console.log(templates);
     const zip = new JSZip();
-    zip.file('lib.rs', 'data');
+    zip.file('lib.rs', templates.application.template);
 
     // Creating collection folder and files
     const collectionFolder = zip.folder('collections');

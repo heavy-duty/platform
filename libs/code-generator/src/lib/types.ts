@@ -133,6 +133,7 @@ export interface IGenerateRustCode {
 }
 
 export interface IFormatedFullProgram {
+  application: { template: string };
   collections: { template: string; fileName: string }[];
   instructions: { template: string; fileName: string }[];
   collectionsMod: { template: string };
