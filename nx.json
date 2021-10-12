@@ -54,6 +54,9 @@
     "bulldozer-application-features-edit-program-account": {
       "tags": []
     },
+    "bulldozer-application-features-edit-relation": {
+      "tags": []
+    },
     "bulldozer-application-features-edit-signer-account": {
       "tags": []
     },
