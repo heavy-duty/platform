@@ -528,6 +528,89 @@
         }
       ],
       "args": []
+    },
+    {
+      "name": "createInstructionRelation",
+      "accounts": [
+        {
+          "name": "relation",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "application",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "instruction",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "from",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "to",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "systemProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "updateInstructionRelation",
+      "accounts": [
+        {
+          "name": "relation",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "from",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "to",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "deleteInstructionRelation",
+      "accounts": [
+        {
+          "name": "relation",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "authority",
+          "isMut": false,
+          "isSigner": true
+        }
+      ],
+      "args": []
     }
   ],
   "accounts": [
@@ -725,6 +808,34 @@
             "type": {
               "defined": "AttributeKindModifier"
             }
+          }
+        ]
+      }
+    },
+    {
+      "name": "InstructionRelation",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "publicKey"
+          },
+          {
+            "name": "application",
+            "type": "publicKey"
+          },
+          {
+            "name": "instruction",
+            "type": "publicKey"
+          },
+          {
+            "name": "from",
+            "type": "publicKey"
+          },
+          {
+            "name": "to",
+            "type": "publicKey"
           }
         ]
       }

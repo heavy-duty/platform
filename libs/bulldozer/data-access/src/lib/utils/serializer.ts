@@ -8,6 +8,7 @@ import {
   CollectionAttribute,
   Instruction,
   InstructionArgument,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 interface RawApplication {
@@ -176,6 +177,30 @@ export const InstructionAccountParser = (
       close: account.close && account.close.toBase58(),
       payer: account.payer && account.payer.toBase58(),
       space: account.space,
+    },
+  };
+};
+
+interface RawInstructionRelation {
+  authority: PublicKey;
+  application: PublicKey;
+  instruction: PublicKey;
+  from: PublicKey;
+  to: PublicKey;
+}
+
+export const InstructionRelationParser = (
+  publicKey: PublicKey,
+  account: RawInstructionRelation
+): InstructionRelation => {
+  return {
+    id: publicKey.toBase58(),
+    data: {
+      authority: account.authority.toBase58(),
+      application: account.application.toBase58(),
+      instruction: account.instruction.toBase58(),
+      from: account.from.toBase58(),
+      to: account.to.toBase58(),
     },
   };
 };

@@ -5,7 +5,10 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/utils/types';
+import {
+  InstructionAccountExtended,
+  InstructionRelationExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-list-accounts',
@@ -24,7 +27,7 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
           <mat-list-item
             role="listitem"
             *ngFor="let account of accounts"
-            class="h-20 bg-black bg-opacity-10 mb-2 last:mb-0"
+            class="h-auto bg-black bg-opacity-10 mb-2 last:mb-0 py-2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
@@ -83,6 +86,49 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
                     account.data.payer.id | obscureAddress
                   }})
                 </p>
+                <ng-container
+                  *ngIf="
+                    account.data.relations && account.data.relations.length > 0
+                  "
+                >
+                  <p>Relations</p>
+                  <ul>
+                    <li *ngFor="let relation of account.data.relations">
+                      {{ relation.data.to.data.name }} ({{
+                        relation.data.to.id | obscureAddress
+                      }})
+                      <button
+                        mat-icon-button
+                        [attr.aria-label]="
+                          'More options of ' +
+                          relation.data.to.data.name +
+                          ' has one relation'
+                        "
+                        [matMenuTriggerFor]="accountRelationMenu"
+                      >
+                        <mat-icon>more_horiz</mat-icon>
+                      </button>
+                      <mat-menu #accountRelationMenu="matMenu">
+                        <button
+                          mat-menu-item
+                          (click)="onUpdateRelation(relation)"
+                          [disabled]="connected === false"
+                        >
+                          <mat-icon>edit</mat-icon>
+                          <span>Update relation</span>
+                        </button>
+                        <button
+                          mat-menu-item
+                          (click)="onDeleteRelation(relation.id)"
+                          [disabled]="connected === false"
+                        >
+                          <mat-icon>delete</mat-icon>
+                          <span>Delete relation</span>
+                        </button>
+                      </mat-menu>
+                    </li>
+                  </ul>
+                </ng-container>
               </div>
 
               <button
@@ -134,6 +180,8 @@ export class ListAccountsComponent {
     new EventEmitter<InstructionAccountExtended>();
   @Output() updateAccount = new EventEmitter<InstructionAccountExtended>();
   @Output() deleteAccount = new EventEmitter<string>();
+  @Output() updateRelation = new EventEmitter<InstructionRelationExtended>();
+  @Output() deleteRelation = new EventEmitter<string>();
 
   onUpdateAccount(account: InstructionAccountExtended) {
     switch (account.data.kind.id) {
@@ -150,5 +198,13 @@ export class ListAccountsComponent {
 
   onDeleteAccount(accountId: string) {
     this.deleteAccount.emit(accountId);
+  }
+
+  onUpdateRelation(relation: InstructionRelationExtended) {
+    this.updateRelation.emit(relation);
+  }
+
+  onDeleteRelation(relationId: string) {
+    this.deleteRelation.emit(relationId);
   }
 }

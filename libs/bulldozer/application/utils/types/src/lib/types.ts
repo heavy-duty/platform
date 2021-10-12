@@ -119,6 +119,7 @@ export interface InstructionAccountExtended {
     collection: Collection | null;
     payer: InstructionAccount | null;
     close: InstructionAccount | null;
+    relations: InstructionRelationExtended[];
   };
 }
 

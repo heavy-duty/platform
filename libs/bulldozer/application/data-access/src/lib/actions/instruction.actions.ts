@@ -42,6 +42,22 @@ export class InstructionArgumentDeleted implements Action<string> {
   constructor(public payload: string) {}
 }
 
+export class InstructionRelationCreated implements Action<void> {
+  type = InstructionActionTypes.InstructionRelationCreated;
+}
+
+export class InstructionRelationUpdated implements Action<string> {
+  type = InstructionActionTypes.InstructionRelationUpdated;
+
+  constructor(public payload: string) {}
+}
+
+export class InstructionRelationDeleted implements Action<string> {
+  type = InstructionActionTypes.InstructionRelationDeleted;
+
+  constructor(public payload: string) {}
+}
+
 export class InstructionAccountCreated implements Action<void> {
   type = InstructionActionTypes.InstructionAccountCreated;
 }
@@ -66,6 +82,9 @@ export type InstructionActions =
   | InstructionArgumentCreated
   | InstructionArgumentUpdated
   | InstructionArgumentDeleted
+  | InstructionRelationCreated
+  | InstructionRelationUpdated
+  | InstructionRelationDeleted
   | InstructionAccountCreated
   | InstructionAccountUpdated
   | InstructionAccountDeleted;
