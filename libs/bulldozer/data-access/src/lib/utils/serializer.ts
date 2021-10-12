@@ -1,14 +1,14 @@
 import { utils } from '@project-serum/anchor';
 import { PublicKey } from '@solana/web3.js';
 
-import { InstructionAccount } from '.';
 import {
+  InstructionAccount,
   Application,
   Collection,
   CollectionAttribute,
   Instruction,
   InstructionArgument,
-} from './types';
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 interface RawApplication {
   authority: PublicKey;

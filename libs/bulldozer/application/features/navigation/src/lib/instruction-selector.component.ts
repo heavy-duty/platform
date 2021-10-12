@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Instruction } from '@heavy-duty/bulldozer/data-access';
+import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-instruction-selector',

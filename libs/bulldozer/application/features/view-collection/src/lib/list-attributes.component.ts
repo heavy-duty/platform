@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { CollectionAttribute } from '@heavy-duty/bulldozer/data-access';
+import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-list-attributes',

@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Application } from '@heavy-duty/bulldozer/data-access';
+import { Application } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-application-selector',

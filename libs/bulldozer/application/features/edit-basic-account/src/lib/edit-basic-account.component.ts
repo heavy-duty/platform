@@ -10,8 +10,8 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
-  PopulatedInstructionAccount,
-} from '@heavy-duty/bulldozer/data-access';
+  InstructionAccountExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -199,9 +199,9 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditBasicAccountComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: PopulatedInstructionAccount;
+      account?: InstructionAccountExtended;
       collections: Collection[];
-      accounts: PopulatedInstructionAccount[];
+      accounts: InstructionAccountExtended[];
     }
   ) {}
 

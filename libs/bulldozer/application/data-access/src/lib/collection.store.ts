@@ -1,40 +1,56 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
+import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
   Collection,
   CollectionAttribute,
-  ProgramStore,
-} from '@heavy-duty/bulldozer/data-access';
-import { generateCollectionRustCode } from '@heavy-duty/code-generator';
+  CollectionExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
+import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  Observable,
+  of,
+  Subject,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
+  map,
+  mergeMap,
   switchMap,
   tap,
+  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
+import {
+  CollectionActions,
+  CollectionAttributeCreated,
+  CollectionAttributeDeleted,
+  CollectionAttributeUpdated,
+  CollectionCreated,
+  CollectionDeleted,
+  CollectionInit,
+  CollectionUpdated,
+} from './actions/collection.actions';
 import { ApplicationStore } from './application.store';
 
 interface ViewModel {
   collectionId: string | null;
-  collection: Collection | null;
-  collections: Collection[];
-  attributes: CollectionAttribute[];
+  collections: CollectionExtended[];
 }
 
-const initialState = {
+const initialState: ViewModel = {
   collectionId: null,
-  collection: null,
   collections: [],
-  attributes: [],
 };
 
 @Injectable()
@@ -43,20 +59,29 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly error$ = this._error.asObservable();
   private readonly _reload = new BehaviorSubject(null);
   readonly reload$ = this._reload.asObservable();
+  private readonly _events = new BehaviorSubject<CollectionActions>(
+    new CollectionInit()
+  );
+  readonly events$ = this._events.asObservable();
   readonly collections$ = this.select(({ collections }) => collections);
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
-  readonly collection$ = this.select(({ collection }) => collection);
-  readonly attributes$ = this.select(({ attributes }) => attributes);
+  readonly collection$ = this.select(
+    this.collections$,
+    this.collectionId$,
+    (collections, collectionId) =>
+      collections.find(({ id }) => id === collectionId) || null
+  );
+  readonly attributes$ = this.select(
+    this.collection$,
+    (collection) => collection && collection.attributes
+  );
   readonly rustCode$ = this.select(
     this.collection$,
-    this.attributes$,
-    (collection, attributes) =>
-      collection && generateCollectionRustCode(collection, attributes)
+    (collection) => collection && generateCollectionCode(collection)
   );
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _matSnackBar: MatSnackBar,
     private readonly _programStore: ProgramStore,
     private readonly _applicationStore: ApplicationStore
   ) {
@@ -70,31 +95,24 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     ]).pipe(
       switchMap(([applicationId]) =>
         this._programStore.getCollections(applicationId).pipe(
-          tapResponse(
-            (collections) => this.patchState({ collections }),
-            (error) => this._error.next(error)
-          )
+          concatMap((collections) =>
+            from(collections).pipe(
+              mergeMap((collection) =>
+                this._programStore.getCollectionAttributes(collection.id).pipe(
+                  map((attributes) => ({
+                    ...collection,
+                    attributes,
+                  }))
+                )
+              )
+            )
+          ),
+          toArray()
         )
-      )
-    )
-  );
-
-  readonly loadCollection = this.effect(() =>
-    combineLatest([
-      this.collectionId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([collectionId]) =>
-        combineLatest([
-          this._programStore.getCollection(collectionId),
-          this._programStore.getCollectionAttributes(collectionId),
-        ]).pipe(
-          tapResponse(
-            ([collection, attributes]) =>
-              this.patchState({ collection, attributes }),
-            (error) => this._error.next(error)
-          )
-        )
+      ),
+      tapResponse(
+        (collections) => this.patchState({ collections }),
+        (error) => this._error.next(error)
       )
     )
   );
@@ -113,6 +131,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .open(EditCollectionComponent)
           .afterClosed()
           .pipe(
+            filter((data) => data),
             withLatestFrom(
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
@@ -121,10 +140,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 tapResponse(
                   () => {
                     this._reload.next(null);
-                    this._matSnackBar.open('Collection created', 'Close', {
-                      panelClass: 'success-snackbar',
-                      duration: 3000,
-                    });
+                    this._events.next(new CollectionCreated());
                   },
                   (error) => this._error.next(error)
                 )
@@ -146,13 +162,8 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               concatMap(({ name }) =>
                 this._programStore.updateCollection(collection.id, name).pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open('Collection updated', 'Close', {
-                        panelClass: 'success-snackbar',
-                        duration: 3000,
-                      });
-                    },
+                    () =>
+                      this._events.next(new CollectionUpdated(collection.id)),
                     (error) => this._error.next(error)
                   )
                 )
@@ -167,13 +178,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       concatMap((collectionId) =>
         this._programStore.deleteCollection(collectionId).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Collection deleted', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new CollectionDeleted(collectionId)),
             (error) => this._error.next(error)
           )
         )
@@ -209,13 +214,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open('Attribute created', 'Close', {
-                        panelClass: 'success-snackbar',
-                        duration: 3000,
-                      });
-                    },
+                    () => this._events.next(new CollectionAttributeCreated()),
                     (error) => this._error.next(error)
                   )
                 )
@@ -247,13 +246,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open('Attribute updated', 'Close', {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        });
-                      },
+                      () =>
+                        this._events.next(
+                          new CollectionAttributeUpdated(attribute.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -269,13 +265,8 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         concatMap((attributeId) =>
           this._programStore.deleteCollectionAttribute(attributeId).pipe(
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._matSnackBar.open('Attribute deleted', 'Close', {
-                  panelClass: 'success-snackbar',
-                  duration: 3000,
-                });
-              },
+              () =>
+                this._events.next(new CollectionAttributeDeleted(attributeId)),
               (error) => this._error.next(error)
             )
           )

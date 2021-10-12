@@ -1,48 +1,65 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { EditBasicAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-basic-account';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
 import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
+import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
   Instruction,
+  InstructionAccountExtended,
   InstructionArgument,
-  PopulatedInstructionAccount,
-  ProgramStore,
-} from '@heavy-duty/bulldozer/data-access';
-import { generateInstructionsRustCode } from '@heavy-duty/code-generator';
+  InstructionExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
+import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { SystemProgram } from '@solana/web3.js';
-import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  from,
+  Observable,
+  of,
+  Subject,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
+  map,
   switchMap,
   tap,
+  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
+import {
+  InstructionAccountCreated,
+  InstructionAccountDeleted,
+  InstructionAccountUpdated,
+  InstructionActions,
+  InstructionArgumentCreated,
+  InstructionArgumentDeleted,
+  InstructionArgumentUpdated,
+  InstructionBodyUpdated,
+  InstructionCreated,
+  InstructionDeleted,
+  InstructionInit,
+  InstructionUpdated,
+} from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
 
 interface ViewModel {
   instructionId: string | null;
-  instruction: Instruction | null;
-  instructions: Instruction[];
-  arguments: InstructionArgument[];
-  accounts: PopulatedInstructionAccount[];
+  instructions: InstructionExtended[];
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  instruction: null,
   instructions: [],
-  arguments: [],
-  accounts: [],
 };
 
 @Injectable()
@@ -51,33 +68,37 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly error$ = this._error.asObservable();
   private readonly _reload = new BehaviorSubject(null);
   readonly reload$ = this._reload.asObservable();
-  readonly instructions$ = this.select(({ instructions }) => instructions);
-  readonly arguments$ = this.select(
-    ({ arguments: instructionArguments }) => instructionArguments
+  private readonly _events = new BehaviorSubject<InstructionActions>(
+    new InstructionInit()
   );
-  readonly accounts$ = this.select(({ accounts }) => accounts);
+  readonly events$ = this._events.asObservable();
+  readonly instructions$ = this.select(({ instructions }) => instructions);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
-  readonly instruction$ = this.select(({ instruction }) => instruction);
+  readonly instruction$ = this.select(
+    this.instructions$,
+    this.instructionId$,
+    (instructions, instructionId) =>
+      instructions.find(({ id }) => id === instructionId) || null
+  );
+  readonly instructionArguments$ = this.select(
+    this.instruction$,
+    (instruction) => instruction && instruction.arguments
+  );
+  readonly instructionAccounts$ = this.select(
+    this.instruction$,
+    (instruction) => instruction && instruction.accounts
+  );
   readonly instructionBody$ = this.select(
     this.instruction$,
     (instruction) => instruction && instruction.data.body
   );
   readonly instructionContext$ = this.select(
     this.instruction$,
-    this.arguments$,
-    this.accounts$,
-    (instruction, instructionArguments, instructionsAccounts) =>
-      instruction &&
-      generateInstructionsRustCode(
-        instruction,
-        instructionArguments,
-        instructionsAccounts
-      )?.context
+    (instruction) => instruction && generateInstructionCode(instruction)
   );
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _matSnackBar: MatSnackBar,
     private readonly _programStore: ProgramStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore
@@ -85,79 +106,76 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     super(initialState);
   }
 
-  readonly updateInstructionBody = this.updater((state, body: string) => ({
-    ...state,
-    instruction: state.instruction && {
-      ...state.instruction,
-      data: {
-        ...state.instruction.data,
-        body,
-      },
-    },
-  }));
+  readonly updateInstructionBody = this.updater((state, body: string) => {
+    return {
+      ...state,
+      instructions: state.instructions.map((instruction) =>
+        instruction.id === state.instructionId
+          ? { ...instruction, data: { ...instruction.data, body } }
+          : instruction
+      ),
+    };
+  });
 
   readonly loadInstructions = this.effect(() =>
     combineLatest([
-      this.reload$,
       this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      switchMap(([, applicationId]) =>
-        this._programStore.getInstructions(applicationId).pipe(
-          tapResponse(
-            (instructions) => this.patchState({ instructions }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly loadInstruction = this.effect(() =>
-    combineLatest([
-      this.instructionId$.pipe(isNotNullOrUndefined),
       this._collectionStore.collections$,
       this.reload$,
     ]).pipe(
-      switchMap(([instructionId, collections]) =>
-        combineLatest([
-          this._programStore.getInstruction(instructionId),
-          this._programStore.getInstructionArguments(instructionId),
-          this._programStore.getInstructionAccounts(instructionId),
-        ]).pipe(
-          tapResponse(
-            ([instruction, instructionArguments, accounts]) =>
-              this.patchState({
-                instruction: instruction,
-                accounts: accounts.map((account) => {
-                  const collection =
-                    account.data.collection &&
-                    collections.find(
-                      ({ id }) => id === account.data.collection
-                    );
+      switchMap(([applicationId, collections]) =>
+        this._programStore.getInstructions(applicationId).pipe(
+          concatMap((instructions) =>
+            from(instructions).pipe(
+              concatMap((instruction) =>
+                combineLatest([
+                  this._programStore.getInstructionArguments(instruction.id),
+                  this._programStore.getInstructionAccounts(instruction.id),
+                ]).pipe(
+                  map(([instructionArguments, instructionAccounts]) => ({
+                    ...instruction,
+                    arguments: instructionArguments,
+                    accounts: instructionAccounts.map((account) => {
+                      const collection =
+                        account.data.collection &&
+                        collections.find(
+                          ({ id }) => id === account.data.collection
+                        );
 
-                  const payer =
-                    account.data.payer &&
-                    accounts.find(({ id }) => id === account.data.payer);
+                      const payer =
+                        account.data.payer &&
+                        instructionAccounts.find(
+                          ({ id }) => id === account.data.payer
+                        );
 
-                  const close =
-                    account.data.close &&
-                    accounts.find(({ id }) => id === account.data.close);
+                      const close =
+                        account.data.close &&
+                        instructionAccounts.find(
+                          ({ id }) => id === account.data.close
+                        );
 
-                  return {
-                    ...account,
-                    data: {
-                      ...account.data,
-                      collection: collection || null,
-                      payer: payer || null,
-                      close: close || null,
-                    },
-                  };
-                }),
-                arguments: instructionArguments,
-              }),
-            (error) => this._error.next(error)
+                      return {
+                        ...account,
+                        data: {
+                          ...account.data,
+                          collection: collection || null,
+                          payer: payer || null,
+                          close: close || null,
+                        },
+                      };
+                    }),
+                  }))
+                )
+              ),
+              toArray()
+            )
           )
         )
+      ),
+
+      tapResponse(
+        (instructions) => this.patchState({ instructions }),
+        (error) => this._error.next(error)
       )
     )
   );
@@ -183,13 +201,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             concatMap(([{ name }, applicationId]) =>
               this._programStore.createInstruction(applicationId, name).pipe(
                 tapResponse(
-                  () => {
-                    this._reload.next(null);
-                    this._matSnackBar.open('Instruction created', 'Close', {
-                      panelClass: 'success-snackbar',
-                      duration: 3000,
-                    });
-                  },
+                  () => this._events.next(new InstructionCreated()),
                   (error) => this._error.next(error)
                 )
               )
@@ -211,13 +223,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               concatMap(({ name }) =>
                 this._programStore.updateInstruction(instruction.id, name).pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open('Instruction updated', 'Close', {
-                        panelClass: 'success-snackbar',
-                        duration: 3000,
-                      });
-                    },
+                    () =>
+                      this._events.next(new InstructionUpdated(instruction.id)),
                     (error) => this._error.next(error)
                   )
                 )
@@ -240,13 +247,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap(({ id, data: { body } }) =>
         this._programStore.updateInstructionBody(id, body).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Instruction body updated', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionBodyUpdated(id)),
             (error) => this._error.next(error)
           )
         )
@@ -260,13 +261,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         concatMap((instructionId) =>
           this._programStore.deleteInstruction(instructionId).pipe(
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._matSnackBar.open('Instruction deleted', 'Close', {
-                  panelClass: 'success-snackbar',
-                  duration: 3000,
-                });
-              },
+              () => this._events.next(new InstructionDeleted(instructionId)),
               (error) => this._error.next(error)
             )
           )
@@ -303,13 +298,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open('Argument created', 'Close', {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        });
-                      },
+                      () => this._events.next(new InstructionArgumentCreated()),
                       (error) => this._error.next(error)
                     )
                   )
@@ -341,13 +330,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open('Argument updated', 'Close', {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        });
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionArgumentUpdated(argument.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -362,13 +348,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap((argumentId) =>
         this._programStore.deleteInstructionArgument(argumentId).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Argument deleted', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionArgumentDeleted(argumentId)),
             (error) => this._error.next(error)
           )
         )
@@ -381,13 +361,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap((accountId) =>
         this._programStore.deleteInstructionAccount(accountId).pipe(
           tapResponse(
-            () => {
-              this._reload.next(null);
-              this._matSnackBar.open('Account deleted', 'Close', {
-                panelClass: 'success-snackbar',
-                duration: 3000,
-              });
-            },
+            () => this._events.next(new InstructionAccountDeleted(accountId)),
             (error) => this._error.next(error)
           )
         )
@@ -399,7 +373,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     action$.pipe(
       concatMap(() =>
         of(null).pipe(
-          withLatestFrom(this._collectionStore.collections$, this.accounts$)
+          withLatestFrom(
+            this._collectionStore.collections$,
+            this.instructionAccounts$
+          )
         )
       ),
       exhaustMap(([, collections, accounts]) =>
@@ -433,17 +410,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Basic account created',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () => this._events.next(new InstructionAccountCreated()),
                       (error) => this._error.next(error)
                     )
                   )
@@ -454,11 +421,14 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateBasicAccount = this.effect(
-    (account$: Observable<PopulatedInstructionAccount>) =>
+    (account$: Observable<InstructionAccountExtended>) =>
       account$.pipe(
         concatMap((account) =>
           of(account).pipe(
-            withLatestFrom(this._collectionStore.collections$, this.accounts$)
+            withLatestFrom(
+              this._collectionStore.collections$,
+              this.instructionAccounts$
+            )
           )
         ),
         exhaustMap(([account, collections, accounts]) =>
@@ -484,17 +454,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Basic account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -532,17 +495,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open(
-                        'Signer account created',
-                        'Close',
-                        {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        }
-                      );
-                    },
+                    () => this._events.next(new InstructionAccountCreated()),
                     (error) => this._error.next(error)
                   )
                 )
@@ -553,7 +506,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateSignerAccount = this.effect(
-    (account$: Observable<PopulatedInstructionAccount>) =>
+    (account$: Observable<InstructionAccountExtended>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog
@@ -578,17 +531,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Signer account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )
@@ -635,17 +581,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 )
                 .pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open(
-                        'Program account created',
-                        'Close',
-                        {
-                          panelClass: 'success-snackbar',
-                          duration: 3000,
-                        }
-                      );
-                    },
+                    () => this._events.next(new InstructionAccountCreated()),
                     (error) => this._error.next(error)
                   )
                 )
@@ -656,7 +592,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateProgramAccount = this.effect(
-    (account$: Observable<PopulatedInstructionAccount>) =>
+    (account$: Observable<InstructionAccountExtended>) =>
       account$.pipe(
         exhaustMap((account) =>
           this._matDialog
@@ -689,17 +625,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   )
                   .pipe(
                     tapResponse(
-                      () => {
-                        this._reload.next(null);
-                        this._matSnackBar.open(
-                          'Program account updated',
-                          'Close',
-                          {
-                            panelClass: 'success-snackbar',
-                            duration: 3000,
-                          }
-                        );
-                      },
+                      () =>
+                        this._events.next(
+                          new InstructionAccountUpdated(account.id)
+                        ),
                       (error) => this._error.next(error)
                     )
                   )

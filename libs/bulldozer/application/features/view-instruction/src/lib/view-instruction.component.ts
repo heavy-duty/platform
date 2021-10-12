@@ -9,9 +9,9 @@ import { WalletStore } from '@danmt/wallet-adapter-angular';
 import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
 import {
+  InstructionAccountExtended,
   InstructionArgument,
-  PopulatedInstructionAccount,
-} from '@heavy-duty/bulldozer/data-access';
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
@@ -104,8 +104,8 @@ export class ViewInstructionComponent implements OnInit {
   readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionBody$ = this._instructionStore.instructionBody$;
   readonly instructionContext$ = this._instructionStore.instructionContext$;
-  readonly arguments$ = this._instructionStore.arguments$;
-  readonly accounts$ = this._instructionStore.accounts$;
+  readonly arguments$ = this._instructionStore.instructionArguments$;
+  readonly accounts$ = this._instructionStore.instructionAccounts$;
   readonly commonEditorOptions = {
     language: 'rust',
     automaticLayout: true,
@@ -183,7 +183,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createBasicAccount();
   }
 
-  onUpdateBasicAccount(account: PopulatedInstructionAccount) {
+  onUpdateBasicAccount(account: InstructionAccountExtended) {
     this._instructionStore.updateBasicAccount(account);
   }
 
@@ -191,7 +191,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createSignerAccount();
   }
 
-  onUpdateSignerAccount(account: PopulatedInstructionAccount) {
+  onUpdateSignerAccount(account: InstructionAccountExtended) {
     this._instructionStore.updateSignerAccount(account);
   }
 
@@ -199,7 +199,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createProgramAccount();
   }
 
-  onUpdateProgramAccount(account: PopulatedInstructionAccount) {
+  onUpdateProgramAccount(account: InstructionAccountExtended) {
     this._instructionStore.updateProgramAccount(account);
   }
 

@@ -1,4 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Output,
+} from '@angular/core';
 import {
   ApplicationStore,
   CollectionStore,
@@ -8,7 +13,7 @@ import {
   Application,
   Collection,
   Instruction,
-} from '@heavy-duty/bulldozer/data-access';
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 import { NavigationStore } from './navigation.store';
 
@@ -30,12 +35,6 @@ import { NavigationStore } from './navigation.store';
               <img src="assets/images/logo.png" class="w-4/6" />
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
-            <mat-nav-list>
-              <div class="w-full mb-6 flex justify-center items-center">
-                <!-- <bd-dark-theme-switch></bd-dark-theme-switch> -->
-              </div>
-            </mat-nav-list>
-
             <mat-accordion
               *ngIf="application$ | ngrxPush"
               displayMode="flat"
@@ -58,7 +57,18 @@ import { NavigationStore } from './navigation.store';
               ></bd-instruction-selector>
             </mat-accordion>
           </div>
-
+          <mat-nav-list togglePosition="afer">
+            <div class="w-full mb-6 flex justify-center items-center">
+              <button
+                *ngIf="application$ | ngrxPush"
+                mat-button
+                color="accent"
+                (click)="onDownload()"
+              >
+                Download code
+              </button>
+            </div>
+          </mat-nav-list>
           <bd-application-selector
             [connected]="connected$ | ngrxPush"
             [application]="application$ | ngrxPush"
@@ -110,6 +120,7 @@ import { NavigationStore } from './navigation.store';
   providers: [NavigationStore],
 })
 export class NavigationComponent {
+  @Output() downloadCode = new EventEmitter();
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
@@ -159,5 +170,9 @@ export class NavigationComponent {
 
   onDeleteInstruction(instructionId: string) {
     this._instructionStore.deleteInstruction(instructionId);
+  }
+
+  onDownload() {
+    this.downloadCode.emit();
   }
 }

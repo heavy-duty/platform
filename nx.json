@@ -90,6 +90,12 @@
     "bulldozer-application-utils-services-active-breakpoint": {
       "tags": []
     },
+    "bulldozer-application-utils-services-code-generator": {
+      "tags": []
+    },
+    "bulldozer-application-utils-types": {
+      "tags": []
+    },
     "bulldozer-client": {
       "tags": []
     },
@@ -104,9 +110,6 @@
       "tags": []
     },
     "bulldozer-shell": {
-      "tags": []
-    },
-    "code-generator": {
       "tags": []
     },
     "shared-utils-operators": {

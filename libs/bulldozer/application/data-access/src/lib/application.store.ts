@@ -1,26 +1,30 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
-import { Application, ProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { generateProgramRustCode } from '@heavy-duty/code-generator';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { Application } from '@heavy-duty/bulldozer/application/utils/types';
+import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
+
+import {
+  ApplicationActions,
+  ApplicationCreated,
+  ApplicationDeleted,
+  ApplicationInit,
+  ApplicationUpdated,
+} from './actions/application.actions';
 
 interface ViewModel {
   applicationId: string | null;
   applications: Application[];
   error: unknown | null;
-  rustCode: string | null;
 }
 
 const initialState = {
   applicationId: null,
   applications: [],
   error: null,
-  rustCode: null,
 };
 
 @Injectable()
@@ -29,6 +33,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly error$ = this._error.asObservable();
   private readonly _reload = new BehaviorSubject(null);
   readonly reload$ = this._reload.asObservable();
+  private readonly _events = new BehaviorSubject<ApplicationActions>(
+    new ApplicationInit()
+  );
+  readonly events$ = this._events.asObservable();
   readonly applications$ = this.select(({ applications }) => applications);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly application$ = this.select(
@@ -37,11 +45,9 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     (applications, applicationId) =>
       applications.find(({ id }) => id === applicationId) || null
   );
-  readonly rustCode$ = this.select(({ rustCode }) => rustCode);
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _matSnackBar: MatSnackBar,
     private readonly _programStore: ProgramStore
   ) {
     super(initialState);
@@ -56,21 +62,6 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             (error) => this._error.next(error)
           )
         )
-      )
-    )
-  );
-
-  readonly loadRustCode$ = this.effect(() =>
-    this.applicationId$.pipe(
-      isNotNullOrUndefined,
-      switchMap((applicationId) =>
-        this._programStore
-          .getApplicationMetadata(applicationId)
-          .pipe(
-            tap((metadata) =>
-              this.patchState({ rustCode: generateProgramRustCode(metadata) })
-            )
-          )
       )
     )
   );
@@ -93,13 +84,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             concatMap(({ name }) =>
               this._programStore.createApplication(name).pipe(
                 tapResponse(
-                  () => {
-                    this._reload.next(null);
-                    this._matSnackBar.open('Application created', 'Close', {
-                      panelClass: 'success-snackbar',
-                      duration: 3000,
-                    });
-                  },
+                  () => this._events.next(new ApplicationCreated()),
                   (error) => this._error.next(error)
                 )
               )
@@ -121,13 +106,8 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               concatMap(({ name }) =>
                 this._programStore.updateApplication(application.id, name).pipe(
                   tapResponse(
-                    () => {
-                      this._reload.next(null);
-                      this._matSnackBar.open('Application created', 'Close', {
-                        panelClass: 'success-snackbar',
-                        duration: 3000,
-                      });
-                    },
+                    () =>
+                      this._events.next(new ApplicationUpdated(application.id)),
                     (error) => this._error.next(error)
                   )
                 )
@@ -143,13 +123,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         concatMap((applicationId) =>
           this._programStore.deleteApplication(applicationId).pipe(
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._matSnackBar.open('Application created', 'Close', {
-                  panelClass: 'success-snackbar',
-                  duration: 3000,
-                });
-              },
+              () => this._events.next(new ApplicationDeleted(applicationId)),
               (error) => this._error.next(error)
             )
           )
