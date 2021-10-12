@@ -13,6 +13,7 @@ import {
   CollectionExtended,
   InstructionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
+import { Console } from 'console';
 
 // TODO: Move later
 registerHandleBarsHelpers();
@@ -58,6 +59,7 @@ export const generateApplicationCode = (
   application: Application,
   instructions: InstructionExtended[]
 ) => {
+  console.log(instructions);
   return generateCode(
     {
       program: {

@@ -79,6 +79,7 @@ const formatInstructionAccounts = (
 
 export const formatInstruction = (instruction: InstructionExtended) => ({
   name: formatName(instruction.data.name),
+  handler: instruction.data.body,
   arguments: formatInstructionArguments(instruction.id, instruction.arguments),
   accounts: formatInstructionAccounts(instruction.id, instruction.accounts),
 });
