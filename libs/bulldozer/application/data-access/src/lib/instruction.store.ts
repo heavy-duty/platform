@@ -9,11 +9,9 @@ import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/fe
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
   Instruction,
-  InstructionAccount,
   InstructionAccountExtended,
   InstructionArgument,
   InstructionExtended,
-  InstructionRelation,
   InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
@@ -195,6 +193,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                           instructionAccounts.find(
                             ({ id }) => id === account.data.close
                           );
+
+                        console.log(relations);
 
                         return {
                           ...account,

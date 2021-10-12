@@ -37,7 +37,25 @@ const formatInstructionAccounts = (
       let payer = null,
         collection = null,
         modifier = null,
-        close = null;
+        close = null,
+        relations = null;
+
+      if (account.data.relations) {
+        relations = account.data.relations.map((relation) => ({
+          ...relation,
+          data: {
+            ...relation.data,
+            to: {
+              ...relation.data.to,
+              data: {
+                ...relation.data.to.data,
+                name: formatName(relation.data.to.data.name),
+              },
+            },
+          },
+        }));
+      }
+
       if (account.data.payer) {
         payer = {
           ...account.data.payer,
@@ -81,6 +99,7 @@ const formatInstructionAccounts = (
           close,
           payer: payer,
           name: formatName(account.data.name),
+          relations,
         },
       };
     });

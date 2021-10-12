@@ -21,11 +21,14 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     space = 8 + {{this.data.space}},
     {{/if}}
     {{#if this.data.payer}}
-    payer = {{this.data.payer.data.name.camelCase}},
+    payer = {{this.data.payer.data.name.snakeCase}},
     {{/if}}
     {{#if this.data.close}}
-    close = {{this.data.close.data.name.camelCase}},
+    close = {{this.data.close.data.name.snakeCase}},
     {{/if}}
+    {{#each this.data.relations}}
+    has_one = {{this.data.to.data.name.snakeCase}},
+    {{/each}}
   )]
   {{/if}}
   pub {{this.data.name.snakeCase}}: Box<Account<'info,{{this.data.collection.data.name.pascalCase}}>>,
@@ -38,8 +41,11 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     space = 8 + {{this.data.space}},
     {{/if}}
     {{#if this.data.payer}}
-    payer = {{this.data.payer.data.name.camelCase}},
+    payer = {{this.data.payer.data.name.snakeCase}},
     {{/if}}
+    {{#each this.data.relations}}
+    has_one = {{this.data.to.data.name.snakeCase}},
+    {{/each}}
   )]
   {{/if}}
   pub {{this.data.name.snakeCase}}: Signer<'info>,
