@@ -4,6 +4,8 @@ Bulldozer is a low code platform that uses abstractions that are common for deve
 
 It consists of an Anchor workspace and an Angular application, the Anchor workspace holds the content of the Bulldozer program, it's used as decentralized storage. The reason we store all the data on-chain is that we want to unlock real-time collaboration while building systems.
 
+![screenshot of bulldozer](https://user-images.githubusercontent.com/7496781/137217166-403c0780-4808-48d7-964a-49d8720c168a.png)
+
 ## Running Locally
 
 Bulldozer has only been tested in localhost, if you want to give it a test drive, make sure to have a local validator running using `solana-test-validator`.
