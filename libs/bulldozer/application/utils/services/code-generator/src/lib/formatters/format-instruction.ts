@@ -3,9 +3,10 @@ import {
   InstructionArgument,
   InstructionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
+import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
-const formatInstructionArguments = (
+export const formatInstructionArguments = (
   instructionId: string,
   instructionArguments: InstructionArgument[]
 ) =>
@@ -16,6 +17,13 @@ const formatInstructionArguments = (
       data: {
         ...argument.data,
         name: formatName(argument.data.name),
+        kind: {
+          ...argument.data.kind,
+          name:
+            argument.data.kind.id === 5
+              ? capitalize(argument.data.kind.name)
+              : argument.data.kind.name,
+        },
       },
     }));
 

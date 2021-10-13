@@ -1,5 +1,5 @@
 export const __mod_program = `{{#each entries}}
-mod {{this.snakeCase}};
+pub mod {{this.snakeCase}};
 {{/each}}
 
 {{#each entries}}

@@ -1,4 +1,5 @@
 import { CollectionExtended } from '@heavy-duty/bulldozer/application/utils/types';
+import { capitalize } from '../utils';
 
 import { formatName } from './format-name';
 
@@ -13,6 +14,13 @@ export const formatCollection = (collection: CollectionExtended) => ({
         data: {
           ...attribute.data,
           name: formatName(attribute.data.name),
+          kind: {
+            ...attribute.data.kind,
+            name:
+              attribute.data.kind.id === 5
+                ? capitalize(attribute.data.kind.name)
+                : attribute.data.kind.name,
+          },
         },
       })),
 });

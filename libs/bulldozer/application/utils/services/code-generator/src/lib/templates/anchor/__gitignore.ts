@@ -3,4 +3,5 @@ export const __gitignore = `
 .DS_Store
 target
 **/*.rs.bk
+node_modules
 `;

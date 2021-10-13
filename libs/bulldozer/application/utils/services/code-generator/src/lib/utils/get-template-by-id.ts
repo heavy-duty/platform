@@ -15,6 +15,7 @@ import { __prettierrc } from '../templates/anchor/__prettierrc';
 import { __readme } from '../templates/anchor/__readme';
 import { __tsconfig } from '../templates/anchor/__tsconfig';
 import { __test } from '../templates/anchor/__test';
+import { __packageJson } from '../templates/anchor/__packageJson';
 
 export const getTemplateByType = (type: string): string => {
   switch (type) {
@@ -48,6 +49,8 @@ export const getTemplateByType = (type: string): string => {
       return __tsconfig;
     case 'test':
       return __test;
+    case 'packageJson':
+      return __packageJson;
     default:
       return __full_program;
   }

@@ -59,7 +59,7 @@ pub fn handler(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.
   {{#each instruction.handler}}
   {{{this}}}
   {{/each}}
-  Ok()
+  Ok(())
 }
 {{/if}}
 `;

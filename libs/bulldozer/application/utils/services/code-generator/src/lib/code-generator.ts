@@ -1,7 +1,12 @@
 import { saveAs } from 'file-saver';
 import * as JSZip from 'jszip';
 
-import { formatCollection, formatInstruction, formatName } from './formatters';
+import {
+  formatApplication,
+  formatCollection,
+  formatInstruction,
+  formatName,
+} from './formatters';
 import {
   generateCode,
   getTemplateByType,
@@ -58,26 +63,11 @@ export const generateApplicationCode = (
   application: Application,
   instructions: InstructionExtended[]
 ) => {
+  const formattedApplication = formatApplication(application, instructions);
+
   return generateCode(
     {
-      application: {
-        id: application.id,
-        name: formatName(application.data.name),
-        instructions: instructions.map((instruction) => ({
-          ...instruction,
-          data: {
-            ...instruction.data,
-            name: formatName(instruction.data.name),
-          },
-          arguments: instruction.arguments.map((argument) => ({
-            ...argument,
-            data: {
-              ...argument.data,
-              name: formatName(argument.data.name),
-            },
-          })),
-        })),
-      },
+      application: formattedApplication,
     },
     getTemplateByType('full_program')
   );
@@ -117,33 +107,40 @@ export const generateApplicationZip = (
   const zip = new JSZip();
   const applicationName = formatName(application.data.name);
 
-  zip.file('.gitignore', getTemplateByType('gitignore'));
-  zip.file('.prettierrc.json', getTemplateByType('prettierrc'));
-  zip.file(
+  const applicationFolder = zip.folder(applicationName.snakeCase);
+
+  applicationFolder?.file;
+  applicationFolder?.file('.gitignore', getTemplateByType('gitignore'));
+  applicationFolder?.file('.prettierrc.json', getTemplateByType('prettierrc'));
+  applicationFolder?.file(
     'Anchor.toml',
     generateCode({ applicationName }, getTemplateByType('anchor'))
   );
-  zip.file('Cargo.toml', getTemplateByType('cargo'));
-  zip.file(
+  applicationFolder?.file('Cargo.toml', getTemplateByType('cargo'));
+  applicationFolder?.file(
     'README.md',
     generateCode({ applicationName }, getTemplateByType('readme'))
   );
-  zip.file('tsconfig.json', getTemplateByType('tsconfig'));
+  applicationFolder?.file('tsconfig.json', getTemplateByType('tsconfig'));
+  applicationFolder?.file(
+    'package.json',
+    generateCode({ applicationName }, getTemplateByType('packageJson'))
+  );
 
   // Creating migrations folder and file
-  const migrationsFolder = zip.folder('migrations');
+  const migrationsFolder = applicationFolder?.folder('migrations');
   migrationsFolder?.file('deploy.js', getTemplateByType('migrations.deploy'));
 
   // Creating tests folder and file
-  const testsFolder = zip.folder('tests');
+  const testsFolder = applicationFolder?.folder('tests');
   testsFolder?.file(
-    `${metadata.application.fileName}.spec.js`,
-    getTemplateByType('tests.deploy')
+    `${metadata.application.fileName}.spec.ts`,
+    generateCode({ applicationName }, getTemplateByType('test'))
   );
 
   // Creating program folder and adding main files
   const programFolderDir = 'programs/' + metadata.application.fileName;
-  const programFolder = zip.folder(programFolderDir);
+  const programFolder = applicationFolder?.folder(programFolderDir);
   programFolder?.file('Xargo.toml', getTemplateByType('program.xargo'));
   programFolder?.file(
     'Cargo.toml',
@@ -151,11 +148,13 @@ export const generateApplicationZip = (
   );
 
   const programFolderSrcDir = programFolderDir + '/src';
-  const programFolderSrc = zip.folder(programFolderSrcDir);
+  const programFolderSrc = applicationFolder?.folder(programFolderSrcDir);
   programFolderSrc?.file('lib.rs', metadata.application.template);
 
   // Creating collection folder and files
-  const collectionFolder = zip.folder(programFolderSrcDir + '/collections');
+  const collectionFolder = applicationFolder?.folder(
+    programFolderSrcDir + '/collections'
+  );
 
   metadata.collections.forEach((collection) => {
     collectionFolder?.file(collection.fileName + '.rs', collection.template);
@@ -163,7 +162,9 @@ export const generateApplicationZip = (
   collectionFolder?.file('mod.rs', metadata.collectionsMod.template);
 
   // Creating instructions folder and files
-  const instructionsFolder = zip.folder(programFolderSrcDir + '/instructions');
+  const instructionsFolder = applicationFolder?.folder(
+    programFolderSrcDir + '/instructions'
+  );
   metadata.instructions.forEach((instruction) => {
     instructionsFolder?.file(
       instruction.fileName + '.rs',

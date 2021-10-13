@@ -1,8 +1,13 @@
-export const __test = `import { Provider, setProvider, utils, workspace } from '@project-serum/anchor';
+export const __test = `import {
+  Provider,
+  setProvider,
+  web3,
+  workspace,
+} from '@project-serum/anchor';
 import { assert } from 'chai';
 
-describe('instruction', () => {
+describe('{{applicationName.pascalCase}}', () => {
   setProvider(Provider.env());
-  const application = workspace.{{application.name.pascalCase}};
+  const application = workspace.{{applicationName.pascalCase}};
 });
 `;
