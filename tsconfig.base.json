@@ -42,6 +42,9 @@
       "@heavy-duty/bulldozer/application/features/edit-program-account": [
         "libs/bulldozer/application/features/edit-program-account/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/edit-relation": [
+        "libs/bulldozer/application/features/edit-relation/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/edit-signer-account": [
         "libs/bulldozer/application/features/edit-signer-account/src/index.ts"
       ],

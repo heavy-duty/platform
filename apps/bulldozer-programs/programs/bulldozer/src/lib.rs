@@ -130,4 +130,16 @@ pub mod bulldozer {
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
     instructions::delete_instruction_account::handler(ctx)
   }
+
+  pub fn create_instruction_relation(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
+    instructions::create_instruction_relation::handler(ctx)
+  }
+
+  pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
+    instructions::update_instruction_relation::handler(ctx)
+  }
+
+  pub fn delete_instruction_relation(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
+    instructions::delete_instruction_relation::handler(ctx)
+  }
 }

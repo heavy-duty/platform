@@ -4,6 +4,7 @@ import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/feature
 import { EditBasicAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-basic-account';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
+import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
 import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
@@ -11,6 +12,7 @@ import {
   InstructionAccountExtended,
   InstructionArgument,
   InstructionExtended,
+  InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
@@ -47,6 +49,9 @@ import {
   InstructionCreated,
   InstructionDeleted,
   InstructionInit,
+  InstructionRelationCreated,
+  InstructionRelationDeleted,
+  InstructionRelationUpdated,
   InstructionUpdated,
 } from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
@@ -131,40 +136,79 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 combineLatest([
                   this._programStore.getInstructionArguments(instruction.id),
                   this._programStore.getInstructionAccounts(instruction.id),
+                  this._programStore.getInstructionRelations(instruction.id),
                 ]).pipe(
-                  map(([instructionArguments, instructionAccounts]) => ({
-                    ...instruction,
-                    arguments: instructionArguments,
-                    accounts: instructionAccounts.map((account) => {
-                      const collection =
-                        account.data.collection &&
-                        collections.find(
-                          ({ id }) => id === account.data.collection
-                        );
+                  map(
+                    ([
+                      instructionArguments,
+                      instructionAccounts,
+                      instructionRelations,
+                    ]) => ({
+                      ...instruction,
+                      arguments: instructionArguments,
+                      accounts: instructionAccounts.map((account) => {
+                        const relations = instructionRelations
+                          .filter(
+                            (relation) => relation.data.from === account.id
+                          )
+                          .map((relation) => {
+                            const toAccount =
+                              instructionAccounts.find(
+                                (instructionAccount) =>
+                                  instructionAccount.id === relation.data.to
+                              ) || null;
 
-                      const payer =
-                        account.data.payer &&
-                        instructionAccounts.find(
-                          ({ id }) => id === account.data.payer
-                        );
+                            return (
+                              toAccount && {
+                                ...relation,
+                                data: {
+                                  ...relation.data,
+                                  from: account,
+                                  to: toAccount,
+                                },
+                              }
+                            );
+                          })
+                          .filter(
+                            (
+                              relation
+                            ): relation is InstructionRelationExtended =>
+                              relation !== null
+                          );
 
-                      const close =
-                        account.data.close &&
-                        instructionAccounts.find(
-                          ({ id }) => id === account.data.close
-                        );
+                        const collection =
+                          account.data.collection &&
+                          collections.find(
+                            ({ id }) => id === account.data.collection
+                          );
 
-                      return {
-                        ...account,
-                        data: {
-                          ...account.data,
-                          collection: collection || null,
-                          payer: payer || null,
-                          close: close || null,
-                        },
-                      };
-                    }),
-                  }))
+                        const payer =
+                          account.data.payer &&
+                          instructionAccounts.find(
+                            ({ id }) => id === account.data.payer
+                          );
+
+                        const close =
+                          account.data.close &&
+                          instructionAccounts.find(
+                            ({ id }) => id === account.data.close
+                          );
+
+                        console.log(relations);
+
+                        return {
+                          ...account,
+                          data: {
+                            ...account.data,
+                            collection: collection || null,
+                            payer: payer || null,
+                            close: close || null,
+                            relations,
+                          },
+                        };
+                      }),
+                    })
+                  )
                 )
               ),
               toArray()
@@ -172,7 +216,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           )
         )
       ),
-
       tapResponse(
         (instructions) => this.patchState({ instructions }),
         (error) => this._error.next(error)
@@ -349,6 +392,84 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         this._programStore.deleteInstructionArgument(argumentId).pipe(
           tapResponse(
             () => this._events.next(new InstructionArgumentDeleted(argumentId)),
+            (error) => this._error.next(error)
+          )
+        )
+      )
+    )
+  );
+
+  readonly createRelation = this.effect((action$) =>
+    action$.pipe(
+      concatMap(() => of(null).pipe(withLatestFrom(this.instructionAccounts$))),
+      exhaustMap(([, accounts]) =>
+        this._matDialog
+          .open(EditRelationComponent, { data: { accounts } })
+          .afterClosed()
+          .pipe(
+            filter((data) => data),
+            withLatestFrom(
+              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+              this.instructionId$.pipe(isNotNullOrUndefined)
+            ),
+            concatMap(([{ from, to }, applicationId, instructionId]) =>
+              this._programStore
+                .createInstructionRelation(
+                  applicationId,
+                  instructionId,
+                  from,
+                  to
+                )
+                .pipe(
+                  tapResponse(
+                    () => this._events.next(new InstructionRelationCreated()),
+                    (error) => this._error.next(error)
+                  )
+                )
+            )
+          )
+      )
+    )
+  );
+
+  readonly updateRelation = this.effect(
+    (relation$: Observable<InstructionRelationExtended>) =>
+      relation$.pipe(
+        concatMap((relation) =>
+          of(relation).pipe(withLatestFrom(this.instructionAccounts$))
+        ),
+        exhaustMap(([relation, accounts]) =>
+          this._matDialog
+            .open(EditRelationComponent, {
+              data: { relation, accounts },
+            })
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              concatMap(({ from, to }) =>
+                this._programStore
+                  .updateInstructionRelation(relation.id, from, to)
+                  .pipe(
+                    tapResponse(
+                      () =>
+                        this._events.next(
+                          new InstructionRelationUpdated(relation.id)
+                        ),
+                      (error) => this._error.next(error)
+                    )
+                  )
+              )
+            )
+        )
+      )
+  );
+
+  readonly deleteRelation = this.effect((relationId$: Observable<string>) =>
+    relationId$.pipe(
+      concatMap((relationId) =>
+        this._programStore.deleteInstructionRelation(relationId).pipe(
+          tapResponse(
+            () => this._events.next(new InstructionRelationDeleted(relationId)),
             (error) => this._error.next(error)
           )
         )

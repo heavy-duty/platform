@@ -11,6 +11,7 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-them
 import {
   InstructionAccountExtended,
   InstructionArgument,
+  InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { filter, map, startWith } from 'rxjs/operators';
 
@@ -40,6 +41,7 @@ import { filter, map, startWith } from 'rxjs/operators';
           (createBasicAccount)="onCreateBasicAccount()"
           (createSignerAccount)="onCreateSignerAccount()"
           (createProgramAccount)="onCreateProgramAccount()"
+          (createRelation)="onCreateRelation()"
         >
         </bd-instruction-menu>
 
@@ -60,6 +62,8 @@ import { filter, map, startWith } from 'rxjs/operators';
             (updateSignerAccount)="onUpdateSignerAccount($event)"
             (updateProgramAccount)="onUpdateProgramAccount($event)"
             (deleteAccount)="onDeleteAccount($event)"
+            (updateRelation)="onUpdateRelation($event)"
+            (deleteRelation)="onDeleteRelation($event)"
           >
           </bd-list-accounts>
         </main>
@@ -205,5 +209,17 @@ export class ViewInstructionComponent implements OnInit {
 
   onDeleteAccount(accountId: string) {
     this._instructionStore.deleteAccount(accountId);
+  }
+
+  onCreateRelation() {
+    this._instructionStore.createRelation();
+  }
+
+  onUpdateRelation(relation: InstructionRelationExtended) {
+    this._instructionStore.updateRelation(relation);
+  }
+
+  onDeleteRelation(relationId: string) {
+    this._instructionStore.deleteRelation(relationId);
   }
 }

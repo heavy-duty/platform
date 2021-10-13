@@ -17,6 +17,7 @@ import {
   InstructionAccountParser,
   InstructionArgumentParser,
   InstructionParser,
+  InstructionRelationParser,
 } from './utils';
 
 interface ViewModel {
@@ -301,8 +302,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             ])
           )
         ).pipe(
-          map((programArguments) =>
-            programArguments.map(({ publicKey, account }) =>
+          map((programAccounts) =>
+            programAccounts.map(({ publicKey, account }) =>
               CollectionAttributeParser(publicKey, account)
             )
           )
@@ -713,8 +714,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
             ])
           )
         ).pipe(
-          map((programArguments) =>
-            programArguments.map(({ publicKey, account }) =>
+          map((programAccounts) =>
+            programAccounts.map(({ publicKey, account }) =>
               InstructionArgumentParser(publicKey, account)
             )
           )
@@ -817,6 +818,110 @@ export class ProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
+  getInstructionRelations(instructionId: string) {
+    return this.reader$.pipe(
+      isNotNullOrUndefined,
+      take(1),
+      concatMap((reader) =>
+        from(
+          defer(() =>
+            reader.account.instructionRelation.all([
+              { memcmp: { bytes: instructionId, offset: 72 } },
+            ])
+          )
+        ).pipe(
+          map((programAccounts) =>
+            programAccounts.map(({ publicKey, account }) =>
+              InstructionRelationParser(publicKey, account)
+            )
+          )
+        )
+      )
+    );
+  }
+
+  createInstructionRelation(
+    applicationId: string,
+    instructionId: string,
+    fromAccount: string,
+    toAccount: string
+  ) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) => {
+        const relation = Keypair.generate();
+
+        return from(
+          defer(() =>
+            writer.rpc.createInstructionRelation({
+              accounts: {
+                relation: relation.publicKey,
+                instruction: new PublicKey(instructionId),
+                application: new PublicKey(applicationId),
+                from: new PublicKey(fromAccount),
+                to: new PublicKey(toAccount),
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [relation],
+            })
+          )
+        );
+      })
+    );
+  }
+
+  updateInstructionRelation(
+    relationId: string,
+    fromAccount: string,
+    toAccount: string
+  ) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) =>
+        from(
+          defer(() =>
+            writer.rpc.updateInstructionRelation({
+              accounts: {
+                relation: new PublicKey(relationId),
+                from: new PublicKey(fromAccount),
+                to: new PublicKey(toAccount),
+                authority: walletPublicKey,
+              },
+            })
+          )
+        )
+      )
+    );
+  }
+
+  deleteInstructionRelation(relationId: string) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) =>
+        from(
+          defer(() =>
+            writer.rpc.deleteInstructionRelation({
+              accounts: {
+                relation: new PublicKey(relationId),
+                authority: walletPublicKey,
+              },
+            })
+          )
+        )
+      )
+    );
+  }
+
   getApplicationMetadata(applicationId: string) {
     const filters = [{ memcmp: { bytes: applicationId, offset: 40 } }];
 
@@ -829,8 +934,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
           from(
             defer(() => reader.account.collectionAttribute.all(filters))
           ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
+            map((programAccounts) =>
+              programAccounts.map(({ publicKey, account }) =>
                 CollectionAttributeParser(publicKey, account)
               )
             )
@@ -839,8 +944,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
           from(
             defer(() => reader.account.instructionArgument.all(filters))
           ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
+            map((programAccounts) =>
+              programAccounts.map(({ publicKey, account }) =>
                 InstructionArgumentParser(publicKey, account)
               )
             )
@@ -848,8 +953,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
           from(
             defer(() => reader.account.instructionAccount.all(filters))
           ).pipe(
-            map((programArguments) =>
-              programArguments.map(({ publicKey, account }) =>
+            map((programAccounts) =>
+              programAccounts.map(({ publicKey, account }) =>
                 InstructionAccountParser(publicKey, account)
               )
             )

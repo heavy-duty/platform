@@ -23,8 +23,8 @@ import {
 registerHandleBarsHelpers();
 
 export const generateInstructionCode = (instruction: InstructionExtended) => {
-  const formattedInstructions = formatInstruction(instruction);
-  const formattedCollections = formattedInstructions.accounts.reduce(
+  const formattedInstruction = formatInstruction(instruction);
+  const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.data.collection && account.data.collection.data.name !== null
         ? collections.set(account.data.collection.id, account.data.collection)
@@ -32,9 +32,11 @@ export const generateInstructionCode = (instruction: InstructionExtended) => {
     new Map([])
   );
 
+  console.log({ instruction, formattedInstruction });
+
   return generateCode(
     {
-      instruction: formattedInstructions,
+      instruction: formattedInstruction,
       collections: Array.from(formattedCollections.values()),
     },
     getTemplateByType('instructions_context_program')

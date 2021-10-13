@@ -119,6 +119,7 @@ export interface InstructionAccountExtended {
     collection: Collection | null;
     payer: InstructionAccount | null;
     close: InstructionAccount | null;
+    relations: InstructionRelationExtended[];
   };
 }
 
@@ -126,3 +127,24 @@ export type InstructionExtended = Instruction & {
   arguments: InstructionArgument[];
   accounts: InstructionAccountExtended[];
 };
+
+export interface InstructionRelationInfo {
+  authority: string;
+  application: string;
+  instruction: string;
+  from: string;
+  to: string;
+}
+
+export interface InstructionRelation {
+  id: string;
+  data: InstructionRelationInfo;
+}
+
+export interface InstructionRelationExtended {
+  id: string;
+  data: Omit<InstructionRelationInfo, 'from' | 'to'> & {
+    from: InstructionAccount;
+    to: InstructionAccount;
+  };
+}
