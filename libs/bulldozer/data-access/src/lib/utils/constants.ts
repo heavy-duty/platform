@@ -1,5 +1,7 @@
-import { PublicKey } from '@solana/web3.js';
+import { InjectionToken } from '@angular/core';
 
-export const BULLDOZER_PROGRAM_ID = new PublicKey(
-  'E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4'
+import { ProgramConfig } from './types';
+
+export const PROGRAM_CONFIG = new InjectionToken<ProgramConfig>(
+  'PROGRAM_CONFIG'
 );
