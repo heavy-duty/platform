@@ -1,24 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Inject, Injectable } from '@angular/core';
 import { ConnectionStore, WalletStore } from '@danmt/wallet-adapter-angular';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';
-import { Idl, Program, Provider } from '@project-serum/anchor';
+import { Program, Provider } from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { combineLatest, defer, from } from 'rxjs';
 import { concatMap, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
   ApplicationParser,
-  BULLDOZER_PROGRAM_ID,
   CollectionAttributeParser,
   CollectionParser,
   DummyWallet,
-  idl,
   InstructionAccountParser,
   InstructionArgumentParser,
   InstructionParser,
   InstructionRelationParser,
+  PROGRAM_CONFIG,
 } from './utils';
+import { ProgramConfig } from './utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -37,7 +37,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _walletStore: WalletStore,
-    private readonly _connectionStore: ConnectionStore
+    private readonly _connectionStore: ConnectionStore,
+    @Inject(PROGRAM_CONFIG) private readonly _programConfig: ProgramConfig
   ) {
     super(initialState);
   }
@@ -48,8 +49,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
       tap((connection) =>
         this.patchState({
           reader: new Program(
-            idl,
-            BULLDOZER_PROGRAM_ID,
+            this._programConfig.idl,
+            new PublicKey(this._programConfig.id),
             new Provider(
               connection,
               new DummyWallet(),
@@ -70,8 +71,8 @@ export class ProgramStore extends ComponentStore<ViewModel> {
         this.patchState({
           writer: wallet
             ? new Program(
-                idl as Idl,
-                BULLDOZER_PROGRAM_ID,
+                this._programConfig.idl,
+                new PublicKey(this._programConfig.id),
                 new Provider(connection, wallet, {
                   commitment: 'confirmed',
                 })

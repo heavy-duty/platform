@@ -3,13 +3,16 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { WALLET_CONFIG } from '@danmt/wallet-adapter-angular';
+import { PROGRAM_CONFIG } from '@heavy-duty/bulldozer/data-access';
 import {
   getPhantomWallet,
-  getSolletWallet,
   getSlopeWallet,
   getSolflareWallet,
+  getSolletWallet,
 } from '@solana/wallet-adapter-wallets';
 
+import * as idl from '../assets/json/bulldozer.json';
+import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -39,6 +42,13 @@ import { AppComponent } from './app.component';
           getSolflareWallet(),
         ],
         autoConnect: true,
+      },
+    },
+    {
+      provide: PROGRAM_CONFIG,
+      useValue: {
+        id: environment.programId,
+        idl,
       },
     },
   ],

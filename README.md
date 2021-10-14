@@ -16,18 +16,30 @@ In order to run Bulldozer in your local environment, you'll need to make sure yo
 - mocha
 - ts-mocha
 - typescript
+- npm
+- node
 
-Clone the repo in the desired location and `cd` to it. Run the commands below:
+Clone the repo in the desired location and `cd` to it and run `npm i`. It's time to build the program and deploy it! Every Solana program needs a Keypair, Bulldozer is not different. We used one during development but you'll need to set up your own and replace it in some files.
 
-- npm i
-- npx nx build bulldozer-programs
-- npx nx deploy bulldozer-programs
-- npx nx serve bulldozer-client
+I know, it's boring, but this is temporal. We'll figure out a better way. For now, cd into `apps/bulldozer-programs` and run `anchor keys list`, you should see a PublicKey, this key matches a new generated Keypair under `/apps/bulldozer-programs/target/deploy/bulldozer-keypair.json`.
 
-The first command will install all the necessary dependencies, the second command builds the Solana program, the third command deploys it to the location specified in solana config and the last one spins up a simple server to serve the Angular application.
+Copy that PublicKey and replace it in these places:
+
+- bulldozer program id in `apps/bulldozer-programs/Anchor.toml`
+- declare_id in `apps/bulldozer-programs/programs/bulldozer/src/lib.rs`
+- programId property in `apps/bulldozer-client/src/environments/environment.prod.ts`
+- programId property in `apps/bulldozer-client/src/environments/environment.ts`
+
+Now you run these commands from the root path:
+
+- `npx nx build bulldozer-programs`
+- `npx nx deploy bulldozer-programs`
+- `npx nx serve bulldozer-client`
+
+Those three commands will build the program, deploy it to your local validator instance and start a server at port 4200 with the client application.
 
 NOTE: Make sure to point the solana config in your local environment to match the local instance you have running.
 
 ## Testing it
 
-If you want to run the program's e2e tests you can call `npx nx test bulldozer-programs` from the root of the project. Make sure to kill any local instance of solana, it can make the tests fail.
+If you want to run the program's e2e tests you can call `npx nx test bulldozer-programs` from the root of the project. Make sure to kill any local instance of Solana, it can make the tests fail.
