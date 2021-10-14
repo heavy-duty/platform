@@ -21,7 +21,7 @@ In order to run Bulldozer in your local environment, you'll need to make sure yo
 
 Clone the repo in the desired location and `cd` to it and run `npm i`. It's time to build the program and deploy it! Every Solana program needs a Keypair, Bulldozer is not different. We used one during development but you'll need to set up your own and replace it in some files.
 
-I know, it's boring, but this is temporal. We'll figure out a better way. For now, run `anchor keys list`, you should see a PublicKey, this key matches a new generated Keypair under `/apps/bulldozer-programs/target/deploy/bulldozer-keypair.json`.
+I know, it's boring, but this is temporal. We'll figure out a better way. For now, cd into `apps/bulldozer-programs` and run `anchor keys list`, you should see a PublicKey, this key matches a new generated Keypair under `/apps/bulldozer-programs/target/deploy/bulldozer-keypair.json`.
 
 Copy that PublicKey and replace it in these places:
 
@@ -30,7 +30,7 @@ Copy that PublicKey and replace it in these places:
 - programId property in `apps/bulldozer-client/src/environments/environment.prod.ts`
 - programId property in `apps/bulldozer-client/src/environments/environment.ts`
 
-Now you run these commands:
+Now you run these commands from the root path:
 
 - `npx nx build bulldozer-programs`
 - `npx nx deploy bulldozer-programs`
