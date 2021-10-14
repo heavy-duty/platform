@@ -25,14 +25,18 @@ I know, it's boring, but this is temporal. We'll figure out a better way. For no
 
 Copy that PublicKey and replace it in these places:
 
-- apps/bulldozer-programs/Anchor.toml
-- apps/bulldozer-programs/programs/bulldozer/src/lib.rs
+- bulldozer program id in `apps/bulldozer-programs/Anchor.toml`
+- declare_id in `apps/bulldozer-programs/programs/bulldozer/src/lib.rs`
+- programId property in `apps/bulldozer-client/src/environments/environment.prod.ts`
+- programId property in `apps/bulldozer-client/src/environments/environment.ts`
 
-Now you can finally run `npx nx build bulldozer-programs`, we're almost there. The last step is to deploy the built program into your local validator instance.
+Now you run these commands:
 
-When you build `bulldozer-programs`, anchor generates an IDL used in the client. To make sure the IDL you have matches the one you just generated, we recommend replacing it. Copy the content from the new idl at `apps/bulldozer-programs/target/bulldozer.json` and paste it inside `apps/bulldozer-client/src/assets/json/bulldozer.json`.
+- `npx nx build bulldozer-programs`
+- `npx nx deploy bulldozer-programs`
+- `npx nx serve bulldozer-client`
 
-And finally, just now, you can deploy the program. You'll need to run `npx nx deploy bulldozer-programs`. Luckily, running the client is way easier just call `npx nx serve bulldozer-client`
+Those three commands will build the program, deploy it to your local validator instance and start a server at port 4200 with the client application.
 
 NOTE: Make sure to point the solana config in your local environment to match the local instance you have running.
 
