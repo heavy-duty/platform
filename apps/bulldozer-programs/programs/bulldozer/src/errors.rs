@@ -15,11 +15,11 @@ pub enum ErrorCode {
   InvalidAccountModifier,
   #[msg("Missing Collection Account")]
   MissingCollectionAccount,
-  #[msg("Invalid Collection Account")]
+  #[msg("Missing Payer Account")]
   MissingPayerAccount,
-  #[msg("Invalid Payer Account")]
+  #[msg("Missing Space")]
   MissingSpace,
-  #[msg("Invalid Close Account")]
+  #[msg("Missing Program")]
   MissingProgram,
   #[msg("Missing Account")]
   MissingAccount,

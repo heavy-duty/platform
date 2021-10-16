@@ -20,6 +20,7 @@ import {
 } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';
+import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
 import { merge, Observable, of, Subject } from 'rxjs';
 import { concatMap, filter, map, tap, withLatestFrom } from 'rxjs/operators';
@@ -287,6 +288,8 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
       return error;
     } else if (error instanceof WalletError) {
       return error.name;
+    } else if (error instanceof ProgramError) {
+      return error.message;
     } else {
       return 'Unknown error';
     }

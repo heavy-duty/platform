@@ -1089,17 +1089,17 @@
     {
       "code": 306,
       "name": "MissingPayerAccount",
-      "msg": "Invalid Collection Account"
+      "msg": "Missing Payer Account"
     },
     {
       "code": 307,
       "name": "MissingSpace",
-      "msg": "Invalid Payer Account"
+      "msg": "Missing Space"
     },
     {
       "code": 308,
       "name": "MissingProgram",
-      "msg": "Invalid Close Account"
+      "msg": "Missing Program"
     },
     {
       "code": 309,
