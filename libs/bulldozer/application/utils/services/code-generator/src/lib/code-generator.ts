@@ -32,8 +32,6 @@ export const generateInstructionCode = (instruction: InstructionExtended) => {
     new Map([])
   );
 
-  console.log({ instruction, formattedInstruction });
-
   return generateCode(
     {
       instruction: formattedInstruction,

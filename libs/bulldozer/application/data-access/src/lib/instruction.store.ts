@@ -200,8 +200,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                             ({ id }) => id === account.data.close
                           );
 
-                        console.log(relations);
-
                         return {
                           ...account,
                           data: {
