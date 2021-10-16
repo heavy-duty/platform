@@ -1,8 +1,9 @@
-import { Inject, Injectable } from '@angular/core';
-import { ConnectionStore, WalletStore } from '@danmt/wallet-adapter-angular';
+import { Injectable } from '@angular/core';
+import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';
-import { Program, Provider } from '@project-serum/anchor';
+import { Program } from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { combineLatest, defer, from } from 'rxjs';
 import { concatMap, map, switchMap, take, tap } from 'rxjs/operators';
@@ -11,14 +12,11 @@ import {
   ApplicationParser,
   CollectionAttributeParser,
   CollectionParser,
-  DummyWallet,
   InstructionAccountParser,
   InstructionArgumentParser,
   InstructionParser,
   InstructionRelationParser,
-  PROGRAM_CONFIG,
 } from './utils';
-import { ProgramConfig } from './utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -31,56 +29,27 @@ const initialState = {
 };
 
 @Injectable()
-export class ProgramStore extends ComponentStore<ViewModel> {
+export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   readonly reader$ = this.select(({ reader }) => reader);
   readonly writer$ = this.select(({ writer }) => writer);
 
   constructor(
     private readonly _walletStore: WalletStore,
-    private readonly _connectionStore: ConnectionStore,
-    @Inject(PROGRAM_CONFIG) private readonly _programConfig: ProgramConfig
+    private readonly _programStore: ProgramStore
   ) {
     super(initialState);
   }
 
-  readonly loadReader = this.effect(() =>
-    this._connectionStore.connection$.pipe(
-      isNotNullOrUndefined,
-      tap((connection) =>
-        this.patchState({
-          reader: new Program(
-            this._programConfig.idl,
-            new PublicKey(this._programConfig.id),
-            new Provider(
-              connection,
-              new DummyWallet(),
-              Provider.defaultOptions()
-            )
-          ),
-        })
-      )
-    )
+  loadReader = this.effect(() =>
+    this._programStore
+      .getReader('bulldozer')
+      .pipe(tap((reader) => this.patchState({ reader })))
   );
 
-  readonly loadWriter = this.effect(() =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.anchorWallet$,
-    ]).pipe(
-      tap(([connection, wallet]) =>
-        this.patchState({
-          writer: wallet
-            ? new Program(
-                this._programConfig.idl,
-                new PublicKey(this._programConfig.id),
-                new Provider(connection, wallet, {
-                  commitment: 'confirmed',
-                })
-              )
-            : null,
-        })
-      )
-    )
+  loadWriter = this.effect(() =>
+    this._programStore
+      .getWriter('bulldozer')
+      .pipe(tap((writer) => this.patchState({ writer })))
   );
 
   getApplications() {

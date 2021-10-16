@@ -14,7 +14,7 @@ import {
   InstructionExtended,
   InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
-import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { SystemProgram } from '@solana/web3.js';
@@ -104,7 +104,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _programStore: ProgramStore,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore
   ) {
@@ -129,14 +129,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       this.reload$,
     ]).pipe(
       switchMap(([applicationId, collections]) =>
-        this._programStore.getInstructions(applicationId).pipe(
+        this._bulldozerProgramStore.getInstructions(applicationId).pipe(
           concatMap((instructions) =>
             from(instructions).pipe(
               concatMap((instruction) =>
                 combineLatest([
-                  this._programStore.getInstructionArguments(instruction.id),
-                  this._programStore.getInstructionAccounts(instruction.id),
-                  this._programStore.getInstructionRelations(instruction.id),
+                  this._bulldozerProgramStore.getInstructionArguments(
+                    instruction.id
+                  ),
+                  this._bulldozerProgramStore.getInstructionAccounts(
+                    instruction.id
+                  ),
+                  this._bulldozerProgramStore.getInstructionRelations(
+                    instruction.id
+                  ),
                 ]).pipe(
                   map(
                     ([
@@ -242,12 +248,14 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, applicationId]) =>
-              this._programStore.createInstruction(applicationId, name).pipe(
-                tapResponse(
-                  () => this._events.next(new InstructionCreated()),
-                  (error) => this._error.next(error)
+              this._bulldozerProgramStore
+                .createInstruction(applicationId, name)
+                .pipe(
+                  tapResponse(
+                    () => this._events.next(new InstructionCreated()),
+                    (error) => this._error.next(error)
+                  )
                 )
-              )
             )
           )
       )
@@ -264,13 +272,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                this._programStore.updateInstruction(instruction.id, name).pipe(
-                  tapResponse(
-                    () =>
-                      this._events.next(new InstructionUpdated(instruction.id)),
-                    (error) => this._error.next(error)
+                this._bulldozerProgramStore
+                  .updateInstruction(instruction.id, name)
+                  .pipe(
+                    tapResponse(
+                      () =>
+                        this._events.next(
+                          new InstructionUpdated(instruction.id)
+                        ),
+                      (error) => this._error.next(error)
+                    )
                   )
-                )
               )
             )
         )
@@ -288,7 +300,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         )
       ),
       concatMap(({ id, data: { body } }) =>
-        this._programStore.updateInstructionBody(id, body).pipe(
+        this._bulldozerProgramStore.updateInstructionBody(id, body).pipe(
           tapResponse(
             () => this._events.next(new InstructionBodyUpdated(id)),
             (error) => this._error.next(error)
@@ -302,7 +314,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     (instructionId$: Observable<string>) =>
       instructionId$.pipe(
         concatMap((instructionId) =>
-          this._programStore.deleteInstruction(instructionId).pipe(
+          this._bulldozerProgramStore.deleteInstruction(instructionId).pipe(
             tapResponse(
               () => this._events.next(new InstructionDeleted(instructionId)),
               (error) => this._error.next(error)
@@ -330,7 +342,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 applicationId,
                 instructionId,
               ]) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .createInstructionArgument(
                     applicationId,
                     instructionId,
@@ -363,7 +375,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name, kind, modifier, size }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateInstructionArgument(
                     argument.id,
                     name,
@@ -389,7 +401,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly deleteArgument = this.effect((argumentId$: Observable<string>) =>
     argumentId$.pipe(
       concatMap((argumentId) =>
-        this._programStore.deleteInstructionArgument(argumentId).pipe(
+        this._bulldozerProgramStore.deleteInstructionArgument(argumentId).pipe(
           tapResponse(
             () => this._events.next(new InstructionArgumentDeleted(argumentId)),
             (error) => this._error.next(error)
@@ -413,7 +425,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ from, to }, applicationId, instructionId]) =>
-              this._programStore
+              this._bulldozerProgramStore
                 .createInstructionRelation(
                   applicationId,
                   instructionId,
@@ -447,7 +459,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ from, to }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateInstructionRelation(relation.id, from, to)
                   .pipe(
                     tapResponse(
@@ -467,7 +479,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly deleteRelation = this.effect((relationId$: Observable<string>) =>
     relationId$.pipe(
       concatMap((relationId) =>
-        this._programStore.deleteInstructionRelation(relationId).pipe(
+        this._bulldozerProgramStore.deleteInstructionRelation(relationId).pipe(
           tapResponse(
             () => this._events.next(new InstructionRelationDeleted(relationId)),
             (error) => this._error.next(error)
@@ -480,7 +492,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly deleteAccount = this.effect((accountId$: Observable<string>) =>
     accountId$.pipe(
       concatMap((accountId) =>
-        this._programStore.deleteInstructionAccount(accountId).pipe(
+        this._bulldozerProgramStore.deleteInstructionAccount(accountId).pipe(
           tapResponse(
             () => this._events.next(new InstructionAccountDeleted(accountId)),
             (error) => this._error.next(error)
@@ -516,7 +528,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 applicationId,
                 instructionId,
               ]) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .createInstructionAccount(
                     applicationId,
                     instructionId,
@@ -561,7 +573,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name, modifier, collection, space, payer, close }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateInstructionAccount(
                     account.id,
                     name,
@@ -601,7 +613,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name, modifier }, applicationId, instructionId]) =>
-              this._programStore
+              this._bulldozerProgramStore
                 .createInstructionAccount(
                   applicationId,
                   instructionId,
@@ -638,7 +650,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name, modifier }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateInstructionAccount(
                     account.id,
                     name,
@@ -687,7 +699,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name, program }, applicationId, instructionId]) =>
-              this._programStore
+              this._bulldozerProgramStore
                 .createInstructionAccount(
                   applicationId,
                   instructionId,
@@ -732,7 +744,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name, program }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateInstructionAccount(
                     account.id,
                     name,

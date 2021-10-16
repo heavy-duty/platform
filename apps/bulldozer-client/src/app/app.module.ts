@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { WALLET_CONFIG } from '@danmt/wallet-adapter-angular';
-import { PROGRAM_CONFIG } from '@heavy-duty/bulldozer/data-access';
+import { PROGRAM_CONFIGS } from '@heavy-duty/ng-anchor';
 import {
   getPhantomWallet,
   getSlopeWallet,
@@ -11,7 +11,7 @@ import {
   getSolletWallet,
 } from '@solana/wallet-adapter-wallets';
 
-import * as idl from '../assets/json/bulldozer.json';
+import * as bulldozerIdl from '../assets/json/bulldozer.json';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 
@@ -45,10 +45,12 @@ import { AppComponent } from './app.component';
       },
     },
     {
-      provide: PROGRAM_CONFIG,
+      provide: PROGRAM_CONFIGS,
       useValue: {
-        id: environment.programId,
-        idl,
+        bulldozer: {
+          id: environment.bulldozerProgramId,
+          idl: bulldozerIdl,
+        },
       },
     },
   ],

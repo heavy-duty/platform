@@ -115,6 +115,9 @@
     "bulldozer-shell": {
       "tags": []
     },
+    "shared-ng-anchor": {
+      "tags": []
+    },
     "shared-utils-operators": {
       "tags": []
     }

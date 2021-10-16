@@ -1,2 +1,1 @@
-export * from './lib/program.store';
-export { PROGRAM_CONFIG } from './lib/utils';
+export * from './lib/bulldozer-program.store';

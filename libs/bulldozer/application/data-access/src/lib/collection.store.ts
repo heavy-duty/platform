@@ -8,7 +8,7 @@ import {
   CollectionAttribute,
   CollectionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
-import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -82,7 +82,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _programStore: ProgramStore,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
@@ -94,16 +94,18 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       this.reload$,
     ]).pipe(
       switchMap(([applicationId]) =>
-        this._programStore.getCollections(applicationId).pipe(
+        this._bulldozerProgramStore.getCollections(applicationId).pipe(
           concatMap((collections) =>
             from(collections).pipe(
               mergeMap((collection) =>
-                this._programStore.getCollectionAttributes(collection.id).pipe(
-                  map((attributes) => ({
-                    ...collection,
-                    attributes,
-                  }))
-                )
+                this._bulldozerProgramStore
+                  .getCollectionAttributes(collection.id)
+                  .pipe(
+                    map((attributes) => ({
+                      ...collection,
+                      attributes,
+                    }))
+                  )
               )
             )
           ),
@@ -136,15 +138,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, applicationId]) =>
-              this._programStore.createCollection(applicationId, name).pipe(
-                tapResponse(
-                  () => {
-                    this._reload.next(null);
-                    this._events.next(new CollectionCreated());
-                  },
-                  (error) => this._error.next(error)
+              this._bulldozerProgramStore
+                .createCollection(applicationId, name)
+                .pipe(
+                  tapResponse(
+                    () => {
+                      this._reload.next(null);
+                      this._events.next(new CollectionCreated());
+                    },
+                    (error) => this._error.next(error)
+                  )
                 )
-              )
             )
           )
       )
@@ -160,13 +164,15 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               concatMap(({ name }) =>
-                this._programStore.updateCollection(collection.id, name).pipe(
-                  tapResponse(
-                    () =>
-                      this._events.next(new CollectionUpdated(collection.id)),
-                    (error) => this._error.next(error)
+                this._bulldozerProgramStore
+                  .updateCollection(collection.id, name)
+                  .pipe(
+                    tapResponse(
+                      () =>
+                        this._events.next(new CollectionUpdated(collection.id)),
+                      (error) => this._error.next(error)
+                    )
                   )
-                )
               )
             )
         )
@@ -176,7 +182,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly deleteCollection = this.effect((collectionId$: Observable<string>) =>
     collectionId$.pipe(
       concatMap((collectionId) =>
-        this._programStore.deleteCollection(collectionId).pipe(
+        this._bulldozerProgramStore.deleteCollection(collectionId).pipe(
           tapResponse(
             () => this._events.next(new CollectionDeleted(collectionId)),
             (error) => this._error.next(error)
@@ -203,7 +209,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             concatMap(({ name, kind, modifier, size }) =>
-              this._programStore
+              this._bulldozerProgramStore
                 .createCollectionAttribute(
                   applicationId,
                   collectionId,
@@ -236,7 +242,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name, kind, modifier, size }) =>
-                this._programStore
+                this._bulldozerProgramStore
                   .updateCollectionAttribute(
                     attribute.id,
                     name,
@@ -263,13 +269,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     (attributeId$: Observable<string>) =>
       attributeId$.pipe(
         concatMap((attributeId) =>
-          this._programStore.deleteCollectionAttribute(attributeId).pipe(
-            tapResponse(
-              () =>
-                this._events.next(new CollectionAttributeDeleted(attributeId)),
-              (error) => this._error.next(error)
+          this._bulldozerProgramStore
+            .deleteCollectionAttribute(attributeId)
+            .pipe(
+              tapResponse(
+                () =>
+                  this._events.next(
+                    new CollectionAttributeDeleted(attributeId)
+                  ),
+                (error) => this._error.next(error)
+              )
             )
-          )
         )
       )
   );
