@@ -29,6 +29,20 @@ export const ApplicationParser = (
   };
 };
 
+
+export const ApplicationParser2 = (
+  publicKey: PublicKey,
+  account: RawApplication
+): Application => {
+  return {
+    id: publicKey.toBase58(),
+    data: {
+      name: utils.bytes.utf8.decode(account.name),
+      authority: account.authority.toBase58(),
+    },
+  };
+};
+
 interface RawCollection {
   authority: PublicKey;
   application: PublicKey;

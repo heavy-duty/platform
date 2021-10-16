@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { Application } from '@heavy-duty/bulldozer/application/utils/types';
-import { ProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
@@ -48,7 +48,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _programStore: ProgramStore
+    private readonly _bulldozerProgramStore: BulldozerProgramStore
   ) {
     super(initialState);
   }
@@ -56,7 +56,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly loadApplications = this.effect(() =>
     this.reload$.pipe(
       switchMap(() =>
-        this._programStore.getApplications().pipe(
+        this._bulldozerProgramStore.getApplications().pipe(
           tapResponse(
             (applications) => this.patchState({ applications }),
             (error) => this._error.next(error)
@@ -82,7 +82,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             concatMap(({ name }) =>
-              this._programStore.createApplication(name).pipe(
+              this._bulldozerProgramStore.createApplication(name).pipe(
                 tapResponse(
                   () => this._events.next(new ApplicationCreated()),
                   (error) => this._error.next(error)
@@ -104,13 +104,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                this._programStore.updateApplication(application.id, name).pipe(
-                  tapResponse(
-                    () =>
-                      this._events.next(new ApplicationUpdated(application.id)),
-                    (error) => this._error.next(error)
+                this._bulldozerProgramStore
+                  .updateApplication(application.id, name)
+                  .pipe(
+                    tapResponse(
+                      () =>
+                        this._events.next(
+                          new ApplicationUpdated(application.id)
+                        ),
+                      (error) => this._error.next(error)
+                    )
                   )
-                )
               )
             )
         )
@@ -121,7 +125,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     (applicationId$: Observable<string>) =>
       applicationId$.pipe(
         concatMap((applicationId) =>
-          this._programStore.deleteApplication(applicationId).pipe(
+          this._bulldozerProgramStore.deleteApplication(applicationId).pipe(
             tapResponse(
               () => this._events.next(new ApplicationDeleted(applicationId)),
               (error) => this._error.next(error)
