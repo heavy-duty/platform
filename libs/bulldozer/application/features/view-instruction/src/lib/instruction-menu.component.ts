@@ -40,6 +40,14 @@ import {
         <mat-icon>add</mat-icon>
         <span>Add signer</span>
       </button>
+      <button
+        mat-menu-item
+        (click)="onCreateRelation()"
+        [disabled]="!connected"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Add relation</span>
+      </button>
     </mat-menu>
   `,
   styles: [],
