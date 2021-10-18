@@ -822,13 +822,21 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const relation = Keypair.generate();
-
         return from(
-          defer(() =>
-            writer.rpc.createInstructionRelation({
+          defer(async () => {
+            const [relationPublicKey, relationBump] =
+              await PublicKey.findProgramAddress(
+                [
+                  Buffer.from('instruction_relation', 'utf8'),
+                  new PublicKey(fromAccount).toBuffer(),
+                  new PublicKey(toAccount).toBuffer(),
+                ],
+                writer.programId
+              );
+
+            return writer.rpc.createInstructionRelation(relationBump, {
               accounts: {
-                relation: relation.publicKey,
+                relation: relationPublicKey,
                 instruction: new PublicKey(instructionId),
                 application: new PublicKey(applicationId),
                 from: new PublicKey(fromAccount),
@@ -836,9 +844,8 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
                 authority: walletPublicKey,
                 systemProgram: SystemProgram.programId,
               },
-              signers: [relation],
-            })
-          )
+            });
+          })
         );
       })
     );

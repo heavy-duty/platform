@@ -1,11 +1,5 @@
-import {
-  ProgramError,
-  Provider,
-  setProvider,
-  utils,
-  workspace,
-} from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Provider, setProvider, workspace } from '@project-serum/anchor';
+import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
 describe('instruction relation', () => {
@@ -27,7 +21,7 @@ describe('instruction relation', () => {
   const toAccountModifier = 0;
   const toAccountSpace = null;
   const toAccountProgram = null;
-  const relationAccount = Keypair.generate();
+  let relationPublicKey: PublicKey, relationBump: number;
 
   before(async () => {
     await program.rpc.createApplication(applicationName, {
@@ -81,25 +75,32 @@ describe('instruction relation', () => {
         signers: [toAccount],
       }
     );
+    [relationPublicKey, relationBump] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_relation', 'utf8'),
+        fromAccount.publicKey.toBuffer(),
+        toAccount.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
   });
 
   it('should create', async () => {
     // act
-    await program.rpc.createInstructionRelation({
+    await program.rpc.createInstructionRelation(relationBump, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         from: fromAccount.publicKey,
         to: toAccount.publicKey,
-        relation: relationAccount.publicKey,
+        relation: relationPublicKey,
         systemProgram: SystemProgram.programId,
       },
-      signers: [relationAccount],
     });
     // assert
     const account = await program.account.instructionRelation.fetch(
-      relationAccount.publicKey
+      relationPublicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.instruction.equals(instruction.publicKey));
@@ -115,12 +116,12 @@ describe('instruction relation', () => {
         authority: program.provider.wallet.publicKey,
         from: toAccount.publicKey,
         to: fromAccount.publicKey,
-        relation: relationAccount.publicKey,
+        relation: relationPublicKey,
       },
     });
     // assert
     const account = await program.account.instructionRelation.fetch(
-      relationAccount.publicKey
+      relationPublicKey
     );
     assert.ok(account.from.equals(toAccount.publicKey));
     assert.ok(account.to.equals(fromAccount.publicKey));
@@ -131,12 +132,12 @@ describe('instruction relation', () => {
     await program.rpc.deleteInstructionRelation({
       accounts: {
         authority: program.provider.wallet.publicKey,
-        relation: relationAccount.publicKey,
+        relation: relationPublicKey,
       },
     });
     // assert
     const account = await program.account.instructionRelation.fetchNullable(
-      relationAccount.publicKey
+      relationPublicKey
     );
     assert.equal(account, null);
   });
