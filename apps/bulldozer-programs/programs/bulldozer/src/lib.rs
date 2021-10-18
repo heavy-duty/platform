@@ -131,8 +131,11 @@ pub mod bulldozer {
     instructions::delete_instruction_account::handler(ctx)
   }
 
-  pub fn create_instruction_relation(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
-    instructions::create_instruction_relation::handler(ctx)
+  pub fn create_instruction_relation(
+    ctx: Context<CreateInstructionRelation>,
+    bump: u8,
+  ) -> ProgramResult {
+    instructions::create_instruction_relation::handler(ctx, bump)
   }
 
   pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {

@@ -535,7 +535,7 @@
         {
           "name": "relation",
           "isMut": true,
-          "isSigner": true
+          "isSigner": false
         },
         {
           "name": "application",
@@ -568,7 +568,12 @@
           "isSigner": false
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "bump",
+          "type": "u8"
+        }
+      ]
     },
     {
       "name": "updateInstructionRelation",
@@ -836,6 +841,10 @@
           {
             "name": "to",
             "type": "publicKey"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
           }
         ]
       }

@@ -7,4 +7,5 @@ pub struct InstructionRelation {
   pub instruction: Pubkey,
   pub from: Pubkey,
   pub to: Pubkey,
+  pub bump: u8,
 }

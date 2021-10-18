@@ -2,11 +2,19 @@ use crate::collections::{Application, Instruction, InstructionAccount, Instructi
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
+#[instruction(bump: u8)]
 pub struct CreateInstructionRelation<'info> {
   #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32 + 32 + 32 + 32
+        space = 8 + 32 + 32 + 32 + 32 + 32 + 1,
+        seeds = [
+          b"instruction_relation",
+          from.key().as_ref(),
+          to.key().as_ref()
+        ],
+        bump = bump,
+        constraint = from.key().as_ref() != to.key().as_ref()
     )]
   pub relation: Box<Account<'info, InstructionRelation>>,
   pub application: Box<Account<'info, Application>>,
@@ -18,13 +26,14 @@ pub struct CreateInstructionRelation<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handler(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
+pub fn handler(ctx: Context<CreateInstructionRelation>, bump: u8) -> ProgramResult {
   msg!("Create instruction relation");
   ctx.accounts.relation.authority = ctx.accounts.authority.key();
   ctx.accounts.relation.application = ctx.accounts.application.key();
   ctx.accounts.relation.instruction = ctx.accounts.instruction.key();
   ctx.accounts.relation.from = ctx.accounts.from.key();
   ctx.accounts.relation.to = ctx.accounts.to.key();
+  ctx.accounts.relation.bump = bump;
 
   Ok(())
 }
