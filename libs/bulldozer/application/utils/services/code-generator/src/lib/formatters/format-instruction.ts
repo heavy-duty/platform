@@ -107,6 +107,9 @@ const formatInstructionAccounts = (
 export const formatInstruction = (instruction: InstructionExtended) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),
+  initializesAccount: instruction.accounts.some(
+    (account) => account.data.modifier.id === 1
+  ),
   arguments: formatInstructionArguments(instruction.id, instruction.arguments),
   accounts: formatInstructionAccounts(instruction.id, instruction.accounts),
 });

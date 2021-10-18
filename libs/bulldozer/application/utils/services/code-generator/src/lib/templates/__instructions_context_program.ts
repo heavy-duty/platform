@@ -36,31 +36,15 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{/if}}
   pub {{this.data.name.snakeCase}}: Box<Account<'info,{{this.data.collection.data.name.pascalCase}}>>,
   {{/case}}
-  {{#case '2'}}
-  {{#if this.data.modifier.name }}
-  #[account(
-    {{this.data.modifier.name}},
-    {{#if this.data.space}}
-    space = 8 + {{this.data.space}},
-    {{/if}}
-    {{#if this.data.payer}}
-    payer = {{this.data.payer.data.name.snakeCase}},
-    {{/if}}
-    {{#each this.data.relations}}
-    has_one = {{this.data.to.data.name.snakeCase}},
-    {{/each}}
-  )]
-  {{/if}}
-  pub {{this.data.name.snakeCase}}: Signer<'info>,
-  {{/case}}
   {{#case '1'}}
   {{#if this.data.modifier.name }}
-  #[account(
-    {{this.data.modifier.name}}
-  )]
+  #[account({{this.data.modifier.name}})]
   {{/if}}
-  pub {{this.data.name.snakeCase}}: Program<'info, System>,
+  pub {{this.data.name.snakeCase}}: Signer<'info>,
   {{/case}}{{/switch}}{{/each}}
+  {{#if instruction.initializesAccount }}
+  pub system_program: Program<'info, System>,
+  {{/if }}
 }
 
 {{#if instruction.handler}}
