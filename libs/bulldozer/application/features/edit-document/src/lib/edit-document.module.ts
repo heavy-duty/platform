@@ -9,7 +9,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 
-import { EditBasicAccountComponent } from './edit-basic-account.component';
+import { EditDocumentComponent } from './edit-document.component';
 
 @NgModule({
   imports: [
@@ -23,6 +23,6 @@ import { EditBasicAccountComponent } from './edit-basic-account.component';
     MatSelectModule,
     ObscureAddressModule,
   ],
-  declarations: [EditBasicAccountComponent],
+  declarations: [EditDocumentComponent],
 })
-export class EditBasicAccountModule {}
+export class EditDocumentModule {}

@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'bulldozer-application-features-edit-basic-account',
+  displayName: 'bulldozer-application-features-edit-document',
   preset: '../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../coverage/libs/bulldozer/application/features/edit-basic-account',
+    '../../../../../coverage/libs/bulldozer/application/features/edit-document',
   transform: {
     '^.+\\.(ts|js|html)$': 'jest-preset-angular',
   },

@@ -28,43 +28,21 @@ import {
         <mat-icon>add</mat-icon>
         <span>Add argument</span>
       </button>
-      <button mat-menu-item [matMenuTriggerFor]="addAccountMenu">
-        Add account
-      </button>
       <button
         mat-menu-item
-        (click)="onCreateRelation()"
+        (click)="onCreateDocument()"
         [disabled]="!connected"
       >
         <mat-icon>add</mat-icon>
-        <span>Add relation</span>
-      </button>
-    </mat-menu>
-
-    <mat-menu #addAccountMenu="matMenu">
-      <button
-        mat-menu-item
-        (click)="onCreateBasicAccount()"
-        [disabled]="!connected"
-      >
-        <mat-icon>description</mat-icon>
-        <span>Basic account</span>
+        <span>Add document</span>
       </button>
       <button
         mat-menu-item
         (click)="onCreateSignerAccount()"
         [disabled]="!connected"
       >
-        <mat-icon>rate_review</mat-icon>
-        <span>Signer account</span>
-      </button>
-      <button
-        mat-menu-item
-        (click)="onCreateProgramAccount()"
-        [disabled]="!connected"
-      >
-        <mat-icon>group_work</mat-icon>
-        <span>Program account</span>
+        <mat-icon>add</mat-icon>
+        <span>Add signer account</span>
       </button>
     </mat-menu>
   `,
@@ -74,7 +52,7 @@ import {
 export class InstructionMenuComponent {
   @Input() connected: boolean | null = null;
   @Output() createArgument = new EventEmitter();
-  @Output() createBasicAccount = new EventEmitter();
+  @Output() createDocument = new EventEmitter();
   @Output() createSignerAccount = new EventEmitter();
   @Output() createProgramAccount = new EventEmitter();
   @Output() createRelation = new EventEmitter();
@@ -83,8 +61,8 @@ export class InstructionMenuComponent {
     this.createArgument.emit();
   }
 
-  onCreateBasicAccount() {
-    this.createBasicAccount.emit();
+  onCreateDocument() {
+    this.createDocument.emit();
   }
 
   onCreateSignerAccount() {

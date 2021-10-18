@@ -38,7 +38,7 @@ import { filter, map, startWith } from 'rxjs/operators';
         <bd-instruction-menu
           [connected]="connected$ | ngrxPush"
           (createArgument)="onCreateArgument()"
-          (createBasicAccount)="onCreateBasicAccount()"
+          (createDocument)="onCreateDocument()"
           (createSignerAccount)="onCreateSignerAccount()"
           (createProgramAccount)="onCreateProgramAccount()"
           (createRelation)="onCreateRelation()"
@@ -58,7 +58,7 @@ import { filter, map, startWith } from 'rxjs/operators';
             class="block mb-16"
             [connected]="connected$ | ngrxPush"
             [accounts]="accounts$ | ngrxPush"
-            (updateBasicAccount)="onUpdateBasicAccount($event)"
+            (updateDocument)="onUpdateDocument($event)"
             (updateSignerAccount)="onUpdateSignerAccount($event)"
             (updateProgramAccount)="onUpdateProgramAccount($event)"
             (deleteAccount)="onDeleteAccount($event)"
@@ -183,12 +183,12 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.deleteArgument(argumentId);
   }
 
-  onCreateBasicAccount() {
-    this._instructionStore.createBasicAccount();
+  onCreateDocument() {
+    this._instructionStore.createDocument();
   }
 
-  onUpdateBasicAccount(account: InstructionAccountExtended) {
-    this._instructionStore.updateBasicAccount(account);
+  onUpdateDocument(account: InstructionAccountExtended) {
+    this._instructionStore.updateDocument(account);
   }
 
   onCreateSignerAccount() {

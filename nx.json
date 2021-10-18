@@ -42,10 +42,10 @@
     "bulldozer-application-features-edit-attribute": {
       "tags": []
     },
-    "bulldozer-application-features-edit-basic-account": {
+    "bulldozer-application-features-edit-collection": {
       "tags": []
     },
-    "bulldozer-application-features-edit-collection": {
+    "bulldozer-application-features-edit-document": {
       "tags": []
     },
     "bulldozer-application-features-edit-instruction": {

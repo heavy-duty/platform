@@ -16,8 +16,8 @@ import {
     <section>
       <mat-card>
         <header bdSectionHeader>
-          <h2>Accounts</h2>
-          <p>Visualize the list of accounts and manage them.</p>
+          <h2>Context</h2>
+          <p>Manage documents in the context of the instruction.</p>
         </header>
 
         <mat-list
@@ -177,7 +177,7 @@ import {
 export class ListAccountsComponent {
   @Input() connected: boolean | null = null;
   @Input() accounts: InstructionAccountExtended[] | null = null;
-  @Output() updateBasicAccount = new EventEmitter<InstructionAccountExtended>();
+  @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
   @Output() updateSignerAccount =
     new EventEmitter<InstructionAccountExtended>();
   @Output() updateProgramAccount =
@@ -190,7 +190,7 @@ export class ListAccountsComponent {
   onUpdateAccount(account: InstructionAccountExtended) {
     switch (account.data.kind.id) {
       case 0:
-        return this.updateBasicAccount.emit(account);
+        return this.updateDocument.emit(account);
       case 1:
         return this.updateProgramAccount.emit(account);
       case 2:
