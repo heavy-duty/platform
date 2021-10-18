@@ -13,7 +13,8 @@ pub struct CreateInstructionRelation<'info> {
           from.key().as_ref(),
           to.key().as_ref()
         ],
-        bump = bump
+        bump = bump,
+        constraint = from.key().as_ref() != to.key().as_ref()
     )]
   pub relation: Box<Account<'info, InstructionRelation>>,
   pub application: Box<Account<'info, Application>>,

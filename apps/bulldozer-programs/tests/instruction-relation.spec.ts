@@ -1,4 +1,9 @@
-import { Provider, setProvider, workspace } from '@project-serum/anchor';
+import {
+  ProgramError,
+  Provider,
+  setProvider,
+  workspace,
+} from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
@@ -140,5 +145,35 @@ describe('instruction relation', () => {
       relationPublicKey
     );
     assert.equal(account, null);
+  });
+
+  it('should fail if from and to are equal', async () => {
+    let error: ProgramError;
+    let [relationPublicKey, relationBump] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_relation', 'utf8'),
+        fromAccount.publicKey.toBuffer(),
+        fromAccount.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    // act
+    try {
+      error = await program.rpc.createInstructionRelation(relationBump, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: fromAccount.publicKey,
+          to: fromAccount.publicKey,
+          relation: relationPublicKey,
+          systemProgram: SystemProgram.programId,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 143);
   });
 });
