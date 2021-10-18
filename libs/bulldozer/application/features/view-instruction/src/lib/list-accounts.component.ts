@@ -91,13 +91,17 @@ import {
                     account.data.relations && account.data.relations.length > 0
                   "
                 >
-                  <p>Relations</p>
-                  <ul>
-                    <li *ngFor="let relation of account.data.relations">
+                  <p class="mt-2 mb-0 font-bold">Relations</p>
+                  <ul class="list-disc pl-4">
+                    <li
+                      *ngFor="let relation of account.data.relations"
+                      class="text-xs"
+                    >
                       {{ relation.data.to.data.name }} ({{
                         relation.data.to.id | obscureAddress
                       }})
                       <button
+                        class="w-6 h-6 leading-6"
                         mat-icon-button
                         [attr.aria-label]="
                           'More options of ' +

@@ -5,7 +5,12 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
@@ -14,6 +19,16 @@ import {
   InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject } from 'rxjs';
+
+export const equalValidator =
+  (a: string, b: string): ValidatorFn =>
+  (control) => {
+    if (control.get(a)?.value === control.get(b)?.value) {
+      return { equal: true };
+    }
+
+    return null;
+  };
 
 @Component({
   selector: 'bd-edit-relation',
@@ -63,6 +78,12 @@ import { Subject } from 'rxjs';
         <mat-error *ngIf="submitted">To is required.</mat-error>
       </mat-form-field>
 
+      <mat-error
+        *ngIf="submitted && relationGroup.errors?.equal"
+        class="text-center m-0"
+        >Accounts have to be different.</mat-error
+      >
+
       <button
         mat-stroked-button
         color="primary"
@@ -88,10 +109,15 @@ export class EditRelationComponent implements OnInit, OnDestroy {
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
   submitted = false;
-  readonly relationGroup = new FormGroup({
-    from: new FormControl(null, { validators: [Validators.required] }),
-    to: new FormControl(null, { validators: [Validators.required] }),
-  });
+  readonly relationGroup = new FormGroup(
+    {
+      from: new FormControl(null, { validators: [Validators.required] }),
+      to: new FormControl(null, { validators: [Validators.required] }),
+    },
+    {
+      validators: [equalValidator('from', 'to')],
+    }
+  );
   get fromControl() {
     return this.relationGroup.get('from') as FormControl;
   }
