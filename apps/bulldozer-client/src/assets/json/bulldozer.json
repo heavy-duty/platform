@@ -463,12 +463,6 @@
           "type": {
             "option": "u16"
           }
-        },
-        {
-          "name": "program",
-          "type": {
-            "option": "publicKey"
-          }
         }
       ]
     },
@@ -503,12 +497,6 @@
           "name": "space",
           "type": {
             "option": "u16"
-          }
-        },
-        {
-          "name": "program",
-          "type": {
-            "option": "publicKey"
           }
         }
       ]
@@ -755,12 +743,6 @@
             }
           },
           {
-            "name": "program",
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
             "name": "payer",
             "type": {
               "option": "publicKey"
@@ -857,16 +839,7 @@
         "kind": "enum",
         "variants": [
           {
-            "name": "Basic",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "Program",
+            "name": "Document",
             "fields": [
               {
                 "name": "id",

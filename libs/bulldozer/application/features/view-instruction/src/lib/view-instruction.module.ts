@@ -14,8 +14,9 @@ import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pi
 import { ReactiveComponentModule } from '@ngrx/component';
 
 import { InstructionMenuComponent } from './instruction-menu.component';
-import { ListAccountsComponent } from './list-accounts.component';
+import { ListDocumentsComponent } from './list-documents.component';
 import { ListArgumentsComponent } from './list-arguments.component';
+import { ListSignersComponent } from './list-signers.component';
 import { ViewInstructionComponent } from './view-instruction.component';
 
 @NgModule({
@@ -43,7 +44,8 @@ import { ViewInstructionComponent } from './view-instruction.component';
   declarations: [
     ViewInstructionComponent,
     ListArgumentsComponent,
-    ListAccountsComponent,
+    ListDocumentsComponent,
+    ListSignersComponent,
     InstructionMenuComponent,
   ],
 })

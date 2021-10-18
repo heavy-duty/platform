@@ -95,10 +95,14 @@ import { takeUntil } from 'rxjs/operators';
           formControlName="space"
           required
           type="number"
+          min="0"
           max="65536"
         />
         <mat-error *ngIf="submitted && spaceControl.errors?.required"
           >The space is mandatory.</mat-error
+        >
+        <mat-error *ngIf="submitted && spaceControl.errors?.min"
+          >Space is meant to be positive.</mat-error
         >
         <mat-error *ngIf="submitted && spaceControl.errors?.max"
           >Maximum is 65536.</mat-error
@@ -212,6 +216,7 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
         if (modifier === 1) {
           this.spaceControl.setValidators([
             Validators.required,
+            Validators.min(0),
             Validators.max(65536),
           ]);
           this.payerControl.setValidators([Validators.required]);

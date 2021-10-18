@@ -53,17 +53,25 @@ import { filter, map, startWith } from 'rxjs/operators';
             (deleteArgument)="onDeleteArgument($event)"
           ></bd-list-arguments>
 
-          <bd-list-accounts
-            class="block mb-16"
+          <bd-list-documents
+            class="block mb-4"
             [connected]="connected$ | ngrxPush"
-            [accounts]="accounts$ | ngrxPush"
+            [documents]="documents$ | ngrxPush"
             (updateDocument)="onUpdateDocument($event)"
-            (updateSigner)="onUpdateSigner($event)"
-            (deleteAccount)="onDeleteAccount($event)"
+            (deleteDocument)="onDeleteAccount($event)"
             (updateRelation)="onUpdateRelation($event)"
             (deleteRelation)="onDeleteRelation($event)"
           >
-          </bd-list-accounts>
+          </bd-list-documents>
+
+          <bd-list-signers
+            class="block mb-16"
+            [connected]="connected$ | ngrxPush"
+            [signers]="signers$ | ngrxPush"
+            (updateSigner)="onUpdateSigner($event)"
+            (deleteSigner)="onDeleteAccount($event)"
+          >
+          </bd-list-signers>
         </main>
       </div>
       <div class="w-1/2">
@@ -108,6 +116,9 @@ export class ViewInstructionComponent implements OnInit {
   readonly instructionContext$ = this._instructionStore.instructionContext$;
   readonly arguments$ = this._instructionStore.instructionArguments$;
   readonly accounts$ = this._instructionStore.instructionAccounts$;
+  readonly documents$ = this._instructionStore.documents$;
+  readonly signers$ = this._instructionStore.signers$;
+
   readonly commonEditorOptions = {
     language: 'rust',
     automaticLayout: true,

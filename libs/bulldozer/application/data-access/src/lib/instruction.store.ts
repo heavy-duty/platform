@@ -99,6 +99,16 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     this.instruction$,
     (instruction) => instruction && generateInstructionCode(instruction)
   );
+  readonly documents$ = this.select(
+    this.instructionAccounts$,
+    (accounts) =>
+      accounts && accounts.filter((account) => account.data.kind.id === 0)
+  );
+  readonly signers$ = this.select(
+    this.instructionAccounts$,
+    (accounts) =>
+      accounts && accounts.filter((account) => account.data.kind.id === 1)
+  );
 
   constructor(
     private readonly _matDialog: MatDialog,
@@ -532,7 +542,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     0,
                     modifier,
                     space,
-                    null,
                     collection,
                     payer,
                     close
@@ -576,7 +585,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     0,
                     modifier,
                     space,
-                    null,
                     collection,
                     payer,
                     close
@@ -614,9 +622,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   applicationId,
                   instructionId,
                   name,
-                  2,
+                  1,
                   modifier,
-                  null,
                   null,
                   null,
                   null,
@@ -650,9 +657,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   .updateInstructionAccount(
                     signer.id,
                     name,
-                    2,
+                    1,
                     modifier,
-                    null,
                     null,
                     null,
                     null,
