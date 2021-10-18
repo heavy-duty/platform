@@ -72,7 +72,10 @@
     "bulldozer-application-shell": {
       "tags": []
     },
-    "bulldozer-application-ui-dark-theme": {
+    "bulldozer-application-ui-components-dark-theme": {
+      "tags": []
+    },
+    "bulldozer-application-ui-directives-dark-theme": {
       "tags": []
     },
     "bulldozer-application-ui-directives-page-header": {
@@ -91,6 +94,9 @@
       "tags": []
     },
     "bulldozer-application-utils-services-code-generator": {
+      "tags": []
+    },
+    "bulldozer-application-utils-services-dark-theme": {
       "tags": []
     },
     "bulldozer-application-utils-types": {

@@ -11,7 +11,8 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { WalletUiModule } from '@danmt/wallet-adapter-angular-material-ui';
-import { DarkThemeModule } from '@heavy-duty/bulldozer/application/ui/dark-theme';
+import { DarkThemeSwitchModule } from '@heavy-duty/bulldozer/application/ui/components/dark-theme';
+import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
 
@@ -36,7 +37,8 @@ import { NavigationComponent } from './navigation.component';
     ReactiveComponentModule,
     WalletUiModule,
     ObscureAddressModule,
-    DarkThemeModule,
+    DarkThemeDirectivesModule,
+    DarkThemeSwitchModule,
   ],
   declarations: [
     NavigationComponent,

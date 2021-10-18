@@ -7,7 +7,7 @@ import {
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { WalletStore } from '@danmt/wallet-adapter-angular';
 import { CollectionStore } from '@heavy-duty/bulldozer/application/data-access';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/ui/dark-theme';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
 import { filter, map, startWith } from 'rxjs/operators';
 
