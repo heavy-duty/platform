@@ -7,8 +7,6 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 
 import { EditSignerComponent } from './edit-signer.component';
 
@@ -22,8 +20,6 @@ import { EditSignerComponent } from './edit-signer.component';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
-    MatSelectModule,
-    ObscureAddressModule,
   ],
   declarations: [EditSignerComponent],
 })
