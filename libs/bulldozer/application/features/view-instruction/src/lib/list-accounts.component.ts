@@ -70,10 +70,6 @@ import {
                     >{{ account.data.collection.id | obscureAddress }}</a
                   >
                 </p>
-                <p class="text-xs mb-0 italic" *ngIf="account.data.program">
-                  Program:
-                  {{ account.data.program | obscureAddress }}
-                </p>
                 <p class="text-xs mb-0 italic" *ngIf="account.data.close">
                   Close:
                   {{ account.data.close.data.name }} ({{
@@ -179,8 +175,6 @@ export class ListAccountsComponent {
   @Input() accounts: InstructionAccountExtended[] | null = null;
   @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
   @Output() updateSigner = new EventEmitter<InstructionAccountExtended>();
-  @Output() updateProgramAccount =
-    new EventEmitter<InstructionAccountExtended>();
   @Output() updateAccount = new EventEmitter<InstructionAccountExtended>();
   @Output() deleteAccount = new EventEmitter<string>();
   @Output() updateRelation = new EventEmitter<InstructionRelationExtended>();
@@ -190,8 +184,6 @@ export class ListAccountsComponent {
     switch (account.data.kind.id) {
       case 0:
         return this.updateDocument.emit(account);
-      case 1:
-        return this.updateProgramAccount.emit(account);
       case 2:
         return this.updateSigner.emit(account);
       default:

@@ -215,33 +215,6 @@
         }
       }
     },
-    "bulldozer-application-features-edit-program-account": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/features/edit-program-account",
-      "sourceRoot": "libs/bulldozer/application/features/edit-program-account/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/features/edit-program-account"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/features/edit-program-account/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/features/edit-program-account/src/**/*.ts",
-              "libs/bulldozer/application/features/edit-program-account/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-application-features-edit-relation": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-relation",

@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/features/edit-document';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
-import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
 import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
 import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
@@ -17,7 +16,6 @@ import {
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { SystemProgram } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -665,100 +663,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                       () =>
                         this._events.next(
                           new InstructionAccountUpdated(signer.id)
-                        ),
-                      (error) => this._error.next(error)
-                    )
-                  )
-              )
-            )
-        )
-      )
-  );
-
-  readonly createProgramAccount = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditProgramAccountComponent, {
-            data: {
-              programs: [
-                {
-                  id: SystemProgram.programId.toBase58(),
-                  name: 'System program',
-                },
-              ],
-            },
-          })
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.instructionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(([{ name, program }, applicationId, instructionId]) =>
-              this._bulldozerProgramStore
-                .createInstructionAccount(
-                  applicationId,
-                  instructionId,
-                  name,
-                  1,
-                  0,
-                  null,
-                  program,
-                  null,
-                  null,
-                  null
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new InstructionAccountCreated()),
-                    (error) => this._error.next(error)
-                  )
-                )
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateProgramAccount = this.effect(
-    (account$: Observable<InstructionAccountExtended>) =>
-      account$.pipe(
-        exhaustMap((account) =>
-          this._matDialog
-            .open(EditProgramAccountComponent, {
-              data: {
-                account,
-                programs: [
-                  {
-                    id: SystemProgram.programId.toBase58(),
-                    name: 'System program',
-                  },
-                ],
-              },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap(({ name, program }) =>
-                this._bulldozerProgramStore
-                  .updateInstructionAccount(
-                    account.id,
-                    name,
-                    1,
-                    0,
-                    null,
-                    program,
-                    null,
-                    null,
-                    null
-                  )
-                  .pipe(
-                    tapResponse(
-                      () =>
-                        this._events.next(
-                          new InstructionAccountUpdated(account.id)
                         ),
                       (error) => this._error.next(error)
                     )
