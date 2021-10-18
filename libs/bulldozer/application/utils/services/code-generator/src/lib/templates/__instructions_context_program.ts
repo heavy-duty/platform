@@ -17,9 +17,12 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{#if this.data.modifier.name }}
   #[account(
     {{this.data.modifier.name}},
-    {{#if this.data.space}}
+    {{#eq this.data.space 0}}
+    space = 8,
+    {{/eq}}
+    {{#gt this.data.space 0}}
     space = 8 + {{this.data.space}},
-    {{/if}}
+    {{/gt}}
     {{#if this.data.payer}}
     payer = {{this.data.payer.data.name.snakeCase}},
     {{/if}}
