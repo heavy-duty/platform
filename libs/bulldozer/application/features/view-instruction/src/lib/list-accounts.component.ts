@@ -178,8 +178,7 @@ export class ListAccountsComponent {
   @Input() connected: boolean | null = null;
   @Input() accounts: InstructionAccountExtended[] | null = null;
   @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
-  @Output() updateSignerAccount =
-    new EventEmitter<InstructionAccountExtended>();
+  @Output() updateSigner = new EventEmitter<InstructionAccountExtended>();
   @Output() updateProgramAccount =
     new EventEmitter<InstructionAccountExtended>();
   @Output() updateAccount = new EventEmitter<InstructionAccountExtended>();
@@ -194,7 +193,7 @@ export class ListAccountsComponent {
       case 1:
         return this.updateProgramAccount.emit(account);
       case 2:
-        return this.updateSignerAccount.emit(account);
+        return this.updateSigner.emit(account);
       default:
         return null;
     }

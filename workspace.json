@@ -269,19 +269,19 @@
         }
       }
     },
-    "bulldozer-application-features-edit-signer-account": {
+    "bulldozer-application-features-edit-signer": {
       "projectType": "library",
-      "root": "libs/bulldozer/application/features/edit-signer-account",
-      "sourceRoot": "libs/bulldozer/application/features/edit-signer-account/src",
+      "root": "libs/bulldozer/application/features/edit-signer",
+      "sourceRoot": "libs/bulldozer/application/features/edit-signer/src",
       "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
           "outputs": [
-            "coverage/libs/bulldozer/application/features/edit-signer-account"
+            "coverage/libs/bulldozer/application/features/edit-signer"
           ],
           "options": {
-            "jestConfig": "libs/bulldozer/application/features/edit-signer-account/jest.config.js",
+            "jestConfig": "libs/bulldozer/application/features/edit-signer/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -289,8 +289,8 @@
           "executor": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": [
-              "libs/bulldozer/application/features/edit-signer-account/src/**/*.ts",
-              "libs/bulldozer/application/features/edit-signer-account/src/**/*.html"
+              "libs/bulldozer/application/features/edit-signer/src/**/*.ts",
+              "libs/bulldozer/application/features/edit-signer/src/**/*.html"
             ]
           }
         }

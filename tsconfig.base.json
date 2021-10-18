@@ -45,8 +45,8 @@
       "@heavy-duty/bulldozer/application/features/edit-relation": [
         "libs/bulldozer/application/features/edit-relation/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/features/edit-signer-account": [
-        "libs/bulldozer/application/features/edit-signer-account/src/index.ts"
+      "@heavy-duty/bulldozer/application/features/edit-signer": [
+        "libs/bulldozer/application/features/edit-signer/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/features/navigation": [
         "libs/bulldozer/application/features/navigation/src/index.ts"

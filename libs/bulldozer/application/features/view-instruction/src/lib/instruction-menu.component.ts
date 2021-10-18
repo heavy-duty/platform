@@ -36,13 +36,9 @@ import {
         <mat-icon>add</mat-icon>
         <span>Add document</span>
       </button>
-      <button
-        mat-menu-item
-        (click)="onCreateSignerAccount()"
-        [disabled]="!connected"
-      >
+      <button mat-menu-item (click)="onCreateSigner()" [disabled]="!connected">
         <mat-icon>add</mat-icon>
-        <span>Add signer account</span>
+        <span>Add signer</span>
       </button>
     </mat-menu>
   `,
@@ -53,7 +49,7 @@ export class InstructionMenuComponent {
   @Input() connected: boolean | null = null;
   @Output() createArgument = new EventEmitter();
   @Output() createDocument = new EventEmitter();
-  @Output() createSignerAccount = new EventEmitter();
+  @Output() createSigner = new EventEmitter();
   @Output() createProgramAccount = new EventEmitter();
   @Output() createRelation = new EventEmitter();
 
@@ -65,8 +61,8 @@ export class InstructionMenuComponent {
     this.createDocument.emit();
   }
 
-  onCreateSignerAccount() {
-    this.createSignerAccount.emit();
+  onCreateSigner() {
+    this.createSigner.emit();
   }
 
   onCreateProgramAccount() {

@@ -39,7 +39,7 @@ import { filter, map, startWith } from 'rxjs/operators';
           [connected]="connected$ | ngrxPush"
           (createArgument)="onCreateArgument()"
           (createDocument)="onCreateDocument()"
-          (createSignerAccount)="onCreateSignerAccount()"
+          (createSigner)="onCreateSigner()"
           (createProgramAccount)="onCreateProgramAccount()"
           (createRelation)="onCreateRelation()"
         >
@@ -59,7 +59,7 @@ import { filter, map, startWith } from 'rxjs/operators';
             [connected]="connected$ | ngrxPush"
             [accounts]="accounts$ | ngrxPush"
             (updateDocument)="onUpdateDocument($event)"
-            (updateSignerAccount)="onUpdateSignerAccount($event)"
+            (updateSigner)="onUpdateSigner($event)"
             (updateProgramAccount)="onUpdateProgramAccount($event)"
             (deleteAccount)="onDeleteAccount($event)"
             (updateRelation)="onUpdateRelation($event)"
@@ -191,12 +191,12 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.updateDocument(account);
   }
 
-  onCreateSignerAccount() {
-    this._instructionStore.createSignerAccount();
+  onCreateSigner() {
+    this._instructionStore.createSigner();
   }
 
-  onUpdateSignerAccount(account: InstructionAccountExtended) {
-    this._instructionStore.updateSignerAccount(account);
+  onUpdateSigner(account: InstructionAccountExtended) {
+    this._instructionStore.updateSigner(account);
   }
 
   onCreateProgramAccount() {

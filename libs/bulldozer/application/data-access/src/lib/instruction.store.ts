@@ -5,7 +5,7 @@ import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/feature
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { EditProgramAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-program-account';
 import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
-import { EditSignerAccountComponent } from '@heavy-duty/bulldozer/application/features/edit-signer-account';
+import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
   Instruction,
@@ -598,11 +598,11 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly createSignerAccount = this.effect((action$) =>
+  readonly createSigner = this.effect((action$) =>
     action$.pipe(
       exhaustMap(() =>
         this._matDialog
-          .open(EditSignerAccountComponent)
+          .open(EditSignerComponent)
           .afterClosed()
           .pipe(
             filter((data) => data),
@@ -636,13 +636,13 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateSignerAccount = this.effect(
-    (account$: Observable<InstructionAccountExtended>) =>
-      account$.pipe(
-        exhaustMap((account) =>
+  readonly updateSigner = this.effect(
+    (signer$: Observable<InstructionAccountExtended>) =>
+      signer$.pipe(
+        exhaustMap((signer) =>
           this._matDialog
-            .open(EditSignerAccountComponent, {
-              data: { account },
+            .open(EditSignerComponent, {
+              data: { signer },
             })
             .afterClosed()
             .pipe(
@@ -650,7 +650,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               concatMap(({ name, modifier }) =>
                 this._bulldozerProgramStore
                   .updateInstructionAccount(
-                    account.id,
+                    signer.id,
                     name,
                     2,
                     modifier,
@@ -664,7 +664,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     tapResponse(
                       () =>
                         this._events.next(
-                          new InstructionAccountUpdated(account.id)
+                          new InstructionAccountUpdated(signer.id)
                         ),
                       (error) => this._error.next(error)
                     )
