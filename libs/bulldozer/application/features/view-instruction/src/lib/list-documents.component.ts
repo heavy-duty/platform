@@ -16,7 +16,7 @@ import {
     <section>
       <mat-card>
         <header bdSectionHeader>
-          <h2>Context</h2>
+          <h2>Documents</h2>
           <p>Manage documents in the context of the instruction.</p>
         </header>
 
