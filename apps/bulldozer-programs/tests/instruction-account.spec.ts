@@ -168,6 +168,8 @@ describe('instruction account', () => {
       const account = await program.account.instructionAccount.fetch(
         instructionAccount.publicKey
       );
+      assert.ok('signer' in account.kind);
+      assert.equal(account.kind.signer.id, instructionAccountKind);
       assert.equal(account.collection, null);
     });
 
