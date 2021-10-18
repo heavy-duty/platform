@@ -17,7 +17,7 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/type
       (ngSubmit)="onEditSigner()"
     >
       <mat-form-field
-        class="w-full"
+        class="w-full mb-4"
         appearance="fill"
         hintLabel="Enter the name."
       >
@@ -39,19 +39,7 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/type
         >
       </mat-form-field>
 
-      <mat-form-field
-        class="w-full"
-        appearance="fill"
-        hintLabel="Select a modifier."
-      >
-        <mat-label>Modifier</mat-label>
-        <mat-select formControlName="modifier">
-          <mat-option [value]="0">None</mat-option>
-          <mat-option [value]="1">Init</mat-option>
-          <mat-option [value]="2">Mut</mat-option>
-        </mat-select>
-        <mat-error *ngIf="submitted">The modifier is required.</mat-error>
-      </mat-form-field>
+      <mat-checkbox formControlName="saveChanges">Save changes.</mat-checkbox>
 
       <button
         mat-stroked-button
@@ -78,13 +66,13 @@ export class EditSignerComponent implements OnInit {
   submitted = false;
   readonly signerGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
-    modifier: new FormControl(0, { validators: [Validators.required] }),
+    saveChanges: new FormControl(0, { validators: [Validators.required] }),
   });
   get nameControl() {
     return this.signerGroup.get('name') as FormControl;
   }
-  get modifierControl() {
-    return this.signerGroup.get('modifier') as FormControl;
+  get saveChangesControl() {
+    return this.signerGroup.get('saveChanges') as FormControl;
   }
 
   constructor(
@@ -101,7 +89,7 @@ export class EditSignerComponent implements OnInit {
       this.signerGroup.setValue(
         {
           name: this.data.signer.data.name,
-          modifier: this.data.signer.data.modifier.id,
+          saveChanges: this.data.signer.data.modifier.id === 2,
         },
         { emitEvent: false }
       );
@@ -115,7 +103,7 @@ export class EditSignerComponent implements OnInit {
     if (this.signerGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
-        modifier: this.modifierControl.value,
+        modifier: this.saveChangesControl.value ? 2 : 0,
       });
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
