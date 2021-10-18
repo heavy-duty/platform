@@ -66,7 +66,7 @@ export class EditSignerComponent implements OnInit {
   submitted = false;
   readonly signerGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
-    saveChanges: new FormControl(0, { validators: [Validators.required] }),
+    saveChanges: new FormControl(false),
   });
   get nameControl() {
     return this.signerGroup.get('name') as FormControl;
