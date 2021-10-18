@@ -58,7 +58,7 @@ describe('instruction account', () => {
     });
   });
 
-  describe('basic account', () => {
+  describe('document', () => {
     const instructionAccount = Keypair.generate();
 
     it('should fail when creating without collection', async () => {
@@ -68,7 +68,6 @@ describe('instruction account', () => {
       const instructionAccountKind = 0;
       const instructionAccountModifier = 0;
       const instructionAccountSpace = null;
-      const instructionAccountProgram = null;
       let error: ProgramError;
       // act
       try {
@@ -77,7 +76,6 @@ describe('instruction account', () => {
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -102,14 +100,12 @@ describe('instruction account', () => {
       const instructionAccountKind = 0;
       const instructionAccountModifier = 0;
       const instructionAccountSpace = null;
-      const instructionAccountProgram = null;
       // act
       await program.rpc.createInstructionAccount(
         instructionAccountName,
         instructionAccountKind,
         instructionAccountModifier,
         instructionAccountSpace,
-        instructionAccountProgram,
         {
           accounts: {
             authority: program.provider.wallet.publicKey,
@@ -137,14 +133,13 @@ describe('instruction account', () => {
         utils.bytes.utf8.decode(account.name),
         instructionAccountName
       );
-      assert.ok('basic' in account.kind);
-      assert.equal(account.kind.basic.id, instructionAccountKind);
+      assert.ok('document' in account.kind);
+      assert.equal(account.kind.document.id, instructionAccountKind);
       assert.ok('none' in account.modifier);
       assert.equal(account.modifier.none.id, instructionAccountModifier);
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.application.equals(application.publicKey));
       assert.ok(account.collection.equals(collection.publicKey));
-      assert.equal(account.program, null);
       assert.equal(account.payer, null);
       assert.equal(account.close, null);
       assert.equal(account.space, null);
@@ -156,14 +151,12 @@ describe('instruction account', () => {
       const instructionAccountKind = 1;
       const instructionAccountModifier = 0;
       const instructionAccountSpace = null;
-      const instructionAccountProgram = SystemProgram.programId;
       // act
       await program.rpc.updateInstructionAccount(
         instructionAccountName,
         instructionAccountKind,
         instructionAccountModifier,
         instructionAccountSpace,
-        instructionAccountProgram,
         {
           accounts: {
             authority: program.provider.wallet.publicKey,
@@ -175,9 +168,6 @@ describe('instruction account', () => {
       const account = await program.account.instructionAccount.fetch(
         instructionAccount.publicKey
       );
-      assert.ok('program' in account.kind);
-      assert.equal(account.kind.program.id, instructionAccountKind);
-      assert.ok(account.program.equals(SystemProgram.programId));
       assert.equal(account.collection, null);
     });
 
@@ -185,17 +175,15 @@ describe('instruction account', () => {
       // arrange
       const instructionAccount = Keypair.generate();
       const instructionAccountName = 'data';
-      const instructionAccountKind = 2;
+      const instructionAccountKind = 0;
       const instructionAccountModifier = 0;
       const instructionAccountSpace = null;
-      const instructionAccountProgram = null;
       // act
       await program.rpc.createInstructionAccount(
         instructionAccountName,
         instructionAccountKind,
         instructionAccountModifier,
         instructionAccountSpace,
-        instructionAccountProgram,
         {
           accounts: {
             authority: program.provider.wallet.publicKey,
@@ -232,7 +220,7 @@ describe('instruction account', () => {
       const instructionPayerAccount = Keypair.generate();
 
       before(async () => {
-        await program.rpc.createInstructionAccount('payer', 2, 0, null, null, {
+        await program.rpc.createInstructionAccount('payer', 1, 0, null, {
           accounts: {
             authority: program.provider.wallet.publicKey,
             application: application.publicKey,
@@ -250,14 +238,12 @@ describe('instruction account', () => {
         const instructionAccountKind = 0;
         const instructionAccountModifier = 1;
         const instructionAccountSpace = 150;
-        const instructionAccountProgram = null;
         // act
         await program.rpc.createInstructionAccount(
           instructionAccountName,
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -297,14 +283,12 @@ describe('instruction account', () => {
         const instructionAccountKind = 0;
         const instructionAccountModifier = 0;
         const instructionAccountSpace = 150;
-        const instructionAccountProgram = null;
         // act
         await program.rpc.updateInstructionAccount(
           instructionAccountName,
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -336,7 +320,6 @@ describe('instruction account', () => {
         const instructionAccountKind = 0;
         const instructionAccountModifier = 1;
         const instructionAccountSpace = null;
-        const instructionAccountProgram = null;
         let error: ProgramError;
         // act
         try {
@@ -345,7 +328,6 @@ describe('instruction account', () => {
             instructionAccountKind,
             instructionAccountModifier,
             instructionAccountSpace,
-            instructionAccountProgram,
             {
               accounts: {
                 authority: program.provider.wallet.publicKey,
@@ -386,14 +368,12 @@ describe('instruction account', () => {
         const instructionAccountKind = 0;
         const instructionAccountModifier = 2;
         const instructionAccountSpace = null;
-        const instructionAccountProgram = null;
         // act
         await program.rpc.createInstructionAccount(
           instructionAccountName,
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -421,14 +401,13 @@ describe('instruction account', () => {
           utils.bytes.utf8.decode(account.name),
           instructionAccountName
         );
-        assert.ok('basic' in account.kind);
-        assert.equal(account.kind.basic.id, instructionAccountKind);
+        assert.ok('document' in account.kind);
+        assert.equal(account.kind.document.id, instructionAccountKind);
         assert.ok('mut' in account.modifier);
         assert.equal(account.modifier.mut.id, instructionAccountModifier);
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.application.equals(application.publicKey));
         assert.ok(account.collection.equals(collection.publicKey));
-        assert.equal(account.program, null);
         assert.equal(account.close, null);
         assert.equal(account.space, null);
       });
@@ -439,23 +418,16 @@ describe('instruction account', () => {
       const instructionCloseAccount = Keypair.generate();
 
       before(async () => {
-        await program.rpc.createInstructionAccount(
-          'authority',
-          2,
-          0,
-          null,
-          null,
-          {
-            accounts: {
-              authority: program.provider.wallet.publicKey,
-              application: application.publicKey,
-              instruction: instruction.publicKey,
-              account: instructionCloseAccount.publicKey,
-              systemProgram: SystemProgram.programId,
-            },
-            signers: [instructionCloseAccount],
-          }
-        );
+        await program.rpc.createInstructionAccount('authority', 1, 0, null, {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionCloseAccount.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [instructionCloseAccount],
+        });
       });
 
       it('should create', async () => {
@@ -464,14 +436,12 @@ describe('instruction account', () => {
         const instructionAccountKind = 0;
         const instructionAccountModifier = 2;
         const instructionAccountSpace = null;
-        const instructionAccountProgram = null;
         // act
         await program.rpc.createInstructionAccount(
           instructionAccountName,
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -504,32 +474,29 @@ describe('instruction account', () => {
           utils.bytes.utf8.decode(account.name),
           instructionAccountName
         );
-        assert.ok('basic' in account.kind);
-        assert.equal(account.kind.basic.id, instructionAccountKind);
+        assert.ok('document' in account.kind);
+        assert.equal(account.kind.document.id, instructionAccountKind);
         assert.ok('mut' in account.modifier);
         assert.equal(account.modifier.mut.id, instructionAccountModifier);
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.application.equals(application.publicKey));
         assert.ok(account.collection.equals(collection.publicKey));
         assert.ok(account.close.equals(instructionCloseAccount.publicKey));
-        assert.equal(account.program, null);
         assert.equal(account.space, null);
       });
 
       it('should remove close when changing the modifier', async () => {
         // arrange
         const instructionAccountName = 'data';
-        const instructionAccountKind = 2;
+        const instructionAccountKind = 1;
         const instructionAccountModifier = 0;
         const instructionAccountSpace = null;
-        const instructionAccountProgram = null;
         // act
         await program.rpc.updateInstructionAccount(
           instructionAccountName,
           instructionAccountKind,
           instructionAccountModifier,
           instructionAccountSpace,
-          instructionAccountProgram,
           {
             accounts: {
               authority: program.provider.wallet.publicKey,
@@ -546,49 +513,13 @@ describe('instruction account', () => {
         assert.ok('none' in account.modifier);
         assert.equal(account.modifier.none.id, instructionAccountModifier);
         assert.equal(account.close, null);
-        assert.equal(account.program, null);
         assert.equal(account.space, null);
       });
     });
   });
 
-  describe('program account', () => {
+  describe('signer', () => {
     const instructionAccount = Keypair.generate();
-
-    it('should fail when creating without program', async () => {
-      // arrange
-      const instructionAccount = Keypair.generate();
-      const instructionAccountName = 'data';
-      const instructionAccountKind = 1;
-      const instructionAccountModifier = 0;
-      const instructionAccountSpace = null;
-      const instructionAccountProgram = null;
-      let error: ProgramError;
-      // act
-      try {
-        await program.rpc.createInstructionAccount(
-          instructionAccountName,
-          instructionAccountKind,
-          instructionAccountModifier,
-          instructionAccountSpace,
-          instructionAccountProgram,
-          {
-            accounts: {
-              authority: program.provider.wallet.publicKey,
-              application: application.publicKey,
-              instruction: instruction.publicKey,
-              account: instructionAccount.publicKey,
-              systemProgram: SystemProgram.programId,
-            },
-            signers: [instructionAccount],
-          }
-        );
-      } catch (err) {
-        error = err;
-      }
-      // assert
-      assert.equal(error.code, 308);
-    });
 
     it('should create', async () => {
       // arrange
@@ -596,65 +527,12 @@ describe('instruction account', () => {
       const instructionAccountKind = 1;
       const instructionAccountModifier = 0;
       const instructionAccountSpace = null;
-      const instructionAccountProgram = SystemProgram.programId;
       // act
       await program.rpc.createInstructionAccount(
         instructionAccountName,
         instructionAccountKind,
         instructionAccountModifier,
         instructionAccountSpace,
-        instructionAccountProgram,
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            application: application.publicKey,
-            instruction: instruction.publicKey,
-            account: instructionAccount.publicKey,
-            systemProgram: SystemProgram.programId,
-          },
-          signers: [instructionAccount],
-        }
-      );
-      // assert
-      const account = await program.account.instructionAccount.fetch(
-        instructionAccount.publicKey
-      );
-      assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-      assert.equal(
-        utils.bytes.utf8.decode(account.name),
-        instructionAccountName
-      );
-      assert.ok('program' in account.kind);
-      assert.equal(account.kind.program.id, instructionAccountKind);
-      assert.ok('none' in account.modifier);
-      assert.equal(account.modifier.none.id, instructionAccountModifier);
-      assert.ok(account.instruction.equals(instruction.publicKey));
-      assert.ok(account.application.equals(application.publicKey));
-      assert.ok(account.program.equals(instructionAccountProgram));
-      assert.equal(account.collection, null);
-      assert.equal(account.payer, null);
-      assert.equal(account.close, null);
-      assert.equal(account.space, null);
-    });
-  });
-
-  describe('signer account', () => {
-    const instructionAccount = Keypair.generate();
-
-    it('should create', async () => {
-      // arrange
-      const instructionAccountName = 'data';
-      const instructionAccountKind = 2;
-      const instructionAccountModifier = 0;
-      const instructionAccountSpace = null;
-      const instructionAccountProgram = null;
-      // act
-      await program.rpc.createInstructionAccount(
-        instructionAccountName,
-        instructionAccountKind,
-        instructionAccountModifier,
-        instructionAccountSpace,
-        instructionAccountProgram,
         {
           accounts: {
             authority: program.provider.wallet.publicKey,
@@ -681,7 +559,6 @@ describe('instruction account', () => {
       assert.equal(account.modifier.none.id, instructionAccountModifier);
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.application.equals(application.publicKey));
-      assert.equal(account.program, null);
       assert.equal(account.collection, null);
       assert.equal(account.payer, null);
       assert.equal(account.close, null);

@@ -3,7 +3,7 @@ use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>, program: Option<Pubkey>)]
+#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>)]
 pub struct CreateInstructionAccount<'info> {
   #[account(
         init,
@@ -24,7 +24,6 @@ pub fn handler(
   kind: u8,
   modifier: u8,
   space: Option<u16>,
-  program: Option<Pubkey>,
 ) -> ProgramResult {
   msg!("Create instruction account");
   ctx.accounts.account.authority = ctx.accounts.authority.key();
@@ -34,7 +33,7 @@ pub fn handler(
   ctx
     .accounts
     .account
-    .set_kind(kind, ctx.remaining_accounts, program)?;
+    .set_kind(kind, ctx.remaining_accounts)?;
   ctx
     .accounts
     .account

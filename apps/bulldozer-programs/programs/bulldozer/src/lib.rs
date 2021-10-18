@@ -111,9 +111,8 @@ pub mod bulldozer {
     kind: u8,
     modifier: u8,
     space: Option<u16>,
-    program: Option<Pubkey>,
   ) -> ProgramResult {
-    instructions::create_instruction_account::handler(ctx, name, kind, modifier, space, program)
+    instructions::create_instruction_account::handler(ctx, name, kind, modifier, space)
   }
 
   pub fn update_instruction_account(
@@ -122,9 +121,8 @@ pub mod bulldozer {
     kind: u8,
     modifier: u8,
     space: Option<u16>,
-    program: Option<Pubkey>,
   ) -> ProgramResult {
-    instructions::update_instruction_account::handler(ctx, name, kind, modifier, space, program)
+    instructions::update_instruction_account::handler(ctx, name, kind, modifier, space)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
