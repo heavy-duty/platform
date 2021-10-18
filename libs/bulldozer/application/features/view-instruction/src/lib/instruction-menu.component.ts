@@ -28,8 +28,17 @@ import {
         <mat-icon>add</mat-icon>
         <span>Add argument</span>
       </button>
-      <button mat-menu-item [matMenuTriggerFor]="addAccountMenu">
-        Add account
+      <button
+        mat-menu-item
+        (click)="onCreateDocument()"
+        [disabled]="!connected"
+      >
+        <mat-icon>add</mat-icon>
+        <span>Add document</span>
+      </button>
+      <button mat-menu-item (click)="onCreateSigner()" [disabled]="!connected">
+        <mat-icon>add</mat-icon>
+        <span>Add signer</span>
       </button>
       <button
         mat-menu-item
@@ -40,33 +49,6 @@ import {
         <span>Add relation</span>
       </button>
     </mat-menu>
-
-    <mat-menu #addAccountMenu="matMenu">
-      <button
-        mat-menu-item
-        (click)="onCreateBasicAccount()"
-        [disabled]="!connected"
-      >
-        <mat-icon>description</mat-icon>
-        <span>Basic account</span>
-      </button>
-      <button
-        mat-menu-item
-        (click)="onCreateSignerAccount()"
-        [disabled]="!connected"
-      >
-        <mat-icon>rate_review</mat-icon>
-        <span>Signer account</span>
-      </button>
-      <button
-        mat-menu-item
-        (click)="onCreateProgramAccount()"
-        [disabled]="!connected"
-      >
-        <mat-icon>group_work</mat-icon>
-        <span>Program account</span>
-      </button>
-    </mat-menu>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -74,8 +56,8 @@ import {
 export class InstructionMenuComponent {
   @Input() connected: boolean | null = null;
   @Output() createArgument = new EventEmitter();
-  @Output() createBasicAccount = new EventEmitter();
-  @Output() createSignerAccount = new EventEmitter();
+  @Output() createDocument = new EventEmitter();
+  @Output() createSigner = new EventEmitter();
   @Output() createProgramAccount = new EventEmitter();
   @Output() createRelation = new EventEmitter();
 
@@ -83,12 +65,12 @@ export class InstructionMenuComponent {
     this.createArgument.emit();
   }
 
-  onCreateBasicAccount() {
-    this.createBasicAccount.emit();
+  onCreateDocument() {
+    this.createDocument.emit();
   }
 
-  onCreateSignerAccount() {
-    this.createSignerAccount.emit();
+  onCreateSigner() {
+    this.createSigner.emit();
   }
 
   onCreateProgramAccount() {

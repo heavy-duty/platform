@@ -102,7 +102,6 @@ export interface InstructionAccountInfo {
     name: string;
   };
   collection: string | null;
-  program: string | null;
   space: number | null;
   payer: string | null;
   close: string | null;

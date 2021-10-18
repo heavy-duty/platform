@@ -14,7 +14,7 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
       <mat-card>
         <header bdSectionHeader>
           <h2>Arguments</h2>
-          <p>Visualize the list of arguments and manage them.</p>
+          <p>Manage arguments of the instruction.</p>
         </header>
 
         <mat-list

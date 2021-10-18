@@ -16,16 +16,16 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'bd-edit-basic-account',
+  selector: 'bd-edit-document',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.account ? 'Edit' : 'Create' }} account
+      {{ data?.document ? 'Edit' : 'Create' }} document
     </h2>
 
     <form
-      [formGroup]="accountGroup"
+      [formGroup]="documentGroup"
       class="flex flex-col gap-4"
-      (ngSubmit)="onEditAccount()"
+      (ngSubmit)="onEditDocument()"
     >
       <mat-form-field
         class="w-full"
@@ -95,10 +95,14 @@ import { takeUntil } from 'rxjs/operators';
           formControlName="space"
           required
           type="number"
+          min="0"
           max="65536"
         />
         <mat-error *ngIf="submitted && spaceControl.errors?.required"
           >The space is mandatory.</mat-error
+        >
+        <mat-error *ngIf="submitted && spaceControl.errors?.min"
+          >Space is meant to be positive.</mat-error
         >
         <mat-error *ngIf="submitted && spaceControl.errors?.max"
           >Maximum is 65536.</mat-error
@@ -146,15 +150,15 @@ import { takeUntil } from 'rxjs/operators';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && accountGroup.invalid"
+        [disabled]="submitted && documentGroup.invalid"
       >
-        {{ data?.account ? 'Save' : 'Create' }}
+        {{ data?.document ? 'Save' : 'Create' }}
       </button>
     </form>
 
     <button
       mat-icon-button
-      aria-label="Close edit account form"
+      aria-label="Close edit document form"
       class="w-8 h-8 leading-none absolute top-0 right-0"
       mat-dialog-close
     >
@@ -162,12 +166,12 @@ import { takeUntil } from 'rxjs/operators';
     </button>
   `,
 })
-export class EditBasicAccountComponent implements OnInit, OnDestroy {
+export class EditDocumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
   submitted = false;
-  readonly accountGroup = new FormGroup({
+  readonly documentGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     modifier: new FormControl(0, { validators: [Validators.required] }),
     collection: new FormControl(null, { validators: [Validators.required] }),
@@ -176,30 +180,30 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
     close: new FormControl(null),
   });
   get nameControl() {
-    return this.accountGroup.get('name') as FormControl;
+    return this.documentGroup.get('name') as FormControl;
   }
   get modifierControl() {
-    return this.accountGroup.get('modifier') as FormControl;
+    return this.documentGroup.get('modifier') as FormControl;
   }
   get collectionControl() {
-    return this.accountGroup.get('collection') as FormControl;
+    return this.documentGroup.get('collection') as FormControl;
   }
   get spaceControl() {
-    return this.accountGroup.get('space') as FormControl;
+    return this.documentGroup.get('space') as FormControl;
   }
   get payerControl() {
-    return this.accountGroup.get('payer') as FormControl;
+    return this.documentGroup.get('payer') as FormControl;
   }
   get closeControl() {
-    return this.accountGroup.get('close') as FormControl;
+    return this.documentGroup.get('close') as FormControl;
   }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
-    private readonly _matDialogRef: MatDialogRef<EditBasicAccountComponent>,
+    private readonly _matDialogRef: MatDialogRef<EditDocumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionAccountExtended;
+      document?: InstructionAccountExtended;
       collections: Collection[];
       accounts: InstructionAccountExtended[];
     }
@@ -212,6 +216,7 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
         if (modifier === 1) {
           this.spaceControl.setValidators([
             Validators.required,
+            Validators.min(0),
             Validators.max(65536),
           ]);
           this.payerControl.setValidators([Validators.required]);
@@ -224,15 +229,15 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
         this.payerControl.updateValueAndValidity();
       });
 
-    if (this.data?.account) {
-      this.accountGroup.setValue(
+    if (this.data?.document) {
+      this.documentGroup.setValue(
         {
-          name: this.data.account.data.name,
-          modifier: this.data.account.data.modifier.id,
-          collection: this.data.account.data.collection?.id || null,
-          space: this.data.account.data.space,
-          payer: this.data.account.data.payer?.id || null,
-          close: this.data.account.data.close?.id || null,
+          name: this.data.document.data.name,
+          modifier: this.data.document.data.modifier.id,
+          collection: this.data.document.data.collection?.id || null,
+          space: this.data.document.data.space,
+          payer: this.data.document.data.payer?.id || null,
+          close: this.data.document.data.close?.id || null,
         },
         { emitEvent: false }
       );
@@ -244,11 +249,11 @@ export class EditBasicAccountComponent implements OnInit, OnDestroy {
     this._destroy.complete();
   }
 
-  async onEditAccount() {
+  async onEditDocument() {
     this.submitted = true;
-    this.accountGroup.markAllAsTouched();
+    this.documentGroup.markAllAsTouched();
 
-    if (this.accountGroup.valid) {
+    if (this.documentGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
         modifier: this.modifierControl.value,

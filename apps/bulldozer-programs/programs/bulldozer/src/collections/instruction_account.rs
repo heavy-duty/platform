@@ -13,7 +13,6 @@ pub struct InstructionAccount {
   pub kind: AccountKind,
   pub modifier: AccountModifier,
   pub collection: Option<Pubkey>,
-  pub program: Option<Pubkey>,
   pub payer: Option<Pubkey>,
   pub close: Option<Pubkey>,
   pub space: Option<u16>,
@@ -24,7 +23,6 @@ impl InstructionAccount {
     &mut self,
     kind: u8,
     remaining_accounts: &[AccountInfo<'info>],
-    program: Option<Pubkey>,
   ) -> Result<&Self, ProgramError> {
     self.kind = AccountKind::from_index(kind)?;
 
@@ -33,16 +31,8 @@ impl InstructionAccount {
         Some(collection) => Some(collection.key()),
         _ => return Err(ErrorCode::MissingCollectionAccount.into()),
       };
-      self.program = None;
-    } else if kind == 1 {
-      self.collection = None;
-      self.program = match program {
-        Some(program) => Some(program),
-        _ => return Err(ErrorCode::MissingProgram.into()),
-      };
     } else {
       self.collection = None;
-      self.program = None;
     };
 
     Ok(self)

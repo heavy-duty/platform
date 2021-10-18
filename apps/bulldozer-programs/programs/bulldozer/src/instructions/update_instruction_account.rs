@@ -4,7 +4,7 @@ use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>, program: Option<Pubkey>)]
+#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>)]
 pub struct UpdateInstructionAccount<'info> {
   #[account(mut, has_one = authority)]
   pub account: Box<Account<'info, InstructionAccount>>,
@@ -17,7 +17,6 @@ pub fn handler(
   kind: u8,
   modifier: u8,
   space: Option<u16>,
-  program: Option<Pubkey>,
 ) -> ProgramResult {
   msg!("Update instruction account");
   ctx.accounts.account.name = vectorize_string(name, 32);
@@ -26,7 +25,7 @@ pub fn handler(
   ctx
     .accounts
     .account
-    .set_kind(kind, ctx.remaining_accounts, program)?;
+    .set_kind(kind, ctx.remaining_accounts)?;
   ctx
     .accounts
     .account

@@ -5,16 +5,16 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
-  selector: 'bd-edit-signer-account',
+  selector: 'bd-edit-signer',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.account ? 'Edit' : 'Create' }} account
+      {{ data?.signer ? 'Edit' : 'Create' }} signer
     </h2>
 
     <form
-      [formGroup]="accountGroup"
+      [formGroup]="signerGroup"
       class="flex flex-col gap-4"
-      (ngSubmit)="onEditSignerAccount()"
+      (ngSubmit)="onEditSigner()"
     >
       <mat-form-field
         class="w-full"
@@ -57,9 +57,9 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/type
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && accountGroup.invalid"
+        [disabled]="submitted && signerGroup.invalid"
       >
-        {{ data?.account ? 'Save' : 'Create' }}
+        {{ data?.signer ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -73,46 +73,46 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/type
     </button>
   `,
 })
-export class EditSignerAccountComponent implements OnInit {
+export class EditSignerComponent implements OnInit {
   @HostBinding('class') class = 'block w-72 relative';
   submitted = false;
-  readonly accountGroup = new FormGroup({
+  readonly signerGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     modifier: new FormControl(0, { validators: [Validators.required] }),
   });
   get nameControl() {
-    return this.accountGroup.get('name') as FormControl;
+    return this.signerGroup.get('name') as FormControl;
   }
   get modifierControl() {
-    return this.accountGroup.get('modifier') as FormControl;
+    return this.signerGroup.get('modifier') as FormControl;
   }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
-    private readonly _matDialogRef: MatDialogRef<EditSignerAccountComponent>,
+    private readonly _matDialogRef: MatDialogRef<EditSignerComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      account?: InstructionAccount;
+      signer?: InstructionAccount;
     }
   ) {}
 
   ngOnInit() {
-    if (this.data?.account) {
-      this.accountGroup.setValue(
+    if (this.data?.signer) {
+      this.signerGroup.setValue(
         {
-          name: this.data.account.data.name,
-          modifier: this.data.account.data.modifier.id,
+          name: this.data.signer.data.name,
+          modifier: this.data.signer.data.modifier.id,
         },
         { emitEvent: false }
       );
     }
   }
 
-  async onEditSignerAccount() {
+  async onEditSigner() {
     this.submitted = true;
-    this.accountGroup.markAllAsTouched();
+    this.signerGroup.markAllAsTouched();
 
-    if (this.accountGroup.valid) {
+    if (this.signerGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
         modifier: this.modifierControl.value,

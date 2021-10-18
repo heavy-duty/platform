@@ -534,7 +534,6 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     accountKind: number,
     accountModifier: number,
     accountSpace: number | null,
-    accountProgram: string | null,
     accountCollection: string | null,
     accountPayer: string | null,
     accountClose: string | null
@@ -554,7 +553,6 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               accountKind,
               accountModifier,
               accountSpace,
-              accountProgram && new PublicKey(accountProgram),
               {
                 accounts: {
                   authority: walletPublicKey,
@@ -599,7 +597,6 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     accountKind: number,
     accountModifier: number,
     accountSpace: number | null,
-    accountProgram: string | null,
     accountCollection: string | null,
     accountPayer: string | null,
     accountClose: string | null
@@ -617,7 +614,6 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               accountKind,
               accountModifier,
               accountSpace,
-              accountProgram && new PublicKey(accountProgram),
               {
                 accounts: {
                   authority: walletPublicKey,

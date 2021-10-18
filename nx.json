@@ -42,22 +42,19 @@
     "bulldozer-application-features-edit-attribute": {
       "tags": []
     },
-    "bulldozer-application-features-edit-basic-account": {
+    "bulldozer-application-features-edit-collection": {
       "tags": []
     },
-    "bulldozer-application-features-edit-collection": {
+    "bulldozer-application-features-edit-document": {
       "tags": []
     },
     "bulldozer-application-features-edit-instruction": {
       "tags": []
     },
-    "bulldozer-application-features-edit-program-account": {
-      "tags": []
-    },
     "bulldozer-application-features-edit-relation": {
       "tags": []
     },
-    "bulldozer-application-features-edit-signer-account": {
+    "bulldozer-application-features-edit-signer": {
       "tags": []
     },
     "bulldozer-application-features-navigation": {

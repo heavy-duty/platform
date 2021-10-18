@@ -30,23 +30,20 @@
       "@heavy-duty/bulldozer/application/features/edit-attribute": [
         "libs/bulldozer/application/features/edit-attribute/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/features/edit-basic-account": [
-        "libs/bulldozer/application/features/edit-basic-account/src/index.ts"
-      ],
       "@heavy-duty/bulldozer/application/features/edit-collection": [
         "libs/bulldozer/application/features/edit-collection/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/application/features/edit-document": [
+        "libs/bulldozer/application/features/edit-document/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/features/edit-instruction": [
         "libs/bulldozer/application/features/edit-instruction/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/features/edit-program-account": [
-        "libs/bulldozer/application/features/edit-program-account/src/index.ts"
-      ],
       "@heavy-duty/bulldozer/application/features/edit-relation": [
         "libs/bulldozer/application/features/edit-relation/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/features/edit-signer-account": [
-        "libs/bulldozer/application/features/edit-signer-account/src/index.ts"
+      "@heavy-duty/bulldozer/application/features/edit-signer": [
+        "libs/bulldozer/application/features/edit-signer/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/features/navigation": [
         "libs/bulldozer/application/features/navigation/src/index.ts"

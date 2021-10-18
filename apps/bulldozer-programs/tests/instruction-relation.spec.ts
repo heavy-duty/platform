@@ -16,16 +16,14 @@ describe('instruction relation', () => {
   const applicationName = 'my-app';
   const fromAccount = Keypair.generate();
   const fromAccountName = 'from';
-  const fromAccountKind = 2;
+  const fromAccountKind = 1;
   const fromAccountModifier = 0;
   const fromAccountSpace = null;
-  const fromAccountProgram = null;
   const toAccount = Keypair.generate();
   const toAccountName = 'to';
-  const toAccountKind = 2;
+  const toAccountKind = 1;
   const toAccountModifier = 0;
   const toAccountSpace = null;
-  const toAccountProgram = null;
   let relationPublicKey: PublicKey, relationBump: number;
 
   before(async () => {
@@ -51,7 +49,6 @@ describe('instruction relation', () => {
       fromAccountKind,
       fromAccountModifier,
       fromAccountSpace,
-      fromAccountProgram,
       {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -68,7 +65,6 @@ describe('instruction relation', () => {
       toAccountKind,
       toAccountModifier,
       toAccountSpace,
-      toAccountProgram,
       {
         accounts: {
           authority: program.provider.wallet.publicKey,

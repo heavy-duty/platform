@@ -134,33 +134,6 @@
         }
       }
     },
-    "bulldozer-application-features-edit-basic-account": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/features/edit-basic-account",
-      "sourceRoot": "libs/bulldozer/application/features/edit-basic-account/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/features/edit-basic-account"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/features/edit-basic-account/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/features/edit-basic-account/src/**/*.ts",
-              "libs/bulldozer/application/features/edit-basic-account/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-application-features-edit-collection": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-collection",
@@ -183,6 +156,33 @@
             "lintFilePatterns": [
               "libs/bulldozer/application/features/edit-collection/src/**/*.ts",
               "libs/bulldozer/application/features/edit-collection/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "bulldozer-application-features-edit-document": {
+      "projectType": "library",
+      "root": "libs/bulldozer/application/features/edit-document",
+      "sourceRoot": "libs/bulldozer/application/features/edit-document/src",
+      "prefix": "bd",
+      "targets": {
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": [
+            "coverage/libs/bulldozer/application/features/edit-document"
+          ],
+          "options": {
+            "jestConfig": "libs/bulldozer/application/features/edit-document/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/bulldozer/application/features/edit-document/src/**/*.ts",
+              "libs/bulldozer/application/features/edit-document/src/**/*.html"
             ]
           }
         }
@@ -215,33 +215,6 @@
         }
       }
     },
-    "bulldozer-application-features-edit-program-account": {
-      "projectType": "library",
-      "root": "libs/bulldozer/application/features/edit-program-account",
-      "sourceRoot": "libs/bulldozer/application/features/edit-program-account/src",
-      "prefix": "bd",
-      "targets": {
-        "test": {
-          "executor": "@nrwl/jest:jest",
-          "outputs": [
-            "coverage/libs/bulldozer/application/features/edit-program-account"
-          ],
-          "options": {
-            "jestConfig": "libs/bulldozer/application/features/edit-program-account/jest.config.js",
-            "passWithNoTests": true
-          }
-        },
-        "lint": {
-          "executor": "@nrwl/linter:eslint",
-          "options": {
-            "lintFilePatterns": [
-              "libs/bulldozer/application/features/edit-program-account/src/**/*.ts",
-              "libs/bulldozer/application/features/edit-program-account/src/**/*.html"
-            ]
-          }
-        }
-      }
-    },
     "bulldozer-application-features-edit-relation": {
       "projectType": "library",
       "root": "libs/bulldozer/application/features/edit-relation",
@@ -269,19 +242,19 @@
         }
       }
     },
-    "bulldozer-application-features-edit-signer-account": {
+    "bulldozer-application-features-edit-signer": {
       "projectType": "library",
-      "root": "libs/bulldozer/application/features/edit-signer-account",
-      "sourceRoot": "libs/bulldozer/application/features/edit-signer-account/src",
+      "root": "libs/bulldozer/application/features/edit-signer",
+      "sourceRoot": "libs/bulldozer/application/features/edit-signer/src",
       "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
           "outputs": [
-            "coverage/libs/bulldozer/application/features/edit-signer-account"
+            "coverage/libs/bulldozer/application/features/edit-signer"
           ],
           "options": {
-            "jestConfig": "libs/bulldozer/application/features/edit-signer-account/jest.config.js",
+            "jestConfig": "libs/bulldozer/application/features/edit-signer/jest.config.js",
             "passWithNoTests": true
           }
         },
@@ -289,8 +262,8 @@
           "executor": "@nrwl/linter:eslint",
           "options": {
             "lintFilePatterns": [
-              "libs/bulldozer/application/features/edit-signer-account/src/**/*.ts",
-              "libs/bulldozer/application/features/edit-signer-account/src/**/*.html"
+              "libs/bulldozer/application/features/edit-signer/src/**/*.ts",
+              "libs/bulldozer/application/features/edit-signer/src/**/*.html"
             ]
           }
         }
@@ -854,7 +827,7 @@
       "projectType": "library",
       "root": "libs/shared/ng-anchor",
       "sourceRoot": "libs/shared/ng-anchor/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "build": {
           "executor": "@nrwl/angular:package",

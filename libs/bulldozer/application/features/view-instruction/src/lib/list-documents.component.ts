@@ -11,90 +11,84 @@ import {
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
-  selector: 'bd-list-accounts',
+  selector: 'bd-list-documents',
   template: `
     <section>
       <mat-card>
         <header bdSectionHeader>
-          <h2>Accounts</h2>
-          <p>Visualize the list of accounts and manage them.</p>
+          <h2>Documents</h2>
+          <p>Manage documents in the context of the instruction.</p>
         </header>
 
         <mat-list
-          *ngIf="accounts !== null && accounts.length > 0; else emptyList"
+          *ngIf="documents !== null && documents.length > 0; else emptyList"
           role="list"
         >
           <mat-list-item
             role="listitem"
-            *ngFor="let account of accounts"
+            *ngFor="let document of documents"
             class="h-auto bg-black bg-opacity-10 mb-2 last:mb-0 py-2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
                 class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
-                [ngSwitch]="account.data.kind.id"
               >
-                <mat-icon *ngSwitchCase="0">description</mat-icon>
-                <mat-icon *ngSwitchCase="1">group_work</mat-icon>
-                <mat-icon *ngSwitchCase="2">rate_review</mat-icon>
+                <mat-icon>description</mat-icon>
               </div>
 
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ account.data.name }}
+                  {{ document.data.name }}
 
                   <span
                     class="text-xs font-thin"
-                    [ngSwitch]="account.data.modifier.id"
+                    [ngSwitch]="document.data.modifier.id"
                   >
                     <ng-container *ngSwitchCase="1">
-                      ({{ account.data.modifier.name }}: space
-                      {{ account.data.space }})
+                      ({{ document.data.modifier.name }}: space
+                      {{ document.data.space }})
                     </ng-container>
                     <ng-container *ngSwitchCase="2">
-                      ({{ account.data.modifier.name }})
+                      ({{ document.data.modifier.name }})
                     </ng-container>
                   </span>
                 </h3>
-                <p class="text-xs mb-0 italic" *ngIf="account.data.collection">
+                <p class="text-xs mb-0 italic" *ngIf="document.data.collection">
                   Collection:
-                  {{ account.data.collection.data.name }}
+                  {{ document.data.collection.data.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
                       '/applications',
-                      account.data.application,
+                      document.data.application,
                       'collections',
-                      account.data.collection.id
+                      document.data.collection.id
                     ]"
-                    >{{ account.data.collection.id | obscureAddress }}</a
+                    >{{ document.data.collection.id | obscureAddress }}</a
                   >
                 </p>
-                <p class="text-xs mb-0 italic" *ngIf="account.data.program">
-                  Program:
-                  {{ account.data.program | obscureAddress }}
-                </p>
-                <p class="text-xs mb-0 italic" *ngIf="account.data.close">
+                <p class="text-xs mb-0 italic" *ngIf="document.data.close">
                   Close:
-                  {{ account.data.close.data.name }} ({{
-                    account.data.close.id | obscureAddress
+                  {{ document.data.close.data.name }} ({{
+                    document.data.close.id | obscureAddress
                   }})
                 </p>
-                <p class="text-xs mb-0 italic" *ngIf="account.data.payer">
+                <p class="text-xs mb-0 italic" *ngIf="document.data.payer">
                   Payer:
-                  {{ account.data.payer.data.name }} ({{
-                    account.data.payer.id | obscureAddress
+                  {{ document.data.payer.data.name }} ({{
+                    document.data.payer.id | obscureAddress
                   }})
                 </p>
                 <ng-container
                   *ngIf="
-                    account.data.relations && account.data.relations.length > 0
+                    document.data.relations &&
+                    document.data.relations.length > 0
                   "
                 >
                   <p class="mt-2 mb-0 font-bold">Relations</p>
                   <ul class="list-disc pl-4">
                     <li
-                      *ngFor="let relation of account.data.relations"
+                      *ngFor="let relation of document.data.relations"
                       class="text-xs"
                     >
                       {{ relation.data.to.data.name }} ({{
@@ -108,11 +102,11 @@ import {
                           relation.data.to.data.name +
                           ' has one relation'
                         "
-                        [matMenuTriggerFor]="accountRelationMenu"
+                        [matMenuTriggerFor]="documentRelationMenu"
                       >
                         <mat-icon>more_horiz</mat-icon>
                       </button>
-                      <mat-menu #accountRelationMenu="matMenu">
+                      <mat-menu #documentRelationMenu="matMenu">
                         <button
                           mat-menu-item
                           (click)="onUpdateRelation(relation)"
@@ -138,27 +132,27 @@ import {
               <button
                 mat-mini-fab
                 color="primary"
-                aria-label="Account menu"
-                [matMenuTriggerFor]="accountMenu"
+                aria-label="Document menu"
+                [matMenuTriggerFor]="documentMenu"
               >
                 <mat-icon>more_horiz</mat-icon>
               </button>
-              <mat-menu #accountMenu="matMenu">
+              <mat-menu #documentMenu="matMenu">
                 <button
                   mat-menu-item
-                  (click)="onUpdateAccount(account)"
+                  (click)="onUpdateDocument(document)"
                   [disabled]="!connected"
                 >
                   <mat-icon>edit</mat-icon>
-                  <span>Update account</span>
+                  <span>Update document</span>
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteAccount(account.id)"
+                  (click)="onDeleteDocument(document.id)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
-                  <span>Delete account</span>
+                  <span>Delete document</span>
                 </button>
               </mat-menu>
             </div>
@@ -166,7 +160,7 @@ import {
         </mat-list>
 
         <ng-template #emptyList>
-          <p class="text-center text-xl py-8">There's no accounts yet.</p>
+          <p class="text-center text-xl py-8">There's no documents yet.</p>
         </ng-template>
       </mat-card>
     </section>
@@ -174,34 +168,20 @@ import {
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ListAccountsComponent {
+export class ListDocumentsComponent {
   @Input() connected: boolean | null = null;
-  @Input() accounts: InstructionAccountExtended[] | null = null;
-  @Output() updateBasicAccount = new EventEmitter<InstructionAccountExtended>();
-  @Output() updateSignerAccount =
-    new EventEmitter<InstructionAccountExtended>();
-  @Output() updateProgramAccount =
-    new EventEmitter<InstructionAccountExtended>();
-  @Output() updateAccount = new EventEmitter<InstructionAccountExtended>();
-  @Output() deleteAccount = new EventEmitter<string>();
+  @Input() documents: InstructionAccountExtended[] | null = null;
+  @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
+  @Output() deleteDocument = new EventEmitter<string>();
   @Output() updateRelation = new EventEmitter<InstructionRelationExtended>();
   @Output() deleteRelation = new EventEmitter<string>();
 
-  onUpdateAccount(account: InstructionAccountExtended) {
-    switch (account.data.kind.id) {
-      case 0:
-        return this.updateBasicAccount.emit(account);
-      case 1:
-        return this.updateProgramAccount.emit(account);
-      case 2:
-        return this.updateSignerAccount.emit(account);
-      default:
-        return null;
-    }
+  onUpdateDocument(document: InstructionAccountExtended) {
+    this.updateDocument.emit(document);
   }
 
-  onDeleteAccount(accountId: string) {
-    this.deleteAccount.emit(accountId);
+  onDeleteDocument(documentId: string) {
+    this.deleteDocument.emit(documentId);
   }
 
   onUpdateRelation(relation: InstructionRelationExtended) {

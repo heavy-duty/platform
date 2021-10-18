@@ -29,7 +29,6 @@ export const ApplicationParser = (
   };
 };
 
-
 export const ApplicationParser2 = (
   publicKey: PublicKey,
   account: RawApplication
@@ -161,7 +160,6 @@ interface RawInstructionAccount {
   kind: { [key: string]: { id: number; name: string } };
   modifier: { [key: string]: { id: number; name: string } };
   collection: PublicKey | null;
-  program: PublicKey | null;
   space: number | null;
   payer: PublicKey | null;
   close: PublicKey | null;
@@ -187,7 +185,6 @@ export const InstructionAccountParser = (
         name: Object.keys(account.modifier)[0],
       },
       collection: account.collection && account.collection.toBase58(),
-      program: account.program && account.program.toBase58(),
       close: account.close && account.close.toBase58(),
       payer: account.payer && account.payer.toBase58(),
       space: account.space,
