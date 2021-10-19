@@ -69,28 +69,15 @@ import { takeUntil } from 'rxjs/operators';
         <mat-error *ngIf="submitted">The collection is required.</mat-error>
       </mat-form-field>
 
-      <div class="w-full bg-white bg-opacity-5 px-2 py-1">
-        <mat-checkbox
-          class="w-full"
-          [ngClass]="{ 'mb-3': modifierControl.value !== 0 }"
-          [checked]="modifierControl.value !== 0"
-          (change)="modifierControl.setValue($event.checked ? 1 : 0)"
-          >Enable modifiers.</mat-checkbox
-        >
-
-        <mat-radio-group
-          ariaLabel="Document modifier"
-          *ngIf="modifierControl.value !== 0"
-          formControlName="modifier"
-        >
-          <mat-radio-button class="w-full mb-2" [value]="1"
-            >Create new document.</mat-radio-button
-          >
-          <mat-radio-button class="w-full" [value]="2"
-            >Save changes.</mat-radio-button
-          >
-        </mat-radio-group>
-      </div>
+      <mat-radio-group
+        class="w-full bg-white bg-opacity-5 px-2 py-1 flex flex-col gap-2"
+        ariaLabel="Document modifier"
+        formControlName="modifier"
+      >
+        <mat-radio-button [value]="0">Read-only.</mat-radio-button>
+        <mat-radio-button [value]="1">Create new document.</mat-radio-button>
+        <mat-radio-button [value]="2">Save changes.</mat-radio-button>
+      </mat-radio-group>
 
       <mat-form-field
         *ngIf="modifierControl.value === 1"
