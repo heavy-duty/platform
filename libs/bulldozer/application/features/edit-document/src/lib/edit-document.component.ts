@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   Component,
   HostBinding,
   Inject,
@@ -53,20 +54,6 @@ import { takeUntil } from 'rxjs/operators';
       <mat-form-field
         class="w-full"
         appearance="fill"
-        hintLabel="Select a modifier."
-      >
-        <mat-label>Modifier</mat-label>
-        <mat-select formControlName="modifier">
-          <mat-option [value]="0">None</mat-option>
-          <mat-option [value]="1">Init</mat-option>
-          <mat-option [value]="2">Mut</mat-option>
-        </mat-select>
-        <mat-error *ngIf="submitted">The modifier is required.</mat-error>
-      </mat-form-field>
-
-      <mat-form-field
-        class="w-full"
-        appearance="fill"
         hintLabel="Select a collection."
       >
         <mat-label>Collection</mat-label>
@@ -81,6 +68,29 @@ import { takeUntil } from 'rxjs/operators';
         </mat-select>
         <mat-error *ngIf="submitted">The collection is required.</mat-error>
       </mat-form-field>
+
+      <div class="w-full bg-white bg-opacity-5 px-2 py-1">
+        <mat-checkbox
+          class="w-full"
+          [ngClass]="{ 'mb-3': modifierControl.value !== 0 }"
+          [checked]="modifierControl.value !== 0"
+          (change)="modifierControl.setValue($event.checked ? 1 : 0)"
+          >Enable modifiers.</mat-checkbox
+        >
+
+        <mat-radio-group
+          ariaLabel="Document modifier"
+          *ngIf="modifierControl.value !== 0"
+          formControlName="modifier"
+        >
+          <mat-radio-button class="w-full mb-2" [value]="1"
+            >Create new document.</mat-radio-button
+          >
+          <mat-radio-button class="w-full" [value]="2"
+            >Save changes.</mat-radio-button
+          >
+        </mat-radio-group>
+      </div>
 
       <mat-form-field
         *ngIf="modifierControl.value === 1"
@@ -165,6 +175,7 @@ import { takeUntil } from 'rxjs/operators';
       <mat-icon>close</mat-icon>
     </button>
   `,
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditDocumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
@@ -258,9 +269,12 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
         name: this.nameControl.value,
         modifier: this.modifierControl.value,
         collection: this.collectionControl.value,
-        space: this.spaceControl.value,
-        payer: this.payerControl.value,
-        close: this.closeControl.value,
+        space:
+          this.modifierControl.value === 1 ? this.spaceControl.value : null,
+        payer:
+          this.modifierControl.value === 1 ? this.payerControl.value : null,
+        close:
+          this.modifierControl.value === 2 ? this.closeControl.value : null,
       });
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
