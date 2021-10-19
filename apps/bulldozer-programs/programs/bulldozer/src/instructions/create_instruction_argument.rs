@@ -1,16 +1,9 @@
-use crate::collections::{Application, Instruction, InstructionArgument};
+use crate::collections::{Application, Instruction, InstructionArgument, InstructionArgumentDto};
 use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(
-  name: String,
-  kind: u8,
-  modifier: Option<u8>,
-  size: Option<u32>,
-  max: Option<u32>,
-  max_length: Option<u32>
-)]
+#[instruction(dto: InstructionArgumentDto)]
 pub struct CreateInstructionArgument<'info> {
   #[account(
         init,
@@ -27,19 +20,17 @@ pub struct CreateInstructionArgument<'info> {
 
 pub fn handler(
   ctx: Context<CreateInstructionArgument>,
-  name: String,
-  kind: u8,
-  modifier: Option<u8>,
-  size: Option<u32>,
-  max: Option<u32>,
-  max_length: Option<u32>,
+  dto: InstructionArgumentDto,
 ) -> ProgramResult {
   msg!("Create instruction argument");
-  ctx.accounts.argument.name = vectorize_string(name, 32);
+  ctx.accounts.argument.name = vectorize_string(dto.name, 32);
   ctx.accounts.argument.authority = ctx.accounts.authority.key();
   ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
   ctx.accounts.argument.application = ctx.accounts.application.key();
-  ctx.accounts.argument.set_kind(kind, max, max_length)?;
-  ctx.accounts.argument.set_modifier(modifier, size)?;
+  ctx
+    .accounts
+    .argument
+    .set_kind(dto.kind, dto.max, dto.max_length)?;
+  ctx.accounts.argument.set_modifier(dto.modifier, dto.size)?;
   Ok(())
 }

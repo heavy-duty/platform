@@ -1,16 +1,9 @@
-use crate::collections::{Application, Collection, CollectionAttribute};
+use crate::collections::{Application, Collection, CollectionAttribute, CollectionAttributeDto};
 use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(
-  name: String,
-  kind: u8,
-  modifier: Option<u8>,
-  size: Option<u32>,
-  max: Option<u32>,
-  max_length: Option<u32>
-)]
+#[instruction(dto: CollectionAttributeDto)]
 pub struct CreateCollectionAttribute<'info> {
   #[account(
         init,
@@ -27,19 +20,20 @@ pub struct CreateCollectionAttribute<'info> {
 
 pub fn handler(
   ctx: Context<CreateCollectionAttribute>,
-  name: String,
-  kind: u8,
-  modifier: Option<u8>,
-  size: Option<u32>,
-  max: Option<u32>,
-  max_length: Option<u32>,
+  dto: CollectionAttributeDto,
 ) -> ProgramResult {
   msg!("Create collection attribute");
-  ctx.accounts.attribute.name = vectorize_string(name, 32);
+  ctx.accounts.attribute.name = vectorize_string(dto.name, 32);
   ctx.accounts.attribute.authority = ctx.accounts.authority.key();
   ctx.accounts.attribute.collection = ctx.accounts.collection.key();
   ctx.accounts.attribute.application = ctx.accounts.application.key();
-  ctx.accounts.attribute.set_kind(kind, max, max_length)?;
-  ctx.accounts.attribute.set_modifier(modifier, size)?;
+  ctx
+    .accounts
+    .attribute
+    .set_kind(dto.kind, dto.max, dto.max_length)?;
+  ctx
+    .accounts
+    .attribute
+    .set_modifier(dto.modifier, dto.size)?;
   Ok(())
 }

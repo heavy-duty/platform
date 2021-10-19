@@ -3,6 +3,16 @@ use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[account]
+pub struct InstructionArgumentDto {
+  pub name: String,
+  pub kind: u8,
+  pub modifier: Option<u8>,
+  pub size: Option<u32>,
+  pub max: Option<u32>,
+  pub max_length: Option<u32>,
+}
+
+#[account]
 pub struct InstructionArgument {
   pub authority: Pubkey,
   pub application: Pubkey,

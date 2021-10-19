@@ -6,6 +6,7 @@ mod errors;
 mod instructions;
 mod utils;
 
+use collections::{CollectionAttributeDto, InstructionArgumentDto};
 use instructions::*;
 
 declare_id!("E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4");
@@ -40,30 +41,16 @@ pub mod bulldozer {
 
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
-    name: String,
-    kind: u8,
-    modifier: Option<u8>,
-    size: Option<u32>,
-    max: Option<u32>,
-    max_length: Option<u32>,
+    dto: CollectionAttributeDto,
   ) -> ProgramResult {
-    instructions::create_collection_attribute::handler(
-      ctx, name, kind, modifier, size, max, max_length,
-    )
+    instructions::create_collection_attribute::handler(ctx, dto)
   }
 
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
-    name: String,
-    kind: u8,
-    modifier: Option<u8>,
-    size: Option<u32>,
-    max: Option<u32>,
-    max_length: Option<u32>,
+    dto: CollectionAttributeDto,
   ) -> ProgramResult {
-    instructions::update_collection_attribute::handler(
-      ctx, name, kind, modifier, size, max, max_length,
-    )
+    instructions::update_collection_attribute::handler(ctx, dto)
   }
 
   pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
@@ -91,30 +78,16 @@ pub mod bulldozer {
 
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
-    name: String,
-    kind: u8,
-    modifier: Option<u8>,
-    size: Option<u32>,
-    max: Option<u32>,
-    max_length: Option<u32>,
+    dto: InstructionArgumentDto,
   ) -> ProgramResult {
-    instructions::create_instruction_argument::handler(
-      ctx, name, kind, modifier, size, max, max_length,
-    )
+    instructions::create_instruction_argument::handler(ctx, dto)
   }
 
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
-    name: String,
-    kind: u8,
-    modifier: Option<u8>,
-    size: Option<u32>,
-    max: Option<u32>,
-    max_length: Option<u32>,
+    dto: InstructionArgumentDto,
   ) -> ProgramResult {
-    instructions::update_instruction_argument::handler(
-      ctx, name, kind, modifier, size, max, max_length,
-    )
+    instructions::update_instruction_argument::handler(ctx, dto)
   }
 
   pub fn delete_instruction_argument(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {
