@@ -1,4 +1,12 @@
-import { Provider, setProvider, utils, workspace } from '@project-serum/anchor';
+import {
+  Provider,
+  setProvider,
+  utils,
+  workspace,
+  BN,
+  Program,
+  ProgramError,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
@@ -35,14 +43,18 @@ describe('collection attribute', () => {
     // arrange
     const attributeName = 'attr1_name';
     const attributeKind = 0;
-    const attributeModifier = 1;
-    const attributeSize = 32;
+    const attributeModifier = null;
+    const attributeSize = null;
+    const attributeMax = 40;
+    const attributeMaxLength = null;
     // act
     await program.rpc.createCollectionAttribute(
       attributeName,
       attributeKind,
       attributeModifier,
       attributeSize,
+      attributeMax,
+      attributeMaxLength,
       {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -60,12 +72,10 @@ describe('collection attribute', () => {
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.name), attributeName);
-    assert.ok('u8' in account.kind);
-    assert.equal(account.kind.u8.id, attributeKind);
-    assert.equal(account.kind.u8.size, 1);
-    assert.ok('array' in account.modifier);
-    assert.equal(account.modifier.array.size, attributeSize);
-    assert.equal(account.modifier.array.id, attributeModifier);
+    assert.ok('number' in account.kind);
+    assert.equal(account.kind.number.id, attributeKind);
+    assert.equal(account.kind.number.size, attributeMax);
+    assert.equal(account.modifier, null);
     assert.ok(account.collection.equals(collection.publicKey));
     assert.ok(account.application.equals(application.publicKey));
   });
@@ -74,14 +84,18 @@ describe('collection attribute', () => {
     // arrange
     const attributeName = 'attr2_name';
     const attributeKind = 1;
-    const attributeModifier = 2;
+    const attributeModifier = 0;
     const attributeSize = 5;
+    const attributeMax = null;
+    const attributeMaxLength = 20;
     // act
     await program.rpc.updateCollectionAttribute(
       attributeName,
       attributeKind,
       attributeModifier,
       attributeSize,
+      attributeMax,
+      attributeMaxLength,
       {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -97,12 +111,12 @@ describe('collection attribute', () => {
       attribute.publicKey
     );
     assert.equal(utils.bytes.utf8.decode(account.name), attributeName);
-    assert.ok('u16' in account.kind);
-    assert.equal(account.kind.u16.id, attributeKind);
-    assert.equal(account.kind.u16.size, 2);
-    assert.ok('vector' in account.modifier);
-    assert.equal(account.modifier.vector.id, attributeModifier);
-    assert.equal(account.modifier.vector.size, attributeSize);
+    assert.ok('string' in account.kind);
+    assert.equal(account.kind.string.id, attributeKind);
+    assert.equal(account.kind.string.size, attributeMaxLength);
+    assert.ok('array' in account.modifier);
+    assert.equal(account.modifier.array.id, attributeModifier);
+    assert.equal(account.modifier.array.size, attributeSize);
   });
 
   it('should delete account', async () => {
@@ -118,5 +132,77 @@ describe('collection attribute', () => {
       attribute.publicKey
     );
     assert.equal(account, null);
+  });
+
+  it('should fail when max is not provided with a number', async () => {
+    // arrange
+    const attributeName = 'attr1_name';
+    const attributeKind = 0;
+    const attributeModifier = 0;
+    const attributeSize = null;
+    const attributeMax = null;
+    const attributeMaxLength = null;
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createCollectionAttribute(
+        attributeName,
+        attributeKind,
+        attributeModifier,
+        attributeSize,
+        attributeMax,
+        attributeMaxLength,
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            collection: collection.publicKey,
+            attribute: attribute.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [attribute],
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 311);
+  });
+
+  it('should fail when max length is not provided with a string', async () => {
+    // arrange
+    const attributeName = 'attr1_name';
+    const attributeKind = 1;
+    const attributeModifier = 0;
+    const attributeSize = null;
+    const attributeMax = null;
+    const attributeMaxLength = null;
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createCollectionAttribute(
+        attributeName,
+        attributeKind,
+        attributeModifier,
+        attributeSize,
+        attributeMax,
+        attributeMaxLength,
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            application: application.publicKey,
+            collection: collection.publicKey,
+            attribute: attribute.publicKey,
+            systemProgram: SystemProgram.programId,
+          },
+          signers: [attribute],
+        }
+      );
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 312);
   });
 });

@@ -25,4 +25,8 @@ pub enum ErrorCode {
   MissingAccount,
   #[msg("Invalid Account")]
   InvalidAccount,
+  #[msg("Missing Max")]
+  MissingMax,
+  #[msg("Missing Max Length")]
+  MissingMaxLength,
 }
