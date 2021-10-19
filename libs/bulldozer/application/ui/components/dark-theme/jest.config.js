@@ -1,6 +1,6 @@
 module.exports = {
-  displayName: 'bulldozer-application-ui-dark-theme',
-  preset: '../../../../../jest.preset.js',
+  displayName: 'bulldozer-application-ui-components-dark-theme',
+  preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
     'ts-jest': {
@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../coverage/libs/bulldozer/application/ui/dark-theme',
+    '../../../../../../coverage/libs/bulldozer/application/ui/components/dark-theme',
   transform: {
     '^.+\\.(ts|js|html)$': 'jest-preset-angular',
   },

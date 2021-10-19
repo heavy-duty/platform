@@ -60,8 +60,11 @@
       "@heavy-duty/bulldozer/application/shell": [
         "libs/bulldozer/application/shell/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/ui/dark-theme": [
-        "libs/bulldozer/application/ui/dark-theme/src/index.ts"
+      "@heavy-duty/bulldozer/application/ui/components/dark-theme": [
+        "libs/bulldozer/application/ui/components/dark-theme/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/application/ui/directives/dark-theme": [
+        "libs/bulldozer/application/ui/directives/dark-theme/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/ui/directives/page-header": [
         "libs/bulldozer/application/ui/directives/page-header/src/index.ts"
@@ -80,6 +83,9 @@
       ],
       "@heavy-duty/bulldozer/application/utils/services/code-generator": [
         "libs/bulldozer/application/utils/services/code-generator/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer/application/utils/services/dark-theme": [
+        "libs/bulldozer/application/utils/services/dark-theme/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/utils/types": [
         "libs/bulldozer/application/utils/types/src/index.ts"
