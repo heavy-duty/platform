@@ -57,7 +57,7 @@ import { takeUntil } from 'rxjs/operators';
         hintLabel="Select a collection."
       >
         <mat-label>Collection</mat-label>
-        <mat-select formControlName="collection">
+        <mat-select formControlName="collection" required>
           <mat-option
             *ngFor="let collection of data?.collections"
             [value]="collection.id"
@@ -113,7 +113,7 @@ import { takeUntil } from 'rxjs/operators';
         hintLabel="Select a payer."
       >
         <mat-label>Payer</mat-label>
-        <mat-select formControlName="payer">
+        <mat-select formControlName="payer" required>
           <mat-option
             *ngFor="let account of data?.accounts"
             [value]="account.id"
@@ -133,6 +133,7 @@ import { takeUntil } from 'rxjs/operators';
       >
         <mat-label>Close</mat-label>
         <mat-select formControlName="close">
+          <mat-option> None </mat-option>
           <mat-option
             *ngFor="let account of data?.accounts"
             [value]="account.id"
