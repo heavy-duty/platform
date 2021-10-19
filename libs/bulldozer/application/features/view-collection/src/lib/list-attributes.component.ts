@@ -24,7 +24,7 @@ import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/typ
           <mat-list-item
             role="listitem"
             *ngFor="let attribute of attributes; let i = index"
-            class="h-20 bg-black bg-opacity-10 mb-2 last:mb-0"
+            class="h-20 bg-white bg-opacity-5 mat-elevation-z2 mb-2 last:mb-0"
           >
             <div class="flex items-center gap-4 w-full">
               <div

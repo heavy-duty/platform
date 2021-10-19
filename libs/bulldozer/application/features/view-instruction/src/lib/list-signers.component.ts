@@ -24,7 +24,7 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
           <mat-list-item
             role="listitem"
             *ngFor="let signer of signers"
-            class="h-auto bg-black bg-opacity-10 mb-2 last:mb-0 py-2"
+            class="h-auto bg-white bg-opacity-5 mat-elevation-z2 mb-2 last:mb-0 py-2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
