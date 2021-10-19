@@ -3,7 +3,6 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/servic
 import { map } from 'rxjs/operators';
 
 @Component({
-  // eslint-disable-next-line @angular-eslint/component-selector
   selector: 'bd-dark-theme-switch',
   template: `
     <button

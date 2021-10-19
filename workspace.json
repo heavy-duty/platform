@@ -406,7 +406,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/ui/components/dark-theme",
       "sourceRoot": "libs/bulldozer/application/ui/components/dark-theme/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -433,7 +433,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/ui/directives/dark-theme",
       "sourceRoot": "libs/bulldozer/application/ui/directives/dark-theme/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
@@ -621,7 +621,7 @@
       "projectType": "library",
       "root": "libs/bulldozer/application/utils/services/dark-theme",
       "sourceRoot": "libs/bulldozer/application/utils/services/dark-theme/src",
-      "prefix": "heavy-duty",
+      "prefix": "bd",
       "targets": {
         "test": {
           "executor": "@nrwl/jest:jest",
