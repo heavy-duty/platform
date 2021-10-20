@@ -96,22 +96,16 @@ pub mod bulldozer {
 
   pub fn create_instruction_account(
     ctx: Context<CreateInstructionAccount>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    space: Option<u16>,
+    dto: AccountDto,
   ) -> ProgramResult {
-    instructions::create_instruction_account::handler(ctx, name, kind, modifier, space)
+    instructions::create_instruction_account::handler(ctx, dto)
   }
 
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    space: Option<u16>,
+    dto: AccountDto,
   ) -> ProgramResult {
-    instructions::update_instruction_account::handler(ctx, name, kind, modifier, space)
+    instructions::update_instruction_account::handler(ctx, dto)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {

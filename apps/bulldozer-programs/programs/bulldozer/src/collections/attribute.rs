@@ -19,7 +19,7 @@ pub trait AttributeModifier {
   ) -> Result<&Self, ProgramError>;
 }
 
-#[account]
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct AttributeDto {
   pub name: String,
   pub kind: u8,

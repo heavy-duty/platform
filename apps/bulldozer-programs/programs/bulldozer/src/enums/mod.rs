@@ -1,9 +1,9 @@
-mod account_kind;
-mod account_modifier;
+mod account_kinds;
+mod account_modifiers;
 mod attribute_kinds;
 mod attribute_modifiers;
 
-pub use account_kind::*;
-pub use account_modifier::*;
+pub use account_kinds::*;
+pub use account_modifiers::*;
 pub use attribute_kinds::*;
 pub use attribute_modifiers::*;

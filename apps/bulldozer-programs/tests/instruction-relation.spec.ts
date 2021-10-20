@@ -15,15 +15,19 @@ describe('instruction relation', () => {
   const application = Keypair.generate();
   const applicationName = 'my-app';
   const fromAccount = Keypair.generate();
-  const fromAccountName = 'from';
-  const fromAccountKind = 1;
-  const fromAccountModifier = 0;
-  const fromAccountSpace = null;
+  const fromAccountDto = {
+    name: 'from',
+    kind: 1,
+    modifier: null,
+    space: null,
+  };
   const toAccount = Keypair.generate();
-  const toAccountName = 'to';
-  const toAccountKind = 1;
-  const toAccountModifier = 0;
-  const toAccountSpace = null;
+  const toAccountDto = {
+    name: 'to',
+    kind: 1,
+    modifier: null,
+    space: null,
+  };
   let relationPublicKey: PublicKey, relationBump: number;
 
   before(async () => {
@@ -44,38 +48,26 @@ describe('instruction relation', () => {
       },
       signers: [instruction],
     });
-    await program.rpc.createInstructionAccount(
-      fromAccountName,
-      fromAccountKind,
-      fromAccountModifier,
-      fromAccountSpace,
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: fromAccount.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [fromAccount],
-      }
-    );
-    await program.rpc.createInstructionAccount(
-      toAccountName,
-      toAccountKind,
-      toAccountModifier,
-      toAccountSpace,
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: toAccount.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [toAccount],
-      }
-    );
+    await program.rpc.createInstructionAccount(fromAccountDto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: fromAccount.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [fromAccount],
+    });
+    await program.rpc.createInstructionAccount(toAccountDto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: toAccount.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [toAccount],
+    });
     [relationPublicKey, relationBump] = await PublicKey.findProgramAddress(
       [
         Buffer.from('instruction_relation', 'utf8'),
