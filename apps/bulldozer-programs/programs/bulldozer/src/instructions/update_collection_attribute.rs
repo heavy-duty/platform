@@ -1,7 +1,4 @@
-use crate::collections::{
-  Attribute, AttributeDto, AttributeKind, AttributeModifier, CollectionAttribute,
-};
-use crate::utils::vectorize_string;
+use crate::collections::{Attribute, AttributeDto, CollectionAttribute};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -14,20 +11,6 @@ pub struct UpdateCollectionAttribute<'info> {
 
 pub fn handler(ctx: Context<UpdateCollectionAttribute>, dto: AttributeDto) -> ProgramResult {
   msg!("Update collection attribute");
-  ctx.accounts.attribute.data = Attribute {
-    name: vectorize_string(dto.name, 32),
-    kind: None,
-    modifier: None,
-  };
-  ctx
-    .accounts
-    .attribute
-    .data
-    .set_kind(Some(dto.kind), dto.max, dto.max_length)?;
-  ctx
-    .accounts
-    .attribute
-    .data
-    .set_modifier(dto.modifier, dto.size)?;
+  ctx.accounts.attribute.data = Attribute::create(dto)?;
   Ok(())
 }

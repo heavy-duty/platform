@@ -1,8 +1,4 @@
-use crate::collections::{
-  Application, Attribute, AttributeDto, AttributeKind, AttributeModifier, Instruction,
-  InstructionArgument,
-};
-use crate::utils::vectorize_string;
+use crate::collections::{Application, Attribute, AttributeDto, Instruction, InstructionArgument};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -26,20 +22,6 @@ pub fn handler(ctx: Context<CreateInstructionArgument>, dto: AttributeDto) -> Pr
   ctx.accounts.argument.authority = ctx.accounts.authority.key();
   ctx.accounts.argument.application = ctx.accounts.application.key();
   ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.argument.data = Attribute {
-    name: vectorize_string(dto.name, 32),
-    kind: None,
-    modifier: None,
-  };
-  ctx
-    .accounts
-    .argument
-    .data
-    .set_kind(Some(dto.kind), dto.max, dto.max_length)?;
-  ctx
-    .accounts
-    .argument
-    .data
-    .set_modifier(dto.modifier, dto.size)?;
+  ctx.accounts.argument.data = Attribute::create(dto)?;
   Ok(())
 }

@@ -1,5 +1,6 @@
 use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
+use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 pub trait AttributeKind {
@@ -91,5 +92,18 @@ impl AttributeModifier for Attribute {
     };
 
     Ok(self)
+  }
+}
+
+impl Attribute {
+  pub fn create(dto: AttributeDto) -> Result<Self, ProgramError> {
+    let mut attribute = Attribute {
+      name: vectorize_string(dto.name, 32),
+      kind: None,
+      modifier: None,
+    };
+    attribute.set_kind(Some(dto.kind), dto.max, dto.max_length)?;
+    attribute.set_modifier(dto.modifier, dto.size)?;
+    return Ok(attribute);
   }
 }

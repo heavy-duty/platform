@@ -1,7 +1,4 @@
-use crate::collections::{
-  Attribute, AttributeDto, AttributeKind, AttributeModifier, InstructionArgument,
-};
-use crate::utils::vectorize_string;
+use crate::collections::{Attribute, AttributeDto, InstructionArgument};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -14,20 +11,6 @@ pub struct UpdateInstructionArgument<'info> {
 
 pub fn handler(ctx: Context<UpdateInstructionArgument>, dto: AttributeDto) -> ProgramResult {
   msg!("Update instruction argument");
-  ctx.accounts.argument.data = Attribute {
-    name: vectorize_string(dto.name, 32),
-    kind: None,
-    modifier: None,
-  };
-  ctx
-    .accounts
-    .argument
-    .data
-    .set_kind(Some(dto.kind), dto.max, dto.max_length)?;
-  ctx
-    .accounts
-    .argument
-    .data
-    .set_modifier(dto.modifier, dto.size)?;
+  ctx.accounts.argument.data = Attribute::create(dto)?;
   Ok(())
 }

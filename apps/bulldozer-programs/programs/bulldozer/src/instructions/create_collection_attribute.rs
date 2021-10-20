@@ -1,8 +1,4 @@
-use crate::collections::{
-  Application, Attribute, AttributeDto, AttributeKind, AttributeModifier, Collection,
-  CollectionAttribute,
-};
-use crate::utils::vectorize_string;
+use crate::collections::{Application, Attribute, AttributeDto, Collection, CollectionAttribute};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -26,20 +22,6 @@ pub fn handler(ctx: Context<CreateCollectionAttribute>, dto: AttributeDto) -> Pr
   ctx.accounts.attribute.authority = ctx.accounts.authority.key();
   ctx.accounts.attribute.application = ctx.accounts.application.key();
   ctx.accounts.attribute.collection = ctx.accounts.collection.key();
-  ctx.accounts.attribute.data = Attribute {
-    name: vectorize_string(dto.name, 32),
-    kind: None,
-    modifier: None,
-  };
-  ctx
-    .accounts
-    .attribute
-    .data
-    .set_kind(Some(dto.kind), dto.max, dto.max_length)?;
-  ctx
-    .accounts
-    .attribute
-    .data
-    .set_modifier(dto.modifier, dto.size)?;
+  ctx.accounts.attribute.data = Attribute::create(dto)?;
   Ok(())
 }
