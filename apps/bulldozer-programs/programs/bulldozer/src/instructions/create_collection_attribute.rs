@@ -1,5 +1,5 @@
 use crate::collections::{
-  Application, Attribute, AttributeDto, AttributeKindSetter, AttributeModifierSetter, Collection,
+  Application, Attribute, AttributeDto, AttributeKind, AttributeModifier, Collection,
   CollectionAttribute,
 };
 use crate::utils::vectorize_string;

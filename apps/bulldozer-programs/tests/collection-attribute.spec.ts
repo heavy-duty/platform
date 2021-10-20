@@ -62,7 +62,6 @@ describe('collection attribute', () => {
     const account = await program.account.collectionAttribute.fetch(
       attribute.publicKey
     );
-    console.log(account);
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
     assert.ok('number' in account.data.kind);

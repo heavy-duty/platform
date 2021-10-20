@@ -1,5 +1,5 @@
 use crate::collections::{
-  Attribute, AttributeDto, AttributeKindSetter, AttributeModifierSetter, InstructionArgument,
+  Attribute, AttributeDto, AttributeKind, AttributeModifier, InstructionArgument,
 };
 use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
