@@ -62,12 +62,13 @@ describe('collection attribute', () => {
     const account = await program.account.collectionAttribute.fetch(
       attribute.publicKey
     );
+    console.log(account);
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.equal(utils.bytes.utf8.decode(account.name), dto.name);
-    assert.ok('number' in account.kind);
-    assert.equal(account.kind.number.id, dto.kind);
-    assert.equal(account.kind.number.size, dto.max);
-    assert.equal(account.modifier, null);
+    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.ok('number' in account.data.kind);
+    assert.equal(account.data.kind.number.id, dto.kind);
+    assert.equal(account.data.kind.number.size, dto.max);
+    assert.equal(account.data.modifier, null);
     assert.ok(account.collection.equals(collection.publicKey));
     assert.ok(account.application.equals(application.publicKey));
   });
@@ -96,13 +97,13 @@ describe('collection attribute', () => {
     const account = await program.account.collectionAttribute.fetch(
       attribute.publicKey
     );
-    assert.equal(utils.bytes.utf8.decode(account.name), dto.name);
-    assert.ok('string' in account.kind);
-    assert.equal(account.kind.string.id, dto.kind);
-    assert.equal(account.kind.string.size, dto.maxLength);
-    assert.ok('array' in account.modifier);
-    assert.equal(account.modifier.array.id, dto.modifier);
-    assert.equal(account.modifier.array.size, dto.size);
+    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.ok('string' in account.data.kind);
+    assert.equal(account.data.kind.string.id, dto.kind);
+    assert.equal(account.data.kind.string.size, dto.maxLength);
+    assert.ok('array' in account.data.modifier);
+    assert.equal(account.data.modifier.array.id, dto.modifier);
+    assert.equal(account.data.modifier.array.size, dto.size);
   });
 
   it('should delete account', async () => {

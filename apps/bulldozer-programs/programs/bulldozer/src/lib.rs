@@ -6,7 +6,7 @@ mod errors;
 mod instructions;
 mod utils;
 
-use collections::{CollectionAttributeDto, InstructionArgumentDto};
+use collections::*;
 use instructions::*;
 
 declare_id!("E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4");
@@ -41,14 +41,14 @@ pub mod bulldozer {
 
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
-    dto: CollectionAttributeDto,
+    dto: AttributeDto,
   ) -> ProgramResult {
     instructions::create_collection_attribute::handler(ctx, dto)
   }
 
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
-    dto: CollectionAttributeDto,
+    dto: AttributeDto,
   ) -> ProgramResult {
     instructions::update_collection_attribute::handler(ctx, dto)
   }
@@ -78,14 +78,14 @@ pub mod bulldozer {
 
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
-    dto: InstructionArgumentDto,
+    dto: AttributeDto,
   ) -> ProgramResult {
     instructions::create_instruction_argument::handler(ctx, dto)
   }
 
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
-    dto: InstructionArgumentDto,
+    dto: AttributeDto,
   ) -> ProgramResult {
     instructions::update_instruction_argument::handler(ctx, dto)
   }
