@@ -47,14 +47,20 @@ impl AttributeKindSetter for Attribute {
       Some(kind) => match kind {
         0 => match max {
           None => return Err(ErrorCode::MissingMax.into()),
-          Some(max) => Some(AttributeKind::from_index(kind, max)?),
+          Some(max) => Some(AttributeKind::Number {
+            id: kind,
+            size: max,
+          }),
         },
         1 => match max_length {
           None => return Err(ErrorCode::MissingMaxLength.into()),
-          Some(max_length) => Some(AttributeKind::from_index(kind, max_length)?),
+          Some(max_length) => Some(AttributeKind::String {
+            id: kind,
+            size: max_length,
+          }),
         },
-        2 => Some(AttributeKind::from_index(kind, 32)?),
-        _ => Some(AttributeKind::from_index(kind, 0)?),
+        2 => Some(AttributeKind::Pubkey { id: kind, size: 32 }),
+        _ => return Err(ErrorCode::InvalidAttributeKind.into()),
       },
       _ => return Ok(self),
     };
@@ -70,7 +76,17 @@ impl AttributeModifierSetter for Attribute {
     size: Option<u32>,
   ) -> Result<&Self, ProgramError> {
     self.modifier = match (modifier, size) {
-      (Some(modifier), Some(size)) => Some(AttributeKindModifier::from_index(modifier, size)?),
+      (Some(modifier), Some(size)) => match modifier {
+        0 => Some(AttributeKindModifier::Array {
+          id: modifier,
+          size: size,
+        }),
+        1 => Some(AttributeKindModifier::Vector {
+          id: modifier,
+          size: size,
+        }),
+        _ => return Err(ErrorCode::InvalidAttributeModifier.into()),
+      },
       (_, _) => return Ok(self),
     };
 
