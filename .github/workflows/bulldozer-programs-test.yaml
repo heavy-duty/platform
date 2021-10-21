@@ -1,0 +1,55 @@
+name: Bulldozer Programs Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Pre config - 🧰 Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Pre config - 🧰 Setting up Node 14.7.5
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14.17.5' # we have to check this
+
+      - name: Step 1 - 🛠️ Setting up Anchor, Rust, Solana and others dependencies
+        run: |
+          echo "Installing Rust >> "
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup component add rustfmt
+
+          echo "Installing Solana >> "
+          sh -c "$(curl -sSfL https://release.solana.com/v1.7.11/install)"
+          echo "-- adding new solana key file"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          solana-keygen new -o $HOME/.config/solana/id.json
+
+          echo "Installing Serum >> "
+          npm i -g @project-serum/anchor 
+          npm i -g @project-serum/anchor-cli
+
+          echo "Installing others dependencies >>"
+          npm i -g typescript
+          npm install -g mocha
+          npm install -g ts-mocha
+
+      - name: Step 2 - 📦 Installing Bulldozer npm packages
+        run: npm ci
+
+      - name: Step 3 - 🏗️ Building Bulldozer Program
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npx nx build bulldozer-programs --verbose
+
+      - name: Step 4 - 🧪 Running Bulldozer Anchor Tests
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npx nx test bulldozer-programs
