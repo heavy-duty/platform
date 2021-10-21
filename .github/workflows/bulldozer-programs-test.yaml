@@ -2,9 +2,15 @@ name: Bulldozer Programs Test
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+    paths:
+      - 'apps/bulldozer-programs/**'
   pull_request:
-    branches: ['**']
+    branches:
+      - '**'
+    paths:
+      - 'apps/bulldozer-programs/**'
 
 jobs:
   build-and-test:
