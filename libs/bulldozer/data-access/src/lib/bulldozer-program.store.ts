@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';

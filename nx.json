@@ -123,6 +123,12 @@
     },
     "shared-utils-operators": {
       "tags": []
+    },
+    "shared-wallet-adapter": {
+      "tags": []
+    },
+    "shared-wallet-adapter-ui": {
+      "tags": []
     }
   }
 }

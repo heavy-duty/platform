@@ -45,7 +45,7 @@ class AppComponent {
 }
 ```
 
-You should have a ConnectionStore and a WalletStore to manage the RPC connection and Wallet connection. We use this package with @danmt/wallet-adapter-angular, and use the stores it provides.
+You should have a ConnectionStore and a WalletStore to manage the RPC connection and Wallet connection. We use this package with @heavy-duty/wallet-adapter, and use the stores it provides.
 
 The ProgramStore has two methods: `getReader` and `getWriter`, given a program name they return a Program instance or null. `getReader` returns null when the connection is not available, while `getWriter` fails if the connection or wallet are not available.
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import {
   ApplicationActionTypes,
   ApplicationStore,
