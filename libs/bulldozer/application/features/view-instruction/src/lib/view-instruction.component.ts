@@ -5,7 +5,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import {

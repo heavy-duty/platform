@@ -695,7 +695,7 @@
             ],
             "styles": [
               "apps/bulldozer-client/src/styles.scss",
-              "node_modules/@danmt/wallet-adapter-angular-material-ui/src/style.css"
+              "libs/shared/wallet-adapter-ui/src/style.css"
             ],
             "scripts": [],
             "customWebpackConfig": {
@@ -938,6 +938,88 @@
           "options": {
             "jestConfig": "libs/shared/utils/operators/jest.config.js",
             "passWithNoTests": true
+          }
+        }
+      }
+    },
+    "shared-wallet-adapter": {
+      "projectType": "library",
+      "root": "libs/shared/wallet-adapter",
+      "sourceRoot": "libs/shared/wallet-adapter/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/angular:package",
+          "outputs": ["dist/libs/shared/wallet-adapter"],
+          "options": {
+            "project": "libs/shared/wallet-adapter/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/shared/wallet-adapter/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/shared/wallet-adapter/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/wallet-adapter"],
+          "options": {
+            "jestConfig": "libs/shared/wallet-adapter/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/shared/wallet-adapter/src/**/*.ts",
+              "libs/shared/wallet-adapter/src/**/*.html"
+            ]
+          }
+        }
+      }
+    },
+    "shared-wallet-adapter-ui": {
+      "projectType": "library",
+      "root": "libs/shared/wallet-adapter-ui",
+      "sourceRoot": "libs/shared/wallet-adapter-ui/src",
+      "prefix": "heavy-duty",
+      "targets": {
+        "build": {
+          "executor": "@nrwl/angular:package",
+          "outputs": ["dist/libs/shared/wallet-adapter-ui"],
+          "options": {
+            "project": "libs/shared/wallet-adapter-ui/ng-package.json"
+          },
+          "configurations": {
+            "production": {
+              "tsConfig": "libs/shared/wallet-adapter-ui/tsconfig.lib.prod.json"
+            },
+            "development": {
+              "tsConfig": "libs/shared/wallet-adapter-ui/tsconfig.lib.json"
+            }
+          },
+          "defaultConfiguration": "production"
+        },
+        "test": {
+          "executor": "@nrwl/jest:jest",
+          "outputs": ["coverage/libs/shared/wallet-adapter-ui"],
+          "options": {
+            "jestConfig": "libs/shared/wallet-adapter-ui/jest.config.js",
+            "passWithNoTests": true
+          }
+        },
+        "lint": {
+          "executor": "@nrwl/linter:eslint",
+          "options": {
+            "lintFilePatterns": [
+              "libs/shared/wallet-adapter-ui/src/**/*.ts",
+              "libs/shared/wallet-adapter-ui/src/**/*.html"
+            ]
           }
         }
       }

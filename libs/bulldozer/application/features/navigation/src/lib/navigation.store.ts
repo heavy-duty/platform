@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { WalletStore } from '@danmt/wallet-adapter-angular';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore } from '@ngrx/component-store';
