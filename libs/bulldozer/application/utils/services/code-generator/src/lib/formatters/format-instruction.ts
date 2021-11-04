@@ -55,7 +55,6 @@ const formatInstructionAccounts = (
     .map((account) => {
       let payer = null,
         collection = null,
-        modifier = null,
         close = null,
         relations = null;
 
@@ -105,16 +104,11 @@ const formatInstructionAccounts = (
         };
       }
 
-      if (account.data.modifier.name !== 'none') {
-        modifier = account.data.modifier;
-      }
-
       return {
         id: account.id,
         data: {
           ...account.data,
           collection: collection,
-          modifier: modifier,
           close,
           payer: payer,
           name: formatName(account.data.name),
@@ -127,7 +121,7 @@ export const formatInstruction = (instruction: InstructionExtended) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),
   initializesAccount: instruction.accounts.some(
-    (account) => account.data.modifier.id === 1
+    (account) => account.data.modifier?.id === 0
   ),
   arguments: formatInstructionArguments(instruction.id, instruction.arguments),
   accounts: formatInstructionAccounts(instruction.id, instruction.accounts),

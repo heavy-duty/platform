@@ -39,13 +39,14 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
 
                   <span
                     class="text-xs font-thin"
+                    *ngIf="signer.data.modifier"
                     [ngSwitch]="signer.data.modifier.id"
                   >
-                    <ng-container *ngSwitchCase="1">
+                    <ng-container *ngSwitchCase="0">
                       ({{ signer.data.modifier.name }}: space
                       {{ signer.data.space }})
                     </ng-container>
-                    <ng-container *ngSwitchCase="2">
+                    <ng-container *ngSwitchCase="1">
                       ({{ signer.data.modifier.name }})
                     </ng-container>
                   </span>

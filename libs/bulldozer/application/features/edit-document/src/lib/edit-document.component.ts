@@ -74,13 +74,13 @@ import { takeUntil } from 'rxjs/operators';
         ariaLabel="Document modifier"
         formControlName="modifier"
       >
-        <mat-radio-button [value]="0">Read-only.</mat-radio-button>
-        <mat-radio-button [value]="1">Create new document.</mat-radio-button>
-        <mat-radio-button [value]="2">Save changes.</mat-radio-button>
+        <mat-radio-button [value]="null">Read-only.</mat-radio-button>
+        <mat-radio-button [value]="0">Create new document.</mat-radio-button>
+        <mat-radio-button [value]="1">Save changes.</mat-radio-button>
       </mat-radio-group>
 
       <mat-form-field
-        *ngIf="modifierControl.value === 1"
+        *ngIf="modifierControl.value === 0"
         class="w-full"
         appearance="fill"
         hintLabel="Enter the space."
@@ -107,7 +107,7 @@ import { takeUntil } from 'rxjs/operators';
       </mat-form-field>
 
       <mat-form-field
-        *ngIf="modifierControl.value === 1"
+        *ngIf="modifierControl.value === 0"
         class="w-full"
         appearance="fill"
         hintLabel="Select a payer."
@@ -126,7 +126,7 @@ import { takeUntil } from 'rxjs/operators';
       </mat-form-field>
 
       <mat-form-field
-        *ngIf="modifierControl.value === 2"
+        *ngIf="modifierControl.value === 1"
         class="w-full"
         appearance="fill"
         hintLabel="Select target for close."
@@ -172,7 +172,7 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
   submitted = false;
   readonly documentGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
-    modifier: new FormControl(0, { validators: [Validators.required] }),
+    modifier: new FormControl(null),
     collection: new FormControl(null, { validators: [Validators.required] }),
     space: new FormControl(null),
     payer: new FormControl(null),
@@ -212,7 +212,7 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     this.modifierControl.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((modifier) => {
-        if (modifier === 1) {
+        if (modifier === 0) {
           this.spaceControl.setValidators([
             Validators.required,
             Validators.min(0),
@@ -232,7 +232,10 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
       this.documentGroup.setValue(
         {
           name: this.data.document.data.name,
-          modifier: this.data.document.data.modifier.id,
+          modifier:
+            this.data.document.data.modifier !== null
+              ? this.data.document.data.modifier.id
+              : null,
           collection: this.data.document.data.collection?.id || null,
           space: this.data.document.data.space,
           payer: this.data.document.data.payer?.id || null,
@@ -252,17 +255,19 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     this.submitted = true;
     this.documentGroup.markAllAsTouched();
 
+    console.log(this.modifierControl.value, this.closeControl.value);
+
     if (this.documentGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
         modifier: this.modifierControl.value,
         collection: this.collectionControl.value,
         space:
-          this.modifierControl.value === 1 ? this.spaceControl.value : null,
+          this.modifierControl.value === 0 ? this.spaceControl.value : null,
         payer:
-          this.modifierControl.value === 1 ? this.payerControl.value : null,
+          this.modifierControl.value === 0 ? this.payerControl.value : null,
         close:
-          this.modifierControl.value === 2 ? this.closeControl.value : null,
+          this.modifierControl.value === 1 ? this.closeControl.value : null,
       });
     } else {
       this._matSnackBar.open('Invalid information', 'close', {

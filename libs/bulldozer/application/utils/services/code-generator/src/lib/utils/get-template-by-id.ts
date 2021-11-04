@@ -1,8 +1,7 @@
 import {
   __collections,
   __full_program,
-  __instructions_context,
-  __instructions_handler_program,
+  __instructions,
   __mod_program,
   __migrations_deploy,
   __program_xargo,
@@ -23,10 +22,8 @@ export const getTemplateByType = (type: string): string => {
       return __full_program;
     case 'collections':
       return __collections;
-    case 'instructions_handler_template':
-      return __instructions_handler_program;
-    case 'instructions_context':
-      return __instructions_context;
+    case 'instructions':
+      return __instructions;
     case 'mod':
       return __mod_program;
     case 'migrations.deploy':

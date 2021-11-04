@@ -42,13 +42,14 @@ import {
 
                   <span
                     class="text-xs font-thin"
+                    *ngIf="document.data.modifier"
                     [ngSwitch]="document.data.modifier.id"
                   >
-                    <ng-container *ngSwitchCase="1">
+                    <ng-container *ngSwitchCase="0">
                       ({{ document.data.modifier.name }}: space
                       {{ document.data.space }})
                     </ng-container>
-                    <ng-container *ngSwitchCase="2">
+                    <ng-container *ngSwitchCase="1">
                       ({{ document.data.modifier.name }})
                     </ng-container>
                   </span>

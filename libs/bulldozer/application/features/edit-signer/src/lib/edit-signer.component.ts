@@ -89,7 +89,7 @@ export class EditSignerComponent implements OnInit {
       this.signerGroup.setValue(
         {
           name: this.data.signer.data.name,
-          saveChanges: this.data.signer.data.modifier.id === 2,
+          saveChanges: this.data.signer.data.modifier?.id === 1,
         },
         { emitEvent: false }
       );
@@ -103,7 +103,7 @@ export class EditSignerComponent implements OnInit {
     if (this.signerGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
-        modifier: this.saveChangesControl.value ? 2 : 0,
+        modifier: this.saveChangesControl.value ? 1 : null,
       });
     } else {
       this._matSnackBar.open('Invalid information', 'close', {

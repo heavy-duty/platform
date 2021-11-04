@@ -122,7 +122,7 @@ export interface InstructionAccountInfo {
   modifier: {
     id: number;
     name: string;
-  };
+  } | null;
   collection: string | null;
   space: number | null;
   payer: string | null;
@@ -132,6 +132,19 @@ export interface InstructionAccountInfo {
 export interface InstructionAccount {
   id: string;
   data: InstructionAccountInfo;
+}
+
+export interface InstructionAccountDto {
+  name: string;
+  kind: number;
+  modifier: number | null;
+  space: number | null;
+}
+
+export interface InstructionAccountExtras {
+  collection: string | null;
+  payer: string | null;
+  close: string | null;
 }
 
 export interface InstructionAccountExtended {

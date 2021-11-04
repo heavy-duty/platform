@@ -528,13 +528,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                   .createInstructionAccount(
                     applicationId,
                     instructionId,
-                    name,
-                    0,
-                    modifier,
-                    space,
-                    collection,
-                    payer,
-                    close
+                    { name, kind: 0, modifier, space },
+                    { collection, payer, close }
                   )
                   .pipe(
                     tapResponse(
@@ -571,13 +566,13 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 this._bulldozerProgramStore
                   .updateInstructionAccount(
                     document.id,
-                    name,
-                    0,
-                    modifier,
-                    space,
-                    collection,
-                    payer,
-                    close
+                    {
+                      name,
+                      kind: 0,
+                      modifier,
+                      space,
+                    },
+                    { collection, payer, close }
                   )
                   .pipe(
                     tapResponse(
@@ -606,18 +601,21 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ name, modifier }, applicationId, instructionId]) =>
+            concatMap(([instructionAccountDto, applicationId, instructionId]) =>
               this._bulldozerProgramStore
                 .createInstructionAccount(
                   applicationId,
                   instructionId,
-                  name,
-                  1,
-                  modifier,
-                  null,
-                  null,
-                  null,
-                  null
+                  {
+                    kind: 1,
+                    space: null,
+                    ...instructionAccountDto,
+                  },
+                  {
+                    collection: null,
+                    payer: null,
+                    close: null,
+                  }
                 )
                 .pipe(
                   tapResponse(
@@ -642,17 +640,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, modifier }) =>
+              concatMap((instructionAccountDto) =>
                 this._bulldozerProgramStore
                   .updateInstructionAccount(
                     signer.id,
-                    name,
-                    1,
-                    modifier,
-                    null,
-                    null,
-                    null,
-                    null
+                    {
+                      kind: 1,
+                      space: null,
+                      ...instructionAccountDto,
+                    },
+                    {
+                      collection: null,
+                      payer: null,
+                      close: null,
+                    }
                   )
                   .pipe(
                     tapResponse(
