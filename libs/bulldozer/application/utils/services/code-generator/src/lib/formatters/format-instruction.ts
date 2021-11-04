@@ -6,6 +6,24 @@ import {
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
+const getArgumentKindName = (id: number, name: string, size: number) => {
+  if (id === 0) {
+    if (size <= 256) {
+      return 'u8';
+    } else if (size > 256 && size <= 65536) {
+      return 'u16';
+    } else if (size > 65536 && size <= 4294967296) {
+      return 'u32';
+    } else {
+      throw Error('Invalid max');
+    }
+  } else if (id === 1 || id === 2) {
+    return capitalize(name);
+  } else {
+    throw Error('Invalid kind');
+  }
+};
+
 export const formatInstructionArguments = (
   instructionId: string,
   instructionArguments: InstructionArgument[]
@@ -19,10 +37,11 @@ export const formatInstructionArguments = (
         name: formatName(argument.data.name),
         kind: {
           ...argument.data.kind,
-          name:
-            argument.data.kind.id === 5
-              ? capitalize(argument.data.kind.name)
-              : argument.data.kind.name,
+          name: getArgumentKindName(
+            argument.data.kind.id,
+            argument.data.kind.name,
+            argument.data.kind.size
+          ),
         },
       },
     }));

@@ -37,7 +37,7 @@ export const generateInstructionCode = (instruction: InstructionExtended) => {
       instruction: formattedInstruction,
       collections: Array.from(formattedCollections.values()),
     },
-    getTemplateByType('instructions_context_program')
+    getTemplateByType('instructions_context')
   );
 };
 
