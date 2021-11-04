@@ -1,5 +1,5 @@
 import {
-  __collections_program,
+  __collections,
   __full_program,
   __instructions_context_program,
   __instructions_handler_program,
@@ -21,8 +21,8 @@ export const getTemplateByType = (type: string): string => {
   switch (type) {
     case 'full_program':
       return __full_program;
-    case 'collections_program':
-      return __collections_program;
+    case 'collections':
+      return __collections;
     case 'instructions_handler_template':
       return __instructions_handler_program;
     case 'instructions_context_program':

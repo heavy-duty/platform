@@ -46,7 +46,7 @@ export const generateCollectionCode = (collection: CollectionExtended) => {
 
   return generateCode(
     { collection: formattedCollection },
-    getTemplateByType('collections_program')
+    getTemplateByType('collections')
   );
 };
 
