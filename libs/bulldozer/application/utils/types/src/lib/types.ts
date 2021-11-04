@@ -86,12 +86,23 @@ export interface InstructionArgumentInfo {
     id: number;
     name: string;
     size: number;
-  };
+  } | null;
+  max: number | null;
+  maxLength: number | null;
 }
 
 export interface InstructionArgument {
   id: string;
   data: InstructionArgumentInfo;
+}
+
+export interface InstructionArgumentDto {
+  name: string;
+  kind: number;
+  modifier: number | null;
+  size: number | null;
+  max: number | null;
+  maxLength: number | null;
 }
 
 export interface Program {

@@ -343,19 +343,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(
-              ([
-                { name, kind, modifier, size },
-                applicationId,
-                instructionId,
-              ]) =>
+              ([instructionArgumentDto, applicationId, instructionId]) =>
                 this._bulldozerProgramStore
                   .createInstructionArgument(
                     applicationId,
                     instructionId,
-                    name,
-                    kind,
-                    modifier,
-                    size
+                    instructionArgumentDto
                   )
                   .pipe(
                     tapResponse(
@@ -380,14 +373,11 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, kind, modifier, size }) =>
+              concatMap((instructionArgumentDto) =>
                 this._bulldozerProgramStore
                   .updateInstructionArgument(
                     argument.id,
-                    name,
-                    kind,
-                    modifier,
-                    size
+                    instructionArgumentDto
                   )
                   .pipe(
                     tapResponse(

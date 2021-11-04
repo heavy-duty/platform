@@ -123,9 +123,13 @@ interface RawInstructionArgument {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
-  name: Uint8Array;
-  kind: { [key: string]: { id: number; name: string; size: number } };
-  modifier: { [key: string]: { id: number; name: string; size: number } };
+  data: {
+    name: Uint8Array;
+    kind: { [key: string]: { id: number; name: string; size: number } };
+    modifier: { [key: string]: { id: number; name: string; size: number } };
+    max: number | null;
+    maxLength: number | null;
+  };
 }
 
 export const InstructionArgumentParser = (
@@ -138,17 +142,27 @@ export const InstructionArgumentParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
+      name: utils.bytes.utf8.decode(account.data.name),
       kind: {
-        id: Object.values(account.kind)[0].id,
-        name: Object.keys(account.kind)[0],
-        size: Object.values(account.kind)[0].size,
+        id: Object.values(account.data.kind)[0].id,
+        name: Object.keys(account.data.kind)[0],
+        size: Object.values(account.data.kind)[0].size,
       },
-      modifier: {
-        id: Object.values(account.modifier)[0].id,
-        name: Object.keys(account.modifier)[0],
-        size: Object.values(account.modifier)[0].size,
-      },
+      modifier: account.data.modifier
+        ? {
+            id: Object.values(account.data.modifier)[0].id,
+            name: Object.keys(account.data.modifier)[0],
+            size: Object.values(account.data.modifier)[0].size,
+          }
+        : null,
+      max:
+        Object.values(account.data.kind)[0].id === 0
+          ? Object.values(account.data.kind)[0].size
+          : null,
+      maxLength:
+        Object.values(account.data.kind)[0].id === 1
+          ? Object.values(account.data.kind)[0].size
+          : null,
     },
   };
 };

@@ -17,7 +17,10 @@ import {
   InstructionParser,
   InstructionRelationParser,
 } from './utils';
-import { CollectionAttributeDto } from '@heavy-duty/bulldozer/application/utils/types';
+import {
+  CollectionAttributeDto,
+  InstructionArgumentDto,
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -676,10 +679,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   createInstructionArgument(
     applicationId: string,
     instructionId: string,
-    argumentName: string,
-    argumentKind: number,
-    argumentModifier: number,
-    argumentSize: number
+    argument: InstructionArgumentDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -687,26 +687,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const argument = Keypair.generate();
+        const argumentKeypair = Keypair.generate();
 
         return from(
           defer(() =>
-            writer.rpc.createInstructionArgument(
-              argumentName,
-              argumentKind,
-              argumentModifier,
-              argumentSize,
-              {
-                accounts: {
-                  argument: argument.publicKey,
-                  instruction: new PublicKey(instructionId),
-                  application: new PublicKey(applicationId),
-                  authority: walletPublicKey,
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [argument],
-              }
-            )
+            writer.rpc.createInstructionArgument(argument, {
+              accounts: {
+                argument: argumentKeypair.publicKey,
+                instruction: new PublicKey(instructionId),
+                application: new PublicKey(applicationId),
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [argumentKeypair],
+            })
           )
         );
       })
@@ -715,10 +709,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstructionArgument(
     argumentId: string,
-    argumentName: string,
-    argumentKind: number,
-    argumentModifier: number,
-    argumentSize: number
+    argument: InstructionArgumentDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -728,18 +719,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateInstructionArgument(
-              argumentName,
-              argumentKind,
-              argumentModifier,
-              argumentSize,
-              {
-                accounts: {
-                  argument: new PublicKey(argumentId),
-                  authority: walletPublicKey,
-                },
-              }
-            )
+            writer.rpc.updateInstructionArgument(argument, {
+              accounts: {
+                argument: new PublicKey(argumentId),
+                authority: walletPublicKey,
+              },
+            })
           )
         )
       )
