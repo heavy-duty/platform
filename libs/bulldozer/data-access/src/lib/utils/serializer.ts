@@ -78,11 +78,13 @@ export const CollectionAttributeParser = (
         name: Object.keys(account.data.kind)[0],
         size: Object.values(account.data.kind)[0].size,
       },
-      modifier: {
-        id: Object.values(account.data.modifier)[0].id,
-        name: Object.keys(account.data.modifier)[0],
-        size: Object.values(account.data.modifier)[0].size,
-      },
+      modifier: account.data.modifier
+        ? {
+            id: Object.values(account.data.modifier)[0].id,
+            name: Object.keys(account.data.modifier)[0],
+            size: Object.values(account.data.modifier)[0].size,
+          }
+        : null,
       max:
         Object.values(account.data.kind)[0].id === 0
           ? Object.values(account.data.kind)[0].size

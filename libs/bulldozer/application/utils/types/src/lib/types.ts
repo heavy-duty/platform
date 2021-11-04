@@ -41,7 +41,7 @@ export interface CollectionAttributeInfo {
     id: number;
     name: string;
     size: number;
-  };
+  } | null;
   max: number | null;
   maxLength: number | null;
 }

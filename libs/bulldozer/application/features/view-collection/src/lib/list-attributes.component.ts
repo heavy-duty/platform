@@ -38,15 +38,17 @@ import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/typ
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:
-                  <ng-container *ngIf="attribute.data.modifier.name !== 'none'">
+
+                  <ng-container *ngIf="attribute.data.modifier">
                     {{ attribute.data.modifier.name }}
                     <ng-container
                       *ngIf="attribute.data.modifier.name === 'array'"
                     >
-                      ({{ attribute.data.modifier.size }})
+                      ({{ attribute.data.modifier?.size }})
                     </ng-container>
                     of
                   </ng-container>
+
                   {{ attribute.data.kind.name }}.
                 </p>
               </div>

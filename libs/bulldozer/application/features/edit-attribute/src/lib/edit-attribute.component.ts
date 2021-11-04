@@ -162,7 +162,7 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
   readonly attributeGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     kind: new FormControl(0, { validators: [Validators.required] }),
-    modifier: new FormControl(0, { validators: [Validators.required] }),
+    modifier: new FormControl(null),
     size: new FormControl(null),
     max: new FormControl(null),
     maxLength: new FormControl(null),
@@ -244,8 +244,14 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
         {
           name: this.data.attribute.data.name,
           kind: this.data.attribute.data.kind.id,
-          modifier: this.data.attribute.data.modifier.id,
-          size: this.data.attribute.data.modifier.size,
+          modifier:
+            this.data.attribute.data.modifier !== null
+              ? this.data.attribute.data.modifier.id
+              : null,
+          size:
+            this.data.attribute.data.modifier !== null
+              ? this.data.attribute.data.modifier.size
+              : null,
           max: this.data.attribute.data.max,
           maxLength: this.data.attribute.data.maxLength,
         },
