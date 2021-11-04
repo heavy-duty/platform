@@ -42,11 +42,22 @@ export interface CollectionAttributeInfo {
     name: string;
     size: number;
   };
+  max: number | null;
+  maxLength: number | null;
 }
 
 export interface CollectionAttribute {
   id: string;
   data: CollectionAttributeInfo;
+}
+
+export interface CollectionAttributeDto {
+  name: string;
+  kind: number;
+  modifier: number | null;
+  size: number | null;
+  max: number | null;
+  maxLength: number | null;
 }
 
 export interface InstructionInfo {

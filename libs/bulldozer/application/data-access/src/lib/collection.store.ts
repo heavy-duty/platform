@@ -208,15 +208,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .afterClosed()
           .pipe(
             filter((data) => data),
-            concatMap(({ name, kind, modifier, size }) =>
+            concatMap((collectionAttributeDto) =>
               this._bulldozerProgramStore
                 .createCollectionAttribute(
                   applicationId,
                   collectionId,
-                  name,
-                  kind,
-                  modifier,
-                  size
+                  collectionAttributeDto
                 )
                 .pipe(
                   tapResponse(
@@ -241,14 +238,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name, kind, modifier, size }) =>
+              concatMap((collectionAttributeDto) =>
                 this._bulldozerProgramStore
                   .updateCollectionAttribute(
                     attribute.id,
-                    name,
-                    kind,
-                    modifier,
-                    size
+                    collectionAttributeDto
                   )
                   .pipe(
                     tapResponse(

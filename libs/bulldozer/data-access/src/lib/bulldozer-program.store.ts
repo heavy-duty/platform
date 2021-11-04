@@ -17,6 +17,7 @@ import {
   InstructionParser,
   InstructionRelationParser,
 } from './utils';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer/application/utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -285,10 +286,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   createCollectionAttribute(
     applicationId: string,
     collectionId: string,
-    attributeName: string,
-    attributeKind: number,
-    attributeModifier: number,
-    attributeSize: number
+    attribute: CollectionAttributeDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -296,26 +294,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const attribute = Keypair.generate();
+        const attributeKeypair = Keypair.generate();
 
         return from(
           defer(() =>
-            writer.rpc.createCollectionAttribute(
-              attributeName,
-              attributeKind,
-              attributeModifier,
-              attributeSize,
-              {
-                accounts: {
-                  attribute: attribute.publicKey,
-                  collection: new PublicKey(collectionId),
-                  application: new PublicKey(applicationId),
-                  authority: walletPublicKey,
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [attribute],
-              }
-            )
+            writer.rpc.createCollectionAttribute(attribute, {
+              accounts: {
+                attribute: attributeKeypair.publicKey,
+                collection: new PublicKey(collectionId),
+                application: new PublicKey(applicationId),
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [attributeKeypair],
+            })
           )
         );
       })
@@ -324,10 +316,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateCollectionAttribute(
     attributeId: string,
-    attributeName: string,
-    attributeKind: number,
-    attributeModifier: number,
-    attributeSize: number
+    attribute: CollectionAttributeDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -337,18 +326,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateCollectionAttribute(
-              attributeName,
-              attributeKind,
-              attributeModifier,
-              attributeSize,
-              {
-                accounts: {
-                  attribute: new PublicKey(attributeId),
-                  authority: walletPublicKey,
-                },
-              }
-            )
+            writer.rpc.updateCollectionAttribute(attribute, {
+              accounts: {
+                attribute: new PublicKey(attributeId),
+                authority: walletPublicKey,
+              },
+            })
           )
         )
       )

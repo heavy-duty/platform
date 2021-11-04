@@ -164,20 +164,10 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "size",
-          "type": "u8"
+          "name": "dto",
+          "type": {
+            "defined": "AttributeDto"
+          }
         }
       ]
     },
@@ -197,20 +187,10 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "size",
-          "type": "u8"
+          "name": "dto",
+          "type": {
+            "defined": "AttributeDto"
+          }
         }
       ]
     },
@@ -350,20 +330,10 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "size",
-          "type": "u8"
+          "name": "dto",
+          "type": {
+            "defined": "AttributeDto"
+          }
         }
       ]
     },
@@ -383,20 +353,10 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "size",
-          "type": "u8"
+          "name": "dto",
+          "type": {
+            "defined": "AttributeDto"
+          }
         }
       ]
     },
@@ -447,21 +407,9 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "space",
+          "name": "dto",
           "type": {
-            "option": "u16"
+            "defined": "AccountDto"
           }
         }
       ]
@@ -482,21 +430,9 @@
       ],
       "args": [
         {
-          "name": "name",
-          "type": "string"
-        },
-        {
-          "name": "kind",
-          "type": "u8"
-        },
-        {
-          "name": "modifier",
-          "type": "u8"
-        },
-        {
-          "name": "space",
+          "name": "dto",
           "type": {
-            "option": "u16"
+            "defined": "AccountDto"
           }
         }
       ]
@@ -661,19 +597,9 @@
             "type": "publicKey"
           },
           {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "kind",
+            "name": "data",
             "type": {
-              "defined": "AttributeKind"
-            }
-          },
-          {
-            "name": "modifier",
-            "type": {
-              "defined": "AttributeKindModifier"
+              "defined": "Attribute"
             }
           }
         ]
@@ -721,43 +647,9 @@
             "type": "publicKey"
           },
           {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "kind",
+            "name": "data",
             "type": {
-              "defined": "AccountKind"
-            }
-          },
-          {
-            "name": "modifier",
-            "type": {
-              "defined": "AccountModifier"
-            }
-          },
-          {
-            "name": "collection",
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
-            "name": "payer",
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
-            "name": "close",
-            "type": {
-              "option": "publicKey"
-            }
-          },
-          {
-            "name": "space",
-            "type": {
-              "option": "u16"
+              "defined": "BaseAccount"
             }
           }
         ]
@@ -781,19 +673,9 @@
             "type": "publicKey"
           },
           {
-            "name": "name",
-            "type": "bytes"
-          },
-          {
-            "name": "kind",
+            "name": "data",
             "type": {
-              "defined": "AttributeKind"
-            }
-          },
-          {
-            "name": "modifier",
-            "type": {
-              "defined": "AttributeKindModifier"
+              "defined": "Attribute"
             }
           }
         ]
@@ -834,7 +716,155 @@
   ],
   "types": [
     {
-      "name": "AccountKind",
+      "name": "AttributeDto",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "size",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "max",
+            "type": {
+              "option": "u32"
+            }
+          },
+          {
+            "name": "maxLength",
+            "type": {
+              "option": "u32"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Attribute",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "option": {
+                "defined": "AttributeKinds"
+              }
+            }
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "option": {
+                "defined": "AttributeModifiers"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountDto",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "kind",
+            "type": "u8"
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "option": "u8"
+            }
+          },
+          {
+            "name": "space",
+            "type": {
+              "option": "u16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BaseAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "name",
+            "type": "bytes"
+          },
+          {
+            "name": "kind",
+            "type": {
+              "option": {
+                "defined": "AccountKinds"
+              }
+            }
+          },
+          {
+            "name": "modifier",
+            "type": {
+              "option": {
+                "defined": "AccountModifiers"
+              }
+            }
+          },
+          {
+            "name": "collection",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "payer",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "close",
+            "type": {
+              "option": "publicKey"
+            }
+          },
+          {
+            "name": "space",
+            "type": {
+              "option": "u16"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AccountKinds",
       "type": {
         "kind": "enum",
         "variants": [
@@ -860,19 +890,10 @@
       }
     },
     {
-      "name": "AccountModifier",
+      "name": "AccountModifiers",
       "type": {
         "kind": "enum",
         "variants": [
-          {
-            "name": "None",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
-          },
           {
             "name": "Init",
             "fields": [
@@ -890,26 +911,17 @@
                 "type": "u8"
               }
             ]
-          },
-          {
-            "name": "Zero",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              }
-            ]
           }
         ]
       }
     },
     {
-      "name": "AttributeKind",
+      "name": "AttributeKinds",
       "type": {
         "kind": "enum",
         "variants": [
           {
-            "name": "U8",
+            "name": "Number",
             "fields": [
               {
                 "name": "id",
@@ -917,12 +929,12 @@
               },
               {
                 "name": "size",
-                "type": "u8"
+                "type": "u32"
               }
             ]
           },
           {
-            "name": "U16",
+            "name": "String",
             "fields": [
               {
                 "name": "id",
@@ -930,46 +942,7 @@
               },
               {
                 "name": "size",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "U32",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              },
-              {
-                "name": "size",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "U64",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              },
-              {
-                "name": "size",
-                "type": "u8"
-              }
-            ]
-          },
-          {
-            "name": "U128",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              },
-              {
-                "name": "size",
-                "type": "u8"
+                "type": "u32"
               }
             ]
           },
@@ -982,7 +955,7 @@
               },
               {
                 "name": "size",
-                "type": "u8"
+                "type": "u32"
               }
             ]
           }
@@ -990,23 +963,10 @@
       }
     },
     {
-      "name": "AttributeKindModifier",
+      "name": "AttributeModifiers",
       "type": {
         "kind": "enum",
         "variants": [
-          {
-            "name": "None",
-            "fields": [
-              {
-                "name": "id",
-                "type": "u8"
-              },
-              {
-                "name": "size",
-                "type": "u8"
-              }
-            ]
-          },
           {
             "name": "Array",
             "fields": [
@@ -1016,7 +976,7 @@
               },
               {
                 "name": "size",
-                "type": "u8"
+                "type": "u32"
               }
             ]
           },
@@ -1029,7 +989,7 @@
               },
               {
                 "name": "size",
-                "type": "u8"
+                "type": "u32"
               }
             ]
           }
@@ -1092,6 +1052,16 @@
       "code": 310,
       "name": "InvalidAccount",
       "msg": "Invalid Account"
+    },
+    {
+      "code": 311,
+      "name": "MissingMax",
+      "msg": "Missing Max"
+    },
+    {
+      "code": 312,
+      "name": "MissingMaxLength",
+      "msg": "Missing Max Length"
     }
   ]
 }
