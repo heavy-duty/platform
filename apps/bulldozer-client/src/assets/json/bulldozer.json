@@ -921,6 +921,19 @@
         "kind": "enum",
         "variants": [
           {
+            "name": "Boolean",
+            "fields": [
+              {
+                "name": "id",
+                "type": "u8"
+              },
+              {
+                "name": "size",
+                "type": "u32"
+              }
+            ]
+          },
+          {
             "name": "Number",
             "fields": [
               {

@@ -255,8 +255,6 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     this.submitted = true;
     this.documentGroup.markAllAsTouched();
 
-    console.log(this.modifierControl.value, this.closeControl.value);
-
     if (this.documentGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,

@@ -86,11 +86,11 @@ export const CollectionAttributeParser = (
           }
         : null,
       max:
-        Object.values(account.data.kind)[0].id === 0
+        Object.values(account.data.kind)[0].id === 1
           ? Object.values(account.data.kind)[0].size
           : null,
       maxLength:
-        Object.values(account.data.kind)[0].id === 1
+        Object.values(account.data.kind)[0].id === 2
           ? Object.values(account.data.kind)[0].size
           : null,
     },
@@ -156,11 +156,11 @@ export const InstructionArgumentParser = (
           }
         : null,
       max:
-        Object.values(account.data.kind)[0].id === 0
+        Object.values(account.data.kind)[0].id === 1
           ? Object.values(account.data.kind)[0].size
           : null,
       maxLength:
-        Object.values(account.data.kind)[0].id === 1
+        Object.values(account.data.kind)[0].id === 2
           ? Object.values(account.data.kind)[0].size
           : null,
     },
@@ -186,7 +186,6 @@ export const InstructionAccountParser = (
   publicKey: PublicKey,
   account: RawInstructionAccount
 ): InstructionAccount => {
-  console.log(utils.bytes.utf8.decode(account.data.name), account);
   return {
     id: publicKey.toBase58(),
     data: {

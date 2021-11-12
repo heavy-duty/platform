@@ -5,6 +5,8 @@ import { formatName } from './format-name';
 
 const getAttributeKindName = (id: number, name: string, size: number) => {
   if (id === 0) {
+    return 'bool';
+  } else if (id === 1) {
     if (size <= 256) {
       return 'u8';
     } else if (size > 256 && size <= 65536) {
@@ -14,7 +16,7 @@ const getAttributeKindName = (id: number, name: string, size: number) => {
     } else {
       throw Error('Invalid max');
     }
-  } else if (id === 1 || id === 2) {
+  } else if (id === 2 || id === 3) {
     return capitalize(name);
   } else {
     throw Error('Invalid kind');

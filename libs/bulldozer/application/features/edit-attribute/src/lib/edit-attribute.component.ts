@@ -54,9 +54,10 @@ import { takeUntil } from 'rxjs/operators';
       >
         <mat-label>Kind</mat-label>
         <mat-select formControlName="kind">
-          <mat-option [value]="0">Number</mat-option>
-          <mat-option [value]="1">String</mat-option>
-          <mat-option [value]="2">Pubkey</mat-option>
+          <mat-option [value]="0">Boolean</mat-option>
+          <mat-option [value]="1">Number</mat-option>
+          <mat-option [value]="2">String</mat-option>
+          <mat-option [value]="3">Pubkey</mat-option>
         </mat-select>
         <mat-error *ngIf="submitted && kindControl.errors?.required"
           >The kind is required.</mat-error
@@ -64,7 +65,7 @@ import { takeUntil } from 'rxjs/operators';
       </mat-form-field>
 
       <mat-form-field
-        *ngIf="kindControl.value === 0"
+        *ngIf="kindControl.value === 1"
         class="w-full"
         appearance="fill"
         hintLabel="Enter a max."
@@ -83,7 +84,7 @@ import { takeUntil } from 'rxjs/operators';
       </mat-form-field>
 
       <mat-form-field
-        *ngIf="kindControl.value === 1"
+        *ngIf="kindControl.value === 2"
         class="w-full"
         appearance="fill"
         hintLabel="Enter a max length."
@@ -198,14 +199,14 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
     this.kindControl.valueChanges
       .pipe(takeUntil(this.destroy$))
       .subscribe((kind) => {
-        if (kind === 0) {
+        if (kind === 1) {
           this.maxControl.setValidators([
             Validators.required,
             Validators.min(0),
           ]);
           this.maxLengthControl.clearValidators();
           this.maxLengthControl.setValue(null);
-        } else if (kind === 1) {
+        } else if (kind === 2) {
           this.maxControl.clearValidators();
           this.maxControl.setValue(null);
           this.maxLengthControl.setValidators([
