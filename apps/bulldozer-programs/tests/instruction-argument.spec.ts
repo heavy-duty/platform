@@ -44,7 +44,7 @@ describe('instruction argument', () => {
       kind: 0,
       modifier: null,
       size: null,
-      max: 40,
+      max: null,
       maxLength: null,
     };
     // act
@@ -66,9 +66,9 @@ describe('instruction argument', () => {
     assert.ok(account.application.equals(application.publicKey));
     assert.ok(account.instruction.equals(instruction.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
-    assert.ok('number' in account.data.kind);
-    assert.equal(account.data.kind.number.id, dto.kind);
-    assert.equal(account.data.kind.number.size, dto.max);
+    assert.ok('boolean' in account.data.kind);
+    assert.equal(account.data.kind.boolean.id, dto.kind);
+    assert.equal(account.data.kind.boolean.size, 1);
     assert.equal(account.data.modifier, null);
   });
 
@@ -79,8 +79,8 @@ describe('instruction argument', () => {
       kind: 1,
       modifier: 0,
       size: 5,
-      max: null,
-      maxLength: 10,
+      max: 10,
+      maxLength: null,
     };
     // act
     await program.rpc.updateInstructionArgument(dto, {
@@ -94,9 +94,9 @@ describe('instruction argument', () => {
       instructionArgument.publicKey
     );
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
-    assert.ok('string' in account.data.kind);
-    assert.equal(account.data.kind.string.id, dto.kind);
-    assert.equal(account.data.kind.string.size, dto.maxLength);
+    assert.ok('number' in account.data.kind);
+    assert.equal(account.data.kind.number.id, dto.kind);
+    assert.equal(account.data.kind.number.size, dto.max);
     assert.ok('array' in account.data.modifier);
     assert.equal(account.data.modifier.array.id, dto.modifier);
     assert.equal(account.data.modifier.array.size, dto.size);
@@ -122,7 +122,7 @@ describe('instruction argument', () => {
     // arrange
     const dto = {
       name: 'attr1_name',
-      kind: 0,
+      kind: 1,
       modifier: 0,
       size: null,
       max: null,
@@ -152,7 +152,7 @@ describe('instruction argument', () => {
     // arrange
     const dto = {
       name: 'attr1_name',
-      kind: 1,
+      kind: 2,
       modifier: 0,
       size: null,
       max: null,

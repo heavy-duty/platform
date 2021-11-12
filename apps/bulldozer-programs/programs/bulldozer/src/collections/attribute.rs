@@ -46,21 +46,25 @@ impl AttributeKind for Attribute {
   ) -> Result<&Self, ProgramError> {
     self.kind = match kind {
       Some(kind) => match kind {
-        0 => match max {
+        0 => Some(AttributeKinds::Boolean {
+          id: kind,
+          size: 1,
+        }),
+        1 => match max {
           None => return Err(ErrorCode::MissingMax.into()),
           Some(max) => Some(AttributeKinds::Number {
             id: kind,
             size: max,
           }),
         },
-        1 => match max_length {
+        2 => match max_length {
           None => return Err(ErrorCode::MissingMaxLength.into()),
           Some(max_length) => Some(AttributeKinds::String {
             id: kind,
             size: max_length,
           }),
         },
-        2 => Some(AttributeKinds::Pubkey { id: kind, size: 32 }),
+        3 => Some(AttributeKinds::Pubkey { id: kind, size: 32 }),
         _ => return Err(ErrorCode::InvalidAttributeKind.into()),
       },
       _ => return Ok(self),

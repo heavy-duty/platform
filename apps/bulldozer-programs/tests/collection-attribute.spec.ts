@@ -44,7 +44,7 @@ describe('collection attribute', () => {
       kind: 0,
       modifier: null,
       size: null,
-      max: 40,
+      max: null,
       maxLength: null,
     };
     // act
@@ -64,9 +64,9 @@ describe('collection attribute', () => {
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
-    assert.ok('number' in account.data.kind);
-    assert.equal(account.data.kind.number.id, dto.kind);
-    assert.equal(account.data.kind.number.size, dto.max);
+    assert.ok('boolean' in account.data.kind);
+    assert.equal(account.data.kind.boolean.id, dto.kind);
+    assert.equal(account.data.kind.boolean.size, 1);
     assert.equal(account.data.modifier, null);
     assert.ok(account.collection.equals(collection.publicKey));
     assert.ok(account.application.equals(application.publicKey));
@@ -79,8 +79,8 @@ describe('collection attribute', () => {
       kind: 1,
       modifier: 0,
       size: 5,
-      max: null,
-      maxLength: 20,
+      max: 20,
+      maxLength: null,
     };
     // act
     await program.rpc.updateCollectionAttribute(dto, {
@@ -97,9 +97,9 @@ describe('collection attribute', () => {
       attribute.publicKey
     );
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
-    assert.ok('string' in account.data.kind);
-    assert.equal(account.data.kind.string.id, dto.kind);
-    assert.equal(account.data.kind.string.size, dto.maxLength);
+    assert.ok('number' in account.data.kind);
+    assert.equal(account.data.kind.number.id, dto.kind);
+    assert.equal(account.data.kind.number.size, dto.max);
     assert.ok('array' in account.data.modifier);
     assert.equal(account.data.modifier.array.id, dto.modifier);
     assert.equal(account.data.modifier.array.size, dto.size);
@@ -124,7 +124,7 @@ describe('collection attribute', () => {
     // arrange
     const dto = {
       name: 'attr1_name',
-      kind: 0,
+      kind: 1,
       modifier: null,
       size: null,
       max: null,
@@ -154,7 +154,7 @@ describe('collection attribute', () => {
     // arrange
     const dto = {
       name: 'attr1_name',
-      kind: 1,
+      kind: 2,
       modifier: null,
       size: null,
       max: null,
