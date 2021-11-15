@@ -1,32 +1,49 @@
-name: Bulldozer Programs Test
+name: Bulldozer Platform Tasks
 
 on:
   push:
     branches:
       - master
-    paths:
-      - 'apps/bulldozer-programs/**'
   pull_request:
     branches:
-      - '**'
-    paths:
-      - 'apps/bulldozer-programs/**'
+      - master
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  ci:
+    runs-on: ubuntu-20.04
+    env:
+      BEFORE_SHA: ${{ github.event.before }}
+      BULLDOZER_PROGRAM: $(echo $(npx nx print-affected --select=projects --base=$BEFORE_SHA) | grep -c "bulldozer-programs")
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Pre config - 🧰 Checkout repo
+      - id: config-repo
+        name: Pre config - 🧰 Checkout repo
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Pre config - 🧰 Setting up Node 14.7.5
+      - id: config-node
+        name: Pre config - 🧰 Setting up Node 14.7.5
         uses: actions/setup-node@v2
         with:
           node-version: '14.17.5' # we have to check this
 
-      - name: Step 1 - 🛠️ Setting up Anchor, Rust, Solana and others dependencies
+      - id: install-npm-packages
+        name: 📦 Pulling repo and installing Bulldozer Platform npm packages
         run: |
+          git fetch --prune origin master
+          npm ci
+
+      - id: get-affected-projects
+        name: 🛠️ Getting affected projects
+        shell: bash
+        run: |
+          echo "::set-output name=bulldozer-program-affected::$BULLDOZER_PROGRAM"
+
+      - id: install-anchor
+        name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
+        if: steps.get-affected-projects.outputs.bulldozer-program-affected != '0'
+        run: |
+          echo "${{steps.get-affected-projects.outputs.bulldozer-program-affected}}"
           echo "Installing Rust >> "
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source $HOME/.cargo/env
@@ -47,15 +64,14 @@ jobs:
           npm install -g mocha
           npm install -g ts-mocha
 
-      - name: Step 2 - 📦 Installing Bulldozer npm packages
-        run: npm ci
-
-      - name: Step 3 - 🏗️ Building Bulldozer Program
+      - id: building-projects
+        name: 🏗️ Building Bulldozer Platform projects
         run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          npx nx build bulldozer-programs --verbose
+          npx nx affected --target=build --base=$BEFORE_SHA
 
-      - name: Step 4 - 🧪 Running Bulldozer Anchor Tests
+      - id: testing-projects
+        name: 🧪 Running Bulldozer Platform projects tests
         run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          npx nx test bulldozer-programs
+          npx nx affected --target=test --base=$BEFORE_SHA
