@@ -13,7 +13,6 @@ jobs:
     runs-on: ubuntu-20.04
     env:
       BEFORE_SHA: ${{ github.event.before }}
-      BULLDOZER_PROGRAM: $(echo $(npx nx print-affected --select=projects --base=$BEFORE_SHA) | grep -c "bulldozer-programs")
     steps:
       - id: config-repo
         name: Pre config - 🧰 Checkout repo
@@ -37,14 +36,13 @@ jobs:
         name: 🛠️ Getting affected projects
         shell: bash
         run: |
-          echo "::set-output name=bulldozer-program-affected::$BULLDOZER_PROGRAM"
+          echo "::set-output name=bulldozer-program-affected::$(echo $(npx nx print-affected --select=projects --base=$BEFORE_SHA) | grep -c "bulldozer-programs")"
 
       - id: install-anchor
         name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
-        if: steps.get-affected-projects.outputs.bulldozer-program-affected != '0'
+        if: steps.get-affected-projects.outputs.bulldozer-program-affected != 0
         run: |
-          echo "${{steps.get-affected-projects.outputs.bulldozer-program-affected}}"
-          echo "Installing Rust >> "
+          echo "Installing Rust >>"
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
           source $HOME/.cargo/env
           rustup component add rustfmt
