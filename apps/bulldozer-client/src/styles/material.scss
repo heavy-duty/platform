@@ -1,8 +1,8 @@
-@use '~@angular/material' as mat;
-@use '~@angular/cdk';
+@use '@angular/material' as mat;
+@use '@angular/cdk';
 
 @import './themes/default-themes.scss';
-@import '~@angular/material/theming';
+@import '@angular/material/theming';
 
 @import 'https://fonts.googleapis.com/css?family=Material+Icons';
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400&display=swap');
