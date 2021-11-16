@@ -6,6 +6,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 
 import { EditAttributeComponent } from './edit-attribute.component';
@@ -19,6 +20,7 @@ import { EditAttributeComponent } from './edit-attribute.component';
     MatFormFieldModule,
     MatIconModule,
     MatInputModule,
+    MatRadioModule,
     MatSelectModule,
   ],
   declarations: [EditAttributeComponent],

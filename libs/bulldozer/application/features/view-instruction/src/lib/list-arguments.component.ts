@@ -38,7 +38,8 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:
-                  <ng-container *ngIf="argument.data.modifier.name !== 'none'">
+
+                  <ng-container *ngIf="argument.data.modifier">
                     {{ argument.data.modifier.name }}
                     <ng-container
                       *ngIf="argument.data.modifier.name === 'array'"
@@ -47,6 +48,7 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
                     </ng-container>
                     of
                   </ng-container>
+
                   {{ argument.data.kind.name }}.
                 </p>
               </div>

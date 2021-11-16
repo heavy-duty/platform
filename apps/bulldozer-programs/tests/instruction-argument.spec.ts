@@ -1,4 +1,10 @@
-import { Provider, setProvider, utils, workspace } from '@project-serum/anchor';
+import {
+  ProgramError,
+  Provider,
+  setProvider,
+  utils,
+  workspace,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
@@ -33,73 +39,67 @@ describe('instruction argument', () => {
 
   it('should create account', async () => {
     // arrange
-    const argumentName = 'name';
-    const argumentKind = 1;
-    const argumentSize = 32;
-    const argumentModifier = 1;
+    const dto = {
+      name: 'attr1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
     // act
-    await program.rpc.createInstructionArgument(
-      argumentName,
-      argumentKind,
-      argumentModifier,
-      argumentSize,
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          argument: instructionArgument.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [instructionArgument],
-      }
-    );
+    await program.rpc.createInstructionArgument(dto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        argument: instructionArgument.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [instructionArgument],
+    });
     // assert
     const account = await program.account.instructionArgument.fetch(
       instructionArgument.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.equal(utils.bytes.utf8.decode(account.name), argumentName);
-    assert.ok('u16' in account.kind);
-    assert.equal(account.kind.u16.id, argumentKind);
-    assert.equal(account.kind.u16.size, 2);
-    assert.ok('array' in account.modifier);
-    assert.equal(account.modifier.array.id, argumentModifier);
-    assert.equal(account.modifier.array.size, argumentSize);
-    assert.ok(account.instruction.equals(instruction.publicKey));
     assert.ok(account.application.equals(application.publicKey));
+    assert.ok(account.instruction.equals(instruction.publicKey));
+    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.ok('boolean' in account.data.kind);
+    assert.equal(account.data.kind.boolean.id, dto.kind);
+    assert.equal(account.data.kind.boolean.size, 1);
+    assert.equal(account.data.modifier, null);
   });
 
   it('should update account', async () => {
     // arrange
-    const argumentName = 'new-name';
-    const argumentKind = 2;
-    const argumentSize = 5;
-    const argumentModifier = 2;
+    const dto = {
+      name: 'attr1_name',
+      kind: 1,
+      modifier: 0,
+      size: 5,
+      max: 10,
+      maxLength: null,
+    };
     // act
-    await program.rpc.updateInstructionArgument(
-      argumentName,
-      argumentKind,
-      argumentModifier,
-      argumentSize,
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          argument: instructionArgument.publicKey,
-        },
-      }
-    );
+    await program.rpc.updateInstructionArgument(dto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        argument: instructionArgument.publicKey,
+      },
+    });
     // assert
     const account = await program.account.instructionArgument.fetch(
       instructionArgument.publicKey
     );
-    assert.equal(utils.bytes.utf8.decode(account.name), argumentName);
-    assert.ok('u32' in account.kind);
-    assert.equal(account.kind.u32.id, argumentKind);
-    assert.equal(account.kind.u32.size, 4);
-    assert.ok('vector' in account.modifier);
-    assert.equal(account.modifier.vector.id, argumentModifier);
-    assert.equal(account.modifier.vector.size, argumentSize);
+    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.ok('number' in account.data.kind);
+    assert.equal(account.data.kind.number.id, dto.kind);
+    assert.equal(account.data.kind.number.size, dto.max);
+    assert.ok('array' in account.data.modifier);
+    assert.equal(account.data.modifier.array.id, dto.modifier);
+    assert.equal(account.data.modifier.array.size, dto.size);
   });
 
   it('should delete account', async () => {
@@ -116,5 +116,65 @@ describe('instruction argument', () => {
         instructionArgument.publicKey
       );
     assert.equal(argumentAccount, null);
+  });
+
+  it('should fail when max is not provided with a number', async () => {
+    // arrange
+    const dto = {
+      name: 'attr1_name',
+      kind: 1,
+      modifier: 0,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstructionArgument(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          argument: instructionArgument.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instructionArgument],
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 311);
+  });
+
+  it('should fail when max length is not provided with a string', async () => {
+    // arrange
+    const dto = {
+      name: 'attr1_name',
+      kind: 2,
+      modifier: 0,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstructionArgument(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          argument: instructionArgument.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instructionArgument],
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 312);
   });
 });

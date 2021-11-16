@@ -37,7 +37,7 @@ export const generateInstructionCode = (instruction: InstructionExtended) => {
       instruction: formattedInstruction,
       collections: Array.from(formattedCollections.values()),
     },
-    getTemplateByType('instructions_context_program')
+    getTemplateByType('instructions')
   );
 };
 
@@ -46,7 +46,7 @@ export const generateCollectionCode = (collection: CollectionExtended) => {
 
   return generateCode(
     { collection: formattedCollection },
-    getTemplateByType('collections_program')
+    getTemplateByType('collections')
   );
 };
 

@@ -3,6 +3,8 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/types';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'bd-edit-argument',
@@ -46,32 +48,66 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
       >
         <mat-label>Kind</mat-label>
         <mat-select formControlName="kind">
-          <mat-option [value]="0">u8</mat-option>
-          <mat-option [value]="1">u16</mat-option>
-          <mat-option [value]="2">u32</mat-option>
-          <mat-option [value]="3">u64</mat-option>
-          <mat-option [value]="4">u128</mat-option>
-          <mat-option [value]="5">Pubkey</mat-option>
+          <mat-option [value]="0">Boolean</mat-option>
+          <mat-option [value]="1">Number</mat-option>
+          <mat-option [value]="2">String</mat-option>
+          <mat-option [value]="3">Pubkey</mat-option>
         </mat-select>
-        <mat-error *ngIf="submitted">The kind is required.</mat-error>
+        <mat-error *ngIf="submitted && kindControl.errors?.required"
+          >The kind is required.</mat-error
+        >
       </mat-form-field>
 
       <mat-form-field
+        *ngIf="kindControl.value === 1"
         class="w-full"
         appearance="fill"
-        hintLabel="Select a modifier."
+        hintLabel="Enter a max."
       >
-        <mat-label>Modifier</mat-label>
-        <mat-select formControlName="modifier">
-          <mat-option [value]="0">None</mat-option>
-          <mat-option [value]="1">Array</mat-option>
-          <mat-option [value]="2">Vector</mat-option>
-        </mat-select>
-        <mat-error *ngIf="submitted">The modifier is required.</mat-error>
+        <mat-label>Max</mat-label>
+        <input
+          matInput
+          formControlName="max"
+          required
+          autocomplete="off"
+          type="number"
+        />
+        <mat-error *ngIf="submitted && maxControl.errors?.required"
+          >The max is mandatory.</mat-error
+        >
       </mat-form-field>
 
       <mat-form-field
-        *ngIf="modifierControl.value === 1"
+        *ngIf="kindControl.value === 2"
+        class="w-full"
+        appearance="fill"
+        hintLabel="Enter a max length."
+      >
+        <mat-label>Max Length</mat-label>
+        <input
+          matInput
+          formControlName="maxLength"
+          required
+          autocomplete="off"
+          type="number"
+        />
+        <mat-error *ngIf="submitted && maxLengthControl.errors?.required"
+          >The max length is mandatory.</mat-error
+        >
+      </mat-form-field>
+
+      <mat-radio-group
+        class="w-full bg-white bg-opacity-5 px-2 py-1 flex flex-col gap-2"
+        ariaLabel="Attribute modifier"
+        formControlName="modifier"
+      >
+        <mat-radio-button [value]="null">Single item.</mat-radio-button>
+        <mat-radio-button [value]="0">Array of items.</mat-radio-button>
+        <mat-radio-button [value]="1">Vector of items.</mat-radio-button>
+      </mat-radio-group>
+
+      <mat-form-field
+        *ngIf="modifierControl.value !== null"
         class="w-full"
         appearance="fill"
         hintLabel="Enter the size."
@@ -81,9 +117,9 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
           matInput
           formControlName="size"
           required
-          type="number"
           autocomplete="off"
-          maxlength="32"
+          min="1"
+          type="number"
         />
         <mat-error *ngIf="submitted && sizeControl.errors?.required"
           >The size is mandatory.</mat-error
@@ -115,14 +151,16 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
 })
 export class EditArgumentComponent implements OnInit {
   @HostBinding('class') class = 'block w-72 relative';
+  private readonly _destroy = new Subject();
+  readonly destroy$ = this._destroy.asObservable();
   submitted = false;
   readonly argumentGroup = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     kind: new FormControl(0, { validators: [Validators.required] }),
-    modifier: new FormControl(0, { validators: [Validators.required] }),
-    size: new FormControl(1, {
-      validators: [Validators.required, Validators.min(1)],
-    }),
+    modifier: new FormControl(null),
+    size: new FormControl(null),
+    max: new FormControl(null),
+    maxLength: new FormControl(null),
   });
 
   get nameControl() {
@@ -137,6 +175,12 @@ export class EditArgumentComponent implements OnInit {
   get sizeControl() {
     return this.argumentGroup.get('size') as FormControl;
   }
+  get maxControl() {
+    return this.argumentGroup.get('max') as FormControl;
+  }
+  get maxLengthControl() {
+    return this.argumentGroup.get('maxLength') as FormControl;
+  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -148,13 +192,67 @@ export class EditArgumentComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this.kindControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((kind) => {
+        if (kind === 1) {
+          this.maxControl.setValidators([
+            Validators.required,
+            Validators.min(0),
+          ]);
+          this.maxLengthControl.clearValidators();
+          this.maxLengthControl.setValue(null);
+        } else if (kind === 2) {
+          this.maxControl.clearValidators();
+          this.maxControl.setValue(null);
+          this.maxLengthControl.setValidators([
+            Validators.required,
+            Validators.min(0),
+          ]);
+        } else {
+          this.maxControl.clearValidators();
+          this.maxControl.setValue(null);
+          this.maxLengthControl.clearValidators();
+          this.maxLengthControl.setValue(null);
+        }
+
+        this.maxControl.updateValueAndValidity();
+        this.maxLengthControl.updateValueAndValidity();
+      });
+
+    this.modifierControl.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((modifier) => {
+        if (modifier === null) {
+          this.sizeControl.clearValidators();
+          this.sizeControl.setValue(null);
+        } else {
+          this.sizeControl.setValidators([
+            Validators.required,
+            Validators.min(0),
+          ]);
+        }
+
+        this.sizeControl.updateValueAndValidity();
+      });
+
     if (this.data?.argument) {
+      console.log(this.data);
+
       this.argumentGroup.setValue(
         {
           name: this.data.argument.data.name,
           kind: this.data.argument.data.kind.id,
-          modifier: this.data.argument.data.modifier.id,
-          size: this.data.argument.data.modifier.size,
+          modifier:
+            this.data.argument.data.modifier !== null
+              ? this.data.argument.data.modifier.id
+              : null,
+          size:
+            this.data.argument.data.modifier !== null
+              ? this.data.argument.data.modifier.size
+              : null,
+          max: this.data.argument.data.max,
+          maxLength: this.data.argument.data.maxLength,
         },
         { emitEvent: false }
       );
@@ -166,12 +264,8 @@ export class EditArgumentComponent implements OnInit {
     this.argumentGroup.markAllAsTouched();
 
     if (this.argumentGroup.valid) {
-      this._matDialogRef.close({
-        name: this.nameControl.value,
-        kind: this.kindControl.value,
-        modifier: this.modifierControl.value,
-        size: this.sizeControl.value,
-      });
+      console.log(this.argumentGroup.value);
+      this._matDialogRef.close(this.argumentGroup.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

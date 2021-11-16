@@ -6,6 +6,26 @@ import {
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
+const getArgumentKindName = (id: number, name: string, size: number) => {
+  if (id === 0) {
+    return 'bool';
+  } else if (id === 1) {
+    if (size <= 256) {
+      return 'u8';
+    } else if (size > 256 && size <= 65536) {
+      return 'u16';
+    } else if (size > 65536 && size <= 4294967296) {
+      return 'u32';
+    } else {
+      throw Error('Invalid max');
+    }
+  } else if (id === 2 || id === 3) {
+    return capitalize(name);
+  } else {
+    throw Error('Invalid kind');
+  }
+};
+
 export const formatInstructionArguments = (
   instructionId: string,
   instructionArguments: InstructionArgument[]
@@ -19,10 +39,11 @@ export const formatInstructionArguments = (
         name: formatName(argument.data.name),
         kind: {
           ...argument.data.kind,
-          name:
-            argument.data.kind.id === 5
-              ? capitalize(argument.data.kind.name)
-              : argument.data.kind.name,
+          name: getArgumentKindName(
+            argument.data.kind.id,
+            argument.data.kind.name,
+            argument.data.kind.size
+          ),
         },
       },
     }));
@@ -36,7 +57,6 @@ const formatInstructionAccounts = (
     .map((account) => {
       let payer = null,
         collection = null,
-        modifier = null,
         close = null,
         relations = null;
 
@@ -86,16 +106,11 @@ const formatInstructionAccounts = (
         };
       }
 
-      if (account.data.modifier.name !== 'none') {
-        modifier = account.data.modifier;
-      }
-
       return {
         id: account.id,
         data: {
           ...account.data,
           collection: collection,
-          modifier: modifier,
           close,
           payer: payer,
           name: formatName(account.data.name),
@@ -108,7 +123,7 @@ export const formatInstruction = (instruction: InstructionExtended) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),
   initializesAccount: instruction.accounts.some(
-    (account) => account.data.modifier.id === 1
+    (account) => account.data.modifier?.id === 0
   ),
   arguments: formatInstructionArguments(instruction.id, instruction.arguments),
   accounts: formatInstructionAccounts(instruction.id, instruction.accounts),

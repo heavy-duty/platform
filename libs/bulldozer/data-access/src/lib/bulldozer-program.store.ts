@@ -17,6 +17,12 @@ import {
   InstructionParser,
   InstructionRelationParser,
 } from './utils';
+import {
+  CollectionAttributeDto,
+  InstructionAccountDto,
+  InstructionAccountExtras,
+  InstructionArgumentDto,
+} from '@heavy-duty/bulldozer/application/utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -285,10 +291,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   createCollectionAttribute(
     applicationId: string,
     collectionId: string,
-    attributeName: string,
-    attributeKind: number,
-    attributeModifier: number,
-    attributeSize: number
+    attribute: CollectionAttributeDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -296,26 +299,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const attribute = Keypair.generate();
+        const attributeKeypair = Keypair.generate();
 
         return from(
           defer(() =>
-            writer.rpc.createCollectionAttribute(
-              attributeName,
-              attributeKind,
-              attributeModifier,
-              attributeSize,
-              {
-                accounts: {
-                  attribute: attribute.publicKey,
-                  collection: new PublicKey(collectionId),
-                  application: new PublicKey(applicationId),
-                  authority: walletPublicKey,
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [attribute],
-              }
-            )
+            writer.rpc.createCollectionAttribute(attribute, {
+              accounts: {
+                attribute: attributeKeypair.publicKey,
+                collection: new PublicKey(collectionId),
+                application: new PublicKey(applicationId),
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [attributeKeypair],
+            })
           )
         );
       })
@@ -324,10 +321,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateCollectionAttribute(
     attributeId: string,
-    attributeName: string,
-    attributeKind: number,
-    attributeModifier: number,
-    attributeSize: number
+    attribute: CollectionAttributeDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -337,18 +331,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateCollectionAttribute(
-              attributeName,
-              attributeKind,
-              attributeModifier,
-              attributeSize,
-              {
-                accounts: {
-                  attribute: new PublicKey(attributeId),
-                  authority: walletPublicKey,
-                },
-              }
-            )
+            writer.rpc.updateCollectionAttribute(attribute, {
+              accounts: {
+                attribute: new PublicKey(attributeId),
+                authority: walletPublicKey,
+              },
+            })
           )
         )
       )
@@ -530,13 +518,8 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   createInstructionAccount(
     applicationId: string,
     instructionId: string,
-    accountName: string,
-    accountKind: number,
-    accountModifier: number,
-    accountSpace: number | null,
-    accountCollection: string | null,
-    accountPayer: string | null,
-    accountClose: string | null
+    account: InstructionAccountDto,
+    extras: InstructionAccountExtras
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -544,47 +527,41 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const account = Keypair.generate();
+        const accountKeypair = Keypair.generate();
 
         return from(
           defer(() =>
-            writer.rpc.createInstructionAccount(
-              accountName,
-              accountKind,
-              accountModifier,
-              accountSpace,
-              {
-                accounts: {
-                  authority: walletPublicKey,
-                  application: new PublicKey(applicationId),
-                  instruction: new PublicKey(instructionId),
-                  account: account.publicKey,
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [account],
-                remainingAccounts: [
-                  accountCollection &&
-                    accountKind === 0 && {
-                      pubkey: new PublicKey(accountCollection),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                  accountPayer &&
-                    accountKind === 0 && {
-                      pubkey: new PublicKey(accountPayer),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                  accountClose &&
-                    accountKind === 0 &&
-                    accountModifier === 2 && {
-                      pubkey: new PublicKey(accountClose),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                ].filter((account) => account),
-              }
-            )
+            writer.rpc.createInstructionAccount(account, {
+              accounts: {
+                authority: walletPublicKey,
+                application: new PublicKey(applicationId),
+                instruction: new PublicKey(instructionId),
+                account: accountKeypair.publicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [accountKeypair],
+              remainingAccounts: [
+                extras.collection &&
+                  account.kind === 0 && {
+                    pubkey: new PublicKey(extras.collection),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+                extras.payer &&
+                  account.kind === 0 && {
+                    pubkey: new PublicKey(extras.payer),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+                extras.close &&
+                  account.kind === 0 &&
+                  account.modifier === 1 && {
+                    pubkey: new PublicKey(extras.close),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+              ].filter((account) => account),
+            })
           )
         );
       })
@@ -593,13 +570,8 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstructionAccount(
     accountId: string,
-    accountName: string,
-    accountKind: number,
-    accountModifier: number,
-    accountSpace: number | null,
-    accountCollection: string | null,
-    accountPayer: string | null,
-    accountClose: string | null
+    account: InstructionAccountDto,
+    extras: InstructionAccountExtras
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -609,38 +581,32 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateInstructionAccount(
-              accountName,
-              accountKind,
-              accountModifier,
-              accountSpace,
-              {
-                accounts: {
-                  authority: walletPublicKey,
-                  account: new PublicKey(accountId),
-                },
-                remainingAccounts: [
-                  accountCollection &&
-                    accountKind === 0 && {
-                      pubkey: new PublicKey(accountCollection),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                  accountPayer &&
-                    accountModifier === 1 && {
-                      pubkey: new PublicKey(accountPayer),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                  accountClose &&
-                    accountModifier === 2 && {
-                      pubkey: new PublicKey(accountClose),
-                      isWritable: false,
-                      isSigner: false,
-                    },
-                ].filter((account) => account),
-              }
-            )
+            writer.rpc.updateInstructionAccount(account, {
+              accounts: {
+                authority: walletPublicKey,
+                account: new PublicKey(accountId),
+              },
+              remainingAccounts: [
+                extras.collection &&
+                  account.kind === 0 && {
+                    pubkey: new PublicKey(extras.collection),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+                extras.payer &&
+                  account.modifier === 0 && {
+                    pubkey: new PublicKey(extras.payer),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+                extras.close &&
+                  account.modifier === 1 && {
+                    pubkey: new PublicKey(extras.close),
+                    isWritable: false,
+                    isSigner: false,
+                  },
+              ].filter((account) => account),
+            })
           )
         )
       )
@@ -693,10 +659,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   createInstructionArgument(
     applicationId: string,
     instructionId: string,
-    argumentName: string,
-    argumentKind: number,
-    argumentModifier: number,
-    argumentSize: number
+    argument: InstructionArgumentDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -704,26 +667,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     ]).pipe(
       take(1),
       concatMap(([writer, walletPublicKey]) => {
-        const argument = Keypair.generate();
+        const argumentKeypair = Keypair.generate();
 
         return from(
           defer(() =>
-            writer.rpc.createInstructionArgument(
-              argumentName,
-              argumentKind,
-              argumentModifier,
-              argumentSize,
-              {
-                accounts: {
-                  argument: argument.publicKey,
-                  instruction: new PublicKey(instructionId),
-                  application: new PublicKey(applicationId),
-                  authority: walletPublicKey,
-                  systemProgram: SystemProgram.programId,
-                },
-                signers: [argument],
-              }
-            )
+            writer.rpc.createInstructionArgument(argument, {
+              accounts: {
+                argument: argumentKeypair.publicKey,
+                instruction: new PublicKey(instructionId),
+                application: new PublicKey(applicationId),
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [argumentKeypair],
+            })
           )
         );
       })
@@ -732,10 +689,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstructionArgument(
     argumentId: string,
-    argumentName: string,
-    argumentKind: number,
-    argumentModifier: number,
-    argumentSize: number
+    argument: InstructionArgumentDto
   ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
@@ -745,18 +699,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       concatMap(([writer, walletPublicKey]) =>
         from(
           defer(() =>
-            writer.rpc.updateInstructionArgument(
-              argumentName,
-              argumentKind,
-              argumentModifier,
-              argumentSize,
-              {
-                accounts: {
-                  argument: new PublicKey(argumentId),
-                  authority: walletPublicKey,
-                },
-              }
-            )
+            writer.rpc.updateInstructionArgument(argument, {
+              accounts: {
+                argument: new PublicKey(argumentId),
+                authority: walletPublicKey,
+              },
+            })
           )
         )
       )

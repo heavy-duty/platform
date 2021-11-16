@@ -1,9 +1,8 @@
-use crate::collections::{Application, Instruction, InstructionAccount};
-use crate::utils::vectorize_string;
+use crate::collections::{AccountDto, Application, BaseAccount, Instruction, InstructionAccount};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(name: String, kind: u8, modifier: u8, space: Option<u16>)]
+#[instruction(dto: AccountDto)]
 pub struct CreateInstructionAccount<'info> {
   #[account(
         init,
@@ -18,26 +17,12 @@ pub struct CreateInstructionAccount<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handler(
-  ctx: Context<CreateInstructionAccount>,
-  name: String,
-  kind: u8,
-  modifier: u8,
-  space: Option<u16>,
-) -> ProgramResult {
+pub fn handler(ctx: Context<CreateInstructionAccount>, dto: AccountDto) -> ProgramResult {
   msg!("Create instruction account");
   ctx.accounts.account.authority = ctx.accounts.authority.key();
   ctx.accounts.account.application = ctx.accounts.application.key();
   ctx.accounts.account.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.account.name = vectorize_string(name, 32);
-  ctx
-    .accounts
-    .account
-    .set_kind(kind, ctx.remaining_accounts)?;
-  ctx
-    .accounts
-    .account
-    .set_modifier(modifier, ctx.remaining_accounts, space)?;
+  ctx.accounts.account.data = BaseAccount::create(dto, ctx.remaining_accounts)?;
 
   Ok(())
 }

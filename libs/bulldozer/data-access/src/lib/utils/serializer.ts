@@ -29,19 +29,6 @@ export const ApplicationParser = (
   };
 };
 
-export const ApplicationParser2 = (
-  publicKey: PublicKey,
-  account: RawApplication
-): Application => {
-  return {
-    id: publicKey.toBase58(),
-    data: {
-      name: utils.bytes.utf8.decode(account.name),
-      authority: account.authority.toBase58(),
-    },
-  };
-};
-
 interface RawCollection {
   authority: PublicKey;
   application: PublicKey;
@@ -66,9 +53,13 @@ interface RawCollectionAttribute {
   authority: PublicKey;
   application: PublicKey;
   collection: PublicKey;
-  name: Uint8Array;
-  kind: { [key: string]: { id: number; name: string; size: number } };
-  modifier: { [key: string]: { id: number; name: string; size: number } };
+  data: {
+    name: Uint8Array;
+    kind: { [key: string]: { id: number; name: string; size: number } };
+    modifier: { [key: string]: { id: number; name: string; size: number } };
+    max: number | null;
+    maxLength: number | null;
+  };
 }
 
 export const CollectionAttributeParser = (
@@ -81,17 +72,27 @@ export const CollectionAttributeParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       collection: account.collection.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
+      name: utils.bytes.utf8.decode(account.data.name),
       kind: {
-        id: Object.values(account.kind)[0].id,
-        name: Object.keys(account.kind)[0],
-        size: Object.values(account.kind)[0].size,
+        id: Object.values(account.data.kind)[0].id,
+        name: Object.keys(account.data.kind)[0],
+        size: Object.values(account.data.kind)[0].size,
       },
-      modifier: {
-        id: Object.values(account.modifier)[0].id,
-        name: Object.keys(account.modifier)[0],
-        size: Object.values(account.modifier)[0].size,
-      },
+      modifier: account.data.modifier
+        ? {
+            id: Object.values(account.data.modifier)[0].id,
+            name: Object.keys(account.data.modifier)[0],
+            size: Object.values(account.data.modifier)[0].size,
+          }
+        : null,
+      max:
+        Object.values(account.data.kind)[0].id === 1
+          ? Object.values(account.data.kind)[0].size
+          : null,
+      maxLength:
+        Object.values(account.data.kind)[0].id === 2
+          ? Object.values(account.data.kind)[0].size
+          : null,
     },
   };
 };
@@ -122,9 +123,13 @@ interface RawInstructionArgument {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
-  name: Uint8Array;
-  kind: { [key: string]: { id: number; name: string; size: number } };
-  modifier: { [key: string]: { id: number; name: string; size: number } };
+  data: {
+    name: Uint8Array;
+    kind: { [key: string]: { id: number; name: string; size: number } };
+    modifier: { [key: string]: { id: number; name: string; size: number } };
+    max: number | null;
+    maxLength: number | null;
+  };
 }
 
 export const InstructionArgumentParser = (
@@ -137,17 +142,27 @@ export const InstructionArgumentParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
+      name: utils.bytes.utf8.decode(account.data.name),
       kind: {
-        id: Object.values(account.kind)[0].id,
-        name: Object.keys(account.kind)[0],
-        size: Object.values(account.kind)[0].size,
+        id: Object.values(account.data.kind)[0].id,
+        name: Object.keys(account.data.kind)[0],
+        size: Object.values(account.data.kind)[0].size,
       },
-      modifier: {
-        id: Object.values(account.modifier)[0].id,
-        name: Object.keys(account.modifier)[0],
-        size: Object.values(account.modifier)[0].size,
-      },
+      modifier: account.data.modifier
+        ? {
+            id: Object.values(account.data.modifier)[0].id,
+            name: Object.keys(account.data.modifier)[0],
+            size: Object.values(account.data.modifier)[0].size,
+          }
+        : null,
+      max:
+        Object.values(account.data.kind)[0].id === 1
+          ? Object.values(account.data.kind)[0].size
+          : null,
+      maxLength:
+        Object.values(account.data.kind)[0].id === 2
+          ? Object.values(account.data.kind)[0].size
+          : null,
     },
   };
 };
@@ -156,13 +171,15 @@ interface RawInstructionAccount {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
-  name: Uint8Array;
-  kind: { [key: string]: { id: number; name: string } };
-  modifier: { [key: string]: { id: number; name: string } };
-  collection: PublicKey | null;
-  space: number | null;
-  payer: PublicKey | null;
-  close: PublicKey | null;
+  data: {
+    name: Uint8Array;
+    kind: { [key: string]: { id: number; name: string } };
+    modifier: { [key: string]: { id: number; name: string } };
+    collection: PublicKey | null;
+    space: number | null;
+    payer: PublicKey | null;
+    close: PublicKey | null;
+  };
 }
 
 export const InstructionAccountParser = (
@@ -175,19 +192,21 @@ export const InstructionAccountParser = (
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
-      name: utils.bytes.utf8.decode(account.name),
+      name: utils.bytes.utf8.decode(account.data.name),
       kind: {
-        id: Object.values(account.kind)[0].id,
-        name: Object.keys(account.kind)[0],
+        id: Object.values(account.data.kind)[0].id,
+        name: Object.keys(account.data.kind)[0],
       },
-      modifier: {
-        id: Object.values(account.modifier)[0].id,
-        name: Object.keys(account.modifier)[0],
-      },
-      collection: account.collection && account.collection.toBase58(),
-      close: account.close && account.close.toBase58(),
-      payer: account.payer && account.payer.toBase58(),
-      space: account.space,
+      modifier: account.data.modifier
+        ? {
+            id: Object.values(account.data.modifier)[0].id,
+            name: Object.keys(account.data.modifier)[0],
+          }
+        : null,
+      collection: account.data.collection && account.data.collection.toBase58(),
+      close: account.data.close && account.data.close.toBase58(),
+      payer: account.data.payer && account.data.payer.toBase58(),
+      space: account.data.space,
     },
   };
 };

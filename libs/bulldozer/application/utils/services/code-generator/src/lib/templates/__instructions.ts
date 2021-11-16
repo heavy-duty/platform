@@ -1,4 +1,4 @@
-export const __instructions_context_program = `use anchor_lang::prelude::*;
+export const __instructions = `use anchor_lang::prelude::*;
 {{#eq collections.length 1}}
 use crate::collections::{{collections.[0].data.name.pascalCase}};
 {{/eq}}
@@ -8,7 +8,7 @@ use crate::collections::{ {{~#each collections}}{{#if @first}}{{else}}, {{/if}}{
 
 #[derive(Accounts)]
 {{#if instruction.arguments.length}}
-#[instruction({{#each instruction.arguments}}{{#if @first}}{{else}}, {{/if}}{{this.data.name.camelCase}}:{{#switch this.data.modifier.id}}{{#case '0'}}{{this.data.kind.name}}{{/case}}{{#case '1'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '2'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}})]
+#[instruction({{#each instruction.arguments}}{{#if @first}}{{else}}, {{/if}}{{this.data.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}})]
 {{/if}}
 pub struct {{instruction.name.pascalCase}}<'info>{
   {{#each instruction.accounts}}
@@ -48,7 +48,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
 }
 
 {{#if instruction.handler}}
-pub fn handler(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.arguments}}, {{this.data.name.camelCase}}:{{#switch this.data.modifier.id}}{{#case '0'}}{{this.data.kind.name}}{{/case}}{{#case '1'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '2'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}}) -> ProgramResult {
+pub fn handler(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.arguments}}, {{this.data.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}}) -> ProgramResult {
   {{#each instruction.handler}}
   {{{this}}}
   {{/each}}

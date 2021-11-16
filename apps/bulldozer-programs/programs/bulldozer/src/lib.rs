@@ -6,6 +6,7 @@ mod errors;
 mod instructions;
 mod utils;
 
+use collections::*;
 use instructions::*;
 
 declare_id!("E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4");
@@ -40,22 +41,16 @@ pub mod bulldozer {
 
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    size: u8,
+    dto: AttributeDto,
   ) -> ProgramResult {
-    instructions::create_collection_attribute::handler(ctx, name, kind, modifier, size)
+    instructions::create_collection_attribute::handler(ctx, dto)
   }
 
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    size: u8,
+    dto: AttributeDto,
   ) -> ProgramResult {
-    instructions::update_collection_attribute::handler(ctx, name, kind, modifier, size)
+    instructions::update_collection_attribute::handler(ctx, dto)
   }
 
   pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
@@ -83,22 +78,16 @@ pub mod bulldozer {
 
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    size: u8,
+    dto: AttributeDto,
   ) -> ProgramResult {
-    instructions::create_instruction_argument::handler(ctx, name, kind, modifier, size)
+    instructions::create_instruction_argument::handler(ctx, dto)
   }
 
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    size: u8,
+    dto: AttributeDto,
   ) -> ProgramResult {
-    instructions::update_instruction_argument::handler(ctx, name, kind, modifier, size)
+    instructions::update_instruction_argument::handler(ctx, dto)
   }
 
   pub fn delete_instruction_argument(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {
@@ -107,22 +96,16 @@ pub mod bulldozer {
 
   pub fn create_instruction_account(
     ctx: Context<CreateInstructionAccount>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    space: Option<u16>,
+    dto: AccountDto,
   ) -> ProgramResult {
-    instructions::create_instruction_account::handler(ctx, name, kind, modifier, space)
+    instructions::create_instruction_account::handler(ctx, dto)
   }
 
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
-    name: String,
-    kind: u8,
-    modifier: u8,
-    space: Option<u16>,
+    dto: AccountDto,
   ) -> ProgramResult {
-    instructions::update_instruction_account::handler(ctx, name, kind, modifier, space)
+    instructions::update_instruction_account::handler(ctx, dto)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {

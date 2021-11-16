@@ -1,10 +1,8 @@
-use crate::collections::{Application, Instruction, InstructionArgument};
-use crate::enums::{AttributeKind, AttributeKindModifier};
-use crate::utils::vectorize_string;
+use crate::collections::{Application, Attribute, AttributeDto, Instruction, InstructionArgument};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-#[instruction(name: String, kind: u8, modifier: u8, array_size: u8)]
+#[instruction(dto: AttributeDto)]
 pub struct CreateInstructionArgument<'info> {
   #[account(
         init,
@@ -19,19 +17,11 @@ pub struct CreateInstructionArgument<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handler(
-  ctx: Context<CreateInstructionArgument>,
-  name: String,
-  kind: u8,
-  modifier: u8,
-  size: u8,
-) -> ProgramResult {
+pub fn handler(ctx: Context<CreateInstructionArgument>, dto: AttributeDto) -> ProgramResult {
   msg!("Create instruction argument");
-  ctx.accounts.argument.name = vectorize_string(name, 32);
-  ctx.accounts.argument.kind = AttributeKind::from_index(kind)?;
-  ctx.accounts.argument.modifier = AttributeKindModifier::from_index(modifier, size)?;
   ctx.accounts.argument.authority = ctx.accounts.authority.key();
-  ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
   ctx.accounts.argument.application = ctx.accounts.application.key();
+  ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
+  ctx.accounts.argument.data = Attribute::create(dto)?;
   Ok(())
 }
