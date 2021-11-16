@@ -35,6 +35,9 @@ jobs:
       - id: get-affected-projects
         name: 🛠️ Getting affected projects
         shell: bash
+        # Here we use the `npx nx print-affected` command to get all the affected projects in a single string
+        # then using grep, we count (using the -c flag) the occurrences of 'bulldozer-program' string in the above result
+        # if we get 0, it means the bulldozer-program does not changed, otherwise it changed and we will install Anchor
         run: |
           echo "::set-output name=bulldozer-program-affected::$(echo $(npx nx print-affected --select=projects --base=$BEFORE_SHA) | grep -c "bulldozer-programs")"
 
