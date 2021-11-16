@@ -26,109 +26,24 @@
       }
     ]
   },
-  "projects": {
-    "bulldozer-application-data-access": {
-      "tags": []
+  "cli": {
+    "defaultCollection": "@nrwl/angular"
+  },
+  "generators": {
+    "@nrwl/angular:application": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest",
+      "e2eTestRunner": "cypress"
     },
-    "bulldozer-application-features-code-editor": {
-      "tags": []
+    "@nrwl/angular:library": {
+      "style": "scss",
+      "linter": "eslint",
+      "unitTestRunner": "jest"
     },
-    "bulldozer-application-features-edit-application": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-argument": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-attribute": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-collection": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-document": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-instruction": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-relation": {
-      "tags": []
-    },
-    "bulldozer-application-features-edit-signer": {
-      "tags": []
-    },
-    "bulldozer-application-features-navigation": {
-      "tags": []
-    },
-    "bulldozer-application-features-view-application": {
-      "tags": []
-    },
-    "bulldozer-application-features-view-collection": {
-      "tags": []
-    },
-    "bulldozer-application-features-view-instruction": {
-      "tags": []
-    },
-    "bulldozer-application-shell": {
-      "tags": []
-    },
-    "bulldozer-application-ui-components-dark-theme": {
-      "tags": []
-    },
-    "bulldozer-application-ui-directives-dark-theme": {
-      "tags": []
-    },
-    "bulldozer-application-ui-directives-page-header": {
-      "tags": []
-    },
-    "bulldozer-application-ui-directives-section-header": {
-      "tags": []
-    },
-    "bulldozer-application-utils-pipes-obscure-address": {
-      "tags": []
-    },
-    "bulldozer-application-utils-pipes-sanitize-url": {
-      "tags": []
-    },
-    "bulldozer-application-utils-services-active-breakpoint": {
-      "tags": []
-    },
-    "bulldozer-application-utils-services-code-generator": {
-      "tags": []
-    },
-    "bulldozer-application-utils-services-dark-theme": {
-      "tags": []
-    },
-    "bulldozer-application-utils-types": {
-      "tags": []
-    },
-    "bulldozer-client": {
-      "tags": []
-    },
-    "bulldozer-client-e2e": {
-      "tags": [],
-      "implicitDependencies": ["bulldozer-client"]
-    },
-    "bulldozer-data-access": {
-      "tags": []
-    },
-    "bulldozer-programs": {
-      "tags": []
-    },
-    "bulldozer-shell": {
-      "tags": []
-    },
-    "shared-ng-anchor": {
-      "tags": []
-    },
-    "shared-utils-operators": {
-      "tags": []
-    },
-    "shared-wallet-adapter": {
-      "tags": []
-    },
-    "shared-wallet-adapter-ui": {
-      "tags": []
+    "@nrwl/angular:component": {
+      "style": "scss"
     }
-  }
+  },
+  "defaultProject": "bulldozer-client"
 }
