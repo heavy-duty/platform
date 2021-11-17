@@ -1,4 +1,4 @@
-name: Bulldozer Platform Tasks
+name: Bulldozer Platform ci
 
 on:
   push:
