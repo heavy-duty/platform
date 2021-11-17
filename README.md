@@ -1,4 +1,4 @@
-# Bulldozer [![Bulldozer Programs Test](https://github.com/heavy-duty/platform/actions/workflows/bulldozer-programs-test.yaml/badge.svg)](https://github.com/heavy-duty/platform/actions/workflows/bulldozer-programs-test.yaml)
+# Bulldozer [![Bulldozer Platform ci](https://github.com/heavy-duty/platform/actions/workflows/bulldozer-platform-ci.yaml/badge.svg?branch=master)](https://github.com/heavy-duty/platform/actions/workflows/bulldozer-platform-ci.yaml)
 
 Bulldozer is a low code platform that uses abstractions that are common for developers to build Solana programs, it’s powered by Anchor Framework. It gives developers the ability to manage their program’s ecosystem through a UI, hiding all the gory details so they can focus on the business logic.
 
