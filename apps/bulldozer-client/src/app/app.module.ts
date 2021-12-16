@@ -9,6 +9,7 @@ import {
   getSlopeWallet,
   getSolflareWallet,
   getSolletWallet,
+  getSolongWallet,
 } from '@solana/wallet-adapter-wallets';
 
 import * as bulldozerIdl from '../assets/json/bulldozer.json';
@@ -40,6 +41,7 @@ import { AppComponent } from './app.component';
           getSolletWallet(),
           getSlopeWallet(),
           getSolflareWallet(),
+          getSolongWallet(),
         ],
         autoConnect: true,
       },
