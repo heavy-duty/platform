@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Wallet } from '@solana/wallet-adapter-wallets';
+import { Wallet } from '@solana/wallet-adapter-base';
 
 @Component({
   selector: 'hd-wallet-icon',

@@ -2,8 +2,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { WALLET_CONFIG } from '@heavy-duty/wallet-adapter';
 import { PROGRAM_CONFIGS } from '@heavy-duty/ng-anchor';
+import { WALLET_CONFIG } from '@heavy-duty/wallet-adapter';
 import {
   getPhantomWallet,
   getSlopeWallet,

@@ -1,10 +1,10 @@
-import { Wallet } from '@solana/wallet-adapter-wallets';
+import { Adapter, Wallet } from '@solana/wallet-adapter-base';
 import { PublicKey } from '@solana/web3.js';
 
 export interface WalletState {
   wallets: Wallet[];
   wallet: Wallet | null;
-  adapter: ReturnType<Wallet['adapter']> | null;
+  adapter: Adapter | null;
   connecting: boolean;
   disconnecting: boolean;
   connected: boolean;

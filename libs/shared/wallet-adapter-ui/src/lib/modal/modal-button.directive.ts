@@ -6,7 +6,7 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Wallet, WalletName } from '@solana/wallet-adapter-wallets';
+import { Wallet, WalletName } from '@solana/wallet-adapter-base';
 
 import { WalletModalComponent } from './modal.component';
 
