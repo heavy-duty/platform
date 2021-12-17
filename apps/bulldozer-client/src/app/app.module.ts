@@ -4,13 +4,6 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { PROGRAM_CONFIGS } from '@heavy-duty/ng-anchor';
 import { WALLET_CONFIG } from '@heavy-duty/wallet-adapter';
-import {
-  getPhantomWallet,
-  getSlopeWallet,
-  getSolflareWallet,
-  getSolletWallet,
-  getSolongWallet,
-} from '@solana/wallet-adapter-wallets';
 
 import * as bulldozerIdl from '../assets/json/bulldozer.json';
 import { environment } from '../environments/environment';
@@ -36,13 +29,6 @@ import { AppComponent } from './app.component';
     {
       provide: WALLET_CONFIG,
       useValue: {
-        wallets: [
-          getPhantomWallet(),
-          getSolletWallet(),
-          getSlopeWallet(),
-          getSolflareWallet(),
-          getSolongWallet(),
-        ],
         autoConnect: true,
       },
     },
