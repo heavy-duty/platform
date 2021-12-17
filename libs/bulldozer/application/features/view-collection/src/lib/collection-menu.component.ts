@@ -34,7 +34,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CollectionMenuComponent {
-  @Input() connected: boolean | null = null;
+  @Input() connected?: boolean | null = null;
   @Output() createAttribute = new EventEmitter();
 
   onCreateAttribute() {

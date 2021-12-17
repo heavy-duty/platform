@@ -54,7 +54,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InstructionMenuComponent {
-  @Input() connected: boolean | null = null;
+  @Input() connected?: boolean | null = null;
   @Output() createArgument = new EventEmitter();
   @Output() createDocument = new EventEmitter();
   @Output() createSigner = new EventEmitter();

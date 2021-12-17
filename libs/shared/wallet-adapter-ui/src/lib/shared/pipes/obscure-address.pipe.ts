@@ -4,8 +4,8 @@ import { Pipe, PipeTransform } from '@angular/core';
   name: 'obscureAddress',
 })
 export class ObscureAddressPipe implements PipeTransform {
-  transform(value: string | null): string {
-    if (value === null) {
+  transform(value?: string | null): string {
+    if (value === null || value === undefined) {
       return '';
     }
 

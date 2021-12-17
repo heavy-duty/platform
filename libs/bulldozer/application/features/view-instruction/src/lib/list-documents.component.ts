@@ -21,7 +21,12 @@ import {
         </header>
 
         <mat-list
-          *ngIf="documents !== null && documents.length > 0; else emptyList"
+          *ngIf="
+            documents !== null &&
+              documents !== undefined &&
+              documents.length > 0;
+            else emptyList
+          "
           role="list"
         >
           <mat-list-item
@@ -170,8 +175,8 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListDocumentsComponent {
-  @Input() connected: boolean | null = null;
-  @Input() documents: InstructionAccountExtended[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() documents?: InstructionAccountExtended[] | null = null;
   @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
   @Output() deleteDocument = new EventEmitter<string>();
   @Output() updateRelation = new EventEmitter<InstructionRelationExtended>();

@@ -18,7 +18,10 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
         </header>
 
         <mat-list
-          *ngIf="signers !== null && signers.length > 0; else emptyList"
+          *ngIf="
+            signers !== null && signers !== undefined && signers.length > 0;
+            else emptyList
+          "
           role="list"
         >
           <mat-list-item
@@ -93,8 +96,8 @@ import { InstructionAccountExtended } from '@heavy-duty/bulldozer/application/ut
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListSignersComponent {
-  @Input() connected: boolean | null = null;
-  @Input() signers: InstructionAccountExtended[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() signers?: InstructionAccountExtended[] | null = null;
   @Output() updateSigner = new EventEmitter<InstructionAccountExtended>();
   @Output() deleteSigner = new EventEmitter<string>();
 

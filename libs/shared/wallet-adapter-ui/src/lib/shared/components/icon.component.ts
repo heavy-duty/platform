@@ -23,5 +23,5 @@ import { Wallet } from '@solana/wallet-adapter-base';
   ],
 })
 export class WalletIconComponent {
-  @Input() wallet: Wallet | null = null;
+  @Input() wallet?: Wallet | null = null;
 }

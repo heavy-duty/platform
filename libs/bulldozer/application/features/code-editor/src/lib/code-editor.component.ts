@@ -13,9 +13,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styles: [],
 })
 export class CodeEditorComponent {
-  @Input() template: string | null = null;
+  @Input() template?: string | null = null;
   @Input() customClass = '';
-  @Input() options = {
+  @Input() options? = {
     theme: 'vs-light',
     language: 'rust',
     automaticLayout: true,

@@ -92,8 +92,8 @@ import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/typ
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListAttributesComponent {
-  @Input() connected: boolean | null = null;
-  @Input() attributes: CollectionAttribute[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() attributes?: CollectionAttribute[] | null = null;
   @Output() updateAttribute = new EventEmitter<CollectionAttribute>();
   @Output() deleteAttribute = new EventEmitter<string>();
 

@@ -70,9 +70,9 @@ import { Application } from '@heavy-duty/bulldozer/application/utils/types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationSelectorComponent {
-  @Input() connected: boolean | null = null;
-  @Input() application: Application | null = null;
-  @Input() applications: Application[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() application?: Application | null = null;
+  @Input() applications?: Application[] | null = null;
   @Output() createApplication = new EventEmitter();
   @Output() updateApplication = new EventEmitter<Application>();
   @Output() deleteApplication = new EventEmitter<string>();
