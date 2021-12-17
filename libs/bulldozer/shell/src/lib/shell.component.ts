@@ -10,6 +10,7 @@ import {
   getSolongWallet,
 } from '@solana/wallet-adapter-wallets';
 import { map } from 'rxjs/operators';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 
 @Component({
   selector: 'bd-shell',
@@ -30,6 +31,7 @@ export class ShellComponent implements OnInit {
 
   ngOnInit() {
     this._connectionStore.setEndpoint('http://localhost:8899');
+    this._connectionStore.setNetwork('localnet' as WalletAdapterNetwork);
     this._walletStore.loadWallets(
       this._connectionStore.network$.pipe(
         map((network) => [
