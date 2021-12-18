@@ -14,6 +14,7 @@ import {
   defer,
   EMPTY,
   from,
+  fromEvent,
   Observable,
   of,
   Subject,
@@ -76,6 +77,7 @@ export class WalletStore extends ComponentStore<WalletState> {
   readonly ready$ = this.select((state) => state.ready);
   readonly connecting$ = this.select((state) => state.connecting);
   readonly disconnecting$ = this.select((state) => state.disconnecting);
+  readonly unloading$ = this.select((state) => state.unloading);
   readonly connected$ = this.select((state) => state.connected);
   readonly name$ = this._name.value$;
   readonly error$ = this._error.asObservable();
@@ -131,6 +133,7 @@ export class WalletStore extends ComponentStore<WalletState> {
       wallets: [],
       connecting: false,
       disconnecting: false,
+      unloading: false,
       autoConnect: this._config?.autoConnect || false,
     });
   }
@@ -174,6 +177,13 @@ export class WalletStore extends ComponentStore<WalletState> {
           tap((ready) => this.patchState({ ready: !!ready }))
         )
       )
+    )
+  );
+
+  // If the window is closing or reloading, ignore disconnect and error events from the adapter
+  readonly handleUnload = this.effect(() =>
+    fromEvent(window, 'beforeunload').pipe(
+      tap(() => this.patchState({ unloading: true }))
     )
   );
 
@@ -249,11 +259,10 @@ export class WalletStore extends ComponentStore<WalletState> {
 
   // Handle the adapter's disconnect event
   readonly onDisconnect = this.effect(() => {
-    return this.adapter$.pipe(
-      isNotNull,
-      switchMap((adapter) =>
+    return combineLatest([this.adapter$.pipe(isNotNull), this.unloading$]).pipe(
+      switchMap(([adapter, unloading]) =>
         fromAdapterEvent(adapter, 'disconnect').pipe(
-          tap(() => this._name.setItem(null))
+          tap(() => !unloading && this._name.setItem(null))
         )
       )
     );
@@ -261,11 +270,10 @@ export class WalletStore extends ComponentStore<WalletState> {
 
   // Handle the adapter's error event
   readonly onError = this.effect(() => {
-    return this.adapter$.pipe(
-      isNotNull,
-      switchMap((adapter) =>
+    return combineLatest([this.adapter$.pipe(isNotNull), this.unloading$]).pipe(
+      switchMap(([adapter, unloading]) =>
         fromAdapterEvent(adapter, 'error').pipe(
-          tap((error) => this._error.next(error))
+          tap((error) => !unloading && this._error.next(error))
         )
       )
     );
