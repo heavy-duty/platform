@@ -69,16 +69,16 @@ export class WalletStore extends ComponentStore<WalletState> {
     this._config?.localStorageKey || 'walletName',
     null
   );
-  readonly wallets$ = this.select((state) => state.wallets);
-  readonly autoConnect$ = this.select((state) => state.autoConnect);
-  readonly wallet$ = this.select((state) => state.wallet);
-  readonly adapter$ = this.select((state) => state.adapter);
-  readonly publicKey$ = this.select((state) => state.publicKey);
-  readonly ready$ = this.select((state) => state.ready);
-  readonly connecting$ = this.select((state) => state.connecting);
-  readonly disconnecting$ = this.select((state) => state.disconnecting);
-  readonly unloading$ = this.select((state) => state.unloading);
-  readonly connected$ = this.select((state) => state.connected);
+  readonly wallets$ = this.select(({ wallets }) => wallets);
+  readonly autoConnect$ = this.select(({ autoConnect }) => autoConnect);
+  readonly wallet$ = this.select(({ wallet }) => wallet);
+  readonly adapter$ = this.select(({ adapter }) => adapter);
+  readonly publicKey$ = this.select(({ publicKey }) => publicKey);
+  readonly ready$ = this.select(({ ready }) => ready);
+  readonly connecting$ = this.select(({ connecting }) => connecting);
+  readonly disconnecting$ = this.select(({ disconnecting }) => disconnecting);
+  readonly unloading$ = this.select(({ unloading }) => unloading);
+  readonly connected$ = this.select(({ connected }) => connected);
   readonly name$ = this._name.value$;
   readonly error$ = this._error.asObservable();
   readonly anchorWallet$ = this.select(
