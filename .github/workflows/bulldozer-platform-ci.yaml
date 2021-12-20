@@ -1,12 +1,10 @@
 name: Bulldozer Platform ci
+on: pull_request
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+env:
+  SOLANA_VERSION: 1.9.1
+  ANCHOR_VERSION: 0.19.0
+  NODE_VERSION: 14.18.2
 
 jobs:
   ci:
@@ -21,16 +19,16 @@ jobs:
           fetch-depth: 0
 
       - id: config-node
-        name: Pre config - 🧰 Setting up Node 14.7.5
+        name: Pre config - 🧰 Setting up Node ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v2
         with:
-          node-version: '14.17.5' # we have to check this
+          node-version: ${{ env.NODE_VERSION }}
 
       - id: install-npm-packages
         name: 📦 Pulling repo and installing Bulldozer Platform npm packages
         run: |
-          git fetch --prune origin master
-          npm ci
+          git fetch --no-tags --prune --depth=2 origin master
+          npm i
 
       - id: get-affected-projects
         name: 🛠️ Getting affected projects
@@ -51,14 +49,14 @@ jobs:
           rustup component add rustfmt
 
           echo "Installing Solana >> "
-          sh -c "$(curl -sSfL https://release.solana.com/v1.7.11/install)"
+          sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
           echo "-- adding new solana key file"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana-keygen new -o $HOME/.config/solana/id.json
 
           echo "Installing Serum >> "
-          npm i -g @project-serum/anchor 
-          npm i -g @project-serum/anchor-cli
+          npm i -g @project-serum/anchor@${{ env.ANCHOR_VERSION }} 
+          npm i -g @project-serum/anchor-cli@${{ env.ANCHOR_VERSION }}
 
           echo "Installing others dependencies >>"
           npm i -g typescript
