@@ -1,10 +1,19 @@
-import { Provider, setProvider, utils, workspace } from '@project-serum/anchor';
+import {
+  Idl,
+  Program,
+  Provider,
+  setProvider,
+  utils,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
+import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { BULLDOZER_PROGRAM_ID } from './utils';
+
 describe('application', () => {
+  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
   setProvider(Provider.env());
-  const program = workspace.Bulldozer;
   const application = Keypair.generate();
 
   it('should create account', async () => {

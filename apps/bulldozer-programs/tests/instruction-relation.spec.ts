@@ -1,15 +1,19 @@
 import {
+  Idl,
+  Program,
   ProgramError,
   Provider,
   setProvider,
-  workspace,
 } from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
+import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { BULLDOZER_PROGRAM_ID } from './utils';
+
 describe('instruction relation', () => {
+  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
   setProvider(Provider.env());
-  const program = workspace.Bulldozer;
   const instruction = Keypair.generate();
   const instructionName = 'create_document';
   const application = Keypair.generate();
@@ -147,7 +151,7 @@ describe('instruction relation', () => {
     );
     // act
     try {
-      error = await program.rpc.createInstructionRelation(relationBump, {
+      await program.rpc.createInstructionRelation(relationBump, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
@@ -162,6 +166,6 @@ describe('instruction relation', () => {
       error = err;
     }
     // assert
-    assert.equal(error.code, 143);
+    assert.equal(error.code, 2003);
   });
 });

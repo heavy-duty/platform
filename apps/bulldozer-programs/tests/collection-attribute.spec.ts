@@ -1,16 +1,20 @@
 import {
+  Idl,
+  Program,
+  ProgramError,
   Provider,
   setProvider,
   utils,
-  workspace,
-  ProgramError,
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
+import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { BULLDOZER_PROGRAM_ID } from './utils';
+
 describe('collection attribute', () => {
+  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
   setProvider(Provider.env());
-  const program = workspace.Bulldozer;
   const attribute = Keypair.generate();
   const collection = Keypair.generate();
   const collectionName = 'things';
@@ -147,7 +151,7 @@ describe('collection attribute', () => {
       error = err;
     }
     // assert
-    assert.equal(error.code, 311);
+    assert.equal(error.code, 6011);
   });
 
   it('should fail when max length is not provided with a string', async () => {
@@ -177,6 +181,6 @@ describe('collection attribute', () => {
       error = err;
     }
     // assert
-    assert.equal(error.code, 312);
+    assert.equal(error.code, 6012);
   });
 });

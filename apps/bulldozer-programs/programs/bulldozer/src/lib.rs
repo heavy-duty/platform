@@ -9,7 +9,7 @@ mod utils;
 use collections::*;
 use instructions::*;
 
-declare_id!("E4kBuz9gC7T32LBKnH3kscxjay1Y3KqFkXJt8UHq1BN4");
+declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
 
 #[program]
 pub mod bulldozer {

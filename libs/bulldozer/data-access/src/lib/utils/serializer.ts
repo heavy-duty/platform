@@ -11,7 +11,7 @@ import {
   InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
-interface RawApplication {
+export interface RawApplication {
   authority: PublicKey;
   name: Uint8Array;
 }
@@ -29,7 +29,7 @@ export const ApplicationParser = (
   };
 };
 
-interface RawCollection {
+export interface RawCollection {
   authority: PublicKey;
   application: PublicKey;
   name: Uint8Array;
@@ -49,7 +49,7 @@ export const CollectionParser = (
   };
 };
 
-interface RawCollectionAttribute {
+export interface RawCollectionAttribute {
   authority: PublicKey;
   application: PublicKey;
   collection: PublicKey;
@@ -97,7 +97,7 @@ export const CollectionAttributeParser = (
   };
 };
 
-interface RawInstruction {
+export interface RawInstruction {
   authority: PublicKey;
   application: PublicKey;
   name: Uint8Array;
@@ -119,7 +119,7 @@ export const InstructionParser = (
   };
 };
 
-interface RawInstructionArgument {
+export interface RawInstructionArgument {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
@@ -167,7 +167,7 @@ export const InstructionArgumentParser = (
   };
 };
 
-interface RawInstructionAccount {
+export interface RawInstructionAccount {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
@@ -211,7 +211,7 @@ export const InstructionAccountParser = (
   };
 };
 
-interface RawInstructionRelation {
+export interface RawInstructionRelation {
   authority: PublicKey;
   application: PublicKey;
   instruction: PublicKey;

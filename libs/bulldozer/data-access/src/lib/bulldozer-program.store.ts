@@ -16,6 +16,13 @@ import {
   InstructionArgumentParser,
   InstructionParser,
   InstructionRelationParser,
+  RawApplication,
+  RawCollection,
+  RawCollectionAttribute,
+  RawInstruction,
+  RawInstructionAccount,
+  RawInstructionArgument,
+  RawInstructionRelation,
 } from './utils';
 import {
   CollectionAttributeDto,
@@ -66,7 +73,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(defer(() => reader.account.application.all())).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              ApplicationParser(publicKey, account)
+              ApplicationParser(publicKey, account as RawApplication)
             )
           )
         )
@@ -85,7 +92,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           map(
             (account) =>
               account &&
-              ApplicationParser(new PublicKey(applicationId), account)
+              ApplicationParser(
+                new PublicKey(applicationId),
+                account as RawApplication
+              )
           )
         )
       )
@@ -173,7 +183,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              CollectionParser(publicKey, account)
+              CollectionParser(publicKey, account as RawCollection)
             )
           )
         )
@@ -191,7 +201,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map(
             (account) =>
-              account && CollectionParser(new PublicKey(collectionId), account)
+              account &&
+              CollectionParser(
+                new PublicKey(collectionId),
+                account as RawCollection
+              )
           )
         )
       )
@@ -280,7 +294,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              CollectionAttributeParser(publicKey, account)
+              CollectionAttributeParser(
+                publicKey,
+                account as RawCollectionAttribute
+              )
             )
           )
         )
@@ -378,7 +395,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              InstructionParser(publicKey, account)
+              InstructionParser(publicKey, account as RawInstruction)
             )
           )
         )
@@ -397,7 +414,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           map(
             (account) =>
               account &&
-              InstructionParser(new PublicKey(instructionId), account)
+              InstructionParser(
+                new PublicKey(instructionId),
+                account as RawInstruction
+              )
           )
         )
       )
@@ -507,7 +527,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              InstructionAccountParser(publicKey, account)
+              InstructionAccountParser(
+                publicKey,
+                account as RawInstructionAccount
+              )
             )
           )
         )
@@ -560,7 +583,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
                     isWritable: false,
                     isSigner: false,
                   },
-              ].filter((account) => account),
+              ].filter(
+                <T>(account: T | '' | false | null): account is T =>
+                  account !== null && account !== false && account !== ''
+              ),
             })
           )
         );
@@ -605,7 +631,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
                     isWritable: false,
                     isSigner: false,
                   },
-              ].filter((account) => account),
+              ].filter(
+                <T>(account: T | '' | false | null): account is T =>
+                  account !== null && account !== false && account !== ''
+              ),
             })
           )
         )
@@ -648,7 +677,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              InstructionArgumentParser(publicKey, account)
+              InstructionArgumentParser(
+                publicKey,
+                account as RawInstructionArgument
+              )
             )
           )
         )
@@ -746,7 +778,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
-              InstructionRelationParser(publicKey, account)
+              InstructionRelationParser(
+                publicKey,
+                account as RawInstructionRelation
+              )
             )
           )
         )
@@ -857,7 +892,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           ).pipe(
             map((programAccounts) =>
               programAccounts.map(({ publicKey, account }) =>
-                CollectionAttributeParser(publicKey, account)
+                CollectionAttributeParser(
+                  publicKey,
+                  account as RawCollectionAttribute
+                )
               )
             )
           ),
@@ -867,7 +905,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           ).pipe(
             map((programAccounts) =>
               programAccounts.map(({ publicKey, account }) =>
-                InstructionArgumentParser(publicKey, account)
+                InstructionArgumentParser(
+                  publicKey,
+                  account as RawInstructionArgument
+                )
               )
             )
           ),
@@ -876,7 +917,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           ).pipe(
             map((programAccounts) =>
               programAccounts.map(({ publicKey, account }) =>
-                InstructionAccountParser(publicKey, account)
+                InstructionAccountParser(
+                  publicKey,
+                  account as RawInstructionAccount
+                )
               )
             )
           ),

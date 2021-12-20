@@ -1,16 +1,20 @@
 import {
+  Idl,
+  Program,
   ProgramError,
   Provider,
   setProvider,
   utils,
-  workspace,
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
+import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { BULLDOZER_PROGRAM_ID } from './utils';
+
 describe('instruction account', () => {
+  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
   setProvider(Provider.env());
-  const program = workspace.Bulldozer;
   const instruction = Keypair.generate();
   const instructionName = 'create_document';
   const collection = Keypair.generate();
@@ -87,7 +91,7 @@ describe('instruction account', () => {
         error = err;
       }
       // assert
-      assert.equal(error.code, 305);
+      assert.equal(error.code, 6005);
     });
 
     it('should create', async () => {
@@ -331,7 +335,7 @@ describe('instruction account', () => {
           error = err;
         }
         // assert
-        assert.equal(error.code, 307);
+        assert.equal(error.code, 6007);
       });
     });
 
