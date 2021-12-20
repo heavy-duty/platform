@@ -8,8 +8,14 @@ import {
   WalletNotConnectedError,
   WalletNotReadyError,
 } from '@solana/wallet-adapter-base';
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import {
+  Connection,
+  PublicKey,
+  Transaction,
+  TransactionSignature,
+} from '@solana/web3.js';
+import {
+  BehaviorSubject,
   combineLatest,
   defer,
   EMPTY,
@@ -41,12 +47,24 @@ import {
   signTransaction,
 } from './wallet.signer';
 import { WALLET_CONFIG } from './wallet.tokens';
-import { WalletConfig, WalletState } from './wallet.types';
+import { WalletConfig } from './wallet.types';
 
-export const WALLET_DEFAULT_CONFIG: WalletConfig = {
+const WALLET_DEFAULT_CONFIG: WalletConfig = {
   autoConnect: false,
   localStorageKey: 'walletName',
 };
+
+interface WalletState {
+  wallets: Wallet[];
+  wallet: Wallet | null;
+  adapter: Adapter | null;
+  connecting: boolean;
+  disconnecting: boolean;
+  connected: boolean;
+  ready: boolean;
+  publicKey: PublicKey | null;
+  autoConnect: boolean;
+}
 
 const initialState: {
   wallet: Wallet | null;
@@ -69,6 +87,8 @@ export class WalletStore extends ComponentStore<WalletState> {
     this._config?.localStorageKey || 'walletName',
     null
   );
+  private readonly _unloading = new BehaviorSubject(false);
+  private readonly unloading$ = this._unloading.asObservable();
   readonly wallets$ = this.select(({ wallets }) => wallets);
   readonly autoConnect$ = this.select(({ autoConnect }) => autoConnect);
   readonly wallet$ = this.select(({ wallet }) => wallet);
@@ -77,7 +97,6 @@ export class WalletStore extends ComponentStore<WalletState> {
   readonly ready$ = this.select(({ ready }) => ready);
   readonly connecting$ = this.select(({ connecting }) => connecting);
   readonly disconnecting$ = this.select(({ disconnecting }) => disconnecting);
-  readonly unloading$ = this.select(({ unloading }) => unloading);
   readonly connected$ = this.select(({ connected }) => connected);
   readonly name$ = this._name.value$;
   readonly error$ = this._error.asObservable();
@@ -133,7 +152,6 @@ export class WalletStore extends ComponentStore<WalletState> {
       wallets: [],
       connecting: false,
       disconnecting: false,
-      unloading: false,
       autoConnect: this._config?.autoConnect || false,
     });
   }
@@ -187,7 +205,7 @@ export class WalletStore extends ComponentStore<WalletState> {
     }
 
     return fromEvent(window, 'beforeunload').pipe(
-      tap(() => this.patchState({ unloading: true }))
+      tap(() => this._unloading.next(true))
     );
   });
 
@@ -284,7 +302,7 @@ export class WalletStore extends ComponentStore<WalletState> {
   });
 
   // Connect the adapter to the wallet
-  connect() {
+  connect(): Observable<unknown> {
     return combineLatest([
       this.connecting$,
       this.disconnecting$,
@@ -331,7 +349,7 @@ export class WalletStore extends ComponentStore<WalletState> {
   }
 
   // Disconnect the adapter from the wallet
-  disconnect() {
+  disconnect(): Observable<unknown> {
     return combineLatest([this.disconnecting$, this.adapter$]).pipe(
       first(),
       filter(([disconnecting]) => !disconnecting),
@@ -375,7 +393,7 @@ export class WalletStore extends ComponentStore<WalletState> {
 
         return from(
           defer(() => adapter.sendTransaction(transaction, connection, options))
-        ).pipe(map((txId) => txId as string));
+        ).pipe(map((txId) => txId as TransactionSignature));
       })
     );
   }
