@@ -16,12 +16,23 @@ describe('collection', () => {
   setProvider(Provider.env());
   const collection = Keypair.generate();
   const application = Keypair.generate();
+  const workspace = Keypair.generate();
   const applicationName = 'my-app';
+  const workspaceName = 'my-workspace';
 
   before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -37,6 +48,7 @@ describe('collection', () => {
       accounts: {
         collection: collection.publicKey,
         application: application.publicKey,
+        workspace: workspace.publicKey,
         authority: program.provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -47,6 +59,8 @@ describe('collection', () => {
       collection.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+    assert.ok(account.workspace.equals(workspace.publicKey));
+    assert.ok(account.application.equals(application.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.name), collectionName);
   });
 
