@@ -14,16 +14,29 @@ import { BULLDOZER_PROGRAM_ID } from './utils';
 describe('application', () => {
   const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
   setProvider(Provider.env());
+  const workspaceName = 'my-workspace';
+  const workspace = Keypair.generate();
   const application = Keypair.generate();
+  const applicationName = 'my-app';
+
+  before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
+  });
 
   it('should create account', async () => {
-    // arrange
-    const applicationName = 'my-app';
     // act
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
+        workspace: workspace.publicKey,
         systemProgram: SystemProgram.programId,
       },
       signers: [application],
@@ -33,6 +46,7 @@ describe('application', () => {
       application.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+    assert.ok(account.workspace.equals(workspace.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.name), applicationName);
   });
 
