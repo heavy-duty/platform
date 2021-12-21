@@ -189,7 +189,6 @@ export class WalletStore extends ComponentStore<WalletState> {
   readonly onAdapterChanged = this.effect(() =>
     this.adapter$.pipe(
       isNotNull,
-
       concatMap((adapter) =>
         from(defer(() => adapter.ready())).pipe(
           tap((ready) => this.patchState({ ready: !!ready }))
