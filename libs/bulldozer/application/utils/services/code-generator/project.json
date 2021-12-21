@@ -1,0 +1,27 @@
+{
+  "root": "libs/bulldozer/application/utils/services/code-generator",
+  "sourceRoot": "libs/bulldozer/application/utils/services/code-generator/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/application/utils/services/code-generator/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/application/utils/services/code-generator"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/application/utils/services/code-generator/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

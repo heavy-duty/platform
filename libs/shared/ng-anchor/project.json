@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/shared/ng-anchor",
+  "sourceRoot": "libs/shared/ng-anchor/src",
+  "prefix": "bd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/shared/ng-anchor"],
+      "options": {
+        "project": "libs/shared/ng-anchor/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/shared/ng-anchor/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/shared/ng-anchor/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/ng-anchor"],
+      "options": {
+        "jestConfig": "libs/shared/ng-anchor/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/shared/ng-anchor/src/**/*.ts",
+          "libs/shared/ng-anchor/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

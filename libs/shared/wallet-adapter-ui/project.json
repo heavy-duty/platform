@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/shared/wallet-adapter-ui",
+  "sourceRoot": "libs/shared/wallet-adapter-ui/src",
+  "prefix": "heavy-duty",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/shared/wallet-adapter-ui"],
+      "options": {
+        "project": "libs/shared/wallet-adapter-ui/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/shared/wallet-adapter-ui/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/shared/wallet-adapter-ui/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/wallet-adapter-ui"],
+      "options": {
+        "jestConfig": "libs/shared/wallet-adapter-ui/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/shared/wallet-adapter-ui/src/**/*.ts",
+          "libs/shared/wallet-adapter-ui/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

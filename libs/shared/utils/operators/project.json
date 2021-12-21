@@ -1,0 +1,23 @@
+{
+  "root": "libs/shared/utils/operators",
+  "sourceRoot": "libs/shared/utils/operators/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/utils/operators/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/utils/operators"],
+      "options": {
+        "jestConfig": "libs/shared/utils/operators/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

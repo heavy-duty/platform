@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/application/utils/pipes/sanitize-url",
+  "sourceRoot": "libs/bulldozer/application/utils/pipes/sanitize-url/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/application/utils/pipes/sanitize-url"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/application/utils/pipes/sanitize-url/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/application/utils/pipes/sanitize-url/src/**/*.ts",
+          "libs/bulldozer/application/utils/pipes/sanitize-url/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

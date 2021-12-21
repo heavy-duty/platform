@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/application/ui/components/dark-theme",
+  "sourceRoot": "libs/bulldozer/application/ui/components/dark-theme/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/application/ui/components/dark-theme"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/application/ui/components/dark-theme/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/application/ui/components/dark-theme/src/**/*.ts",
+          "libs/bulldozer/application/ui/components/dark-theme/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

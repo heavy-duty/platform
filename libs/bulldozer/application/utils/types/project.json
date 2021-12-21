@@ -1,0 +1,23 @@
+{
+  "root": "libs/bulldozer/application/utils/types",
+  "sourceRoot": "libs/bulldozer/application/utils/types/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/bulldozer/application/utils/types/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/application/utils/types"],
+      "options": {
+        "jestConfig": "libs/bulldozer/application/utils/types/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
