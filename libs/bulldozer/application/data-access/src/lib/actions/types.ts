@@ -32,7 +32,7 @@ export enum InstructionActionTypes {
   InstructionAccountDeleted = 'Instruction account deleted',
 }
 
-export interface Action<T extends unknown> {
+export interface Action<T> {
   type: ApplicationActionTypes | InstructionActionTypes | CollectionActionTypes;
   payload?: T;
 }
