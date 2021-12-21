@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Wallet } from '@solana/wallet-adapter-wallets';
+import { Wallet } from '@solana/wallet-adapter-base';
 
 @Component({
   selector: 'hd-wallet-icon',
@@ -23,5 +23,5 @@ import { Wallet } from '@solana/wallet-adapter-wallets';
   ],
 })
 export class WalletIconComponent {
-  @Input() wallet: Wallet | null = null;
+  @Input() wallet?: Wallet | null = null;
 }

@@ -92,8 +92,8 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ListArgumentsComponent {
-  @Input() connected: boolean | null = null;
-  @Input() arguments: InstructionArgument[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() arguments?: InstructionArgument[] | null = null;
   @Output() updateArgument = new EventEmitter<InstructionArgument>();
   @Output() deleteArgument = new EventEmitter<string>();
 

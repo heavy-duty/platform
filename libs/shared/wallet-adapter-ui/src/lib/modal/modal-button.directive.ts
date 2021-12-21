@@ -6,20 +6,20 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Wallet, WalletName } from '@solana/wallet-adapter-wallets';
+import { Wallet, WalletName } from '@solana/wallet-adapter-base';
 
 import { WalletModalComponent } from './modal.component';
 
 @Directive({ selector: 'button[hdWalletModalButton]' })
 export class WalletModalButtonDirective {
-  @Input() wallets: Wallet[] = [];
+  @Input() wallets?: Wallet[] = [];
   @Input() featured = 3;
   @Output() selectWallet = new EventEmitter<WalletName>();
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<
         WalletModalComponent,
-        { wallets: Wallet[]; featured: number },
+        { wallets?: Wallet[]; featured: number },
         WalletName
       >(WalletModalComponent, {
         panelClass: 'wallet-modal',

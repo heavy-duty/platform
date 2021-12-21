@@ -9,7 +9,7 @@ import {
   MatSelectionList,
   MatSelectionListChange,
 } from '@angular/material/list';
-import { Wallet, WalletName } from '@solana/wallet-adapter-wallets';
+import { Wallet, WalletName } from '@solana/wallet-adapter-base';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({

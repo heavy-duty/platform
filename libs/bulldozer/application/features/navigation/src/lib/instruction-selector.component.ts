@@ -65,8 +65,8 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
   `,
 })
 export class InstructionSelectorComponent {
-  @Input() connected: boolean | null = null;
-  @Input() instructions: Instruction[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() instructions?: Instruction[] | null = null;
   @Output() createInstruction = new EventEmitter();
   @Output() updateInstruction = new EventEmitter<Instruction>();
   @Output() deleteInstruction = new EventEmitter<string>();

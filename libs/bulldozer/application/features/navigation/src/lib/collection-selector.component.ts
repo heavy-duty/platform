@@ -65,8 +65,8 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
   `,
 })
 export class CollectionSelectorComponent {
-  @Input() connected: boolean | null = null;
-  @Input() collections: Collection[] | null = null;
+  @Input() connected?: boolean | null = null;
+  @Input() collections?: Collection[] | null = null;
   @Output() createCollection = new EventEmitter();
   @Output() updateCollection = new EventEmitter<Collection>();
   @Output() deleteCollection = new EventEmitter<string>();
