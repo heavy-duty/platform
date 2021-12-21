@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   ApplicationStore,
   CollectionStore,
@@ -6,6 +7,8 @@ import {
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { filter, take } from 'rxjs/operators';
 
 import { ApplicationShellStore } from './shell.store';
 
@@ -54,15 +57,26 @@ import { ApplicationShellStore } from './shell.store';
     ApplicationShellStore,
   ],
 })
-export class ApplicationShellComponent {
+export class ApplicationShellComponent implements OnInit {
   readonly applicationId$ = this._applicationStore.applicationId$;
   readonly tabs$ = this._applicationShellStore.tabs$;
   readonly selectedTab$ = this._applicationShellStore.selected$;
 
   constructor(
     private readonly _applicationShellStore: ApplicationShellStore,
-    private readonly _applicationStore: ApplicationStore
+    private readonly _applicationStore: ApplicationStore,
+    private readonly _walletStore: WalletStore,
+    private readonly _router: Router
   ) {}
+
+  ngOnInit() {
+    this._walletStore.connected$
+      .pipe(
+        filter((connected) => !connected),
+        take(1)
+      )
+      .subscribe(() => this._router.navigate(['/unauthorized-access']));
+  }
 
   onDownloadWorkspace(workspace: Workspace) {
     this._applicationShellStore.downloadWorkspace(workspace);

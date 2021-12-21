@@ -3,6 +3,8 @@ import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { ShellComponent } from './shell.component';
+import { AuthGuard } from '@heavy-duty/bulldozer/utils/guards/auth';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 
 @NgModule({
   declarations: [ShellComponent],
@@ -19,6 +21,7 @@ import { ShellComponent } from './shell.component';
               import('@heavy-duty/bulldozer/application/shell').then(
                 (m) => m.ApplicationShellModule
               ),
+            canActivate: [AuthGuard],
           },
           {
             path: 'unauthorized-access',
@@ -35,5 +38,6 @@ import { ShellComponent } from './shell.component';
       },
     ]),
   ],
+  providers: [ConnectionStore, WalletStore, AuthGuard],
 })
 export class ShellModule {}

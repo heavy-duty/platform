@@ -14,12 +14,7 @@ import {
 @Component({
   selector: 'bd-shell',
   template: ` <router-outlet></router-outlet> `,
-  providers: [
-    ProgramStore,
-    BulldozerProgramStore,
-    ConnectionStore,
-    WalletStore,
-  ],
+  providers: [ProgramStore, BulldozerProgramStore],
 })
 export class ShellComponent implements OnInit {
   constructor(
