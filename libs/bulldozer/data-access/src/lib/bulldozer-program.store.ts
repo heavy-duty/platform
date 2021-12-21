@@ -23,6 +23,8 @@ import {
   RawInstructionAccount,
   RawInstructionArgument,
   RawInstructionRelation,
+  RawWorkspace,
+  WorkspaceParser,
 } from './utils';
 import {
   CollectionAttributeDto,
@@ -65,12 +67,122 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       .pipe(tap((writer) => this.patchState({ writer })))
   );
 
-  getApplications() {
+  getWorkspaces() {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
       concatMap((reader) =>
-        from(defer(() => reader.account.application.all())).pipe(
+        from(defer(() => reader.account.workspace.all())).pipe(
+          map((programAccounts) =>
+            programAccounts.map(({ publicKey, account }) =>
+              WorkspaceParser(publicKey, account as RawWorkspace)
+            )
+          )
+        )
+      )
+    );
+  }
+
+  getWorkspace(workspaceId: string) {
+    return this.reader$.pipe(
+      isNotNullOrUndefined,
+      take(1),
+      concatMap((reader) =>
+        from(
+          defer(() => reader.account.workspace.fetchNullable(workspaceId))
+        ).pipe(
+          map(
+            (account) =>
+              account &&
+              WorkspaceParser(
+                new PublicKey(workspaceId),
+                account as RawWorkspace
+              )
+          )
+        )
+      )
+    );
+  }
+
+  createWorkspace(workspaceName: string) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) => {
+        const workspace = Keypair.generate();
+
+        return from(
+          defer(() =>
+            writer.rpc.createWorkspace(workspaceName, {
+              accounts: {
+                workspace: workspace.publicKey,
+                authority: walletPublicKey,
+                systemProgram: SystemProgram.programId,
+              },
+              signers: [workspace],
+            })
+          )
+        );
+      })
+    );
+  }
+
+  updateWorkspace(workspaceId: string, workspaceName: string) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) =>
+        from(
+          defer(() =>
+            writer.rpc.updateWorkspace(workspaceName, {
+              accounts: {
+                workspace: new PublicKey(workspaceId),
+                authority: walletPublicKey,
+              },
+            })
+          )
+        )
+      )
+    );
+  }
+
+  deleteWorkspace(workspaceId: string) {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      take(1),
+      concatMap(([writer, walletPublicKey]) =>
+        from(
+          defer(() =>
+            writer.rpc.deleteWorkspace({
+              accounts: {
+                workspace: new PublicKey(workspaceId),
+                authority: walletPublicKey,
+              },
+            })
+          )
+        )
+      )
+    );
+  }
+
+  getApplications(workspaceId: string) {
+    return this.reader$.pipe(
+      isNotNullOrUndefined,
+      take(1),
+      concatMap((reader) =>
+        from(
+          defer(() =>
+            reader.account.application.all([
+              { memcmp: { bytes: workspaceId, offset: 40 } },
+            ])
+          )
+        ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
               ApplicationParser(publicKey, account as RawApplication)
@@ -102,7 +214,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  createApplication(applicationName: string) {
+  createApplication(workspaceId: string, applicationName: string) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
       this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
@@ -117,6 +229,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               accounts: {
                 application: application.publicKey,
                 authority: walletPublicKey,
+                workspace: new PublicKey(workspaceId),
                 systemProgram: SystemProgram.programId,
               },
               signers: [application],
@@ -177,7 +290,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.collection.all([
-              { memcmp: { bytes: applicationId, offset: 40 } },
+              { memcmp: { bytes: applicationId, offset: 72 } },
             ])
           )
         ).pipe(
@@ -212,7 +325,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  createCollection(applicationId: string, collectionName: string) {
+  createCollection(
+    workspaceId: string,
+    applicationId: string,
+    collectionName: string
+  ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
       this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
@@ -226,6 +343,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             writer.rpc.createCollection(collectionName, {
               accounts: {
                 collection: collection.publicKey,
+                workspace: new PublicKey(workspaceId),
                 application: new PublicKey(applicationId),
                 authority: walletPublicKey,
                 systemProgram: SystemProgram.programId,
@@ -288,7 +406,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.collectionAttribute.all([
-              { memcmp: { bytes: collectionId, offset: 72 } },
+              { memcmp: { bytes: collectionId, offset: 104 } },
             ])
           )
         ).pipe(
@@ -306,6 +424,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createCollectionAttribute(
+    workspaceId: string,
     applicationId: string,
     collectionId: string,
     attribute: CollectionAttributeDto
@@ -323,6 +442,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             writer.rpc.createCollectionAttribute(attribute, {
               accounts: {
                 attribute: attributeKeypair.publicKey,
+                workspace: new PublicKey(workspaceId),
                 collection: new PublicKey(collectionId),
                 application: new PublicKey(applicationId),
                 authority: walletPublicKey,
@@ -389,7 +509,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.instruction.all([
-              { memcmp: { bytes: applicationId, offset: 40 } },
+              { memcmp: { bytes: applicationId, offset: 72 } },
             ])
           )
         ).pipe(
@@ -424,7 +544,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  createInstruction(applicationId: string, instructionName: string) {
+  createInstruction(
+    workspaceId: string,
+    applicationId: string,
+    instructionName: string
+  ) {
     return combineLatest([
       this.writer$.pipe(isNotNullOrUndefined),
       this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
@@ -438,6 +562,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             writer.rpc.createInstruction(instructionName, {
               accounts: {
                 instruction: instruction.publicKey,
+                workspace: new PublicKey(workspaceId),
                 application: new PublicKey(applicationId),
                 authority: walletPublicKey,
                 systemProgram: SystemProgram.programId,
@@ -521,7 +646,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.instructionAccount.all([
-              { memcmp: { bytes: instructionId, offset: 72 } },
+              { memcmp: { bytes: instructionId, offset: 104 } },
             ])
           )
         ).pipe(
@@ -539,6 +664,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createInstructionAccount(
+    workspaceId: string,
     applicationId: string,
     instructionId: string,
     account: InstructionAccountDto,
@@ -557,6 +683,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             writer.rpc.createInstructionAccount(account, {
               accounts: {
                 authority: walletPublicKey,
+                workspace: new PublicKey(workspaceId),
                 application: new PublicKey(applicationId),
                 instruction: new PublicKey(instructionId),
                 account: accountKeypair.publicKey,
@@ -671,7 +798,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.instructionArgument.all([
-              { memcmp: { bytes: instructionId, offset: 72 } },
+              { memcmp: { bytes: instructionId, offset: 104 } },
             ])
           )
         ).pipe(
@@ -689,6 +816,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createInstructionArgument(
+    workspaceId: string,
     applicationId: string,
     instructionId: string,
     argument: InstructionArgumentDto
@@ -706,6 +834,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             writer.rpc.createInstructionArgument(argument, {
               accounts: {
                 argument: argumentKeypair.publicKey,
+                workspace: new PublicKey(workspaceId),
                 instruction: new PublicKey(instructionId),
                 application: new PublicKey(applicationId),
                 authority: walletPublicKey,
@@ -772,7 +901,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.instructionRelation.all([
-              { memcmp: { bytes: instructionId, offset: 72 } },
+              { memcmp: { bytes: instructionId, offset: 104 } },
             ])
           )
         ).pipe(
@@ -790,6 +919,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createInstructionRelation(
+    workspaceId: string,
     applicationId: string,
     instructionId: string,
     fromAccount: string,
@@ -816,6 +946,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             return writer.rpc.createInstructionRelation(relationBump, {
               accounts: {
                 relation: relationPublicKey,
+                workspace: new PublicKey(workspaceId),
                 instruction: new PublicKey(instructionId),
                 application: new PublicKey(applicationId),
                 from: new PublicKey(fromAccount),
@@ -879,7 +1010,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   getApplicationMetadata(applicationId: string) {
-    const filters = [{ memcmp: { bytes: applicationId, offset: 40 } }];
+    const filters = [{ memcmp: { bytes: applicationId, offset: 72 } }];
 
     return this.reader$.pipe(
       isNotNullOrUndefined,

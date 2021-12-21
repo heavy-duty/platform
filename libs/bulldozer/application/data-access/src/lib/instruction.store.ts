@@ -54,6 +54,7 @@ import {
 } from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
+import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   instructionId: string | null;
@@ -113,6 +114,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore
   ) {
@@ -251,11 +253,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ name }, applicationId]) =>
+            concatMap(([{ name }, workspaceId, applicationId]) =>
               this._bulldozerProgramStore
-                .createInstruction(applicationId, name)
+                .createInstruction(workspaceId, applicationId, name)
                 .pipe(
                   tapResponse(
                     () => this._events.next(new InstructionCreated()),
@@ -339,13 +342,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(
-              ([instructionArgumentDto, applicationId, instructionId]) =>
+              ([
+                instructionArgumentDto,
+                workspaceId,
+                applicationId,
+                instructionId,
+              ]) =>
                 this._bulldozerProgramStore
                   .createInstructionArgument(
+                    workspaceId,
                     applicationId,
                     instructionId,
                     instructionArgumentDto
@@ -417,23 +427,26 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ from, to }, applicationId, instructionId]) =>
-              this._bulldozerProgramStore
-                .createInstructionRelation(
-                  applicationId,
-                  instructionId,
-                  from,
-                  to
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new InstructionRelationCreated()),
-                    (error) => this._error.next(error)
+            concatMap(
+              ([{ from, to }, workspaceId, applicationId, instructionId]) =>
+                this._bulldozerProgramStore
+                  .createInstructionRelation(
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    from,
+                    to
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new InstructionRelationCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )
@@ -515,17 +528,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(
               ([
                 { name, modifier, collection, space, payer, close },
+                workspaceId,
                 applicationId,
                 instructionId,
               ]) =>
                 this._bulldozerProgramStore
                   .createInstructionAccount(
+                    workspaceId,
                     applicationId,
                     instructionId,
                     { name, kind: 0, modifier, space },
@@ -598,31 +614,39 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([instructionAccountDto, applicationId, instructionId]) =>
-              this._bulldozerProgramStore
-                .createInstructionAccount(
-                  applicationId,
-                  instructionId,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new InstructionAccountCreated()),
-                    (error) => this._error.next(error)
+            concatMap(
+              ([
+                instructionAccountDto,
+                workspaceId,
+                applicationId,
+                instructionId,
+              ]) =>
+                this._bulldozerProgramStore
+                  .createInstructionAccount(
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    {
+                      kind: 1,
+                      space: null,
+                      ...instructionAccountDto,
+                    },
+                    {
+                      collection: null,
+                      payer: null,
+                      close: null,
+                    }
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new InstructionAccountCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )

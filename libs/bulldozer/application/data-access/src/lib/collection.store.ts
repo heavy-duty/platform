@@ -16,7 +16,6 @@ import {
   combineLatest,
   from,
   Observable,
-  of,
   Subject,
 } from 'rxjs';
 import {
@@ -42,6 +41,7 @@ import {
   CollectionUpdated,
 } from './actions/collection.actions';
 import { ApplicationStore } from './application.store';
+import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   collectionId: string | null;
@@ -83,6 +83,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
@@ -135,11 +136,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ name }, applicationId]) =>
+            concatMap(([{ name }, workspaceId, applicationId]) =>
               this._bulldozerProgramStore
-                .createCollection(applicationId, name)
+                .createCollection(workspaceId, applicationId, name)
                 .pipe(
                   tapResponse(
                     () => {
@@ -194,33 +196,37 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly createCollectionAttribute = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-            this.collectionId$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, applicationId, collectionId]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditAttributeComponent)
           .afterClosed()
           .pipe(
             filter((data) => data),
-            concatMap((collectionAttributeDto) =>
-              this._bulldozerProgramStore
-                .createCollectionAttribute(
-                  applicationId,
-                  collectionId,
-                  collectionAttributeDto
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new CollectionAttributeCreated()),
-                    (error) => this._error.next(error)
+            withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
+              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+              this.collectionId$.pipe(isNotNullOrUndefined)
+            ),
+            concatMap(
+              ([
+                collectionAttributeDto,
+                workspaceId,
+                applicationId,
+                collectionId,
+              ]) =>
+                this._bulldozerProgramStore
+                  .createCollectionAttribute(
+                    workspaceId,
+                    applicationId,
+                    collectionId,
+                    collectionAttributeDto
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new CollectionAttributeCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )

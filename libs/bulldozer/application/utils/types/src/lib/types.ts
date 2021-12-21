@@ -1,5 +1,16 @@
+export interface WorkspaceInfo {
+  authority: string;
+  name: string;
+}
+
+export interface Workspace {
+  id: string;
+  data: WorkspaceInfo;
+}
+
 export interface ApplicationInfo {
   authority: string;
+  workspace: string;
   name: string;
 }
 
@@ -10,6 +21,7 @@ export interface Application {
 
 export interface CollectionInfo {
   authority: string;
+  workspace: string;
   application: string;
   name: string;
 }
@@ -29,6 +41,7 @@ export type CollectionExtended = Collection & {
 
 export interface CollectionAttributeInfo {
   authority: string;
+  workspace: string;
   application: string;
   collection: string;
   name: string;
@@ -62,6 +75,7 @@ export interface CollectionAttributeDto {
 
 export interface InstructionInfo {
   authority: string;
+  workspace: string;
   application: string;
   name: string;
   body: string;
@@ -74,6 +88,7 @@ export interface Instruction {
 
 export interface InstructionArgumentInfo {
   authority: string;
+  workspace: string;
   application: string;
   instruction: string;
   name: string;
@@ -112,6 +127,7 @@ export interface Program {
 
 export interface InstructionAccountInfo {
   authority: string;
+  workspace: string;
   application: string;
   instruction: string;
   name: string;
@@ -164,6 +180,7 @@ export type InstructionExtended = Instruction & {
 
 export interface InstructionRelationInfo {
   authority: string;
+  workspace: string;
   application: string;
   instruction: string;
   from: string;

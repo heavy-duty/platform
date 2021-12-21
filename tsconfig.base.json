@@ -46,6 +46,9 @@
       "@heavy-duty/bulldozer/application/features/edit-signer": [
         "libs/bulldozer/application/features/edit-signer/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/edit-workspace": [
+        "libs/bulldozer/application/features/edit-workspace/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/navigation": [
         "libs/bulldozer/application/features/navigation/src/index.ts"
       ],

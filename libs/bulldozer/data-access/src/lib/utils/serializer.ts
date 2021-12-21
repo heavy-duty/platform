@@ -1,18 +1,36 @@
-import { utils } from '@project-serum/anchor';
-import { PublicKey } from '@solana/web3.js';
-
 import {
-  InstructionAccount,
   Application,
   Collection,
   CollectionAttribute,
   Instruction,
+  InstructionAccount,
   InstructionArgument,
   InstructionRelation,
+  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
+import { utils } from '@project-serum/anchor';
+import { PublicKey } from '@solana/web3.js';
+
+export interface RawWorkspace {
+  authority: PublicKey;
+  name: Uint8Array;
+}
+export const WorkspaceParser = (
+  publicKey: PublicKey,
+  account: RawWorkspace
+): Workspace => {
+  return {
+    id: publicKey.toBase58(),
+    data: {
+      name: utils.bytes.utf8.decode(account.name),
+      authority: account.authority.toBase58(),
+    },
+  };
+};
 
 export interface RawApplication {
   authority: PublicKey;
+  workspace: PublicKey;
   name: Uint8Array;
 }
 
@@ -25,12 +43,14 @@ export const ApplicationParser = (
     data: {
       name: utils.bytes.utf8.decode(account.name),
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
     },
   };
 };
 
 export interface RawCollection {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   name: Uint8Array;
 }
@@ -44,6 +64,7 @@ export const CollectionParser = (
     data: {
       application: account.application.toBase58(),
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
       name: utils.bytes.utf8.decode(account.name),
     },
   };
@@ -51,6 +72,7 @@ export const CollectionParser = (
 
 export interface RawCollectionAttribute {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   collection: PublicKey;
   data: {
@@ -71,6 +93,7 @@ export const CollectionAttributeParser = (
     data: {
       authority: account.authority.toBase58(),
       application: account.application.toBase58(),
+      workspace: account.workspace.toBase58(),
       collection: account.collection.toBase58(),
       name: utils.bytes.utf8.decode(account.data.name),
       kind: {
@@ -99,6 +122,7 @@ export const CollectionAttributeParser = (
 
 export interface RawInstruction {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   name: Uint8Array;
   body: Uint8Array;
@@ -112,6 +136,7 @@ export const InstructionParser = (
     id: publicKey.toBase58(),
     data: {
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
       application: account.application.toBase58(),
       name: utils.bytes.utf8.decode(account.name),
       body: utils.bytes.utf8.decode(account.body),
@@ -121,6 +146,7 @@ export const InstructionParser = (
 
 export interface RawInstructionArgument {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
   data: {
@@ -140,6 +166,7 @@ export const InstructionArgumentParser = (
     id: publicKey.toBase58(),
     data: {
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
       name: utils.bytes.utf8.decode(account.data.name),
@@ -169,6 +196,7 @@ export const InstructionArgumentParser = (
 
 export interface RawInstructionAccount {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
   data: {
@@ -190,6 +218,7 @@ export const InstructionAccountParser = (
     id: publicKey.toBase58(),
     data: {
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
       name: utils.bytes.utf8.decode(account.data.name),
@@ -213,6 +242,7 @@ export const InstructionAccountParser = (
 
 export interface RawInstructionRelation {
   authority: PublicKey;
+  workspace: PublicKey;
   application: PublicKey;
   instruction: PublicKey;
   from: PublicKey;
@@ -227,6 +257,7 @@ export const InstructionRelationParser = (
     id: publicKey.toBase58(),
     data: {
       authority: account.authority.toBase58(),
+      workspace: account.workspace.toBase58(),
       application: account.application.toBase58(),
       instruction: account.instruction.toBase58(),
       from: account.from.toBase58(),

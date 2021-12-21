@@ -3,9 +3,17 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { Application } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import {
+  concatMap,
+  exhaustMap,
+  filter,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
 
 import {
   ApplicationActions,
@@ -14,6 +22,7 @@ import {
   ApplicationInit,
   ApplicationUpdated,
 } from './actions/application.actions';
+import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   applicationId: string | null;
@@ -48,15 +57,19 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _workspaceStore: WorkspaceStore
   ) {
     super(initialState);
   }
 
   readonly loadApplications = this.effect(() =>
-    this.reload$.pipe(
-      switchMap(() =>
-        this._bulldozerProgramStore.getApplications().pipe(
+    combineLatest([
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
+      this.reload$,
+    ]).pipe(
+      switchMap(([workspaceId]) =>
+        this._bulldozerProgramStore.getApplications(workspaceId).pipe(
           tapResponse(
             (applications) => this.patchState({ applications }),
             (error) => this._error.next(error)
@@ -81,13 +94,18 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
           .afterClosed()
           .pipe(
             filter((data) => data),
-            concatMap(({ name }) =>
-              this._bulldozerProgramStore.createApplication(name).pipe(
-                tapResponse(
-                  () => this._events.next(new ApplicationCreated()),
-                  (error) => this._error.next(error)
+            withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
+            ),
+            concatMap(([{ name }, workspaceId]) =>
+              this._bulldozerProgramStore
+                .createApplication(workspaceId, name)
+                .pipe(
+                  tapResponse(
+                    () => this._events.next(new ApplicationCreated()),
+                    (error) => this._error.next(error)
+                  )
                 )
-              )
             )
           )
       )
