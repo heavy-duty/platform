@@ -43,8 +43,14 @@
       "simpleModuleName": true,
       "standaloneConfig": true
     },
-    "@nrwl/angular:component": {
-      "style": "scss"
+    "@nrwl/angular:scam": {
+      "style": "scss",
+      "changeDetection": "OnPush",
+      "flat": true,
+      "inlineStyle": true,
+      "inlineTemplate": true,
+      "skipTests": true,
+      "inlineScam": false
     }
   },
   "defaultProject": "bulldozer-client"
