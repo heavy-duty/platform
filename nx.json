@@ -51,7 +51,8 @@
       "inlineTemplate": true,
       "skipTests": true,
       "inlineScam": false
-    }
+    },
+    "@nrwl/angular:component": {}
   },
   "defaultProject": "bulldozer-client"
 }

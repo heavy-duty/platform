@@ -21,6 +21,13 @@ import { ShellComponent } from './shell.component';
               ),
           },
           {
+            path: 'unauthorized-access',
+            loadChildren: () =>
+              import('@heavy-duty/bulldozer/features/unauthorized-access').then(
+                (m) => m.UnauthorizedAccessModule
+              ),
+          },
+          {
             path: '**',
             redirectTo: 'workspaces',
           },

@@ -31,6 +31,7 @@
     "bulldozer-client": "apps/bulldozer-client",
     "bulldozer-client-e2e": "apps/bulldozer-client-e2e",
     "bulldozer-data-access": "libs/bulldozer/data-access",
+    "bulldozer-features-unauthorized-access": "libs/bulldozer/features/unauthorized-access",
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shell": "libs/bulldozer/shell",
     "shared-ng-anchor": "libs/shared/ng-anchor",

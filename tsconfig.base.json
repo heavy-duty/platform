@@ -100,6 +100,9 @@
       "@heavy-duty/bulldozer/data-access": [
         "libs/bulldozer/data-access/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/features/unauthorized-access": [
+        "libs/bulldozer/features/unauthorized-access/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/shell": ["libs/bulldozer/shell/src/index.ts"],
       "@heavy-duty/ng-anchor": ["libs/shared/ng-anchor/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
