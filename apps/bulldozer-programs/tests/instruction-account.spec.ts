@@ -21,13 +21,24 @@ describe('instruction account', () => {
   const collectionName = 'things';
   const application = Keypair.generate();
   const applicationName = 'my-app';
+  const workspace = Keypair.generate();
+  const workspaceName = 'my-workspace';
   const anotherCollection = Keypair.generate();
   const anotherCollectionName = 'another-things';
 
   before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -36,6 +47,7 @@ describe('instruction account', () => {
     await program.rpc.createCollection(collectionName, {
       accounts: {
         collection: collection.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         authority: program.provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
@@ -45,6 +57,7 @@ describe('instruction account', () => {
     await program.rpc.createCollection(anotherCollectionName, {
       accounts: {
         collection: anotherCollection.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         authority: program.provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
@@ -54,6 +67,7 @@ describe('instruction account', () => {
     await program.rpc.createInstruction(instructionName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         systemProgram: SystemProgram.programId,
@@ -80,6 +94,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -106,6 +121,7 @@ describe('instruction account', () => {
       await program.rpc.createInstructionAccount(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
@@ -126,6 +142,7 @@ describe('instruction account', () => {
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
       assert.ok(account.instruction.equals(instruction.publicKey));
+      assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
       assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
       assert.ok('document' in account.data.kind);
@@ -174,6 +191,7 @@ describe('instruction account', () => {
       await program.rpc.createInstructionAccount(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
@@ -216,6 +234,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionPayerAccount.publicKey,
@@ -237,6 +256,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -312,6 +332,7 @@ describe('instruction account', () => {
           await program.rpc.createInstructionAccount(dto, {
             accounts: {
               authority: program.provider.wallet.publicKey,
+              workspace: workspace.publicKey,
               application: application.publicKey,
               instruction: instruction.publicKey,
               account: instructionAccount.publicKey,
@@ -354,6 +375,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -374,6 +396,7 @@ describe('instruction account', () => {
         );
         assert.ok(account.authority.equals(program.provider.wallet.publicKey));
         assert.ok(account.instruction.equals(instruction.publicKey));
+        assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
         assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
         assert.ok(account.data.collection.equals(collection.publicKey));
@@ -401,6 +424,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionCloseAccount.publicKey,
@@ -422,6 +446,7 @@ describe('instruction account', () => {
         await program.rpc.createInstructionAccount(dto, {
           accounts: {
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -447,6 +472,7 @@ describe('instruction account', () => {
         );
         assert.ok(account.authority.equals(program.provider.wallet.publicKey));
         assert.ok(account.instruction.equals(instruction.publicKey));
+        assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
         assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
         assert.ok('document' in account.data.kind);
@@ -501,6 +527,7 @@ describe('instruction account', () => {
       await program.rpc.createInstructionAccount(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
@@ -514,6 +541,7 @@ describe('instruction account', () => {
       );
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
       assert.ok(account.instruction.equals(instruction.publicKey));
+      assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
       assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
       assert.ok('signer' in account.data.kind);

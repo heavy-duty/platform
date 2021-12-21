@@ -138,6 +138,7 @@ impl BaseAccount {
 #[account]
 pub struct InstructionAccount {
   pub authority: Pubkey,
+  pub workspace: Pubkey,
   pub application: Pubkey,
   pub instruction: Pubkey,
   pub data: BaseAccount,
