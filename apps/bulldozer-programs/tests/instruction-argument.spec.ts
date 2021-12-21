@@ -20,11 +20,22 @@ describe('instruction argument', () => {
   const instructionName = 'create_document';
   const application = Keypair.generate();
   const applicationName = 'my-app';
+  const workspace = Keypair.generate();
+  const workspaceName = 'my-workspace';
 
   before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -33,6 +44,7 @@ describe('instruction argument', () => {
     await program.rpc.createInstruction(instructionName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         systemProgram: SystemProgram.programId,
@@ -55,6 +67,7 @@ describe('instruction argument', () => {
     await program.rpc.createInstructionArgument(dto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         argument: instructionArgument.publicKey,
@@ -67,6 +80,7 @@ describe('instruction argument', () => {
       instructionArgument.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+    assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.ok(account.instruction.equals(instruction.publicKey));
     assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
@@ -138,6 +152,7 @@ describe('instruction argument', () => {
       await program.rpc.createInstructionArgument(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
@@ -168,6 +183,7 @@ describe('instruction argument', () => {
       await program.rpc.createInstructionArgument(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
