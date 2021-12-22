@@ -93,7 +93,7 @@ import { NavigationStore } from './navigation.store';
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
 
-          <ng-container *ngrxLet="workspace$; let workspace">
+          <ng-container *ngrxLet="workspace$; let selectedWorkspace">
             <button
               class="ml-auto"
               type="button"
@@ -101,7 +101,9 @@ import { NavigationStore } from './navigation.store';
               [matMenuTriggerFor]="menu"
             >
               {{
-                workspace === null ? 'Select workspace' : workspace.data.name
+                selectedWorkspace === null
+                  ? 'Select workspace'
+                  : selectedWorkspace.data.name
               }}
             </button>
             <mat-menu id="workspace-menu" #menu="matMenu" class="px-4 py-2">
@@ -109,7 +111,10 @@ import { NavigationStore } from './navigation.store';
                 <mat-list-item
                   *ngFor="let workspace of workspaces$ | ngrxPush"
                   role="listitem"
-                  class="w-60 h-32 bg-black bg-opacity-10 mb-2"
+                  class="w-60 h-auto bg-black bg-opacity-10 mb-2 pt-4 pb-3 border-b-4 border-transparent"
+                  [ngClass]="{
+                    'border-b-primary': selectedWorkspace?.id === workspace.id
+                  }"
                 >
                   <div>
                     <p class="text-xl font-bold mb-0">
@@ -118,10 +123,20 @@ import { NavigationStore } from './navigation.store';
 
                     <p class="mb-2">
                       <a
-                        class="text-xs underline text-primary"
+                        class="text-xs"
                         [routerLink]="['/workspaces', workspace.id]"
+                        [ngClass]="{
+                          'underline text-primary':
+                            selectedWorkspace?.id !== workspace.id,
+                          'opacity-50 italic':
+                            selectedWorkspace?.id === workspace.id
+                        }"
                       >
-                        Activate
+                        {{
+                          selectedWorkspace?.id === workspace.id
+                            ? 'Active'
+                            : 'Activate'
+                        }}
                       </a>
                     </p>
 
