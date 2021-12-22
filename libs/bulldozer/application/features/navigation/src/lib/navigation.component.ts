@@ -117,6 +117,28 @@ import { NavigationStore } from './navigation.store';
             >
               New workspace
             </button>
+            <ng-container *ngIf="workspace$ | ngrxPush as workspace">
+              <button
+                class="ml-auto"
+                type="button"
+                mat-raised-button
+                color="primary"
+                [disabled]="workspace === null"
+                (click)="onUpdateWorkspace(workspace)"
+              >
+                Edit
+              </button>
+              <button
+                class="ml-auto"
+                type="button"
+                mat-raised-button
+                color="primary"
+                [disabled]="workspace === null"
+                (click)="onDeleteWorkspace(workspace.id)"
+              >
+                Delete
+              </button>
+            </ng-container>
           </mat-menu>
           <hd-wallet-multi-button
             class="bd-custom-color ml-6 h-auto leading-none"
@@ -152,6 +174,7 @@ export class NavigationComponent {
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
+  readonly workspace$ = this._workspaceStore.workspace$;
   readonly workspaces$ = this._workspaceStore.workspaces$;
   readonly applications$ = this._applicationStore.applications$;
   readonly application$ = this._applicationStore.application$;
