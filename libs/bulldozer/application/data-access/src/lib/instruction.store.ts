@@ -77,6 +77,14 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
   readonly events$ = this._events.asObservable();
   readonly instructions$ = this.select(({ instructions }) => instructions);
+  readonly activeInstructions$ = this.select(
+    this.instructions$,
+    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+    (instructions, applicationId) =>
+      instructions.filter(
+        (instruction) => instruction.data.application === applicationId
+      )
+  );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(
     this.instructions$,
@@ -134,12 +142,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly loadInstructions = this.effect(() =>
     combineLatest([
-      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
       this._collectionStore.collections$,
       this.reload$,
     ]).pipe(
-      switchMap(([applicationId, collections]) =>
-        this._bulldozerProgramStore.getInstructions(applicationId).pipe(
+      switchMap(([workspaceId, collections]) =>
+        this._bulldozerProgramStore.getInstructions(workspaceId).pipe(
           concatMap((instructions) =>
             from(instructions).pipe(
               concatMap((instruction) =>

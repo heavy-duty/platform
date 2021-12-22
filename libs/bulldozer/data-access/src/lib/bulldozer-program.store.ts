@@ -282,7 +282,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  getCollections(applicationId: string) {
+  getCollections(workspaceId: string) {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
@@ -290,7 +290,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.collection.all([
-              { memcmp: { bytes: applicationId, offset: 72 } },
+              { memcmp: { bytes: workspaceId, offset: 40 } },
             ])
           )
         ).pipe(
@@ -501,7 +501,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  getInstructions(applicationId: string) {
+  getInstructions(workspaceId: string) {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
@@ -509,7 +509,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.instruction.all([
-              { memcmp: { bytes: applicationId, offset: 72 } },
+              { memcmp: { bytes: workspaceId, offset: 40 } },
             ])
           )
         ).pipe(

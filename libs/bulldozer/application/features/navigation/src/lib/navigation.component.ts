@@ -178,8 +178,8 @@ export class NavigationComponent {
   readonly workspaces$ = this._workspaceStore.workspaces$;
   readonly applications$ = this._applicationStore.applications$;
   readonly application$ = this._applicationStore.application$;
-  readonly collections$ = this._collectionStore.collections$;
-  readonly instructions$ = this._instructionStore.instructions$;
+  readonly collections$ = this._collectionStore.activeCollections$;
+  readonly instructions$ = this._instructionStore.activeInstructions$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,

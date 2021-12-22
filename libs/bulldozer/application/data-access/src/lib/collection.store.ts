@@ -64,6 +64,14 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
   readonly events$ = this._events.asObservable();
   readonly collections$ = this.select(({ collections }) => collections);
+  readonly activeCollections$ = this.select(
+    this.collections$,
+    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+    (collections, applicationId) =>
+      collections.filter(
+        (collection) => collection.data.application === applicationId
+      )
+  );
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
   readonly collection$ = this.select(
     this.collections$,
@@ -91,11 +99,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly loadCollections = this.effect(() =>
     combineLatest([
-      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
       this.reload$,
     ]).pipe(
-      switchMap(([applicationId]) =>
-        this._bulldozerProgramStore.getCollections(applicationId).pipe(
+      switchMap(([workspaceId]) =>
+        this._bulldozerProgramStore.getCollections(workspaceId).pipe(
           concatMap((collections) =>
             from(collections).pipe(
               mergeMap((collection) =>
