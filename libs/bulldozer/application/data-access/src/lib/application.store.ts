@@ -80,7 +80,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly selectApplication = this.effect(
-    (applicationId$: Observable<string>) =>
+    (applicationId$: Observable<string | null>) =>
       applicationId$.pipe(
         tap((applicationId) => this.patchState({ applicationId }))
       )

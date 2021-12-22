@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
-import { filter, map } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 @Component({
   selector: 'bd-view-application',
@@ -12,14 +12,26 @@ import { filter, map } from 'rxjs/operators';
 export class ViewApplicationComponent implements OnInit {
   constructor(
     private readonly _applicationStore: ApplicationStore,
-    private readonly _route: ActivatedRoute
+    private readonly _route: ActivatedRoute,
+    private readonly _router: Router
   ) {}
 
   ngOnInit() {
     this._applicationStore.selectApplication(
-      this._route.paramMap.pipe(
-        filter((paramMap) => paramMap.has('applicationId')),
-        map((paramMap) => paramMap.get('applicationId') as string)
+      this._router.events.pipe(
+        filter(
+          (event): event is NavigationStart => event instanceof NavigationStart
+        ),
+        map((event) => {
+          const urlAsArray = event.url.split('/').filter((segment) => segment);
+
+          if (urlAsArray[2] !== 'applications') {
+            return null;
+          } else {
+            return urlAsArray[3];
+          }
+        }),
+        startWith(this._route.snapshot.paramMap.get('applicationId') || null)
       )
     );
   }

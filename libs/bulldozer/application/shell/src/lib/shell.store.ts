@@ -147,8 +147,11 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly closeTabsOnApplicationChange = this.effect(() =>
-    this._applicationStore.applicationId$.pipe(
+  readonly closeTabsOnApplicationOrWorkspaceChange = this.effect(() =>
+    merge(
+      this._workspaceStore.workspaceId$,
+      this._applicationStore.applicationId$
+    ).pipe(
       isNotNullOrUndefined,
       tap(() => this.patchState({ selected: null, tabs: [] }))
     )
