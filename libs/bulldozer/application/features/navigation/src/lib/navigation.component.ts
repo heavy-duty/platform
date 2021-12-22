@@ -59,18 +59,6 @@ import { NavigationStore } from './navigation.store';
               ></bd-instruction-selector>
             </mat-accordion>
           </div>
-          <mat-nav-list togglePosition="afer">
-            <div class="w-full mb-6 flex justify-center items-center">
-              <button
-                *ngIf="application$ | ngrxPush"
-                mat-button
-                color="accent"
-                (click)="onDownload()"
-              >
-                Download code
-              </button>
-            </div>
-          </mat-nav-list>
           <bd-application-selector
             [connected]="connected$ | ngrxPush"
             [application]="application$ | ngrxPush"
@@ -101,6 +89,7 @@ import { NavigationStore } from './navigation.store';
               (createWorkspace)="onCreateWorkspace()"
               (updateWorkspace)="onUpdateWorkspace($event)"
               (deleteWorkspace)="onDeleteWorkspace($event)"
+              (downloadWorkspace)="onDownloadWorkspace($event)"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -121,7 +110,7 @@ import { NavigationStore } from './navigation.store';
   providers: [NavigationStore],
 })
 export class NavigationComponent {
-  @Output() downloadCode = new EventEmitter();
+  @Output() downloadWorkspace = new EventEmitter();
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
@@ -188,7 +177,7 @@ export class NavigationComponent {
     this._instructionStore.deleteInstruction(instructionId);
   }
 
-  onDownload() {
-    this.downloadCode.emit();
+  onDownloadWorkspace(workspace: Workspace) {
+    this.downloadWorkspace.emit(workspace);
   }
 }

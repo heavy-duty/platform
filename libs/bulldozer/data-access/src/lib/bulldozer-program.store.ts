@@ -1,12 +1,21 @@
 import { Injectable } from '@angular/core';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import {
+  CollectionAttributeDto,
+  CollectionExtended,
+  InstructionAccountDto,
+  InstructionAccountExtras,
+  InstructionArgumentDto,
+  InstructionExtended,
+  InstructionRelationExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
 import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { combineLatest, defer, from } from 'rxjs';
-import { concatMap, map, switchMap, take, tap } from 'rxjs/operators';
+import { combineLatest, defer, from, Observable } from 'rxjs';
+import { concatMap, map, mergeMap, take, tap, toArray } from 'rxjs/operators';
 
 import {
   ApplicationParser,
@@ -26,12 +35,6 @@ import {
   RawWorkspace,
   WorkspaceParser,
 } from './utils';
-import {
-  CollectionAttributeDto,
-  InstructionAccountDto,
-  InstructionAccountExtras,
-  InstructionArgumentDto,
-} from '@heavy-duty/bulldozer/application/utils/types';
 
 interface ViewModel {
   reader: Program | null;
@@ -1009,54 +1012,111 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  getApplicationMetadata(applicationId: string) {
-    const filters = [{ memcmp: { bytes: applicationId, offset: 72 } }];
+  getExtendedInstructions(
+    workspaceId: string
+  ): Observable<InstructionExtended[]> {
+    return combineLatest([
+      this.getCollections(workspaceId),
+      this.getInstructions(workspaceId),
+    ]).pipe(
+      concatMap(([collections, instructions]) =>
+        from(instructions).pipe(
+          concatMap((instruction) =>
+            combineLatest([
+              this.getInstructionArguments(instruction.id),
+              this.getInstructionAccounts(instruction.id),
+              this.getInstructionRelations(instruction.id),
+            ]).pipe(
+              map(
+                ([
+                  instructionArguments,
+                  instructionAccounts,
+                  instructionRelations,
+                ]) => ({
+                  ...instruction,
+                  arguments: instructionArguments,
+                  accounts: instructionAccounts.map((account) => {
+                    const relations = instructionRelations
+                      .filter((relation) => relation.data.from === account.id)
+                      .map((relation) => {
+                        const toAccount =
+                          instructionAccounts.find(
+                            (instructionAccount) =>
+                              instructionAccount.id === relation.data.to
+                          ) || null;
 
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      switchMap((reader) =>
-        combineLatest([
-          this.getApplication(applicationId),
-          this.getCollections(applicationId),
-          from(
-            defer(() => reader.account.collectionAttribute.all(filters))
-          ).pipe(
-            map((programAccounts) =>
-              programAccounts.map(({ publicKey, account }) =>
-                CollectionAttributeParser(
-                  publicKey,
-                  account as RawCollectionAttribute
-                )
+                        return (
+                          toAccount && {
+                            ...relation,
+                            data: {
+                              ...relation.data,
+                              from: account,
+                              to: toAccount,
+                            },
+                          }
+                        );
+                      })
+                      .filter(
+                        (relation): relation is InstructionRelationExtended =>
+                          relation !== null
+                      );
+
+                    const collection =
+                      account.data.collection &&
+                      collections.find(
+                        ({ id }) => id === account.data.collection
+                      );
+
+                    const payer =
+                      account.data.payer &&
+                      instructionAccounts.find(
+                        ({ id }) => id === account.data.payer
+                      );
+
+                    const close =
+                      account.data.close &&
+                      instructionAccounts.find(
+                        ({ id }) => id === account.data.close
+                      );
+
+                    return {
+                      ...account,
+                      data: {
+                        ...account.data,
+                        collection: collection || null,
+                        payer: payer || null,
+                        close: close || null,
+                        relations,
+                      },
+                    };
+                  }),
+                })
               )
             )
           ),
-          this.getInstructions(applicationId),
-          from(
-            defer(() => reader.account.instructionArgument.all(filters))
-          ).pipe(
-            map((programAccounts) =>
-              programAccounts.map(({ publicKey, account }) =>
-                InstructionArgumentParser(
-                  publicKey,
-                  account as RawInstructionArgument
-                )
-              )
-            )
-          ),
-          from(
-            defer(() => reader.account.instructionAccount.all(filters))
-          ).pipe(
-            map((programAccounts) =>
-              programAccounts.map(({ publicKey, account }) =>
-                InstructionAccountParser(
-                  publicKey,
-                  account as RawInstructionAccount
-                )
-              )
-            )
-          ),
-        ])
+          toArray()
+        )
       )
+    );
+  }
+
+  getExtendedCollections(
+    workspaceId: string
+  ): Observable<CollectionExtended[]> {
+    return this.getCollections(workspaceId).pipe(
+      concatMap((collections) =>
+        from(collections).pipe(
+          mergeMap((collection) =>
+            this.getCollectionAttributes(collection.id).pipe(
+              map((attributes) => ({
+                ...collection,
+                attributes,
+              }))
+            )
+          )
+        )
+      ),
+      toArray()
     );
   }
 }

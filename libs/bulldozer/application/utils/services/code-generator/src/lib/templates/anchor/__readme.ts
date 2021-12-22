@@ -1,1 +1,1 @@
-export const __readme = `{{applicationName.pascalCase}}`;
+export const __readme = `{{workspaceName.pascalCase}}`;

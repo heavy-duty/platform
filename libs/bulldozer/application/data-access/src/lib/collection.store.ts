@@ -11,22 +11,13 @@ import {
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  from,
-  Observable,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
-  map,
-  mergeMap,
   switchMap,
   tap,
-  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
@@ -103,27 +94,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       this.reload$,
     ]).pipe(
       switchMap(([workspaceId]) =>
-        this._bulldozerProgramStore.getCollections(workspaceId).pipe(
-          concatMap((collections) =>
-            from(collections).pipe(
-              mergeMap((collection) =>
-                this._bulldozerProgramStore
-                  .getCollectionAttributes(collection.id)
-                  .pipe(
-                    map((attributes) => ({
-                      ...collection,
-                      attributes,
-                    }))
-                  )
-              )
-            )
-          ),
-          toArray()
+        this._bulldozerProgramStore.getExtendedCollections(workspaceId).pipe(
+          tapResponse(
+            (collections) => this.patchState({ collections }),
+            (error) => this._error.next(error)
+          )
         )
-      ),
-      tapResponse(
-        (collections) => this.patchState({ collections }),
-        (error) => this._error.next(error)
       )
     )
   );

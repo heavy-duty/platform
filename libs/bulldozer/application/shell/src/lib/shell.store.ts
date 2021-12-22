@@ -16,15 +16,17 @@ import {
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
-  generateApplicationMetadata,
-  generateApplicationZip,
+  generateWorkspaceMetadata,
+  generateWorkspaceZip,
 } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
+import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
-import { merge, Observable, of, Subject } from 'rxjs';
+import { combineLatest, merge, Observable, of, Subject } from 'rxjs';
 import { concatMap, filter, map, tap, withLatestFrom } from 'rxjs/operators';
 
 export type TabKind = 'collections' | 'instructions';
@@ -70,20 +72,12 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     this.selected$,
     (tabs, selected) => tabs.find(({ id }) => id === selected) || null
   );
-  readonly applicationMetadata$ = this.select(
-    this._applicationStore.application$,
-    this._collectionStore.collections$,
-    this._instructionStore.instructions$,
-    (application, collections, instructions) =>
-      application &&
-      generateApplicationMetadata(application, collections, instructions),
-    { debounce: true }
-  );
 
   constructor(
     private readonly _router: Router,
     private readonly _matSnackBar: MatSnackBar,
     private readonly _walletStore: WalletStore,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
@@ -297,30 +291,30 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly downloadCode = this.effect((action$) =>
-    action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._applicationStore.application$,
-            this._collectionStore.collections$,
-            this._instructionStore.instructions$
-          ),
-          map(
-            ([, application, collections, instructions]) =>
-              application &&
-              generateApplicationZip(
-                application,
-                generateApplicationMetadata(
-                  application,
-                  collections,
-                  instructions
+  readonly downloadWorkspace = this.effect(
+    (workspace$: Observable<Workspace>) =>
+      workspace$.pipe(
+        concatMap((workspace) =>
+          combineLatest([
+            this._bulldozerProgramStore.getApplications(workspace.id),
+            this._bulldozerProgramStore.getExtendedCollections(workspace.id),
+            this._bulldozerProgramStore.getExtendedInstructions(workspace.id),
+          ]).pipe(
+            map(
+              ([applications, collections, instructions]) =>
+                workspace &&
+                generateWorkspaceZip(
+                  workspace,
+                  generateWorkspaceMetadata(
+                    applications,
+                    collections,
+                    instructions
+                  )
                 )
-              )
+            )
           )
         )
       )
-    )
   );
 
   private getErrorMessage(error: unknown) {

@@ -16,22 +16,13 @@ import {
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  from,
-  Observable,
-  of,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
-  map,
   switchMap,
   tap,
-  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
@@ -143,104 +134,15 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly loadInstructions = this.effect(() =>
     combineLatest([
       this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-      this._collectionStore.collections$,
       this.reload$,
     ]).pipe(
-      switchMap(([workspaceId, collections]) =>
-        this._bulldozerProgramStore.getInstructions(workspaceId).pipe(
-          concatMap((instructions) =>
-            from(instructions).pipe(
-              concatMap((instruction) =>
-                combineLatest([
-                  this._bulldozerProgramStore.getInstructionArguments(
-                    instruction.id
-                  ),
-                  this._bulldozerProgramStore.getInstructionAccounts(
-                    instruction.id
-                  ),
-                  this._bulldozerProgramStore.getInstructionRelations(
-                    instruction.id
-                  ),
-                ]).pipe(
-                  map(
-                    ([
-                      instructionArguments,
-                      instructionAccounts,
-                      instructionRelations,
-                    ]) => ({
-                      ...instruction,
-                      arguments: instructionArguments,
-                      accounts: instructionAccounts.map((account) => {
-                        const relations = instructionRelations
-                          .filter(
-                            (relation) => relation.data.from === account.id
-                          )
-                          .map((relation) => {
-                            const toAccount =
-                              instructionAccounts.find(
-                                (instructionAccount) =>
-                                  instructionAccount.id === relation.data.to
-                              ) || null;
-
-                            return (
-                              toAccount && {
-                                ...relation,
-                                data: {
-                                  ...relation.data,
-                                  from: account,
-                                  to: toAccount,
-                                },
-                              }
-                            );
-                          })
-                          .filter(
-                            (
-                              relation
-                            ): relation is InstructionRelationExtended =>
-                              relation !== null
-                          );
-
-                        const collection =
-                          account.data.collection &&
-                          collections.find(
-                            ({ id }) => id === account.data.collection
-                          );
-
-                        const payer =
-                          account.data.payer &&
-                          instructionAccounts.find(
-                            ({ id }) => id === account.data.payer
-                          );
-
-                        const close =
-                          account.data.close &&
-                          instructionAccounts.find(
-                            ({ id }) => id === account.data.close
-                          );
-
-                        return {
-                          ...account,
-                          data: {
-                            ...account.data,
-                            collection: collection || null,
-                            payer: payer || null,
-                            close: close || null,
-                            relations,
-                          },
-                        };
-                      }),
-                    })
-                  )
-                )
-              ),
-              toArray()
-            )
+      switchMap(([workspaceId]) =>
+        this._bulldozerProgramStore.getExtendedInstructions(workspaceId).pipe(
+          tapResponse(
+            (instructions) => this.patchState({ instructions }),
+            (error) => this._error.next(error)
           )
         )
-      ),
-      tapResponse(
-        (instructions) => this.patchState({ instructions }),
-        (error) => this._error.next(error)
       )
     )
   );

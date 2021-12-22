@@ -10,13 +10,14 @@ import {
 import {
   generateCode,
   getTemplateByType,
-  ApplicationMetadata,
+  WorkspaceMetadata,
   registerHandleBarsHelpers,
 } from './utils';
 import {
   Application,
   CollectionExtended,
   InstructionExtended,
+  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 // TODO: Move later
@@ -73,108 +74,131 @@ export const generateApplicationCode = (
   );
 };
 
-export const generateApplicationMetadata = (
-  application: Application,
+export const generateWorkspaceMetadata = (
+  applications: Application[],
   collections: CollectionExtended[],
   instructions: InstructionExtended[]
-): ApplicationMetadata => {
+): WorkspaceMetadata => {
   return {
-    application: {
-      template: generateApplicationCode(application, instructions),
-      fileName: formatName(application.data.name).camelCase,
-    },
-    collections: collections.map((collection) => ({
-      template: generateCollectionCode(collection),
-      fileName: formatName(collection.data.name).snakeCase,
-    })),
-    instructions: instructions.map((instruction) => ({
-      template: generateInstructionCode(instruction),
-      fileName: formatName(instruction.data.name).snakeCase,
-    })),
-    collectionsMod: {
-      template: generateModCode(collections),
-    },
-    instructionsMod: {
-      template: generateModCode(instructions),
-    },
+    applications: applications.map((application) => {
+      const filteredCollections = collections.filter(
+        (collection) => collection.data.application === application.id
+      );
+      const filteredInstructions = instructions.filter(
+        (instruction) => instruction.data.application === application.id
+      );
+
+      console.log(instructions, filteredInstructions);
+
+      return {
+        template: generateApplicationCode(application, filteredInstructions),
+        name: formatName(application.data.name),
+        collections: filteredCollections.map((collection) => ({
+          template: generateCollectionCode(collection),
+          name: formatName(collection.data.name),
+        })),
+        instructions: filteredInstructions.map((instruction) => ({
+          template: generateInstructionCode(instruction),
+          name: formatName(instruction.data.name),
+        })),
+        collectionsMod: {
+          template: generateModCode(filteredCollections),
+        },
+        instructionsMod: {
+          template: generateModCode(filteredInstructions),
+        },
+      };
+    }),
   };
 };
 
-export const generateApplicationZip = (
-  application: Application,
-  metadata: ApplicationMetadata
+export const generateWorkspaceZip = (
+  workspace: Workspace,
+  metadata: WorkspaceMetadata
 ) => {
   const zip = new JSZip();
-  const applicationName = formatName(application.data.name);
+  const workspaceName = formatName(workspace.data.name);
+  const workspaceFolder = zip.folder(workspaceName.snakeCase);
 
-  const applicationFolder = zip.folder(applicationName.snakeCase);
-
-  applicationFolder?.file;
-  applicationFolder?.file('.gitignore', getTemplateByType('gitignore'));
-  applicationFolder?.file('.prettierrc.json', getTemplateByType('prettierrc'));
-  applicationFolder?.file(
+  workspaceFolder?.file;
+  workspaceFolder?.file('.gitignore', getTemplateByType('gitignore'));
+  workspaceFolder?.file('.prettierrc.json', getTemplateByType('prettierrc'));
+  workspaceFolder?.file(
     'Anchor.toml',
-    generateCode({ applicationName }, getTemplateByType('anchor'))
+    generateCode({ workspaceName }, getTemplateByType('anchor'))
   );
-  applicationFolder?.file('Cargo.toml', getTemplateByType('cargo'));
-  applicationFolder?.file(
+  workspaceFolder?.file('Cargo.toml', getTemplateByType('cargo'));
+  workspaceFolder?.file(
     'README.md',
-    generateCode({ applicationName }, getTemplateByType('readme'))
+    generateCode({ workspaceName }, getTemplateByType('readme'))
   );
-  applicationFolder?.file('tsconfig.json', getTemplateByType('tsconfig'));
-  applicationFolder?.file(
+  workspaceFolder?.file('tsconfig.json', getTemplateByType('tsconfig'));
+  workspaceFolder?.file(
     'package.json',
-    generateCode({ applicationName }, getTemplateByType('packageJson'))
+    generateCode({ workspaceName }, getTemplateByType('packageJson'))
   );
 
   // Creating migrations folder and file
-  const migrationsFolder = applicationFolder?.folder('migrations');
+  const migrationsFolder = workspaceFolder?.folder('migrations');
   migrationsFolder?.file('deploy.js', getTemplateByType('migrations.deploy'));
 
-  // Creating tests folder and file
-  const testsFolder = applicationFolder?.folder('tests');
-  testsFolder?.file(
-    `${metadata.application.fileName}.spec.ts`,
-    generateCode({ applicationName }, getTemplateByType('test'))
-  );
+  // Creating programs folder
+  const programsFolderDir = 'programs';
+  const programsFolder = workspaceFolder?.folder(programsFolderDir);
 
-  // Creating program folder and adding main files
-  const programFolderDir = 'programs/' + metadata.application.fileName;
-  const programFolder = applicationFolder?.folder(programFolderDir);
-  programFolder?.file('Xargo.toml', getTemplateByType('program.xargo'));
-  programFolder?.file(
-    'Cargo.toml',
-    generateCode({ applicationName }, getTemplateByType('program.cargo'))
-  );
+  // Creating tests folder
+  const testsFolderDir = 'tests';
+  const testsFolder = workspaceFolder?.folder(testsFolderDir);
 
-  const programFolderSrcDir = programFolderDir + '/src';
-  const programFolderSrc = applicationFolder?.folder(programFolderSrcDir);
-  programFolderSrc?.file('lib.rs', metadata.application.template);
+  // Create all the applications from workspace
+  metadata.applications.forEach((application) => {
+    // Creating application folder and adding main files
+    const applicationFolder = programsFolder?.folder(
+      application.name.normalCase
+    );
+    applicationFolder?.file('Xargo.toml', getTemplateByType('program.xargo'));
+    applicationFolder?.file(
+      'Cargo.toml',
+      generateCode(
+        { applicationName: application.name },
+        getTemplateByType('program.cargo')
+      )
+    );
+    const applicationFolderSrc = applicationFolder?.folder('src');
+    applicationFolderSrc?.file('lib.rs', application.template);
 
-  // Creating collection folder and files
-  const collectionFolder = applicationFolder?.folder(
-    programFolderSrcDir + '/collections'
-  );
+    // Creating collection folder and files
+    const collectionFolder = applicationFolderSrc?.folder('collections');
+    application.collections.forEach((collection) => {
+      collectionFolder?.file(
+        collection.name.normalCase + '.rs',
+        collection.template
+      );
+    });
+    collectionFolder?.file('mod.rs', application.collectionsMod.template);
 
-  metadata.collections.forEach((collection) => {
-    collectionFolder?.file(collection.fileName + '.rs', collection.template);
-  });
-  collectionFolder?.file('mod.rs', metadata.collectionsMod.template);
+    // Creating instructions folder and files
+    const instructionsFolder = applicationFolderSrc?.folder('instructions');
+    application.instructions.forEach((instruction) => {
+      instructionsFolder?.file(
+        instruction.name.normalCase + '.rs',
+        instruction.template
+      );
+    });
+    instructionsFolder?.file('mod.rs', application.instructionsMod.template);
 
-  // Creating instructions folder and files
-  const instructionsFolder = applicationFolder?.folder(
-    programFolderSrcDir + '/instructions'
-  );
-  metadata.instructions.forEach((instruction) => {
-    instructionsFolder?.file(
-      instruction.fileName + '.rs',
-      instruction.template
+    // Creating tests per application
+    testsFolder?.file(
+      `${application.name.normalCase}.spec.ts`,
+      generateCode(
+        { applicationName: application.name },
+        getTemplateByType('test')
+      )
     );
   });
-  instructionsFolder?.file('mod.rs', metadata.instructionsMod.template);
 
   // Save a download file
   zip.generateAsync({ type: 'blob' }).then(function (content) {
-    saveAs(content, metadata.application.fileName + '-program.zip');
+    saveAs(content, workspaceName.normalCase + '-program.zip');
   });
 };

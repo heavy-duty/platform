@@ -27,9 +27,22 @@ import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
             'border-b-primary': activeWorkspace?.id === workspace.id
           }"
         >
-          <div>
-            <p class="text-xl font-bold mb-0">
-              {{ workspace.data.name }}
+          <div class="w-full">
+            <p class="text-xl font-bold mb-0 flex justify-between">
+              <span class="flex-grow leading-8">
+                {{ workspace.data.name }}
+              </span>
+              <button
+                mat-icon-button
+                color="primary"
+                class="w-8 h-8 leading-8 flex-shrink-0"
+                [attr.aria-label]="
+                  'Download ' + workspace.data.name + ' workspace'
+                "
+                (click)="onDownloadWorkspace(workspace)"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
             </p>
 
             <p class="mb-2">
@@ -91,6 +104,7 @@ export class WorkspaceSelectorComponent {
   @Output() createWorkspace = new EventEmitter();
   @Output() updateWorkspace = new EventEmitter<Workspace>();
   @Output() deleteWorkspace = new EventEmitter<string>();
+  @Output() downloadWorkspace = new EventEmitter<Workspace>();
 
   onCreateWorkspace() {
     this.createWorkspace.emit();
@@ -102,5 +116,9 @@ export class WorkspaceSelectorComponent {
 
   onDeleteWorkspace(workspaceId: string) {
     this.deleteWorkspace.emit(workspaceId);
+  }
+
+  onDownloadWorkspace(workspace: Workspace) {
+    this.downloadWorkspace.emit(workspace);
   }
 }

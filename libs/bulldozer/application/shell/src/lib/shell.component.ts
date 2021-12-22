@@ -5,13 +5,14 @@ import {
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
 
 import { ApplicationShellStore } from './shell.store';
 
 @Component({
   selector: 'bd-application-shell',
   template: `
-    <bd-navigation (downloadCode)="onDownloadCode()">
+    <bd-navigation (downloadWorkspace)="onDownloadWorkspace($event)">
       <nav mat-tab-nav-bar *ngIf="applicationId$ | ngrxPush as applicationId">
         <div
           mat-tab-link
@@ -63,8 +64,8 @@ export class ApplicationShellComponent {
     private readonly _applicationStore: ApplicationStore
   ) {}
 
-  onDownloadCode() {
-    this._applicationShellStore.downloadCode();
+  onDownloadWorkspace(workspace: Workspace) {
+    this._applicationShellStore.downloadWorkspace(workspace);
   }
 
   onCloseTab(event: Event, tabId: string) {
