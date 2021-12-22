@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import {
   ApplicationActionTypes,
   ApplicationStore,
@@ -21,6 +20,7 @@ import {
   generateApplicationZip,
 } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
@@ -32,6 +32,7 @@ export type TabKind = 'collections' | 'instructions';
 export interface Tab {
   kind: TabKind;
   id: string;
+  workspaceId: string;
 }
 
 interface ViewModel {
@@ -92,16 +93,23 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
   }
 
   readonly openCollectionTab = this.effect(() =>
-    this._collectionStore.collectionId$.pipe(
+    this._collectionStore.collection$.pipe(
       isNotNullOrUndefined,
-      tap((collectionId) => this.patchState({ selected: collectionId })),
-      concatMap((collectionId) =>
-        of(collectionId).pipe(
+      tap((collection) => this.patchState({ selected: collection.id })),
+      concatMap((collection) =>
+        of(collection).pipe(
           withLatestFrom(this.tabs$),
-          filter(([, tabs]) => !tabs.some(({ id }) => id === collectionId)),
+          filter(([, tabs]) => !tabs.some(({ id }) => id === collection.id)),
           tap(([, tabs]) =>
             this.patchState({
-              tabs: [...tabs, { id: collectionId, kind: 'collections' }],
+              tabs: [
+                ...tabs,
+                {
+                  id: collection.id,
+                  kind: 'collections',
+                  workspaceId: collection.data.workspace,
+                },
+              ],
             })
           )
         )
@@ -110,16 +118,23 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
   );
 
   readonly openInstructionTab = this.effect(() =>
-    this._instructionStore.instructionId$.pipe(
+    this._instructionStore.instruction$.pipe(
       isNotNullOrUndefined,
-      tap((instructionId) => this.patchState({ selected: instructionId })),
-      concatMap((instructionId) =>
-        of(instructionId).pipe(
+      tap((instruction) => this.patchState({ selected: instruction.id })),
+      concatMap((instruction) =>
+        of(instruction).pipe(
           withLatestFrom(this.tabs$),
-          filter(([, tabs]) => !tabs.some(({ id }) => id === instructionId)),
+          filter(([, tabs]) => !tabs.some(({ id }) => id === instruction.id)),
           tap(([, tabs]) =>
             this.patchState({
-              tabs: [...tabs, { id: instructionId, kind: 'instructions' }],
+              tabs: [
+                ...tabs,
+                {
+                  id: instruction.id,
+                  kind: 'instructions',
+                  workspaceId: instruction.data.workspace,
+                },
+              ],
             })
           )
         )
@@ -148,10 +163,7 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
   );
 
   readonly closeTabsOnApplicationOrWorkspaceChange = this.effect(() =>
-    merge(
-      this._workspaceStore.workspaceId$,
-      this._applicationStore.applicationId$
-    ).pipe(
+    this._workspaceStore.workspaceId$.pipe(
       isNotNullOrUndefined,
       tap(() => this.patchState({ selected: null, tabs: [] }))
     )
@@ -170,15 +182,21 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
           withLatestFrom(
             this.tabs$,
             this.selected$,
+            this._workspaceStore.workspaceId$,
             this._applicationStore.applicationId$
           )
         )
       ),
-      tap(([tabId, tabs, selectedTab, applicationId]) => {
+      tap(([tabId, tabs, selectedTab, workspaceId, applicationId]) => {
         const filteredTabs = tabs.filter((tab) => tab.id !== tabId);
 
         if (filteredTabs?.length === 0) {
-          this._router.navigate(['/applications', applicationId]);
+          this._router.navigate([
+            '/workspaces',
+            workspaceId,
+            'applications',
+            applicationId,
+          ]);
           this.patchState({
             selected: null,
             tabs: [],
@@ -190,7 +208,9 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
 
           if (firstTab && tabId === selectedTab) {
             this._router.navigate([
-              '/applications',
+              '/workspaces',
+              workspaceId,
+              'applications',
               applicationId,
               firstTab.kind,
               firstTab.id,
