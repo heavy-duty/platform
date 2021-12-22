@@ -102,7 +102,15 @@ import { NavigationStore } from './navigation.store';
             Select workspace
           </button>
           <mat-menu #menu="matMenu" class="p-4">
-            <p>Let's go crazy</p>
+            <mat-selection-list [multiple]="false">
+              <mat-list-option
+                *ngFor="let workspace of workspaces$ | ngrxPush"
+                [value]="workspace"
+              >
+                {{ workspace.data.name }}
+              </mat-list-option>
+            </mat-selection-list>
+
             <button
               class="ml-auto"
               type="button"
@@ -147,6 +155,7 @@ export class NavigationComponent {
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
+  readonly workspaces$ = this._workspaceStore.workspaces$;
   readonly applications$ = this._navigationStore.applications$;
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
