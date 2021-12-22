@@ -102,14 +102,11 @@ import { NavigationStore } from './navigation.store';
             Select workspace
           </button>
           <mat-menu #menu="matMenu" class="p-4">
-            <mat-selection-list [multiple]="false">
-              <mat-list-option
-                *ngFor="let workspace of workspaces$ | ngrxPush"
-                [value]="workspace"
-              >
+            <p *ngFor="let workspace of workspaces$ | ngrxPush">
+              <a [routerLink]="['/workspaces', workspace.id]">
                 {{ workspace.data.name }}
-              </mat-list-option>
-            </mat-selection-list>
+              </a>
+            </p>
 
             <button
               class="ml-auto"
@@ -156,7 +153,7 @@ export class NavigationComponent {
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
   readonly workspaces$ = this._workspaceStore.workspaces$;
-  readonly applications$ = this._navigationStore.applications$;
+  readonly applications$ = this._applicationStore.applications$;
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.collections$;
   readonly instructions$ = this._instructionStore.instructions$;

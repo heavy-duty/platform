@@ -13,6 +13,8 @@ import {
   InstructionActionTypes,
   InstructionDeleted,
   InstructionStore,
+  WorkspaceActionTypes,
+  WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
   generateApplicationMetadata,
@@ -81,6 +83,7 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     private readonly _router: Router,
     private readonly _matSnackBar: MatSnackBar,
     private readonly _walletStore: WalletStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore
@@ -205,6 +208,7 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
 
   readonly notifyErrors = this.effect(() =>
     merge(
+      this._workspaceStore.error$,
       this._applicationStore.error$,
       this._collectionStore.error$,
       this._instructionStore.error$,
@@ -215,6 +219,19 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
           panelClass: `error-snackbar`,
         })
       )
+    )
+  );
+
+  readonly notifyWorkspaceSuccess = this.effect(() =>
+    this._workspaceStore.events$.pipe(
+      filter((event) => event.type !== WorkspaceActionTypes.WorkspaceInit),
+      tap((event) => {
+        this._workspaceStore.reload();
+        this._matSnackBar.open(event.type, 'Close', {
+          panelClass: `success-snackbar`,
+          duration: 3000,
+        });
+      })
     )
   );
 

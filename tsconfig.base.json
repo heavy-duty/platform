@@ -61,6 +61,9 @@
       "@heavy-duty/bulldozer/application/features/view-instruction": [
         "libs/bulldozer/application/features/view-instruction/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/view-workspace": [
+        "libs/bulldozer/application/features/view-workspace/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/shell": [
         "libs/bulldozer/application/shell/src/index.ts"
       ],

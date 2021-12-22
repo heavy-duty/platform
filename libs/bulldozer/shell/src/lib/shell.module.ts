@@ -14,7 +14,7 @@ import { ShellComponent } from './shell.component';
         component: ShellComponent,
         children: [
           {
-            path: 'applications',
+            path: 'workspaces',
             loadChildren: () =>
               import('@heavy-duty/bulldozer/application/shell').then(
                 (m) => m.ApplicationShellModule
@@ -22,7 +22,7 @@ import { ShellComponent } from './shell.component';
           },
           {
             path: '**',
-            redirectTo: 'applications',
+            redirectTo: 'workspaces',
           },
         ],
       },

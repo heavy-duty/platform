@@ -23,7 +23,9 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
           <a
             matLine
             [routerLink]="[
-              '/applications',
+              '/workspaces',
+              collection.data.workspace,
+              'applications',
               collection.data.application,
               'collections',
               collection.id

@@ -23,7 +23,9 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
           <a
             matLine
             [routerLink]="[
-              '/applications',
+              '/workspaces',
+              instruction.data.workspace,
+              'applications',
               instruction.data.application,
               'instructions',
               instruction.id
