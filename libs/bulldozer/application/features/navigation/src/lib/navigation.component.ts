@@ -25,7 +25,7 @@ import { NavigationStore } from './navigation.store';
     <mat-sidenav-container class="h-full" fullscreen>
       <mat-sidenav
         #drawer
-        class="sidenav"
+        class="w-52"
         fixedInViewport
         [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
         [mode]="(isHandset$ | async) ? 'over' : 'side'"
@@ -93,93 +93,21 @@ import { NavigationStore } from './navigation.store';
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
 
-          <ng-container *ngrxLet="workspace$; let selectedWorkspace">
-            <button
-              class="ml-auto"
-              type="button"
-              mat-raised-button
-              [matMenuTriggerFor]="menu"
-            >
-              {{
-                selectedWorkspace === null
-                  ? 'Select workspace'
-                  : selectedWorkspace.data.name
-              }}
-            </button>
-            <mat-menu id="workspace-menu" #menu="matMenu" class="px-4 py-2">
-              <mat-list role="list" class="p-0">
-                <mat-list-item
-                  *ngFor="let workspace of workspaces$ | ngrxPush"
-                  role="listitem"
-                  class="w-60 h-auto bg-black bg-opacity-10 mb-2 pt-4 pb-3 border-b-4 border-transparent"
-                  [ngClass]="{
-                    'border-b-primary': selectedWorkspace?.id === workspace.id
-                  }"
-                >
-                  <div>
-                    <p class="text-xl font-bold mb-0">
-                      {{ workspace.data.name }}
-                    </p>
+          <div class="ml-auto flex items-center">
+            <bd-workspace-selector
+              class="mr-6"
+              [activeWorkspace]="workspace$ | ngrxPush"
+              [workspaces]="workspaces$ | ngrxPush"
+              (createWorkspace)="onCreateWorkspace()"
+              (updateWorkspace)="onUpdateWorkspace($event)"
+              (deleteWorkspace)="onDeleteWorkspace($event)"
+            ></bd-workspace-selector>
 
-                    <p class="mb-2">
-                      <a
-                        class="text-xs"
-                        [routerLink]="['/workspaces', workspace.id]"
-                        [ngClass]="{
-                          'underline text-primary':
-                            selectedWorkspace?.id !== workspace.id,
-                          'opacity-50 italic':
-                            selectedWorkspace?.id === workspace.id
-                        }"
-                      >
-                        {{
-                          selectedWorkspace?.id === workspace.id
-                            ? 'Active'
-                            : 'Activate'
-                        }}
-                      </a>
-                    </p>
+            <hd-wallet-multi-button
+              class="bd-custom-color mr-6 h-auto leading-none"
+              color="accent"
+            ></hd-wallet-multi-button>
 
-                    <div>
-                      <button
-                        class="mr-2"
-                        type="button"
-                        mat-raised-button
-                        color="primary"
-                        (click)="onUpdateWorkspace(workspace)"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        mat-raised-button
-                        color="primary"
-                        (click)="onDeleteWorkspace(workspace.id)"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                </mat-list-item>
-              </mat-list>
-
-              <button
-                class="w-full h-12"
-                type="button"
-                mat-raised-button
-                color="primary"
-                (click)="onCreateWorkspace()"
-              >
-                New workspace
-              </button>
-            </mat-menu>
-          </ng-container>
-
-          <hd-wallet-multi-button
-            class="bd-custom-color ml-6 h-auto leading-none"
-            color="accent"
-          ></hd-wallet-multi-button>
-          <div class="ml-6">
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
         </mat-toolbar>
@@ -188,23 +116,7 @@ import { NavigationStore } from './navigation.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  styles: [
-    `
-      .sidenav {
-        width: 200px;
-      }
-
-      .mat-toolbar.mat-primary {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-
-      #workspace-menu .mat-menu-content {
-        padding: 0 !important;
-      }
-    `,
-  ],
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [NavigationStore],
 })
