@@ -8,11 +8,13 @@ import {
   ApplicationStore,
   CollectionStore,
   InstructionStore,
+  WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
   Application,
   Collection,
   Instruction,
+  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 import { NavigationStore } from './navigation.store';
@@ -90,8 +92,29 @@ import { NavigationStore } from './navigation.store';
           >
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
+          <button
+            class="ml-auto"
+            type="button"
+            mat-raised-button
+            color="accent"
+            [matMenuTriggerFor]="menu"
+          >
+            Select workspace
+          </button>
+          <mat-menu #menu="matMenu" class="p-4">
+            <p>Let's go crazy</p>
+            <button
+              class="ml-auto"
+              type="button"
+              mat-raised-button
+              color="primary"
+              (click)="onCreateWorkspace()"
+            >
+              New workspace
+            </button>
+          </mat-menu>
           <hd-wallet-multi-button
-            class="ml-auto bd-custom-color"
+            class="bd-custom-color ml-6 h-auto leading-none"
             color="accent"
           ></hd-wallet-multi-button>
           <div class="ml-6">
@@ -131,10 +154,23 @@ export class NavigationComponent {
 
   constructor(
     private readonly _navigationStore: NavigationStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore
   ) {}
+
+  onCreateWorkspace() {
+    this._workspaceStore.createWorkspace();
+  }
+
+  onUpdateWorkspace(workspace: Workspace) {
+    this._workspaceStore.updateWorkspace(workspace);
+  }
+
+  onDeleteWorkspace(workspaceId: string) {
+    this._workspaceStore.deleteWorkspace(workspaceId);
+  }
 
   onCreateApplication() {
     this._applicationStore.createApplication();

@@ -3,6 +3,7 @@ import {
   ApplicationStore,
   CollectionStore,
   InstructionStore,
+  WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 
 import { ApplicationShellStore } from './shell.store';
@@ -36,6 +37,7 @@ import { ApplicationShellStore } from './shell.store';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    WorkspaceStore,
     ApplicationStore,
     CollectionStore,
     InstructionStore,
