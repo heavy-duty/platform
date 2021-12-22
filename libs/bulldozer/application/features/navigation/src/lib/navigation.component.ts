@@ -92,54 +92,74 @@ import { NavigationStore } from './navigation.store';
           >
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
-          <button
-            class="ml-auto"
-            type="button"
-            mat-raised-button
-            color="accent"
-            [matMenuTriggerFor]="menu"
-          >
-            Select workspace
-          </button>
-          <mat-menu #menu="matMenu" class="p-4">
-            <p *ngFor="let workspace of workspaces$ | ngrxPush">
-              <a [routerLink]="['/workspaces', workspace.id]">
-                {{ workspace.data.name }}
-              </a>
-            </p>
 
+          <ng-container *ngrxLet="workspace$; let workspace">
             <button
               class="ml-auto"
               type="button"
               mat-raised-button
-              color="primary"
-              (click)="onCreateWorkspace()"
+              [matMenuTriggerFor]="menu"
             >
-              New workspace
+              {{
+                workspace === null ? 'Select workspace' : workspace.data.name
+              }}
             </button>
-            <ng-container *ngIf="workspace$ | ngrxPush as workspace">
+            <mat-menu id="workspace-menu" #menu="matMenu" class="px-4 py-2">
+              <mat-list role="list" class="p-0">
+                <mat-list-item
+                  *ngFor="let workspace of workspaces$ | ngrxPush"
+                  role="listitem"
+                  class="w-60 h-32 bg-black bg-opacity-10 mb-2"
+                >
+                  <div>
+                    <p class="text-xl font-bold mb-0">
+                      {{ workspace.data.name }}
+                    </p>
+
+                    <p class="mb-2">
+                      <a
+                        class="text-xs underline text-primary"
+                        [routerLink]="['/workspaces', workspace.id]"
+                      >
+                        Activate
+                      </a>
+                    </p>
+
+                    <div>
+                      <button
+                        class="mr-2"
+                        type="button"
+                        mat-raised-button
+                        color="primary"
+                        (click)="onUpdateWorkspace(workspace)"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        mat-raised-button
+                        color="primary"
+                        (click)="onDeleteWorkspace(workspace.id)"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </mat-list-item>
+              </mat-list>
+
               <button
-                class="ml-auto"
+                class="w-full h-12"
                 type="button"
                 mat-raised-button
                 color="primary"
-                [disabled]="workspace === null"
-                (click)="onUpdateWorkspace(workspace)"
+                (click)="onCreateWorkspace()"
               >
-                Edit
+                New workspace
               </button>
-              <button
-                class="ml-auto"
-                type="button"
-                mat-raised-button
-                color="primary"
-                [disabled]="workspace === null"
-                (click)="onDeleteWorkspace(workspace.id)"
-              >
-                Delete
-              </button>
-            </ng-container>
-          </mat-menu>
+            </mat-menu>
+          </ng-container>
+
           <hd-wallet-multi-button
             class="bd-custom-color ml-6 h-auto leading-none"
             color="accent"
@@ -163,6 +183,10 @@ import { NavigationStore } from './navigation.store';
         position: sticky;
         top: 0;
         z-index: 1;
+      }
+
+      #workspace-menu .mat-menu-content {
+        padding: 0 !important;
       }
     `,
   ],
