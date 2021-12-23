@@ -171,7 +171,7 @@ export const generateWorkspaceZip = (
     const collectionFolder = applicationFolderSrc?.folder('collections');
     application.collections.forEach((collection) => {
       collectionFolder?.file(
-        collection.name.normalCase + '.rs',
+        collection.name.snakeCase + '.rs',
         collection.template
       );
     });
@@ -181,7 +181,7 @@ export const generateWorkspaceZip = (
     const instructionsFolder = applicationFolderSrc?.folder('instructions');
     application.instructions.forEach((instruction) => {
       instructionsFolder?.file(
-        instruction.name.normalCase + '.rs',
+        instruction.name.snakeCase + '.rs',
         instruction.template
       );
     });
