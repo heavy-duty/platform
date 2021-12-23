@@ -9,6 +9,8 @@ pub struct CreateInstructionRelation<'info> {
   #[account(
         init,
         payer = authority,
+        // discriminator + authority + workspace + application
+        // instruction + from + to + bump
         space = 8 + 32 + 32 + 32 + 32 + 32 + 32 + 1,
         seeds = [
           b"instruction_relation",

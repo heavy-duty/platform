@@ -5,5 +5,5 @@ pub struct Collection {
   pub authority: Pubkey,
   pub workspace: Pubkey,
   pub application: Pubkey,
-  pub name: Vec<u8>,
+  pub name: String,
 }

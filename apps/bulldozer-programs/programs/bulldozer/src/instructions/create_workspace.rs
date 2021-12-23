@@ -1,5 +1,4 @@
 use crate::collections::Workspace;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -8,7 +7,8 @@ pub struct CreateWorkspace<'info> {
   #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32,
+        // discriminator + authority + name (size 32 + 4 ?)
+        space = 8 + 32 + 36,
     )]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
@@ -18,7 +18,7 @@ pub struct CreateWorkspace<'info> {
 
 pub fn handler(ctx: Context<CreateWorkspace>, name: String) -> ProgramResult {
   msg!("Create workspace");
-  ctx.accounts.workspace.name = vectorize_string(name, 32);
+  ctx.accounts.workspace.name = name;
   ctx.accounts.workspace.authority = ctx.accounts.authority.key();
   Ok(())
 }

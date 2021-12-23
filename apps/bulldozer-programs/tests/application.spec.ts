@@ -1,10 +1,4 @@
-import {
-  Idl,
-  Program,
-  Provider,
-  setProvider,
-  utils,
-} from '@project-serum/anchor';
+import { Idl, Program, Provider, setProvider } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
@@ -47,7 +41,7 @@ describe('application', () => {
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
-    assert.equal(utils.bytes.utf8.decode(account.name), applicationName);
+    assert.equal(account.name, applicationName);
   });
 
   it('should update account', async () => {
@@ -64,7 +58,7 @@ describe('application', () => {
     const account = await program.account.application.fetch(
       application.publicKey
     );
-    assert.equal(utils.bytes.utf8.decode(account.name), applicationName);
+    assert.equal(account.name, applicationName);
   });
 
   it('should delete account', async () => {

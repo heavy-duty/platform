@@ -4,7 +4,6 @@ import {
   ProgramError,
   Provider,
   setProvider,
-  utils,
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
@@ -80,7 +79,7 @@ describe('collection attribute', () => {
       attribute.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.equal(account.data.name, dto.name);
     assert.ok('boolean' in account.data.kind);
     assert.equal(account.data.kind.boolean.id, dto.kind);
     assert.equal(account.data.kind.boolean.size, 1);
@@ -111,7 +110,7 @@ describe('collection attribute', () => {
     const account = await program.account.collectionAttribute.fetch(
       attribute.publicKey
     );
-    assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+    assert.equal(account.data.name, dto.name);
     assert.ok('number' in account.data.kind);
     assert.equal(account.data.kind.number.id, dto.kind);
     assert.equal(account.data.kind.number.size, dto.max);

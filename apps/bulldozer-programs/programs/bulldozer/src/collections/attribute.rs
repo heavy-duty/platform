@@ -1,6 +1,5 @@
 use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 pub trait AttributeKind {
@@ -32,7 +31,7 @@ pub struct AttributeDto {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct Attribute {
-  pub name: Vec<u8>,
+  pub name: String,
   pub kind: Option<AttributeKinds>,
   pub modifier: Option<AttributeModifiers>,
 }
@@ -46,10 +45,7 @@ impl AttributeKind for Attribute {
   ) -> Result<&Self, ProgramError> {
     self.kind = match kind {
       Some(kind) => match kind {
-        0 => Some(AttributeKinds::Boolean {
-          id: kind,
-          size: 1,
-        }),
+        0 => Some(AttributeKinds::Boolean { id: kind, size: 1 }),
         1 => match max {
           None => return Err(ErrorCode::MissingMax.into()),
           Some(max) => Some(AttributeKinds::Number {
@@ -102,7 +98,7 @@ impl AttributeModifier for Attribute {
 impl Attribute {
   pub fn create(dto: AttributeDto) -> Result<Self, ProgramError> {
     let mut attribute = Attribute {
-      name: vectorize_string(dto.name, 32),
+      name: dto.name,
       kind: None,
       modifier: None,
     };

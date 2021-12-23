@@ -1,5 +1,4 @@
 use crate::collections::Workspace;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -12,6 +11,6 @@ pub struct UpdateWorkspace<'info> {
 
 pub fn handler(ctx: Context<UpdateWorkspace>, name: String) -> ProgramResult {
   msg!("Update workspace");
-  ctx.accounts.workspace.name = vectorize_string(name, 32);
+  ctx.accounts.workspace.name = name;
   Ok(())
 }

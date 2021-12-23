@@ -9,7 +9,10 @@ pub struct CreateInstructionAccount<'info> {
   #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32 + 32 + 32 + 32 + 32 + 2 + 33 + 33 + 33 + 3
+        // discriminator + authority + workspace + application
+        // instruction + name (size 32 + 4 ?) + kind + modifier
+        // collection + payer + close + space
+        space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3
     )]
   pub account: Box<Account<'info, InstructionAccount>>,
   pub workspace: Box<Account<'info, Workspace>>,

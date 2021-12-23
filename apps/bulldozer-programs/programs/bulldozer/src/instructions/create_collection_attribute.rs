@@ -9,7 +9,9 @@ pub struct CreateCollectionAttribute<'info> {
   #[account(
         init,
         payer = authority,
-        space = 8 + 32 + 32 + 32 + 32 + 32 + 3 + 3
+        // discriminator + authority + workspace + application
+        // collection + name (size 32 + 4 ?) + kind + modifier
+        space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6
     )]
   pub attribute: Box<Account<'info, CollectionAttribute>>,
   pub workspace: Box<Account<'info, Workspace>>,

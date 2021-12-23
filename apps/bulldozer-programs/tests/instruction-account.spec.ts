@@ -4,7 +4,6 @@ import {
   ProgramError,
   Provider,
   setProvider,
-  utils,
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
@@ -83,7 +82,7 @@ describe('instruction account', () => {
       // arrange
       const instructionAccount = Keypair.generate();
       const dto = {
-        name: 'data',
+        name: '12345678901234567890123456789012',
         kind: 0,
         modifier: null,
         space: null,
@@ -144,7 +143,7 @@ describe('instruction account', () => {
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
-      assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+      assert.equal(account.data.name, dto.name);
       assert.ok('document' in account.data.kind);
       assert.equal(account.data.kind.document.id, dto.kind);
       assert.ok(account.data.collection.equals(collection.publicKey));
@@ -398,7 +397,7 @@ describe('instruction account', () => {
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
-        assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+        assert.equal(account.data.name, dto.name);
         assert.ok(account.data.collection.equals(collection.publicKey));
         assert.ok('document' in account.data.kind);
         assert.equal(account.data.kind.document.id, dto.kind);
@@ -474,7 +473,7 @@ describe('instruction account', () => {
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
-        assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+        assert.equal(account.data.name, dto.name);
         assert.ok('document' in account.data.kind);
         assert.equal(account.data.kind.document.id, dto.kind);
         assert.ok('mut' in account.data.modifier);
@@ -543,7 +542,7 @@ describe('instruction account', () => {
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
-      assert.equal(utils.bytes.utf8.decode(account.data.name), dto.name);
+      assert.equal(account.data.name, dto.name);
       assert.ok('signer' in account.data.kind);
       assert.equal(account.data.kind.signer.id, dto.kind);
       assert.equal(account.data.modifier, null);

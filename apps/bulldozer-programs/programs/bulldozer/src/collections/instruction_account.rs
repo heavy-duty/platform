@@ -1,7 +1,7 @@
 use crate::collections::Collection;
 use crate::enums::{AccountKinds, AccountModifiers};
 use crate::errors::ErrorCode;
-use crate::utils::{get_remaining_account, vectorize_string};
+use crate::utils::get_remaining_account;
 use anchor_lang::prelude::*;
 
 pub trait AccountCollection {
@@ -35,7 +35,7 @@ pub struct AccountDto {
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct BaseAccount {
-  pub name: Vec<u8>,
+  pub name: String,
   pub kind: Option<AccountKinds>,
   pub modifier: Option<AccountModifiers>,
   pub collection: Option<Pubkey>,
@@ -92,7 +92,7 @@ impl BaseAccount {
     remaining_accounts: &[AccountInfo<'info>],
   ) -> Result<Self, ProgramError> {
     let mut base_account = BaseAccount {
-      name: vectorize_string(dto.name, 32),
+      name: dto.name,
       kind: None,
       modifier: None,
       collection: None,
