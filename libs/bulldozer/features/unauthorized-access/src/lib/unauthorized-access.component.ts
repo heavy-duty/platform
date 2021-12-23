@@ -13,11 +13,16 @@ import { filter, takeUntil, withLatestFrom } from 'rxjs/operators';
 @Component({
   selector: 'bd-unauthorized-access',
   template: `
-    <p>Connect your wallet to start building</p>
-    <hd-wallet-multi-button
-      class="ml-auto bd-custom-color"
-      color="primary"
-    ></hd-wallet-multi-button>
+    <header class="mt-16 flex justify-center flex-wrap">
+      <figure class="mb-4 w-40">
+        <img src="assets/images/logo.png" class="w-full" />
+      </figure>
+      <h1 class="w-full text-center">BULLDOZER</h1>
+      <p class="w-full text-center">Connect your wallet to start building</p>
+    </header>
+    <main class="flex justify-center">
+      <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
+    </main>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
