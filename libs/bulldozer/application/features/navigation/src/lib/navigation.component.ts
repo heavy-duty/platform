@@ -8,11 +8,13 @@ import {
   ApplicationStore,
   CollectionStore,
   InstructionStore,
+  WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
   Application,
   Collection,
   Instruction,
+  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 import { NavigationStore } from './navigation.store';
@@ -23,7 +25,7 @@ import { NavigationStore } from './navigation.store';
     <mat-sidenav-container class="h-full" fullscreen>
       <mat-sidenav
         #drawer
-        class="sidenav"
+        class="w-52"
         fixedInViewport
         [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
         [mode]="(isHandset$ | async) ? 'over' : 'side'"
@@ -57,18 +59,6 @@ import { NavigationStore } from './navigation.store';
               ></bd-instruction-selector>
             </mat-accordion>
           </div>
-          <mat-nav-list togglePosition="afer">
-            <div class="w-full mb-6 flex justify-center items-center">
-              <button
-                *ngIf="application$ | ngrxPush"
-                mat-button
-                color="accent"
-                (click)="onDownload()"
-              >
-                Download code
-              </button>
-            </div>
-          </mat-nav-list>
           <bd-application-selector
             [connected]="connected$ | ngrxPush"
             [application]="application$ | ngrxPush"
@@ -90,11 +80,23 @@ import { NavigationStore } from './navigation.store';
           >
             <mat-icon aria-label="Side nav toggle icon">menu</mat-icon>
           </button>
-          <hd-wallet-multi-button
-            class="ml-auto bd-custom-color"
-            color="accent"
-          ></hd-wallet-multi-button>
-          <div class="ml-6">
+
+          <div class="ml-auto flex items-center">
+            <bd-workspace-selector
+              class="mr-6"
+              [activeWorkspace]="workspace$ | ngrxPush"
+              [workspaces]="workspaces$ | ngrxPush"
+              (createWorkspace)="onCreateWorkspace()"
+              (updateWorkspace)="onUpdateWorkspace($event)"
+              (deleteWorkspace)="onDeleteWorkspace($event)"
+              (downloadWorkspace)="onDownloadWorkspace($event)"
+            ></bd-workspace-selector>
+
+            <hd-wallet-multi-button
+              class="bd-custom-color mr-6 h-auto leading-none"
+              color="accent"
+            ></hd-wallet-multi-button>
+
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
         </mat-toolbar>
@@ -103,38 +105,41 @@ import { NavigationStore } from './navigation.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  styles: [
-    `
-      .sidenav {
-        width: 200px;
-      }
-
-      .mat-toolbar.mat-primary {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-      }
-    `,
-  ],
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [NavigationStore],
 })
 export class NavigationComponent {
-  @Output() downloadCode = new EventEmitter();
+  @Output() downloadWorkspace = new EventEmitter();
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
-  readonly applications$ = this._navigationStore.applications$;
+  readonly workspace$ = this._workspaceStore.workspace$;
+  readonly workspaces$ = this._workspaceStore.workspaces$;
+  readonly applications$ = this._applicationStore.applications$;
   readonly application$ = this._applicationStore.application$;
-  readonly collections$ = this._collectionStore.collections$;
-  readonly instructions$ = this._instructionStore.instructions$;
+  readonly collections$ = this._collectionStore.activeCollections$;
+  readonly instructions$ = this._instructionStore.activeInstructions$;
 
   constructor(
     private readonly _navigationStore: NavigationStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore
   ) {}
+
+  onCreateWorkspace() {
+    this._workspaceStore.createWorkspace();
+  }
+
+  onUpdateWorkspace(workspace: Workspace) {
+    this._workspaceStore.updateWorkspace(workspace);
+  }
+
+  onDeleteWorkspace(workspaceId: string) {
+    this._workspaceStore.deleteWorkspace(workspaceId);
+  }
 
   onCreateApplication() {
     this._applicationStore.createApplication();
@@ -172,7 +177,7 @@ export class NavigationComponent {
     this._instructionStore.deleteInstruction(instructionId);
   }
 
-  onDownload() {
-    this.downloadCode.emit();
+  onDownloadWorkspace(workspace: Workspace) {
+    this.downloadWorkspace.emit(workspace);
   }
 }

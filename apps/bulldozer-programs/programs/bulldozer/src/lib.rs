@@ -15,6 +15,18 @@ declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
 pub mod bulldozer {
   use super::*;
 
+  pub fn create_workspace(ctx: Context<CreateWorkspace>, name: String) -> ProgramResult {
+    instructions::create_workspace::handler(ctx, name)
+  }
+
+  pub fn update_workspace(ctx: Context<UpdateWorkspace>, name: String) -> ProgramResult {
+    instructions::update_workspace::handler(ctx, name)
+  }
+
+  pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> ProgramResult {
+    instructions::delete_workspace::handler(ctx)
+  }
+
   pub fn create_application(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
     instructions::create_application::handler(ctx, name)
   }

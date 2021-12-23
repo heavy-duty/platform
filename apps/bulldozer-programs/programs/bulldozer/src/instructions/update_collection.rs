@@ -1,5 +1,4 @@
 use crate::collections::Collection;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -12,6 +11,6 @@ pub struct UpdateCollection<'info> {
 
 pub fn handler(ctx: Context<UpdateCollection>, name: String) -> ProgramResult {
   msg!("Update collection");
-  ctx.accounts.collection.name = vectorize_string(name, 32);
+  ctx.accounts.collection.name = name;
   Ok(())
 }

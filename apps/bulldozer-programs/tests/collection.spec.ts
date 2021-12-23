@@ -1,10 +1,4 @@
-import {
-  Idl,
-  Program,
-  Provider,
-  setProvider,
-  utils,
-} from '@project-serum/anchor';
+import { Idl, Program, Provider, setProvider } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
 
@@ -16,12 +10,23 @@ describe('collection', () => {
   setProvider(Provider.env());
   const collection = Keypair.generate();
   const application = Keypair.generate();
+  const workspace = Keypair.generate();
   const applicationName = 'my-app';
+  const workspaceName = 'my-workspace';
 
   before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -37,6 +42,7 @@ describe('collection', () => {
       accounts: {
         collection: collection.publicKey,
         application: application.publicKey,
+        workspace: workspace.publicKey,
         authority: program.provider.wallet.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -47,7 +53,9 @@ describe('collection', () => {
       collection.publicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.equal(utils.bytes.utf8.decode(account.name), collectionName);
+    assert.ok(account.workspace.equals(workspace.publicKey));
+    assert.ok(account.application.equals(application.publicKey));
+    assert.equal(account.name, collectionName);
   });
 
   it('should update account', async () => {
@@ -64,7 +72,7 @@ describe('collection', () => {
     const account = await program.account.collection.fetch(
       collection.publicKey
     );
-    assert.equal(utils.bytes.utf8.decode(account.name), collectionName);
+    assert.equal(account.name, collectionName);
   });
 
   it('should delete account', async () => {

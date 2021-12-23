@@ -11,23 +11,13 @@ import {
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  from,
-  Observable,
-  of,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
-  map,
-  mergeMap,
   switchMap,
   tap,
-  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
@@ -42,6 +32,7 @@ import {
   CollectionUpdated,
 } from './actions/collection.actions';
 import { ApplicationStore } from './application.store';
+import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   collectionId: string | null;
@@ -64,6 +55,14 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
   readonly events$ = this._events.asObservable();
   readonly collections$ = this.select(({ collections }) => collections);
+  readonly activeCollections$ = this.select(
+    this.collections$,
+    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+    (collections, applicationId) =>
+      collections.filter(
+        (collection) => collection.data.application === applicationId
+      )
+  );
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
   readonly collection$ = this.select(
     this.collections$,
@@ -83,6 +82,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
@@ -90,31 +90,16 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly loadCollections = this.effect(() =>
     combineLatest([
-      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
       this.reload$,
     ]).pipe(
-      switchMap(([applicationId]) =>
-        this._bulldozerProgramStore.getCollections(applicationId).pipe(
-          concatMap((collections) =>
-            from(collections).pipe(
-              mergeMap((collection) =>
-                this._bulldozerProgramStore
-                  .getCollectionAttributes(collection.id)
-                  .pipe(
-                    map((attributes) => ({
-                      ...collection,
-                      attributes,
-                    }))
-                  )
-              )
-            )
-          ),
-          toArray()
+      switchMap(([workspaceId]) =>
+        this._bulldozerProgramStore.getExtendedCollections(workspaceId).pipe(
+          tapResponse(
+            (collections) => this.patchState({ collections }),
+            (error) => this._error.next(error)
+          )
         )
-      ),
-      tapResponse(
-        (collections) => this.patchState({ collections }),
-        (error) => this._error.next(error)
       )
     )
   );
@@ -135,11 +120,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ name }, applicationId]) =>
+            concatMap(([{ name }, workspaceId, applicationId]) =>
               this._bulldozerProgramStore
-                .createCollection(applicationId, name)
+                .createCollection(workspaceId, applicationId, name)
                 .pipe(
                   tapResponse(
                     () => {
@@ -194,33 +180,37 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly createCollectionAttribute = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-            this.collectionId$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, applicationId, collectionId]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditAttributeComponent)
           .afterClosed()
           .pipe(
             filter((data) => data),
-            concatMap((collectionAttributeDto) =>
-              this._bulldozerProgramStore
-                .createCollectionAttribute(
-                  applicationId,
-                  collectionId,
-                  collectionAttributeDto
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new CollectionAttributeCreated()),
-                    (error) => this._error.next(error)
+            withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
+              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+              this.collectionId$.pipe(isNotNullOrUndefined)
+            ),
+            concatMap(
+              ([
+                collectionAttributeDto,
+                workspaceId,
+                applicationId,
+                collectionId,
+              ]) =>
+                this._bulldozerProgramStore
+                  .createCollectionAttribute(
+                    workspaceId,
+                    applicationId,
+                    collectionId,
+                    collectionAttributeDto
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new CollectionAttributeCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )

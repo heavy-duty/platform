@@ -9,17 +9,19 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { WalletAdapterUiModule } from '@heavy-duty/wallet-adapter-ui';
 import { DarkThemeSwitchModule } from '@heavy-duty/bulldozer/application/ui/components/dark-theme';
 import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
+import { WalletAdapterUiModule } from '@heavy-duty/wallet-adapter-ui';
 import { ReactiveComponentModule } from '@ngrx/component';
 
 import { ApplicationSelectorComponent } from './application-selector.component';
 import { CollectionSelectorComponent } from './collection-selector.component';
 import { InstructionSelectorComponent } from './instruction-selector.component';
 import { NavigationComponent } from './navigation.component';
+import { WorkspaceSelectorComponent } from './workspace-selector.component';
 
 @NgModule({
   imports: [
@@ -34,6 +36,7 @@ import { NavigationComponent } from './navigation.component';
     MatMenuModule,
     MatSidenavModule,
     MatToolbarModule,
+    MatTooltipModule,
     ReactiveComponentModule,
     WalletAdapterUiModule,
     ObscureAddressModule,
@@ -42,6 +45,7 @@ import { NavigationComponent } from './navigation.component';
   ],
   declarations: [
     NavigationComponent,
+    WorkspaceSelectorComponent,
     ApplicationSelectorComponent,
     CollectionSelectorComponent,
     InstructionSelectorComponent,

@@ -1,5 +1,4 @@
 use crate::collections::Application;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -12,6 +11,6 @@ pub struct UpdateApplication<'info> {
 
 pub fn handler(ctx: Context<UpdateApplication>, name: String) -> ProgramResult {
   msg!("Update application");
-  ctx.accounts.application.name = vectorize_string(name, 32);
+  ctx.accounts.application.name = name;
   Ok(())
 }

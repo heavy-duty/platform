@@ -14,10 +14,15 @@ export interface CodeGeneratorParameters {
   // { program: formatedProgram },
 }
 
-export interface ApplicationMetadata {
-  application: { template: string; fileName: string };
-  collections: { template: string; fileName: string }[];
-  instructions: { template: string; fileName: string }[];
+interface ApplicationMetadata {
+  template: string;
+  name: FormattedName;
+  collections: { template: string; name: FormattedName }[];
+  instructions: { template: string; name: FormattedName }[];
   collectionsMod: { template: string };
   instructionsMod: { template: string };
+}
+
+export interface WorkspaceMetadata {
+  applications: ApplicationMetadata[];
 }

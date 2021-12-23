@@ -157,10 +157,10 @@ export class ViewInstructionComponent implements OnInit {
         map((event) => {
           const urlAsArray = event.url.split('/').filter((segment) => segment);
 
-          if (urlAsArray.length !== 4 || urlAsArray[2] !== 'instructions') {
+          if (urlAsArray.length !== 6 || urlAsArray[4] !== 'instructions') {
             return null;
           } else {
-            return urlAsArray[3];
+            return urlAsArray[5];
           }
         }),
         startWith(this._route.snapshot.paramMap.get('instructionId') || null)

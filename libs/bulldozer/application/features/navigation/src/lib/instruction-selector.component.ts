@@ -23,11 +23,15 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
           <a
             matLine
             [routerLink]="[
-              '/applications',
+              '/workspaces',
+              instruction.data.workspace,
+              'applications',
               instruction.data.application,
               'instructions',
               instruction.id
             ]"
+            [matTooltip]="instruction.data.name"
+            matTooltipShowDelay="500"
           >
             {{ instruction.data.name }}
           </a>

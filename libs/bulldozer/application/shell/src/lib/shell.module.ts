@@ -20,11 +20,11 @@ import { ApplicationShellComponent } from './shell.component';
         component: ApplicationShellComponent,
         children: [
           {
-            path: ':applicationId',
+            path: ':workspaceId',
             loadChildren: () =>
               import(
-                '@heavy-duty/bulldozer/application/features/view-application'
-              ).then((m) => m.ViewApplicationModule),
+                '@heavy-duty/bulldozer/application/features/view-workspace'
+              ).then((m) => m.ViewWorkspaceModule),
           },
         ],
       },

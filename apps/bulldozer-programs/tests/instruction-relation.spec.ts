@@ -18,6 +18,8 @@ describe('instruction relation', () => {
   const instructionName = 'create_document';
   const application = Keypair.generate();
   const applicationName = 'my-app';
+  const workspace = Keypair.generate();
+  const workspaceName = 'my-app';
   const fromAccount = Keypair.generate();
   const fromAccountDto = {
     name: 'from',
@@ -35,9 +37,18 @@ describe('instruction relation', () => {
   let relationPublicKey: PublicKey, relationBump: number;
 
   before(async () => {
+    await program.rpc.createWorkspace(workspaceName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [workspace],
+    });
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         systemProgram: SystemProgram.programId,
       },
@@ -46,6 +57,7 @@ describe('instruction relation', () => {
     await program.rpc.createInstruction(instructionName, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         systemProgram: SystemProgram.programId,
@@ -55,6 +67,7 @@ describe('instruction relation', () => {
     await program.rpc.createInstructionAccount(fromAccountDto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: fromAccount.publicKey,
@@ -65,6 +78,7 @@ describe('instruction relation', () => {
     await program.rpc.createInstructionAccount(toAccountDto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: toAccount.publicKey,
@@ -87,6 +101,7 @@ describe('instruction relation', () => {
     await program.rpc.createInstructionRelation(relationBump, {
       accounts: {
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         from: fromAccount.publicKey,
@@ -101,6 +116,7 @@ describe('instruction relation', () => {
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.instruction.equals(instruction.publicKey));
+    assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.ok(account.from.equals(fromAccount.publicKey));
     assert.ok(account.to.equals(toAccount.publicKey));
@@ -154,6 +170,7 @@ describe('instruction relation', () => {
       await program.rpc.createInstructionRelation(relationBump, {
         accounts: {
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           from: fromAccount.publicKey,

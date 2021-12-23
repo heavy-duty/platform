@@ -1,5 +1,4 @@
 use crate::collections::Instruction;
-use crate::utils::vectorize_string;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -12,6 +11,6 @@ pub struct UpdateInstruction<'info> {
 
 pub fn handler(ctx: Context<UpdateInstruction>, name: String) -> ProgramResult {
   msg!("Update instruction");
-  ctx.accounts.instruction.name = vectorize_string(name, 32);
+  ctx.accounts.instruction.name = name;
   Ok(())
 }

@@ -1,3 +1,10 @@
+export enum WorkspaceActionTypes {
+  WorkspaceInit = 'Workspace initialized',
+  WorkspaceCreated = 'Workspace created',
+  WorkspaceUpdated = 'Workspace updated',
+  WorkspaceDeleted = 'Workspace deleted',
+}
+
 export enum ApplicationActionTypes {
   ApplicationInit = 'Application initialized',
   ApplicationCreated = 'Application created',
@@ -33,6 +40,10 @@ export enum InstructionActionTypes {
 }
 
 export interface Action<T> {
-  type: ApplicationActionTypes | InstructionActionTypes | CollectionActionTypes;
+  type:
+    | WorkspaceActionTypes
+    | ApplicationActionTypes
+    | InstructionActionTypes
+    | CollectionActionTypes;
   payload?: T;
 }

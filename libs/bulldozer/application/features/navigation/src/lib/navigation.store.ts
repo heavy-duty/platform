@@ -1,8 +1,7 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { tap } from 'rxjs/operators';
 
@@ -22,17 +21,10 @@ export class NavigationStore extends ComponentStore<ViewModel> {
     this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
     (publicKey) => publicKey.toBase58()
   );
-  readonly applications$ = this.select(
-    this._applicationStore.applications$,
-    this._applicationStore.application$,
-    (applications, application) =>
-      applications.filter(({ id }) => id !== application?.id)
-  );
 
   constructor(
     private readonly _breakpointObserver: BreakpointObserver,
-    private readonly _walletStore: WalletStore,
-    private readonly _applicationStore: ApplicationStore
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }

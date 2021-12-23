@@ -1,7 +1,7 @@
 export const __packageJson = `{
-  "name": "{{applicationName.camelCase}}",
+  "name": "{{workspaceName.camelCase}}",
   "version": "1.0.0",
-  "description": "{{applicationName.pascalCase}}",
+  "description": "{{workspaceName.pascalCase}}",
   "scripts": {},
   "author": "",
   "license": "ISC",
@@ -14,7 +14,7 @@ export const __packageJson = `{
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.17.1-beta.1"
+    "@project-serum/anchor": "^0.19.0"
   }
 }
 `;

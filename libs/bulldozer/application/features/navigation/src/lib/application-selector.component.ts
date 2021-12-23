@@ -31,7 +31,17 @@ import { Application } from '@heavy-duty/bulldozer/application/utils/types';
       </mat-expansion-panel-header>
       <mat-nav-list dense>
         <mat-list-item *ngFor="let application of applications">
-          <a matLine [routerLink]="['/applications', application.id]">
+          <a
+            matLine
+            [routerLink]="[
+              '/workspaces',
+              application.data.workspace,
+              'applications',
+              application.id
+            ]"
+            [matTooltip]="application.data.name"
+            matTooltipShowDelay="500"
+          >
             {{ application.data.name }}
           </a>
 

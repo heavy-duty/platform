@@ -16,22 +16,13 @@ import {
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  combineLatest,
-  from,
-  Observable,
-  of,
-  Subject,
-} from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
 import {
   concatMap,
   exhaustMap,
   filter,
-  map,
   switchMap,
   tap,
-  toArray,
   withLatestFrom,
 } from 'rxjs/operators';
 
@@ -54,6 +45,7 @@ import {
 } from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
 import { CollectionStore } from './collection.store';
+import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   instructionId: string | null;
@@ -76,6 +68,14 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
   readonly events$ = this._events.asObservable();
   readonly instructions$ = this.select(({ instructions }) => instructions);
+  readonly activeInstructions$ = this.select(
+    this.instructions$,
+    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+    (instructions, applicationId) =>
+      instructions.filter(
+        (instruction) => instruction.data.application === applicationId
+      )
+  );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(
     this.instructions$,
@@ -113,6 +113,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore
   ) {
@@ -132,105 +133,16 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly loadInstructions = this.effect(() =>
     combineLatest([
-      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-      this._collectionStore.collections$,
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
       this.reload$,
     ]).pipe(
-      switchMap(([applicationId, collections]) =>
-        this._bulldozerProgramStore.getInstructions(applicationId).pipe(
-          concatMap((instructions) =>
-            from(instructions).pipe(
-              concatMap((instruction) =>
-                combineLatest([
-                  this._bulldozerProgramStore.getInstructionArguments(
-                    instruction.id
-                  ),
-                  this._bulldozerProgramStore.getInstructionAccounts(
-                    instruction.id
-                  ),
-                  this._bulldozerProgramStore.getInstructionRelations(
-                    instruction.id
-                  ),
-                ]).pipe(
-                  map(
-                    ([
-                      instructionArguments,
-                      instructionAccounts,
-                      instructionRelations,
-                    ]) => ({
-                      ...instruction,
-                      arguments: instructionArguments,
-                      accounts: instructionAccounts.map((account) => {
-                        const relations = instructionRelations
-                          .filter(
-                            (relation) => relation.data.from === account.id
-                          )
-                          .map((relation) => {
-                            const toAccount =
-                              instructionAccounts.find(
-                                (instructionAccount) =>
-                                  instructionAccount.id === relation.data.to
-                              ) || null;
-
-                            return (
-                              toAccount && {
-                                ...relation,
-                                data: {
-                                  ...relation.data,
-                                  from: account,
-                                  to: toAccount,
-                                },
-                              }
-                            );
-                          })
-                          .filter(
-                            (
-                              relation
-                            ): relation is InstructionRelationExtended =>
-                              relation !== null
-                          );
-
-                        const collection =
-                          account.data.collection &&
-                          collections.find(
-                            ({ id }) => id === account.data.collection
-                          );
-
-                        const payer =
-                          account.data.payer &&
-                          instructionAccounts.find(
-                            ({ id }) => id === account.data.payer
-                          );
-
-                        const close =
-                          account.data.close &&
-                          instructionAccounts.find(
-                            ({ id }) => id === account.data.close
-                          );
-
-                        return {
-                          ...account,
-                          data: {
-                            ...account.data,
-                            collection: collection || null,
-                            payer: payer || null,
-                            close: close || null,
-                            relations,
-                          },
-                        };
-                      }),
-                    })
-                  )
-                )
-              ),
-              toArray()
-            )
+      switchMap(([workspaceId]) =>
+        this._bulldozerProgramStore.getExtendedInstructions(workspaceId).pipe(
+          tapResponse(
+            (instructions) => this.patchState({ instructions }),
+            (error) => this._error.next(error)
           )
         )
-      ),
-      tapResponse(
-        (instructions) => this.patchState({ instructions }),
-        (error) => this._error.next(error)
       )
     )
   );
@@ -251,11 +163,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ name }, applicationId]) =>
+            concatMap(([{ name }, workspaceId, applicationId]) =>
               this._bulldozerProgramStore
-                .createInstruction(applicationId, name)
+                .createInstruction(workspaceId, applicationId, name)
                 .pipe(
                   tapResponse(
                     () => this._events.next(new InstructionCreated()),
@@ -339,13 +252,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(
-              ([instructionArgumentDto, applicationId, instructionId]) =>
+              ([
+                instructionArgumentDto,
+                workspaceId,
+                applicationId,
+                instructionId,
+              ]) =>
                 this._bulldozerProgramStore
                   .createInstructionArgument(
+                    workspaceId,
                     applicationId,
                     instructionId,
                     instructionArgumentDto
@@ -417,23 +337,26 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([{ from, to }, applicationId, instructionId]) =>
-              this._bulldozerProgramStore
-                .createInstructionRelation(
-                  applicationId,
-                  instructionId,
-                  from,
-                  to
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new InstructionRelationCreated()),
-                    (error) => this._error.next(error)
+            concatMap(
+              ([{ from, to }, workspaceId, applicationId, instructionId]) =>
+                this._bulldozerProgramStore
+                  .createInstructionRelation(
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    from,
+                    to
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new InstructionRelationCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )
@@ -515,17 +438,20 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(
               ([
                 { name, modifier, collection, space, payer, close },
+                workspaceId,
                 applicationId,
                 instructionId,
               ]) =>
                 this._bulldozerProgramStore
                   .createInstructionAccount(
+                    workspaceId,
                     applicationId,
                     instructionId,
                     { name, kind: 0, modifier, space },
@@ -598,31 +524,39 @@ export class InstructionStore extends ComponentStore<ViewModel> {
           .pipe(
             filter((data) => data),
             withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(([instructionAccountDto, applicationId, instructionId]) =>
-              this._bulldozerProgramStore
-                .createInstructionAccount(
-                  applicationId,
-                  instructionId,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-                .pipe(
-                  tapResponse(
-                    () => this._events.next(new InstructionAccountCreated()),
-                    (error) => this._error.next(error)
+            concatMap(
+              ([
+                instructionAccountDto,
+                workspaceId,
+                applicationId,
+                instructionId,
+              ]) =>
+                this._bulldozerProgramStore
+                  .createInstructionAccount(
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    {
+                      kind: 1,
+                      space: null,
+                      ...instructionAccountDto,
+                    },
+                    {
+                      collection: null,
+                      payer: null,
+                      close: null,
+                    }
                   )
-                )
+                  .pipe(
+                    tapResponse(
+                      () => this._events.next(new InstructionAccountCreated()),
+                      (error) => this._error.next(error)
+                    )
+                  )
             )
           )
       )
