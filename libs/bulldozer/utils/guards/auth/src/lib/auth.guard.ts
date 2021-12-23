@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  CanActivate,
+  Router,
+  RouterStateSnapshot,
+} from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs/operators';
 
@@ -10,12 +15,17 @@ export class AuthGuard implements CanActivate {
     private readonly _router: Router
   ) {}
 
-  canActivate() {
+  canActivate(_: ActivatedRouteSnapshot, state: RouterStateSnapshot) {
     return this._walletStore.connected$.pipe(
-      map(
-        (connected) =>
-          connected || this._router.parseUrl('/unauthorized-access')
-      )
+      map((connected) => {
+        if (connected) {
+          return true;
+        }
+
+        const urlTree = this._router.parseUrl('/unauthorized-access');
+        urlTree.queryParams = { redirect: state.url };
+        return urlTree;
+      })
     );
   }
 }
