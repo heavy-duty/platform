@@ -12,7 +12,12 @@ export class DarkThemeDirective {
 
   setDarkTheme(value: boolean) {
     const bodyClass = document.body.className;
+    const isAlreadyInDarkMode = bodyClass.includes('darkMode');
+
     if (value) {
+      if (isAlreadyInDarkMode) {
+        return;
+      }
       document.body.className += ' darkMode';
     } else {
       document.body.className = bodyClass.replace('darkMode', '');
