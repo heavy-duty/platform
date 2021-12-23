@@ -30,6 +30,8 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
               'instructions',
               instruction.id
             ]"
+            [matTooltip]="instruction.data.name"
+            matTooltipShowDelay="500"
           >
             {{ instruction.data.name }}
           </a>

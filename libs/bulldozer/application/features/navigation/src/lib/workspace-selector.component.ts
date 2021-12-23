@@ -29,7 +29,11 @@ import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
         >
           <div class="w-full">
             <p class="text-xl font-bold mb-0 flex justify-between">
-              <span class="flex-grow leading-8">
+              <span
+                class="flex-grow leading-8 overflow-hidden"
+                [matTooltip]="workspace.data.name"
+                matTooltipShowDelay="500"
+              >
                 {{ workspace.data.name }}
               </span>
               <button

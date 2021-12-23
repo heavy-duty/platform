@@ -39,6 +39,8 @@ import { Application } from '@heavy-duty/bulldozer/application/utils/types';
               'applications',
               application.id
             ]"
+            [matTooltip]="application.data.name"
+            matTooltipShowDelay="500"
           >
             {{ application.data.name }}
           </a>

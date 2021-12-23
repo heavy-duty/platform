@@ -9,6 +9,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { DarkThemeSwitchModule } from '@heavy-duty/bulldozer/application/ui/components/dark-theme';
 import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
@@ -35,6 +36,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     MatMenuModule,
     MatSidenavModule,
     MatToolbarModule,
+    MatTooltipModule,
     ReactiveComponentModule,
     WalletAdapterUiModule,
     ObscureAddressModule,
