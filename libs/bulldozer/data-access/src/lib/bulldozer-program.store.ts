@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  Application,
   CollectionAttributeDto,
   CollectionExtended,
   InstructionAccountDto,
@@ -7,14 +8,21 @@ import {
   InstructionArgumentDto,
   InstructionExtended,
   InstructionRelationExtended,
+  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
-import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
-import { combineLatest, defer, from, Observable } from 'rxjs';
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  SystemProgram,
+  Transaction,
+} from '@solana/web3.js';
+import { combineLatest, defer, forkJoin, from, Observable, of } from 'rxjs';
 import { concatMap, map, mergeMap, take, tap, toArray } from 'rxjs/operators';
 
 import {
@@ -52,6 +60,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   readonly writer$ = this.select(({ writer }) => writer);
 
   constructor(
+    private readonly _connectionStore: ConnectionStore,
     private readonly _walletStore: WalletStore,
     private readonly _programStore: ProgramStore
   ) {
@@ -1041,6 +1050,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
                 ]) => ({
                   ...instruction,
                   arguments: instructionArguments,
+                  relations: instructionRelations,
                   accounts: instructionAccounts.map((account) => {
                     const relations = instructionRelations
                       .filter((relation) => relation.data.from === account.id)
@@ -1123,6 +1133,220 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         )
       ),
       toArray()
+    );
+  }
+
+  getDeleteCollectionTransactions(
+    connection: Connection,
+    walletPublicKey: PublicKey,
+    collection: CollectionExtended
+  ): Observable<Transaction[]> {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      from(defer(() => connection.getRecentBlockhash())),
+    ]).pipe(
+      take(1),
+      map(([writer, { blockhash }]) => {
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: walletPublicKey,
+        }).add(
+          writer.instruction.deleteCollection({
+            accounts: {
+              collection: new PublicKey(collection.id),
+              authority: walletPublicKey,
+            },
+          })
+        );
+
+        collection.attributes.forEach((attribute) => {
+          transaction.add(
+            writer.instruction.deleteCollectionAttribute({
+              accounts: {
+                attribute: new PublicKey(attribute.id),
+                authority: walletPublicKey,
+              },
+            })
+          );
+        });
+
+        return [transaction];
+      })
+    );
+  }
+
+  getDeleteInstructionTransactions(
+    connection: Connection,
+    walletPublicKey: PublicKey,
+    instruction: InstructionExtended
+  ): Observable<Transaction[]> {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined),
+      from(defer(() => connection.getRecentBlockhash())),
+    ]).pipe(
+      take(1),
+      map(([writer, { blockhash }]) => {
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: walletPublicKey,
+        }).add(
+          writer.instruction.deleteInstruction({
+            accounts: {
+              instruction: new PublicKey(instruction.id),
+              authority: walletPublicKey,
+            },
+          })
+        );
+
+        instruction.arguments.forEach((argument) => {
+          transaction.add(
+            writer.instruction.deleteInstructionArgument({
+              accounts: {
+                argument: new PublicKey(argument.id),
+                authority: walletPublicKey,
+              },
+            })
+          );
+        });
+
+        instruction.accounts.forEach((account) => {
+          transaction.add(
+            writer.instruction.deleteInstructionAccount({
+              accounts: {
+                account: new PublicKey(account.id),
+                authority: walletPublicKey,
+              },
+            })
+          );
+        });
+
+        instruction.relations.forEach((relation) => {
+          transaction.add(
+            writer.instruction.deleteInstructionRelation({
+              accounts: {
+                relation: new PublicKey(relation.id),
+                authority: walletPublicKey,
+              },
+            })
+          );
+        });
+
+        return [transaction];
+      })
+    );
+  }
+
+  getDeleteApplicationTransactions(
+    connection: Connection,
+    walletPublicKey: PublicKey,
+    application: Application,
+    collections: CollectionExtended[],
+    instructions: InstructionExtended[]
+  ): Observable<Transaction[]> {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined, take(1)),
+      from(defer(() => connection.getRecentBlockhash())),
+    ]).pipe(
+      concatMap(([writer, { blockhash }]) => {
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: walletPublicKey,
+        }).add(
+          writer.instruction.deleteApplication({
+            accounts: {
+              application: new PublicKey(application.id),
+              authority: walletPublicKey,
+            },
+          })
+        );
+
+        const transactions$ = [
+          ...collections.map((collection) =>
+            this.getDeleteCollectionTransactions(
+              connection,
+              walletPublicKey,
+              collection
+            )
+          ),
+          ...instructions.map((instruction) =>
+            this.getDeleteInstructionTransactions(
+              connection,
+              walletPublicKey,
+              instruction
+            )
+          ),
+        ];
+
+        if (transactions$.length === 0) {
+          return of([transaction]);
+        } else {
+          return forkJoin(transactions$).pipe(
+            map((transactionsList) =>
+              transactionsList.reduce(
+                (allTransactions, transactions) =>
+                  allTransactions.concat(transactions),
+                [transaction]
+              )
+            )
+          );
+        }
+      })
+    );
+  }
+
+  getDeleteWorkspaceTransactions(
+    connection: Connection,
+    walletPublicKey: PublicKey,
+    workspace: Workspace,
+    applications: Application[],
+    collections: CollectionExtended[],
+    instructions: InstructionExtended[]
+  ): Observable<Transaction[]> {
+    return combineLatest([
+      this.writer$.pipe(isNotNullOrUndefined, take(1)),
+      from(defer(() => connection.getRecentBlockhash())),
+    ]).pipe(
+      concatMap(([writer, { blockhash }]) => {
+        const transaction = new Transaction({
+          recentBlockhash: blockhash,
+          feePayer: walletPublicKey,
+        }).add(
+          writer.instruction.deleteWorkspace({
+            accounts: {
+              workspace: new PublicKey(workspace.id),
+              authority: walletPublicKey,
+            },
+          })
+        );
+
+        const transactions$ = applications.map((application) =>
+          this.getDeleteApplicationTransactions(
+            connection,
+            walletPublicKey,
+            application,
+            collections.filter(
+              ({ data }) => data.application === application.id
+            ),
+            instructions.filter(
+              ({ data }) => data.application === application.id
+            )
+          )
+        );
+
+        if (transactions$.length === 0) {
+          return of([transaction]);
+        } else {
+          return combineLatest(transactions$).pipe(
+            map((transactionsList) =>
+              transactionsList.reduce(
+                (allTransactions, transactions) =>
+                  allTransactions.concat(transactions),
+                [transaction]
+              )
+            )
+          );
+        }
+      })
     );
   }
 }

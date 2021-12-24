@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
+import { CollectionExtended } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-collection-selector',
@@ -56,7 +56,7 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteCollection(collection.id)"
+              (click)="onDeleteCollection(collection)"
               [disabled]="connected === false"
             >
               <mat-icon>delete</mat-icon>
@@ -70,10 +70,10 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
 })
 export class CollectionSelectorComponent {
   @Input() connected?: boolean | null = null;
-  @Input() collections?: Collection[] | null = null;
+  @Input() collections?: CollectionExtended[] | null = null;
   @Output() createCollection = new EventEmitter();
-  @Output() updateCollection = new EventEmitter<Collection>();
-  @Output() deleteCollection = new EventEmitter<string>();
+  @Output() updateCollection = new EventEmitter<CollectionExtended>();
+  @Output() deleteCollection = new EventEmitter<CollectionExtended>();
 
   onCreateCollection(event: Event) {
     event.stopPropagation();
@@ -81,11 +81,11 @@ export class CollectionSelectorComponent {
     this.createCollection.emit();
   }
 
-  onEditCollection(collection: Collection) {
+  onEditCollection(collection: CollectionExtended) {
     this.updateCollection.emit(collection);
   }
 
-  onDeleteCollection(collectionId: string) {
-    this.deleteCollection.emit(collectionId);
+  onDeleteCollection(collection: CollectionExtended) {
+    this.deleteCollection.emit(collection);
   }
 }

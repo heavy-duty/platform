@@ -12,10 +12,16 @@ import {
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
   Application,
-  Collection,
-  Instruction,
+  CollectionExtended,
+  InstructionExtended,
   Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { LAMPORTS_PER_SOL } from '@solana/web3.js';
+import { combineLatest, defer, from } from 'rxjs';
+import { concatMap, map } from 'rxjs/operators';
 
 import { NavigationStore } from './navigation.store';
 
@@ -82,6 +88,10 @@ import { NavigationStore } from './navigation.store';
           </button>
 
           <div class="ml-auto flex items-center">
+            <p class="mb-0 mr-6">
+              {{ balance$ | ngrxPush | number: '1.2-8' }} $SOL
+            </p>
+
             <bd-workspace-selector
               class="mr-6"
               [activeWorkspace]="workspace$ | ngrxPush"
@@ -120,13 +130,26 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.activeCollections$;
   readonly instructions$ = this._instructionStore.activeInstructions$;
+  readonly balance$ = combineLatest([
+    this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+    this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+  ]).pipe(
+    concatMap(([connection, walletPublicKey]) =>
+      from(defer(() => connection.getBalance(walletPublicKey))).pipe(
+        map((lamports) => lamports / LAMPORTS_PER_SOL)
+      )
+    )
+  );
 
   constructor(
+    private readonly _connectionStore: ConnectionStore,
+    private readonly _walletStore: WalletStore,
     private readonly _navigationStore: NavigationStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore
+    private readonly _instructionStore: InstructionStore,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore
   ) {}
 
   onCreateWorkspace() {
@@ -137,8 +160,27 @@ export class NavigationComponent {
     this._workspaceStore.updateWorkspace(workspace);
   }
 
-  onDeleteWorkspace(workspaceId: string) {
-    this._workspaceStore.deleteWorkspace(workspaceId);
+  onDeleteWorkspace(workspace: Workspace) {
+    const applications$ = this._bulldozerProgramStore.getApplications(
+      workspace.id
+    );
+    const collections$ = this._bulldozerProgramStore.getExtendedCollections(
+      workspace.id
+    );
+    const instructions$ = this._bulldozerProgramStore.getExtendedInstructions(
+      workspace.id
+    );
+
+    this._workspaceStore.deleteWorkspace(
+      combineLatest([applications$, collections$, instructions$]).pipe(
+        map(([applications, collections, instructions]) => ({
+          workspace,
+          applications,
+          collections,
+          instructions,
+        }))
+      )
+    );
   }
 
   onCreateApplication() {
@@ -149,32 +191,51 @@ export class NavigationComponent {
     this._applicationStore.updateApplication(application);
   }
 
-  onDeleteApplication(applicationId: string) {
-    this._applicationStore.deleteApplication(applicationId);
+  onDeleteApplication(application: Application) {
+    const collections$ = this._collectionStore.collections$.pipe(
+      map((collections) =>
+        collections.filter(({ data }) => application.id === data.application)
+      )
+    );
+    const instructions$ = this._instructionStore.instructions$.pipe(
+      map((instructions) =>
+        instructions.filter(({ data }) => application.id === data.application)
+      )
+    );
+
+    this._applicationStore.deleteApplication(
+      combineLatest([collections$, instructions$]).pipe(
+        map(([collections, instructions]) => ({
+          application,
+          collections,
+          instructions,
+        }))
+      )
+    );
   }
 
   onCreateCollection() {
     this._collectionStore.createCollection();
   }
 
-  onUpdateCollection(collection: Collection) {
+  onUpdateCollection(collection: CollectionExtended) {
     this._collectionStore.updateCollection(collection);
   }
 
-  onDeleteCollection(collectionId: string) {
-    this._collectionStore.deleteCollection(collectionId);
+  onDeleteCollection(collection: CollectionExtended) {
+    this._collectionStore.deleteCollection(collection);
   }
 
   onCreateInstruction() {
     this._instructionStore.createInstruction();
   }
 
-  onUpdateInstruction(instruction: Instruction) {
+  onUpdateInstruction(instruction: InstructionExtended) {
     this._instructionStore.updateInstruction(instruction);
   }
 
-  onDeleteInstruction(instructionId: string) {
-    this._instructionStore.deleteInstruction(instructionId);
+  onDeleteInstruction(instruction: InstructionExtended) {
+    this._instructionStore.deleteInstruction(instruction);
   }
 
   onDownloadWorkspace(workspace: Workspace) {

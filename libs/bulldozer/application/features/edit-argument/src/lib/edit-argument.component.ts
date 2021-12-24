@@ -237,8 +237,6 @@ export class EditArgumentComponent implements OnInit {
       });
 
     if (this.data?.argument) {
-      console.log(this.data);
-
       this.argumentGroup.setValue(
         {
           name: this.data.argument.data.name,
@@ -264,7 +262,6 @@ export class EditArgumentComponent implements OnInit {
     this.argumentGroup.markAllAsTouched();
 
     if (this.argumentGroup.valid) {
-      console.log(this.argumentGroup.value);
       this._matDialogRef.close(this.argumentGroup.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {

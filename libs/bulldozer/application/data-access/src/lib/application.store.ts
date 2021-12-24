@@ -1,11 +1,25 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
-import { Application } from '@heavy-duty/bulldozer/application/utils/types';
+import {
+  Application,
+  CollectionExtended,
+  InstructionExtended,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  from,
+  Observable,
+  Subject,
+  throwError,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
@@ -58,7 +72,9 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _workspaceStore: WorkspaceStore
+    private readonly _workspaceStore: WorkspaceStore,
+    private readonly _connectionStore: ConnectionStore,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
@@ -140,15 +156,65 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteApplication = this.effect(
-    (applicationId$: Observable<string>) =>
-      applicationId$.pipe(
-        concatMap((applicationId) =>
-          this._bulldozerProgramStore.deleteApplication(applicationId).pipe(
-            tapResponse(
-              () => this._events.next(new ApplicationDeleted(applicationId)),
-              (error) => this._error.next(error)
-            )
-          )
+    (
+      request$: Observable<{
+        application: Application;
+        collections: CollectionExtended[];
+        instructions: InstructionExtended[];
+      }>
+    ) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        request$,
+      ]).pipe(
+        concatMap(
+          ([
+            connection,
+            walletPublicKey,
+            { application, collections, instructions },
+          ]) =>
+            this._bulldozerProgramStore
+              .getDeleteApplicationTransactions(
+                connection,
+                walletPublicKey,
+                application,
+                collections,
+                instructions
+              )
+              .pipe(
+                concatMap((transactions) => {
+                  const signAllTransactions$ =
+                    this._walletStore.signAllTransactions(transactions);
+
+                  if (!signAllTransactions$) {
+                    return throwError(
+                      new Error('Sign all transactions method is not defined')
+                    );
+                  }
+
+                  return signAllTransactions$;
+                }),
+                concatMap((transactions) =>
+                  from(
+                    defer(() =>
+                      Promise.all(
+                        transactions.map((transaction) =>
+                          sendAndConfirmRawTransaction(
+                            connection,
+                            transaction.serialize()
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                tapResponse(
+                  () =>
+                    this._events.next(new ApplicationDeleted(application.id)),
+                  (error) => this._error.next(error)
+                )
+              )
         )
       )
   );

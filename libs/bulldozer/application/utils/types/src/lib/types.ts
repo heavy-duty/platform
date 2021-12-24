@@ -176,6 +176,7 @@ export interface InstructionAccountExtended {
 export type InstructionExtended = Instruction & {
   arguments: InstructionArgument[];
   accounts: InstructionAccountExtended[];
+  relations: InstructionRelation[];
 };
 
 export interface InstructionRelationInfo {

@@ -65,7 +65,7 @@ import { Application } from '@heavy-duty/bulldozer/application/utils/types';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteApplication(application.id)"
+              (click)="onDeleteApplication(application)"
               [disabled]="connected === false"
             >
               <mat-icon>delete</mat-icon>
@@ -85,7 +85,7 @@ export class ApplicationSelectorComponent {
   @Input() applications?: Application[] | null = null;
   @Output() createApplication = new EventEmitter();
   @Output() updateApplication = new EventEmitter<Application>();
-  @Output() deleteApplication = new EventEmitter<string>();
+  @Output() deleteApplication = new EventEmitter<Application>();
 
   onCreateApplication(event: Event) {
     event.stopPropagation();
@@ -97,7 +97,7 @@ export class ApplicationSelectorComponent {
     this.updateApplication.emit(application);
   }
 
-  onDeleteApplication(applicationId: string) {
-    this.deleteApplication.emit(applicationId);
+  onDeleteApplication(application: Application) {
+    this.deleteApplication.emit(application);
   }
 }

@@ -1,12 +1,26 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
-import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
+import {
+  Application,
+  CollectionExtended,
+  InstructionExtended,
+  Workspace,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  from,
+  Observable,
+  Subject,
+  throwError,
+} from 'rxjs';
 import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
 
 import {
@@ -51,6 +65,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _connectionStore: ConnectionStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -120,17 +135,69 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly deleteWorkspace = this.effect((workspaceId$: Observable<string>) =>
-    workspaceId$.pipe(
-      concatMap((workspaceId) =>
-        this._bulldozerProgramStore.deleteWorkspace(workspaceId).pipe(
-          tapResponse(
-            () => this._events.next(new WorkspaceDeleted(workspaceId)),
-            (error) => this._error.next(error)
-          )
+  readonly deleteWorkspace = this.effect(
+    (
+      request$: Observable<{
+        workspace: Workspace;
+        applications: Application[];
+        collections: CollectionExtended[];
+        instructions: InstructionExtended[];
+      }>
+    ) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        request$,
+      ]).pipe(
+        concatMap(
+          ([
+            connection,
+            walletPublicKey,
+            { workspace, applications, collections, instructions },
+          ]) =>
+            this._bulldozerProgramStore
+              .getDeleteWorkspaceTransactions(
+                connection,
+                walletPublicKey,
+                workspace,
+                applications,
+                collections,
+                instructions
+              )
+              .pipe(
+                concatMap((transactions) => {
+                  const signAllTransactions$ =
+                    this._walletStore.signAllTransactions(transactions);
+
+                  if (!signAllTransactions$) {
+                    return throwError(
+                      new Error('Sign all transactions method is not defined')
+                    );
+                  }
+
+                  return signAllTransactions$;
+                }),
+                concatMap((transactions) =>
+                  from(
+                    defer(() =>
+                      Promise.all(
+                        transactions.map((transaction) =>
+                          sendAndConfirmRawTransaction(
+                            connection,
+                            transaction.serialize()
+                          )
+                        )
+                      )
+                    )
+                  )
+                ),
+                tapResponse(
+                  () => this._events.next(new WorkspaceDeleted(workspace.id)),
+                  (error) => this._error.next(error)
+                )
+              )
         )
       )
-    )
   );
 
   reload() {

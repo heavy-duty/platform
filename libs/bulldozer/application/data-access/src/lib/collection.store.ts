@@ -4,14 +4,23 @@ import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/featur
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
-  Collection,
   CollectionAttribute,
   CollectionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  from,
+  Observable,
+  Subject,
+  throwError,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
@@ -83,7 +92,9 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
-    private readonly _applicationStore: ApplicationStore
+    private readonly _applicationStore: ApplicationStore,
+    private readonly _connectionStore: ConnectionStore,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
@@ -142,7 +153,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateCollection = this.effect(
-    (collection$: Observable<Collection>) =>
+    (collection$: Observable<CollectionExtended>) =>
       collection$.pipe(
         exhaustMap((collection) =>
           this._matDialog
@@ -165,17 +176,54 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly deleteCollection = this.effect((collectionId$: Observable<string>) =>
-    collectionId$.pipe(
-      concatMap((collectionId) =>
-        this._bulldozerProgramStore.deleteCollection(collectionId).pipe(
-          tapResponse(
-            () => this._events.next(new CollectionDeleted(collectionId)),
-            (error) => this._error.next(error)
-          )
+  readonly deleteCollection = this.effect(
+    (collection$: Observable<CollectionExtended>) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        collection$,
+      ]).pipe(
+        concatMap(([connection, walletPublicKey, collection]) =>
+          this._bulldozerProgramStore
+            .getDeleteCollectionTransactions(
+              connection,
+              walletPublicKey,
+              collection
+            )
+            .pipe(
+              concatMap((transactions) => {
+                const signAllTransactions$ =
+                  this._walletStore.signAllTransactions(transactions);
+
+                if (!signAllTransactions$) {
+                  return throwError(
+                    new Error('Sign all transactions method is not defined')
+                  );
+                }
+
+                return signAllTransactions$;
+              }),
+              concatMap((transactions) =>
+                from(
+                  defer(() =>
+                    Promise.all(
+                      transactions.map((transaction) =>
+                        sendAndConfirmRawTransaction(
+                          connection,
+                          transaction.serialize()
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              tapResponse(
+                () => this._events.next(new CollectionDeleted(collection.id)),
+                (error) => this._error.next(error)
+              )
+            )
         )
       )
-    )
   );
 
   readonly createCollectionAttribute = this.effect((action$) =>

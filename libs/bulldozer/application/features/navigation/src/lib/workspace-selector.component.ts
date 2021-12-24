@@ -79,7 +79,7 @@ import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
                 type="button"
                 mat-raised-button
                 color="primary"
-                (click)="onDeleteWorkspace(workspace.id)"
+                (click)="onDeleteWorkspace(workspace)"
               >
                 Delete
               </button>
@@ -107,7 +107,7 @@ export class WorkspaceSelectorComponent {
   @Input() workspaces?: Workspace[] | null = null;
   @Output() createWorkspace = new EventEmitter();
   @Output() updateWorkspace = new EventEmitter<Workspace>();
-  @Output() deleteWorkspace = new EventEmitter<string>();
+  @Output() deleteWorkspace = new EventEmitter<Workspace>();
   @Output() downloadWorkspace = new EventEmitter<Workspace>();
 
   onCreateWorkspace() {
@@ -118,8 +118,8 @@ export class WorkspaceSelectorComponent {
     this.updateWorkspace.emit(workspace);
   }
 
-  onDeleteWorkspace(workspaceId: string) {
-    this.deleteWorkspace.emit(workspaceId);
+  onDeleteWorkspace(workspace: Workspace) {
+    this.deleteWorkspace.emit(workspace);
   }
 
   onDownloadWorkspace(workspace: Workspace) {
