@@ -17,11 +17,9 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { combineLatest, defer, from } from 'rxjs';
-import { concatMap, map } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { NavigationStore } from './navigation.store';
 
@@ -88,10 +86,6 @@ import { NavigationStore } from './navigation.store';
           </button>
 
           <div class="ml-auto flex items-center">
-            <p class="mb-0 mr-6">
-              {{ balance$ | ngrxPush | number: '1.2-8' }} $SOL
-            </p>
-
             <bd-workspace-selector
               class="mr-6"
               [activeWorkspace]="workspace$ | ngrxPush"
@@ -130,16 +124,6 @@ export class NavigationComponent {
   readonly application$ = this._applicationStore.application$;
   readonly collections$ = this._collectionStore.activeCollections$;
   readonly instructions$ = this._instructionStore.activeInstructions$;
-  readonly balance$ = combineLatest([
-    this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-    this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-  ]).pipe(
-    concatMap(([connection, walletPublicKey]) =>
-      from(defer(() => connection.getBalance(walletPublicKey))).pipe(
-        map((lamports) => lamports / LAMPORTS_PER_SOL)
-      )
-    )
-  );
 
   constructor(
     private readonly _connectionStore: ConnectionStore,
@@ -150,7 +134,7 @@ export class NavigationComponent {
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore,
     private readonly _bulldozerProgramStore: BulldozerProgramStore
-  ) {}
+  ) { }
 
   onCreateWorkspace() {
     this._workspaceStore.createWorkspace();
