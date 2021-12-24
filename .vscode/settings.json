@@ -18,5 +18,11 @@
     "titleBar.inactiveBackground": "#ffc40799",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#ffc407"
+  "peacock.color": "#ffc407",
+  "conventionalCommits.scopes": [
+    "core",
+    "bulldozer-programs",
+    "bulldozer-client",
+    "editor"
+  ]
 }

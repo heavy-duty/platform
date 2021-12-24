@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
+import { InstructionExtended } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-instruction-selector',
@@ -56,7 +56,7 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteInstruction(instruction.id)"
+              (click)="onDeleteInstruction(instruction)"
               [disabled]="connected === false"
             >
               <mat-icon>delete</mat-icon>
@@ -70,10 +70,10 @@ import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
 })
 export class InstructionSelectorComponent {
   @Input() connected?: boolean | null = null;
-  @Input() instructions?: Instruction[] | null = null;
+  @Input() instructions?: InstructionExtended[] | null = null;
   @Output() createInstruction = new EventEmitter();
-  @Output() updateInstruction = new EventEmitter<Instruction>();
-  @Output() deleteInstruction = new EventEmitter<string>();
+  @Output() updateInstruction = new EventEmitter<InstructionExtended>();
+  @Output() deleteInstruction = new EventEmitter<InstructionExtended>();
 
   onCreateInstruction(event: Event) {
     event.stopPropagation();
@@ -81,11 +81,11 @@ export class InstructionSelectorComponent {
     this.createInstruction.emit();
   }
 
-  onEditInstruction(instruction: Instruction) {
+  onEditInstruction(instruction: InstructionExtended) {
     this.updateInstruction.emit(instruction);
   }
 
-  onDeleteInstruction(instructionId: string) {
-    this.deleteInstruction.emit(instructionId);
+  onDeleteInstruction(instruction: InstructionExtended) {
+    this.deleteInstruction.emit(instruction);
   }
 }

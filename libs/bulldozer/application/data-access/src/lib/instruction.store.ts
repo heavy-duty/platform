@@ -15,8 +15,19 @@ import {
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import {
+  BehaviorSubject,
+  combineLatest,
+  defer,
+  from,
+  Observable,
+  of,
+  Subject,
+  throwError,
+} from 'rxjs';
 import {
   concatMap,
   exhaustMap,
@@ -112,6 +123,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
+    private readonly _connectionStore: ConnectionStore,
+    private readonly _walletStore: WalletStore,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
@@ -230,15 +243,51 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstruction = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        concatMap((instructionId) =>
-          this._bulldozerProgramStore.deleteInstruction(instructionId).pipe(
-            tapResponse(
-              () => this._events.next(new InstructionDeleted(instructionId)),
-              (error) => this._error.next(error)
+    (collection$: Observable<InstructionExtended>) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        collection$,
+      ]).pipe(
+        concatMap(([connection, walletPublicKey, collection]) =>
+          this._bulldozerProgramStore
+            .getDeleteInstructionTransactions(
+              connection,
+              walletPublicKey,
+              collection
             )
-          )
+            .pipe(
+              concatMap((transactions) => {
+                const signAllTransactions$ =
+                  this._walletStore.signAllTransactions(transactions);
+
+                if (!signAllTransactions$) {
+                  return throwError(
+                    new Error('Sign all transactions method is not defined')
+                  );
+                }
+
+                return signAllTransactions$;
+              }),
+              concatMap((transactions) =>
+                from(
+                  defer(() =>
+                    Promise.all(
+                      transactions.map((transaction) =>
+                        sendAndConfirmRawTransaction(
+                          connection,
+                          transaction.serialize()
+                        )
+                      )
+                    )
+                  )
+                )
+              ),
+              tapResponse(
+                () => this._events.next(new InstructionDeleted(collection.id)),
+                (error) => this._error.next(error)
+              )
+            )
         )
       )
   );

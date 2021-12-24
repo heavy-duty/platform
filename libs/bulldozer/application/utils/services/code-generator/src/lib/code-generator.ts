@@ -88,8 +88,6 @@ export const generateWorkspaceMetadata = (
         (instruction) => instruction.data.application === application.id
       );
 
-      console.log(instructions, filteredInstructions);
-
       return {
         template: generateApplicationCode(application, filteredInstructions),
         name: formatName(application.data.name),
