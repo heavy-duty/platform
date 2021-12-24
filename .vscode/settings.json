@@ -20,6 +20,9 @@
   },
   "peacock.color": "#ffc407",
   "conventionalCommits.scopes": [
-    "bulldozer-client"
+    "core",
+    "bulldozer-programs",
+    "bulldozer-client",
+    "editor"
   ]
 }
