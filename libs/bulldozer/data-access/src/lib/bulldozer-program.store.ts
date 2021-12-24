@@ -70,12 +70,18 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       .pipe(tap((writer) => this.patchState({ writer })))
   );
 
-  getWorkspaces() {
+  getWorkspaces(walletPublicKey: string) {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
       concatMap((reader) =>
-        from(defer(() => reader.account.workspace.all())).pipe(
+        from(
+          defer(() =>
+            reader.account.workspace.all([
+              { memcmp: { bytes: walletPublicKey, offset: 8 } },
+            ])
+          )
+        ).pipe(
           map((programAccounts) =>
             programAccounts.map(({ publicKey, account }) =>
               WorkspaceParser(publicKey, account as RawWorkspace)

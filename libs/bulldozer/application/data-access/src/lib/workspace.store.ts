@@ -3,8 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, Subject } from 'rxjs';
 import { concatMap, exhaustMap, filter, switchMap, tap } from 'rxjs/operators';
 
 import {
@@ -48,15 +50,19 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
 
   readonly loadWorkspaces = this.effect(() =>
-    this.reload$.pipe(
-      switchMap(() =>
-        this._bulldozerProgramStore.getWorkspaces().pipe(
+    combineLatest([
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+      this.reload$,
+    ]).pipe(
+      switchMap(([publicKey]) =>
+        this._bulldozerProgramStore.getWorkspaces(publicKey.toBase58()).pipe(
           tapResponse(
             (workspaces) => this.patchState({ workspaces }),
             (error) => this._error.next(error)
