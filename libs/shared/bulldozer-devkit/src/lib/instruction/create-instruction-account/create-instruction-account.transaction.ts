@@ -1,7 +1,8 @@
 import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import { defer, from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { createTransaction } from '../../operations';
 import { InstructionAccountDto, InstructionAccountExtras } from '../../utils';
 import { createInstructionAccountInstruction } from './create-instruction-account.instruction';
 
@@ -15,15 +16,10 @@ export const createInstructionAccount = (
   instructionAccountDto: InstructionAccountDto,
   instructionAccountExtras: InstructionAccountExtras
 ): Observable<{ transaction: Transaction; signers: Keypair[] }> => {
-  return from(
-    defer(() => connection.getRecentBlockhash(connection.commitment))
-  ).pipe(
-    map(({ blockhash }) => {
+  return createTransaction(connection, authority).pipe(
+    map((transaction) => {
       const instructionAccount = Keypair.generate();
-      const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: authority,
-      }).add(
+      transaction.add(
         createInstructionAccountInstruction(
           authority,
           program,

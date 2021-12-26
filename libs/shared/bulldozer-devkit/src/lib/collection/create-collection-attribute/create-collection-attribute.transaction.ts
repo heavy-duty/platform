@@ -1,7 +1,8 @@
 import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import { defer, from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { createTransaction } from '../../operations';
 import { CollectionAttributeDto } from '../../utils';
 import { createCollectionAttributeInstruction } from './create-collection-attribute.instruction';
 
@@ -14,15 +15,10 @@ export const createCollectionAttribute = (
   collectionPublicKey: PublicKey,
   attributeDto: CollectionAttributeDto
 ): Observable<{ transaction: Transaction; signers: Keypair[] }> => {
-  return from(
-    defer(() => connection.getRecentBlockhash(connection.commitment))
-  ).pipe(
-    map(({ blockhash }) => {
+  return createTransaction(connection, authority).pipe(
+    map((transaction) => {
       const collectionAttribute = Keypair.generate();
-      const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: authority,
-      }).add(
+      transaction.add(
         createCollectionAttributeInstruction(
           authority,
           program,

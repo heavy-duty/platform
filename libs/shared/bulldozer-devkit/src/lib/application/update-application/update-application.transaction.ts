@@ -1,7 +1,8 @@
 import { Program } from '@project-serum/anchor';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
-import { defer, from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { createTransaction } from '../../operations';
 import { updateApplicationInstruction } from './update-application.instruction';
 
 export const updateApplication = (
@@ -11,15 +12,9 @@ export const updateApplication = (
   applicationPublicKey: PublicKey,
   applicationName: string
 ): Observable<{ transaction: Transaction }> => {
-  return from(
-    defer(() => connection.getRecentBlockhash(connection.commitment))
-  ).pipe(
-    map(({ blockhash }) => {
-      console.log('am I called?');
-      const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: authority,
-      }).add(
+  return createTransaction(connection, authority).pipe(
+    map((transaction) => {
+      transaction.add(
         updateApplicationInstruction(
           authority,
           program,

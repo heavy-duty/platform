@@ -1,7 +1,8 @@
 import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
-import { defer, from, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { createTransaction } from '../../operations';
 import { createWorkspaceInstruction } from './create-workspace.instruction';
 
 export const createWorkspace = (
@@ -10,15 +11,10 @@ export const createWorkspace = (
   program: Program,
   workspaceName: string
 ): Observable<{ transaction: Transaction; signers: Keypair[] }> => {
-  return from(
-    defer(() => connection.getRecentBlockhash(connection.commitment))
-  ).pipe(
-    map(({ blockhash }) => {
+  return createTransaction(connection, authority).pipe(
+    map((transaction) => {
       const workspace = Keypair.generate();
-      const transaction = new Transaction({
-        recentBlockhash: blockhash,
-        feePayer: authority,
-      }).add(
+      transaction.add(
         createWorkspaceInstruction(
           authority,
           program,
