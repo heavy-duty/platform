@@ -13,10 +13,10 @@ export const createInstructionAccountInstruction = (
   applicationPublicKey: PublicKey,
   instructionPublicKey: PublicKey,
   instructionAccountPublicKey: PublicKey,
-  instructionAccount: InstructionAccountDto,
+  instructionAccountDto: InstructionAccountDto,
   instructionAccountExtras: InstructionAccountExtras
 ): TransactionInstruction => {
-  return program.instruction.createInstructionAccount(instructionAccount, {
+  return program.instruction.createInstructionAccount(instructionAccountDto, {
     accounts: {
       authority: authority,
       workspace: workspacePublicKey,
@@ -27,20 +27,20 @@ export const createInstructionAccountInstruction = (
     },
     remainingAccounts: [
       instructionAccountExtras.collection &&
-        instructionAccount.kind === 0 && {
+        instructionAccountDto.kind === 0 && {
           pubkey: new PublicKey(instructionAccountExtras.collection),
           isWritable: false,
           isSigner: false,
         },
       instructionAccountExtras.payer &&
-        instructionAccount.kind === 0 && {
+        instructionAccountDto.kind === 0 && {
           pubkey: new PublicKey(instructionAccountExtras.payer),
           isWritable: false,
           isSigner: false,
         },
       instructionAccountExtras.close &&
-        instructionAccount.kind === 0 &&
-        instructionAccount.modifier === 1 && {
+        instructionAccountDto.kind === 0 &&
+        instructionAccountDto.modifier === 1 && {
           pubkey: new PublicKey(instructionAccountExtras.close),
           isWritable: false,
           isSigner: false,
