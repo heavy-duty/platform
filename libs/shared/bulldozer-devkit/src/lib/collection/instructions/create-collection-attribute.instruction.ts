@@ -4,20 +4,23 @@ import {
   SystemProgram,
   TransactionInstruction,
 } from '@solana/web3.js';
+import { CollectionAttributeDto } from '../../utils';
 
-export const createCollectionInstruction = (
+export const createCollectionAttributeInstruction = (
   authority: PublicKey,
   program: Program,
   workspacePublicKey: PublicKey,
   applicationPublicKey: PublicKey,
   collectionPublicKey: PublicKey,
-  collectionName: string
+  attributePublicKey: PublicKey,
+  attribute: CollectionAttributeDto
 ): TransactionInstruction => {
-  return program.instruction.createCollection(collectionName, {
+  return program.instruction.createCollectionAttribute(attribute, {
     accounts: {
+      attribute: attributePublicKey,
       workspace: workspacePublicKey,
-      application: applicationPublicKey,
       collection: collectionPublicKey,
+      application: applicationPublicKey,
       authority,
       systemProgram: SystemProgram.programId,
     },

@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
   createCollection,
+  createCollectionAttribute,
   updateCollection,
+  updateCollectionAttribute,
 } from '@heavy-duty/bulldozer-devkit';
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
@@ -265,8 +267,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly createCollectionAttribute = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
+    combineLatest([
+      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+      action$,
+    ]).pipe(
+      exhaustMap(([connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditAttributeComponent)
           .afterClosed()
@@ -284,19 +291,28 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 applicationId,
                 collectionId,
               ]) =>
-                this._bulldozerProgramStore
-                  .createCollectionAttribute(
-                    workspaceId,
-                    applicationId,
-                    collectionId,
-                    collectionAttributeDto
+                createCollectionAttribute(
+                  connection,
+                  walletPublicKey,
+                  writer,
+                  new PublicKey(workspaceId),
+                  new PublicKey(applicationId),
+                  new PublicKey(collectionId),
+                  collectionAttributeDto
+                )
+            ),
+            concatMap(({ transaction, signers }) =>
+              this._walletStore
+                .sendTransaction(transaction, connection, { signers })
+                .pipe(
+                  concatMap((signature) =>
+                    from(defer(() => connection.confirmTransaction(signature)))
                   )
-                  .pipe(
-                    tapResponse(
-                      () => this._events.next(new CollectionAttributeCreated()),
-                      (error) => this._error.next(error)
-                    )
-                  )
+                )
+            ),
+            tapResponse(
+              () => this._events.next(new CollectionAttributeCreated()),
+              (error) => this._error.next(error)
             )
           )
       )
@@ -305,8 +321,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly updateCollectionAttribute = this.effect(
     (attribute$: Observable<CollectionAttribute>) =>
-      attribute$.pipe(
-        exhaustMap((attribute) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+        attribute$,
+      ]).pipe(
+        exhaustMap(([connection, walletPublicKey, writer, attribute]) =>
           this._matDialog
             .open(EditAttributeComponent, {
               data: { attribute },
@@ -315,20 +336,31 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap((collectionAttributeDto) =>
-                this._bulldozerProgramStore
-                  .updateCollectionAttribute(
-                    attribute.id,
-                    collectionAttributeDto
-                  )
+                updateCollectionAttribute(
+                  connection,
+                  walletPublicKey,
+                  writer,
+                  new PublicKey(attribute.id),
+                  collectionAttributeDto
+                )
+              ),
+              concatMap(({ transaction }) =>
+                this._walletStore
+                  .sendTransaction(transaction, connection)
                   .pipe(
-                    tapResponse(
-                      () =>
-                        this._events.next(
-                          new CollectionAttributeUpdated(attribute.id)
-                        ),
-                      (error) => this._error.next(error)
+                    concatMap((signature) =>
+                      from(
+                        defer(() => connection.confirmTransaction(signature))
+                      )
                     )
                   )
+              ),
+              tapResponse(
+                () =>
+                  this._events.next(
+                    new CollectionAttributeUpdated(attribute.id)
+                  ),
+                (error) => this._error.next(error)
               )
             )
         )
