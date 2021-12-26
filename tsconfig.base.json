@@ -16,6 +16,9 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@heavy-duty/bulldozer-devkit": [
+        "libs/shared/bulldozer-devkit/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/data-access": [
         "libs/bulldozer/application/data-access/src/index.ts"
       ],

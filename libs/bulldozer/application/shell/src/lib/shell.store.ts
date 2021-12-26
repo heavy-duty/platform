@@ -251,8 +251,10 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
 
   readonly notifyWorkspaceSuccess = this.effect(() =>
     this._workspaceStore.events$.pipe(
+      tap((a) => console.log(a)),
       filter((event) => event.type !== WorkspaceActionTypes.WorkspaceInit),
       tap((event) => {
+        console.log(event);
         this._workspaceStore.reload();
         this._matSnackBar.open(event.type, 'Close', {
           panelClass: `success-snackbar`,

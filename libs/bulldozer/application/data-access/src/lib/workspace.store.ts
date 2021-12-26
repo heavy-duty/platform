@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { createWorkspace } from '@heavy-duty/bulldozer-devkit';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import {
   Application,
@@ -95,20 +96,33 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly createWorkspace = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
+    combineLatest([
+      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+      action$,
+    ]).pipe(
+      exhaustMap(([connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditWorkspaceComponent)
           .afterClosed()
           .pipe(
             filter((data) => data),
             concatMap(({ name }) =>
-              this._bulldozerProgramStore.createWorkspace(name).pipe(
-                tapResponse(
-                  () => this._events.next(new WorkspaceCreated()),
-                  (error) => this._error.next(error)
+              createWorkspace(connection, walletPublicKey, writer, name)
+            ),
+            concatMap(({ transaction, signers }) =>
+              this._walletStore
+                .sendTransaction(transaction, connection, { signers })
+                .pipe(
+                  concatMap((signature) =>
+                    from(defer(() => connection.confirmTransaction(signature)))
+                  )
                 )
-              )
+            ),
+            tapResponse(
+              () => this._events.next(new WorkspaceCreated()),
+              (error) => this._error.next(error)
             )
           )
       )

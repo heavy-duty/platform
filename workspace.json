@@ -35,6 +35,7 @@
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shell": "libs/bulldozer/shell",
     "bulldozer-utils-guards-auth": "libs/bulldozer/utils/guards/auth",
+    "shared-bulldozer-devkit": "libs/shared/bulldozer-devkit",
     "shared-ng-anchor": "libs/shared/ng-anchor",
     "shared-utils-operators": "libs/shared/utils/operators",
     "wallet-adapter-data-access": "libs/wallet-adapter/data-access",
