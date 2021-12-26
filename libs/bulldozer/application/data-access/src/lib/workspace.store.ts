@@ -22,6 +22,7 @@ import {
   filter,
   from,
   Observable,
+  of,
   Subject,
   switchMap,
   tap,
@@ -96,13 +97,17 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly createWorkspace = this.effect((action$) =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-      action$,
-    ]).pipe(
-      exhaustMap(([connection, walletPublicKey, writer]) =>
+    action$.pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditWorkspaceComponent)
           .afterClosed()
@@ -130,13 +135,17 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateWorkspace = this.effect((workspace$: Observable<Workspace>) =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-      workspace$,
-    ]).pipe(
-      exhaustMap(([connection, walletPublicKey, writer, workspace]) =>
+    workspace$.pipe(
+      concatMap((workspace) =>
+        of(workspace).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([workspace, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditWorkspaceComponent, { data: { workspace } })
           .afterClosed()
@@ -178,16 +187,20 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         instructions: InstructionExtended[];
       }>
     ) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        request$,
-      ]).pipe(
+      request$.pipe(
+        concatMap((request) =>
+          of(request).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
         concatMap(
           ([
+            { workspace, applications, collections, instructions },
             connection,
             walletPublicKey,
-            { workspace, applications, collections, instructions },
           ]) =>
             this._bulldozerProgramStore
               .getDeleteWorkspaceTransactions(

@@ -27,6 +27,7 @@ import {
   filter,
   from,
   Observable,
+  of,
   Subject,
   switchMap,
   tap,
@@ -126,13 +127,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly createCollection = this.effect((action$) =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-      action$,
-    ]).pipe(
-      exhaustMap(([connection, walletPublicKey, writer]) =>
+    action$.pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditCollectionComponent)
           .afterClosed()
@@ -175,13 +180,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly updateCollection = this.effect(
     (collection$: Observable<CollectionExtended>) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-        collection$,
-      ]).pipe(
-        exhaustMap(([connection, walletPublicKey, writer, collection]) =>
+      collection$.pipe(
+        concatMap((collection) =>
+          of(collection).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
+        exhaustMap(([collection, connection, walletPublicKey, writer]) =>
           this._matDialog
             .open(EditCollectionComponent, { data: { collection } })
             .afterClosed()
@@ -218,12 +227,16 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly deleteCollection = this.effect(
     (collection$: Observable<CollectionExtended>) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        collection$,
-      ]).pipe(
-        concatMap(([connection, walletPublicKey, collection]) =>
+      collection$.pipe(
+        concatMap((collection) =>
+          of(collection).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
+        concatMap(([collection, connection, walletPublicKey]) =>
           this._bulldozerProgramStore
             .getDeleteCollectionTransactions(
               connection,
@@ -267,13 +280,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly createCollectionAttribute = this.effect((action$) =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-      action$,
-    ]).pipe(
-      exhaustMap(([connection, walletPublicKey, writer]) =>
+    action$.pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditAttributeComponent)
           .afterClosed()
@@ -321,13 +338,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly updateCollectionAttribute = this.effect(
     (attribute$: Observable<CollectionAttribute>) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-        attribute$,
-      ]).pipe(
-        exhaustMap(([connection, walletPublicKey, writer, attribute]) =>
+      attribute$.pipe(
+        concatMap((attribute) =>
+          of(attribute).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
+        exhaustMap(([attribute, connection, walletPublicKey, writer]) =>
           this._matDialog
             .open(EditAttributeComponent, {
               data: { attribute },

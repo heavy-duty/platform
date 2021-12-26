@@ -24,6 +24,7 @@ import {
   filter,
   from,
   Observable,
+  of,
   Subject,
   switchMap,
   tap,
@@ -104,13 +105,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly createApplication = this.effect((action$) =>
-    combineLatest([
-      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-      action$,
-    ]).pipe(
-      exhaustMap(([connection, walletPublicKey, writer]) =>
+    action$.pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditApplicationComponent)
           .afterClosed()
@@ -148,13 +153,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   readonly updateApplication = this.effect(
     (application$: Observable<Application>) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
-        application$,
-      ]).pipe(
-        exhaustMap(([connection, walletPublicKey, writer, application]) =>
+      application$.pipe(
+        concatMap((application) =>
+          of(application).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
+        exhaustMap(([application, connection, walletPublicKey, writer]) =>
           this._matDialog
             .open(EditApplicationComponent, { data: { application } })
             .afterClosed()
@@ -197,16 +206,20 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         instructions: InstructionExtended[];
       }>
     ) =>
-      combineLatest([
-        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-        request$,
-      ]).pipe(
+      request$.pipe(
+        concatMap((request) =>
+          of(request).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
         concatMap(
           ([
+            { application, collections, instructions },
             connection,
             walletPublicKey,
-            { application, collections, instructions },
           ]) =>
             this._bulldozerProgramStore
               .getDeleteApplicationTransactions(
