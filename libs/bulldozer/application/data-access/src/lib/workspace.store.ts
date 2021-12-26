@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { createWorkspace } from '@heavy-duty/bulldozer-devkit';
+import { createWorkspace, updateWorkspace } from '@heavy-duty/bulldozer-devkit';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import {
   Application,
@@ -12,7 +12,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -130,22 +130,39 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateWorkspace = this.effect((workspace$: Observable<Workspace>) =>
-    workspace$.pipe(
-      exhaustMap((workspace) =>
+    combineLatest([
+      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+      workspace$,
+    ]).pipe(
+      exhaustMap(([connection, walletPublicKey, writer, workspace]) =>
         this._matDialog
           .open(EditWorkspaceComponent, { data: { workspace } })
           .afterClosed()
           .pipe(
             filter((data) => data),
             concatMap(({ name }) =>
-              this._bulldozerProgramStore
-                .updateWorkspace(workspace.id, name)
+              updateWorkspace(
+                connection,
+                walletPublicKey,
+                writer,
+                new PublicKey(workspace.id),
+                name
+              )
+            ),
+            concatMap(({ transaction }) =>
+              this._walletStore
+                .sendTransaction(transaction, connection)
                 .pipe(
-                  tapResponse(
-                    () => this._events.next(new WorkspaceUpdated(workspace.id)),
-                    (error) => this._error.next(error)
+                  concatMap((signature) =>
+                    from(defer(() => connection.confirmTransaction(signature)))
                   )
                 )
+            ),
+            tapResponse(
+              () => this._events.next(new WorkspaceUpdated(workspace.id)),
+              (error) => this._error.next(error)
             )
           )
       )
