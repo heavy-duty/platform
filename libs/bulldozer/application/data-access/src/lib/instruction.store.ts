@@ -3,8 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   createInstruction,
   createInstructionAccount,
+  createInstructionArgument,
   updateInstruction,
   updateInstructionAccount,
+  updateInstructionArgument,
   updateInstructionBody,
 } from '@heavy-duty/bulldozer-devkit';
 import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
@@ -366,7 +368,16 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly createArgument = this.effect((action$) =>
     action$.pipe(
-      exhaustMap(() =>
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+          )
+        )
+      ),
+      exhaustMap(([, connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditArgumentComponent)
           .afterClosed()
@@ -377,26 +388,29 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
-            concatMap(
-              ([
-                instructionArgumentDto,
-                workspaceId,
-                applicationId,
-                instructionId,
-              ]) =>
-                this._bulldozerProgramStore
-                  .createInstructionArgument(
-                    workspaceId,
-                    applicationId,
-                    instructionId,
-                    instructionArgumentDto
+            concatMap(([{ name }, workspaceId, applicationId, instructionId]) =>
+              createInstructionArgument(
+                connection,
+                walletPublicKey,
+                writer,
+                new PublicKey(workspaceId),
+                new PublicKey(applicationId),
+                new PublicKey(instructionId),
+                name
+              )
+            ),
+            concatMap(({ transaction, signers }) =>
+              this._walletStore
+                .sendTransaction(transaction, connection, { signers })
+                .pipe(
+                  concatMap((signature) =>
+                    from(defer(() => connection.confirmTransaction(signature)))
                   )
-                  .pipe(
-                    tapResponse(
-                      () => this._events.next(new InstructionArgumentCreated()),
-                      (error) => this._error.next(error)
-                    )
-                  )
+                )
+            ),
+            tapResponse(
+              () => this._events.next(new InstructionArgumentCreated()),
+              (error) => this._error.next(error)
             )
           )
       )
@@ -406,7 +420,16 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly updateArgument = this.effect(
     (argument$: Observable<InstructionArgument>) =>
       argument$.pipe(
-        exhaustMap((argument) =>
+        concatMap((argument) =>
+          of(argument).pipe(
+            withLatestFrom(
+              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
+            )
+          )
+        ),
+        exhaustMap(([argument, connection, walletPublicKey, writer]) =>
           this._matDialog
             .open(EditArgumentComponent, {
               data: { argument },
@@ -414,21 +437,32 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap((instructionArgumentDto) =>
-                this._bulldozerProgramStore
-                  .updateInstructionArgument(
-                    argument.id,
-                    instructionArgumentDto
-                  )
+              concatMap(({ name }) =>
+                updateInstructionArgument(
+                  connection,
+                  walletPublicKey,
+                  writer,
+                  new PublicKey(argument.id),
+                  name
+                )
+              ),
+              concatMap(({ transaction }) =>
+                this._walletStore
+                  .sendTransaction(transaction, connection)
                   .pipe(
-                    tapResponse(
-                      () =>
-                        this._events.next(
-                          new InstructionArgumentUpdated(argument.id)
-                        ),
-                      (error) => this._error.next(error)
+                    concatMap((signature) =>
+                      from(
+                        defer(() => connection.confirmTransaction(signature))
+                      )
                     )
                   )
+              ),
+              tapResponse(
+                () =>
+                  this._events.next(
+                    new InstructionArgumentUpdated(argument.id)
+                  ),
+                (error) => this._error.next(error)
               )
             )
         )

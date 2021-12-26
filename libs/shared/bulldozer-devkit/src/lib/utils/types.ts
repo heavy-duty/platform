@@ -19,3 +19,12 @@ export interface InstructionAccountExtras {
   payer: string | null;
   close: string | null;
 }
+
+export interface InstructionArgumentDto {
+  name: string;
+  kind: number;
+  modifier: number | null;
+  size: number | null;
+  max: number | null;
+  maxLength: number | null;
+}
