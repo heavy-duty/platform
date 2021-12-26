@@ -1,5 +1,22 @@
 import { Injectable } from '@angular/core';
 import {
+  createApplication,
+  createCollection,
+  createCollectionAttribute,
+  createInstruction,
+  createInstructionAccount,
+  createInstructionArgument,
+  createInstructionRelation,
+  createWorkspace,
+  updateCollection,
+  updateCollectionAttribute,
+  updateInstruction,
+  updateInstructionAccount,
+  updateInstructionBody,
+  updateInstructionRelation,
+  updateWorkspace,
+} from '@heavy-duty/bulldozer-devkit';
+import {
   Application,
   CollectionAttributeDto,
   CollectionExtended,
@@ -15,13 +32,7 @@ import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-} from '@solana/web3.js';
+import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import {
   combineLatest,
   concatMap,
@@ -35,6 +46,7 @@ import {
   take,
   tap,
   toArray,
+  withLatestFrom,
 } from 'rxjs';
 import {
   ApplicationParser,
@@ -69,6 +81,25 @@ const initialState = {
 export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   readonly reader$ = this.select(({ reader }) => reader);
   readonly writer$ = this.select(({ writer }) => writer);
+
+  get context() {
+    return of(null).pipe(
+      concatMap(() =>
+        of(null).pipe(
+          withLatestFrom(
+            this.writer$.pipe(isNotNullOrUndefined),
+            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+            (_, program, connection, authority) => ({
+              program,
+              connection,
+              authority,
+            })
+          )
+        )
+      )
+    );
+  }
 
   constructor(
     private readonly _connectionStore: ConnectionStore,
@@ -134,45 +165,41 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createWorkspace(workspaceName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const workspace = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createWorkspace(workspaceName, {
-              accounts: {
-                workspace: workspace.publicKey,
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [workspace],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createWorkspace(connection, authority, program, workspaceName).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateWorkspace(workspaceId: string, workspaceName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateWorkspace(workspaceName, {
-              accounts: {
-                workspace: new PublicKey(workspaceId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateWorkspace(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          workspaceName
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -244,46 +271,47 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createApplication(workspaceId: string, applicationName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const application = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createApplication(applicationName, {
-              accounts: {
-                application: application.publicKey,
-                authority: walletPublicKey,
-                workspace: new PublicKey(workspaceId),
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [application],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createApplication(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          applicationName
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateApplication(applicationId: string, applicationName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateApplication(applicationName, {
-              accounts: {
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateWorkspace(
+          connection,
+          authority,
+          program,
+          new PublicKey(applicationId),
+          applicationName
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -359,47 +387,48 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     applicationId: string,
     collectionName: string
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const collection = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createCollection(collectionName, {
-              accounts: {
-                collection: collection.publicKey,
-                workspace: new PublicKey(workspaceId),
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [collection],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createCollection(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          collectionName
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateCollection(collectionId: string, collectionName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateCollection(collectionName, {
-              accounts: {
-                collection: new PublicKey(collectionId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateCollection(
+          connection,
+          authority,
+          program,
+          new PublicKey(collectionId),
+          collectionName
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -456,53 +485,54 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceId: string,
     applicationId: string,
     collectionId: string,
-    attribute: CollectionAttributeDto
+    collectionAttributeDto: CollectionAttributeDto
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const attributeKeypair = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createCollectionAttribute(attribute, {
-              accounts: {
-                attribute: attributeKeypair.publicKey,
-                workspace: new PublicKey(workspaceId),
-                collection: new PublicKey(collectionId),
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [attributeKeypair],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createCollectionAttribute(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          new PublicKey(collectionId),
+          collectionAttributeDto
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateCollectionAttribute(
-    attributeId: string,
-    attribute: CollectionAttributeDto
+    collectionAttributeId: string,
+    collectionAttributeDto: CollectionAttributeDto
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateCollectionAttribute(attribute, {
-              accounts: {
-                attribute: new PublicKey(attributeId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateCollectionAttribute(
+          connection,
+          authority,
+          program,
+          new PublicKey(collectionAttributeId),
+          collectionAttributeDto
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -578,47 +608,48 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     applicationId: string,
     instructionName: string
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const instruction = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createInstruction(instructionName, {
-              accounts: {
-                instruction: instruction.publicKey,
-                workspace: new PublicKey(workspaceId),
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [instruction],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createInstruction(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          instructionName
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateInstruction(instructionId: string, instructionName: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstruction(instructionName, {
-              accounts: {
-                instruction: new PublicKey(instructionId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateInstruction(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionId),
+          instructionName
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -626,20 +657,23 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   updateInstructionBody(instructionId: string, instructionBody: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionBody(instructionBody, {
-              accounts: {
-                instruction: new PublicKey(instructionId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateInstructionBody(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionId),
+          instructionBody
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -696,102 +730,58 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    account: InstructionAccountDto,
-    extras: InstructionAccountExtras
+    instructionAccountDto: InstructionAccountDto,
+    instructionAccountExtras: InstructionAccountExtras
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const accountKeypair = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createInstructionAccount(account, {
-              accounts: {
-                authority: walletPublicKey,
-                workspace: new PublicKey(workspaceId),
-                application: new PublicKey(applicationId),
-                instruction: new PublicKey(instructionId),
-                account: accountKeypair.publicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [accountKeypair],
-              remainingAccounts: [
-                extras.collection &&
-                  account.kind === 0 && {
-                    pubkey: new PublicKey(extras.collection),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-                extras.payer &&
-                  account.kind === 0 && {
-                    pubkey: new PublicKey(extras.payer),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-                extras.close &&
-                  account.kind === 0 &&
-                  account.modifier === 1 && {
-                    pubkey: new PublicKey(extras.close),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-              ].filter(
-                <T>(account: T | '' | false | null): account is T =>
-                  account !== null && account !== false && account !== ''
-              ),
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createInstructionAccount(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          new PublicKey(instructionId),
+          instructionAccountDto,
+          instructionAccountExtras
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateInstructionAccount(
-    accountId: string,
-    account: InstructionAccountDto,
-    extras: InstructionAccountExtras
+    instructionAccountId: string,
+    instructionAccountDto: InstructionAccountDto,
+    instructionAccountExtras: InstructionAccountExtras
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionAccount(account, {
-              accounts: {
-                authority: walletPublicKey,
-                account: new PublicKey(accountId),
-              },
-              remainingAccounts: [
-                extras.collection &&
-                  account.kind === 0 && {
-                    pubkey: new PublicKey(extras.collection),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-                extras.payer &&
-                  account.modifier === 0 && {
-                    pubkey: new PublicKey(extras.payer),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-                extras.close &&
-                  account.modifier === 1 && {
-                    pubkey: new PublicKey(extras.close),
-                    isWritable: false,
-                    isSigner: false,
-                  },
-              ].filter(
-                <T>(account: T | '' | false | null): account is T =>
-                  account !== null && account !== false && account !== ''
-              ),
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateInstructionAccount(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionAccountId),
+          instructionAccountDto,
+          instructionAccountExtras
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -848,53 +838,54 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    argument: InstructionArgumentDto
+    instructionArgumentDto: InstructionArgumentDto
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        const argumentKeypair = Keypair.generate();
-
-        return from(
-          defer(() =>
-            writer.rpc.createInstructionArgument(argument, {
-              accounts: {
-                argument: argumentKeypair.publicKey,
-                workspace: new PublicKey(workspaceId),
-                instruction: new PublicKey(instructionId),
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-              signers: [argumentKeypair],
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createInstructionArgument(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          new PublicKey(instructionId),
+          instructionArgumentDto
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
-        );
-      })
+        )
+      )
     );
   }
 
   updateInstructionArgument(
-    argumentId: string,
-    argument: InstructionArgumentDto
+    instructionArgumentId: string,
+    instructionArgumentDto: InstructionArgumentDto
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionArgument(argument, {
-              accounts: {
-                argument: new PublicKey(argumentId),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateCollectionAttribute(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionArgumentId),
+          instructionArgumentDto
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -951,66 +942,58 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    fromAccount: string,
-    toAccount: string
+    fromId: string,
+    toId: string
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) => {
-        return from(
-          defer(async () => {
-            const [relationPublicKey, relationBump] =
-              await PublicKey.findProgramAddress(
-                [
-                  Buffer.from('instruction_relation', 'utf8'),
-                  new PublicKey(fromAccount).toBuffer(),
-                  new PublicKey(toAccount).toBuffer(),
-                ],
-                writer.programId
-              );
-
-            return writer.rpc.createInstructionRelation(relationBump, {
-              accounts: {
-                relation: relationPublicKey,
-                workspace: new PublicKey(workspaceId),
-                instruction: new PublicKey(instructionId),
-                application: new PublicKey(applicationId),
-                from: new PublicKey(fromAccount),
-                to: new PublicKey(toAccount),
-                authority: walletPublicKey,
-                systemProgram: SystemProgram.programId,
-              },
-            });
-          })
-        );
-      })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        createInstructionRelation(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId),
+          new PublicKey(instructionId),
+          new PublicKey(fromId),
+          new PublicKey(toId)
+        ).pipe(
+          concatMap(({ transaction, signers }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection, { signers })
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
+          )
+        )
+      )
     );
   }
 
   updateInstructionRelation(
-    relationId: string,
-    fromAccount: string,
-    toAccount: string
+    instructionRelationId: string,
+    fromId: string,
+    toId: string
   ) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.updateInstructionRelation({
-              accounts: {
-                relation: new PublicKey(relationId),
-                from: new PublicKey(fromAccount),
-                to: new PublicKey(toAccount),
-                authority: walletPublicKey,
-              },
-            })
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        updateInstructionRelation(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionRelationId),
+          new PublicKey(fromId),
+          new PublicKey(toId)
+        ).pipe(
+          concatMap(({ transaction }) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )

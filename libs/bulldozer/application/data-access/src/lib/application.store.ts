@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  createApplication,
-  updateApplication,
-} from '@heavy-duty/bulldozer-devkit';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import {
   Application,
@@ -14,7 +10,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -106,16 +102,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   readonly createApplication = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditApplicationComponent)
           .afterClosed()
@@ -125,22 +112,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, workspaceId]) =>
-              createApplication(
-                connection,
-                walletPublicKey,
-                writer,
-                new PublicKey(workspaceId),
-                name
-              )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
+              this._bulldozerProgramStore.createApplication(workspaceId, name)
             ),
             tapResponse(
               () => this._events.next(new ApplicationCreated()),
@@ -154,40 +126,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly updateApplication = this.effect(
     (application$: Observable<Application>) =>
       application$.pipe(
-        concatMap((application) =>
-          of(application).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([application, connection, walletPublicKey, writer]) =>
+        exhaustMap((application) =>
           this._matDialog
             .open(EditApplicationComponent, { data: { application } })
             .afterClosed()
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                updateApplication(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(application.id),
+                this._bulldozerProgramStore.updateApplication(
+                  application.id,
                   name
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () => this._events.next(new ApplicationUpdated(application.id)),

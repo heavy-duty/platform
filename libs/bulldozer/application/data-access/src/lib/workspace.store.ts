@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { createWorkspace, updateWorkspace } from '@heavy-duty/bulldozer-devkit';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import {
   Application,
@@ -12,7 +11,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -98,32 +97,14 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly createWorkspace = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditWorkspaceComponent)
           .afterClosed()
           .pipe(
             filter((data) => data),
             concatMap(({ name }) =>
-              createWorkspace(connection, walletPublicKey, writer, name)
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
+              this._bulldozerProgramStore.createWorkspace(name)
             ),
             tapResponse(
               () => this._events.next(new WorkspaceCreated()),
@@ -136,38 +117,14 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly updateWorkspace = this.effect((workspace$: Observable<Workspace>) =>
     workspace$.pipe(
-      concatMap((workspace) =>
-        of(workspace).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([workspace, connection, walletPublicKey, writer]) =>
+      exhaustMap((workspace) =>
         this._matDialog
           .open(EditWorkspaceComponent, { data: { workspace } })
           .afterClosed()
           .pipe(
             filter((data) => data),
             concatMap(({ name }) =>
-              updateWorkspace(
-                connection,
-                walletPublicKey,
-                writer,
-                new PublicKey(workspace.id),
-                name
-              )
-            ),
-            concatMap(({ transaction }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection)
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
+              this._bulldozerProgramStore.updateWorkspace(workspace.id, name)
             ),
             tapResponse(
               () => this._events.next(new WorkspaceUpdated(workspace.id)),

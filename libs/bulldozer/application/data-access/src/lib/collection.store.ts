@@ -1,11 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  createCollection,
-  createCollectionAttribute,
-  updateCollection,
-  updateCollectionAttribute,
-} from '@heavy-duty/bulldozer-devkit';
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
@@ -17,7 +11,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -128,16 +122,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly createCollection = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditCollectionComponent)
           .afterClosed()
@@ -148,23 +133,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, workspaceId, applicationId]) =>
-              createCollection(
-                connection,
-                walletPublicKey,
-                writer,
-                new PublicKey(workspaceId),
-                new PublicKey(applicationId),
+              this._bulldozerProgramStore.createCollection(
+                workspaceId,
+                applicationId,
                 name
               )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
             ),
             tapResponse(
               () => {
@@ -181,40 +154,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly updateCollection = this.effect(
     (collection$: Observable<CollectionExtended>) =>
       collection$.pipe(
-        concatMap((collection) =>
-          of(collection).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([collection, connection, walletPublicKey, writer]) =>
+        exhaustMap((collection) =>
           this._matDialog
             .open(EditCollectionComponent, { data: { collection } })
             .afterClosed()
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                updateCollection(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(collection.id),
+                this._bulldozerProgramStore.updateCollection(
+                  collection.id,
                   name
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () => this._events.next(new CollectionUpdated(collection.id)),
@@ -281,16 +231,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly createCollectionAttribute = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditAttributeComponent)
           .afterClosed()
@@ -308,23 +249,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 applicationId,
                 collectionId,
               ]) =>
-                createCollectionAttribute(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(workspaceId),
-                  new PublicKey(applicationId),
-                  new PublicKey(collectionId),
+                this._bulldozerProgramStore.createCollectionAttribute(
+                  workspaceId,
+                  applicationId,
+                  collectionId,
                   collectionAttributeDto
-                )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
                 )
             ),
             tapResponse(
@@ -339,16 +268,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly updateCollectionAttribute = this.effect(
     (attribute$: Observable<CollectionAttribute>) =>
       attribute$.pipe(
-        concatMap((attribute) =>
-          of(attribute).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([attribute, connection, walletPublicKey, writer]) =>
+        exhaustMap((attribute) =>
           this._matDialog
             .open(EditAttributeComponent, {
               data: { attribute },
@@ -357,24 +277,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap((collectionAttributeDto) =>
-                updateCollectionAttribute(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(attribute.id),
+                this._bulldozerProgramStore.updateCollectionAttribute(
+                  attribute.id,
                   collectionAttributeDto
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () =>

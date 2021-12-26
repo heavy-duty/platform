@@ -1,14 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  createInstruction,
-  createInstructionAccount,
-  createInstructionArgument,
-  updateInstruction,
-  updateInstructionAccount,
-  updateInstructionArgument,
-  updateInstructionBody,
-} from '@heavy-duty/bulldozer-devkit';
 import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/features/edit-document';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
@@ -26,7 +17,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -174,16 +165,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly createInstruction = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditInstructionComponent)
           .afterClosed()
@@ -194,23 +176,11 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, workspaceId, applicationId]) =>
-              createInstruction(
-                connection,
-                walletPublicKey,
-                writer,
-                new PublicKey(workspaceId),
-                new PublicKey(applicationId),
+              this._bulldozerProgramStore.createInstruction(
+                workspaceId,
+                applicationId,
                 name
               )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
             ),
             tapResponse(
               () => {
@@ -227,40 +197,17 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly updateInstruction = this.effect(
     (instruction$: Observable<Instruction>) =>
       instruction$.pipe(
-        concatMap((instruction) =>
-          of(instruction).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([instruction, connection, walletPublicKey, writer]) =>
+        exhaustMap((instruction) =>
           this._matDialog
             .open(EditInstructionComponent, { data: { instruction } })
             .afterClosed()
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                updateInstruction(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(instruction.id),
+                this._bulldozerProgramStore.updateInstruction(
+                  instruction.id,
                   name
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () => this._events.next(new InstructionUpdated(instruction.id)),
@@ -274,35 +221,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly updateInstructionBody = this.effect(
     (request$: Observable<{ instruction: Instruction; body: string }>) =>
       request$.pipe(
-        concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        concatMap(
-          ([{ instruction, body }, connection, walletPublicKey, writer]) =>
-            updateInstructionBody(
-              connection,
-              walletPublicKey,
-              writer,
-              new PublicKey(instruction.id),
-              body
-            ).pipe(
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
-              ),
+        concatMap(({ instruction, body }) =>
+          this._bulldozerProgramStore
+            .updateInstructionBody(instruction.id, body)
+            .pipe(
               tapResponse(
                 () => this._events.next(new InstructionUpdated(instruction.id)),
                 (error) => this._error.next(error)
@@ -368,16 +290,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly createArgument = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditArgumentComponent)
           .afterClosed()
@@ -389,24 +302,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               this.instructionId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, workspaceId, applicationId, instructionId]) =>
-              createInstructionArgument(
-                connection,
-                walletPublicKey,
-                writer,
-                new PublicKey(workspaceId),
-                new PublicKey(applicationId),
-                new PublicKey(instructionId),
+              this._bulldozerProgramStore.createInstructionArgument(
+                workspaceId,
+                applicationId,
+                instructionId,
                 name
               )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
-                )
             ),
             tapResponse(
               () => this._events.next(new InstructionArgumentCreated()),
@@ -420,16 +321,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly updateArgument = this.effect(
     (argument$: Observable<InstructionArgument>) =>
       argument$.pipe(
-        concatMap((argument) =>
-          of(argument).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([argument, connection, walletPublicKey, writer]) =>
+        exhaustMap((argument) =>
           this._matDialog
             .open(EditArgumentComponent, {
               data: { argument },
@@ -438,24 +330,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                updateInstructionArgument(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(argument.id),
+                this._bulldozerProgramStore.updateInstructionArgument(
+                  argument.id,
                   name
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () =>
@@ -581,62 +459,42 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap(() =>
         of(null).pipe(
           withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
             this._collectionStore.collections$,
             this.instructionAccounts$
           )
         )
       ),
-      exhaustMap(
-        ([, connection, walletPublicKey, writer, collections, accounts]) =>
-          this._matDialog
-            .open(EditDocumentComponent, { data: { collections, accounts } })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              withLatestFrom(
-                this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-                this._applicationStore.applicationId$.pipe(
-                  isNotNullOrUndefined
-                ),
-                this.instructionId$.pipe(isNotNullOrUndefined)
-              ),
-              concatMap(
-                ([
-                  { name, modifier, collection, space, payer, close },
+      exhaustMap(([, collections, accounts]) =>
+        this._matDialog
+          .open(EditDocumentComponent, { data: { collections, accounts } })
+          .afterClosed()
+          .pipe(
+            filter((data) => data),
+            withLatestFrom(
+              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
+              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+              this.instructionId$.pipe(isNotNullOrUndefined)
+            ),
+            concatMap(
+              ([
+                { name, modifier, collection, space, payer, close },
+                workspaceId,
+                applicationId,
+                instructionId,
+              ]) =>
+                this._bulldozerProgramStore.createInstructionAccount(
                   workspaceId,
                   applicationId,
                   instructionId,
-                ]) =>
-                  createInstructionAccount(
-                    connection,
-                    walletPublicKey,
-                    writer,
-                    new PublicKey(workspaceId),
-                    new PublicKey(applicationId),
-                    new PublicKey(instructionId),
-                    { name, kind: 0, modifier, space },
-                    { collection, payer, close }
-                  )
-              ),
-              concatMap(({ transaction, signers }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection, { signers })
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
-              ),
-              tapResponse(
-                () => this._events.next(new InstructionAccountCreated()),
-                (error) => this._error.next(error)
-              )
+                  { name, kind: 0, modifier, space },
+                  { collection, payer, close }
+                )
+            ),
+            tapResponse(
+              () => this._events.next(new InstructionAccountCreated()),
+              (error) => this._error.next(error)
             )
+          )
       )
     )
   );
@@ -647,81 +505,44 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         concatMap((document) =>
           of(document).pipe(
             withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
               this._collectionStore.collections$,
               this.instructionAccounts$
             )
           )
         ),
-        exhaustMap(
-          ([
-            document,
-            connection,
-            walletPublicKey,
-            writer,
-            collections,
-            accounts,
-          ]) =>
-            this._matDialog
-              .open(EditDocumentComponent, {
-                data: { document, collections, accounts },
-              })
-              .afterClosed()
-              .pipe(
-                filter((data) => data),
-                concatMap(
-                  ({ name, modifier, collection, space, payer, close }) =>
-                    updateInstructionAccount(
-                      connection,
-                      walletPublicKey,
-                      writer,
-                      new PublicKey(document.id),
-                      {
-                        name,
-                        kind: 0,
-                        modifier,
-                        space,
-                      },
-                      { collection, payer, close }
-                    )
-                ),
-                concatMap(({ transaction }) =>
-                  this._walletStore
-                    .sendTransaction(transaction, connection)
-                    .pipe(
-                      concatMap((signature) =>
-                        from(
-                          defer(() => connection.confirmTransaction(signature))
-                        )
-                      )
-                    )
-                ),
-                tapResponse(
-                  () =>
-                    this._events.next(
-                      new InstructionAccountUpdated(document.id)
-                    ),
-                  (error) => this._error.next(error)
+        exhaustMap(([document, collections, accounts]) =>
+          this._matDialog
+            .open(EditDocumentComponent, {
+              data: { document, collections, accounts },
+            })
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              concatMap(({ name, modifier, collection, space, payer, close }) =>
+                this._bulldozerProgramStore.updateInstructionAccount(
+                  document.id,
+                  {
+                    name,
+                    kind: 0,
+                    modifier,
+                    space,
+                  },
+                  { collection, payer, close }
                 )
+              ),
+              tapResponse(
+                () =>
+                  this._events.next(new InstructionAccountUpdated(document.id)),
+                (error) => this._error.next(error)
               )
+            )
         )
       )
   );
 
   readonly createSigner = this.effect((action$) =>
     action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-            this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-          )
-        )
-      ),
-      exhaustMap(([, connection, walletPublicKey, writer]) =>
+      exhaustMap(() =>
         this._matDialog
           .open(EditSignerComponent)
           .afterClosed()
@@ -739,13 +560,10 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 applicationId,
                 instructionId,
               ]) =>
-                createInstructionAccount(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(workspaceId),
-                  new PublicKey(applicationId),
-                  new PublicKey(instructionId),
+                this._bulldozerProgramStore.createInstructionAccount(
+                  workspaceId,
+                  applicationId,
+                  instructionId,
                   {
                     kind: 1,
                     space: null,
@@ -756,15 +574,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     payer: null,
                     close: null,
                   }
-                )
-            ),
-            concatMap(({ transaction, signers }) =>
-              this._walletStore
-                .sendTransaction(transaction, connection, { signers })
-                .pipe(
-                  concatMap((signature) =>
-                    from(defer(() => connection.confirmTransaction(signature)))
-                  )
                 )
             ),
             tapResponse(
@@ -779,16 +588,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly updateSigner = this.effect(
     (signer$: Observable<InstructionAccountExtended>) =>
       signer$.pipe(
-        concatMap((signer) =>
-          of(signer).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-              this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        exhaustMap(([signer, connection, walletPublicKey, writer]) =>
+        exhaustMap((signer) =>
           this._matDialog
             .open(EditSignerComponent, {
               data: { signer },
@@ -797,11 +597,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
             .pipe(
               filter((data) => data),
               concatMap((instructionAccountDto) =>
-                updateInstructionAccount(
-                  connection,
-                  walletPublicKey,
-                  writer,
-                  new PublicKey(signer.id),
+                this._bulldozerProgramStore.updateInstructionAccount(
+                  signer.id,
                   {
                     kind: 1,
                     space: null,
@@ -813,17 +610,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                     close: null,
                   }
                 )
-              ),
-              concatMap(({ transaction }) =>
-                this._walletStore
-                  .sendTransaction(transaction, connection)
-                  .pipe(
-                    concatMap((signature) =>
-                      from(
-                        defer(() => connection.confirmTransaction(signature))
-                      )
-                    )
-                  )
               ),
               tapResponse(
                 () =>

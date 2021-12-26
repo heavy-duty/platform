@@ -10,3 +10,4 @@ export * from './update-instruction';
 export * from './update-instruction-account';
 export * from './update-instruction-argument';
 export * from './update-instruction-body';
+export * from './update-instruction-relation';
