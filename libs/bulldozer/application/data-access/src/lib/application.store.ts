@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import {
+  createApplication,
+  updateApplication,
+} from '@heavy-duty/bulldozer-devkit';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import {
   Application,
@@ -10,7 +14,7 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
+import { PublicKey, sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
@@ -100,8 +104,13 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly createApplication = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
+    combineLatest([
+      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+      this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+      action$,
+    ]).pipe(
+      exhaustMap(([connection, walletPublicKey, writer]) =>
         this._matDialog
           .open(EditApplicationComponent)
           .afterClosed()
@@ -111,14 +120,26 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
             ),
             concatMap(([{ name }, workspaceId]) =>
-              this._bulldozerProgramStore
-                .createApplication(workspaceId, name)
+              createApplication(
+                connection,
+                walletPublicKey,
+                writer,
+                new PublicKey(workspaceId),
+                name
+              )
+            ),
+            concatMap(({ transaction, signers }) =>
+              this._walletStore
+                .sendTransaction(transaction, connection, { signers })
                 .pipe(
-                  tapResponse(
-                    () => this._events.next(new ApplicationCreated()),
-                    (error) => this._error.next(error)
+                  concatMap((signature) =>
+                    from(defer(() => connection.confirmTransaction(signature)))
                   )
                 )
+            ),
+            tapResponse(
+              () => this._events.next(new ApplicationCreated()),
+              (error) => this._error.next(error)
             )
           )
       )
@@ -127,25 +148,41 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   readonly updateApplication = this.effect(
     (application$: Observable<Application>) =>
-      application$.pipe(
-        exhaustMap((application) =>
+      combineLatest([
+        this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+        this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+        this._bulldozerProgramStore.writer$.pipe(isNotNullOrUndefined),
+        application$,
+      ]).pipe(
+        exhaustMap(([connection, walletPublicKey, writer, application]) =>
           this._matDialog
             .open(EditApplicationComponent, { data: { application } })
             .afterClosed()
             .pipe(
               filter((data) => data),
               concatMap(({ name }) =>
-                this._bulldozerProgramStore
-                  .updateApplication(application.id, name)
+                updateApplication(
+                  connection,
+                  walletPublicKey,
+                  writer,
+                  new PublicKey(application.id),
+                  name
+                )
+              ),
+              concatMap(({ transaction }) =>
+                this._walletStore
+                  .sendTransaction(transaction, connection)
                   .pipe(
-                    tapResponse(
-                      () =>
-                        this._events.next(
-                          new ApplicationUpdated(application.id)
-                        ),
-                      (error) => this._error.next(error)
+                    concatMap((signature) =>
+                      from(
+                        defer(() => connection.confirmTransaction(signature))
+                      )
                     )
                   )
+              ),
+              tapResponse(
+                () => this._events.next(new ApplicationUpdated(application.id)),
+                (error) => this._error.next(error)
               )
             )
         )

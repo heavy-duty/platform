@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
@@ -12,10 +13,9 @@ import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directive
 import { SectionHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/section-header';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
-
 import { InstructionMenuComponent } from './instruction-menu.component';
-import { ListDocumentsComponent } from './list-documents.component';
 import { ListArgumentsComponent } from './list-arguments.component';
+import { ListDocumentsComponent } from './list-documents.component';
 import { ListSignersComponent } from './list-signers.component';
 import { ViewInstructionComponent } from './view-instruction.component';
 
@@ -29,6 +29,7 @@ import { ViewInstructionComponent } from './view-instruction.component';
         pathMatch: 'full',
       },
     ]),
+    ReactiveFormsModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,

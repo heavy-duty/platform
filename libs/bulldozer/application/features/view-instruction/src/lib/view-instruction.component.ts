@@ -10,17 +10,18 @@ import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/servic
 import {
   InstructionAccountExtended,
   InstructionArgument,
+  InstructionExtended,
   InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { filter, map, startWith } from 'rxjs';
+import { filter, map, startWith, take } from 'rxjs';
 
 @Component({
   selector: 'bd-view-instruction',
   template: `
-    <div class="flex w-full">
+    <div class="flex w-full" *ngIf="instruction$ | ngrxPush as instruction">
       <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
-        <header bdPageHeader *ngIf="instruction$ | ngrxPush as instruction">
+        <header bdPageHeader>
           <h1>
             {{ instruction.data.name }}
             <button
@@ -82,24 +83,29 @@ import { filter, map, startWith } from 'rxjs';
             [options]="contextEditorOptions$ | ngrxPush"
           ></bd-code-editor>
 
-          <div *ngIf="connected$ | ngrxPush" class="w-full flex justify-end">
-            <p class="ml-2 mb-0">
-              Remember to save the changes below:
-              <button
-                mat-raised-button
-                color="primary"
-                (click)="onSaveInstructionBody()"
-              >
-                Save
-              </button>
-            </p>
-          </div>
+          <ng-container *ngIf="connected$ | ngrxPush">
+            <div
+              *ngIf="instruction.data.body !== instructionBody"
+              class="w-full flex justify-end"
+            >
+              <p class="ml-2 mb-0">
+                Remember to save the changes below:
+                <button
+                  mat-raised-button
+                  color="primary"
+                  (click)="onUpdateInstructionBody(instruction)"
+                >
+                  Save
+                </button>
+              </p>
+            </div>
+          </ng-container>
 
           <bd-code-editor
             [customClass]="'bd-custom-monaco-editor-splited'"
             [template]="instructionBody$ | ngrxPush"
             [options]="handlerEditorOptions$ | ngrxPush"
-            (codeChange)="onUpdateInstructionBody($event)"
+            (codeChange)="instructionBody = $event"
           ></bd-code-editor>
         </div>
       </div>
@@ -110,6 +116,7 @@ import { filter, map, startWith } from 'rxjs';
 })
 export class ViewInstructionComponent implements OnInit {
   @HostBinding('class') class = 'block';
+  instructionBody = '';
   readonly connected$ = this._walletStore.connected$;
   readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionBody$ = this._instructionStore.instructionBody$;
@@ -149,6 +156,12 @@ export class ViewInstructionComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    this._instructionStore.instruction$
+      .pipe(take(1))
+      .subscribe(
+        (instruction) => (this.instructionBody = instruction?.data.body || '')
+      );
+
     this._instructionStore.selectInstruction(
       this._router.events.pipe(
         filter(
@@ -172,12 +185,11 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.reload();
   }
 
-  onUpdateInstructionBody(body: string) {
-    this._instructionStore.updateInstructionBody(body);
-  }
-
-  onSaveInstructionBody() {
-    this._instructionStore.saveInstructionBody();
+  onUpdateInstructionBody(instruction: InstructionExtended) {
+    this._instructionStore.updateInstructionBody({
+      instruction,
+      body: this.instructionBody,
+    });
   }
 
   onCreateArgument() {
