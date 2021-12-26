@@ -3,24 +3,25 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { createTransaction } from '../../operations';
-import { CollectionAttributeDto } from '../../utils';
-import { updateCollectionAttributeInstruction } from './update-collection-attribute.instruction';
+import { updateInstructionRelationInstruction } from './update-instruction-relation.instruction';
 
-export const updateCollectionAttribute = (
+export const updateInstructionRelation = (
   connection: Connection,
   authority: PublicKey,
   program: Program,
-  collectionAttributePublicKey: PublicKey,
-  collectionAttributeDto: CollectionAttributeDto
+  instructionRelationPublicKey: PublicKey,
+  fromPublicKey: PublicKey,
+  toPublicKey: PublicKey
 ): Observable<{ transaction: Transaction }> => {
   return createTransaction(connection, authority).pipe(
     map((transaction) => {
       transaction.add(
-        updateCollectionAttributeInstruction(
+        updateInstructionRelationInstruction(
           authority,
           program,
-          collectionAttributePublicKey,
-          collectionAttributeDto
+          instructionRelationPublicKey,
+          fromPublicKey,
+          toPublicKey
         )
       );
 

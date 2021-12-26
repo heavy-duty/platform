@@ -3,6 +3,7 @@ import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { createTransaction } from '../../operations';
+import { InstructionArgumentDto } from '../../utils';
 import { updateInstructionArgumentInstruction } from './update-instruction-argument.instruction';
 
 export const updateInstructionArgument = (
@@ -10,7 +11,7 @@ export const updateInstructionArgument = (
   authority: PublicKey,
   program: Program,
   instructionArgumentPublicKey: PublicKey,
-  instructionArgumentName: string
+  instructionArgumentDto: InstructionArgumentDto
 ): Observable<{ transaction: Transaction }> => {
   return createTransaction(connection, authority).pipe(
     map((transaction) => {
@@ -19,7 +20,7 @@ export const updateInstructionArgument = (
           authority,
           program,
           instructionArgumentPublicKey,
-          instructionArgumentName
+          instructionArgumentDto
         )
       );
 

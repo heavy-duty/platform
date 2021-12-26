@@ -1,14 +1,14 @@
 import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 
-export const deleteInstructionArgumentInstruction = (
+export const deleteInstructionRelationInstruction = (
   authority: PublicKey,
   program: Program,
-  instructionArgumentPublicKey: PublicKey
+  instructionRelationPublicKey: PublicKey
 ): TransactionInstruction => {
-  return program.instruction.deleteInstructionArgument({
+  return program.instruction.deleteInstructionRelation({
     accounts: {
-      argument: instructionArgumentPublicKey,
+      relation: instructionRelationPublicKey,
       authority: authority,
     },
   });
