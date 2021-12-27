@@ -1,6 +1,15 @@
+import {
+  Application,
+  Collection,
+  CollectionAttribute,
+  Instruction,
+  InstructionAccount,
+  InstructionArgument,
+  InstructionRelation,
+  Workspace,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { saveAs } from 'file-saver';
 import * as JSZip from 'jszip';
-
 import {
   formatApplication,
   formatCollection,
@@ -10,21 +19,25 @@ import {
 import {
   generateCode,
   getTemplateByType,
-  WorkspaceMetadata,
   registerHandleBarsHelpers,
+  WorkspaceMetadata,
 } from './utils';
-import {
-  Application,
-  CollectionExtended,
-  InstructionExtended,
-  Workspace,
-} from '@heavy-duty/bulldozer/application/utils/types';
 
 // TODO: Move later
 registerHandleBarsHelpers();
 
-export const generateInstructionCode = (instruction: InstructionExtended) => {
-  const formattedInstruction = formatInstruction(instruction);
+export const generateInstructionCode = (
+  instruction: Instruction,
+  instructionArguments: InstructionArgument[],
+  instructionAccounts: InstructionAccount[],
+  instructionRelations: InstructionRelation[]
+) => {
+  const formattedInstruction = formatInstruction(
+    instruction,
+    instructionArguments,
+    instructionAccounts,
+    instructionRelations
+  );
   const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.data.collection && account.data.collection.data.name !== null
@@ -42,8 +55,14 @@ export const generateInstructionCode = (instruction: InstructionExtended) => {
   );
 };
 
-export const generateCollectionCode = (collection: CollectionExtended) => {
-  const formattedCollection = formatCollection(collection);
+export const generateCollectionCode = (
+  collection: Collection,
+  collectionAttributes: CollectionAttribute[]
+) => {
+  const formattedCollection = formatCollection(
+    collection,
+    collectionAttributes
+  );
 
   return generateCode(
     { collection: formattedCollection },
@@ -62,9 +81,14 @@ export const generateModCode = (entries: { data: { name: string } }[]) => {
 
 export const generateApplicationCode = (
   application: Application,
-  instructions: InstructionExtended[]
+  instructions: Instruction[],
+  instructionArguments: InstructionArgument[]
 ) => {
-  const formattedApplication = formatApplication(application, instructions);
+  const formattedApplication = formatApplication(
+    application,
+    instructions,
+    instructionArguments
+  );
 
   return generateCode(
     {
@@ -76,8 +100,12 @@ export const generateApplicationCode = (
 
 export const generateWorkspaceMetadata = (
   applications: Application[],
-  collections: CollectionExtended[],
-  instructions: InstructionExtended[]
+  collections: Collection[],
+  collectionAttributes: CollectionAttribute[],
+  instructions: Instruction[],
+  instructionArguments: InstructionArgument[],
+  instructionAccounts: InstructionAccount[],
+  instructionRelations: InstructionRelation[]
 ): WorkspaceMetadata => {
   return {
     applications: applications.map((application) => {
@@ -89,14 +117,36 @@ export const generateWorkspaceMetadata = (
       );
 
       return {
-        template: generateApplicationCode(application, filteredInstructions),
+        template: generateApplicationCode(
+          application,
+          filteredInstructions,
+          instructionArguments.filter(
+            ({ data }) => data.application === application.id
+          )
+        ),
         name: formatName(application.data.name),
         collections: filteredCollections.map((collection) => ({
-          template: generateCollectionCode(collection),
+          template: generateCollectionCode(
+            collection,
+            collectionAttributes.filter(
+              ({ data }) => data.collection === collection.id
+            )
+          ),
           name: formatName(collection.data.name),
         })),
         instructions: filteredInstructions.map((instruction) => ({
-          template: generateInstructionCode(instruction),
+          template: generateInstructionCode(
+            instruction,
+            instructionArguments.filter(
+              ({ data }) => data.instruction === instruction.id
+            ),
+            instructionAccounts.filter(
+              ({ data }) => data.instruction === instruction.id
+            ),
+            instructionRelations.filter(
+              ({ data }) => data.instruction === instruction.id
+            )
+          ),
           name: formatName(instruction.data.name),
         })),
         collectionsMod: {

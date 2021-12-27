@@ -11,7 +11,6 @@ import {
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { filter, Subject, takeUntil } from 'rxjs';
 import { ApplicationShellStore } from './shell.store';
@@ -19,7 +18,7 @@ import { ApplicationShellStore } from './shell.store';
 @Component({
   selector: 'bd-application-shell',
   template: `
-    <bd-navigation (downloadWorkspace)="onDownloadWorkspace($event)">
+    <bd-navigation>
       <nav mat-tab-nav-bar *ngIf="applicationId$ | ngrxPush as applicationId">
         <div
           mat-tab-link
@@ -93,10 +92,6 @@ export class ApplicationShellComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this._destroy.next(null);
     this._destroy.complete();
-  }
-
-  onDownloadWorkspace(workspace: Workspace) {
-    this._applicationShellStore.downloadWorkspace(workspace);
   }
 
   onCloseTab(event: Event, tabId: string) {

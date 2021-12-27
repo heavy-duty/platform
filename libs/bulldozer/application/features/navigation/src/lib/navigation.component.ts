@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  EventEmitter,
-  Output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
   ApplicationStore,
   CollectionStore,
@@ -12,13 +7,10 @@ import {
 } from '@heavy-duty/bulldozer/application/data-access';
 import {
   Application,
-  CollectionExtended,
-  InstructionExtended,
+  Collection,
+  Instruction,
   Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { combineLatest, map } from 'rxjs';
 import { NavigationStore } from './navigation.store';
 
 @Component({
@@ -112,7 +104,6 @@ import { NavigationStore } from './navigation.store';
   providers: [NavigationStore],
 })
 export class NavigationComponent {
-  @Output() downloadWorkspace = new EventEmitter();
   readonly isHandset$ = this._navigationStore.isHandset$;
   readonly connected$ = this._navigationStore.connected$;
   readonly address$ = this._navigationStore.address$;
@@ -120,18 +111,15 @@ export class NavigationComponent {
   readonly workspaces$ = this._workspaceStore.workspaces$;
   readonly applications$ = this._applicationStore.applications$;
   readonly application$ = this._applicationStore.application$;
-  readonly collections$ = this._collectionStore.activeCollections$;
-  readonly instructions$ = this._instructionStore.activeInstructions$;
+  readonly collections$ = this._collectionStore.collections$;
+  readonly instructions$ = this._instructionStore.instructions$;
 
   constructor(
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore,
     private readonly _navigationStore: NavigationStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore
+    private readonly _instructionStore: InstructionStore
   ) {}
 
   onCreateWorkspace() {
@@ -143,26 +131,7 @@ export class NavigationComponent {
   }
 
   onDeleteWorkspace(workspace: Workspace) {
-    const applications$ = this._bulldozerProgramStore.getApplications(
-      workspace.id
-    );
-    const collections$ = this._bulldozerProgramStore.getExtendedCollections(
-      workspace.id
-    );
-    const instructions$ = this._bulldozerProgramStore.getExtendedInstructions(
-      workspace.id
-    );
-
-    this._workspaceStore.deleteWorkspace(
-      combineLatest([applications$, collections$, instructions$]).pipe(
-        map(([applications, collections, instructions]) => ({
-          workspace,
-          applications,
-          collections,
-          instructions,
-        }))
-      )
-    );
+    this._workspaceStore.deleteWorkspace(workspace);
   }
 
   onCreateApplication() {
@@ -174,37 +143,18 @@ export class NavigationComponent {
   }
 
   onDeleteApplication(application: Application) {
-    const collections$ = this._collectionStore.collections$.pipe(
-      map((collections) =>
-        collections.filter(({ data }) => application.id === data.application)
-      )
-    );
-    const instructions$ = this._instructionStore.instructions$.pipe(
-      map((instructions) =>
-        instructions.filter(({ data }) => application.id === data.application)
-      )
-    );
-
-    this._applicationStore.deleteApplication(
-      combineLatest([collections$, instructions$]).pipe(
-        map(([collections, instructions]) => ({
-          application,
-          collections,
-          instructions,
-        }))
-      )
-    );
+    this._applicationStore.deleteApplication(application);
   }
 
   onCreateCollection() {
     this._collectionStore.createCollection();
   }
 
-  onUpdateCollection(collection: CollectionExtended) {
+  onUpdateCollection(collection: Collection) {
     this._collectionStore.updateCollection(collection);
   }
 
-  onDeleteCollection(collection: CollectionExtended) {
+  onDeleteCollection(collection: Collection) {
     this._collectionStore.deleteCollection(collection);
   }
 
@@ -212,15 +162,15 @@ export class NavigationComponent {
     this._instructionStore.createInstruction();
   }
 
-  onUpdateInstruction(instruction: InstructionExtended) {
+  onUpdateInstruction(instruction: Instruction) {
     this._instructionStore.updateInstruction(instruction);
   }
 
-  onDeleteInstruction(instruction: InstructionExtended) {
+  onDeleteInstruction(instruction: Instruction) {
     this._instructionStore.deleteInstruction(instruction);
   }
 
   onDownloadWorkspace(workspace: Workspace) {
-    this.downloadWorkspace.emit(workspace);
+    this._workspaceStore.downloadWorkspace(workspace);
   }
 }

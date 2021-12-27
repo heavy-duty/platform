@@ -1,6 +1,8 @@
-import { CollectionExtended } from '@heavy-duty/bulldozer/application/utils/types';
+import {
+  Collection,
+  CollectionAttribute,
+} from '@heavy-duty/bulldozer/application/utils/types';
 import { capitalize } from '../utils';
-
 import { formatName } from './format-name';
 
 const getAttributeKindName = (id: number, name: string, size: number) => {
@@ -23,11 +25,14 @@ const getAttributeKindName = (id: number, name: string, size: number) => {
   }
 };
 
-export const formatCollection = (collection: CollectionExtended) => ({
+export const formatCollection = (
+  collection: Collection,
+  collectionAttributes: CollectionAttribute[]
+) => ({
   name: formatName(collection.data.name),
   attributes:
-    collection.attributes &&
-    collection.attributes
+    collectionAttributes &&
+    collectionAttributes
       .filter((attribute) => attribute.data.collection === collection.id)
       .map((attribute) => ({
         id: attribute.id,

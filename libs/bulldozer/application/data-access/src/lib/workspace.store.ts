@@ -2,30 +2,35 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import {
+  generateWorkspaceMetadata,
+  generateWorkspaceZip,
+} from '@heavy-duty/bulldozer/application/utils/services/code-generator';
+import {
   Application,
-  CollectionExtended,
-  InstructionExtended,
+  Collection,
+  CollectionAttribute,
+  Instruction,
+  InstructionAccount,
+  InstructionArgument,
+  InstructionRelation,
   Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
   concatMap,
-  defer,
   exhaustMap,
   filter,
-  from,
+  forkJoin,
+  map,
   Observable,
   of,
   Subject,
   switchMap,
   tap,
-  throwError,
+  withLatestFrom,
 } from 'rxjs';
 import {
   WorkspaceActions,
@@ -35,7 +40,17 @@ import {
   WorkspaceUpdated,
 } from './actions/workspace.actions';
 
-interface ViewModel {
+interface WorkspaceData {
+  applications: Application[];
+  collections: Collection[];
+  collectionAttributes: CollectionAttribute[];
+  instructions: Instruction[];
+  instructionArguments: InstructionArgument[];
+  instructionAccounts: InstructionAccount[];
+  instructionRelations: InstructionRelation[];
+}
+
+interface ViewModel extends WorkspaceData {
   workspaceId: string | null;
   workspaces: Workspace[];
   error: unknown | null;
@@ -44,6 +59,13 @@ interface ViewModel {
 const initialState = {
   workspaceId: null,
   workspaces: [],
+  applications: [],
+  collections: [],
+  collectionAttributes: [],
+  instructions: [],
+  instructionArguments: [],
+  instructionAccounts: [],
+  instructionRelations: [],
   error: null,
 };
 
@@ -65,28 +87,119 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     (workspaces, workspaceId) =>
       workspaces.find(({ id }) => id === workspaceId) || null
   );
+  readonly applications$ = this.select(({ applications }) => applications);
+  readonly collections$ = this.select(({ collections }) => collections);
+  readonly collectionAttributes$ = this.select(
+    ({ collectionAttributes }) => collectionAttributes
+  );
+  readonly instructions$ = this.select(({ instructions }) => instructions);
+  readonly instructionArguments$ = this.select(
+    ({ instructionArguments }) => instructionArguments
+  );
+  readonly instructionAccounts$ = this.select(
+    ({ instructionAccounts }) => instructionAccounts
+  );
+  readonly instructionRelations$ = this.select(
+    ({ instructionRelations }) => instructionRelations
+  );
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore
+    private readonly _bulldozerProgramStore: BulldozerProgramStore
   ) {
     super(initialState);
   }
 
+  readonly addWorkspaceData = this.updater(
+    (state, workspaceData: WorkspaceData) => ({
+      ...state,
+      applications: [...state.applications, ...workspaceData.applications],
+      collections: [...state.collections, ...workspaceData.collections],
+      collectionAttributes: [
+        ...state.collectionAttributes,
+        ...workspaceData.collectionAttributes,
+      ],
+      instructions: [...state.instructions, ...workspaceData.instructions],
+      instructionArguments: [
+        ...state.instructionArguments,
+        ...workspaceData.instructionArguments,
+      ],
+      instructionAccounts: [
+        ...state.instructionAccounts,
+        ...workspaceData.instructionAccounts,
+      ],
+      instructionRelations: [
+        ...state.instructionRelations,
+        ...workspaceData.instructionRelations,
+      ],
+    })
+  );
+
   readonly loadWorkspaces = this.effect(() =>
-    combineLatest([
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([publicKey]) =>
-        this._bulldozerProgramStore.getWorkspaces(publicKey.toBase58()).pipe(
+    this.reload$.pipe(
+      switchMap(() =>
+        this._bulldozerProgramStore.getWorkspaces().pipe(
           tapResponse(
             (workspaces) => this.patchState({ workspaces }),
             (error) => this._error.next(error)
           )
         )
+      ),
+      switchMap((workspaces) =>
+        forkJoin(
+          workspaces.map((workspace) =>
+            forkJoin([
+              this._bulldozerProgramStore.getApplications(workspace.id),
+              forkJoin([
+                this._bulldozerProgramStore.getCollections(workspace.id),
+                this._bulldozerProgramStore.getCollectionAttributes(
+                  workspace.id
+                ),
+              ]),
+              forkJoin([
+                this._bulldozerProgramStore.getInstructions(workspace.id),
+                this._bulldozerProgramStore.getInstructionArguments(
+                  workspace.id
+                ),
+                this._bulldozerProgramStore.getInstructionAccounts(
+                  workspace.id
+                ),
+                this._bulldozerProgramStore.getInstructionRelations(
+                  workspace.id
+                ),
+              ]),
+            ]).pipe(
+              map(
+                ([
+                  applications,
+                  [collections, collectionAttributes],
+                  [
+                    instructions,
+                    instructionArguments,
+                    instructionAccounts,
+                    instructionRelations,
+                  ],
+                ]) => ({
+                  applications,
+                  collections,
+                  collectionAttributes,
+                  instructions,
+                  instructionArguments,
+                  instructionAccounts,
+                  instructionRelations,
+                })
+              )
+            )
+          )
+        )
+      ),
+      tapResponse(
+        (workspacesData) => {
+          workspacesData.forEach((workspaceData) =>
+            this.addWorkspaceData(workspaceData)
+          );
+        },
+        (error) => this._error.next(error)
       )
     )
   );
@@ -135,71 +248,187 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly deleteWorkspace = this.effect(
-    (
-      request$: Observable<{
-        workspace: Workspace;
-        applications: Application[];
-        collections: CollectionExtended[];
-        instructions: InstructionExtended[];
-      }>
-    ) =>
-      request$.pipe(
-        concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
-            )
-          )
-        ),
-        concatMap(
-          ([
-            { workspace, applications, collections, instructions },
-            connection,
-            walletPublicKey,
-          ]) =>
-            this._bulldozerProgramStore
-              .getDeleteWorkspaceTransactions(
-                connection,
-                walletPublicKey,
-                workspace,
-                applications,
-                collections,
-                instructions
+  readonly deleteWorkspace = this.effect((workspace$: Observable<Workspace>) =>
+    workspace$.pipe(
+      concatMap((workspace) =>
+        of(workspace).pipe(
+          withLatestFrom(
+            this.applications$.pipe(
+              map((applications) =>
+                applications
+                  .filter(({ data }) => data.workspace === workspace.id)
+                  .map(({ id }) => id)
               )
-              .pipe(
-                concatMap((transactions) => {
-                  const signAllTransactions$ =
-                    this._walletStore.signAllTransactions(transactions);
+            ),
+            combineLatest([
+              this.collections$.pipe(
+                map((collections) =>
+                  collections
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this.collectionAttributes$.pipe(
+                map((collectionAttributes) =>
+                  collectionAttributes
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+            ]),
+            combineLatest([
+              this.instructions$.pipe(
+                map((instructions) =>
+                  instructions
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this.instructionArguments$.pipe(
+                map((instructionArguments) =>
+                  instructionArguments
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this.instructionAccounts$.pipe(
+                map((instructionAccounts) =>
+                  instructionAccounts
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this.instructionRelations$.pipe(
+                map((instructionRelations) =>
+                  instructionRelations
+                    .filter(({ data }) => data.workspace === workspace.id)
+                    .map(({ id }) => id)
+                )
+              ),
+            ])
+          )
+        )
+      ),
+      concatMap(
+        ([
+          workspace,
+          applications,
+          [collections, collectionAttributes],
+          [
+            instructions,
+            instructionArguments,
+            instructionAccounts,
+            instructionRelations,
+          ],
+        ]) =>
+          this._bulldozerProgramStore
+            .deleteWorkspace(
+              workspace.id,
+              applications,
+              collections,
+              collectionAttributes,
+              instructions,
+              instructionArguments,
+              instructionAccounts,
+              instructionRelations
+            )
+            .pipe(
+              tapResponse(
+                () => this._events.next(new WorkspaceDeleted(workspace.id)),
+                (error) => this._error.next(error)
+              )
+            )
+      )
+    )
+  );
 
-                  if (!signAllTransactions$) {
-                    return throwError(
-                      new Error('Sign all transactions method is not defined')
-                    );
-                  }
-
-                  return signAllTransactions$;
-                }),
-                concatMap((transactions) =>
-                  from(
-                    defer(() =>
-                      Promise.all(
-                        transactions.map((transaction) =>
-                          sendAndConfirmRawTransaction(
-                            connection,
-                            transaction.serialize()
-                          )
-                        )
-                      )
+  readonly downloadWorkspace = this.effect(
+    (workspace$: Observable<Workspace>) =>
+      workspace$.pipe(
+        concatMap((workspace) =>
+          of(workspace).pipe(
+            withLatestFrom(
+              this.applications$.pipe(
+                map((applications) =>
+                  applications.filter(
+                    ({ data }) => data.workspace === workspace.id
+                  )
+                )
+              ),
+              combineLatest([
+                this.collections$.pipe(
+                  map((collections) =>
+                    collections.filter(
+                      ({ data }) => data.workspace === workspace.id
                     )
                   )
                 ),
-                tapResponse(
-                  () => this._events.next(new WorkspaceDeleted(workspace.id)),
-                  (error) => this._error.next(error)
-                )
+                this.collectionAttributes$.pipe(
+                  map((collectionAttributes) =>
+                    collectionAttributes.filter(
+                      ({ data }) => data.workspace === workspace.id
+                    )
+                  )
+                ),
+              ]),
+              combineLatest([
+                this.instructions$.pipe(
+                  map((instructions) =>
+                    instructions.filter(
+                      ({ data }) => data.workspace === workspace.id
+                    )
+                  )
+                ),
+                this.instructionArguments$.pipe(
+                  map((instructionArguments) =>
+                    instructionArguments.filter(
+                      ({ data }) => data.workspace === workspace.id
+                    )
+                  )
+                ),
+                this.instructionAccounts$.pipe(
+                  map((instructionAccounts) =>
+                    instructionAccounts.filter(
+                      ({ data }) => data.workspace === workspace.id
+                    )
+                  )
+                ),
+                this.instructionRelations$.pipe(
+                  map((instructionRelations) =>
+                    instructionRelations.filter(
+                      ({ data }) => data.workspace === workspace.id
+                    )
+                  )
+                ),
+              ])
+            )
+          )
+        ),
+        map(
+          ([
+            workspace,
+            applications,
+            [collections, collectionAttributes],
+            [
+              instructions,
+              instructionArguments,
+              instructionAccounts,
+              instructionRelations,
+            ],
+          ]) =>
+            workspace &&
+            generateWorkspaceZip(
+              workspace,
+              generateWorkspaceMetadata(
+                applications,
+                collections,
+                collectionAttributes,
+                instructions,
+                instructionArguments,
+                instructionAccounts,
+                instructionRelations
               )
+            )
         )
       )
   );

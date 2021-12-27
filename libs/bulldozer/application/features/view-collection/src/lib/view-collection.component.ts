@@ -41,7 +41,7 @@ import { filter, map, startWith } from 'rxjs';
           <bd-list-attributes
             class="block mb-16"
             [connected]="connected$ | ngrxPush"
-            [attributes]="attributes$ | ngrxPush"
+            [attributes]="collectionAttributes$ | ngrxPush"
             (updateAttribute)="onUpdateAttribute($event)"
             (deleteAttribute)="onDeleteAttribute($event)"
           >
@@ -64,7 +64,7 @@ export class ViewCollectionComponent implements OnInit {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._collectionStore.collection$;
-  readonly attributes$ = this._collectionStore.attributes$;
+  readonly collectionAttributes$ = this._collectionStore.collectionAttributes$;
   readonly rustCodeCollection$ = this._collectionStore.rustCode$;
   readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) => ({

@@ -11,7 +11,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
-  InstructionAccountExtended,
+  InstructionAccount,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -201,9 +201,9 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditDocumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      document?: InstructionAccountExtended;
+      document?: InstructionAccount;
       collections: Collection[];
-      accounts: InstructionAccountExtended[];
+      accounts: InstructionAccount[];
     }
   ) {}
 
@@ -235,10 +235,10 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
             this.data.document.data.modifier !== null
               ? this.data.document.data.modifier.id
               : null,
-          collection: this.data.document.data.collection?.id || null,
+          collection: this.data.document.data.collection || null,
           space: this.data.document.data.space,
-          payer: this.data.document.data.payer?.id || null,
-          close: this.data.document.data.close?.id || null,
+          payer: this.data.document.data.payer || null,
+          close: this.data.document.data.close || null,
         },
         { emitEvent: false }
       );

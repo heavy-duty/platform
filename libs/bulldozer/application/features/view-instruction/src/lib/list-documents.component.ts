@@ -6,8 +6,9 @@ import {
   Output,
 } from '@angular/core';
 import {
-  InstructionAccountExtended,
-  InstructionRelationExtended,
+  Collection,
+  InstructionAccount,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
@@ -59,53 +60,50 @@ import {
                     </ng-container>
                   </span>
                 </h3>
-                <p class="text-xs mb-0 italic" *ngIf="document.data.collection">
+                <p class="text-xs mb-0 italic" *ngIf="document.collection">
                   Collection:
-                  {{ document.data.collection.data.name }}
+                  {{ document.collection.data.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
                       '/applications',
                       document.data.application,
                       'collections',
-                      document.data.collection.id
+                      document.collection.id
                     ]"
-                    >{{ document.data.collection.id | obscureAddress }}</a
+                    >{{ document.collection.id | obscureAddress }}</a
                   >
                 </p>
-                <p class="text-xs mb-0 italic" *ngIf="document.data.close">
+                <p class="text-xs mb-0 italic" *ngIf="document.close">
                   Close:
-                  {{ document.data.close.data.name }} ({{
-                    document.data.close.id | obscureAddress
+                  {{ document.close.data.name }} ({{
+                    document.close.id | obscureAddress
                   }})
                 </p>
-                <p class="text-xs mb-0 italic" *ngIf="document.data.payer">
+                <p class="text-xs mb-0 italic" *ngIf="document.payer">
                   Payer:
-                  {{ document.data.payer.data.name }} ({{
-                    document.data.payer.id | obscureAddress
+                  {{ document.payer.data.name }} ({{
+                    document.payer.id | obscureAddress
                   }})
                 </p>
                 <ng-container
-                  *ngIf="
-                    document.data.relations &&
-                    document.data.relations.length > 0
-                  "
+                  *ngIf="document.relations && document.relations.length > 0"
                 >
                   <p class="mt-2 mb-0 font-bold">Relations</p>
                   <ul class="list-disc pl-4">
                     <li
-                      *ngFor="let relation of document.data.relations"
+                      *ngFor="let relation of document.relations"
                       class="text-xs"
                     >
-                      {{ relation.data.to.data.name }} ({{
-                        relation.data.to.id | obscureAddress
+                      {{ relation.to.data.name }} ({{
+                        relation.id | obscureAddress
                       }})
                       <button
                         class="w-6 h-6 leading-6"
                         mat-icon-button
                         [attr.aria-label]="
                           'More options of ' +
-                          relation.data.to.data.name +
+                          relation.to.data.name +
                           ' has one relation'
                         "
                         [matMenuTriggerFor]="documentRelationMenu"
@@ -176,13 +174,20 @@ import {
 })
 export class ListDocumentsComponent {
   @Input() connected?: boolean | null = null;
-  @Input() documents?: InstructionAccountExtended[] | null = null;
-  @Output() updateDocument = new EventEmitter<InstructionAccountExtended>();
+  @Input() documents?:
+    | (InstructionAccount & {
+        relations: (InstructionRelation & { to: InstructionAccount })[];
+        close: InstructionAccount | null;
+        collection: Collection | null;
+        payer: InstructionAccount | null;
+      })[]
+    | null;
+  @Output() updateDocument = new EventEmitter<InstructionAccount>();
   @Output() deleteDocument = new EventEmitter<string>();
-  @Output() updateRelation = new EventEmitter<InstructionRelationExtended>();
+  @Output() updateRelation = new EventEmitter<InstructionRelation>();
   @Output() deleteRelation = new EventEmitter<string>();
 
-  onUpdateDocument(document: InstructionAccountExtended) {
+  onUpdateDocument(document: InstructionAccount) {
     this.updateDocument.emit(document);
   }
 
@@ -190,7 +195,7 @@ export class ListDocumentsComponent {
     this.deleteDocument.emit(documentId);
   }
 
-  onUpdateRelation(relation: InstructionRelationExtended) {
+  onUpdateRelation(relation: InstructionRelation & { to: InstructionAccount }) {
     this.updateRelation.emit(relation);
   }
 

@@ -1,8 +1,8 @@
 import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CollectionExtended } from '@heavy-duty/bulldozer/application/utils/types';
+import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-edit-collection',
@@ -77,7 +77,7 @@ export class EditCollectionComponent implements OnInit {
     private readonly _matDialogRef: MatDialogRef<EditCollectionComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      collection?: CollectionExtended;
+      collection?: Collection;
     }
   ) {}
 

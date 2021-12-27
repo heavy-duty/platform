@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { InstructionExtended } from '@heavy-duty/bulldozer/application/utils/types';
+import { Instruction } from '@heavy-duty/bulldozer/application/utils/types';
 
 @Component({
   selector: 'bd-instruction-selector',
@@ -70,10 +70,10 @@ import { InstructionExtended } from '@heavy-duty/bulldozer/application/utils/typ
 })
 export class InstructionSelectorComponent {
   @Input() connected?: boolean | null = null;
-  @Input() instructions?: InstructionExtended[] | null = null;
+  @Input() instructions?: Instruction[] | null = null;
   @Output() createInstruction = new EventEmitter();
-  @Output() updateInstruction = new EventEmitter<InstructionExtended>();
-  @Output() deleteInstruction = new EventEmitter<InstructionExtended>();
+  @Output() updateInstruction = new EventEmitter<Instruction>();
+  @Output() deleteInstruction = new EventEmitter<Instruction>();
 
   onCreateInstruction(event: Event) {
     event.stopPropagation();
@@ -81,11 +81,11 @@ export class InstructionSelectorComponent {
     this.createInstruction.emit();
   }
 
-  onEditInstruction(instruction: InstructionExtended) {
+  onEditInstruction(instruction: Instruction) {
     this.updateInstruction.emit(instruction);
   }
 
-  onDeleteInstruction(instruction: InstructionExtended) {
+  onDeleteInstruction(instruction: Instruction) {
     this.deleteInstruction.emit(instruction);
   }
 }

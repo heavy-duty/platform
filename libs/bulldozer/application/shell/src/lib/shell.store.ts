@@ -15,11 +15,6 @@ import {
   WorkspaceActionTypes,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import {
-  generateWorkspaceMetadata,
-  generateWorkspaceZip,
-} from '@heavy-duty/bulldozer/application/utils/services/code-generator';
-import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -27,10 +22,8 @@ import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
 import {
-  combineLatest,
   concatMap,
   filter,
-  map,
   merge,
   Observable,
   of,
@@ -251,10 +244,8 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
 
   readonly notifyWorkspaceSuccess = this.effect(() =>
     this._workspaceStore.events$.pipe(
-      tap((a) => console.log(a)),
       filter((event) => event.type !== WorkspaceActionTypes.WorkspaceInit),
       tap((event) => {
-        console.log(event);
         this._workspaceStore.reload();
         this._matSnackBar.open(event.type, 'Close', {
           panelClass: `success-snackbar`,
@@ -301,32 +292,6 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
         });
       })
     )
-  );
-
-  readonly downloadWorkspace = this.effect(
-    (workspace$: Observable<Workspace>) =>
-      workspace$.pipe(
-        concatMap((workspace) =>
-          combineLatest([
-            this._bulldozerProgramStore.getApplications(workspace.id),
-            this._bulldozerProgramStore.getExtendedCollections(workspace.id),
-            this._bulldozerProgramStore.getExtendedInstructions(workspace.id),
-          ]).pipe(
-            map(
-              ([applications, collections, instructions]) =>
-                workspace &&
-                generateWorkspaceZip(
-                  workspace,
-                  generateWorkspaceMetadata(
-                    applications,
-                    collections,
-                    instructions
-                  )
-                )
-            )
-          )
-        )
-      )
   );
 
   private getErrorMessage(error: unknown) {

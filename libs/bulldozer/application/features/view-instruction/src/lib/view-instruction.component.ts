@@ -8,10 +8,10 @@ import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import {
-  InstructionAccountExtended,
+  Instruction,
+  InstructionAccount,
   InstructionArgument,
-  InstructionExtended,
-  InstructionRelationExtended,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { filter, map, startWith, take } from 'rxjs';
@@ -185,7 +185,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.reload();
   }
 
-  onUpdateInstructionBody(instruction: InstructionExtended) {
+  onUpdateInstructionBody(instruction: Instruction) {
     this._instructionStore.updateInstructionBody({
       instruction,
       body: this.instructionBody,
@@ -208,7 +208,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createDocument();
   }
 
-  onUpdateDocument(account: InstructionAccountExtended) {
+  onUpdateDocument(account: InstructionAccount) {
     this._instructionStore.updateDocument(account);
   }
 
@@ -216,7 +216,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createSigner();
   }
 
-  onUpdateSigner(account: InstructionAccountExtended) {
+  onUpdateSigner(account: InstructionAccount) {
     this._instructionStore.updateSigner(account);
   }
 
@@ -228,7 +228,7 @@ export class ViewInstructionComponent implements OnInit {
     this._instructionStore.createRelation();
   }
 
-  onUpdateRelation(relation: InstructionRelationExtended) {
+  onUpdateRelation(relation: InstructionRelation) {
     this._instructionStore.updateRelation(relation);
   }
 

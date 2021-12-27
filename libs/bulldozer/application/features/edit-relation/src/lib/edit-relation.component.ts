@@ -11,12 +11,12 @@ import {
   ValidatorFn,
   Validators,
 } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
-  InstructionAccountExtended,
-  InstructionRelationExtended,
+  InstructionAccount,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject } from 'rxjs';
 
@@ -130,9 +130,9 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      relation?: InstructionRelationExtended;
+      relation?: InstructionRelation;
       collections: Collection[];
-      accounts: InstructionAccountExtended[];
+      accounts: InstructionAccount[];
     }
   ) {}
 
@@ -140,8 +140,8 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     if (this.data?.relation) {
       this.relationGroup.setValue(
         {
-          from: this.data.relation.data.from.id,
-          to: this.data.relation.data.to.id,
+          from: this.data.relation.data.from,
+          to: this.data.relation.data.to,
         },
         { emitEvent: false }
       );

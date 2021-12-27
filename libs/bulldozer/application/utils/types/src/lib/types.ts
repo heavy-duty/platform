@@ -31,14 +31,6 @@ export interface Collection {
   data: CollectionInfo;
 }
 
-export interface CollectionExtension {
-  attributes: CollectionAttribute[];
-}
-
-export type CollectionExtended = Collection & {
-  attributes: CollectionAttribute[];
-};
-
 export interface CollectionAttributeInfo {
   authority: string;
   workspace: string;
@@ -163,22 +155,6 @@ export interface InstructionAccountExtras {
   close: string | null;
 }
 
-export interface InstructionAccountExtended {
-  id: string;
-  data: Omit<InstructionAccountInfo, 'collection' | 'payer' | 'close'> & {
-    collection: Collection | null;
-    payer: InstructionAccount | null;
-    close: InstructionAccount | null;
-    relations: InstructionRelationExtended[];
-  };
-}
-
-export type InstructionExtended = Instruction & {
-  arguments: InstructionArgument[];
-  accounts: InstructionAccountExtended[];
-  relations: InstructionRelation[];
-};
-
 export interface InstructionRelationInfo {
   authority: string;
   workspace: string;
@@ -191,12 +167,4 @@ export interface InstructionRelationInfo {
 export interface InstructionRelation {
   id: string;
   data: InstructionRelationInfo;
-}
-
-export interface InstructionRelationExtended {
-  id: string;
-  data: Omit<InstructionRelationInfo, 'from' | 'to'> & {
-    from: InstructionAccount;
-    to: InstructionAccount;
-  };
 }

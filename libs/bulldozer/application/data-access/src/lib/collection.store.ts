@@ -4,28 +4,22 @@ import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/featur
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
+  Collection,
   CollectionAttribute,
-  CollectionExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
-  combineLatest,
   concatMap,
-  defer,
   exhaustMap,
   filter,
-  from,
+  map,
   Observable,
   of,
   Subject,
-  switchMap,
   tap,
-  throwError,
   withLatestFrom,
 } from 'rxjs';
 import {
@@ -43,12 +37,12 @@ import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   collectionId: string | null;
-  collections: CollectionExtended[];
+  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   collectionId: null,
-  collections: [],
+  error: null,
 };
 
 @Injectable()
@@ -61,57 +55,42 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     new CollectionInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly collections$ = this.select(({ collections }) => collections);
-  readonly activeCollections$ = this.select(
-    this.collections$,
-    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
+  readonly collections$ = this.select(
+    this._workspaceStore.collections$,
+    this._applicationStore.applicationId$,
     (collections, applicationId) =>
-      collections.filter(
-        (collection) => collection.data.application === applicationId
-      )
+      collections.filter(({ data }) => data.application === applicationId)
   );
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
   readonly collection$ = this.select(
-    this.collections$,
+    this._workspaceStore.collections$,
     this.collectionId$,
     (collections, collectionId) =>
       collections.find(({ id }) => id === collectionId) || null
   );
-  readonly attributes$ = this.select(
-    this.collection$,
-    (collection) => collection && collection.attributes
+  readonly collectionAttributes$ = this.select(
+    this._workspaceStore.collectionAttributes$,
+    this.collectionId$,
+    (attributes, collectionId) =>
+      attributes.filter(
+        ({ data: { collection } }) => collection === collectionId
+      )
   );
   readonly rustCode$ = this.select(
     this.collection$,
-    (collection) => collection && generateCollectionCode(collection)
+    this.collectionAttributes$,
+    (collection, collectionAttributes) =>
+      collection && generateCollectionCode(collection, collectionAttributes)
   );
 
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
-    private readonly _applicationStore: ApplicationStore,
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore
+    private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
   }
-
-  readonly loadCollections = this.effect(() =>
-    combineLatest([
-      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([workspaceId]) =>
-        this._bulldozerProgramStore.getExtendedCollections(workspaceId).pipe(
-          tapResponse(
-            (collections) => this.patchState({ collections }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
 
   readonly selectCollection = this.effect(
     (collectionId$: Observable<string | null>) =>
@@ -152,7 +131,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateCollection = this.effect(
-    (collection$: Observable<CollectionExtended>) =>
+    (collection$: Observable<Collection>) =>
       collection$.pipe(
         exhaustMap((collection) =>
           this._matDialog
@@ -176,50 +155,25 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteCollection = this.effect(
-    (collection$: Observable<CollectionExtended>) =>
+    (collection$: Observable<Collection>) =>
       collection$.pipe(
         concatMap((collection) =>
           of(collection).pipe(
             withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+              this._workspaceStore.collectionAttributes$.pipe(
+                map((collections) =>
+                  collections
+                    .filter(({ data }) => data.collection === collection.id)
+                    .map(({ id }) => id)
+                )
+              )
             )
           )
         ),
-        concatMap(([collection, connection, walletPublicKey]) =>
+        concatMap(([collection, collectionAttributes]) =>
           this._bulldozerProgramStore
-            .getDeleteCollectionTransactions(
-              connection,
-              walletPublicKey,
-              collection
-            )
+            .deleteCollection(collection.id, collectionAttributes)
             .pipe(
-              concatMap((transactions) => {
-                const signAllTransactions$ =
-                  this._walletStore.signAllTransactions(transactions);
-
-                if (!signAllTransactions$) {
-                  return throwError(
-                    new Error('Sign all transactions method is not defined')
-                  );
-                }
-
-                return signAllTransactions$;
-              }),
-              concatMap((transactions) =>
-                from(
-                  defer(() =>
-                    Promise.all(
-                      transactions.map((transaction) =>
-                        sendAndConfirmRawTransaction(
-                          connection,
-                          transaction.serialize()
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
               tapResponse(
                 () => this._events.next(new CollectionDeleted(collection.id)),
                 (error) => this._error.next(error)

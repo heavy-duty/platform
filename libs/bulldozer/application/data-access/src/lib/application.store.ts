@@ -1,30 +1,21 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
-import {
-  Application,
-  CollectionExtended,
-  InstructionExtended,
-} from '@heavy-duty/bulldozer/application/utils/types';
+import { Application } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
   concatMap,
-  defer,
   exhaustMap,
   filter,
-  from,
+  map,
   Observable,
   of,
   Subject,
-  switchMap,
   tap,
-  throwError,
   withLatestFrom,
 } from 'rxjs';
 import {
@@ -38,13 +29,11 @@ import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   applicationId: string | null;
-  applications: Application[];
   error: unknown | null;
 }
 
 const initialState = {
   applicationId: null,
-  applications: [],
   error: null,
 };
 
@@ -58,10 +47,15 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     new ApplicationInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly applications$ = this.select(({ applications }) => applications);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
+  readonly applications$ = this.select(
+    this._workspaceStore.applications$,
+    this._workspaceStore.workspaceId$,
+    (applications, workspaceId) =>
+      applications.filter(({ data }) => data.workspace === workspaceId)
+  );
   readonly application$ = this.select(
-    this.applications$,
+    this._workspaceStore.applications$,
     this.applicationId$,
     (applications, applicationId) =>
       applications.find(({ id }) => id === applicationId) || null
@@ -70,28 +64,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore
+    private readonly _workspaceStore: WorkspaceStore
   ) {
     super(initialState);
   }
-
-  readonly loadApplications = this.effect(() =>
-    combineLatest([
-      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([workspaceId]) =>
-        this._bulldozerProgramStore.getApplications(workspaceId).pipe(
-          tapResponse(
-            (applications) => this.patchState({ applications }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
 
   readonly selectApplication = this.effect(
     (applicationId$: Observable<string | null>) =>
@@ -148,63 +124,82 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteApplication = this.effect(
-    (
-      request$: Observable<{
-        application: Application;
-        collections: CollectionExtended[];
-        instructions: InstructionExtended[];
-      }>
-    ) =>
-      request$.pipe(
-        concatMap((request) =>
-          of(request).pipe(
+    (application$: Observable<Application>) =>
+      application$.pipe(
+        concatMap((application) =>
+          of(application).pipe(
             withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+              combineLatest([
+                this._workspaceStore.collections$.pipe(
+                  map((collections) =>
+                    collections
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+                this._workspaceStore.collectionAttributes$.pipe(
+                  map((collectionAttributes) =>
+                    collectionAttributes
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+              ]),
+              combineLatest([
+                this._workspaceStore.instructions$.pipe(
+                  map((instructions) =>
+                    instructions
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+                this._workspaceStore.instructionArguments$.pipe(
+                  map((instructions) =>
+                    instructions
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+                this._workspaceStore.instructionAccounts$.pipe(
+                  map((instructionAccounts) =>
+                    instructionAccounts
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+                this._workspaceStore.instructionRelations$.pipe(
+                  map((instructionRelations) =>
+                    instructionRelations
+                      .filter(({ data }) => data.application === application.id)
+                      .map(({ id }) => id)
+                  )
+                ),
+              ])
             )
           )
         ),
         concatMap(
           ([
-            { application, collections, instructions },
-            connection,
-            walletPublicKey,
+            application,
+            [collections, collectionAttributes],
+            [
+              instructions,
+              instructionArguments,
+              instructionAccounts,
+              instructionRelations,
+            ],
           ]) =>
             this._bulldozerProgramStore
-              .getDeleteApplicationTransactions(
-                connection,
-                walletPublicKey,
-                application,
+              .deleteApplication(
+                application.id,
                 collections,
-                instructions
+                collectionAttributes,
+                instructions,
+                instructionArguments,
+                instructionAccounts,
+                instructionRelations
               )
               .pipe(
-                concatMap((transactions) => {
-                  const signAllTransactions$ =
-                    this._walletStore.signAllTransactions(transactions);
-
-                  if (!signAllTransactions$) {
-                    return throwError(
-                      new Error('Sign all transactions method is not defined')
-                    );
-                  }
-
-                  return signAllTransactions$;
-                }),
-                concatMap((transactions) =>
-                  from(
-                    defer(() =>
-                      Promise.all(
-                        transactions.map((transaction) =>
-                          sendAndConfirmRawTransaction(
-                            connection,
-                            transaction.serialize()
-                          )
-                        )
-                      )
-                    )
-                  )
-                ),
                 tapResponse(
                   () =>
                     this._events.next(new ApplicationDeleted(application.id)),

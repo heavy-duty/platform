@@ -1,7 +1,8 @@
 import {
-  InstructionAccountExtended,
+  Instruction,
+  InstructionAccount,
   InstructionArgument,
-  InstructionExtended,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
@@ -48,83 +49,163 @@ export const formatInstructionArguments = (
       },
     }));
 
-const formatInstructionAccounts = (
-  instructionId: string,
-  instructionAccounts: InstructionAccountExtended[]
-) =>
-  instructionAccounts
-    .filter((account) => account.data.instruction === instructionId)
-    .map((account) => {
-      let payer = null,
-        collection = null,
-        close = null,
-        relations = null;
+const getInstructionAccountRelations = (
+  instructionAccount: InstructionAccount,
+  instructionAccounts: InstructionAccount[],
+  instructionRelations: InstructionRelation[]
+) => {
+  return instructionRelations
+    .filter((relation) => relation.data.from === instructionAccount.id)
+    .map((relation) => {
+      const toAccount = instructionAccounts.find(
+        ({ id }) => id === relation.data.to
+      );
 
-      if (account.data.relations) {
-        relations = account.data.relations.map((relation) => ({
-          ...relation,
-          data: {
-            ...relation.data,
-            to: {
-              ...relation.data.to,
-              data: {
-                ...relation.data.to.data,
-                name: formatName(relation.data.to.data.name),
-              },
-            },
-          },
-        }));
-      }
-
-      if (account.data.payer) {
-        payer = {
-          ...account.data.payer,
-          data: {
-            ...account.data.payer?.data,
-            name: formatName(account.data.payer?.data?.name),
-          },
-        };
-      }
-
-      if (account.data.collection) {
-        collection = {
-          ...account.data.collection,
-          data: {
-            ...account.data.collection?.data,
-            name: formatName(account.data.collection?.data?.name),
-          },
-        };
-      }
-
-      if (account.data.close) {
-        close = {
-          ...account.data.close,
-          data: {
-            ...account.data.close?.data,
-            name: formatName(account.data.close?.data?.name),
-          },
-        };
+      if (!toAccount) {
+        throw Error('Relation references uknown account');
       }
 
       return {
-        id: account.id,
+        ...relation,
         data: {
-          ...account.data,
-          collection: collection,
-          close,
-          payer: payer,
-          name: formatName(account.data.name),
-          relations,
+          ...relation.data,
+          toAccount: {
+            ...toAccount,
+            data: {
+              ...toAccount.data,
+              name: formatName(toAccount.data.name),
+            },
+          },
         },
       };
     });
+};
 
-export const formatInstruction = (instruction: InstructionExtended) => ({
+const getInstructionAccountPayer = (
+  instructionAccount: InstructionAccount,
+  instructionAccounts: InstructionAccount[]
+) => {
+  if (!instructionAccount.data.payer) {
+    return null;
+  }
+
+  const payerAccount = instructionAccounts.find(
+    ({ id }) => id === instructionAccount.data.payer
+  );
+
+  if (!payerAccount) {
+    throw Error('Payer references uknown account');
+  }
+
+  return {
+    ...payerAccount,
+    data: {
+      ...payerAccount.data,
+      name: formatName(payerAccount.data.name),
+    },
+  };
+};
+
+const getInstructionAccountCollection = (
+  instructionAccount: InstructionAccount,
+  instructionAccounts: InstructionAccount[]
+) => {
+  if (!instructionAccount.data.collection) {
+    return null;
+  }
+
+  const collectionAccount = instructionAccounts.find(
+    ({ id }) => id === instructionAccount.data.collection
+  );
+
+  if (!collectionAccount) {
+    throw Error('Collection references uknown account');
+  }
+
+  return {
+    ...collectionAccount,
+    data: {
+      ...collectionAccount.data,
+      name: formatName(collectionAccount.data.name),
+    },
+  };
+};
+
+const getInstructionAccountClose = (
+  instructionAccount: InstructionAccount,
+  instructionAccounts: InstructionAccount[]
+) => {
+  if (!instructionAccount.data.close) {
+    return null;
+  }
+
+  const closeAccount = instructionAccounts.find(
+    ({ id }) => id === instructionAccount.data.close
+  );
+
+  if (!closeAccount) {
+    throw Error('Close references uknown account');
+  }
+
+  return {
+    ...closeAccount,
+    data: {
+      ...closeAccount.data,
+      name: formatName(closeAccount.data.name),
+    },
+  };
+};
+
+const formatInstructionAccounts = (
+  instructionId: string,
+  instructionAccounts: InstructionAccount[],
+  instructionRelations: InstructionRelation[]
+) =>
+  instructionAccounts
+    .filter(
+      (instructionAccount) =>
+        instructionAccount.data.instruction === instructionId
+    )
+    .map((instructionAccount) => ({
+      id: instructionAccount.id,
+      data: {
+        ...instructionAccount.data,
+        collection: getInstructionAccountCollection(
+          instructionAccount,
+          instructionAccounts
+        ),
+        close: getInstructionAccountClose(
+          instructionAccount,
+          instructionAccounts
+        ),
+        payer: getInstructionAccountPayer(
+          instructionAccount,
+          instructionAccounts
+        ),
+        name: formatName(instructionAccount.data.name),
+        relations: getInstructionAccountRelations(
+          instructionAccount,
+          instructionAccounts,
+          instructionRelations
+        ),
+      },
+    }));
+
+export const formatInstruction = (
+  instruction: Instruction,
+  instructionArguments: InstructionArgument[],
+  instructionAccounts: InstructionAccount[],
+  instructionRelations: InstructionRelation[]
+) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),
-  initializesAccount: instruction.accounts.some(
+  initializesAccount: instructionAccounts.some(
     (account) => account.data.modifier?.id === 0
   ),
-  arguments: formatInstructionArguments(instruction.id, instruction.arguments),
-  accounts: formatInstructionAccounts(instruction.id, instruction.accounts),
+  arguments: formatInstructionArguments(instruction.id, instructionArguments),
+  accounts: formatInstructionAccounts(
+    instruction.id,
+    instructionAccounts,
+    instructionRelations
+  ),
 });

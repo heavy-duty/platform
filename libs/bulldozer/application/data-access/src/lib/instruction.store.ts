@@ -7,31 +7,25 @@ import { EditRelationComponent } from '@heavy-duty/bulldozer/application/feature
 import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
+  Collection,
   Instruction,
-  InstructionAccountExtended,
+  InstructionAccount,
   InstructionArgument,
-  InstructionExtended,
-  InstructionRelationExtended,
+  InstructionRelation,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
-  combineLatest,
   concatMap,
-  defer,
   exhaustMap,
   filter,
-  from,
+  map,
   Observable,
   of,
   Subject,
-  switchMap,
   tap,
-  throwError,
   withLatestFrom,
 } from 'rxjs';
 import {
@@ -56,12 +50,12 @@ import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   instructionId: string | null;
-  instructions: InstructionExtended[];
+  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  instructions: [],
+  error: null,
 };
 
 @Injectable()
@@ -74,14 +68,11 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     new InstructionInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly instructions$ = this.select(({ instructions }) => instructions);
-  readonly activeInstructions$ = this.select(
-    this.instructions$,
+  readonly instructions$ = this.select(
+    this._workspaceStore.instructions$,
     this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
     (instructions, applicationId) =>
-      instructions.filter(
-        (instruction) => instruction.data.application === applicationId
-      )
+      instructions.filter(({ data }) => data.application === applicationId)
   );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instruction$ = this.select(
@@ -91,12 +82,28 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       instructions.find(({ id }) => id === instructionId) || null
   );
   readonly instructionArguments$ = this.select(
-    this.instruction$,
-    (instruction) => instruction && instruction.arguments
+    this._workspaceStore.instructionArguments$,
+    this.instructionId$,
+    (instructionArguments, instructionId) =>
+      instructionArguments.filter(
+        ({ data }) => data.instruction === instructionId
+      )
   );
   readonly instructionAccounts$ = this.select(
-    this.instruction$,
-    (instruction) => instruction && instruction.accounts
+    this._workspaceStore.instructionAccounts$,
+    this.instructionId$,
+    (instructionAccounts, instructionId) =>
+      instructionAccounts.filter(
+        ({ data }) => data.instruction === instructionId
+      )
+  );
+  readonly instructionRelations$ = this.select(
+    this._workspaceStore.instructionRelations$,
+    this.instructionId$,
+    (instructionRelations, instructionId) =>
+      instructionRelations.filter(
+        ({ data }) => data.instruction === instructionId
+      )
   );
   readonly instructionBody$ = this.select(
     this.instruction$,
@@ -104,12 +111,79 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
   readonly instructionContext$ = this.select(
     this.instruction$,
-    (instruction) => instruction && generateInstructionCode(instruction)
+    this.instructionArguments$,
+    this.instructionAccounts$,
+    this.instructionRelations$,
+    (
+      instruction,
+      instructionArguments,
+      instructionAccounts,
+      instructionRelations
+    ) =>
+      instruction &&
+      generateInstructionCode(
+        instruction,
+        instructionArguments,
+        instructionAccounts,
+        instructionRelations
+      )
   );
   readonly documents$ = this.select(
     this.instructionAccounts$,
-    (accounts) =>
-      accounts && accounts.filter((account) => account.data.kind.id === 0)
+    this.instructionRelations$,
+    this._workspaceStore.collections$,
+    (instructionAccounts, instructionRelations, collections) =>
+      instructionAccounts
+        .filter((instructionAccount) => instructionAccount.data.kind.id === 0)
+        .map((instructionAccount) => ({
+          ...instructionAccount,
+          relations: instructionRelations
+            .filter(({ data }) => data.from === instructionAccount.id)
+            .reduce(
+              (
+                relations: (InstructionRelation & {
+                  to: InstructionAccount;
+                })[],
+                instructionRelation
+              ) => {
+                const toAccount = instructionAccounts.find(
+                  ({ id }) => id === instructionRelation.data.to
+                );
+
+                return toAccount
+                  ? [
+                      ...relations,
+                      {
+                        ...instructionRelation,
+                        to: toAccount,
+                      },
+                    ]
+                  : relations;
+              },
+              []
+            ),
+          collection: collections.reduce(
+            (found: Collection | null, collection) =>
+              !found && instructionAccount.data.collection === collection.id
+                ? collection
+                : null,
+            null
+          ),
+          payer: instructionAccounts.reduce(
+            (found: InstructionAccount | null, payer) =>
+              !found && instructionAccount.data.payer === payer.id
+                ? payer
+                : null,
+            null
+          ),
+          close: instructionAccounts.reduce(
+            (found: InstructionAccount | null, close) =>
+              !found && instructionAccount.data.close === close.id
+                ? close
+                : null,
+            null
+          ),
+        }))
   );
   readonly signers$ = this.select(
     this.instructionAccounts$,
@@ -119,8 +193,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _matDialog: MatDialog,
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
@@ -128,33 +200,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
   }
-
-  readonly setInstructionBody = this.updater((state, body: string) => {
-    return {
-      ...state,
-      instructions: state.instructions.map((instruction) =>
-        instruction.id === state.instructionId
-          ? { ...instruction, data: { ...instruction.data, body } }
-          : instruction
-      ),
-    };
-  });
-
-  readonly loadInstructions = this.effect(() =>
-    combineLatest([
-      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-      this.reload$,
-    ]).pipe(
-      switchMap(([workspaceId]) =>
-        this._bulldozerProgramStore.getExtendedInstructions(workspaceId).pipe(
-          tapResponse(
-            (instructions) => this.patchState({ instructions }),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
 
   readonly selectInstruction = this.effect(
     (instructionId$: Observable<string | null>) =>
@@ -235,55 +280,56 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstruction = this.effect(
-    (instruction$: Observable<InstructionExtended>) =>
+    (instruction$: Observable<Instruction>) =>
       instruction$.pipe(
         concatMap((instruction) =>
           of(instruction).pipe(
             withLatestFrom(
-              this._connectionStore.connection$.pipe(isNotNullOrUndefined),
-              this._walletStore.publicKey$.pipe(isNotNullOrUndefined)
+              this._workspaceStore.instructionArguments$.pipe(
+                map((instructions) =>
+                  instructions
+                    .filter(({ data }) => data.instruction === instruction.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this._workspaceStore.instructionAccounts$.pipe(
+                map((instructionAccounts) =>
+                  instructionAccounts
+                    .filter(({ data }) => data.instruction === instruction.id)
+                    .map(({ id }) => id)
+                )
+              ),
+              this._workspaceStore.instructionRelations$.pipe(
+                map((instructionRelations) =>
+                  instructionRelations
+                    .filter(({ data }) => data.instruction === instruction.id)
+                    .map(({ id }) => id)
+                )
+              )
             )
           )
         ),
-        concatMap(([instruction, connection, walletPublicKey]) =>
-          this._bulldozerProgramStore
-            .getDeleteInstructionTransactions(
-              connection,
-              walletPublicKey,
-              instruction
-            )
-            .pipe(
-              concatMap((transactions) => {
-                const signAllTransactions$ =
-                  this._walletStore.signAllTransactions(transactions);
-
-                if (!signAllTransactions$) {
-                  return throwError(
-                    new Error('Sign all transactions method is not defined')
-                  );
-                }
-
-                return signAllTransactions$;
-              }),
-              concatMap((transactions) =>
-                from(
-                  defer(() =>
-                    Promise.all(
-                      transactions.map((transaction) =>
-                        sendAndConfirmRawTransaction(
-                          connection,
-                          transaction.serialize()
-                        )
-                      )
-                    )
-                  )
-                )
-              ),
-              tapResponse(
-                () => this._events.next(new InstructionDeleted(instruction.id)),
-                (error) => this._error.next(error)
+        concatMap(
+          ([
+            instruction,
+            instructionArguments,
+            instructionAccounts,
+            instructionRelations,
+          ]) =>
+            this._bulldozerProgramStore
+              .deleteInstruction(
+                instruction.id,
+                instructionArguments,
+                instructionAccounts,
+                instructionRelations
               )
-            )
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._events.next(new InstructionDeleted(instruction.id)),
+                  (error) => this._error.next(error)
+                )
+              )
         )
       )
   );
@@ -397,7 +443,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateRelation = this.effect(
-    (relation$: Observable<InstructionRelationExtended>) =>
+    (relation$: Observable<InstructionRelation>) =>
       relation$.pipe(
         concatMap((relation) =>
           of(relation).pipe(withLatestFrom(this.instructionAccounts$))
@@ -500,7 +546,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateDocument = this.effect(
-    (document$: Observable<InstructionAccountExtended>) =>
+    (document$: Observable<InstructionAccount>) =>
       document$.pipe(
         concatMap((document) =>
           of(document).pipe(
@@ -586,7 +632,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateSigner = this.effect(
-    (signer$: Observable<InstructionAccountExtended>) =>
+    (signer$: Observable<InstructionAccount>) =>
       signer$.pipe(
         exhaustMap((signer) =>
           this._matDialog

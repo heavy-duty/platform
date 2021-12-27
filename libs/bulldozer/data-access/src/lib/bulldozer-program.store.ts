@@ -1,51 +1,51 @@
 import { Injectable } from '@angular/core';
 import {
-  createApplication,
-  createCollection,
-  createCollectionAttribute,
-  createInstruction,
-  createInstructionAccount,
-  createInstructionArgument,
-  createInstructionRelation,
-  createWorkspace,
-  updateCollection,
-  updateCollectionAttribute,
-  updateInstruction,
-  updateInstructionAccount,
-  updateInstructionBody,
-  updateInstructionRelation,
-  updateWorkspace,
+  findInstructionRelationAddress,
+  getCreateApplicationTransaction,
+  getCreateCollectionAttributeTransaction,
+  getCreateCollectionTransaction,
+  getCreateInstructionAccountTransaction,
+  getCreateInstructionArgumentTransaction,
+  getCreateInstructionRelationTransaction,
+  getCreateInstructionTransaction,
+  getCreateWorkspaceTransaction,
+  getDeleteApplicationTransaction,
+  getDeleteCollectionAttributeTransaction,
+  getDeleteCollectionTransaction,
+  getDeleteInstructionArgumentTransaction,
+  getDeleteInstructionRelationTransaction,
+  getDeleteInstructionTransaction,
+  getDeleteWorkspaceTransaction,
+  getUpdateApplicationTransaction,
+  getUpdateCollectionAttributeTransaction,
+  getUpdateCollectionTransaction,
+  getUpdateInstructionAccountTransaction,
+  getUpdateInstructionBodyTransaction,
+  getUpdateInstructionRelationTransaction,
+  getUpdateInstructionTransaction,
+  getUpdateWorkspaceTransaction,
 } from '@heavy-duty/bulldozer-devkit';
 import {
-  Application,
   CollectionAttributeDto,
-  CollectionExtended,
   InstructionAccountDto,
   InstructionAccountExtras,
   InstructionArgumentDto,
-  InstructionExtended,
-  InstructionRelationExtended,
-  Workspace,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
-import { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   combineLatest,
   concatMap,
   defer,
-  forkJoin,
   from,
   map,
-  mergeMap,
-  Observable,
   of,
   take,
   tap,
-  toArray,
   withLatestFrom,
 } from 'rxjs';
 import {
@@ -121,15 +121,13 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
       .pipe(tap((writer) => this.patchState({ writer })))
   );
 
-  getWorkspaces(walletPublicKey: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
+  getWorkspaces() {
+    return this.context.pipe(
+      concatMap(({ program, authority }) =>
         from(
           defer(() =>
-            reader.account.workspace.all([
-              { memcmp: { bytes: walletPublicKey, offset: 8 } },
+            program.account.workspace.all([
+              { memcmp: { bytes: authority.toBase58(), offset: 8 } },
             ])
           )
         ).pipe(
@@ -165,12 +163,22 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createWorkspace(workspaceName: string) {
+    const workspaceKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createWorkspace(connection, authority, program, workspaceName).pipe(
-          concatMap(({ transaction, signers }) =>
+        getCreateWorkspaceTransaction(
+          connection,
+          authority,
+          program,
+          workspaceKeypair,
+          workspaceName
+        ).pipe(
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [workspaceKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -185,14 +193,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateWorkspace(workspaceId: string, workspaceName: string) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateWorkspace(
+        getUpdateWorkspaceTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           workspaceName
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -206,21 +214,59 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteWorkspace(workspaceId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteWorkspace({
-              accounts: {
-                workspace: new PublicKey(workspaceId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteWorkspace(
+    workspaceId: string,
+    workspaceApplicationIds: string[],
+    workspaceApplicationCollectionIds: string[],
+    workspaceApplicationCollectionAttributeIds: string[],
+    workspaceApplicationInstructionIds: string[],
+    workspaceApplicationInstructionArgumentIds: string[],
+    workspaceApplicationInstructionAccountIds: string[],
+    workspaceApplicationInstructionRelationIds: string[]
+  ) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteWorkspaceTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(workspaceId),
+          workspaceApplicationIds.map(
+            (workspaceApplicationId) => new PublicKey(workspaceApplicationId)
+          ),
+          workspaceApplicationCollectionIds.map(
+            (workspaceApplicationCollectionId) =>
+              new PublicKey(workspaceApplicationCollectionId)
+          ),
+          workspaceApplicationCollectionAttributeIds.map(
+            (workspaceApplicationCollectionAttributeId) =>
+              new PublicKey(workspaceApplicationCollectionAttributeId)
+          ),
+          workspaceApplicationInstructionIds.map(
+            (workspaceApplicationInstructionId) =>
+              new PublicKey(workspaceApplicationInstructionId)
+          ),
+          workspaceApplicationInstructionArgumentIds.map(
+            (workspaceApplicationInstructionArgumentId) =>
+              new PublicKey(workspaceApplicationInstructionArgumentId)
+          ),
+          workspaceApplicationInstructionAccountIds.map(
+            (workspaceApplicationInstructionAccountId) =>
+              new PublicKey(workspaceApplicationInstructionAccountId)
+          ),
+          workspaceApplicationInstructionRelationIds.map(
+            (workspaceApplicationInstructionRelationId) =>
+              new PublicKey(workspaceApplicationInstructionRelationId)
+          )
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -271,18 +317,23 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   createApplication(workspaceId: string, applicationName: string) {
+    const applicationKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createApplication(
+        getCreateApplicationTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
+          applicationKeypair,
           applicationName
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [applicationKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -297,14 +348,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateApplication(applicationId: string, applicationName: string) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateWorkspace(
+        getUpdateApplicationTransaction(
           connection,
           authority,
           program,
           new PublicKey(applicationId),
           applicationName
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -318,21 +369,54 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteApplication(applicationId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteApplication({
-              accounts: {
-                application: new PublicKey(applicationId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteApplication(
+    applicationId: string,
+    applicationCollectionIds: string[],
+    applicationCollectionAttributeIds: string[],
+    applicationInstructionIds: string[],
+    applicationInstructionArgumentIds: string[],
+    applicationInstructionAccountIds: string[],
+    applicationInstructionRelationIds: string[]
+  ) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteApplicationTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(applicationId),
+          applicationCollectionIds.map(
+            (applicationCollectionId) => new PublicKey(applicationCollectionId)
+          ),
+          applicationCollectionAttributeIds.map(
+            (applicationCollectionAttributeId) =>
+              new PublicKey(applicationCollectionAttributeId)
+          ),
+          applicationInstructionIds.map(
+            (applicationInstructionId) =>
+              new PublicKey(applicationInstructionId)
+          ),
+          applicationInstructionArgumentIds.map(
+            (applicationInstructionArgumentId) =>
+              new PublicKey(applicationInstructionArgumentId)
+          ),
+          applicationInstructionAccountIds.map(
+            (applicationInstructionAccountId) =>
+              new PublicKey(applicationInstructionAccountId)
+          ),
+          applicationInstructionRelationIds.map(
+            (applicationInstructionRelationId) =>
+              new PublicKey(applicationInstructionRelationId)
+          )
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -387,19 +471,24 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     applicationId: string,
     collectionName: string
   ) {
+    const collectionKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createCollection(
+        getCreateCollectionTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
+          collectionKeypair,
           collectionName
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [collectionKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -414,14 +503,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateCollection(collectionId: string, collectionName: string) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateCollection(
+        getUpdateCollectionTransaction(
           connection,
           authority,
           program,
           new PublicKey(collectionId),
           collectionName
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -435,28 +524,33 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteCollection(collectionId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteCollection({
-              accounts: {
-                collection: new PublicKey(collectionId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteCollection(collectionId: string, collectionAttributeIds: string[]) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteCollectionTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(collectionId),
+          collectionAttributeIds.map(
+            (collectionAttributeId) => new PublicKey(collectionAttributeId)
+          )
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
     );
   }
 
-  getCollectionAttributes(collectionId: string) {
+  getCollectionAttributes(workspaceId: string) {
     return this.reader$.pipe(
       isNotNullOrUndefined,
       take(1),
@@ -464,7 +558,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         from(
           defer(() =>
             reader.account.collectionAttribute.all([
-              { memcmp: { bytes: collectionId, offset: 104 } },
+              { memcmp: { bytes: workspaceId, offset: 40 } },
             ])
           )
         ).pipe(
@@ -487,20 +581,25 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     collectionId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
+    const collectionAttributeKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createCollectionAttribute(
+        getCreateCollectionAttributeTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(collectionId),
+          collectionAttributeKeypair,
           collectionAttributeDto
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [collectionAttributeKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -518,14 +617,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateCollectionAttribute(
+        getUpdateCollectionAttributeTransaction(
           connection,
           authority,
           program,
           new PublicKey(collectionAttributeId),
           collectionAttributeDto
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -539,21 +638,23 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteCollectionAttribute(attributeId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteCollectionAttribute({
-              accounts: {
-                attribute: new PublicKey(attributeId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteCollectionAttribute(collectionAttributeId: string) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteCollectionAttributeTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(collectionAttributeId)
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -608,19 +709,24 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     applicationId: string,
     instructionName: string
   ) {
+    const instructionKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createInstruction(
+        getCreateInstructionTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
+          instructionKeypair,
           instructionName
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [instructionKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -635,14 +741,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateInstruction(instructionId: string, instructionName: string) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateInstruction(
+        getUpdateInstructionTransaction(
           connection,
           authority,
           program,
           new PublicKey(instructionId),
           instructionName
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -659,14 +765,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateInstructionBody(instructionId: string, instructionBody: string) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateInstructionBody(
+        getUpdateInstructionBodyTransaction(
           connection,
           authority,
           program,
           new PublicKey(instructionId),
           instructionBody
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -680,21 +786,37 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstruction(instructionId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstruction({
-              accounts: {
-                instruction: new PublicKey(instructionId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteInstruction(
+    instructionId: string,
+    instructionArgumentIds: string[],
+    instructionAccountIds: string[],
+    instructionRelationIds: string[]
+  ) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteInstructionTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionId),
+          instructionArgumentIds.map(
+            (instructionArgumentId) => new PublicKey(instructionArgumentId)
+          ),
+          instructionAccountIds.map(
+            (instructionAccountId) => new PublicKey(instructionAccountId)
+          ),
+          instructionRelationIds.map(
+            (instructionRelationId) => new PublicKey(instructionRelationId)
+          )
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -733,21 +855,26 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     instructionAccountDto: InstructionAccountDto,
     instructionAccountExtras: InstructionAccountExtras
   ) {
+    const instructionAccountKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createInstructionAccount(
+        getCreateInstructionAccountTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(instructionId),
+          instructionAccountKeypair,
           instructionAccountDto,
           instructionAccountExtras
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [instructionAccountKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -766,7 +893,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateInstructionAccount(
+        getUpdateInstructionAccountTransaction(
           connection,
           authority,
           program,
@@ -774,7 +901,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           instructionAccountDto,
           instructionAccountExtras
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -840,20 +967,25 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     instructionId: string,
     instructionArgumentDto: InstructionArgumentDto
   ) {
+    const instructionArgumentKeypair = new Keypair();
+
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createInstructionArgument(
+        getCreateInstructionArgumentTransaction(
           connection,
           authority,
           program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(instructionId),
+          instructionArgumentKeypair,
           instructionArgumentDto
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection, {
+                signers: [instructionArgumentKeypair],
+              })
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -871,14 +1003,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateCollectionAttribute(
+        getUpdateCollectionAttributeTransaction(
           connection,
           authority,
           program,
           new PublicKey(instructionArgumentId),
           instructionArgumentDto
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -892,21 +1024,23 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionArgument(argumentId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstructionArgument({
-              accounts: {
-                argument: new PublicKey(argumentId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteInstructionArgument(instructionArgumentId: string) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteInstructionArgumentTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionArgumentId)
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
@@ -947,19 +1081,27 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        createInstructionRelation(
-          connection,
-          authority,
-          program,
-          new PublicKey(workspaceId),
-          new PublicKey(applicationId),
-          new PublicKey(instructionId),
+        findInstructionRelationAddress(
           new PublicKey(fromId),
           new PublicKey(toId)
         ).pipe(
-          concatMap(({ transaction, signers }) =>
+          concatMap(([relationPublicKey, relationBump]) =>
+            getCreateInstructionRelationTransaction(
+              connection,
+              authority,
+              program,
+              new PublicKey(workspaceId),
+              new PublicKey(applicationId),
+              new PublicKey(instructionId),
+              relationPublicKey,
+              relationBump,
+              new PublicKey(fromId),
+              new PublicKey(toId)
+            )
+          ),
+          concatMap((transaction) =>
             this._walletStore
-              .sendTransaction(transaction, connection, { signers })
+              .sendTransaction(transaction, connection)
               .pipe(
                 concatMap((signature) =>
                   from(defer(() => connection.confirmTransaction(signature)))
@@ -978,7 +1120,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ program, connection, authority }) =>
-        updateInstructionRelation(
+        getUpdateInstructionRelationTransaction(
           connection,
           authority,
           program,
@@ -986,7 +1128,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(fromId),
           new PublicKey(toId)
         ).pipe(
-          concatMap(({ transaction }) =>
+          concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
               .pipe(
@@ -1000,347 +1142,26 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionRelation(relationId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstructionRelation({
-              accounts: {
-                relation: new PublicKey(relationId),
-                authority: walletPublicKey,
-              },
-            })
+  deleteInstructionRelation(instructionRelationId: string) {
+    return this.context.pipe(
+      concatMap(({ program, connection, authority }) =>
+        getDeleteInstructionRelationTransaction(
+          connection,
+          authority,
+          program,
+          new PublicKey(instructionRelationId)
+        ).pipe(
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(
+                concatMap((signature) =>
+                  from(defer(() => connection.confirmTransaction(signature)))
+                )
+              )
           )
         )
       )
-    );
-  }
-
-  getExtendedInstructions(
-    workspaceId: string
-  ): Observable<InstructionExtended[]> {
-    return combineLatest([
-      this.getCollections(workspaceId),
-      this.getInstructions(workspaceId),
-    ]).pipe(
-      concatMap(([collections, instructions]) =>
-        from(instructions).pipe(
-          concatMap((instruction) =>
-            combineLatest([
-              this.getInstructionArguments(instruction.id),
-              this.getInstructionAccounts(instruction.id),
-              this.getInstructionRelations(instruction.id),
-            ]).pipe(
-              map(
-                ([
-                  instructionArguments,
-                  instructionAccounts,
-                  instructionRelations,
-                ]) => ({
-                  ...instruction,
-                  arguments: instructionArguments,
-                  relations: instructionRelations,
-                  accounts: instructionAccounts.map((account) => {
-                    const relations = instructionRelations
-                      .filter((relation) => relation.data.from === account.id)
-                      .map((relation) => {
-                        const toAccount =
-                          instructionAccounts.find(
-                            (instructionAccount) =>
-                              instructionAccount.id === relation.data.to
-                          ) || null;
-
-                        return (
-                          toAccount && {
-                            ...relation,
-                            data: {
-                              ...relation.data,
-                              from: account,
-                              to: toAccount,
-                            },
-                          }
-                        );
-                      })
-                      .filter(
-                        (relation): relation is InstructionRelationExtended =>
-                          relation !== null
-                      );
-
-                    const collection =
-                      account.data.collection &&
-                      collections.find(
-                        ({ id }) => id === account.data.collection
-                      );
-
-                    const payer =
-                      account.data.payer &&
-                      instructionAccounts.find(
-                        ({ id }) => id === account.data.payer
-                      );
-
-                    const close =
-                      account.data.close &&
-                      instructionAccounts.find(
-                        ({ id }) => id === account.data.close
-                      );
-
-                    return {
-                      ...account,
-                      data: {
-                        ...account.data,
-                        collection: collection || null,
-                        payer: payer || null,
-                        close: close || null,
-                        relations,
-                      },
-                    };
-                  }),
-                })
-              )
-            )
-          ),
-          toArray()
-        )
-      )
-    );
-  }
-
-  getExtendedCollections(
-    workspaceId: string
-  ): Observable<CollectionExtended[]> {
-    return this.getCollections(workspaceId).pipe(
-      concatMap((collections) =>
-        from(collections).pipe(
-          mergeMap((collection) =>
-            this.getCollectionAttributes(collection.id).pipe(
-              map((attributes) => ({
-                ...collection,
-                attributes,
-              }))
-            )
-          )
-        )
-      ),
-      toArray()
-    );
-  }
-
-  getDeleteCollectionTransactions(
-    connection: Connection,
-    walletPublicKey: PublicKey,
-    collection: CollectionExtended
-  ): Observable<Transaction[]> {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      from(defer(() => connection.getRecentBlockhash())),
-    ]).pipe(
-      take(1),
-      map(([writer, { blockhash }]) => {
-        const transaction = new Transaction({
-          recentBlockhash: blockhash,
-          feePayer: walletPublicKey,
-        }).add(
-          writer.instruction.deleteCollection({
-            accounts: {
-              collection: new PublicKey(collection.id),
-              authority: walletPublicKey,
-            },
-          })
-        );
-
-        collection.attributes.forEach((attribute) => {
-          transaction.add(
-            writer.instruction.deleteCollectionAttribute({
-              accounts: {
-                attribute: new PublicKey(attribute.id),
-                authority: walletPublicKey,
-              },
-            })
-          );
-        });
-
-        return [transaction];
-      })
-    );
-  }
-
-  getDeleteInstructionTransactions(
-    connection: Connection,
-    walletPublicKey: PublicKey,
-    instruction: InstructionExtended
-  ): Observable<Transaction[]> {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      from(defer(() => connection.getRecentBlockhash())),
-    ]).pipe(
-      take(1),
-      map(([writer, { blockhash }]) => {
-        const transaction = new Transaction({
-          recentBlockhash: blockhash,
-          feePayer: walletPublicKey,
-        }).add(
-          writer.instruction.deleteInstruction({
-            accounts: {
-              instruction: new PublicKey(instruction.id),
-              authority: walletPublicKey,
-            },
-          })
-        );
-
-        instruction.arguments.forEach((argument) => {
-          transaction.add(
-            writer.instruction.deleteInstructionArgument({
-              accounts: {
-                argument: new PublicKey(argument.id),
-                authority: walletPublicKey,
-              },
-            })
-          );
-        });
-
-        instruction.accounts.forEach((account) => {
-          transaction.add(
-            writer.instruction.deleteInstructionAccount({
-              accounts: {
-                account: new PublicKey(account.id),
-                authority: walletPublicKey,
-              },
-            })
-          );
-        });
-
-        instruction.relations.forEach((relation) => {
-          transaction.add(
-            writer.instruction.deleteInstructionRelation({
-              accounts: {
-                relation: new PublicKey(relation.id),
-                authority: walletPublicKey,
-              },
-            })
-          );
-        });
-
-        return [transaction];
-      })
-    );
-  }
-
-  getDeleteApplicationTransactions(
-    connection: Connection,
-    walletPublicKey: PublicKey,
-    application: Application,
-    collections: CollectionExtended[],
-    instructions: InstructionExtended[]
-  ): Observable<Transaction[]> {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined, take(1)),
-      from(defer(() => connection.getRecentBlockhash())),
-    ]).pipe(
-      concatMap(([writer, { blockhash }]) => {
-        const transaction = new Transaction({
-          recentBlockhash: blockhash,
-          feePayer: walletPublicKey,
-        }).add(
-          writer.instruction.deleteApplication({
-            accounts: {
-              application: new PublicKey(application.id),
-              authority: walletPublicKey,
-            },
-          })
-        );
-
-        const transactions$ = [
-          ...collections.map((collection) =>
-            this.getDeleteCollectionTransactions(
-              connection,
-              walletPublicKey,
-              collection
-            )
-          ),
-          ...instructions.map((instruction) =>
-            this.getDeleteInstructionTransactions(
-              connection,
-              walletPublicKey,
-              instruction
-            )
-          ),
-        ];
-
-        if (transactions$.length === 0) {
-          return of([transaction]);
-        } else {
-          return forkJoin(transactions$).pipe(
-            map((transactionsList) =>
-              transactionsList.reduce(
-                (allTransactions, transactions) =>
-                  allTransactions.concat(transactions),
-                [transaction]
-              )
-            )
-          );
-        }
-      })
-    );
-  }
-
-  getDeleteWorkspaceTransactions(
-    connection: Connection,
-    walletPublicKey: PublicKey,
-    workspace: Workspace,
-    applications: Application[],
-    collections: CollectionExtended[],
-    instructions: InstructionExtended[]
-  ): Observable<Transaction[]> {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined, take(1)),
-      from(defer(() => connection.getRecentBlockhash())),
-    ]).pipe(
-      concatMap(([writer, { blockhash }]) => {
-        const transaction = new Transaction({
-          recentBlockhash: blockhash,
-          feePayer: walletPublicKey,
-        }).add(
-          writer.instruction.deleteWorkspace({
-            accounts: {
-              workspace: new PublicKey(workspace.id),
-              authority: walletPublicKey,
-            },
-          })
-        );
-
-        const transactions$ = applications.map((application) =>
-          this.getDeleteApplicationTransactions(
-            connection,
-            walletPublicKey,
-            application,
-            collections.filter(
-              ({ data }) => data.application === application.id
-            ),
-            instructions.filter(
-              ({ data }) => data.application === application.id
-            )
-          )
-        );
-
-        if (transactions$.length === 0) {
-          return of([transaction]);
-        } else {
-          return combineLatest(transactions$).pipe(
-            map((transactionsList) =>
-              transactionsList.reduce(
-                (allTransactions, transactions) =>
-                  allTransactions.concat(transactions),
-                [transaction]
-              )
-            )
-          );
-        }
-      })
     );
   }
 }
