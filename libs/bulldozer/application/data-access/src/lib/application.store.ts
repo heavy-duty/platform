@@ -41,8 +41,6 @@ const initialState = {
 export class ApplicationStore extends ComponentStore<ViewModel> {
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
-  private readonly _reload = new BehaviorSubject(null);
-  readonly reload$ = this._reload.asObservable();
   private readonly _events = new BehaviorSubject<ApplicationActions>(
     new ApplicationInit()
   );
@@ -209,8 +207,4 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         )
       )
   );
-
-  reload() {
-    this._reload.next(null);
-  }
 }

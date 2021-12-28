@@ -62,8 +62,6 @@ const initialState: ViewModel = {
 export class InstructionStore extends ComponentStore<ViewModel> {
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
-  private readonly _reload = new BehaviorSubject(null);
-  readonly reload$ = this._reload.asObservable();
   private readonly _events = new BehaviorSubject<InstructionActions>(
     new InstructionInit()
   );
@@ -228,10 +226,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               )
             ),
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._events.next(new InstructionCreated());
-              },
+              () => this._events.next(new InstructionCreated()),
               (error) => this._error.next(error)
             )
           )
@@ -666,8 +661,4 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         )
       )
   );
-
-  reload() {
-    this._reload.next(null);
-  }
 }

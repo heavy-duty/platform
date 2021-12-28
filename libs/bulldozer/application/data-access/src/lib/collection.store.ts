@@ -49,8 +49,6 @@ const initialState: ViewModel = {
 export class CollectionStore extends ComponentStore<ViewModel> {
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
-  private readonly _reload = new BehaviorSubject(null);
-  readonly reload$ = this._reload.asObservable();
   private readonly _events = new BehaviorSubject<CollectionActions>(
     new CollectionInit()
   );
@@ -119,10 +117,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               )
             ),
             tapResponse(
-              () => {
-                this._reload.next(null);
-                this._events.next(new CollectionCreated());
-              },
+              () => this._events.next(new CollectionCreated()),
               (error) => this._error.next(error)
             )
           )
@@ -266,8 +261,4 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         )
       )
   );
-
-  reload() {
-    this._reload.next(null);
-  }
 }

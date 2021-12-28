@@ -105,7 +105,7 @@ export class ViewCollectionComponent implements OnInit {
   }
 
   onReload() {
-    this._collectionStore.reload();
+    // this._collectionStore.reload();
   }
 
   onCreateAttribute() {

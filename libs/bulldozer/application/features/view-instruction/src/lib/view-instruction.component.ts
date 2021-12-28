@@ -182,7 +182,7 @@ export class ViewInstructionComponent implements OnInit {
   }
 
   onReload() {
-    this._instructionStore.reload();
+    // this._instructionStore.reload();
   }
 
   onUpdateInstructionBody(instruction: Instruction) {

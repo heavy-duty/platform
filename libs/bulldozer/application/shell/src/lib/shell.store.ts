@@ -259,7 +259,6 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     this._applicationStore.events$.pipe(
       filter((event) => event.type !== ApplicationActionTypes.ApplicationInit),
       tap((event) => {
-        this._applicationStore.reload();
         this._matSnackBar.open(event.type, 'Close', {
           panelClass: `success-snackbar`,
           duration: 3000,
@@ -272,7 +271,6 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     this._collectionStore.events$.pipe(
       filter((event) => event.type !== CollectionActionTypes.CollectionInit),
       tap((event) => {
-        this._collectionStore.reload();
         this._matSnackBar.open(event.type, 'Close', {
           panelClass: `success-snackbar`,
           duration: 3000,
@@ -285,7 +283,6 @@ export class ApplicationShellStore extends ComponentStore<ViewModel> {
     this._instructionStore.events$.pipe(
       filter((event) => event.type !== InstructionActionTypes.InstructionInit),
       tap((event) => {
-        this._instructionStore.reload();
         this._matSnackBar.open(event.type, 'Close', {
           panelClass: `success-snackbar`,
           duration: 3000,
