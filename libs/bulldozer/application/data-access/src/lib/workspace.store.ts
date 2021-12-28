@@ -138,7 +138,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   readonly loadWorkspaces = this.effect(() =>
     this.reload$.pipe(
       switchMap(() =>
-        this._bulldozerProgramStore.getWorkspaces().pipe(
+        this._bulldozerProgramStore.getWorkspacesByAuthority().pipe(
           tapResponse(
             (workspaces) => this.patchState({ workspaces }),
             (error) => this._error.next(error)
@@ -149,22 +149,28 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         forkJoin(
           workspaces.map((workspace) =>
             forkJoin([
-              this._bulldozerProgramStore.getApplications(workspace.id),
+              this._bulldozerProgramStore.getApplicationsByWorkspace(
+                workspace.id
+              ),
               forkJoin([
-                this._bulldozerProgramStore.getCollections(workspace.id),
-                this._bulldozerProgramStore.getCollectionAttributes(
+                this._bulldozerProgramStore.getCollectionsByWorkspace(
+                  workspace.id
+                ),
+                this._bulldozerProgramStore.getCollectionAttributesByWorkspace(
                   workspace.id
                 ),
               ]),
               forkJoin([
-                this._bulldozerProgramStore.getInstructions(workspace.id),
-                this._bulldozerProgramStore.getInstructionArguments(
+                this._bulldozerProgramStore.getInstructionsByWorkspace(
                   workspace.id
                 ),
-                this._bulldozerProgramStore.getInstructionAccounts(
+                this._bulldozerProgramStore.getInstructionArgumentsByWorkspace(
                   workspace.id
                 ),
-                this._bulldozerProgramStore.getInstructionRelations(
+                this._bulldozerProgramStore.getInstructionAccountsByWorkspace(
+                  workspace.id
+                ),
+                this._bulldozerProgramStore.getInstructionRelationsByWorkspace(
                   workspace.id
                 ),
               ]),

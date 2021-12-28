@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import {
+  Collection,
+  CollectionAttribute,
+  CollectionAttributeDto,
+  Document,
   findInstructionRelationAddress,
+  getApplication,
+  getApplicationsByWorkspace,
+  getCollection,
+  getCollectionAttributesByWorkspace,
+  getCollectionsByWorkspace,
   getCreateApplicationTransaction,
   getCreateCollectionAttributeTransaction,
   getCreateCollectionTransaction,
@@ -12,10 +21,16 @@ import {
   getDeleteApplicationTransaction,
   getDeleteCollectionAttributeTransaction,
   getDeleteCollectionTransaction,
+  getDeleteInstructionAccountTransaction,
   getDeleteInstructionArgumentTransaction,
   getDeleteInstructionRelationTransaction,
   getDeleteInstructionTransaction,
   getDeleteWorkspaceTransaction,
+  getInstruction,
+  getInstructionAccountsByWorkspace,
+  getInstructionArgumentsByWorkspace,
+  getInstructionRelationsByWorkspace,
+  getInstructionsByWorkspace,
   getUpdateApplicationTransaction,
   getUpdateCollectionAttributeTransaction,
   getUpdateCollectionTransaction,
@@ -24,48 +39,24 @@ import {
   getUpdateInstructionRelationTransaction,
   getUpdateInstructionTransaction,
   getUpdateWorkspaceTransaction,
-} from '@heavy-duty/bulldozer-devkit';
-import {
-  CollectionAttributeDto,
+  getWorkspace,
+  getWorkspacesByAuthority,
+  Instruction,
+  InstructionAccount,
   InstructionAccountDto,
   InstructionAccountExtras,
+  InstructionArgument,
   InstructionArgumentDto,
-} from '@heavy-duty/bulldozer/application/utils/types';
-import { ProgramStore } from '@heavy-duty/ng-anchor';
+  InstructionRelation,
+  Workspace,
+} from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import {
-  combineLatest,
-  concatMap,
-  defer,
-  from,
-  map,
-  of,
-  take,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
-import {
-  ApplicationParser,
-  CollectionAttributeParser,
-  CollectionParser,
-  InstructionAccountParser,
-  InstructionArgumentParser,
-  InstructionParser,
-  InstructionRelationParser,
-  RawApplication,
-  RawCollection,
-  RawCollectionAttribute,
-  RawInstruction,
-  RawInstructionAccount,
-  RawInstructionArgument,
-  RawInstructionRelation,
-  RawWorkspace,
-  WorkspaceParser,
-} from './utils';
+import { concatMap, Observable, of, withLatestFrom } from 'rxjs';
+import { confirmTransaction } from './operators';
 
 interface ViewModel {
   reader: Program | null;
@@ -79,19 +70,14 @@ const initialState = {
 
 @Injectable()
 export class BulldozerProgramStore extends ComponentStore<ViewModel> {
-  readonly reader$ = this.select(({ reader }) => reader);
-  readonly writer$ = this.select(({ writer }) => writer);
-
   get context() {
     return of(null).pipe(
       concatMap(() =>
         of(null).pipe(
           withLatestFrom(
-            this.writer$.pipe(isNotNullOrUndefined),
             this._connectionStore.connection$.pipe(isNotNullOrUndefined),
             this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-            (_, program, connection, authority) => ({
-              program,
+            (_, connection, authority) => ({
               connection,
               authority,
             })
@@ -103,61 +89,23 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _programStore: ProgramStore
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
 
-  loadReader = this.effect(() =>
-    this._programStore
-      .getReader('bulldozer')
-      .pipe(tap((reader) => this.patchState({ reader })))
-  );
-
-  loadWriter = this.effect(() =>
-    this._programStore
-      .getWriter('bulldozer')
-      .pipe(tap((writer) => this.patchState({ writer })))
-  );
-
-  getWorkspaces() {
+  getWorkspacesByAuthority(): Observable<Document<Workspace>[]> {
     return this.context.pipe(
-      concatMap(({ program, authority }) =>
-        from(
-          defer(() =>
-            program.account.workspace.all([
-              { memcmp: { bytes: authority.toBase58(), offset: 8 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              WorkspaceParser(publicKey, account as RawWorkspace)
-            )
-          )
-        )
+      concatMap(({ connection, authority }) =>
+        getWorkspacesByAuthority(connection, authority)
       )
     );
   }
 
-  getWorkspace(workspaceId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() => reader.account.workspace.fetchNullable(workspaceId))
-        ).pipe(
-          map(
-            (account) =>
-              account &&
-              WorkspaceParser(
-                new PublicKey(workspaceId),
-                account as RawWorkspace
-              )
-          )
-        )
+  getWorkspace(workspaceId: string): Observable<Document<Workspace> | null> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getWorkspace(connection, new PublicKey(workspaceId))
       )
     );
   }
@@ -178,11 +126,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [workspaceKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -201,11 +145,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -259,56 +199,25 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getApplications(workspaceId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.application.all([
-              { memcmp: { bytes: workspaceId, offset: 40 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              ApplicationParser(publicKey, account as RawApplication)
-            )
-          )
-        )
+  getApplicationsByWorkspace(workspaceId: string) {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getApplicationsByWorkspace(connection, new PublicKey(workspaceId))
       )
     );
   }
 
   getApplication(applicationId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() => reader.account.application.fetchNullable(applicationId))
-        ).pipe(
-          map(
-            (account) =>
-              account &&
-              ApplicationParser(
-                new PublicKey(applicationId),
-                account as RawApplication
-              )
-          )
-        )
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getApplication(connection, new PublicKey(applicationId))
       )
     );
   }
@@ -330,11 +239,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [applicationKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -353,11 +258,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -406,56 +307,27 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getCollections(workspaceId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.collection.all([
-              { memcmp: { bytes: workspaceId, offset: 40 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              CollectionParser(publicKey, account as RawCollection)
-            )
-          )
-        )
+  getCollectionsByWorkspace(
+    workspaceId: string
+  ): Observable<Document<Collection>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getCollectionsByWorkspace(connection, new PublicKey(workspaceId))
       )
     );
   }
 
-  getCollection(collectionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() => reader.account.collection.fetchNullable(collectionId))
-        ).pipe(
-          map(
-            (account) =>
-              account &&
-              CollectionParser(
-                new PublicKey(collectionId),
-                account as RawCollection
-              )
-          )
-        )
+  getCollection(collectionId: string): Observable<Document<Collection> | null> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getCollection(connection, new PublicKey(collectionId))
       )
     );
   }
@@ -482,11 +354,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [collectionKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -505,11 +373,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -530,37 +394,21 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getCollectionAttributes(workspaceId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.collectionAttribute.all([
-              { memcmp: { bytes: workspaceId, offset: 40 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              CollectionAttributeParser(
-                publicKey,
-                account as RawCollectionAttribute
-              )
-            )
-          )
+  getCollectionAttributesByWorkspace(
+    workspaceId: string
+  ): Observable<Document<CollectionAttribute>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getCollectionAttributesByWorkspace(
+          connection,
+          new PublicKey(workspaceId)
         )
       )
     );
@@ -590,11 +438,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [collectionAttributeKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -616,11 +460,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -638,56 +478,29 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getInstructions(workspaceId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instruction.all([
-              { memcmp: { bytes: workspaceId, offset: 40 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionParser(publicKey, account as RawInstruction)
-            )
-          )
-        )
+  getInstructionsByWorkspace(
+    workspaceId: string
+  ): Observable<Document<Instruction>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getInstructionsByWorkspace(connection, new PublicKey(workspaceId))
       )
     );
   }
 
-  getInstruction(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() => reader.account.instruction.fetchNullable(instructionId))
-        ).pipe(
-          map(
-            (account) =>
-              account &&
-              InstructionParser(
-                new PublicKey(instructionId),
-                account as RawInstruction
-              )
-          )
-        )
+  getInstruction(
+    instructionId: string
+  ): Observable<Document<Instruction> | null> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getInstruction(connection, new PublicKey(instructionId))
       )
     );
   }
@@ -714,11 +527,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [instructionKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -737,11 +546,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -760,11 +565,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -796,37 +597,21 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getInstructionAccounts(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instructionAccount.all([
-              { memcmp: { bytes: instructionId, offset: 104 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionAccountParser(
-                publicKey,
-                account as RawInstructionAccount
-              )
-            )
-          )
+  getInstructionAccountsByWorkspace(
+    workspaceId: string
+  ): Observable<Document<InstructionAccount>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getInstructionAccountsByWorkspace(
+          connection,
+          new PublicKey(workspaceId)
         )
       )
     );
@@ -858,11 +643,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [instructionAccountKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -886,58 +667,39 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  deleteInstructionAccount(accountId: string) {
-    return combineLatest([
-      this.writer$.pipe(isNotNullOrUndefined),
-      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      take(1),
-      concatMap(([writer, walletPublicKey]) =>
-        from(
-          defer(() =>
-            writer.rpc.deleteInstructionAccount({
-              accounts: {
-                authority: walletPublicKey,
-                account: new PublicKey(accountId),
-              },
-            })
-          )
-        )
-      )
-    );
-  }
-
-  getInstructionArguments(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instructionArgument.all([
-              { memcmp: { bytes: instructionId, offset: 104 } },
-            ])
-          )
+  deleteInstructionAccount(instructionAccountId: string) {
+    return this.context.pipe(
+      concatMap(({ connection, authority }) =>
+        getDeleteInstructionAccountTransaction(
+          connection,
+          authority,
+          new PublicKey(instructionAccountId)
         ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionArgumentParser(
-                publicKey,
-                account as RawInstructionArgument
-              )
-            )
+          concatMap((transaction) =>
+            this._walletStore
+              .sendTransaction(transaction, connection)
+              .pipe(confirmTransaction(connection))
           )
+        )
+      )
+    );
+  }
+
+  getInstructionArgumentsByWorkspace(
+    workspaceId: string
+  ): Observable<Document<InstructionArgument>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getInstructionArgumentsByWorkspace(
+          connection,
+          new PublicKey(workspaceId)
         )
       )
     );
@@ -967,11 +729,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               .sendTransaction(transaction, connection, {
                 signers: [instructionArgumentKeypair],
               })
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -993,11 +751,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -1015,37 +769,21 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
     );
   }
 
-  getInstructionRelations(instructionId: string) {
-    return this.reader$.pipe(
-      isNotNullOrUndefined,
-      take(1),
-      concatMap((reader) =>
-        from(
-          defer(() =>
-            reader.account.instructionRelation.all([
-              { memcmp: { bytes: instructionId, offset: 104 } },
-            ])
-          )
-        ).pipe(
-          map((programAccounts) =>
-            programAccounts.map(({ publicKey, account }) =>
-              InstructionRelationParser(
-                publicKey,
-                account as RawInstructionRelation
-              )
-            )
-          )
+  getInstructionRelationsByWorkspace(
+    workspaceId: string
+  ): Observable<Document<InstructionRelation>[]> {
+    return this.context.pipe(
+      concatMap(({ connection }) =>
+        getInstructionRelationsByWorkspace(
+          connection,
+          new PublicKey(workspaceId)
         )
       )
     );
@@ -1080,11 +818,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -1108,11 +842,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
@@ -1130,11 +860,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           concatMap((transaction) =>
             this._walletStore
               .sendTransaction(transaction, connection)
-              .pipe(
-                concatMap((signature) =>
-                  from(defer(() => connection.confirmTransaction(signature)))
-                )
-              )
+              .pipe(confirmTransaction(connection))
           )
         )
       )
