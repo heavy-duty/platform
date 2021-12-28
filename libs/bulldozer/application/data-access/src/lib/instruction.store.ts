@@ -21,7 +21,6 @@ import {
   concatMap,
   exhaustMap,
   filter,
-  map,
   Observable,
   of,
   Subject,
@@ -277,55 +276,25 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   readonly deleteInstruction = this.effect(
     (instruction$: Observable<Instruction>) =>
       instruction$.pipe(
-        concatMap((instruction) =>
-          of(instruction).pipe(
-            withLatestFrom(
-              this._workspaceStore.instructionArguments$.pipe(
-                map((instructions) =>
-                  instructions
-                    .filter(({ data }) => data.instruction === instruction.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this._workspaceStore.instructionAccounts$.pipe(
-                map((instructionAccounts) =>
-                  instructionAccounts
-                    .filter(({ data }) => data.instruction === instruction.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this._workspaceStore.instructionRelations$.pipe(
-                map((instructionRelations) =>
-                  instructionRelations
-                    .filter(({ data }) => data.instruction === instruction.id)
-                    .map(({ id }) => id)
-                )
-              )
+        concatMap((instruction) => {
+          const instructionData = this._workspaceStore.getInstructionData(
+            instruction.id
+          );
+
+          return this._bulldozerProgramStore
+            .deleteInstruction(
+              instruction.id,
+              instructionData.instructionArguments.map(({ id }) => id),
+              instructionData.instructionAccounts.map(({ id }) => id),
+              instructionData.instructionRelations.map(({ id }) => id)
             )
-          )
-        ),
-        concatMap(
-          ([
-            instruction,
-            instructionArguments,
-            instructionAccounts,
-            instructionRelations,
-          ]) =>
-            this._bulldozerProgramStore
-              .deleteInstruction(
-                instruction.id,
-                instructionArguments,
-                instructionAccounts,
-                instructionRelations
+            .pipe(
+              tapResponse(
+                () => this._events.next(new InstructionDeleted(instruction.id)),
+                (error) => this._error.next(error)
               )
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._events.next(new InstructionDeleted(instruction.id)),
-                  (error) => this._error.next(error)
-                )
-              )
-        )
+            );
+        })
       )
   );
 

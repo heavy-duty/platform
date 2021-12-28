@@ -19,18 +19,15 @@ import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
-  combineLatest,
   concatMap,
   exhaustMap,
   filter,
   forkJoin,
   map,
   Observable,
-  of,
   Subject,
   switchMap,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import {
   WorkspaceActions,
@@ -256,190 +253,124 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly deleteWorkspace = this.effect((workspace$: Observable<Workspace>) =>
     workspace$.pipe(
-      concatMap((workspace) =>
-        of(workspace).pipe(
-          withLatestFrom(
-            this.applications$.pipe(
-              map((applications) =>
-                applications
-                  .filter(({ data }) => data.workspace === workspace.id)
-                  .map(({ id }) => id)
-              )
-            ),
-            combineLatest([
-              this.collections$.pipe(
-                map((collections) =>
-                  collections
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this.collectionAttributes$.pipe(
-                map((collectionAttributes) =>
-                  collectionAttributes
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-            ]),
-            combineLatest([
-              this.instructions$.pipe(
-                map((instructions) =>
-                  instructions
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this.instructionArguments$.pipe(
-                map((instructionArguments) =>
-                  instructionArguments
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this.instructionAccounts$.pipe(
-                map((instructionAccounts) =>
-                  instructionAccounts
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-              this.instructionRelations$.pipe(
-                map((instructionRelations) =>
-                  instructionRelations
-                    .filter(({ data }) => data.workspace === workspace.id)
-                    .map(({ id }) => id)
-                )
-              ),
-            ])
+      concatMap((workspace) => {
+        const workspaceData = this.getWorkspaceData(workspace.id);
+
+        return this._bulldozerProgramStore
+          .deleteWorkspace(
+            workspace.id,
+            workspaceData.applications.map(({ id }) => id),
+            workspaceData.collections.map(({ id }) => id),
+            workspaceData.collectionAttributes.map(({ id }) => id),
+            workspaceData.instructions.map(({ id }) => id),
+            workspaceData.instructionArguments.map(({ id }) => id),
+            workspaceData.instructionAccounts.map(({ id }) => id),
+            workspaceData.instructionRelations.map(({ id }) => id)
           )
-        )
-      ),
-      concatMap(
-        ([
-          workspace,
-          applications,
-          [collections, collectionAttributes],
-          [
-            instructions,
-            instructionArguments,
-            instructionAccounts,
-            instructionRelations,
-          ],
-        ]) =>
-          this._bulldozerProgramStore
-            .deleteWorkspace(
-              workspace.id,
-              applications,
-              collections,
-              collectionAttributes,
-              instructions,
-              instructionArguments,
-              instructionAccounts,
-              instructionRelations
+          .pipe(
+            tapResponse(
+              () => this._events.next(new WorkspaceDeleted(workspace.id)),
+              (error) => this._error.next(error)
             )
-            .pipe(
-              tapResponse(
-                () => this._events.next(new WorkspaceDeleted(workspace.id)),
-                (error) => this._error.next(error)
-              )
-            )
-      )
+          );
+      })
     )
   );
 
   readonly downloadWorkspace = this.effect(
     (workspace$: Observable<Workspace>) =>
       workspace$.pipe(
-        concatMap((workspace) =>
-          of(workspace).pipe(
-            withLatestFrom(
-              this.applications$.pipe(
-                map((applications) =>
-                  applications.filter(
-                    ({ data }) => data.workspace === workspace.id
-                  )
-                )
-              ),
-              combineLatest([
-                this.collections$.pipe(
-                  map((collections) =>
-                    collections.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-                this.collectionAttributes$.pipe(
-                  map((collectionAttributes) =>
-                    collectionAttributes.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-              ]),
-              combineLatest([
-                this.instructions$.pipe(
-                  map((instructions) =>
-                    instructions.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-                this.instructionArguments$.pipe(
-                  map((instructionArguments) =>
-                    instructionArguments.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-                this.instructionAccounts$.pipe(
-                  map((instructionAccounts) =>
-                    instructionAccounts.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-                this.instructionRelations$.pipe(
-                  map((instructionRelations) =>
-                    instructionRelations.filter(
-                      ({ data }) => data.workspace === workspace.id
-                    )
-                  )
-                ),
-              ])
-            )
-          )
-        ),
-        map(
-          ([
+        map((workspace) => {
+          const workspaceData = this.getWorkspaceData(workspace.id);
+
+          return generateWorkspaceZip(
             workspace,
-            applications,
-            [collections, collectionAttributes],
-            [
-              instructions,
-              instructionArguments,
-              instructionAccounts,
-              instructionRelations,
-            ],
-          ]) =>
-            workspace &&
-            generateWorkspaceZip(
-              workspace,
-              generateWorkspaceMetadata(
-                applications,
-                collections,
-                collectionAttributes,
-                instructions,
-                instructionArguments,
-                instructionAccounts,
-                instructionRelations
-              )
+            generateWorkspaceMetadata(
+              workspaceData.applications,
+              workspaceData.collections,
+              workspaceData.collectionAttributes,
+              workspaceData.instructions,
+              workspaceData.instructionArguments,
+              workspaceData.instructionAccounts,
+              workspaceData.instructionRelations
             )
-        )
+          );
+        })
       )
   );
 
   reload() {
     this._reload.next(null);
+  }
+
+  getWorkspaceData(workspaceId: string) {
+    return {
+      applications: this.get().applications.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      collections: this.get().collections.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      collectionAttributes: this.get().collectionAttributes.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      instructions: this.get().instructions.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      instructionArguments: this.get().instructionArguments.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      instructionAccounts: this.get().instructionAccounts.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+      instructionRelations: this.get().instructionRelations.filter(
+        ({ data }) => data.workspace === workspaceId
+      ),
+    };
+  }
+
+  getApplicationData(applicationId: string) {
+    return {
+      collections: this.get().collections.filter(
+        ({ data }) => data.application === applicationId
+      ),
+      collectionAttributes: this.get().collectionAttributes.filter(
+        ({ data }) => data.application === applicationId
+      ),
+      instructions: this.get().instructions.filter(
+        ({ data }) => data.application === applicationId
+      ),
+      instructionArguments: this.get().instructionArguments.filter(
+        ({ data }) => data.application === applicationId
+      ),
+      instructionAccounts: this.get().instructionAccounts.filter(
+        ({ data }) => data.application === applicationId
+      ),
+      instructionRelations: this.get().instructionRelations.filter(
+        ({ data }) => data.application === applicationId
+      ),
+    };
+  }
+
+  getInstructionData(instructionId: string) {
+    return {
+      instructionArguments: this.get().instructionArguments.filter(
+        ({ data }) => data.instruction === instructionId
+      ),
+      instructionAccounts: this.get().instructionAccounts.filter(
+        ({ data }) => data.instruction === instructionId
+      ),
+      instructionRelations: this.get().instructionRelations.filter(
+        ({ data }) => data.instruction === instructionId
+      ),
+    };
+  }
+
+  getCollectionData(collectionId: string) {
+    return {
+      collectionAttributes: this.get().collectionAttributes.filter(
+        ({ data }) => data.collection === collectionId
+      ),
+    };
   }
 }

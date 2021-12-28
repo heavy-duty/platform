@@ -7,13 +7,10 @@ import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
-  combineLatest,
   concatMap,
   exhaustMap,
   filter,
-  map,
   Observable,
-  of,
   Subject,
   tap,
   withLatestFrom,
@@ -124,87 +121,28 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   readonly deleteApplication = this.effect(
     (application$: Observable<Application>) =>
       application$.pipe(
-        concatMap((application) =>
-          of(application).pipe(
-            withLatestFrom(
-              combineLatest([
-                this._workspaceStore.collections$.pipe(
-                  map((collections) =>
-                    collections
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-                this._workspaceStore.collectionAttributes$.pipe(
-                  map((collectionAttributes) =>
-                    collectionAttributes
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-              ]),
-              combineLatest([
-                this._workspaceStore.instructions$.pipe(
-                  map((instructions) =>
-                    instructions
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-                this._workspaceStore.instructionArguments$.pipe(
-                  map((instructions) =>
-                    instructions
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-                this._workspaceStore.instructionAccounts$.pipe(
-                  map((instructionAccounts) =>
-                    instructionAccounts
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-                this._workspaceStore.instructionRelations$.pipe(
-                  map((instructionRelations) =>
-                    instructionRelations
-                      .filter(({ data }) => data.application === application.id)
-                      .map(({ id }) => id)
-                  )
-                ),
-              ])
+        concatMap((application) => {
+          const applicationData = this._workspaceStore.getApplicationData(
+            application.id
+          );
+
+          return this._bulldozerProgramStore
+            .deleteApplication(
+              application.id,
+              applicationData.collections.map(({ id }) => id),
+              applicationData.collectionAttributes.map(({ id }) => id),
+              applicationData.instructions.map(({ id }) => id),
+              applicationData.instructionArguments.map(({ id }) => id),
+              applicationData.instructionAccounts.map(({ id }) => id),
+              applicationData.instructionRelations.map(({ id }) => id)
             )
-          )
-        ),
-        concatMap(
-          ([
-            application,
-            [collections, collectionAttributes],
-            [
-              instructions,
-              instructionArguments,
-              instructionAccounts,
-              instructionRelations,
-            ],
-          ]) =>
-            this._bulldozerProgramStore
-              .deleteApplication(
-                application.id,
-                collections,
-                collectionAttributes,
-                instructions,
-                instructionArguments,
-                instructionAccounts,
-                instructionRelations
+            .pipe(
+              tapResponse(
+                () => this._events.next(new ApplicationDeleted(application.id)),
+                (error) => this._error.next(error)
               )
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._events.next(new ApplicationDeleted(application.id)),
-                  (error) => this._error.next(error)
-                )
-              )
-        )
+            );
+        })
       )
   );
 }

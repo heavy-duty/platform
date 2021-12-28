@@ -15,9 +15,7 @@ import {
   concatMap,
   exhaustMap,
   filter,
-  map,
   Observable,
-  of,
   Subject,
   tap,
   withLatestFrom,
@@ -152,29 +150,23 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly deleteCollection = this.effect(
     (collection$: Observable<Collection>) =>
       collection$.pipe(
-        concatMap((collection) =>
-          of(collection).pipe(
-            withLatestFrom(
-              this._workspaceStore.collectionAttributes$.pipe(
-                map((collections) =>
-                  collections
-                    .filter(({ data }) => data.collection === collection.id)
-                    .map(({ id }) => id)
-                )
-              )
+        concatMap((collection) => {
+          const collectionData = this._workspaceStore.getCollectionData(
+            collection.id
+          );
+
+          return this._bulldozerProgramStore
+            .deleteCollection(
+              collection.id,
+              collectionData.collectionAttributes.map(({ id }) => id)
             )
-          )
-        ),
-        concatMap(([collection, collectionAttributes]) =>
-          this._bulldozerProgramStore
-            .deleteCollection(collection.id, collectionAttributes)
             .pipe(
               tapResponse(
                 () => this._events.next(new CollectionDeleted(collection.id)),
                 (error) => this._error.next(error)
               )
-            )
-        )
+            );
+        })
       )
   );
 
