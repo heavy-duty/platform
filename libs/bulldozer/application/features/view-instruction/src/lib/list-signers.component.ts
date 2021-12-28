@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/types';
+import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-list-signers',
@@ -97,11 +97,11 @@ import { InstructionAccount } from '@heavy-duty/bulldozer/application/utils/type
 })
 export class ListSignersComponent {
   @Input() connected?: boolean | null = null;
-  @Input() signers?: InstructionAccount[] | null;
-  @Output() updateSigner = new EventEmitter<InstructionAccount>();
+  @Input() signers?: Document<InstructionAccount>[] | null;
+  @Output() updateSigner = new EventEmitter<Document<InstructionAccount>>();
   @Output() deleteSigner = new EventEmitter<string>();
 
-  onUpdateSigner(signer: InstructionAccount) {
+  onUpdateSigner(signer: Document<InstructionAccount>) {
     this.updateSigner.emit(signer);
   }
 

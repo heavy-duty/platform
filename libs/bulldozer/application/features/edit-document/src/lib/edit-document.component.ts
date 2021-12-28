@@ -11,6 +11,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
+  Document,
   InstructionAccount,
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject, takeUntil } from 'rxjs';
@@ -42,10 +43,10 @@ import { Subject, takeUntil } from 'rxjs';
         />
         <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
 
-        <mat-error *ngIf="submitted && nameControl.errors?.required"
+        <mat-error *ngIf="submitted && nameControl.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.errors?.maxlength"
+        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -94,13 +95,13 @@ import { Subject, takeUntil } from 'rxjs';
           min="0"
           max="65536"
         />
-        <mat-error *ngIf="submitted && spaceControl.errors?.required"
+        <mat-error *ngIf="submitted && spaceControl.hasError('required')"
           >The space is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && spaceControl.errors?.min"
+        <mat-error *ngIf="submitted && spaceControl.hasError('min')"
           >Space is meant to be positive.</mat-error
         >
-        <mat-error *ngIf="submitted && spaceControl.errors?.max"
+        <mat-error *ngIf="submitted && spaceControl.hasError('max')"
           >Maximum is 65536.</mat-error
         >
       </mat-form-field>
@@ -201,9 +202,9 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditDocumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      document?: InstructionAccount;
-      collections: Collection[];
-      accounts: InstructionAccount[];
+      document?: Document<InstructionAccount>;
+      collections: Document<Collection>[];
+      accounts: Document<InstructionAccount>[];
     }
   ) {}
 

@@ -1,18 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
-import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/features/edit-document';
+import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
-import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
-import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
-import {
-  Collection,
-  Instruction,
-  InstructionAccount,
-  InstructionArgument,
-  InstructionRelation,
-} from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -22,29 +12,18 @@ import {
   exhaustMap,
   filter,
   Observable,
-  of,
   Subject,
   tap,
   withLatestFrom,
 } from 'rxjs';
 import {
-  InstructionAccountCreated,
-  InstructionAccountDeleted,
-  InstructionAccountUpdated,
   InstructionActions,
-  InstructionArgumentCreated,
-  InstructionArgumentDeleted,
-  InstructionArgumentUpdated,
   InstructionCreated,
   InstructionDeleted,
   InstructionInit,
-  InstructionRelationCreated,
-  InstructionRelationDeleted,
-  InstructionRelationUpdated,
   InstructionUpdated,
 } from './actions/instruction.actions';
 import { ApplicationStore } from './application.store';
-import { CollectionStore } from './collection.store';
 import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
@@ -125,75 +104,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         instructionRelations
       )
   );
-  readonly documents$ = this.select(
-    this.instructionAccounts$,
-    this.instructionRelations$,
-    this._workspaceStore.collections$,
-    (instructionAccounts, instructionRelations, collections) =>
-      instructionAccounts
-        .filter((instructionAccount) => instructionAccount.data.kind.id === 0)
-        .map((instructionAccount) => ({
-          ...instructionAccount,
-          relations: instructionRelations
-            .filter(({ data }) => data.from === instructionAccount.id)
-            .reduce(
-              (
-                relations: (InstructionRelation & {
-                  to: InstructionAccount;
-                })[],
-                instructionRelation
-              ) => {
-                const toAccount = instructionAccounts.find(
-                  ({ id }) => id === instructionRelation.data.to
-                );
-
-                return toAccount
-                  ? [
-                      ...relations,
-                      {
-                        ...instructionRelation,
-                        to: toAccount,
-                      },
-                    ]
-                  : relations;
-              },
-              []
-            ),
-          collection: collections.reduce(
-            (found: Collection | null, collection) =>
-              !found && instructionAccount.data.collection === collection.id
-                ? collection
-                : null,
-            null
-          ),
-          payer: instructionAccounts.reduce(
-            (found: InstructionAccount | null, payer) =>
-              !found && instructionAccount.data.payer === payer.id
-                ? payer
-                : null,
-            null
-          ),
-          close: instructionAccounts.reduce(
-            (found: InstructionAccount | null, close) =>
-              !found && instructionAccount.data.close === close.id
-                ? close
-                : null,
-            null
-          ),
-        }))
-  );
-  readonly signers$ = this.select(
-    this.instructionAccounts$,
-    (accounts) =>
-      accounts && accounts.filter((account) => account.data.kind.id === 1)
-  );
 
   constructor(
     private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
-    private readonly _applicationStore: ApplicationStore,
-    private readonly _collectionStore: CollectionStore
+    private readonly _applicationStore: ApplicationStore
   ) {
     super(initialState);
   }
@@ -234,7 +150,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstruction = this.effect(
-    (instruction$: Observable<Instruction>) =>
+    (instruction$: Observable<Document<Instruction>>) =>
       instruction$.pipe(
         exhaustMap((instruction) =>
           this._matDialog
@@ -258,7 +174,9 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstructionBody = this.effect(
-    (request$: Observable<{ instruction: Instruction; body: string }>) =>
+    (
+      request$: Observable<{ instruction: Document<Instruction>; body: string }>
+    ) =>
       request$.pipe(
         concatMap(({ instruction, body }) =>
           this._bulldozerProgramStore
@@ -274,7 +192,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstruction = this.effect(
-    (instruction$: Observable<Instruction>) =>
+    (instruction$: Observable<Document<Instruction>>) =>
       instruction$.pipe(
         concatMap((instruction) => {
           const instructionData = this._workspaceStore.getInstructionData(
@@ -295,339 +213,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               )
             );
         })
-      )
-  );
-
-  readonly createArgument = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditArgumentComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.instructionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(([{ name }, workspaceId, applicationId, instructionId]) =>
-              this._bulldozerProgramStore.createInstructionArgument(
-                workspaceId,
-                applicationId,
-                instructionId,
-                name
-              )
-            ),
-            tapResponse(
-              () => this._events.next(new InstructionArgumentCreated()),
-              (error) => this._error.next(error)
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateArgument = this.effect(
-    (argument$: Observable<InstructionArgument>) =>
-      argument$.pipe(
-        exhaustMap((argument) =>
-          this._matDialog
-            .open(EditArgumentComponent, {
-              data: { argument },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateInstructionArgument(
-                  argument.id,
-                  name
-                )
-              ),
-              tapResponse(
-                () =>
-                  this._events.next(
-                    new InstructionArgumentUpdated(argument.id)
-                  ),
-                (error) => this._error.next(error)
-              )
-            )
-        )
-      )
-  );
-
-  readonly deleteArgument = this.effect((argumentId$: Observable<string>) =>
-    argumentId$.pipe(
-      concatMap((argumentId) =>
-        this._bulldozerProgramStore.deleteInstructionArgument(argumentId).pipe(
-          tapResponse(
-            () => this._events.next(new InstructionArgumentDeleted(argumentId)),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly createRelation = this.effect((action$) =>
-    action$.pipe(
-      concatMap(() => of(null).pipe(withLatestFrom(this.instructionAccounts$))),
-      exhaustMap(([, accounts]) =>
-        this._matDialog
-          .open(EditRelationComponent, { data: { accounts } })
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.instructionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(
-              ([{ from, to }, workspaceId, applicationId, instructionId]) =>
-                this._bulldozerProgramStore
-                  .createInstructionRelation(
-                    workspaceId,
-                    applicationId,
-                    instructionId,
-                    from,
-                    to
-                  )
-                  .pipe(
-                    tapResponse(
-                      () => this._events.next(new InstructionRelationCreated()),
-                      (error) => this._error.next(error)
-                    )
-                  )
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateRelation = this.effect(
-    (relation$: Observable<InstructionRelation>) =>
-      relation$.pipe(
-        concatMap((relation) =>
-          of(relation).pipe(withLatestFrom(this.instructionAccounts$))
-        ),
-        exhaustMap(([relation, accounts]) =>
-          this._matDialog
-            .open(EditRelationComponent, {
-              data: { relation, accounts },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap(({ from, to }) =>
-                this._bulldozerProgramStore
-                  .updateInstructionRelation(relation.id, from, to)
-                  .pipe(
-                    tapResponse(
-                      () =>
-                        this._events.next(
-                          new InstructionRelationUpdated(relation.id)
-                        ),
-                      (error) => this._error.next(error)
-                    )
-                  )
-              )
-            )
-        )
-      )
-  );
-
-  readonly deleteRelation = this.effect((relationId$: Observable<string>) =>
-    relationId$.pipe(
-      concatMap((relationId) =>
-        this._bulldozerProgramStore.deleteInstructionRelation(relationId).pipe(
-          tapResponse(
-            () => this._events.next(new InstructionRelationDeleted(relationId)),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly deleteAccount = this.effect((accountId$: Observable<string>) =>
-    accountId$.pipe(
-      concatMap((accountId) =>
-        this._bulldozerProgramStore.deleteInstructionAccount(accountId).pipe(
-          tapResponse(
-            () => this._events.next(new InstructionAccountDeleted(accountId)),
-            (error) => this._error.next(error)
-          )
-        )
-      )
-    )
-  );
-
-  readonly createDocument = this.effect((action$) =>
-    action$.pipe(
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(
-            this._collectionStore.collections$,
-            this.instructionAccounts$
-          )
-        )
-      ),
-      exhaustMap(([, collections, accounts]) =>
-        this._matDialog
-          .open(EditDocumentComponent, { data: { collections, accounts } })
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.instructionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(
-              ([
-                { name, modifier, collection, space, payer, close },
-                workspaceId,
-                applicationId,
-                instructionId,
-              ]) =>
-                this._bulldozerProgramStore.createInstructionAccount(
-                  workspaceId,
-                  applicationId,
-                  instructionId,
-                  { name, kind: 0, modifier, space },
-                  { collection, payer, close }
-                )
-            ),
-            tapResponse(
-              () => this._events.next(new InstructionAccountCreated()),
-              (error) => this._error.next(error)
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateDocument = this.effect(
-    (document$: Observable<InstructionAccount>) =>
-      document$.pipe(
-        concatMap((document) =>
-          of(document).pipe(
-            withLatestFrom(
-              this._collectionStore.collections$,
-              this.instructionAccounts$
-            )
-          )
-        ),
-        exhaustMap(([document, collections, accounts]) =>
-          this._matDialog
-            .open(EditDocumentComponent, {
-              data: { document, collections, accounts },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap(({ name, modifier, collection, space, payer, close }) =>
-                this._bulldozerProgramStore.updateInstructionAccount(
-                  document.id,
-                  {
-                    name,
-                    kind: 0,
-                    modifier,
-                    space,
-                  },
-                  { collection, payer, close }
-                )
-              ),
-              tapResponse(
-                () =>
-                  this._events.next(new InstructionAccountUpdated(document.id)),
-                (error) => this._error.next(error)
-              )
-            )
-        )
-      )
-  );
-
-  readonly createSigner = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditSignerComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.instructionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(
-              ([
-                instructionAccountDto,
-                workspaceId,
-                applicationId,
-                instructionId,
-              ]) =>
-                this._bulldozerProgramStore.createInstructionAccount(
-                  workspaceId,
-                  applicationId,
-                  instructionId,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-            ),
-            tapResponse(
-              () => this._events.next(new InstructionAccountCreated()),
-              (error) => this._error.next(error)
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateSigner = this.effect(
-    (signer$: Observable<InstructionAccount>) =>
-      signer$.pipe(
-        exhaustMap((signer) =>
-          this._matDialog
-            .open(EditSignerComponent, {
-              data: { signer },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap((instructionAccountDto) =>
-                this._bulldozerProgramStore.updateInstructionAccount(
-                  signer.id,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-              ),
-              tapResponse(
-                () =>
-                  this._events.next(new InstructionAccountUpdated(signer.id)),
-                (error) => this._error.next(error)
-              )
-            )
-        )
       )
   );
 }

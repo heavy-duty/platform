@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
+import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-list-attributes',
@@ -93,11 +93,11 @@ import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/typ
 })
 export class ListAttributesComponent {
   @Input() connected?: boolean | null = null;
-  @Input() attributes?: CollectionAttribute[] | null = null;
-  @Output() updateAttribute = new EventEmitter<CollectionAttribute>();
+  @Input() attributes?: Document<CollectionAttribute>[] | null = null;
+  @Output() updateAttribute = new EventEmitter<Document<CollectionAttribute>>();
   @Output() deleteAttribute = new EventEmitter<string>();
 
-  onUpdateAttribute(attributes: CollectionAttribute) {
+  onUpdateAttribute(attributes: Document<CollectionAttribute>) {
     this.updateAttribute.emit(attributes);
   }
 

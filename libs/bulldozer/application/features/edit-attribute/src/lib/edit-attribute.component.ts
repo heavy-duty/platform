@@ -8,6 +8,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Document } from '@heavy-duty/bulldozer-devkit';
 import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -38,10 +39,10 @@ import { Subject, takeUntil } from 'rxjs';
         />
         <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
 
-        <mat-error *ngIf="submitted && nameControl.errors?.required"
+        <mat-error *ngIf="submitted && nameControl.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.errors?.maxlength"
+        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -58,7 +59,7 @@ import { Subject, takeUntil } from 'rxjs';
           <mat-option [value]="2">String</mat-option>
           <mat-option [value]="3">Pubkey</mat-option>
         </mat-select>
-        <mat-error *ngIf="submitted && kindControl.errors?.required"
+        <mat-error *ngIf="submitted && kindControl.hasError('required')"
           >The kind is required.</mat-error
         >
       </mat-form-field>
@@ -77,7 +78,7 @@ import { Subject, takeUntil } from 'rxjs';
           autocomplete="off"
           type="number"
         />
-        <mat-error *ngIf="submitted && maxControl.errors?.required"
+        <mat-error *ngIf="submitted && maxControl.hasError('required')"
           >The max is mandatory.</mat-error
         >
       </mat-form-field>
@@ -96,7 +97,7 @@ import { Subject, takeUntil } from 'rxjs';
           autocomplete="off"
           type="number"
         />
-        <mat-error *ngIf="submitted && maxLengthControl.errors?.required"
+        <mat-error *ngIf="submitted && maxLengthControl.hasError('required')"
           >The max length is mandatory.</mat-error
         >
       </mat-form-field>
@@ -126,10 +127,10 @@ import { Subject, takeUntil } from 'rxjs';
           min="1"
           type="number"
         />
-        <mat-error *ngIf="submitted && sizeControl.errors?.required"
+        <mat-error *ngIf="submitted && sizeControl.hasError('required')"
           >The size is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && sizeControl.errors?.min"
+        <mat-error *ngIf="submitted && sizeControl.hasError('min')"
           >The size has to be above 1</mat-error
         >
       </mat-form-field>
@@ -191,7 +192,7 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditAttributeComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: { attribute?: CollectionAttribute }
+    public data?: { attribute?: Document<CollectionAttribute> }
   ) {}
 
   ngOnInit() {

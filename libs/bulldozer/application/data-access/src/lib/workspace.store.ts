@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
-import {
-  generateWorkspaceMetadata,
-  generateWorkspaceZip,
-} from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import {
   Application,
   Collection,
   CollectionAttribute,
+  Document,
   Instruction,
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
   Workspace,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
+import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
+import {
+  generateWorkspaceMetadata,
+  generateWorkspaceZip,
+} from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -38,18 +39,18 @@ import {
 } from './actions/workspace.actions';
 
 interface WorkspaceData {
-  applications: Application[];
-  collections: Collection[];
-  collectionAttributes: CollectionAttribute[];
-  instructions: Instruction[];
-  instructionArguments: InstructionArgument[];
-  instructionAccounts: InstructionAccount[];
-  instructionRelations: InstructionRelation[];
+  applications: Document<Application>[];
+  collections: Document<Collection>[];
+  collectionAttributes: Document<CollectionAttribute>[];
+  instructions: Document<Instruction>[];
+  instructionArguments: Document<InstructionArgument>[];
+  instructionAccounts: Document<InstructionAccount>[];
+  instructionRelations: Document<InstructionRelation>[];
 }
 
 interface ViewModel extends WorkspaceData {
   workspaceId: string | null;
-  workspaces: Workspace[];
+  workspaces: Document<Workspace>[];
   error: unknown | null;
 }
 
@@ -231,54 +232,56 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly updateWorkspace = this.effect((workspace$: Observable<Workspace>) =>
-    workspace$.pipe(
-      exhaustMap((workspace) =>
-        this._matDialog
-          .open(EditWorkspaceComponent, { data: { workspace } })
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            concatMap(({ name }) =>
-              this._bulldozerProgramStore.updateWorkspace(workspace.id, name)
-            ),
-            tapResponse(
-              () => this._events.next(new WorkspaceUpdated(workspace.id)),
-              (error) => this._error.next(error)
+  readonly updateWorkspace = this.effect(
+    (workspace$: Observable<Document<Workspace>>) =>
+      workspace$.pipe(
+        exhaustMap((workspace) =>
+          this._matDialog
+            .open(EditWorkspaceComponent, { data: { workspace } })
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              concatMap(({ name }) =>
+                this._bulldozerProgramStore.updateWorkspace(workspace.id, name)
+              ),
+              tapResponse(
+                () => this._events.next(new WorkspaceUpdated(workspace.id)),
+                (error) => this._error.next(error)
+              )
             )
-          )
+        )
       )
-    )
   );
 
-  readonly deleteWorkspace = this.effect((workspace$: Observable<Workspace>) =>
-    workspace$.pipe(
-      concatMap((workspace) => {
-        const workspaceData = this.getWorkspaceData(workspace.id);
+  readonly deleteWorkspace = this.effect(
+    (workspace$: Observable<Document<Workspace>>) =>
+      workspace$.pipe(
+        concatMap((workspace) => {
+          const workspaceData = this.getWorkspaceData(workspace.id);
 
-        return this._bulldozerProgramStore
-          .deleteWorkspace(
-            workspace.id,
-            workspaceData.applications.map(({ id }) => id),
-            workspaceData.collections.map(({ id }) => id),
-            workspaceData.collectionAttributes.map(({ id }) => id),
-            workspaceData.instructions.map(({ id }) => id),
-            workspaceData.instructionArguments.map(({ id }) => id),
-            workspaceData.instructionAccounts.map(({ id }) => id),
-            workspaceData.instructionRelations.map(({ id }) => id)
-          )
-          .pipe(
-            tapResponse(
-              () => this._events.next(new WorkspaceDeleted(workspace.id)),
-              (error) => this._error.next(error)
+          return this._bulldozerProgramStore
+            .deleteWorkspace(
+              workspace.id,
+              workspaceData.applications.map(({ id }) => id),
+              workspaceData.collections.map(({ id }) => id),
+              workspaceData.collectionAttributes.map(({ id }) => id),
+              workspaceData.instructions.map(({ id }) => id),
+              workspaceData.instructionArguments.map(({ id }) => id),
+              workspaceData.instructionAccounts.map(({ id }) => id),
+              workspaceData.instructionRelations.map(({ id }) => id)
             )
-          );
-      })
-    )
+            .pipe(
+              tapResponse(
+                () => this._events.next(new WorkspaceDeleted(workspace.id)),
+                (error) => this._error.next(error)
+              )
+            );
+        })
+      )
   );
 
   readonly downloadWorkspace = this.effect(
-    (workspace$: Observable<Workspace>) =>
+    (workspace$: Observable<Document<Workspace>>) =>
       workspace$.pipe(
         map((workspace) => {
           const workspaceData = this.getWorkspaceData(workspace.id);

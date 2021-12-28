@@ -1,14 +1,15 @@
 import {
   Application,
+  Document,
   Instruction,
   InstructionArgument,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 import { formatInstructionArguments, formatName } from '.';
 
 export const formatApplication = (
-  application: Application,
-  instructions: Instruction[],
-  instructionArguments: InstructionArgument[]
+  application: Document<Application>,
+  instructions: Document<Instruction>[],
+  instructionArguments: Document<InstructionArgument>[]
 ) => {
   return {
     id: application.id,

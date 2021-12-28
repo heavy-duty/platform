@@ -1,14 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
+import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
-import {
-  Collection,
-  CollectionAttribute,
-} from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -18,13 +13,9 @@ import {
   Observable,
   Subject,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import {
   CollectionActions,
-  CollectionAttributeCreated,
-  CollectionAttributeDeleted,
-  CollectionAttributeUpdated,
   CollectionCreated,
   CollectionDeleted,
   CollectionInit,
@@ -35,12 +26,10 @@ import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   collectionId: string | null;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   collectionId: null,
-  error: null,
 };
 
 @Injectable()
@@ -67,8 +56,8 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   readonly collectionAttributes$ = this.select(
     this._workspaceStore.collectionAttributes$,
     this.collectionId$,
-    (attributes, collectionId) =>
-      attributes.filter(
+    (collectionAttributes, collectionId) =>
+      collectionAttributes.filter(
         ({ data: { collection } }) => collection === collectionId
       )
   );
@@ -95,36 +84,33 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly createCollection = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditCollectionComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(([{ name }, workspaceId, applicationId]) =>
-              this._bulldozerProgramStore.createCollection(
-                workspaceId,
-                applicationId,
-                name
+  readonly createCollection = this.effect(
+    (request$: Observable<{ workspaceId: string; applicationId: string }>) =>
+      request$.pipe(
+        exhaustMap(({ workspaceId, applicationId }) =>
+          this._matDialog
+            .open(EditCollectionComponent)
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              concatMap(({ name }) =>
+                this._bulldozerProgramStore.createCollection(
+                  workspaceId,
+                  applicationId,
+                  name
+                )
+              ),
+              tapResponse(
+                () => this._events.next(new CollectionCreated()),
+                (error) => this._error.next(error)
               )
-            ),
-            tapResponse(
-              () => this._events.next(new CollectionCreated()),
-              (error) => this._error.next(error)
             )
-          )
+        )
       )
-    )
   );
 
   readonly updateCollection = this.effect(
-    (collection$: Observable<Collection>) =>
+    (collection$: Observable<Document<Collection>>) =>
       collection$.pipe(
         exhaustMap((collection) =>
           this._matDialog
@@ -148,7 +134,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteCollection = this.effect(
-    (collection$: Observable<Collection>) =>
+    (collection$: Observable<Document<Collection>>) =>
       collection$.pipe(
         concatMap((collection) => {
           const collectionData = this._workspaceStore.getCollectionData(
@@ -167,90 +153,6 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               )
             );
         })
-      )
-  );
-
-  readonly createCollectionAttribute = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditAttributeComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-              this.collectionId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(
-              ([
-                collectionAttributeDto,
-                workspaceId,
-                applicationId,
-                collectionId,
-              ]) =>
-                this._bulldozerProgramStore.createCollectionAttribute(
-                  workspaceId,
-                  applicationId,
-                  collectionId,
-                  collectionAttributeDto
-                )
-            ),
-            tapResponse(
-              () => this._events.next(new CollectionAttributeCreated()),
-              (error) => this._error.next(error)
-            )
-          )
-      )
-    )
-  );
-
-  readonly updateCollectionAttribute = this.effect(
-    (attribute$: Observable<CollectionAttribute>) =>
-      attribute$.pipe(
-        exhaustMap((attribute) =>
-          this._matDialog
-            .open(EditAttributeComponent, {
-              data: { attribute },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap((collectionAttributeDto) =>
-                this._bulldozerProgramStore.updateCollectionAttribute(
-                  attribute.id,
-                  collectionAttributeDto
-                )
-              ),
-              tapResponse(
-                () =>
-                  this._events.next(
-                    new CollectionAttributeUpdated(attribute.id)
-                  ),
-                (error) => this._error.next(error)
-              )
-            )
-        )
-      )
-  );
-
-  readonly deleteCollectionAttribute = this.effect(
-    (attributeId$: Observable<string>) =>
-      attributeId$.pipe(
-        concatMap((attributeId) =>
-          this._bulldozerProgramStore
-            .deleteCollectionAttribute(attributeId)
-            .pipe(
-              tapResponse(
-                () =>
-                  this._events.next(
-                    new CollectionAttributeDeleted(attributeId)
-                  ),
-                (error) => this._error.next(error)
-              )
-            )
-        )
       )
   );
 }

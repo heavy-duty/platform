@@ -1,16 +1,17 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import {
+  Application,
+  Collection,
+  Document,
+  Instruction,
+  Workspace,
+} from '@heavy-duty/bulldozer-devkit';
+import {
   ApplicationStore,
   CollectionStore,
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import {
-  Application,
-  Collection,
-  Instruction,
-  Workspace,
-} from '@heavy-duty/bulldozer/application/utils/types';
 import { NavigationStore } from './navigation.store';
 
 @Component({
@@ -32,7 +33,7 @@ import { NavigationStore } from './navigation.store';
             </figure>
             <h2 class="mt-4 text-center">BULLDOZER</h2>
             <mat-accordion
-              *ngIf="application$ | ngrxPush"
+              *ngIf="application$ | ngrxPush as application"
               displayMode="flat"
               togglePosition="before"
               multi
@@ -40,7 +41,9 @@ import { NavigationStore } from './navigation.store';
               <bd-collection-selector
                 [connected]="connected$ | ngrxPush"
                 [collections]="collections$ | ngrxPush"
-                (createCollection)="onCreateCollection()"
+                (createCollection)="
+                  onCreateCollection(application.data.workspace, application.id)
+                "
                 (updateCollection)="onUpdateCollection($event)"
                 (deleteCollection)="onDeleteCollection($event)"
               ></bd-collection-selector>
@@ -54,10 +57,11 @@ import { NavigationStore } from './navigation.store';
             </mat-accordion>
           </div>
           <bd-application-selector
+            *ngIf="workspace$ | ngrxPush as workspace"
             [connected]="connected$ | ngrxPush"
             [application]="application$ | ngrxPush"
             [applications]="applications$ | ngrxPush"
-            (createApplication)="onCreateApplication()"
+            (createApplication)="onCreateApplication(workspace.id)"
             (updateApplication)="onUpdateApplication($event)"
             (deleteApplication)="onDeleteApplication($event)"
           ></bd-application-selector>
@@ -126,35 +130,35 @@ export class NavigationComponent {
     this._workspaceStore.createWorkspace();
   }
 
-  onUpdateWorkspace(workspace: Workspace) {
+  onUpdateWorkspace(workspace: Document<Workspace>) {
     this._workspaceStore.updateWorkspace(workspace);
   }
 
-  onDeleteWorkspace(workspace: Workspace) {
+  onDeleteWorkspace(workspace: Document<Workspace>) {
     this._workspaceStore.deleteWorkspace(workspace);
   }
 
-  onCreateApplication() {
-    this._applicationStore.createApplication();
+  onCreateApplication(workspaceId: string) {
+    this._applicationStore.createApplication({ workspaceId });
   }
 
-  onUpdateApplication(application: Application) {
+  onUpdateApplication(application: Document<Application>) {
     this._applicationStore.updateApplication(application);
   }
 
-  onDeleteApplication(application: Application) {
+  onDeleteApplication(application: Document<Application>) {
     this._applicationStore.deleteApplication(application);
   }
 
-  onCreateCollection() {
-    this._collectionStore.createCollection();
+  onCreateCollection(workspaceId: string, applicationId: string) {
+    this._collectionStore.createCollection({ workspaceId, applicationId });
   }
 
-  onUpdateCollection(collection: Collection) {
+  onUpdateCollection(collection: Document<Collection>) {
     this._collectionStore.updateCollection(collection);
   }
 
-  onDeleteCollection(collection: Collection) {
+  onDeleteCollection(collection: Document<Collection>) {
     this._collectionStore.deleteCollection(collection);
   }
 
@@ -162,15 +166,15 @@ export class NavigationComponent {
     this._instructionStore.createInstruction();
   }
 
-  onUpdateInstruction(instruction: Instruction) {
+  onUpdateInstruction(instruction: Document<Instruction>) {
     this._instructionStore.updateInstruction(instruction);
   }
 
-  onDeleteInstruction(instruction: Instruction) {
+  onDeleteInstruction(instruction: Document<Instruction>) {
     this._instructionStore.deleteInstruction(instruction);
   }
 
-  onDownloadWorkspace(workspace: Workspace) {
+  onDownloadWorkspace(workspace: Document<Workspace>) {
     this._workspaceStore.downloadWorkspace(workspace);
   }
 }

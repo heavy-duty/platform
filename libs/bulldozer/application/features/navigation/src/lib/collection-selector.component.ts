@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
+import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-collection-selector',
@@ -70,10 +70,10 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
 })
 export class CollectionSelectorComponent {
   @Input() connected?: boolean | null = null;
-  @Input() collections?: Collection[] | null = null;
+  @Input() collections?: Document<Collection>[] | null = null;
   @Output() createCollection = new EventEmitter();
-  @Output() updateCollection = new EventEmitter<Collection>();
-  @Output() deleteCollection = new EventEmitter<Collection>();
+  @Output() updateCollection = new EventEmitter<Document<Collection>>();
+  @Output() deleteCollection = new EventEmitter<Document<Collection>>();
 
   onCreateCollection(event: Event) {
     event.stopPropagation();
@@ -81,11 +81,11 @@ export class CollectionSelectorComponent {
     this.createCollection.emit();
   }
 
-  onEditCollection(collection: Collection) {
+  onEditCollection(collection: Document<Collection>) {
     this.updateCollection.emit(collection);
   }
 
-  onDeleteCollection(collection: Collection) {
+  onDeleteCollection(collection: Document<Collection>) {
     this.deleteCollection.emit(collection);
   }
 }

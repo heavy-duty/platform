@@ -5,16 +5,24 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import {
+  Document,
   Instruction,
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
+import {
+  InstructionArgumentStore,
+  InstructionDocumentStore,
+  InstructionRelationStore,
+  InstructionSignerStore,
+  InstructionStore,
+  WorkspaceStore,
+} from '@heavy-duty/bulldozer/application/data-access';
+import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { filter, map, startWith, take } from 'rxjs';
+import { combineLatest, filter, map, startWith, take } from 'rxjs';
 
 @Component({
   selector: 'bd-view-instruction',
@@ -38,10 +46,34 @@ import { filter, map, startWith, take } from 'rxjs';
 
         <bd-instruction-menu
           [connected]="connected$ | ngrxPush"
-          (createArgument)="onCreateArgument()"
-          (createDocument)="onCreateDocument()"
-          (createSigner)="onCreateSigner()"
-          (createRelation)="onCreateRelation()"
+          (createArgument)="
+            onCreateArgument(
+              instruction.data.workspace,
+              instruction.data.application,
+              instruction.id
+            )
+          "
+          (createDocument)="
+            onCreateDocument(
+              instruction.data.workspace,
+              instruction.data.application,
+              instruction.id
+            )
+          "
+          (createSigner)="
+            onCreateSigner(
+              instruction.data.workspace,
+              instruction.data.application,
+              instruction.id
+            )
+          "
+          (createRelation)="
+            onCreateRelation(
+              instruction.data.workspace,
+              instruction.data.application,
+              instruction.id
+            )
+          "
         >
         </bd-instruction-menu>
 
@@ -123,8 +155,8 @@ export class ViewInstructionComponent implements OnInit {
   readonly instructionContext$ = this._instructionStore.instructionContext$;
   readonly arguments$ = this._instructionStore.instructionArguments$;
   readonly accounts$ = this._instructionStore.instructionAccounts$;
-  readonly documents$ = this._instructionStore.documents$;
-  readonly signers$ = this._instructionStore.signers$;
+  readonly documents$ = this._instructionDocumentStore.documents$;
+  readonly signers$ = this._instructionSignerStore.signers$;
 
   readonly commonEditorOptions = {
     language: 'rust',
@@ -151,7 +183,12 @@ export class ViewInstructionComponent implements OnInit {
     private readonly _route: ActivatedRoute,
     private readonly _router: Router,
     private readonly _walletStore: WalletStore,
+    private readonly _workspaceStore: WorkspaceStore,
     private readonly _instructionStore: InstructionStore,
+    private readonly _instructionDocumentStore: InstructionDocumentStore,
+    private readonly _instructionSignerStore: InstructionSignerStore,
+    private readonly _instructionArgumentStore: InstructionArgumentStore,
+    private readonly _instructionRelationStore: InstructionRelationStore,
     private readonly _themeService: DarkThemeService
   ) {}
 
@@ -185,54 +222,118 @@ export class ViewInstructionComponent implements OnInit {
     // this._instructionStore.reload();
   }
 
-  onUpdateInstructionBody(instruction: Instruction) {
+  onUpdateInstructionBody(instruction: Document<Instruction>) {
     this._instructionStore.updateInstructionBody({
       instruction,
       body: this.instructionBody,
     });
   }
 
-  onCreateArgument() {
-    this._instructionStore.createArgument();
+  onCreateArgument(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._instructionArgumentStore.createArgument({
+      workspaceId,
+      applicationId,
+      instructionId,
+    });
   }
 
-  onUpdateArgument(argument: InstructionArgument) {
-    this._instructionStore.updateArgument(argument);
+  onUpdateArgument(argument: Document<InstructionArgument>) {
+    this._instructionArgumentStore.updateArgument(argument);
   }
 
   onDeleteArgument(argumentId: string) {
-    this._instructionStore.deleteArgument(argumentId);
+    this._instructionArgumentStore.deleteArgument(argumentId);
   }
 
-  onCreateDocument() {
-    this._instructionStore.createDocument();
+  onCreateDocument(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._instructionDocumentStore.createDocument(
+      combineLatest([
+        this._workspaceStore.collections$,
+        this._instructionStore.instructionAccounts$,
+      ]).pipe(
+        map(([collections, instructionAccounts]) => ({
+          collections,
+          instructionAccounts,
+          workspaceId,
+          applicationId,
+          instructionId,
+        }))
+      )
+    );
   }
 
-  onUpdateDocument(account: InstructionAccount) {
-    this._instructionStore.updateDocument(account);
+  onUpdateDocument(document: Document<InstructionAccount>) {
+    this._instructionDocumentStore.updateDocument(
+      combineLatest([
+        this._workspaceStore.collections$,
+        this._instructionStore.instructionAccounts$,
+      ]).pipe(
+        map(([collections, instructionAccounts]) => ({
+          collections,
+          instructionAccounts,
+          document,
+        }))
+      )
+    );
   }
 
-  onCreateSigner() {
-    this._instructionStore.createSigner();
+  onCreateSigner(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._instructionSignerStore.createSigner({
+      workspaceId,
+      applicationId,
+      instructionId,
+    });
   }
 
-  onUpdateSigner(account: InstructionAccount) {
-    this._instructionStore.updateSigner(account);
+  onUpdateSigner(signer: Document<InstructionAccount>) {
+    this._instructionSignerStore.updateSigner(signer);
   }
 
-  onDeleteAccount(accountId: string) {
-    this._instructionStore.deleteAccount(accountId);
+  onDeleteAccount(signerId: string) {
+    this._instructionSignerStore.deleteSigner(signerId);
   }
 
-  onCreateRelation() {
-    this._instructionStore.createRelation();
+  onCreateRelation(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._instructionRelationStore.createRelation(
+      this._instructionStore.instructionAccounts$.pipe(
+        map((instructionAccounts) => ({
+          instructionAccounts,
+          workspaceId,
+          applicationId,
+          instructionId,
+        }))
+      )
+    );
   }
 
-  onUpdateRelation(relation: InstructionRelation) {
-    this._instructionStore.updateRelation(relation);
+  onUpdateRelation(relation: Document<InstructionRelation>) {
+    this._instructionRelationStore.updateRelation(
+      this._instructionStore.instructionAccounts$.pipe(
+        map((instructionAccounts) => ({
+          instructionAccounts,
+          relation,
+        }))
+      )
+    );
   }
 
   onDeleteRelation(relationId: string) {
-    this._instructionStore.deleteRelation(relationId);
+    this._instructionRelationStore.deleteRelation(relationId);
   }
 }

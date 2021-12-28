@@ -2,7 +2,7 @@ import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
+import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-collection',
@@ -31,10 +31,10 @@ import { Collection } from '@heavy-duty/bulldozer/application/utils/types';
         />
         <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
 
-        <mat-error *ngIf="submitted && nameControl.errors?.required"
+        <mat-error *ngIf="submitted && nameControl.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.errors?.maxlength"
+        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -77,7 +77,7 @@ export class EditCollectionComponent implements OnInit {
     private readonly _matDialogRef: MatDialogRef<EditCollectionComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      collection?: Collection;
+      collection?: Document<Collection>;
     }
   ) {}
 

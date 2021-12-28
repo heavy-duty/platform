@@ -5,18 +5,21 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { CollectionStore } from '@heavy-duty/bulldozer/application/data-access';
+import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
+import {
+  CollectionAttributeStore,
+  CollectionStore,
+} from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
-import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'bd-view-collection',
   template: `
-    <div class="flex">
+    <div class="flex" *ngIf="collection$ | ngrxPush as collection">
       <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
-        <header bdPageHeader *ngIf="collection$ | ngrxPush as collection">
+        <header bdPageHeader>
           <h1>
             {{ collection.data.name }}
             <button
@@ -33,7 +36,13 @@ import { filter, map, startWith } from 'rxjs';
 
         <bd-collection-menu
           [connected]="connected$ | ngrxPush"
-          (createAttribute)="onCreateAttribute()"
+          (createAttribute)="
+            onCreateAttribute(
+              collection.data.workspace,
+              collection.data.application,
+              collection.id
+            )
+          "
         >
         </bd-collection-menu>
 
@@ -81,6 +90,7 @@ export class ViewCollectionComponent implements OnInit {
     private readonly _router: Router,
     private readonly _walletStore: WalletStore,
     private readonly _collectionStore: CollectionStore,
+    private readonly _collectionAttributeStore: CollectionAttributeStore,
     private readonly _themeService: DarkThemeService
   ) {}
 
@@ -108,15 +118,23 @@ export class ViewCollectionComponent implements OnInit {
     // this._collectionStore.reload();
   }
 
-  onCreateAttribute() {
-    this._collectionStore.createCollectionAttribute();
+  onCreateAttribute(
+    workspaceId: string,
+    applicationId: string,
+    collectionId: string
+  ) {
+    this._collectionAttributeStore.createCollectionAttribute({
+      workspaceId,
+      applicationId,
+      collectionId,
+    });
   }
 
-  onUpdateAttribute(attribute: CollectionAttribute) {
-    this._collectionStore.updateCollectionAttribute(attribute);
+  onUpdateAttribute(attribute: Document<CollectionAttribute>) {
+    this._collectionAttributeStore.updateCollectionAttribute(attribute);
   }
 
   onDeleteAttribute(attributeId: string) {
-    this._collectionStore.deleteCollectionAttribute(attributeId);
+    this._collectionAttributeStore.deleteCollectionAttribute(attributeId);
   }
 }

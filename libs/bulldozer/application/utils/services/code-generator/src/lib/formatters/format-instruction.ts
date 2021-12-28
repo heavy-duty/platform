@@ -1,9 +1,10 @@
 import {
+  Document,
   Instruction,
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
@@ -29,7 +30,7 @@ const getArgumentKindName = (id: number, name: string, size: number) => {
 
 export const formatInstructionArguments = (
   instructionId: string,
-  instructionArguments: InstructionArgument[]
+  instructionArguments: Document<InstructionArgument>[]
 ) =>
   instructionArguments
     .filter((argument) => argument.data.instruction === instructionId)
@@ -50,9 +51,9 @@ export const formatInstructionArguments = (
     }));
 
 const getInstructionAccountRelations = (
-  instructionAccount: InstructionAccount,
-  instructionAccounts: InstructionAccount[],
-  instructionRelations: InstructionRelation[]
+  instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[],
+  instructionRelations: Document<InstructionRelation>[]
 ) => {
   return instructionRelations
     .filter((relation) => relation.data.from === instructionAccount.id)
@@ -82,8 +83,8 @@ const getInstructionAccountRelations = (
 };
 
 const getInstructionAccountPayer = (
-  instructionAccount: InstructionAccount,
-  instructionAccounts: InstructionAccount[]
+  instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[]
 ) => {
   if (!instructionAccount.data.payer) {
     return null;
@@ -107,8 +108,8 @@ const getInstructionAccountPayer = (
 };
 
 const getInstructionAccountCollection = (
-  instructionAccount: InstructionAccount,
-  instructionAccounts: InstructionAccount[]
+  instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[]
 ) => {
   if (!instructionAccount.data.collection) {
     return null;
@@ -132,8 +133,8 @@ const getInstructionAccountCollection = (
 };
 
 const getInstructionAccountClose = (
-  instructionAccount: InstructionAccount,
-  instructionAccounts: InstructionAccount[]
+  instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[]
 ) => {
   if (!instructionAccount.data.close) {
     return null;
@@ -158,8 +159,8 @@ const getInstructionAccountClose = (
 
 const formatInstructionAccounts = (
   instructionId: string,
-  instructionAccounts: InstructionAccount[],
-  instructionRelations: InstructionRelation[]
+  instructionAccounts: Document<InstructionAccount>[],
+  instructionRelations: Document<InstructionRelation>[]
 ) =>
   instructionAccounts
     .filter(
@@ -192,10 +193,10 @@ const formatInstructionAccounts = (
     }));
 
 export const formatInstruction = (
-  instruction: Instruction,
-  instructionArguments: InstructionArgument[],
-  instructionAccounts: InstructionAccount[],
-  instructionRelations: InstructionRelation[]
+  instruction: Document<Instruction>,
+  instructionArguments: Document<InstructionArgument>[],
+  instructionAccounts: Document<InstructionAccount>[],
+  instructionRelations: Document<InstructionRelation>[]
 ) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),

@@ -1,7 +1,8 @@
 import {
   Collection,
   CollectionAttribute,
-} from '@heavy-duty/bulldozer/application/utils/types';
+  Document,
+} from '@heavy-duty/bulldozer-devkit';
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
@@ -26,8 +27,8 @@ const getAttributeKindName = (id: number, name: string, size: number) => {
 };
 
 export const formatCollection = (
-  collection: Collection,
-  collectionAttributes: CollectionAttribute[]
+  collection: Document<Collection>,
+  collectionAttributes: Document<CollectionAttribute>[]
 ) => ({
   name: formatName(collection.data.name),
   attributes:

@@ -97,9 +97,6 @@
       "@heavy-duty/bulldozer/application/utils/services/dark-theme": [
         "libs/bulldozer/application/utils/services/dark-theme/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/application/utils/types": [
-        "libs/bulldozer/application/utils/types/src/index.ts"
-      ],
       "@heavy-duty/bulldozer/data-access": [
         "libs/bulldozer/data-access/src/index.ts"
       ],

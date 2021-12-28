@@ -7,9 +7,10 @@ import {
 } from '@angular/core';
 import {
   Collection,
+  Document,
   InstructionAccount,
   InstructionRelation,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-list-documents',
@@ -175,19 +176,21 @@ import {
 export class ListDocumentsComponent {
   @Input() connected?: boolean | null = null;
   @Input() documents?:
-    | (InstructionAccount & {
-        relations: (InstructionRelation & { to: InstructionAccount })[];
-        close: InstructionAccount | null;
-        collection: Collection | null;
-        payer: InstructionAccount | null;
+    | (Document<InstructionAccount> & {
+        relations: (Document<InstructionRelation> & {
+          to: Document<InstructionAccount>;
+        })[];
+        close: Document<InstructionAccount> | null;
+        collection: Document<Collection> | null;
+        payer: Document<InstructionAccount> | null;
       })[]
     | null;
-  @Output() updateDocument = new EventEmitter<InstructionAccount>();
+  @Output() updateDocument = new EventEmitter<Document<InstructionAccount>>();
   @Output() deleteDocument = new EventEmitter<string>();
-  @Output() updateRelation = new EventEmitter<InstructionRelation>();
+  @Output() updateRelation = new EventEmitter<Document<InstructionRelation>>();
   @Output() deleteRelation = new EventEmitter<string>();
 
-  onUpdateDocument(document: InstructionAccount) {
+  onUpdateDocument(document: Document<InstructionAccount>) {
     this.updateDocument.emit(document);
   }
 
@@ -195,7 +198,11 @@ export class ListDocumentsComponent {
     this.deleteDocument.emit(documentId);
   }
 
-  onUpdateRelation(relation: InstructionRelation & { to: InstructionAccount }) {
+  onUpdateRelation(
+    relation: Document<InstructionRelation> & {
+      to: Document<InstructionAccount>;
+    }
+  ) {
     this.updateRelation.emit(relation);
   }
 

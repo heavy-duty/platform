@@ -7,7 +7,12 @@ import {
 import { Router } from '@angular/router';
 import {
   ApplicationStore,
+  CollectionAttributeStore,
   CollectionStore,
+  InstructionArgumentStore,
+  InstructionDocumentStore,
+  InstructionRelationStore,
+  InstructionSignerStore,
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
@@ -56,7 +61,12 @@ import { ApplicationShellStore } from './shell.store';
     WorkspaceStore,
     ApplicationStore,
     CollectionStore,
+    CollectionAttributeStore,
     InstructionStore,
+    InstructionArgumentStore,
+    InstructionDocumentStore,
+    InstructionSignerStore,
+    InstructionRelationStore,
     ApplicationShellStore,
   ],
 })

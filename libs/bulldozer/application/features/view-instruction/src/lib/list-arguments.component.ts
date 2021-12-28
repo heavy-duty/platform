@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/types';
+import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-list-arguments',
@@ -93,11 +93,11 @@ import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/typ
 })
 export class ListArgumentsComponent {
   @Input() connected?: boolean | null = null;
-  @Input() arguments?: InstructionArgument[] | null = null;
-  @Output() updateArgument = new EventEmitter<InstructionArgument>();
+  @Input() arguments?: Document<InstructionArgument>[] | null = null;
+  @Output() updateArgument = new EventEmitter<Document<InstructionArgument>>();
   @Output() deleteArgument = new EventEmitter<string>();
 
-  onUpdateArgument(argument: InstructionArgument) {
+  onUpdateArgument(argument: Document<InstructionArgument>) {
     this.updateArgument.emit(argument);
   }
 

@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
+import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-workspace-selector',
@@ -103,26 +103,26 @@ import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WorkspaceSelectorComponent {
-  @Input() activeWorkspace?: Workspace | null = null;
-  @Input() workspaces?: Workspace[] | null = null;
+  @Input() activeWorkspace?: Document<Workspace> | null = null;
+  @Input() workspaces?: Document<Workspace>[] | null = null;
   @Output() createWorkspace = new EventEmitter();
-  @Output() updateWorkspace = new EventEmitter<Workspace>();
-  @Output() deleteWorkspace = new EventEmitter<Workspace>();
-  @Output() downloadWorkspace = new EventEmitter<Workspace>();
+  @Output() updateWorkspace = new EventEmitter<Document<Workspace>>();
+  @Output() deleteWorkspace = new EventEmitter<Document<Workspace>>();
+  @Output() downloadWorkspace = new EventEmitter<Document<Workspace>>();
 
   onCreateWorkspace() {
     this.createWorkspace.emit();
   }
 
-  onEditWorkspace(workspace: Workspace) {
+  onEditWorkspace(workspace: Document<Workspace>) {
     this.updateWorkspace.emit(workspace);
   }
 
-  onDeleteWorkspace(workspace: Workspace) {
+  onDeleteWorkspace(workspace: Document<Workspace>) {
     this.deleteWorkspace.emit(workspace);
   }
 
-  onDownloadWorkspace(workspace: Workspace) {
+  onDownloadWorkspace(workspace: Document<Workspace>) {
     this.downloadWorkspace.emit(workspace);
   }
 }

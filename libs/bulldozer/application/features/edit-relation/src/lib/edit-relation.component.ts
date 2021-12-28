@@ -15,9 +15,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
   Collection,
+  Document,
   InstructionAccount,
   InstructionRelation,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 import { Subject } from 'rxjs';
 
 export const equalValidator =
@@ -79,7 +80,7 @@ export const equalValidator =
       </mat-form-field>
 
       <mat-error
-        *ngIf="submitted && relationGroup.errors?.equal"
+        *ngIf="submitted && relationGroup.hasError('equal')"
         class="text-center m-0"
         >Accounts have to be different.</mat-error
       >
@@ -130,9 +131,9 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      relation?: InstructionRelation;
-      collections: Collection[];
-      accounts: InstructionAccount[];
+      relation?: Document<InstructionRelation>;
+      collections: Document<Collection>[];
+      accounts: Document<InstructionAccount>[];
     }
   ) {}
 

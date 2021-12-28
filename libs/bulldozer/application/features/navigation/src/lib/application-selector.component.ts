@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Application } from '@heavy-duty/bulldozer/application/utils/types';
+import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-application-selector',
@@ -81,11 +81,11 @@ import { Application } from '@heavy-duty/bulldozer/application/utils/types';
 })
 export class ApplicationSelectorComponent {
   @Input() connected?: boolean | null = null;
-  @Input() application?: Application | null = null;
-  @Input() applications?: Application[] | null = null;
+  @Input() application?: Document<Application> | null = null;
+  @Input() applications?: Document<Application>[] | null = null;
   @Output() createApplication = new EventEmitter();
-  @Output() updateApplication = new EventEmitter<Application>();
-  @Output() deleteApplication = new EventEmitter<Application>();
+  @Output() updateApplication = new EventEmitter<Document<Application>>();
+  @Output() deleteApplication = new EventEmitter<Document<Application>>();
 
   onCreateApplication(event: Event) {
     event.stopPropagation();
@@ -93,11 +93,11 @@ export class ApplicationSelectorComponent {
     this.createApplication.emit();
   }
 
-  onEditApplication(application: Application) {
+  onEditApplication(application: Document<Application>) {
     this.updateApplication.emit(application);
   }
 
-  onDeleteApplication(application: Application) {
+  onDeleteApplication(application: Document<Application>) {
     this.deleteApplication.emit(application);
   }
 }

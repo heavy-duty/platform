@@ -2,12 +2,13 @@ import {
   Application,
   Collection,
   CollectionAttribute,
+  Document,
   Instruction,
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
   Workspace,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
 import * as JSZip from 'jszip';
 import {
@@ -27,10 +28,10 @@ import {
 registerHandleBarsHelpers();
 
 export const generateInstructionCode = (
-  instruction: Instruction,
-  instructionArguments: InstructionArgument[],
-  instructionAccounts: InstructionAccount[],
-  instructionRelations: InstructionRelation[]
+  instruction: Document<Instruction>,
+  instructionArguments: Document<InstructionArgument>[],
+  instructionAccounts: Document<InstructionAccount>[],
+  instructionRelations: Document<InstructionRelation>[]
 ) => {
   const formattedInstruction = formatInstruction(
     instruction,
@@ -56,8 +57,8 @@ export const generateInstructionCode = (
 };
 
 export const generateCollectionCode = (
-  collection: Collection,
-  collectionAttributes: CollectionAttribute[]
+  collection: Document<Collection>,
+  collectionAttributes: Document<CollectionAttribute>[]
 ) => {
   const formattedCollection = formatCollection(
     collection,
@@ -80,9 +81,9 @@ export const generateModCode = (entries: { data: { name: string } }[]) => {
 };
 
 export const generateApplicationCode = (
-  application: Application,
-  instructions: Instruction[],
-  instructionArguments: InstructionArgument[]
+  application: Document<Application>,
+  instructions: Document<Instruction>[],
+  instructionArguments: Document<InstructionArgument>[]
 ) => {
   const formattedApplication = formatApplication(
     application,
@@ -99,13 +100,13 @@ export const generateApplicationCode = (
 };
 
 export const generateWorkspaceMetadata = (
-  applications: Application[],
-  collections: Collection[],
-  collectionAttributes: CollectionAttribute[],
-  instructions: Instruction[],
-  instructionArguments: InstructionArgument[],
-  instructionAccounts: InstructionAccount[],
-  instructionRelations: InstructionRelation[]
+  applications: Document<Application>[],
+  collections: Document<Collection>[],
+  collectionAttributes: Document<CollectionAttribute>[],
+  instructions: Document<Instruction>[],
+  instructionArguments: Document<InstructionArgument>[],
+  instructionAccounts: Document<InstructionAccount>[],
+  instructionRelations: Document<InstructionRelation>[]
 ): WorkspaceMetadata => {
   return {
     applications: applications.map((application) => {
@@ -161,7 +162,7 @@ export const generateWorkspaceMetadata = (
 };
 
 export const generateWorkspaceZip = (
-  workspace: Workspace,
+  workspace: Document<Workspace>,
   metadata: WorkspaceMetadata
 ) => {
   const zip = new JSZip();

@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
+import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
-import { Application } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -13,7 +12,6 @@ import {
   Observable,
   Subject,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import {
   ApplicationActions,
@@ -26,12 +24,10 @@ import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   applicationId: string | null;
-  error: unknown | null;
 }
 
 const initialState = {
   applicationId: null,
-  error: null,
 };
 
 @Injectable()
@@ -71,31 +67,29 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly createApplication = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditApplicationComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(([{ name }, workspaceId]) =>
-              this._bulldozerProgramStore.createApplication(workspaceId, name)
-            ),
-            tapResponse(
-              () => this._events.next(new ApplicationCreated()),
-              (error) => this._error.next(error)
+  readonly createApplication = this.effect(
+    (request$: Observable<{ workspaceId: string }>) =>
+      request$.pipe(
+        exhaustMap(({ workspaceId }) =>
+          this._matDialog
+            .open(EditApplicationComponent)
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              concatMap(({ name }) =>
+                this._bulldozerProgramStore.createApplication(workspaceId, name)
+              ),
+              tapResponse(
+                () => this._events.next(new ApplicationCreated()),
+                (error) => this._error.next(error)
+              )
             )
-          )
+        )
       )
-    )
   );
 
   readonly updateApplication = this.effect(
-    (application$: Observable<Application>) =>
+    (application$: Observable<Document<Application>>) =>
       application$.pipe(
         exhaustMap((application) =>
           this._matDialog
@@ -119,7 +113,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteApplication = this.effect(
-    (application$: Observable<Application>) =>
+    (application$: Observable<Document<Application>>) =>
       application$.pipe(
         concatMap((application) => {
           const applicationData = this._workspaceStore.getApplicationData(
