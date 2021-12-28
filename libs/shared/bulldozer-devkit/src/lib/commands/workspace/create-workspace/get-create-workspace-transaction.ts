@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { getCreateWorkspaceInstruction } from '.';
@@ -11,7 +10,6 @@ import {
 export const getCreateWorkspaceTransaction = (
   connection: Connection,
   authority: PublicKey,
-  program: Program,
   workspaceKeypair: Keypair,
   workspaceName: string
 ): Observable<Transaction> => {
@@ -19,7 +17,6 @@ export const getCreateWorkspaceTransaction = (
     addInstructionToTransaction(
       getCreateWorkspaceInstruction(
         authority,
-        program,
         workspaceKeypair.publicKey,
         workspaceName
       )

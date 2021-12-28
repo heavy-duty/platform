@@ -1,13 +1,12 @@
-import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { bulldozerProgram } from '../../../programs';
 
 export const getUpdateCollectionInstruction = (
   authority: PublicKey,
-  program: Program,
   collectionPublicKey: PublicKey,
   collectionName: string
 ): TransactionInstruction => {
-  return program.instruction.updateCollection(collectionName, {
+  return bulldozerProgram.instruction.updateCollection(collectionName, {
     accounts: {
       collection: collectionPublicKey,
       authority: authority,

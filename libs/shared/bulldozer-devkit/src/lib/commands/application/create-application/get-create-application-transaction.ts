@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { getCreateApplicationInstruction } from '.';
@@ -11,7 +10,6 @@ import {
 export const getCreateApplicationTransaction = (
   connection: Connection,
   authority: PublicKey,
-  program: Program,
   workspacePublicKey: PublicKey,
   applicationKeypair: Keypair,
   applicationName: string
@@ -20,7 +18,6 @@ export const getCreateApplicationTransaction = (
     addInstructionToTransaction(
       getCreateApplicationInstruction(
         authority,
-        program,
         workspacePublicKey,
         applicationKeypair.publicKey,
         applicationName

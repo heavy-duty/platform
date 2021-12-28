@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { defer, Observable } from 'rxjs';
-import { BULLDOZER_PROGRAM_ID } from '../utils';
+import { BULLDOZER_PROGRAM_ID } from '../programs';
 
 const SEEDS_PREFIX = 'instruction_relation';
 

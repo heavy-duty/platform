@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { getUpdateInstructionBodyInstruction } from '.';
@@ -8,7 +7,6 @@ import { addInstructionToTransaction } from '../../../operators';
 export const getUpdateInstructionBodyTransaction = (
   connection: Connection,
   authority: PublicKey,
-  program: Program,
   instructionPublicKey: PublicKey,
   instructionBody: string
 ): Observable<Transaction> => {
@@ -16,7 +14,6 @@ export const getUpdateInstructionBodyTransaction = (
     addInstructionToTransaction(
       getUpdateInstructionBodyInstruction(
         authority,
-        program,
         instructionPublicKey,
         instructionBody
       )

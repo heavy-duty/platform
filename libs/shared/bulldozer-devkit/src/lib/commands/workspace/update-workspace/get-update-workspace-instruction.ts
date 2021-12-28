@@ -1,13 +1,12 @@
-import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { bulldozerProgram } from '../../../programs';
 
 export const getUpdateWorkspaceInstruction = (
   authority: PublicKey,
-  program: Program,
   workspacePublicKey: PublicKey,
   workspaceName: string
 ): TransactionInstruction => {
-  return program.instruction.updateWorkspace(workspaceName, {
+  return bulldozerProgram.instruction.updateWorkspace(workspaceName, {
     accounts: {
       workspace: workspacePublicKey,
       authority: authority,

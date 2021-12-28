@@ -1,2 +1,2 @@
-export * from './create-transaction.operation';
-export * from './find-instruction-relation-address.operation';
+export * from './create-transaction';
+export * from './find-instruction-relation-address';

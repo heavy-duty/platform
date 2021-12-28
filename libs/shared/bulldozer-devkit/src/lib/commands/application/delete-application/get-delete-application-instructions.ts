@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getDeleteApplicationInstruction } from '.';
 import {
@@ -14,7 +13,6 @@ import {
 
 export const getDeleteApplicationInstructions = (
   authority: PublicKey,
-  program: Program,
   applicationPublicKey: PublicKey,
   applicationCollectionPublicKeys: PublicKey[],
   applicationCollectionAttributePublicKeys: PublicKey[],
@@ -23,34 +21,24 @@ export const getDeleteApplicationInstructions = (
   applicationInstructionAccountPublicKeys: PublicKey[],
   applicationInstructionRelationPublicKeys: PublicKey[]
 ): TransactionInstruction[] => [
-  getDeleteApplicationInstruction(authority, program, applicationPublicKey),
+  getDeleteApplicationInstruction(authority, applicationPublicKey),
   ...applicationCollectionPublicKeys.map((applicationCollectionPublicKey) =>
-    getDeleteCollectionInstruction(
-      authority,
-      program,
-      applicationCollectionPublicKey
-    )
+    getDeleteCollectionInstruction(authority, applicationCollectionPublicKey)
   ),
   ...applicationCollectionAttributePublicKeys.map(
     (applicationCollectionAttributePublicKey) =>
       getDeleteCollectionAttributeInstruction(
         authority,
-        program,
         applicationCollectionAttributePublicKey
       )
   ),
   ...applicationInstructionPublicKeys.map((applicationInstructionPublicKey) =>
-    getDeleteInstructionInstruction(
-      authority,
-      program,
-      applicationInstructionPublicKey
-    )
+    getDeleteInstructionInstruction(authority, applicationInstructionPublicKey)
   ),
   ...applicationInstructionArgumentPublicKeys.map(
     (applicationInstructionArgumentPublicKey) =>
       getDeleteInstructionArgumentInstruction(
         authority,
-        program,
         applicationInstructionArgumentPublicKey
       )
   ),
@@ -58,7 +46,6 @@ export const getDeleteApplicationInstructions = (
     (applicationInstructionAccountPublicKey) =>
       getDeleteInstructionAccountInstruction(
         authority,
-        program,
         applicationInstructionAccountPublicKey
       )
   ),
@@ -66,7 +53,6 @@ export const getDeleteApplicationInstructions = (
     (applicationInstructionRelationPublicKey) =>
       getDeleteInstructionRelationInstruction(
         authority,
-        program,
         applicationInstructionRelationPublicKey
       )
   ),

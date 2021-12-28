@@ -1,12 +1,11 @@
-import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { bulldozerProgram } from '../../../programs';
 
 export const getDeleteInstructionInstruction = (
   authority: PublicKey,
-  program: Program,
   instructionPublicKey: PublicKey
 ): TransactionInstruction => {
-  return program.instruction.deleteInstruction({
+  return bulldozerProgram.instruction.deleteInstruction({
     accounts: {
       instruction: instructionPublicKey,
       authority: authority,

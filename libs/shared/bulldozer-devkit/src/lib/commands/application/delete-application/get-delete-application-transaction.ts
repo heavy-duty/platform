@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { getDeleteApplicationInstructions } from '.';
@@ -8,7 +7,6 @@ import { addAllInstructionsToTransaction } from '../../../operators';
 export const getDeleteApplicationTransaction = (
   connection: Connection,
   authority: PublicKey,
-  program: Program,
   applicationPublicKey: PublicKey,
   applicationCollectionPublicKeys: PublicKey[],
   applicationCollectionAttributePublicKeys: PublicKey[],
@@ -21,7 +19,6 @@ export const getDeleteApplicationTransaction = (
     addAllInstructionsToTransaction(
       getDeleteApplicationInstructions(
         authority,
-        program,
         applicationPublicKey,
         applicationCollectionPublicKeys,
         applicationCollectionAttributePublicKeys,

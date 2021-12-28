@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { getDeleteWorkspaceInstructions } from '.';
@@ -8,7 +7,6 @@ import { addAllInstructionsToTransaction } from '../../../operators';
 export const getDeleteWorkspaceTransaction = (
   connection: Connection,
   authority: PublicKey,
-  program: Program,
   workspacePublicKey: PublicKey,
   workspaceApplicationPublicKeys: PublicKey[],
   workspaceApplicationCollectionPublicKeys: PublicKey[],
@@ -22,7 +20,6 @@ export const getDeleteWorkspaceTransaction = (
     addAllInstructionsToTransaction(
       getDeleteWorkspaceInstructions(
         authority,
-        program,
         workspacePublicKey,
         workspaceApplicationPublicKeys,
         workspaceApplicationCollectionPublicKeys,

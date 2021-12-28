@@ -1,4 +1,3 @@
-import { Program } from '@project-serum/anchor';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getDeleteWorkspaceInstruction } from '.';
 import { getDeleteApplicationInstruction } from '../../application';
@@ -15,7 +14,6 @@ import {
 
 export const getDeleteWorkspaceInstructions = (
   authority: PublicKey,
-  program: Program,
   workspacePublicKey: PublicKey,
   workspaceApplicationPublicKeys: PublicKey[],
   workspaceApplicationCollectionPublicKeys: PublicKey[],
@@ -25,19 +23,14 @@ export const getDeleteWorkspaceInstructions = (
   workspaceApplicationInstructionAccountPublicKeys: PublicKey[],
   workspaceApplicationInstructionRelationPublicKeys: PublicKey[]
 ): TransactionInstruction[] => [
-  getDeleteWorkspaceInstruction(authority, program, workspacePublicKey),
+  getDeleteWorkspaceInstruction(authority, workspacePublicKey),
   ...workspaceApplicationPublicKeys.map((workspaceApplicationPublicKey) =>
-    getDeleteApplicationInstruction(
-      authority,
-      program,
-      workspaceApplicationPublicKey
-    )
+    getDeleteApplicationInstruction(authority, workspaceApplicationPublicKey)
   ),
   ...workspaceApplicationCollectionPublicKeys.map(
     (workspaceApplicationCollectionPublicKey) =>
       getDeleteCollectionInstruction(
         authority,
-        program,
         workspaceApplicationCollectionPublicKey
       )
   ),
@@ -45,7 +38,6 @@ export const getDeleteWorkspaceInstructions = (
     (workspaceApplicationCollectionAttributePublicKey) =>
       getDeleteCollectionAttributeInstruction(
         authority,
-        program,
         workspaceApplicationCollectionAttributePublicKey
       )
   ),
@@ -53,7 +45,6 @@ export const getDeleteWorkspaceInstructions = (
     (workspaceApplicationInstructionPublicKey) =>
       getDeleteInstructionInstruction(
         authority,
-        program,
         workspaceApplicationInstructionPublicKey
       )
   ),
@@ -61,7 +52,6 @@ export const getDeleteWorkspaceInstructions = (
     (workspaceApplicationInstructionArgumentPublicKey) =>
       getDeleteInstructionArgumentInstruction(
         authority,
-        program,
         workspaceApplicationInstructionArgumentPublicKey
       )
   ),
@@ -69,7 +59,6 @@ export const getDeleteWorkspaceInstructions = (
     (workspaceApplicationInstructionAccountPublicKey) =>
       getDeleteInstructionAccountInstruction(
         authority,
-        program,
         workspaceApplicationInstructionAccountPublicKey
       )
   ),
@@ -77,7 +66,6 @@ export const getDeleteWorkspaceInstructions = (
     (workspaceApplicationInstructionRelationPublicKey) =>
       getDeleteInstructionRelationInstruction(
         authority,
-        program,
         workspaceApplicationInstructionRelationPublicKey
       )
   ),

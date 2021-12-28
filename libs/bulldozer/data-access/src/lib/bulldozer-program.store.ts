@@ -166,11 +166,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const workspaceKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateWorkspaceTransaction(
           connection,
           authority,
-          program,
           workspaceKeypair,
           workspaceName
         ).pipe(
@@ -192,11 +191,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateWorkspace(workspaceId: string, workspaceName: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateWorkspaceTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           workspaceName
         ).pipe(
@@ -225,11 +223,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceApplicationInstructionRelationIds: string[]
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteWorkspaceTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           workspaceApplicationIds.map(
             (workspaceApplicationId) => new PublicKey(workspaceApplicationId)
@@ -320,11 +317,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const applicationKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateApplicationTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           applicationKeypair,
           applicationName
@@ -347,11 +343,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateApplication(applicationId: string, applicationName: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateApplicationTransaction(
           connection,
           authority,
-          program,
           new PublicKey(applicationId),
           applicationName
         ).pipe(
@@ -379,11 +374,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     applicationInstructionRelationIds: string[]
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteApplicationTransaction(
           connection,
           authority,
-          program,
           new PublicKey(applicationId),
           applicationCollectionIds.map(
             (applicationCollectionId) => new PublicKey(applicationCollectionId)
@@ -474,11 +468,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const collectionKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateCollectionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           collectionKeypair,
@@ -502,11 +495,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateCollection(collectionId: string, collectionName: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateCollectionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(collectionId),
           collectionName
         ).pipe(
@@ -526,11 +518,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   deleteCollection(collectionId: string, collectionAttributeIds: string[]) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteCollectionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(collectionId),
           collectionAttributeIds.map(
             (collectionAttributeId) => new PublicKey(collectionAttributeId)
@@ -584,11 +575,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const collectionAttributeKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateCollectionAttributeTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(collectionId),
@@ -616,11 +606,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     collectionAttributeDto: CollectionAttributeDto
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateCollectionAttributeTransaction(
           connection,
           authority,
-          program,
           new PublicKey(collectionAttributeId),
           collectionAttributeDto
         ).pipe(
@@ -640,11 +629,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   deleteCollectionAttribute(collectionAttributeId: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteCollectionAttributeTransaction(
           connection,
           authority,
-          program,
           new PublicKey(collectionAttributeId)
         ).pipe(
           concatMap((transaction) =>
@@ -712,11 +700,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const instructionKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateInstructionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           instructionKeypair,
@@ -740,11 +727,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstruction(instructionId: string, instructionName: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateInstructionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionId),
           instructionName
         ).pipe(
@@ -764,11 +750,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstructionBody(instructionId: string, instructionBody: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateInstructionBodyTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionId),
           instructionBody
         ).pipe(
@@ -793,11 +778,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     instructionRelationIds: string[]
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteInstructionTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionId),
           instructionArgumentIds.map(
             (instructionArgumentId) => new PublicKey(instructionArgumentId)
@@ -858,11 +842,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const instructionAccountKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateInstructionAccountTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(instructionId),
@@ -892,11 +875,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     instructionAccountExtras: InstructionAccountExtras
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateInstructionAccountTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionAccountId),
           instructionAccountDto,
           instructionAccountExtras
@@ -970,11 +952,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     const instructionArgumentKeypair = new Keypair();
 
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getCreateInstructionArgumentTransaction(
           connection,
           authority,
-          program,
           new PublicKey(workspaceId),
           new PublicKey(applicationId),
           new PublicKey(instructionId),
@@ -1002,11 +983,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     instructionArgumentDto: InstructionArgumentDto
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateCollectionAttributeTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionArgumentId),
           instructionArgumentDto
         ).pipe(
@@ -1026,11 +1006,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   deleteInstructionArgument(instructionArgumentId: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteInstructionArgumentTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionArgumentId)
         ).pipe(
           concatMap((transaction) =>
@@ -1080,7 +1059,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     toId: string
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         findInstructionRelationAddress(
           new PublicKey(fromId),
           new PublicKey(toId)
@@ -1089,7 +1068,6 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
             getCreateInstructionRelationTransaction(
               connection,
               authority,
-              program,
               new PublicKey(workspaceId),
               new PublicKey(applicationId),
               new PublicKey(instructionId),
@@ -1119,11 +1097,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     toId: string
   ) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getUpdateInstructionRelationTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionRelationId),
           new PublicKey(fromId),
           new PublicKey(toId)
@@ -1144,11 +1121,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   deleteInstructionRelation(instructionRelationId: string) {
     return this.context.pipe(
-      concatMap(({ program, connection, authority }) =>
+      concatMap(({ connection, authority }) =>
         getDeleteInstructionRelationTransaction(
           connection,
           authority,
-          program,
           new PublicKey(instructionRelationId)
         ).pipe(
           concatMap((transaction) =>
