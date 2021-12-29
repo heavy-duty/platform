@@ -24,7 +24,7 @@ export const createInstructionArgumentDocument = (
     id: publicKey.toBase58(),
     metadata: account,
     data: {
-      name: decodedAccount.name,
+      name: decodedAccount.data.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),

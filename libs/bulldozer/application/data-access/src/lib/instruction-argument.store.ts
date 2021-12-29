@@ -45,12 +45,12 @@ export class InstructionArgumentStore extends ComponentStore<object> {
             .afterClosed()
             .pipe(
               filter((data) => data),
-              concatMap(({ name }) =>
+              concatMap((instructionArgumentDto) =>
                 this._bulldozerProgramStore.createInstructionArgument(
                   workspaceId,
                   applicationId,
                   instructionId,
-                  name
+                  instructionArgumentDto
                 )
               ),
               tapResponse(
