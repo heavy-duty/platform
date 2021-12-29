@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import {
   Collection,
   Document,
@@ -7,10 +6,9 @@ import {
   InstructionRelation,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/features/edit-document';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, exhaustMap, filter } from 'rxjs/operators';
+import { concatMap } from 'rxjs/operators';
 import { InstructionStore } from '..';
 import {
   InstructionAccountCreated,
@@ -101,7 +99,6 @@ export class InstructionDocumentStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _instructionStore: InstructionStore
@@ -109,42 +106,39 @@ export class InstructionDocumentStore extends ComponentStore<ViewModel> {
     super(initialState);
   }
 
-  readonly createDocument = this.effect(
+  readonly createInstructionDocument = this.effect(
     (
       request$: Observable<{
-        collections: Document<Collection>[];
-        instructionAccounts: Document<InstructionAccount>[];
         workspaceId: string;
         applicationId: string;
         instructionId: string;
+        data: {
+          name: string;
+          modifier: number;
+          collection: string;
+          space: number | null;
+          payer: string | null;
+          close: string | null;
+        };
       }>
     ) =>
       request$.pipe(
-        exhaustMap(
+        concatMap(
           ({
             applicationId,
-            collections,
-            instructionAccounts,
             instructionId,
             workspaceId,
+            data: { name, modifier, collection, space, payer, close },
           }) =>
-            this._matDialog
-              .open(EditDocumentComponent, {
-                data: { collections, accounts: instructionAccounts },
-              })
-              .afterClosed()
+            this._bulldozerProgramStore
+              .createInstructionAccount(
+                workspaceId,
+                applicationId,
+                instructionId,
+                { name, kind: 0, modifier, space },
+                { collection, payer, close }
+              )
               .pipe(
-                filter((data) => data),
-                concatMap(
-                  ({ name, modifier, collection, space, payer, close }) =>
-                    this._bulldozerProgramStore.createInstructionAccount(
-                      workspaceId,
-                      applicationId,
-                      instructionId,
-                      { name, kind: 0, modifier, space },
-                      { collection, payer, close }
-                    )
-                ),
                 tapResponse(
                   () => this._events.next(new InstructionAccountCreated()),
                   (error) => this._error.next(error)
@@ -154,55 +148,61 @@ export class InstructionDocumentStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly updateDocument = this.effect(
+  readonly updateInstructionDocument = this.effect(
     (
       request$: Observable<{
-        document: Document<InstructionAccount>;
-        collections: Document<Collection>[];
-        instructionAccounts: Document<InstructionAccount>[];
+        instructionDocument: Document<InstructionAccount>;
+        changes: {
+          name: string;
+          modifier: number;
+          collection: string;
+          space: number | null;
+          payer: string | null;
+          close: string | null;
+        };
       }>
     ) =>
       request$.pipe(
-        exhaustMap(({ document, collections, instructionAccounts }) =>
-          this._matDialog
-            .open(EditDocumentComponent, {
-              data: { document, collections, accounts: instructionAccounts },
-            })
-            .afterClosed()
-            .pipe(
-              filter((data) => data),
-              concatMap(({ name, modifier, collection, space, payer, close }) =>
-                this._bulldozerProgramStore.updateInstructionAccount(
-                  document.id,
-                  {
-                    name,
-                    kind: 0,
-                    modifier,
-                    space,
-                  },
-                  { collection, payer, close }
-                )
-              ),
-              tapResponse(
-                () =>
-                  this._events.next(new InstructionAccountUpdated(document.id)),
-                (error) => this._error.next(error)
+        concatMap(
+          ({
+            instructionDocument,
+            changes: { name, modifier, collection, space, payer, close },
+          }) =>
+            this._bulldozerProgramStore
+              .updateInstructionAccount(
+                instructionDocument.id,
+                {
+                  name,
+                  kind: 0,
+                  modifier,
+                  space,
+                },
+                { collection, payer, close }
               )
-            )
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._events.next(
+                      new InstructionAccountUpdated(instructionDocument.id)
+                    ),
+                  (error) => this._error.next(error)
+                )
+              )
         )
       )
   );
 
-  readonly deleteDocument = this.effect((accountId$: Observable<string>) =>
-    accountId$.pipe(
-      concatMap((accountId) =>
-        this._bulldozerProgramStore.deleteInstructionAccount(accountId).pipe(
-          tapResponse(
-            () => this._events.next(new InstructionAccountDeleted(accountId)),
-            (error) => this._error.next(error)
+  readonly deleteInstructionDocument = this.effect(
+    (accountId$: Observable<string>) =>
+      accountId$.pipe(
+        concatMap((accountId) =>
+          this._bulldozerProgramStore.deleteInstructionAccount(accountId).pipe(
+            tapResponse(
+              () => this._events.next(new InstructionAccountDeleted(accountId)),
+              (error) => this._error.next(error)
+            )
           )
         )
       )
-    )
   );
 }

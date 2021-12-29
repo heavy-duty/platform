@@ -4,12 +4,14 @@ import {
   HostBinding,
   OnInit,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
 import {
   CollectionAttributeStore,
   CollectionStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { filter, map, startWith } from 'rxjs';
@@ -37,7 +39,7 @@ import { filter, map, startWith } from 'rxjs';
         <bd-collection-menu
           [connected]="connected$ | ngrxPush"
           (createAttribute)="
-            onCreateAttribute(
+            onCreateCollectionAttribute(
               collection.data.workspace,
               collection.data.application,
               collection.id
@@ -51,8 +53,8 @@ import { filter, map, startWith } from 'rxjs';
             class="block mb-16"
             [connected]="connected$ | ngrxPush"
             [attributes]="collectionAttributes$ | ngrxPush"
-            (updateAttribute)="onUpdateAttribute($event)"
-            (deleteAttribute)="onDeleteAttribute($event)"
+            (updateAttribute)="onUpdateCollectionAttribute($event)"
+            (deleteAttribute)="onDeleteCollectionAttribute($event)"
           >
           </bd-list-attributes>
         </main>
@@ -91,7 +93,8 @@ export class ViewCollectionComponent implements OnInit {
     private readonly _walletStore: WalletStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _collectionAttributeStore: CollectionAttributeStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _themeService: DarkThemeService,
+    private readonly _matDialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -118,23 +121,39 @@ export class ViewCollectionComponent implements OnInit {
     // this._collectionStore.reload();
   }
 
-  onCreateAttribute(
+  onCreateCollectionAttribute(
     workspaceId: string,
     applicationId: string,
     collectionId: string
   ) {
-    this._collectionAttributeStore.createCollectionAttribute({
-      workspaceId,
-      applicationId,
-      collectionId,
-    });
+    this._collectionAttributeStore.createCollectionAttribute(
+      this._matDialog
+        .open(EditAttributeComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({ workspaceId, applicationId, collectionId, data }))
+        )
+    );
   }
 
-  onUpdateAttribute(attribute: Document<CollectionAttribute>) {
-    this._collectionAttributeStore.updateCollectionAttribute(attribute);
+  onUpdateCollectionAttribute(
+    collectionAttribute: Document<CollectionAttribute>
+  ) {
+    this._collectionAttributeStore.updateCollectionAttribute(
+      this._matDialog
+        .open(EditAttributeComponent)
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({ collectionAttribute, changes }))
+        )
+    );
   }
 
-  onDeleteAttribute(attributeId: string) {
-    this._collectionAttributeStore.deleteCollectionAttribute(attributeId);
+  onDeleteCollectionAttribute(collectionAttributeId: string) {
+    this._collectionAttributeStore.deleteCollectionAttribute(
+      collectionAttributeId
+    );
   }
 }

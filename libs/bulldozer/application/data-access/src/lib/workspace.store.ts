@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import {
   Application,
   Collection,
@@ -16,13 +15,10 @@ import {
   generateWorkspaceZip,
 } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
   concatMap,
-  exhaustMap,
-  filter,
   forkJoin,
   map,
   Observable,
@@ -101,10 +97,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     ({ instructionRelations }) => instructionRelations
   );
 
-  constructor(
-    private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore
-  ) {
+  constructor(private readonly _bulldozerProgramStore: BulldozerProgramStore) {
     super(initialState);
   }
 
@@ -212,38 +205,32 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     workspaceId$.pipe(tap((workspaceId) => this.patchState({ workspaceId })))
   );
 
-  readonly createWorkspace = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditWorkspaceComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            concatMap(({ name }) =>
-              this._bulldozerProgramStore.createWorkspace(name)
-            ),
+  readonly createWorkspace = this.effect(
+    (request$: Observable<{ data: { name: string } }>) =>
+      request$.pipe(
+        concatMap(({ data }) =>
+          this._bulldozerProgramStore.createWorkspace(data.name).pipe(
             tapResponse(
               () => this._events.next(new WorkspaceCreated()),
               (error) => this._error.next(error)
             )
           )
+        )
       )
-    )
   );
 
   readonly updateWorkspace = this.effect(
-    (workspace$: Observable<Document<Workspace>>) =>
-      workspace$.pipe(
-        exhaustMap((workspace) =>
-          this._matDialog
-            .open(EditWorkspaceComponent, { data: { workspace } })
-            .afterClosed()
+    (
+      request$: Observable<{
+        workspace: Document<Workspace>;
+        changes: { name: string };
+      }>
+    ) =>
+      request$.pipe(
+        concatMap(({ workspace, changes }) =>
+          this._bulldozerProgramStore
+            .updateWorkspace(workspace.id, changes.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateWorkspace(workspace.id, name)
-              ),
               tapResponse(
                 () => this._events.next(new WorkspaceUpdated(workspace.id)),
                 (error) => this._error.next(error)

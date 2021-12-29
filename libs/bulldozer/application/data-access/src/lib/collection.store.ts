@@ -1,19 +1,9 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { generateCollectionCode } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  concatMap,
-  exhaustMap,
-  filter,
-  Observable,
-  Subject,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, concatMap, Observable, Subject, tap } from 'rxjs';
 import {
   CollectionActions,
   CollectionCreated,
@@ -69,7 +59,6 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore
@@ -85,21 +74,18 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly createCollection = this.effect(
-    (request$: Observable<{ workspaceId: string; applicationId: string }>) =>
+    (
+      request$: Observable<{
+        workspaceId: string;
+        applicationId: string;
+        data: { name: string };
+      }>
+    ) =>
       request$.pipe(
-        exhaustMap(({ workspaceId, applicationId }) =>
-          this._matDialog
-            .open(EditCollectionComponent)
-            .afterClosed()
+        concatMap(({ workspaceId, applicationId, data }) =>
+          this._bulldozerProgramStore
+            .createCollection(workspaceId, applicationId, data.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.createCollection(
-                  workspaceId,
-                  applicationId,
-                  name
-                )
-              ),
               tapResponse(
                 () => this._events.next(new CollectionCreated()),
                 (error) => this._error.next(error)
@@ -110,20 +96,17 @@ export class CollectionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateCollection = this.effect(
-    (collection$: Observable<Document<Collection>>) =>
+    (
+      collection$: Observable<{
+        collection: Document<Collection>;
+        changes: { name: string };
+      }>
+    ) =>
       collection$.pipe(
-        exhaustMap((collection) =>
-          this._matDialog
-            .open(EditCollectionComponent, { data: { collection } })
-            .afterClosed()
+        concatMap(({ collection, changes }) =>
+          this._bulldozerProgramStore
+            .updateCollection(collection.id, changes.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateCollection(
-                  collection.id,
-                  name
-                )
-              ),
               tapResponse(
                 () => this._events.next(new CollectionUpdated(collection.id)),
                 (error) => this._error.next(error)

@@ -1,21 +1,10 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { generateInstructionCode } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  concatMap,
-  exhaustMap,
-  filter,
-  Observable,
-  Subject,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { BehaviorSubject, concatMap, Observable, Subject, tap } from 'rxjs';
 import {
   InstructionActions,
   InstructionCreated,
@@ -111,7 +100,6 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore
@@ -126,49 +114,40 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly createInstruction = this.effect((action$) =>
-    action$.pipe(
-      exhaustMap(() =>
-        this._matDialog
-          .open(EditInstructionComponent)
-          .afterClosed()
-          .pipe(
-            filter((data) => data),
-            withLatestFrom(
-              this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined),
-              this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
-            ),
-            concatMap(([{ name }, workspaceId, applicationId]) =>
-              this._bulldozerProgramStore.createInstruction(
-                workspaceId,
-                applicationId,
-                name
+  readonly createInstruction = this.effect(
+    (
+      request$: Observable<{
+        workspaceId: string;
+        applicationId: string;
+        data: { name: string };
+      }>
+    ) =>
+      request$.pipe(
+        concatMap(({ workspaceId, applicationId, data }) =>
+          this._bulldozerProgramStore
+            .createInstruction(workspaceId, applicationId, data.name)
+            .pipe(
+              tapResponse(
+                () => this._events.next(new InstructionCreated()),
+                (error) => this._error.next(error)
               )
-            ),
-            tapResponse(
-              () => this._events.next(new InstructionCreated()),
-              (error) => this._error.next(error)
             )
-          )
+        )
       )
-    )
   );
 
   readonly updateInstruction = this.effect(
-    (instruction$: Observable<Document<Instruction>>) =>
-      instruction$.pipe(
-        exhaustMap((instruction) =>
-          this._matDialog
-            .open(EditInstructionComponent, { data: { instruction } })
-            .afterClosed()
+    (
+      request$: Observable<{
+        instruction: Document<Instruction>;
+        changes: { name: string };
+      }>
+    ) =>
+      request$.pipe(
+        concatMap(({ instruction, changes }) =>
+          this._bulldozerProgramStore
+            .updateInstruction(instruction.id, changes.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateInstruction(
-                  instruction.id,
-                  name
-                )
-              ),
               tapResponse(
                 () => this._events.next(new InstructionUpdated(instruction.id)),
                 (error) => this._error.next(error)

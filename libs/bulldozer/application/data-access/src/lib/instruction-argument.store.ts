@@ -1,11 +1,13 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
+import {
+  Document,
+  InstructionArgument,
+  InstructionArgumentDto,
+} from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, exhaustMap, filter } from 'rxjs/operators';
+import { concatMap } from 'rxjs/operators';
 import {
   InstructionActions,
   InstructionArgumentCreated,
@@ -23,36 +25,29 @@ export class InstructionArgumentStore extends ComponentStore<object> {
   );
   readonly events$ = this._events.asObservable();
 
-  constructor(
-    private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore
-  ) {
+  constructor(private readonly _bulldozerProgramStore: BulldozerProgramStore) {
     super({});
   }
 
-  readonly createArgument = this.effect(
+  readonly createInstructionArgument = this.effect(
     (
       request$: Observable<{
         workspaceId: string;
         applicationId: string;
         instructionId: string;
+        data: InstructionArgumentDto;
       }>
     ) =>
       request$.pipe(
-        exhaustMap(({ workspaceId, applicationId, instructionId }) =>
-          this._matDialog
-            .open(EditArgumentComponent)
-            .afterClosed()
+        concatMap(({ workspaceId, applicationId, instructionId, data }) =>
+          this._bulldozerProgramStore
+            .createInstructionArgument(
+              workspaceId,
+              applicationId,
+              instructionId,
+              data
+            )
             .pipe(
-              filter((data) => data),
-              concatMap((instructionArgumentDto) =>
-                this._bulldozerProgramStore.createInstructionArgument(
-                  workspaceId,
-                  applicationId,
-                  instructionId,
-                  instructionArgumentDto
-                )
-              ),
               tapResponse(
                 () => this._events.next(new InstructionArgumentCreated()),
                 (error) => this._error.next(error)
@@ -62,27 +57,22 @@ export class InstructionArgumentStore extends ComponentStore<object> {
       )
   );
 
-  readonly updateArgument = this.effect(
-    (argument$: Observable<Document<InstructionArgument>>) =>
-      argument$.pipe(
-        exhaustMap((argument) =>
-          this._matDialog
-            .open(EditArgumentComponent, {
-              data: { argument },
-            })
-            .afterClosed()
+  readonly updateInstructionArgument = this.effect(
+    (
+      request$: Observable<{
+        instructionArgument: Document<InstructionArgument>;
+        changes: InstructionArgumentDto;
+      }>
+    ) =>
+      request$.pipe(
+        concatMap(({ instructionArgument, changes }) =>
+          this._bulldozerProgramStore
+            .updateInstructionArgument(instructionArgument.id, changes)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateInstructionArgument(
-                  argument.id,
-                  name
-                )
-              ),
               tapResponse(
                 () =>
                   this._events.next(
-                    new InstructionArgumentUpdated(argument.id)
+                    new InstructionArgumentUpdated(instructionArgument.id)
                   ),
                 (error) => this._error.next(error)
               )
@@ -91,16 +81,20 @@ export class InstructionArgumentStore extends ComponentStore<object> {
       )
   );
 
-  readonly deleteArgument = this.effect((argumentId$: Observable<string>) =>
-    argumentId$.pipe(
-      concatMap((argumentId) =>
-        this._bulldozerProgramStore.deleteInstructionArgument(argumentId).pipe(
-          tapResponse(
-            () => this._events.next(new InstructionArgumentDeleted(argumentId)),
-            (error) => this._error.next(error)
-          )
+  readonly deleteInstructionArgument = this.effect(
+    (argumentId$: Observable<string>) =>
+      argumentId$.pipe(
+        concatMap((argumentId) =>
+          this._bulldozerProgramStore
+            .deleteInstructionArgument(argumentId)
+            .pipe(
+              tapResponse(
+                () =>
+                  this._events.next(new InstructionArgumentDeleted(argumentId)),
+                (error) => this._error.next(error)
+              )
+            )
         )
       )
-    )
   );
 }

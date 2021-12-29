@@ -4,6 +4,7 @@ import {
   HostBinding,
   OnInit,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import {
   Document,
@@ -20,9 +21,13 @@ import {
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
+import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/features/edit-document';
+import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
+import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { combineLatest, filter, map, startWith, take } from 'rxjs';
+import { combineLatest, concatMap, filter, map, startWith, take } from 'rxjs';
 
 @Component({
   selector: 'bd-view-instruction',
@@ -47,28 +52,28 @@ import { combineLatest, filter, map, startWith, take } from 'rxjs';
         <bd-instruction-menu
           [connected]="connected$ | ngrxPush"
           (createArgument)="
-            onCreateArgument(
+            onCreateInstructionArgument(
               instruction.data.workspace,
               instruction.data.application,
               instruction.id
             )
           "
           (createDocument)="
-            onCreateDocument(
+            onCreateInstructionDocument(
               instruction.data.workspace,
               instruction.data.application,
               instruction.id
             )
           "
           (createSigner)="
-            onCreateSigner(
+            onCreateInstructionSigner(
               instruction.data.workspace,
               instruction.data.application,
               instruction.id
             )
           "
           (createRelation)="
-            onCreateRelation(
+            onCreateInstructionRelation(
               instruction.data.workspace,
               instruction.data.application,
               instruction.id
@@ -82,18 +87,18 @@ import { combineLatest, filter, map, startWith, take } from 'rxjs';
             class="block mb-4"
             [connected]="connected$ | ngrxPush"
             [arguments]="arguments$ | ngrxPush"
-            (updateArgument)="onUpdateArgument($event)"
-            (deleteArgument)="onDeleteArgument($event)"
+            (updateArgument)="onUpdateInstructionArgument($event)"
+            (deleteArgument)="onDeleteInstructionArgument($event)"
           ></bd-list-arguments>
 
           <bd-list-documents
             class="block mb-4"
             [connected]="connected$ | ngrxPush"
             [documents]="documents$ | ngrxPush"
-            (updateDocument)="onUpdateDocument($event)"
-            (deleteDocument)="onDeleteAccount($event)"
-            (updateRelation)="onUpdateRelation($event)"
-            (deleteRelation)="onDeleteRelation($event)"
+            (updateDocument)="onUpdateInstructionDocument($event)"
+            (deleteDocument)="onDeleteInstructionDocument($event)"
+            (updateRelation)="onUpdateInstructionRelation($event)"
+            (deleteRelation)="onDeleteInstructionRelation($event)"
           >
           </bd-list-documents>
 
@@ -101,8 +106,8 @@ import { combineLatest, filter, map, startWith, take } from 'rxjs';
             class="block mb-16"
             [connected]="connected$ | ngrxPush"
             [signers]="signers$ | ngrxPush"
-            (updateSigner)="onUpdateSigner($event)"
-            (deleteSigner)="onDeleteAccount($event)"
+            (updateSigner)="onUpdateInstructionSigner($event)"
+            (deleteSigner)="onDeleteInstructionSigner($event)"
           >
           </bd-list-signers>
         </main>
@@ -189,7 +194,8 @@ export class ViewInstructionComponent implements OnInit {
     private readonly _instructionSignerStore: InstructionSignerStore,
     private readonly _instructionArgumentStore: InstructionArgumentStore,
     private readonly _instructionRelationStore: InstructionRelationStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _themeService: DarkThemeService,
+    private readonly _matDialog: MatDialog
   ) {}
 
   ngOnInit() {
@@ -229,111 +235,195 @@ export class ViewInstructionComponent implements OnInit {
     });
   }
 
-  onCreateArgument(
+  onCreateInstructionArgument(
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionArgumentStore.createArgument({
-      workspaceId,
-      applicationId,
-      instructionId,
-    });
+    this._instructionArgumentStore.createInstructionArgument(
+      this._matDialog
+        .open(EditArgumentComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({ workspaceId, applicationId, instructionId, data }))
+        )
+    );
   }
 
-  onUpdateArgument(argument: Document<InstructionArgument>) {
-    this._instructionArgumentStore.updateArgument(argument);
+  onUpdateInstructionArgument(
+    instructionArgument: Document<InstructionArgument>
+  ) {
+    this._instructionArgumentStore.updateInstructionArgument(
+      this._matDialog
+        .open(EditArgumentComponent)
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({ instructionArgument, changes }))
+        )
+    );
   }
 
-  onDeleteArgument(argumentId: string) {
-    this._instructionArgumentStore.deleteArgument(argumentId);
+  onDeleteInstructionArgument(instructionArgumentId: string) {
+    this._instructionArgumentStore.deleteInstructionArgument(
+      instructionArgumentId
+    );
   }
 
-  onCreateDocument(
+  onCreateInstructionDocument(
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionDocumentStore.createDocument(
+    this._instructionDocumentStore.createInstructionDocument(
       combineLatest([
         this._workspaceStore.collections$,
         this._instructionStore.instructionAccounts$,
       ]).pipe(
-        map(([collections, instructionAccounts]) => ({
-          collections,
-          instructionAccounts,
-          workspaceId,
-          applicationId,
-          instructionId,
-        }))
+        concatMap(([collections, instructionAccounts]) =>
+          this._matDialog
+            .open(EditDocumentComponent, {
+              data: { data: { collections, accounts: instructionAccounts } },
+            })
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              map((data) => ({
+                workspaceId,
+                applicationId,
+                instructionId,
+                data,
+              }))
+            )
+        )
       )
     );
   }
 
-  onUpdateDocument(document: Document<InstructionAccount>) {
-    this._instructionDocumentStore.updateDocument(
+  onUpdateInstructionDocument(
+    instructionDocument: Document<InstructionAccount>
+  ) {
+    this._instructionDocumentStore.updateInstructionDocument(
       combineLatest([
         this._workspaceStore.collections$,
         this._instructionStore.instructionAccounts$,
       ]).pipe(
-        map(([collections, instructionAccounts]) => ({
-          collections,
-          instructionAccounts,
-          document,
-        }))
+        concatMap(([collections, instructionAccounts]) =>
+          this._matDialog
+            .open(EditDocumentComponent, {
+              data: { data: { collections, accounts: instructionAccounts } },
+            })
+            .afterClosed()
+            .pipe(
+              filter((changes) => changes),
+              map((changes) => ({
+                instructionDocument,
+                changes,
+              }))
+            )
+        )
       )
     );
   }
 
-  onCreateSigner(
+  onDeleteInstructionDocument(instructionDocumentId: string) {
+    this._instructionDocumentStore.deleteInstructionDocument(
+      instructionDocumentId
+    );
+  }
+
+  onCreateInstructionSigner(
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionSignerStore.createSigner({
-      workspaceId,
-      applicationId,
-      instructionId,
-    });
+    this._instructionSignerStore.createInstructionSigner(
+      this._matDialog
+        .open(EditSignerComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({
+            workspaceId,
+            applicationId,
+            instructionId,
+            data,
+          }))
+        )
+    );
   }
 
-  onUpdateSigner(signer: Document<InstructionAccount>) {
-    this._instructionSignerStore.updateSigner(signer);
+  onUpdateInstructionSigner(instructionSigner: Document<InstructionAccount>) {
+    this._instructionSignerStore.updateInstructionSigner(
+      this._matDialog
+        .open(EditSignerComponent)
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({
+            instructionSigner,
+            changes,
+          }))
+        )
+    );
   }
 
-  onDeleteAccount(signerId: string) {
-    this._instructionSignerStore.deleteSigner(signerId);
+  onDeleteInstructionSigner(instructionSignerId: string) {
+    this._instructionSignerStore.deleteInstructionSigner(instructionSignerId);
   }
 
-  onCreateRelation(
+  onCreateInstructionRelation(
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionRelationStore.createRelation(
+    this._instructionRelationStore.createInstructionRelation(
       this._instructionStore.instructionAccounts$.pipe(
-        map((instructionAccounts) => ({
-          instructionAccounts,
-          workspaceId,
-          applicationId,
-          instructionId,
-        }))
+        concatMap(([instructionAccounts]) =>
+          this._matDialog
+            .open(EditRelationComponent, {
+              data: { data: { accounts: instructionAccounts } },
+            })
+            .afterClosed()
+            .pipe(
+              filter((data) => data),
+              map((data) => ({
+                workspaceId,
+                applicationId,
+                instructionId,
+                data,
+              }))
+            )
+        )
       )
     );
   }
 
-  onUpdateRelation(relation: Document<InstructionRelation>) {
-    this._instructionRelationStore.updateRelation(
+  onUpdateInstructionRelation(
+    instructionRelation: Document<InstructionRelation>
+  ) {
+    this._instructionRelationStore.updateInstructionRelation(
       this._instructionStore.instructionAccounts$.pipe(
-        map((instructionAccounts) => ({
-          instructionAccounts,
-          relation,
-        }))
+        concatMap(([instructionAccounts]) =>
+          this._matDialog
+            .open(EditRelationComponent, {
+              data: { data: { accounts: instructionAccounts } },
+            })
+            .afterClosed()
+            .pipe(
+              filter((changes) => changes),
+              map((changes) => ({
+                instructionRelation,
+                changes,
+              }))
+            )
+        )
       )
     );
   }
 
-  onDeleteRelation(relationId: string) {
-    this._instructionRelationStore.deleteRelation(relationId);
+  onDeleteInstructionRelation(relationId: string) {
+    this._instructionRelationStore.deleteInstructionRelation(relationId);
   }
 }

@@ -1,18 +1,8 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  concatMap,
-  exhaustMap,
-  filter,
-  Observable,
-  Subject,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, concatMap, Observable, Subject, tap } from 'rxjs';
 import {
   ApplicationActions,
   ApplicationCreated,
@@ -53,7 +43,6 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore
   ) {
@@ -68,17 +57,12 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly createApplication = this.effect(
-    (request$: Observable<{ workspaceId: string }>) =>
+    (request$: Observable<{ workspaceId: string; data: { name: string } }>) =>
       request$.pipe(
-        exhaustMap(({ workspaceId }) =>
-          this._matDialog
-            .open(EditApplicationComponent)
-            .afterClosed()
+        concatMap(({ workspaceId, data }) =>
+          this._bulldozerProgramStore
+            .createApplication(workspaceId, data.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.createApplication(workspaceId, name)
-              ),
               tapResponse(
                 () => this._events.next(new ApplicationCreated()),
                 (error) => this._error.next(error)
@@ -89,20 +73,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateApplication = this.effect(
-    (application$: Observable<Document<Application>>) =>
-      application$.pipe(
-        exhaustMap((application) =>
-          this._matDialog
-            .open(EditApplicationComponent, { data: { application } })
-            .afterClosed()
+    (
+      request$: Observable<{
+        application: Document<Application>;
+        changes: { name: string };
+      }>
+    ) =>
+      request$.pipe(
+        concatMap(({ application, changes }) =>
+          this._bulldozerProgramStore
+            .updateApplication(application.id, changes.name)
             .pipe(
-              filter((data) => data),
-              concatMap(({ name }) =>
-                this._bulldozerProgramStore.updateApplication(
-                  application.id,
-                  name
-                )
-              ),
               tapResponse(
                 () => this._events.next(new ApplicationUpdated(application.id)),
                 (error) => this._error.next(error)

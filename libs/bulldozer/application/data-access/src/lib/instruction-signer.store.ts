@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
-import { concatMap, exhaustMap, filter } from 'rxjs/operators';
+import { concatMap } from 'rxjs/operators';
 import { InstructionStore } from '..';
 import {
   InstructionAccountCreated,
@@ -34,45 +32,43 @@ export class InstructionSignerStore extends ComponentStore<object> {
   );
 
   constructor(
-    private readonly _matDialog: MatDialog,
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _instructionStore: InstructionStore
   ) {
     super({});
   }
 
-  readonly createSigner = this.effect(
+  readonly createInstructionSigner = this.effect(
     (
       request$: Observable<{
         workspaceId: string;
         applicationId: string;
         instructionId: string;
+        data: {
+          name: string;
+          modifier: number;
+        };
       }>
     ) =>
       request$.pipe(
-        exhaustMap(({ workspaceId, applicationId, instructionId }) =>
-          this._matDialog
-            .open(EditSignerComponent)
-            .afterClosed()
+        concatMap(({ workspaceId, applicationId, instructionId, data }) =>
+          this._bulldozerProgramStore
+            .createInstructionAccount(
+              workspaceId,
+              applicationId,
+              instructionId,
+              {
+                kind: 1,
+                space: null,
+                ...data,
+              },
+              {
+                collection: null,
+                payer: null,
+                close: null,
+              }
+            )
             .pipe(
-              filter((data) => data),
-              concatMap((instructionAccountDto) =>
-                this._bulldozerProgramStore.createInstructionAccount(
-                  workspaceId,
-                  applicationId,
-                  instructionId,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-              ),
               tapResponse(
                 () => this._events.next(new InstructionAccountCreated()),
                 (error) => this._error.next(error)
@@ -82,35 +78,35 @@ export class InstructionSignerStore extends ComponentStore<object> {
       )
   );
 
-  readonly updateSigner = this.effect(
-    (signer$: Observable<Document<InstructionAccount>>) =>
+  readonly updateInstructionSigner = this.effect(
+    (
+      signer$: Observable<{
+        instructionSigner: Document<InstructionAccount>;
+        changes: { name: string; modifier: number };
+      }>
+    ) =>
       signer$.pipe(
-        exhaustMap((signer) =>
-          this._matDialog
-            .open(EditSignerComponent, {
-              data: { signer },
-            })
-            .afterClosed()
+        concatMap(({ instructionSigner, changes }) =>
+          this._bulldozerProgramStore
+            .updateInstructionAccount(
+              instructionSigner.id,
+              {
+                kind: 1,
+                space: null,
+                ...changes,
+              },
+              {
+                collection: null,
+                payer: null,
+                close: null,
+              }
+            )
             .pipe(
-              filter((data) => data),
-              concatMap((instructionAccountDto) =>
-                this._bulldozerProgramStore.updateInstructionAccount(
-                  signer.id,
-                  {
-                    kind: 1,
-                    space: null,
-                    ...instructionAccountDto,
-                  },
-                  {
-                    collection: null,
-                    payer: null,
-                    close: null,
-                  }
-                )
-              ),
               tapResponse(
                 () =>
-                  this._events.next(new InstructionAccountUpdated(signer.id)),
+                  this._events.next(
+                    new InstructionAccountUpdated(instructionSigner.id)
+                  ),
                 (error) => this._error.next(error)
               )
             )
@@ -118,7 +114,7 @@ export class InstructionSignerStore extends ComponentStore<object> {
       )
   );
 
-  readonly deleteSigner = this.effect(
+  readonly deleteInstructionSigner = this.effect(
     (instructionAccountId$: Observable<string>) =>
       instructionAccountId$.pipe(
         concatMap((instructionAccountId) =>

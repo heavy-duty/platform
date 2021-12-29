@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import {
   Application,
   Collection,
@@ -12,6 +13,11 @@ import {
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
+import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
+import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
+import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
+import { filter, map } from 'rxjs/operators';
 import { NavigationStore } from './navigation.store';
 
 @Component({
@@ -50,7 +56,12 @@ import { NavigationStore } from './navigation.store';
               <bd-instruction-selector
                 [connected]="connected$ | ngrxPush"
                 [instructions]="instructions$ | ngrxPush"
-                (createInstruction)="onCreateInstruction()"
+                (createInstruction)="
+                  onCreateInstruction(
+                    application.data.workspace,
+                    application.id
+                  )
+                "
                 (updateInstruction)="onUpdateInstruction($event)"
                 (deleteInstruction)="onDeleteInstruction($event)"
               ></bd-instruction-selector>
@@ -123,15 +134,35 @@ export class NavigationComponent {
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore
+    private readonly _instructionStore: InstructionStore,
+    private readonly _matDialog: MatDialog
   ) {}
 
   onCreateWorkspace() {
-    this._workspaceStore.createWorkspace();
+    this._workspaceStore.createWorkspace(
+      this._matDialog
+        .open(EditWorkspaceComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({ data }))
+        )
+    );
   }
 
   onUpdateWorkspace(workspace: Document<Workspace>) {
-    this._workspaceStore.updateWorkspace(workspace);
+    this._workspaceStore.updateWorkspace(
+      this._matDialog
+        .open(EditWorkspaceComponent, { data: { workspace } })
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({
+            workspace,
+            changes,
+          }))
+        )
+    );
   }
 
   onDeleteWorkspace(workspace: Document<Workspace>) {
@@ -139,11 +170,33 @@ export class NavigationComponent {
   }
 
   onCreateApplication(workspaceId: string) {
-    this._applicationStore.createApplication({ workspaceId });
+    this._applicationStore.createApplication(
+      this._matDialog
+        .open(EditApplicationComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({
+            workspaceId,
+            data,
+          }))
+        )
+    );
   }
 
   onUpdateApplication(application: Document<Application>) {
-    this._applicationStore.updateApplication(application);
+    this._applicationStore.updateApplication(
+      this._matDialog
+        .open(EditApplicationComponent, { data: { application } })
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({
+            application,
+            changes,
+          }))
+        )
+    );
   }
 
   onDeleteApplication(application: Document<Application>) {
@@ -151,23 +204,69 @@ export class NavigationComponent {
   }
 
   onCreateCollection(workspaceId: string, applicationId: string) {
-    this._collectionStore.createCollection({ workspaceId, applicationId });
+    this._collectionStore.createCollection(
+      this._matDialog
+        .open(EditCollectionComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({
+            workspaceId,
+            applicationId,
+            data,
+          }))
+        )
+    );
   }
 
   onUpdateCollection(collection: Document<Collection>) {
-    this._collectionStore.updateCollection(collection);
+    this._collectionStore.updateCollection(
+      this._matDialog
+        .open(EditCollectionComponent, { data: { collection } })
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({
+            collection,
+            changes,
+          }))
+        )
+    );
   }
 
   onDeleteCollection(collection: Document<Collection>) {
     this._collectionStore.deleteCollection(collection);
   }
 
-  onCreateInstruction() {
-    this._instructionStore.createInstruction();
+  onCreateInstruction(workspaceId: string, applicationId: string) {
+    this._instructionStore.createInstruction(
+      this._matDialog
+        .open(EditInstructionComponent)
+        .afterClosed()
+        .pipe(
+          filter((data) => data),
+          map((data) => ({
+            workspaceId,
+            applicationId,
+            data,
+          }))
+        )
+    );
   }
 
   onUpdateInstruction(instruction: Document<Instruction>) {
-    this._instructionStore.updateInstruction(instruction);
+    this._instructionStore.updateInstruction(
+      this._matDialog
+        .open(EditInstructionComponent, { data: { instruction } })
+        .afterClosed()
+        .pipe(
+          filter((changes) => changes),
+          map((changes) => ({
+            instruction,
+            changes,
+          }))
+        )
+    );
   }
 
   onDeleteInstruction(instruction: Document<Instruction>) {
