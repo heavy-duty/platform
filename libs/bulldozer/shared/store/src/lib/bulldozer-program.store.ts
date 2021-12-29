@@ -50,13 +50,12 @@ import {
   InstructionRelation,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { concatMap, Observable, of, withLatestFrom } from 'rxjs';
-import { confirmTransaction } from './operators';
+import { confirmTransaction, isNotNullOrUndefined } from './operators';
 
 interface ViewModel {
   reader: Program | null;
