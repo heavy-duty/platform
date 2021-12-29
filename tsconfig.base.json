@@ -19,6 +19,9 @@
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],
+      "@heavy-duty/bulldozer-generator": [
+        "libs/bulldozer/shared/generator/src/index.ts"
+      ],
       "@heavy-duty/bulldozer-store": [
         "libs/bulldozer/shared/store/src/index.ts"
       ],
@@ -99,9 +102,6 @@
       ],
       "@heavy-duty/bulldozer/application/utils/services/active-breakpoint": [
         "libs/bulldozer/application/utils/services/active-breakpoint/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/application/utils/services/code-generator": [
-        "libs/bulldozer/application/utils/services/code-generator/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/utils/services/dark-theme": [
         "libs/bulldozer/application/utils/services/dark-theme/src/index.ts"

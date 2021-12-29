@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
+import { generateCollectionCode } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
-import { generateCollectionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,

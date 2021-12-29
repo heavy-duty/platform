@@ -1,0 +1,23 @@
+{
+  "root": "libs/bulldozer/shared/generator",
+  "sourceRoot": "libs/bulldozer/shared/generator/src",
+  "projectType": "library",
+  "targets": {
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/bulldozer/shared/generator/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/shared/generator"],
+      "options": {
+        "jestConfig": "libs/bulldozer/shared/generator/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}
