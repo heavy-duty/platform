@@ -44,14 +44,8 @@ export class InstructionDocumentStore extends ComponentStore<ViewModel> {
     this._instructionStore.instructionRelations$,
     this._workspaceStore.collections$,
     this._instructionStore.instructionId$,
-    (instructionAccounts, instructionRelations, collections, instructionId) => {
-      console.log({
-        instructionAccounts,
-        instructionRelations,
-        collections,
-        instructionId,
-      });
-      return instructionAccounts
+    (instructionAccounts, instructionRelations, collections, instructionId) =>
+      instructionAccounts
         .filter(
           ({ data }) => data.instruction === instructionId && data.kind.id === 0
         )
@@ -103,8 +97,7 @@ export class InstructionDocumentStore extends ComponentStore<ViewModel> {
                 : null,
             null
           ),
-        }));
-    }
+        }))
   );
 
   constructor(

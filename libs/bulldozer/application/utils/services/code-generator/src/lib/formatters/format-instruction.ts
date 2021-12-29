@@ -163,40 +163,8 @@ const formatInstructionAccounts = (
   instructionAccounts: Document<InstructionAccount>[],
   instructionRelations: Document<InstructionRelation>[],
   collections: Document<Collection>[]
-) => {
-  console.log({ instructionAccounts, instructionRelations });
-  console.log(
-    instructionAccounts
-      .filter(
-        (instructionAccount) =>
-          instructionAccount.data.instruction === instructionId
-      )
-      .map((instructionAccount) => ({
-        id: instructionAccount.id,
-        data: {
-          ...instructionAccount.data,
-          collection: getInstructionAccountCollection(
-            instructionAccount,
-            collections
-          ),
-          close: getInstructionAccountClose(
-            instructionAccount,
-            instructionAccounts
-          ),
-          payer: getInstructionAccountPayer(
-            instructionAccount,
-            instructionAccounts
-          ),
-          name: formatName(instructionAccount.data.name),
-          relations: getInstructionAccountRelations(
-            instructionAccount,
-            instructionAccounts,
-            instructionRelations
-          ),
-        },
-      }))
-  );
-  return instructionAccounts
+) =>
+  instructionAccounts
     .filter(
       (instructionAccount) =>
         instructionAccount.data.instruction === instructionId
@@ -225,7 +193,6 @@ const formatInstructionAccounts = (
         ),
       },
     }));
-};
 
 export const formatInstruction = (
   instruction: Document<Instruction>,
