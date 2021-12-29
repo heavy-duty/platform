@@ -31,13 +31,15 @@ export const generateInstructionCode = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[]
+  instructionRelations: Document<InstructionRelation>[],
+  collections: Document<Collection>[]
 ) => {
   const formattedInstruction = formatInstruction(
     instruction,
     instructionArguments,
     instructionAccounts,
-    instructionRelations
+    instructionRelations,
+    collections
   );
   const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
@@ -146,7 +148,8 @@ export const generateWorkspaceMetadata = (
             ),
             instructionRelations.filter(
               ({ data }) => data.instruction === instruction.id
-            )
+            ),
+            collections
           ),
           name: formatName(instruction.data.name),
         })),

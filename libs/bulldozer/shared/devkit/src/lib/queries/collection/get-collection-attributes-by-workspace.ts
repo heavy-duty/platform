@@ -1,6 +1,6 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { getFiltersByWorkspace, getProgramAccounts } from '../../operations';
 import { BULLDOZER_PROGRAM_ID } from '../../programs';
 import {
@@ -25,7 +25,6 @@ export const getCollectionAttributesByWorkspace = (
       programAccounts.map(({ pubkey, account }) =>
         createCollectionAttributeDocument(pubkey, account)
       )
-    ),
-    tap((a) => console.log(a))
+    )
   );
 };

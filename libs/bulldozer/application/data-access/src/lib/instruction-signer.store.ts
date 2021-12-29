@@ -29,7 +29,7 @@ export class InstructionSignerStore extends ComponentStore<object> {
     (instructionAccounts, instructionId) =>
       instructionAccounts &&
       instructionAccounts.filter(
-        ({ id, data }) => id === instructionId && data.kind.id === 1
+        ({ data }) => data.instruction === instructionId && data.kind.id === 1
       )
   );
 

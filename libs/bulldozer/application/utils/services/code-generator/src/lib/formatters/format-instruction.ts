@@ -1,4 +1,5 @@
 import {
+  Collection,
   Document,
   Instruction,
   InstructionAccount,
@@ -109,13 +110,13 @@ const getInstructionAccountPayer = (
 
 const getInstructionAccountCollection = (
   instructionAccount: Document<InstructionAccount>,
-  instructionAccounts: Document<InstructionAccount>[]
+  collections: Document<Collection>[]
 ) => {
   if (!instructionAccount.data.collection) {
     return null;
   }
 
-  const collectionAccount = instructionAccounts.find(
+  const collectionAccount = collections.find(
     ({ id }) => id === instructionAccount.data.collection
   );
 
@@ -160,9 +161,42 @@ const getInstructionAccountClose = (
 const formatInstructionAccounts = (
   instructionId: string,
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[]
-) =>
-  instructionAccounts
+  instructionRelations: Document<InstructionRelation>[],
+  collections: Document<Collection>[]
+) => {
+  console.log({ instructionAccounts, instructionRelations });
+  console.log(
+    instructionAccounts
+      .filter(
+        (instructionAccount) =>
+          instructionAccount.data.instruction === instructionId
+      )
+      .map((instructionAccount) => ({
+        id: instructionAccount.id,
+        data: {
+          ...instructionAccount.data,
+          collection: getInstructionAccountCollection(
+            instructionAccount,
+            collections
+          ),
+          close: getInstructionAccountClose(
+            instructionAccount,
+            instructionAccounts
+          ),
+          payer: getInstructionAccountPayer(
+            instructionAccount,
+            instructionAccounts
+          ),
+          name: formatName(instructionAccount.data.name),
+          relations: getInstructionAccountRelations(
+            instructionAccount,
+            instructionAccounts,
+            instructionRelations
+          ),
+        },
+      }))
+  );
+  return instructionAccounts
     .filter(
       (instructionAccount) =>
         instructionAccount.data.instruction === instructionId
@@ -173,7 +207,7 @@ const formatInstructionAccounts = (
         ...instructionAccount.data,
         collection: getInstructionAccountCollection(
           instructionAccount,
-          instructionAccounts
+          collections
         ),
         close: getInstructionAccountClose(
           instructionAccount,
@@ -191,12 +225,14 @@ const formatInstructionAccounts = (
         ),
       },
     }));
+};
 
 export const formatInstruction = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[]
+  instructionRelations: Document<InstructionRelation>[],
+  collections: Document<Collection>[]
 ) => ({
   name: formatName(instruction.data.name),
   handler: instruction.data.body.split('\n'),
@@ -207,6 +243,7 @@ export const formatInstruction = (
   accounts: formatInstructionAccounts(
     instruction.id,
     instructionAccounts,
-    instructionRelations
+    instructionRelations,
+    collections
   ),
 });

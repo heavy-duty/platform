@@ -14,9 +14,12 @@ export const createInstructionArgumentDocument = (
     INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
     account.data
   );
-  const decodedKind = decodedAccount.kind[Object.keys(decodedAccount.kind)[0]];
-  const decodedModifer =
-    decodedAccount.modifier[Object.keys(decodedAccount.modifier)[0]];
+  const decodedKind = decodedAccount.data.kind
+    ? decodedAccount.data.kind[Object.keys(decodedAccount.data.kind)[0]]
+    : null;
+  const decodedModifer = decodedAccount.data.modifier
+    ? decodedAccount.data.modifier[Object.keys(decodedAccount.data.modifier)[0]]
+    : null;
 
   return {
     id: publicKey.toBase58(),

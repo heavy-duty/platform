@@ -6,6 +6,16 @@ import {
   INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
 } from '../../../utils';
 
+const decodeAccountEnum = (accountEnum: { [key: string]: { id: number } }) => {
+  const accountEnumName = Object.keys(accountEnum)[0];
+  return accountEnum && accountEnumName
+    ? {
+        id: accountEnum[accountEnumName].id,
+        name: accountEnumName,
+      }
+    : null;
+};
+
 export const createInstructionAccountDocument = (
   publicKey: PublicKey,
   account: AccountInfo<Buffer>
@@ -14,26 +24,27 @@ export const createInstructionAccountDocument = (
     INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
     account.data
   );
-  const decodedKind = decodedAccount.kind[Object.keys(decodedAccount.kind)[0]];
-  const decodedModifer =
-    decodedAccount.modifier[Object.keys(decodedAccount.modifier)[0]];
 
   return {
     id: publicKey.toBase58(),
     metadata: account,
     data: {
-      name: decodedAccount.name,
+      name: decodedAccount.data.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
       instruction: decodedAccount.instruction.toBase58(),
-      kind: decodedKind,
-      modifier: decodedModifer,
+      kind:
+        decodedAccount.data.kind && decodeAccountEnum(decodedAccount.data.kind),
+      modifier:
+        decodedAccount.data.modifier &&
+        decodeAccountEnum(decodedAccount.data.modifier),
       collection:
-        decodedAccount.collection && decodedAccount.collection.toBase58(),
-      close: decodedAccount.close && decodedAccount.close.toBase58(),
-      payer: decodedAccount.payer && decodedAccount.payer.toBase58(),
-      space: decodedAccount.space,
+        decodedAccount.data.collection &&
+        decodedAccount.data.collection.toBase58(),
+      close: decodedAccount.data.close && decodedAccount.data.close.toBase58(),
+      payer: decodedAccount.data.payer && decodedAccount.data.payer.toBase58(),
+      space: decodedAccount.data.space,
     },
   };
 };

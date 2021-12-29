@@ -90,18 +90,23 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     this.instructionArguments$,
     this.instructionAccounts$,
     this.instructionRelations$,
+    this._workspaceStore.collections$,
+    this._workspaceStore.workspaceId$,
     (
       instruction,
       instructionArguments,
       instructionAccounts,
-      instructionRelations
+      instructionRelations,
+      collections,
+      workspaceId
     ) =>
       instruction &&
       generateInstructionCode(
         instruction,
         instructionArguments,
         instructionAccounts,
-        instructionRelations
+        instructionRelations,
+        collections.filter(({ data }) => data.workspace === workspaceId)
       )
   );
 

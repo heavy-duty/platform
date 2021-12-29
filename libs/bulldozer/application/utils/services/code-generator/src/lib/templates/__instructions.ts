@@ -30,7 +30,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     close = {{this.data.close.data.name.snakeCase}},
     {{/if}}
     {{#each this.data.relations}}
-    has_one = {{this.data.to.data.name.snakeCase}},
+    has_one = {{this.data.toAccount.data.name.snakeCase}},
     {{/each}}
   )]
   {{/if}}
