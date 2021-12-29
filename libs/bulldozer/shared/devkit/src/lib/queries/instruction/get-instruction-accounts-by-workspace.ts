@@ -23,7 +23,7 @@ export const getInstructionAccountsByWorkspace = (
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createInstructionAccountDocument(pubkey, account.data)
+        createInstructionAccountDocument(pubkey, account)
       )
     )
   );

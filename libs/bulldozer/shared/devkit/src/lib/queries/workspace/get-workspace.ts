@@ -12,7 +12,7 @@ export const getWorkspace = (
   return getAccountInfo(connection, workspacePublicKey).pipe(
     map(
       (account) =>
-        account && createWorkspaceDocument(workspacePublicKey, account.data)
+        account && createWorkspaceDocument(workspacePublicKey, account)
     )
   );
 };

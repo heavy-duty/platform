@@ -12,7 +12,7 @@ export const getCollection = (
   return getAccountInfo(connection, collectionPublicKey).pipe(
     map(
       (account) =>
-        account && createCollectionDocument(collectionPublicKey, account.data)
+        account && createCollectionDocument(collectionPublicKey, account)
     )
   );
 };

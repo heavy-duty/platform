@@ -12,7 +12,7 @@ export const getApplication = (
   return getAccountInfo(connection, applicationPublicKey).pipe(
     map(
       (account) =>
-        account && createApplicationDocument(applicationPublicKey, account.data)
+        account && createApplicationDocument(applicationPublicKey, account)
     )
   );
 };

@@ -19,7 +19,7 @@ export const getApplicationsByWorkspace = (
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createApplicationDocument(pubkey, account.data)
+        createApplicationDocument(pubkey, account)
       )
     )
   );

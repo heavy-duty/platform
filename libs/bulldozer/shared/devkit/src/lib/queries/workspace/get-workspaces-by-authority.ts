@@ -16,7 +16,7 @@ export const getWorkspacesByAuthority = (
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createWorkspaceDocument(pubkey, account.data)
+        createWorkspaceDocument(pubkey, account)
       )
     )
   );

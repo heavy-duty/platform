@@ -16,7 +16,7 @@ export const getCollectionsByWorkspace = (
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createCollectionDocument(pubkey, account.data)
+        createCollectionDocument(pubkey, account)
       )
     )
   );

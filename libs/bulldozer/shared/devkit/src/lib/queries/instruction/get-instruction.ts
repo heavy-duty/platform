@@ -12,7 +12,7 @@ export const getInstruction = (
   return getAccountInfo(connection, collectionPublicKey).pipe(
     map(
       (account) =>
-        account && createInstructionDocument(collectionPublicKey, account.data)
+        account && createInstructionDocument(collectionPublicKey, account)
     )
   );
 };

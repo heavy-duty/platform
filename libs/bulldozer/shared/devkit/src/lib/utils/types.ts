@@ -1,3 +1,5 @@
+import { AccountInfo } from '@solana/web3.js';
+
 export interface CollectionAttributeDto {
   name: string;
   kind: number;
@@ -127,6 +129,5 @@ export interface InstructionRelation {
 export interface Document<T> {
   id: string;
   data: T;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: any;
+  metadata: AccountInfo<Buffer>;
 }

@@ -23,7 +23,7 @@ export const getInstructionRelationsByWorkspace = (
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createInstructionRelationDocument(pubkey, account.data)
+        createInstructionRelationDocument(pubkey, account)
       )
     )
   );

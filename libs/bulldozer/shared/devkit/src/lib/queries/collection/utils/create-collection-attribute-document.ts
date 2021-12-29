@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { AccountInfo, PublicKey } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 import {
   CollectionAttribute,
@@ -8,21 +8,24 @@ import {
 
 export const createCollectionAttributeDocument = (
   publicKey: PublicKey,
-  data: Buffer
+  account: AccountInfo<Buffer>
 ): Document<CollectionAttribute> => {
   const decodedAccount = bulldozerProgram.coder.accounts.decode(
     COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
-    data
+    account.data
   );
-  const decodedKind = decodedAccount.kind[Object.keys(decodedAccount.kind)[0]];
-  const decodedModifer =
-    decodedAccount.modifier[Object.keys(decodedAccount.modifier)[0]];
+  const decodedKind = decodedAccount.data.kind
+    ? decodedAccount.data.kind[Object.keys(decodedAccount.data.kind)[0]]
+    : null;
+  const decodedModifer = decodedAccount.data.modifier
+    ? decodedAccount.data.modifier[Object.keys(decodedAccount.data.modifier)[0]]
+    : null;
 
   return {
     id: publicKey.toBase58(),
-    metadata: decodedAccount,
+    metadata: account,
     data: {
-      name: decodedAccount.name,
+      name: decodedAccount.data.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),

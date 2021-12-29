@@ -1,4 +1,4 @@
-import { PublicKey } from '@solana/web3.js';
+import { AccountInfo, PublicKey } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 import {
   Document,
@@ -8,16 +8,16 @@ import {
 
 export const createInstructionDocument = (
   publicKey: PublicKey,
-  data: Buffer
+  account: AccountInfo<Buffer>
 ): Document<Instruction> => {
   const decodedAccount = bulldozerProgram.coder.accounts.decode(
     INSTRUCTION_ACCOUNT_NAME,
-    data
+    account.data
   );
 
   return {
     id: publicKey.toBase58(),
-    metadata: decodedAccount,
+    metadata: account,
     data: {
       name: decodedAccount.name,
       body: decodedAccount.body,
