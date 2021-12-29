@@ -1,4 +1,6 @@
 export * from './create-transaction';
+export * from './decode-account-enum';
+export * from './decode-attribute-enum';
 export * from './find-instruction-relation-address';
 export * from './get-account-info';
 export * from './get-filters';

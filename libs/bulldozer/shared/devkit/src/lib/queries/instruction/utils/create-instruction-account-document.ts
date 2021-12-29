@@ -1,20 +1,11 @@
 import { AccountInfo, PublicKey } from '@solana/web3.js';
+import { decodeAccountEnum } from '../../../operations';
 import { bulldozerProgram } from '../../../programs';
 import {
   Document,
   InstructionAccount,
   INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
 } from '../../../utils';
-
-const decodeAccountEnum = (accountEnum: { [key: string]: { id: number } }) => {
-  const accountEnumName = Object.keys(accountEnum)[0];
-  return accountEnum && accountEnumName
-    ? {
-        id: accountEnum[accountEnumName].id,
-        name: accountEnumName,
-      }
-    : null;
-};
 
 export const createInstructionAccountDocument = (
   publicKey: PublicKey,
@@ -34,8 +25,7 @@ export const createInstructionAccountDocument = (
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
       instruction: decodedAccount.instruction.toBase58(),
-      kind:
-        decodedAccount.data.kind && decodeAccountEnum(decodedAccount.data.kind),
+      kind: decodeAccountEnum(decodedAccount.data.kind),
       modifier:
         decodedAccount.data.modifier &&
         decodeAccountEnum(decodedAccount.data.modifier),
