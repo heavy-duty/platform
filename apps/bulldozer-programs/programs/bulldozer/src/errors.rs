@@ -47,4 +47,8 @@ pub enum ErrorCode {
   CantDeleteInstructionWithAccounts,
   #[msg("Instruction provided doesnt match account")]
   InstructionDoesntMatchAccount,
+  #[msg("Cant delete application with collections")]
+  CantDeleteApplicationWithCollections,
+  #[msg("Application provided doesnt match collection")]
+  ApplicationDoesntMatchCollection,
 }

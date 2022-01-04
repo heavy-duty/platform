@@ -8,7 +8,8 @@ pub struct CreateApplication<'info> {
         init,
         payer = authority,
         // discriminator + authority + workspace + name (size 32 + 4 ?)
-        space = 8 + 32 + 32 + 36,
+        // quantity of collections
+        space = 8 + 32 + 32 + 36 + 1,
     )]
   pub application: Box<Account<'info, Application>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -22,5 +23,6 @@ pub fn handler(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
   ctx.accounts.application.name = name;
   ctx.accounts.application.authority = ctx.accounts.authority.key();
   ctx.accounts.application.workspace = ctx.accounts.workspace.key();
+  ctx.accounts.application.quantity_of_collections = 0;
   Ok(())
 }

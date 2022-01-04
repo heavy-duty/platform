@@ -1,7 +1,12 @@
-import { Idl, Program, Provider, setProvider } from '@project-serum/anchor';
+import {
+  Idl,
+  Program,
+  ProgramError,
+  Provider,
+  setProvider,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -74,5 +79,46 @@ describe('application', () => {
       application.publicKey
     );
     assert.equal(account, null);
+  });
+
+  it('should fail when deleting application with collections', async () => {
+    // arrange
+    const newApplicationName = 'sample';
+    const newApplication = Keypair.generate();
+    const collectionName = 'sample';
+    const collection = Keypair.generate();
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createApplication(newApplicationName, {
+        accounts: {
+          application: newApplication.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newApplication],
+      });
+      await program.rpc.createCollection(collectionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          collection: collection.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [collection],
+      });
+      await program.rpc.deleteApplication({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: newApplication.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6022);
   });
 });

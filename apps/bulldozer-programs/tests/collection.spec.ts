@@ -57,10 +57,14 @@ describe('collection', () => {
     const account = await program.account.collection.fetch(
       collection.publicKey
     );
+    const applicationAccount = await program.account.application.fetch(
+      application.publicKey
+    );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.equal(account.name, collectionName);
+    assert.equal(applicationAccount.quantityOfCollections, 1);
   });
 
   it('should update account', async () => {
@@ -86,13 +90,18 @@ describe('collection', () => {
       accounts: {
         collection: collection.publicKey,
         authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
       },
     });
     // assert
     const account = await program.account.collection.fetchNullable(
       collection.publicKey
     );
+    const applicationAccount = await program.account.application.fetch(
+      application.publicKey
+    );
     assert.equal(account, null);
+    assert.equal(applicationAccount.quantityOfCollections, 0);
   });
 
   it('should fail when deleting collection with attributes', async () => {
@@ -136,6 +145,7 @@ describe('collection', () => {
         accounts: {
           collection: collection.publicKey,
           authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
         },
       });
     } catch (err) {
@@ -143,5 +153,47 @@ describe('collection', () => {
     }
     // assert
     assert.equal(error.code, 6013);
+  });
+
+  it('should fail when providing wrong "application" to delete', async () => {
+    // arrange
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newCollection = Keypair.generate();
+    const newCollectionName = 'sample';
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createApplication(newApplicationName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newApplication],
+      });
+      await program.rpc.createCollection(newCollectionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          collection: newCollection.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newCollection],
+      });
+      await program.rpc.deleteCollection({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          collection: newCollection.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6023);
   });
 });

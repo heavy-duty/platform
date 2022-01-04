@@ -12,6 +12,7 @@ pub struct CreateCollection<'info> {
         space = 8 + 32 + 32 + 32 + 36 + 1
     )]
   pub collection: Box<Account<'info, Collection>>,
+  #[account(mut)]
   pub application: Box<Account<'info, Application>>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
@@ -26,5 +27,6 @@ pub fn handler(ctx: Context<CreateCollection>, name: String) -> ProgramResult {
   ctx.accounts.collection.application = ctx.accounts.application.key();
   ctx.accounts.collection.workspace = ctx.accounts.workspace.key();
   ctx.accounts.collection.quantity_of_attributes = 0;
+  ctx.accounts.application.quantity_of_collections += 1;
   Ok(())
 }
