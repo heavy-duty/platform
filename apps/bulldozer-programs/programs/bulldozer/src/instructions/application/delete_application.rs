@@ -1,4 +1,4 @@
-use crate::collections::Application;
+use crate::collections::{Application, Workspace};
 use anchor_lang::prelude::*;
 use crate::errors::ErrorCode;
 
@@ -12,10 +12,16 @@ pub struct DeleteApplication<'info> {
     constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions
   )]
   pub application: Account<'info, Application>,
+  #[account(
+    mut,
+    constraint = application.workspace == workspace.key() @ ErrorCode::WorkspaceDoesntMatchApplication
+  )]
+  pub workspace: Account<'info, Workspace>,
   pub authority: Signer<'info>,
 }
 
-pub fn handler(_ctx: Context<DeleteApplication>) -> ProgramResult {
+pub fn handler(ctx: Context<DeleteApplication>) -> ProgramResult {
   msg!("Delete application");
+  ctx.accounts.workspace.quantity_of_applications -= 1;
   Ok(())
 }

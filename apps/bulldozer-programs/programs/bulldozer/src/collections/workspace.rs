@@ -4,4 +4,5 @@ use anchor_lang::prelude::*;
 pub struct Workspace {
   pub authority: Pubkey,
   pub name: String,
+  pub quantity_of_applications: u8,
 }

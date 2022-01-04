@@ -8,7 +8,8 @@ pub struct CreateWorkspace<'info> {
         init,
         payer = authority,
         // discriminator + authority + name (size 32 + 4 ?)
-        space = 8 + 32 + 36,
+        // quantity of apps
+        space = 8 + 32 + 36 + 1,
     )]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
@@ -20,5 +21,6 @@ pub fn handler(ctx: Context<CreateWorkspace>, name: String) -> ProgramResult {
   msg!("Create workspace");
   ctx.accounts.workspace.name = name;
   ctx.accounts.workspace.authority = ctx.accounts.authority.key();
+  ctx.accounts.workspace.quantity_of_applications = 0;
   Ok(())
 }

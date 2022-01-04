@@ -1,9 +1,15 @@
 use crate::collections::Workspace;
 use anchor_lang::prelude::*;
+use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct DeleteWorkspace<'info> {
-  #[account(mut, has_one = authority, close = authority)]
+  #[account(
+    mut,
+    has_one = authority,
+    close = authority,
+    constraint = workspace.quantity_of_applications == 0 @ ErrorCode::CantDeleteWorkspaceWithApplications,
+  )]
   pub workspace: Account<'info, Workspace>,
   pub authority: Signer<'info>,
 }

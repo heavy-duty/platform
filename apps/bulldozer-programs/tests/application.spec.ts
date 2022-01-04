@@ -44,9 +44,13 @@ describe('application', () => {
     const account = await program.account.application.fetch(
       application.publicKey
     );
+    const workspaceAccount = await program.account.workspace.fetch(
+      workspace.publicKey
+    );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.equal(account.name, applicationName);
+    assert.equal(workspaceAccount.quantityOfApplications, 1);
   });
 
   it('should update account', async () => {
@@ -72,13 +76,18 @@ describe('application', () => {
       accounts: {
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
+        workspace: workspace.publicKey,
       },
     });
     // assert
     const account = await program.account.application.fetchNullable(
       application.publicKey
     );
+    const workspaceAccount = await program.account.workspace.fetch(
+      workspace.publicKey
+    );
     assert.equal(account, null);
+    assert.equal(workspaceAccount.quantityOfApplications, 0);
   });
 
   it('should fail when deleting application with collections', async () => {
@@ -113,6 +122,7 @@ describe('application', () => {
         accounts: {
           authority: program.provider.wallet.publicKey,
           application: newApplication.publicKey,
+          workspace: workspace.publicKey,
         },
       });
     } catch (err) {
@@ -154,6 +164,7 @@ describe('application', () => {
         accounts: {
           authority: program.provider.wallet.publicKey,
           application: newApplication.publicKey,
+          workspace: workspace.publicKey,
         },
       });
     } catch (err) {
@@ -161,5 +172,45 @@ describe('application', () => {
     }
     // assert
     assert.equal(error.code, 6024);
+  });
+
+  it('should fail when providing wrong "workspace" to delete', async () => {
+    // arrange
+    const newWorkspace = Keypair.generate();
+    const newWorkspaceName = 'sample';
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createWorkspace(newWorkspaceName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newWorkspace],
+      });
+      await program.rpc.createApplication(newApplicationName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newApplication],
+      });
+      await program.rpc.deleteApplication({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6027);
   });
 });

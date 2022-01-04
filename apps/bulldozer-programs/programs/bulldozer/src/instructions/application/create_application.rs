@@ -12,6 +12,7 @@ pub struct CreateApplication<'info> {
         space = 8 + 32 + 32 + 36 + 1 + 1,
     )]
   pub application: Box<Account<'info, Application>>,
+  #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -25,5 +26,6 @@ pub fn handler(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
   ctx.accounts.application.workspace = ctx.accounts.workspace.key();
   ctx.accounts.application.quantity_of_collections = 0;
   ctx.accounts.application.quantity_of_instructions = 0;
+  ctx.accounts.workspace.quantity_of_applications += 1;
   Ok(())
 }

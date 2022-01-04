@@ -55,4 +55,8 @@ pub enum ErrorCode {
   CantDeleteApplicationWithInstructions,
   #[msg("Application provided doesnt match instruction")]
   ApplicationDoesntMatchInstruction,
+  #[msg("Cant delete workspace with applications")]
+  CantDeleteWorkspaceWithApplications,
+  #[msg("Workspace provided doesnt match application")]
+  WorkspaceDoesntMatchApplication,
 }
