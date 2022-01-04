@@ -31,4 +31,6 @@ pub enum ErrorCode {
   MissingMaxLength,
   #[msg("Cant delete collection with attributes")]
   CantDeleteCollectionWithAttributes,
+  #[msg("Collection provided doesnt match attribute")]
+  CollectionDoesntMatchAttribute,
 }

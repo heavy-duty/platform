@@ -212,4 +212,55 @@ describe('collection attribute', () => {
     // assert
     assert.equal(error.code, 6012);
   });
+
+  it('should fail when providing wrong collection to delete', async () => {
+    // arrange
+    const newCollection = Keypair.generate();
+    const newCollectionName = 'sample';
+    const newAttribute = Keypair.generate();
+    const dto = {
+      name: 'attr1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createCollection(newCollectionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          collection: newCollection.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newCollection],
+      });
+      await program.rpc.createCollectionAttribute(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          collection: newCollection.publicKey,
+          attribute: newAttribute.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newAttribute],
+      });
+      await program.rpc.deleteCollectionAttribute({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          collection: collection.publicKey,
+          attribute: newAttribute.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6014);
+  });
 });
