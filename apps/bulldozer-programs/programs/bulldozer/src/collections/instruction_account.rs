@@ -142,4 +142,5 @@ pub struct InstructionAccount {
   pub application: Pubkey,
   pub instruction: Pubkey,
   pub data: BaseAccount,
+  pub quantity_of_relations: u8,
 }

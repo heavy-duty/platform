@@ -5,9 +5,8 @@ import {
   Provider,
   setProvider,
 } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair, PublicKey, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -551,5 +550,88 @@ describe('instruction account', () => {
       assert.equal(account.data.close, null);
       assert.equal(account.data.space, null);
     });
+  });
+
+  it('should fail when deleting account with relations', async () => {
+    // arrange
+    const instructionAccount1 = Keypair.generate();
+    const instructionAccount2 = Keypair.generate();
+    const dto = {
+      name: '12345678901234567890123456789012',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstructionAccount(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: instructionAccount1.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instructionAccount1],
+        remainingAccounts: [
+          {
+            pubkey: collection.publicKey,
+            isWritable: false,
+            isSigner: false,
+          },
+        ],
+      });
+      await program.rpc.createInstructionAccount(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: instructionAccount2.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instructionAccount2],
+        remainingAccounts: [
+          {
+            pubkey: collection.publicKey,
+            isWritable: false,
+            isSigner: false,
+          },
+        ],
+      });
+      const [relationPublicKey, relationBump] =
+        await PublicKey.findProgramAddress(
+          [
+            Buffer.from('instruction_relation', 'utf8'),
+            instructionAccount1.publicKey.toBuffer(),
+            instructionAccount2.publicKey.toBuffer(),
+          ],
+          program.programId
+        );
+      await program.rpc.createInstructionRelation(relationBump, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: instructionAccount1.publicKey,
+          to: instructionAccount2.publicKey,
+          relation: relationPublicKey,
+          systemProgram: SystemProgram.programId,
+        },
+      });
+      await program.rpc.deleteInstructionAccount({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          account: instructionAccount1.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6015);
   });
 });

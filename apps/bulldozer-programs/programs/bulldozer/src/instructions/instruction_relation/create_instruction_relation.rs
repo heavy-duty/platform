@@ -24,7 +24,9 @@ pub struct CreateInstructionRelation<'info> {
   pub workspace: Box<Account<'info, Workspace>>,
   pub application: Box<Account<'info, Application>>,
   pub instruction: Box<Account<'info, Instruction>>,
+  #[account(mut)]
   pub from: Box<Account<'info, InstructionAccount>>,
+  #[account(mut)]
   pub to: Box<Account<'info, InstructionAccount>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -40,6 +42,7 @@ pub fn handler(ctx: Context<CreateInstructionRelation>, bump: u8) -> ProgramResu
   ctx.accounts.relation.from = ctx.accounts.from.key();
   ctx.accounts.relation.to = ctx.accounts.to.key();
   ctx.accounts.relation.bump = bump;
-
+  ctx.accounts.from.quantity_of_relations += 1;
+  ctx.accounts.to.quantity_of_relations += 1;
   Ok(())
 }

@@ -11,8 +11,8 @@ pub struct CreateInstructionAccount<'info> {
         payer = authority,
         // discriminator + authority + workspace + application
         // instruction + name (size 32 + 4 ?) + kind + modifier
-        // collection + payer + close + space
-        space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3
+        // collection + payer + close + space + quantity of relations
+        space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3 + 1
     )]
   pub account: Box<Account<'info, InstructionAccount>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -30,6 +30,6 @@ pub fn handler(ctx: Context<CreateInstructionAccount>, dto: AccountDto) -> Progr
   ctx.accounts.account.application = ctx.accounts.application.key();
   ctx.accounts.account.instruction = ctx.accounts.instruction.key();
   ctx.accounts.account.data = BaseAccount::create(dto, ctx.remaining_accounts)?;
-
+  ctx.accounts.account.quantity_of_relations = 0;
   Ok(())
 }

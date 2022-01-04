@@ -33,4 +33,10 @@ pub enum ErrorCode {
   CantDeleteCollectionWithAttributes,
   #[msg("Collection provided doesnt match attribute")]
   CollectionDoesntMatchAttribute,
+  #[msg("Cant delete account with relations")]
+  CantDeleteAccountWithRelations,
+  #[msg("From provided doesnt match relation")]
+  FromDoesntMatchRelation,
+  #[msg("To provided doesnt match relation")]
+  ToDoesntMatchRelation,
 }
