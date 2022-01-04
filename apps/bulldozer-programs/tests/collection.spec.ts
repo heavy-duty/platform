@@ -1,7 +1,12 @@
-import { Idl, Program, Provider, setProvider } from '@project-serum/anchor';
+import {
+  Idl,
+  Program,
+  ProgramError,
+  Provider,
+  setProvider,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -88,5 +93,55 @@ describe('collection', () => {
       collection.publicKey
     );
     assert.equal(account, null);
+  });
+
+  it('should fail when deleting collection with attributes', async () => {
+    // arrange
+    const collectionName = 'sample';
+    const collection = Keypair.generate();
+    const attribute = Keypair.generate();
+    const dto = {
+      name: 'attr1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createCollection(collectionName, {
+        accounts: {
+          collection: collection.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [collection],
+      });
+      await program.rpc.createCollectionAttribute(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          collection: collection.publicKey,
+          attribute: attribute.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [attribute],
+      });
+      await program.rpc.deleteCollection({
+        accounts: {
+          collection: collection.publicKey,
+          authority: program.provider.wallet.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6013);
   });
 });

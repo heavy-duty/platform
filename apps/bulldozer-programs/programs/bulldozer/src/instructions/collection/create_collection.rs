@@ -8,7 +8,8 @@ pub struct CreateCollection<'info> {
         init,
         payer = authority,
         // discriminator + authority + workspace + application + string (size 32 + 4 ?)
-        space = 8 + 32 + 32 + 32 + 36
+        // quantity of attributes
+        space = 8 + 32 + 32 + 32 + 36 + 1
     )]
   pub collection: Box<Account<'info, Collection>>,
   pub application: Box<Account<'info, Application>>,
@@ -24,5 +25,6 @@ pub fn handler(ctx: Context<CreateCollection>, name: String) -> ProgramResult {
   ctx.accounts.collection.authority = ctx.accounts.authority.key();
   ctx.accounts.collection.application = ctx.accounts.application.key();
   ctx.accounts.collection.workspace = ctx.accounts.workspace.key();
+  ctx.accounts.collection.quantity_of_attributes = 0;
   Ok(())
 }

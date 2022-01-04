@@ -29,4 +29,6 @@ pub enum ErrorCode {
   MissingMax,
   #[msg("Missing Max Length")]
   MissingMaxLength,
+  #[msg("Cant delete collection with attributes")]
+  CantDeleteCollectionWithAttributes,
 }

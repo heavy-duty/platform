@@ -7,7 +7,6 @@ import {
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -75,18 +74,29 @@ describe('collection attribute', () => {
       signers: [attribute],
     });
     // assert
-    const account = await program.account.collectionAttribute.fetch(
-      attribute.publicKey
+    const collectionAttributeAccount =
+      await program.account.collectionAttribute.fetch(attribute.publicKey);
+    const collectionAccount = await program.account.collection.fetch(
+      collection.publicKey
     );
-    assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.equal(account.data.name, dto.name);
-    assert.ok('boolean' in account.data.kind);
-    assert.equal(account.data.kind.boolean.id, dto.kind);
-    assert.equal(account.data.kind.boolean.size, 1);
-    assert.equal(account.data.modifier, null);
-    assert.ok(account.collection.equals(collection.publicKey));
-    assert.ok(account.application.equals(application.publicKey));
-    assert.ok(account.workspace.equals(workspace.publicKey));
+    assert.ok(
+      collectionAttributeAccount.authority.equals(
+        program.provider.wallet.publicKey
+      )
+    );
+    assert.equal(collectionAttributeAccount.data.name, dto.name);
+    assert.ok('boolean' in collectionAttributeAccount.data.kind);
+    assert.equal(collectionAttributeAccount.data.kind.boolean.id, dto.kind);
+    assert.equal(collectionAttributeAccount.data.kind.boolean.size, 1);
+    assert.equal(collectionAttributeAccount.data.modifier, null);
+    assert.ok(
+      collectionAttributeAccount.collection.equals(collection.publicKey)
+    );
+    assert.ok(
+      collectionAttributeAccount.application.equals(application.publicKey)
+    );
+    assert.ok(collectionAttributeAccount.workspace.equals(workspace.publicKey));
+    assert.equal(collectionAccount.quantityOfAttributes, 1);
   });
 
   it('should update account', async () => {
@@ -124,14 +134,21 @@ describe('collection attribute', () => {
     await program.rpc.deleteCollectionAttribute({
       accounts: {
         authority: program.provider.wallet.publicKey,
+        collection: collection.publicKey,
         attribute: attribute.publicKey,
       },
     });
     // assert
-    const account = await program.account.collectionAttribute.fetchNullable(
-      attribute.publicKey
+    const collectionAttributeAccount =
+      await program.account.collectionAttribute.fetchNullable(
+        attribute.publicKey
+      );
+    const collectionAccount = await program.account.collection.fetch(
+      collection.publicKey
     );
-    assert.equal(account, null);
+    console.log(collectionAccount);
+    assert.equal(collectionAttributeAccount, null);
+    assert.equal(collectionAccount.quantityOfAttributes, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {

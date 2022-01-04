@@ -16,6 +16,7 @@ pub struct CreateCollectionAttribute<'info> {
   pub attribute: Box<Account<'info, CollectionAttribute>>,
   pub workspace: Box<Account<'info, Workspace>>,
   pub application: Box<Account<'info, Application>>,
+  #[account(mut)]
   pub collection: Box<Account<'info, Collection>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -29,5 +30,6 @@ pub fn handler(ctx: Context<CreateCollectionAttribute>, dto: AttributeDto) -> Pr
   ctx.accounts.attribute.application = ctx.accounts.application.key();
   ctx.accounts.attribute.collection = ctx.accounts.collection.key();
   ctx.accounts.attribute.data = Attribute::create(dto)?;
+  ctx.accounts.collection.quantity_of_attributes += 1;
   Ok(())
 }
