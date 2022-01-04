@@ -208,6 +208,7 @@ describe('instruction account', () => {
         accounts: {
           authority: program.provider.wallet.publicKey,
           account: instructionAccount.publicKey,
+          instruction: instruction.publicKey,
         },
       });
       // assert
@@ -626,6 +627,7 @@ describe('instruction account', () => {
         accounts: {
           authority: program.provider.wallet.publicKey,
           account: instructionAccount1.publicKey,
+          instruction: instruction.publicKey,
         },
       });
     } catch (err) {
@@ -633,5 +635,153 @@ describe('instruction account', () => {
     }
     // assert
     assert.equal(error.code, 6015);
+  });
+
+  it('should increment instruction account quantity on create', async () => {
+    // arrange
+    const instructionAccount = Keypair.generate();
+    const instruction = Keypair.generate();
+    const dto = {
+      name: 'data',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    // act
+    await program.rpc.createInstruction(instructionName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [instruction],
+    });
+    await program.rpc.createInstructionAccount(dto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: instructionAccount.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [instructionAccount],
+      remainingAccounts: [
+        {
+          pubkey: collection.publicKey,
+          isWritable: false,
+          isSigner: false,
+        },
+      ],
+    });
+    // assert
+    const account = await program.account.instruction.fetch(
+      instruction.publicKey
+    );
+    assert.equal(account.quantityOfAccounts, 1);
+  });
+
+  it('should decrement instruction account quantity on delete', async () => {
+    // arrange
+    const instructionAccount = Keypair.generate();
+    const instruction = Keypair.generate();
+    const dto = {
+      name: 'data',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    // act
+    await program.rpc.createInstruction(instructionName, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [instruction],
+    });
+    await program.rpc.createInstructionAccount(dto, {
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: instructionAccount.publicKey,
+        systemProgram: SystemProgram.programId,
+      },
+      signers: [instructionAccount],
+      remainingAccounts: [
+        {
+          pubkey: collection.publicKey,
+          isWritable: false,
+          isSigner: false,
+        },
+      ],
+    });
+    await program.rpc.deleteInstructionAccount({
+      accounts: {
+        authority: program.provider.wallet.publicKey,
+        account: instructionAccount.publicKey,
+        instruction: instruction.publicKey,
+      },
+    });
+    // assert
+    const account = await program.account.instruction.fetch(
+      instruction.publicKey
+    );
+    assert.equal(account.quantityOfAccounts, 0);
+  });
+
+  it('should fail when providing wrong "instruction" to delete', async () => {
+    // arrange
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const newAccount = Keypair.generate();
+    const dto = {
+      name: 'data',
+      kind: 1,
+      modifier: null,
+      space: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstruction(newInstructionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newInstruction],
+      });
+      await program.rpc.createInstructionAccount(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+          account: newAccount.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newAccount],
+      });
+      await program.rpc.deleteInstructionAccount({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          instruction: instruction.publicKey,
+          account: newAccount.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6021);
   });
 });

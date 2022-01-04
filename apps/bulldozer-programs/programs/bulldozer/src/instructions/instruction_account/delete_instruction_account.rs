@@ -1,4 +1,4 @@
-use crate::collections::InstructionAccount;
+use crate::collections::{Instruction, InstructionAccount};
 use anchor_lang::prelude::*;
 use crate::errors::ErrorCode;
 
@@ -11,10 +11,16 @@ pub struct DeleteInstructionAccount<'info> {
     constraint = account.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations
   )]
   pub account: Account<'info, InstructionAccount>,
+  #[account(
+    mut,
+    constraint = instruction.key() == account.instruction @ ErrorCode::InstructionDoesntMatchAccount
+  )]
+  pub instruction: Account<'info, Instruction>,
   pub authority: Signer<'info>,
 }
 
-pub fn handler(_ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
+pub fn handler(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
   msg!("Delete instruction account");
+  ctx.accounts.instruction.quantity_of_accounts -= 1;
   Ok(())
 }

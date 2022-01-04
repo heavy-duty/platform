@@ -9,7 +9,8 @@ pub struct CreateInstruction<'info> {
         payer = authority,
         // discriminator + authority + workspace + application
         // name (size 32 + 4 ?) + body + quantity of arguments
-        space = 8 + 32 + 32 + 32 + 33 + 2000 + 1
+        // quantity of accounts
+        space = 8 + 32 + 32 + 32 + 33 + 2000 + 1 + 1
     )]
   pub instruction: Box<Account<'info, Instruction>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -27,5 +28,6 @@ pub fn handler(ctx: Context<CreateInstruction>, name: String) -> ProgramResult {
   ctx.accounts.instruction.name = name;
   ctx.accounts.instruction.body = "".to_string();
   ctx.accounts.instruction.quantity_of_arguments = 0;
+  ctx.accounts.instruction.quantity_of_accounts = 0;
   Ok(())
 }

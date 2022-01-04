@@ -17,6 +17,7 @@ pub struct CreateInstructionAccount<'info> {
   pub account: Box<Account<'info, InstructionAccount>>,
   pub workspace: Box<Account<'info, Workspace>>,
   pub application: Box<Account<'info, Application>>,
+  #[account(mut)]
   pub instruction: Box<Account<'info, Instruction>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -31,5 +32,6 @@ pub fn handler(ctx: Context<CreateInstructionAccount>, dto: AccountDto) -> Progr
   ctx.accounts.account.instruction = ctx.accounts.instruction.key();
   ctx.accounts.account.data = BaseAccount::create(dto, ctx.remaining_accounts)?;
   ctx.accounts.account.quantity_of_relations = 0;
+  ctx.accounts.instruction.quantity_of_accounts += 1;
   Ok(())
 }

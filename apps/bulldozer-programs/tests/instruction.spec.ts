@@ -170,4 +170,52 @@ describe('instruction', () => {
     // assert
     assert.equal(error.code, 6018);
   });
+
+  it('should fail when deleting instruction with accounts', async () => {
+    // arrange
+    const instructionName = 'sample';
+    const instruction = Keypair.generate();
+    const account = Keypair.generate();
+    const dto = {
+      name: 'data',
+      kind: 1,
+      modifier: null,
+      space: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstruction(instructionName, {
+        accounts: {
+          instruction: instruction.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instruction],
+      });
+      await program.rpc.createInstructionAccount(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: account.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [account],
+      });
+      await program.rpc.deleteInstruction({
+        accounts: {
+          instruction: instruction.publicKey,
+          authority: program.provider.wallet.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6020);
+  });
 });

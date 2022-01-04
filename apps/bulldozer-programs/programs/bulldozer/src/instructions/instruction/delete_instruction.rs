@@ -8,7 +8,8 @@ pub struct DeleteInstruction<'info> {
     mut,
     has_one = authority,
     close = authority,
-    constraint = instruction.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments
+    constraint = instruction.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments,
+    constraint = instruction.quantity_of_accounts == 0 @ ErrorCode::CantDeleteInstructionWithAccounts,
   )]
   pub instruction: Account<'info, Instruction>,
   pub authority: Signer<'info>,

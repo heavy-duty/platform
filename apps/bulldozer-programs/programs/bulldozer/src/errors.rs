@@ -43,4 +43,8 @@ pub enum ErrorCode {
   CantDeleteInstructionWithArguments,
   #[msg("Instruction provided doesnt match argument")]
   InstructionDoesntMatchArgument,
+  #[msg("Cant delete instruction with accounts")]
+  CantDeleteInstructionWithAccounts,
+  #[msg("Instruction provided doesnt match account")]
+  InstructionDoesntMatchAccount,
 }
