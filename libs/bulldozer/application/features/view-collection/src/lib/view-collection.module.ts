@@ -7,11 +7,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
+import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/code-editor';
 import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
 import { SectionHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/section-header';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { CodeEditorModule } from '@heavy-duty/bulldozer/application/features/code-editor';
-
 import { CollectionMenuComponent } from './collection-menu.component';
 import { ListAttributesComponent } from './list-attributes.component';
 import { ViewCollectionComponent } from './view-collection.component';

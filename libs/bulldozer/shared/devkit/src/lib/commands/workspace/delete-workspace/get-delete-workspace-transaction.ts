@@ -8,26 +8,26 @@ export const getDeleteWorkspaceTransaction = (
   connection: Connection,
   authority: PublicKey,
   workspacePublicKey: PublicKey,
-  workspaceApplicationPublicKeys: PublicKey[],
-  workspaceApplicationCollectionPublicKeys: PublicKey[],
-  workspaceApplicationCollectionAttributePublicKeys: PublicKey[],
-  workspaceApplicationInstructionPublicKeys: PublicKey[],
-  workspaceApplicationInstructionArgumentPublicKeys: PublicKey[],
-  workspaceApplicationInstructionAccountPublicKeys: PublicKey[],
-  workspaceApplicationInstructionRelationPublicKeys: PublicKey[]
+  applicationPublicKeys: PublicKey[],
+  collectionPublicKeys: PublicKey[],
+  collectionAttributePublicKeys: PublicKey[],
+  instructionPublicKeys: PublicKey[],
+  instructionArgumentPublicKeys: PublicKey[],
+  instructionAccountPublicKeys: PublicKey[],
+  instructionRelationPublicKeys: PublicKey[]
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
     addAllInstructionsToTransaction(
       getDeleteWorkspaceInstructions(
         authority,
         workspacePublicKey,
-        workspaceApplicationPublicKeys,
-        workspaceApplicationCollectionPublicKeys,
-        workspaceApplicationCollectionAttributePublicKeys,
-        workspaceApplicationInstructionPublicKeys,
-        workspaceApplicationInstructionArgumentPublicKeys,
-        workspaceApplicationInstructionAccountPublicKeys,
-        workspaceApplicationInstructionRelationPublicKeys
+        applicationPublicKeys,
+        collectionPublicKeys,
+        collectionAttributePublicKeys,
+        instructionPublicKeys,
+        instructionArgumentPublicKeys,
+        instructionAccountPublicKeys,
+        instructionRelationPublicKeys
       )
     )
   );

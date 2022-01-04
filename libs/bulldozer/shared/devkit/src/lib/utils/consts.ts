@@ -1,5 +1,8 @@
 export const LAYOUT_AUTHORITY_OFFSET = 8;
 export const LAYOUT_WORKSPACE_OFFSET = 40;
+export const LAYOUT_APPLICATION_OFFSET = 72;
+export const LAYOUT_COLLECTION_OFFSET = 104;
+export const LAYOUT_INSTRUCTION_OFFSET = 104;
 
 export const WORKSPACE_ACCOUNT_NAME = 'workspace';
 export const APPLICATION_ACCOUNT_NAME = 'application';

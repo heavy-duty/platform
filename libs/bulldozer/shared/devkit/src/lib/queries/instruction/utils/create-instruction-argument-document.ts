@@ -30,7 +30,7 @@ export const createInstructionArgumentDocument = (
       application: decodedAccount.application.toBase58(),
       instruction: decodedAccount.instruction.toBase58(),
       kind: decodedKind,
-      modifier: decodedModifier,
+      modifier: decodedModifier || null,
       max: decodedKind.id === 1 ? decodedKind.size : null,
       maxLength: decodedKind.id === 2 ? decodedKind.size : null,
     },

@@ -1,20 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostBinding,
-  OnInit,
-} from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
-import {
-  CollectionAttributeStore,
-  CollectionStore,
-} from '@heavy-duty/bulldozer/application/data-access';
-import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { filter, map, startWith } from 'rxjs';
+import { ViewCollectionStore } from './view-collection.store';
 
 @Component({
   selector: 'bd-view-collection',
@@ -70,52 +56,18 @@ import { filter, map, startWith } from 'rxjs';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ViewCollectionStore],
 })
-export class ViewCollectionComponent implements OnInit {
+export class ViewCollectionComponent {
   @HostBinding('class') class = 'block';
-  readonly connected$ = this._walletStore.connected$;
-  readonly collection$ = this._collectionStore.collection$;
-  readonly collectionAttributes$ = this._collectionStore.collectionAttributes$;
-  readonly rustCodeCollection$ = this._collectionStore.rustCode$;
-  readonly editorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
-    map((isDarkThemeEnabled) => ({
-      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-      language: 'rust',
-      automaticLayout: true,
-      readOnly: true,
-      fontSize: 16,
-    }))
-  );
+  readonly connected$ = this._viewCollectionStore.connected$;
+  readonly collection$ = this._viewCollectionStore.collection$;
+  readonly collectionAttributes$ =
+    this._viewCollectionStore.collectionAttributes$;
+  readonly rustCodeCollection$ = this._viewCollectionStore.rustCode$;
+  readonly editorOptions$ = this._viewCollectionStore.editorOptions$;
 
-  constructor(
-    private readonly _route: ActivatedRoute,
-    private readonly _router: Router,
-    private readonly _walletStore: WalletStore,
-    private readonly _collectionStore: CollectionStore,
-    private readonly _collectionAttributeStore: CollectionAttributeStore,
-    private readonly _themeService: DarkThemeService,
-    private readonly _matDialog: MatDialog
-  ) {}
-
-  ngOnInit() {
-    this._collectionStore.selectCollection(
-      this._router.events.pipe(
-        filter(
-          (event): event is NavigationStart => event instanceof NavigationStart
-        ),
-        map((event) => {
-          const urlAsArray = event.url.split('/').filter((segment) => segment);
-
-          if (urlAsArray.length !== 6 || urlAsArray[4] !== 'collections') {
-            return null;
-          } else {
-            return urlAsArray[5];
-          }
-        }),
-        startWith(this._route.snapshot.paramMap.get('collectionId') || null)
-      )
-    );
-  }
+  constructor(private readonly _viewCollectionStore: ViewCollectionStore) {}
 
   onReload() {
     // this._collectionStore.reload();
@@ -126,34 +78,20 @@ export class ViewCollectionComponent implements OnInit {
     applicationId: string,
     collectionId: string
   ) {
-    this._collectionAttributeStore.createCollectionAttribute(
-      this._matDialog
-        .open(EditAttributeComponent)
-        .afterClosed()
-        .pipe(
-          filter((data) => data),
-          map((data) => ({ workspaceId, applicationId, collectionId, data }))
-        )
-    );
+    this._viewCollectionStore.createCollectionAttribute({
+      workspaceId,
+      applicationId,
+      collectionId,
+    });
   }
 
   onUpdateCollectionAttribute(
     collectionAttribute: Document<CollectionAttribute>
   ) {
-    this._collectionAttributeStore.updateCollectionAttribute(
-      this._matDialog
-        .open(EditAttributeComponent)
-        .afterClosed()
-        .pipe(
-          filter((changes) => changes),
-          map((changes) => ({ collectionAttribute, changes }))
-        )
-    );
+    this._viewCollectionStore.updateCollectionAttribute(collectionAttribute);
   }
 
   onDeleteCollectionAttribute(collectionAttributeId: string) {
-    this._collectionAttributeStore.deleteCollectionAttribute(
-      collectionAttributeId
-    );
+    this._viewCollectionStore.deleteCollectionAttribute(collectionAttributeId);
   }
 }

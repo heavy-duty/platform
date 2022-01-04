@@ -8,8 +8,8 @@ import {
   getApplication,
   getApplicationsByWorkspace,
   getCollection,
-  getCollectionAttributesByWorkspace,
-  getCollectionsByWorkspace,
+  getCollectionAttributesByCollection,
+  getCollectionsByApplication,
   getCreateApplicationTransaction,
   getCreateCollectionAttributeTransaction,
   getCreateCollectionTransaction,
@@ -27,14 +27,15 @@ import {
   getDeleteInstructionTransaction,
   getDeleteWorkspaceTransaction,
   getInstruction,
-  getInstructionAccountsByWorkspace,
-  getInstructionArgumentsByWorkspace,
-  getInstructionRelationsByWorkspace,
-  getInstructionsByWorkspace,
+  getInstructionAccountsByInstruction,
+  getInstructionArgumentsByInstruction,
+  getInstructionRelationsByInstruction,
+  getInstructionsByApplication,
   getUpdateApplicationTransaction,
   getUpdateCollectionAttributeTransaction,
   getUpdateCollectionTransaction,
   getUpdateInstructionAccountTransaction,
+  getUpdateInstructionArgumentTransaction,
   getUpdateInstructionBodyTransaction,
   getUpdateInstructionRelationTransaction,
   getUpdateInstructionTransaction,
@@ -44,18 +45,74 @@ import {
   Instruction,
   InstructionAccount,
   InstructionAccountDto,
-  InstructionAccountExtras,
   InstructionArgument,
   InstructionArgumentDto,
   InstructionRelation,
+  onApplicationByWorkspaceChanges,
+  onApplicationUpdated,
+  onCollectionAttributeByCollectionChanges,
+  onCollectionAttributeUpdated,
+  onCollectionByApplicationChanges,
+  onCollectionUpdated,
+  onInstructionAccountByInstructionChanges,
+  onInstructionAccountUpdated,
+  onInstructionArgumentByInstructionChanges,
+  onInstructionArgumentUpdated,
+  onInstructionByApplicationChanges,
+  onInstructionRelationByInstructionChanges,
+  onInstructionRelationUpdated,
+  onInstructionUpdated,
+  onWorkspaceByAuthorityChanges,
+  onWorkspaceUpdated,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { concatMap, Observable, of, withLatestFrom } from 'rxjs';
-import { confirmTransaction, isNotNullOrUndefined } from './operators';
+import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
+import {
+  combineLatest,
+  concatMap,
+  Observable,
+  of,
+  shareReplay,
+  Subject,
+  tap,
+  throwError,
+  withLatestFrom,
+} from 'rxjs';
+import {
+  ApplicationCreated,
+  ApplicationDeleted,
+  ApplicationUpdated,
+  BulldozerActions,
+  CollectionAttributeCreated,
+  CollectionAttributeDeleted,
+  CollectionAttributeUpdated,
+  CollectionCreated,
+  CollectionDeleted,
+  CollectionUpdated,
+  InstructionAccountCreated,
+  InstructionAccountDeleted,
+  InstructionAccountUpdated,
+  InstructionArgumentCreated,
+  InstructionArgumentDeleted,
+  InstructionArgumentUpdated,
+  InstructionCreated,
+  InstructionDeleted,
+  InstructionRelationCreated,
+  InstructionRelationDeleted,
+  InstructionRelationUpdated,
+  InstructionUpdated,
+  WorkspaceCreated,
+  WorkspaceDeleted,
+  WorkspaceUpdated,
+} from './actions';
+import {
+  confirmTransaction,
+  isNotNullOrUndefined,
+  sendAndConfirmTransactions,
+} from './operators';
 
 interface ViewModel {
   reader: Program | null;
@@ -69,6 +126,11 @@ const initialState = {
 
 @Injectable()
 export class BulldozerProgramStore extends ComponentStore<ViewModel> {
+  private readonly _events = new Subject<BulldozerActions>();
+  readonly events$ = this._events
+    .asObservable()
+    .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
+
   get context() {
     return of(null).pipe(
       concatMap(() =>
@@ -91,6 +153,31 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
+  }
+
+  private _signSendAndConfirmTransactions(connection: Connection) {
+    return (source: Observable<Transaction | Transaction[]>) =>
+      source.pipe(
+        concatMap((transactions) => {
+          const signer: Observable<Transaction | Transaction[]> | undefined =
+            Array.isArray(transactions)
+              ? this._walletStore.signAllTransactions(transactions)
+              : this._walletStore.signTransaction(transactions);
+
+          if (!signer) {
+            return throwError(() => 'Current wallet does not support signing.');
+          }
+
+          return signer.pipe(
+            concatMap((transactions) =>
+              sendAndConfirmTransactions(
+                connection,
+                Array.isArray(transactions) ? transactions : [transactions]
+              )
+            )
+          );
+        })
+      );
   }
 
   getWorkspacesByAuthority(): Observable<Document<Workspace>[]> {
@@ -119,15 +206,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           workspaceKeypair,
           workspaceName
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [workspaceKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -140,26 +219,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(workspaceId),
           workspaceName
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
 
   deleteWorkspace(
     workspaceId: string,
-    workspaceApplicationIds: string[],
-    workspaceApplicationCollectionIds: string[],
-    workspaceApplicationCollectionAttributeIds: string[],
-    workspaceApplicationInstructionIds: string[],
-    workspaceApplicationInstructionArgumentIds: string[],
-    workspaceApplicationInstructionAccountIds: string[],
-    workspaceApplicationInstructionRelationIds: string[]
+    applicationIds: string[],
+    collectionIds: string[],
+    collectionAttributeIds: string[],
+    instructionIds: string[],
+    instructionArgumentIds: string[],
+    instructionAccountIds: string[],
+    instructionRelationIds: string[]
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
@@ -167,39 +240,51 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(workspaceId),
-          workspaceApplicationIds.map(
-            (workspaceApplicationId) => new PublicKey(workspaceApplicationId)
+          applicationIds.map((applicationId) => new PublicKey(applicationId)),
+          collectionIds.map((collectionId) => new PublicKey(collectionId)),
+          collectionAttributeIds.map(
+            (collectionAttributeId) => new PublicKey(collectionAttributeId)
           ),
-          workspaceApplicationCollectionIds.map(
-            (workspaceApplicationCollectionId) =>
-              new PublicKey(workspaceApplicationCollectionId)
+          instructionIds.map((instructionId) => new PublicKey(instructionId)),
+          instructionArgumentIds.map(
+            (instructionArgumentId) => new PublicKey(instructionArgumentId)
           ),
-          workspaceApplicationCollectionAttributeIds.map(
-            (workspaceApplicationCollectionAttributeId) =>
-              new PublicKey(workspaceApplicationCollectionAttributeId)
+          instructionAccountIds.map(
+            (instructionAccountId) => new PublicKey(instructionAccountId)
           ),
-          workspaceApplicationInstructionIds.map(
-            (workspaceApplicationInstructionId) =>
-              new PublicKey(workspaceApplicationInstructionId)
-          ),
-          workspaceApplicationInstructionArgumentIds.map(
-            (workspaceApplicationInstructionArgumentId) =>
-              new PublicKey(workspaceApplicationInstructionArgumentId)
-          ),
-          workspaceApplicationInstructionAccountIds.map(
-            (workspaceApplicationInstructionAccountId) =>
-              new PublicKey(workspaceApplicationInstructionAccountId)
-          ),
-          workspaceApplicationInstructionRelationIds.map(
-            (workspaceApplicationInstructionRelationId) =>
-              new PublicKey(workspaceApplicationInstructionRelationId)
+          instructionRelationIds.map(
+            (instructionRelationId) => new PublicKey(instructionRelationId)
           )
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onWorkspaceByAuthorityChanges() {
+    return combineLatest([
+      this._connectionStore.connection$.pipe(isNotNullOrUndefined),
+      this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    ]).pipe(
+      concatMap(([connection, walletPublicKey]) =>
+        onWorkspaceByAuthorityChanges(connection, walletPublicKey).pipe(
+          tap(() => this._events.next(new WorkspaceCreated()))
+        )
+      )
+    );
+  }
+
+  onWorkspaceUpdated(workspaceId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onWorkspaceUpdated(connection, new PublicKey(workspaceId)).pipe(
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new WorkspaceUpdated(changes));
+            } else {
+              this._events.next(new WorkspaceDeleted(workspaceId));
+            }
+          })
         )
       )
     );
@@ -253,25 +338,19 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(applicationId),
           applicationName
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
 
   deleteApplication(
     applicationId: string,
-    applicationCollectionIds: string[],
-    applicationCollectionAttributeIds: string[],
-    applicationInstructionIds: string[],
-    applicationInstructionArgumentIds: string[],
-    applicationInstructionAccountIds: string[],
-    applicationInstructionRelationIds: string[]
+    collectionIds: string[],
+    collectionAttributeIds: string[],
+    instructionIds: string[],
+    instructionArgumentIds: string[],
+    instructionAccountIds: string[],
+    instructionRelationIds: string[]
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
@@ -279,46 +358,60 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(applicationId),
-          applicationCollectionIds.map(
-            (applicationCollectionId) => new PublicKey(applicationCollectionId)
+          collectionIds.map((collectionId) => new PublicKey(collectionId)),
+          collectionAttributeIds.map(
+            (collectionAttributeId) => new PublicKey(collectionAttributeId)
           ),
-          applicationCollectionAttributeIds.map(
-            (applicationCollectionAttributeId) =>
-              new PublicKey(applicationCollectionAttributeId)
+          instructionIds.map((instructionId) => new PublicKey(instructionId)),
+          instructionArgumentIds.map(
+            (instructionArgumentId) => new PublicKey(instructionArgumentId)
           ),
-          applicationInstructionIds.map(
-            (applicationInstructionId) =>
-              new PublicKey(applicationInstructionId)
+          instructionAccountIds.map(
+            (instructionAccountId) => new PublicKey(instructionAccountId)
           ),
-          applicationInstructionArgumentIds.map(
-            (applicationInstructionArgumentId) =>
-              new PublicKey(applicationInstructionArgumentId)
-          ),
-          applicationInstructionAccountIds.map(
-            (applicationInstructionAccountId) =>
-              new PublicKey(applicationInstructionAccountId)
-          ),
-          applicationInstructionRelationIds.map(
-            (applicationInstructionRelationId) =>
-              new PublicKey(applicationInstructionRelationId)
+          instructionRelationIds.map(
+            (instructionRelationId) => new PublicKey(instructionRelationId)
           )
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onApplicationByWorkspaceChanges(workspaceId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onApplicationByWorkspaceChanges(
+          connection,
+          new PublicKey(workspaceId)
+        ).pipe(tap(() => this._events.next(new ApplicationCreated())))
+      )
+    );
+  }
+
+  onApplicationUpdated(applicationId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onApplicationUpdated(connection, new PublicKey(applicationId)).pipe(
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new ApplicationUpdated(changes));
+            } else {
+              this._events.next(new ApplicationDeleted(applicationId));
+            }
+          })
         )
       )
     );
   }
 
-  getCollectionsByWorkspace(
-    workspaceId: string
+  getCollectionsByApplication(
+    applicationId: string
   ): Observable<Document<Collection>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getCollectionsByWorkspace(connection, new PublicKey(workspaceId))
+        getCollectionsByApplication(connection, new PublicKey(applicationId))
       )
     );
   }
@@ -368,13 +461,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(collectionId),
           collectionName
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -389,25 +476,48 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           collectionAttributeIds.map(
             (collectionAttributeId) => new PublicKey(collectionAttributeId)
           )
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onCollectionByApplicationChanges(applicationId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onCollectionByApplicationChanges(
+          connection,
+          new PublicKey(applicationId)
+        ).pipe(tap(() => this._events.next(new CollectionCreated())))
+      )
+    );
+  }
+
+  onCollectionUpdated(collectionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onCollectionUpdated(connection, new PublicKey(collectionId)).pipe(
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new CollectionUpdated(changes));
+            } else {
+              this._events.next(new CollectionDeleted(collectionId));
+            }
+          })
         )
       )
     );
   }
 
-  getCollectionAttributesByWorkspace(
-    workspaceId: string
+  getCollectionAttributesByCollection(
+    applicationId: string
   ): Observable<Document<CollectionAttribute>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getCollectionAttributesByWorkspace(
+        getCollectionAttributesByCollection(
           connection,
-          new PublicKey(workspaceId)
+          new PublicKey(applicationId)
         )
       )
     );
@@ -455,13 +565,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(collectionAttributeId),
           collectionAttributeDto
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -473,23 +577,51 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(collectionAttributeId)
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onCollectionAttributeByCollectionChanges(collectionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onCollectionAttributeByCollectionChanges(
+          connection,
+          new PublicKey(collectionId)
+        ).pipe(tap(() => this._events.next(new CollectionAttributeCreated())))
+      )
+    );
+  }
+
+  onCollectionAttributeUpdated(collectionAttributeId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onCollectionAttributeUpdated(
+          connection,
+          new PublicKey(collectionAttributeId)
         ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new CollectionAttributeUpdated(changes));
+            } else {
+              this._events.next(
+                new CollectionAttributeDeleted(collectionAttributeId)
+              );
+            }
+          })
         )
       )
     );
   }
 
-  getInstructionsByWorkspace(
-    workspaceId: string
+  getInstructionsByApplication(
+    applicationId: string
   ): Observable<Document<Instruction>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getInstructionsByWorkspace(connection, new PublicKey(workspaceId))
+        getInstructionsByApplication(connection, new PublicKey(applicationId))
       )
     );
   }
@@ -541,13 +673,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           instructionName
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -560,13 +686,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           instructionBody
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -592,25 +712,48 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           instructionRelationIds.map(
             (instructionRelationId) => new PublicKey(instructionRelationId)
           )
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onInstructionByApplicationChanges(applicationId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionByApplicationChanges(
+          connection,
+          new PublicKey(applicationId)
+        ).pipe(tap(() => this._events.next(new InstructionCreated())))
+      )
+    );
+  }
+
+  onInstructionUpdated(instructionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionUpdated(connection, new PublicKey(instructionId)).pipe(
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new InstructionUpdated(changes));
+            } else {
+              this._events.next(new InstructionDeleted(instructionId));
+            }
+          })
         )
       )
     );
   }
 
-  getInstructionAccountsByWorkspace(
-    workspaceId: string
+  getInstructionAccountsByInstruction(
+    instructionId: string
   ): Observable<Document<InstructionAccount>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getInstructionAccountsByWorkspace(
+        getInstructionAccountsByInstruction(
           connection,
-          new PublicKey(workspaceId)
+          new PublicKey(instructionId)
         )
       )
     );
@@ -620,8 +763,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    instructionAccountDto: InstructionAccountDto,
-    instructionAccountExtras: InstructionAccountExtras
+    instructionAccountDto: InstructionAccountDto
   ) {
     const instructionAccountKeypair = new Keypair();
 
@@ -634,8 +776,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(applicationId),
           new PublicKey(instructionId),
           instructionAccountKeypair,
-          instructionAccountDto,
-          instructionAccountExtras
+          instructionAccountDto
         ).pipe(
           concatMap((transaction) =>
             this._walletStore
@@ -651,8 +792,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   updateInstructionAccount(
     instructionAccountId: string,
-    instructionAccountDto: InstructionAccountDto,
-    instructionAccountExtras: InstructionAccountExtras
+    instructionAccountDto: InstructionAccountDto
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
@@ -660,15 +800,8 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(instructionAccountId),
-          instructionAccountDto,
-          instructionAccountExtras
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+          instructionAccountDto
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -680,25 +813,53 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(instructionAccountId)
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onInstructionAccountByInstructionChanges(instructionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionAccountByInstructionChanges(
+          connection,
+          new PublicKey(instructionId)
+        ).pipe(tap(() => this._events.next(new InstructionAccountCreated())))
+      )
+    );
+  }
+
+  onInstructionAccountUpdated(instructionAccountId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionAccountUpdated(
+          connection,
+          new PublicKey(instructionAccountId)
         ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new InstructionAccountUpdated(changes));
+            } else {
+              this._events.next(
+                new InstructionAccountDeleted(instructionAccountId)
+              );
+            }
+          })
         )
       )
     );
   }
 
-  getInstructionArgumentsByWorkspace(
-    workspaceId: string
+  getInstructionArgumentsByInstruction(
+    instructionId: string
   ): Observable<Document<InstructionArgument>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getInstructionArgumentsByWorkspace(
+        getInstructionArgumentsByInstruction(
           connection,
-          new PublicKey(workspaceId)
+          new PublicKey(instructionId)
         )
       )
     );
@@ -741,18 +902,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateCollectionAttributeTransaction(
+        getUpdateInstructionArgumentTransaction(
           connection,
           authority,
           new PublicKey(instructionArgumentId),
           instructionArgumentDto
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -764,25 +919,53 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(instructionArgumentId)
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onInstructionArgumentByInstructionChanges(instructionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionArgumentByInstructionChanges(
+          connection,
+          new PublicKey(instructionId)
+        ).pipe(tap(() => this._events.next(new InstructionArgumentCreated())))
+      )
+    );
+  }
+
+  onInstructionArgumentUpdated(instructionArgumentId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionArgumentUpdated(
+          connection,
+          new PublicKey(instructionArgumentId)
         ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new InstructionArgumentUpdated(changes));
+            } else {
+              this._events.next(
+                new InstructionArgumentDeleted(instructionArgumentId)
+              );
+            }
+          })
         )
       )
     );
   }
 
-  getInstructionRelationsByWorkspace(
-    workspaceId: string
+  getInstructionRelationsByInstruction(
+    instructionId: string
   ): Observable<Document<InstructionRelation>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        getInstructionRelationsByWorkspace(
+        getInstructionRelationsByInstruction(
           connection,
-          new PublicKey(workspaceId)
+          new PublicKey(instructionId)
         )
       )
     );
@@ -814,11 +997,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               new PublicKey(toId)
             )
           ),
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+          this._signSendAndConfirmTransactions(connection)
         )
       )
     );
@@ -837,13 +1016,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(instructionRelationId),
           new PublicKey(fromId),
           new PublicKey(toId)
-        ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
-        )
+        ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -855,12 +1028,40 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(instructionRelationId)
+        ).pipe(this._signSendAndConfirmTransactions(connection))
+      )
+    );
+  }
+
+  onInstructionRelationByInstructionChanges(instructionId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionRelationByInstructionChanges(
+          connection,
+          new PublicKey(instructionId)
+        ).pipe(tap(() => this._events.next(new InstructionRelationCreated())))
+      )
+    );
+  }
+
+  onInstructionRelationUpdated(instructionRelationId: string) {
+    return this._connectionStore.connection$.pipe(
+      isNotNullOrUndefined,
+      concatMap((connection) =>
+        onInstructionRelationUpdated(
+          connection,
+          new PublicKey(instructionRelationId)
         ).pipe(
-          concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection)
-              .pipe(confirmTransaction(connection))
-          )
+          tap((changes) => {
+            if (changes) {
+              this._events.next(new InstructionRelationUpdated(changes));
+            } else {
+              this._events.next(
+                new InstructionRelationDeleted(instructionRelationId)
+              );
+            }
+          })
         )
       )
     );

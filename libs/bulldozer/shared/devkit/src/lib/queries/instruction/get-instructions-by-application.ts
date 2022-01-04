@@ -1,20 +1,19 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByWorkspace, getProgramAccounts } from '../../operations';
-import { BULLDOZER_PROGRAM_ID } from '../../programs';
+import { getFiltersByApplication, getProgramAccounts } from '../../operations';
 import { Document, Instruction, INSTRUCTION_ACCOUNT_NAME } from '../../utils';
 import { createInstructionDocument } from './utils';
 
-export const getInstructionsByWorkspace = (
+export const getInstructionsByApplication = (
   connection: Connection,
-  workspacePublicKey: PublicKey
+  applicationPublicKey: PublicKey
 ): Observable<Document<Instruction>[]> => {
-  return getProgramAccounts(connection, BULLDOZER_PROGRAM_ID, {
+  return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByWorkspace(
+    filters: getFiltersByApplication(
       INSTRUCTION_ACCOUNT_NAME,
-      workspacePublicKey
+      applicationPublicKey
     ),
   }).pipe(
     map((programAccounts) =>

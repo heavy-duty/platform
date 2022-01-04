@@ -104,6 +104,11 @@ export class EditSignerComponent implements OnInit {
       this._matDialogRef.close({
         name: this.nameControl.value,
         modifier: this.saveChangesControl.value ? 1 : null,
+        kind: 1,
+        space: null,
+        collection: null,
+        payer: null,
+        close: null,
       });
     } else {
       this._matSnackBar.open('Invalid information', 'close', {

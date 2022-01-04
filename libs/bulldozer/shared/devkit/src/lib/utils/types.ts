@@ -13,11 +13,8 @@ export interface InstructionAccountDto {
   name: string;
   kind: number;
   modifier: number | null;
-  space: number | null;
-}
-
-export interface InstructionAccountExtras {
   collection: string | null;
+  space: number | null;
   payer: string | null;
   close: string | null;
 }
@@ -29,6 +26,11 @@ export interface InstructionArgumentDto {
   size: number | null;
   max: number | null;
   maxLength: number | null;
+}
+
+export interface InstructionRelationDto {
+  from: string;
+  to: string;
 }
 
 export interface Workspace {

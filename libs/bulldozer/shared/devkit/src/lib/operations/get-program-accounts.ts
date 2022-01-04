@@ -1,12 +1,11 @@
-import {
-  Connection,
-  GetProgramAccountsConfig,
-  PublicKey,
-} from '@solana/web3.js';
+import { Connection, GetProgramAccountsConfig } from '@solana/web3.js';
 import { defer, from } from 'rxjs';
+import { BULLDOZER_PROGRAM_ID } from '../programs';
 
 export const getProgramAccounts = (
   connection: Connection,
-  programId: PublicKey,
   config?: GetProgramAccountsConfig
-) => from(defer(() => connection.getProgramAccounts(programId, config)));
+) =>
+  from(
+    defer(() => connection.getProgramAccounts(BULLDOZER_PROGRAM_ID, config))
+  );

@@ -4,10 +4,7 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
-import {
-  InstructionAccountDto,
-  InstructionAccountExtras,
-} from '../../../utils';
+import { InstructionAccountDto } from '../../../utils';
 
 export const getCreateInstructionAccountInstruction = (
   authority: PublicKey,
@@ -15,8 +12,7 @@ export const getCreateInstructionAccountInstruction = (
   applicationPublicKey: PublicKey,
   instructionPublicKey: PublicKey,
   instructionAccountPublicKey: PublicKey,
-  instructionAccountDto: InstructionAccountDto,
-  instructionAccountExtras: InstructionAccountExtras
+  instructionAccountDto: InstructionAccountDto
 ): TransactionInstruction => {
   return bulldozerProgram.instruction.createInstructionAccount(
     instructionAccountDto,
@@ -30,22 +26,22 @@ export const getCreateInstructionAccountInstruction = (
         systemProgram: SystemProgram.programId,
       },
       remainingAccounts: [
-        instructionAccountExtras.collection &&
+        instructionAccountDto.collection &&
           instructionAccountDto.kind === 0 && {
-            pubkey: new PublicKey(instructionAccountExtras.collection),
+            pubkey: new PublicKey(instructionAccountDto.collection),
             isWritable: false,
             isSigner: false,
           },
-        instructionAccountExtras.payer &&
+        instructionAccountDto.payer &&
           instructionAccountDto.kind === 0 && {
-            pubkey: new PublicKey(instructionAccountExtras.payer),
+            pubkey: new PublicKey(instructionAccountDto.payer),
             isWritable: false,
             isSigner: false,
           },
-        instructionAccountExtras.close &&
+        instructionAccountDto.close &&
           instructionAccountDto.kind === 0 &&
           instructionAccountDto.modifier === 1 && {
-            pubkey: new PublicKey(instructionAccountExtras.close),
+            pubkey: new PublicKey(instructionAccountDto.close),
             isWritable: false,
             isSigner: false,
           },

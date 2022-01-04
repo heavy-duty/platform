@@ -1,116 +1,163 @@
 import { Injectable } from '@angular/core';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import { generateInstructionCode } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, concatMap, Observable, Subject, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  concatMap,
+  merge,
+  Observable,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import {
   InstructionActions,
   InstructionCreated,
-  InstructionDeleted,
   InstructionInit,
   InstructionUpdated,
 } from './actions/instruction.actions';
-import { ApplicationStore } from './application.store';
-import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
   instructionId: string | null;
-  error: unknown | null;
+  instructionsMap: Map<string, Document<Instruction>>;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  error: null,
+  instructionsMap: new Map<string, Document<Instruction>>(),
 };
 
 @Injectable()
 export class InstructionStore extends ComponentStore<ViewModel> {
+  private readonly _reload = new BehaviorSubject(null);
+  readonly reload$ = this._reload.asObservable();
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
   private readonly _events = new BehaviorSubject<InstructionActions>(
     new InstructionInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly instructions$ = this.select(
-    this._workspaceStore.instructions$,
-    this._applicationStore.applicationId$.pipe(isNotNullOrUndefined),
-    (instructions, applicationId) =>
-      instructions.filter(({ data }) => data.application === applicationId)
-  );
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
+  readonly instructionsMap$ = this.select(
+    ({ instructionsMap }) => instructionsMap
+  );
+  readonly instructions$ = this.select(
+    this.instructionsMap$,
+    (instructionsMap) =>
+      Array.from(instructionsMap, ([, instruction]) => instruction)
+  );
   readonly instruction$ = this.select(
-    this.instructions$,
+    this.instructionsMap$,
     this.instructionId$,
     (instructions, instructionId) =>
-      instructions.find(({ id }) => id === instructionId) || null
-  );
-  readonly instructionArguments$ = this.select(
-    this._workspaceStore.instructionArguments$,
-    this.instructionId$,
-    (instructionArguments, instructionId) =>
-      instructionArguments.filter(
-        ({ data }) => data.instruction === instructionId
-      )
-  );
-  readonly instructionAccounts$ = this.select(
-    this._workspaceStore.instructionAccounts$,
-    this.instructionId$,
-    (instructionAccounts, instructionId) =>
-      instructionAccounts.filter(
-        ({ data }) => data.instruction === instructionId
-      )
-  );
-  readonly instructionRelations$ = this.select(
-    this._workspaceStore.instructionRelations$,
-    this.instructionId$,
-    (instructionRelations, instructionId) =>
-      instructionRelations.filter(
-        ({ data }) => data.instruction === instructionId
-      )
-  );
-  readonly instructionBody$ = this.select(
-    this.instruction$,
-    (instruction) => instruction && instruction.data.body
-  );
-  readonly instructionContext$ = this.select(
-    this.instruction$,
-    this.instructionArguments$,
-    this.instructionAccounts$,
-    this.instructionRelations$,
-    this._workspaceStore.collections$,
-    this._workspaceStore.workspaceId$,
-    (
-      instruction,
-      instructionArguments,
-      instructionAccounts,
-      instructionRelations,
-      collections,
-      workspaceId
-    ) =>
-      instruction &&
-      generateInstructionCode(
-        instruction,
-        instructionArguments,
-        instructionAccounts,
-        instructionRelations,
-        collections.filter(({ data }) => data.workspace === workspaceId)
-      )
+      (instructionId && instructions.get(instructionId)) || null
   );
 
-  constructor(
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _applicationStore: ApplicationStore
-  ) {
+  constructor(private readonly _bulldozerProgramStore: BulldozerProgramStore) {
     super(initialState);
   }
 
-  readonly selectInstruction = this.effect(
+  private readonly _setInstruction = this.updater(
+    (state, newInstruction: Document<Instruction>) => {
+      const instructionsMap = new Map(state.instructionsMap);
+      instructionsMap.set(newInstruction.id, newInstruction);
+      return {
+        ...state,
+        instructionsMap,
+      };
+    }
+  );
+
+  private readonly _addInstruction = this.updater(
+    (state, newInstruction: Document<Instruction>) => {
+      if (state.instructionsMap.has(newInstruction.id)) {
+        return state;
+      }
+      const instructionsMap = new Map(state.instructionsMap);
+      instructionsMap.set(newInstruction.id, newInstruction);
+      return {
+        ...state,
+        instructionsMap,
+      };
+    }
+  );
+
+  private readonly _removeInstruction = this.updater(
+    (state, instructionId: string) => {
+      const instructionsMap = new Map(state.instructionsMap);
+      instructionsMap.delete(instructionId);
+      return {
+        ...state,
+        instructionsMap,
+      };
+    }
+  );
+
+  private readonly _watchInstructions = this.effect(
+    (instructions$: Observable<Document<Instruction>[]>) =>
+      instructions$.pipe(
+        switchMap((instructions) =>
+          merge(
+            ...instructions.map((instruction) =>
+              this._bulldozerProgramStore
+                .onInstructionUpdated(instruction.id)
+                .pipe(
+                  tap((changes) => {
+                    if (!changes) {
+                      this._removeInstruction(instruction.id);
+                    } else {
+                      this._setInstruction(changes);
+                    }
+                  })
+                )
+            )
+          )
+        )
+      )
+  );
+
+  private readonly _onInstructionByApplicationChanges = this.effect(
+    (applicationId$: Observable<string>) =>
+      applicationId$.pipe(
+        switchMap((workspaceId) =>
+          this._bulldozerProgramStore
+            .onInstructionByApplicationChanges(workspaceId)
+            .pipe(tap((instruction) => this._addInstruction(instruction)))
+        )
+      )
+  );
+
+  readonly setInstructionId = this.effect(
     (instructionId$: Observable<string | null>) =>
       instructionId$.pipe(
         tap((instructionId) => this.patchState({ instructionId }))
+      )
+  );
+
+  readonly loadInstructions = this.effect(
+    (applicationId$: Observable<string>) =>
+      applicationId$.pipe(
+        concatMap((applicationId) =>
+          this._bulldozerProgramStore
+            .getInstructionsByApplication(applicationId)
+            .pipe(
+              tapResponse(
+                (instructions) => {
+                  this.patchState({
+                    instructionsMap: instructions.reduce(
+                      (instructionsMap, instruction) =>
+                        instructionsMap.set(instruction.id, instruction),
+                      new Map<string, Document<Instruction>>()
+                    ),
+                  });
+                  this._watchInstructions(instructions);
+                  this._onInstructionByApplicationChanges(applicationId);
+                },
+                (error) => this._error.next(error)
+              )
+            )
+        )
       )
   );
 
@@ -177,8 +224,9 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly deleteInstruction = this.effect(
     (instruction$: Observable<Document<Instruction>>) =>
-      instruction$.pipe(
-        concatMap((instruction) => {
+      instruction$
+        .pipe
+        /* concatMap((instruction) => {
           const instructionData = this._workspaceStore.getInstructionData(
             instruction.id
           );
@@ -196,7 +244,11 @@ export class InstructionStore extends ComponentStore<ViewModel> {
                 (error) => this._error.next(error)
               )
             );
-        })
-      )
+        }) */
+        ()
   );
+
+  reload() {
+    // this._reload.next(null);
+  }
 }

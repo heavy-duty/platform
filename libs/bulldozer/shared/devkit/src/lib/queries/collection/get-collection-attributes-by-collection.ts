@@ -1,8 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByWorkspace, getProgramAccounts } from '../../operations';
-import { BULLDOZER_PROGRAM_ID } from '../../programs';
+import { getFiltersByCollection, getProgramAccounts } from '../../operations';
 import {
   CollectionAttribute,
   COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
@@ -10,15 +9,15 @@ import {
 } from '../../utils';
 import { createCollectionAttributeDocument } from './utils';
 
-export const getCollectionAttributesByWorkspace = (
+export const getCollectionAttributesByCollection = (
   connection: Connection,
-  workspacePublicKey: PublicKey
+  collectionPublicKey: PublicKey
 ): Observable<Document<CollectionAttribute>[]> => {
-  return getProgramAccounts(connection, BULLDOZER_PROGRAM_ID, {
+  return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByWorkspace(
+    filters: getFiltersByCollection(
       COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
-      workspacePublicKey
+      collectionPublicKey
     ),
   }).pipe(
     map((programAccounts) =>

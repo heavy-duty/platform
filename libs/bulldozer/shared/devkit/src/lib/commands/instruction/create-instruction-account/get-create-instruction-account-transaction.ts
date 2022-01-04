@@ -6,10 +6,7 @@ import {
   addInstructionToTransaction,
   partialSignTransaction,
 } from '../../../operators';
-import {
-  InstructionAccountDto,
-  InstructionAccountExtras,
-} from '../../../utils';
+import { InstructionAccountDto } from '../../../utils';
 
 export const getCreateInstructionAccountTransaction = (
   connection: Connection,
@@ -18,8 +15,7 @@ export const getCreateInstructionAccountTransaction = (
   applicationPublicKey: PublicKey,
   instructionPublicKey: PublicKey,
   instructionAccountKeypair: Keypair,
-  instructionAccountDto: InstructionAccountDto,
-  instructionAccountExtras: InstructionAccountExtras
+  instructionAccountDto: InstructionAccountDto
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
     addInstructionToTransaction(
@@ -29,8 +25,7 @@ export const getCreateInstructionAccountTransaction = (
         applicationPublicKey,
         instructionPublicKey,
         instructionAccountKeypair.publicKey,
-        instructionAccountDto,
-        instructionAccountExtras
+        instructionAccountDto
       )
     ),
     partialSignTransaction(instructionAccountKeypair)

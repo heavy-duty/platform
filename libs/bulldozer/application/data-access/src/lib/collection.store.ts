@@ -1,76 +1,171 @@
 import { Injectable } from '@angular/core';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
-import { generateCollectionCode } from '@heavy-duty/bulldozer-generator';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { BehaviorSubject, concatMap, Observable, Subject, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  concatMap,
+  merge,
+  Observable,
+  Subject,
+  switchMap,
+  tap,
+} from 'rxjs';
 import {
   CollectionActions,
   CollectionCreated,
-  CollectionDeleted,
   CollectionInit,
   CollectionUpdated,
 } from './actions/collection.actions';
-import { ApplicationStore } from './application.store';
-import { WorkspaceStore } from './workspace.store';
 
 interface ViewModel {
+  applicationId: string | null;
   collectionId: string | null;
+  collectionsMap: Map<string, Document<Collection>>;
 }
 
 const initialState: ViewModel = {
+  applicationId: null,
   collectionId: null,
+  collectionsMap: new Map<string, Document<Collection>>(),
 };
 
 @Injectable()
 export class CollectionStore extends ComponentStore<ViewModel> {
+  private readonly _reload = new BehaviorSubject(null);
+  readonly reload$ = this._reload.asObservable();
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
   private readonly _events = new BehaviorSubject<CollectionActions>(
     new CollectionInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly collections$ = this.select(
-    this._workspaceStore.collections$,
-    this._applicationStore.applicationId$,
-    (collections, applicationId) =>
-      collections.filter(({ data }) => data.application === applicationId)
-  );
+  readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
+  readonly collectionsMap$ = this.select(
+    ({ collectionsMap }) => collectionsMap
+  );
+  readonly collections$ = this.select(this.collectionsMap$, (collectionsMap) =>
+    Array.from(collectionsMap, ([, collection]) => collection)
+  );
   readonly collection$ = this.select(
-    this._workspaceStore.collections$,
+    this.collectionsMap$,
     this.collectionId$,
     (collections, collectionId) =>
-      collections.find(({ id }) => id === collectionId) || null
-  );
-  readonly collectionAttributes$ = this.select(
-    this._workspaceStore.collectionAttributes$,
-    this.collectionId$,
-    (collectionAttributes, collectionId) =>
-      collectionAttributes.filter(
-        ({ data: { collection } }) => collection === collectionId
-      )
-  );
-  readonly rustCode$ = this.select(
-    this.collection$,
-    this.collectionAttributes$,
-    (collection, collectionAttributes) =>
-      collection && generateCollectionCode(collection, collectionAttributes)
+      (collectionId && collections.get(collectionId)) || null
   );
 
-  constructor(
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _applicationStore: ApplicationStore
-  ) {
+  constructor(private readonly _bulldozerProgramStore: BulldozerProgramStore) {
     super(initialState);
   }
 
-  readonly selectCollection = this.effect(
+  private readonly _setCollection = this.updater(
+    (state, newCollection: Document<Collection>) => {
+      const collectionsMap = new Map(state.collectionsMap);
+      collectionsMap.set(newCollection.id, newCollection);
+      return {
+        ...state,
+        collectionsMap,
+      };
+    }
+  );
+
+  private readonly _addCollection = this.updater(
+    (state, newCollection: Document<Collection>) => {
+      if (state.collectionsMap.has(newCollection.id)) {
+        return state;
+      }
+      const collectionsMap = new Map(state.collectionsMap);
+      collectionsMap.set(newCollection.id, newCollection);
+      return {
+        ...state,
+        collectionsMap,
+      };
+    }
+  );
+
+  private readonly _removeCollection = this.updater(
+    (state, collectionId: string) => {
+      const collectionsMap = new Map(state.collectionsMap);
+      collectionsMap.delete(collectionId);
+      return {
+        ...state,
+        collectionsMap,
+      };
+    }
+  );
+
+  private readonly _watchCollections = this.effect(
+    (collections$: Observable<Document<Collection>[]>) =>
+      collections$.pipe(
+        switchMap((collections) =>
+          merge(
+            ...collections.map((collection) =>
+              this._bulldozerProgramStore
+                .onCollectionUpdated(collection.id)
+                .pipe(
+                  tap((changes) => {
+                    if (!changes) {
+                      this._removeCollection(collection.id);
+                    } else {
+                      this._setCollection(changes);
+                    }
+                  })
+                )
+            )
+          )
+        )
+      )
+  );
+
+  private readonly _onCollectionByApplicationChanges = this.effect(
+    (applicationId$: Observable<string>) =>
+      applicationId$.pipe(
+        switchMap((applicationId) =>
+          this._bulldozerProgramStore
+            .onCollectionByApplicationChanges(applicationId)
+            .pipe(tap((collection) => this._addCollection(collection)))
+        )
+      )
+  );
+
+  readonly setApplicationId = this.effect(
+    (applicationId$: Observable<string | null>) =>
+      applicationId$.pipe(
+        tap((applicationId) => this.patchState({ applicationId }))
+      )
+  );
+
+  readonly setCollectionId = this.effect(
     (collectionId$: Observable<string | null>) =>
       collectionId$.pipe(
         tap((collectionId) => this.patchState({ collectionId }))
       )
+  );
+
+  readonly loadCollections = this.effect((applicationId$: Observable<string>) =>
+    applicationId$.pipe(
+      concatMap((applicationId) =>
+        this._bulldozerProgramStore
+          .getCollectionsByApplication(applicationId)
+          .pipe(
+            tapResponse(
+              (collections) => {
+                this.patchState({
+                  collectionsMap: collections.reduce(
+                    (collectionsMap, collection) =>
+                      collectionsMap.set(collection.id, collection),
+                    new Map<string, Document<Collection>>()
+                  ),
+                });
+                this._watchCollections(collections);
+                this._onCollectionByApplicationChanges(applicationId);
+              },
+              (error) => this._error.next(error)
+            )
+          )
+      )
+    )
   );
 
   readonly createCollection = this.effect(
@@ -118,8 +213,9 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly deleteCollection = this.effect(
     (collection$: Observable<Document<Collection>>) =>
-      collection$.pipe(
-        concatMap((collection) => {
+      collection$
+        .pipe
+        /* concatMap((collection) => {
           const collectionData = this._workspaceStore.getCollectionData(
             collection.id
           );
@@ -135,7 +231,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
                 (error) => this._error.next(error)
               )
             );
-        })
-      )
+        }) */
+        ()
   );
+
+  reload() {
+    // this._reload.next(null);
+  }
 }

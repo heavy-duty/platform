@@ -1,26 +1,27 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { WorkspaceStore } from '@heavy-duty/bulldozer/application/data-access';
-import { filter, map } from 'rxjs';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
   selector: 'bd-view-workspace',
-  template: ` <router-outlet></router-outlet> `,
+  template: `
+    <ng-container *ngIf="workspace$ | ngrxPush as workspace">
+      <header bdPageHeader>
+        <h1>
+          {{ workspace.data.name }}
+        </h1>
+        <p>Visualize all the details about this workspace.</p>
+      </header>
+
+      <main></main>
+    </ng-container>
+  `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ViewWorkspaceStore],
 })
-export class ViewWorkspaceComponent implements OnInit {
-  constructor(
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _route: ActivatedRoute
-  ) {}
+export class ViewWorkspaceComponent {
+  @HostBinding('class') class = 'block p-4';
+  readonly workspace$ = this._viewWorkspaceStore.workspace$;
 
-  ngOnInit(): void {
-    this._workspaceStore.selectWorkspace(
-      this._route.paramMap.pipe(
-        filter((paramMap) => paramMap.has('workspaceId')),
-        map((paramMap) => paramMap.get('workspaceId') as string)
-      )
-    );
-  }
+  constructor(private readonly _viewWorkspaceStore: ViewWorkspaceStore) {}
 }

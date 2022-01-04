@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-
+import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
+import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewApplicationComponent } from './view-application.component';
 
 @NgModule({
@@ -10,25 +11,12 @@ import { ViewApplicationComponent } from './view-application.component';
     RouterModule.forChild([
       {
         path: '',
+        pathMatch: 'full',
         component: ViewApplicationComponent,
-        children: [
-          {
-            path: 'collections/:collectionId',
-            loadChildren: () =>
-              import(
-                '@heavy-duty/bulldozer/application/features/view-collection'
-              ).then((m) => m.ViewCollectionModule),
-          },
-          {
-            path: 'instructions/:instructionId',
-            loadChildren: () =>
-              import(
-                '@heavy-duty/bulldozer/application/features/view-instruction'
-              ).then((m) => m.ViewInstructionModule),
-          },
-        ],
       },
     ]),
+    ReactiveComponentModule,
+    PageHeaderModule,
   ],
   declarations: [ViewApplicationComponent],
 })

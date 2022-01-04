@@ -258,6 +258,7 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     if (this.documentGroup.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
+        kind: 0,
         modifier: this.modifierControl.value,
         collection: this.collectionControl.value,
         space:

@@ -40,14 +40,6 @@ import {
         <mat-icon>add</mat-icon>
         <span>Add signer</span>
       </button>
-      <button
-        mat-menu-item
-        (click)="onCreateRelation()"
-        [disabled]="!connected"
-      >
-        <mat-icon>add</mat-icon>
-        <span>Add relation</span>
-      </button>
     </mat-menu>
   `,
   styles: [],
@@ -58,8 +50,6 @@ export class InstructionMenuComponent {
   @Output() createArgument = new EventEmitter();
   @Output() createDocument = new EventEmitter();
   @Output() createSigner = new EventEmitter();
-  @Output() createProgramAccount = new EventEmitter();
-  @Output() createRelation = new EventEmitter();
 
   onCreateArgument() {
     this.createArgument.emit();
@@ -71,13 +61,5 @@ export class InstructionMenuComponent {
 
   onCreateSigner() {
     this.createSigner.emit();
-  }
-
-  onCreateProgramAccount() {
-    this.createProgramAccount.emit();
-  }
-
-  onCreateRelation() {
-    this.createRelation.emit();
   }
 }

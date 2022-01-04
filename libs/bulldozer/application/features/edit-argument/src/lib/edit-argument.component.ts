@@ -10,7 +10,7 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'bd-edit-argument',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.argument ? 'Edit' : 'Create' }} argument
+      {{ data?.instructionArgument ? 'Edit' : 'Create' }} argument
     </h2>
 
     <form
@@ -135,7 +135,7 @@ import { Subject, takeUntil } from 'rxjs';
         class="w-full"
         [disabled]="submitted && argumentGroup.invalid"
       >
-        {{ data?.argument ? 'Save' : 'Create' }}
+        {{ data?.instructionArgument ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -187,7 +187,7 @@ export class EditArgumentComponent implements OnInit {
     private readonly _matDialogRef: MatDialogRef<EditArgumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      argument?: Document<InstructionArgument>;
+      instructionArgument?: Document<InstructionArgument>;
     }
   ) {}
 
@@ -236,21 +236,21 @@ export class EditArgumentComponent implements OnInit {
         this.sizeControl.updateValueAndValidity();
       });
 
-    if (this.data?.argument) {
+    if (this.data?.instructionArgument) {
       this.argumentGroup.setValue(
         {
-          name: this.data.argument.data.name,
-          kind: this.data.argument.data.kind.id,
+          name: this.data.instructionArgument.data.name,
+          kind: this.data.instructionArgument.data.kind.id,
           modifier:
-            this.data.argument.data.modifier !== null
-              ? this.data.argument.data.modifier.id
+            this.data.instructionArgument.data?.modifier !== null
+              ? this.data.instructionArgument.data.modifier.id
               : null,
           size:
-            this.data.argument.data.modifier !== null
-              ? this.data.argument.data.modifier.size
+            this.data.instructionArgument.data?.modifier !== null
+              ? this.data.instructionArgument.data.modifier.size
               : null,
-          max: this.data.argument.data.max,
-          maxLength: this.data.argument.data.maxLength,
+          max: this.data.instructionArgument.data.max,
+          maxLength: this.data.instructionArgument.data.maxLength,
         },
         { emitEvent: false }
       );

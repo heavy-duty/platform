@@ -16,7 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
   selector: 'bd-edit-attribute',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.attribute ? 'Edit' : 'Create' }} attribute
+      {{ data?.collectionAttribute ? 'Edit' : 'Create' }} attribute
     </h2>
 
     <form
@@ -141,7 +141,7 @@ import { Subject, takeUntil } from 'rxjs';
         class="w-full"
         [disabled]="submitted && attributeGroup.invalid"
       >
-        {{ data?.attribute ? 'Save' : 'Create' }}
+        {{ data?.collectionAttribute ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -192,7 +192,7 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditAttributeComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: { attribute?: Document<CollectionAttribute> }
+    public data?: { collectionAttribute?: Document<CollectionAttribute> }
   ) {}
 
   ngOnInit() {
@@ -240,21 +240,21 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
         this.sizeControl.updateValueAndValidity();
       });
 
-    if (this.data?.attribute) {
+    if (this.data?.collectionAttribute) {
       this.attributeGroup.setValue(
         {
-          name: this.data.attribute.data.name,
-          kind: this.data.attribute.data.kind.id,
+          name: this.data.collectionAttribute.data.name,
+          kind: this.data.collectionAttribute.data.kind.id,
           modifier:
-            this.data.attribute.data.modifier !== null
-              ? this.data.attribute.data.modifier.id
+            this.data.collectionAttribute.data.modifier !== null
+              ? this.data.collectionAttribute.data.modifier.id
               : null,
           size:
-            this.data.attribute.data.modifier !== null
-              ? this.data.attribute.data.modifier.size
+            this.data.collectionAttribute.data.modifier !== null
+              ? this.data.collectionAttribute.data.modifier.size
               : null,
-          max: this.data.attribute.data.max,
-          maxLength: this.data.attribute.data.maxLength,
+          max: this.data.collectionAttribute.data.max,
+          maxLength: this.data.collectionAttribute.data.maxLength,
         },
         { emitEvent: false }
       );

@@ -145,6 +145,14 @@ import {
               <mat-menu #documentMenu="matMenu">
                 <button
                   mat-menu-item
+                  (click)="onCreateRelation(document.id)"
+                  [disabled]="!connected"
+                >
+                  <mat-icon>add</mat-icon>
+                  <span>Create relation</span>
+                </button>
+                <button
+                  mat-menu-item
                   (click)="onUpdateDocument(document)"
                   [disabled]="!connected"
                 >
@@ -187,6 +195,7 @@ export class ListDocumentsComponent {
     | null;
   @Output() updateDocument = new EventEmitter<Document<InstructionAccount>>();
   @Output() deleteDocument = new EventEmitter<string>();
+  @Output() createRelation = new EventEmitter<string>();
   @Output() updateRelation = new EventEmitter<Document<InstructionRelation>>();
   @Output() deleteRelation = new EventEmitter<string>();
 
@@ -196,6 +205,10 @@ export class ListDocumentsComponent {
 
   onDeleteDocument(documentId: string) {
     this.deleteDocument.emit(documentId);
+  }
+
+  onCreateRelation(documentId: string) {
+    this.createRelation.emit(documentId);
   }
 
   onUpdateRelation(

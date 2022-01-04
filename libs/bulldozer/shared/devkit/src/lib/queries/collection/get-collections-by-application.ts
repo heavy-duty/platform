@@ -1,18 +1,20 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByWorkspace, getProgramAccounts } from '../../operations';
-import { BULLDOZER_PROGRAM_ID } from '../../programs';
+import { getFiltersByApplication, getProgramAccounts } from '../../operations';
 import { Collection, COLLECTION_ACCOUNT_NAME, Document } from '../../utils';
 import { createCollectionDocument } from './utils';
 
-export const getCollectionsByWorkspace = (
+export const getCollectionsByApplication = (
   connection: Connection,
-  workspacePublicKey: PublicKey
+  applicationPublicKey: PublicKey
 ): Observable<Document<Collection>[]> => {
-  return getProgramAccounts(connection, BULLDOZER_PROGRAM_ID, {
+  return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByWorkspace(COLLECTION_ACCOUNT_NAME, workspacePublicKey),
+    filters: getFiltersByApplication(
+      COLLECTION_ACCOUNT_NAME,
+      applicationPublicKey
+    ),
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>

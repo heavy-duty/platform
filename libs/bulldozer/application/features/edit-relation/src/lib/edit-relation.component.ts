@@ -46,24 +46,6 @@ export const equalValidator =
       <mat-form-field
         class="w-full"
         appearance="fill"
-        hintLabel="Select from account."
-      >
-        <mat-label>From</mat-label>
-        <mat-select formControlName="from">
-          <mat-option
-            *ngFor="let account of data?.accounts"
-            [value]="account.id"
-          >
-            {{ account.data.name }} |
-            {{ account.id | obscureAddress }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="submitted">From is required.</mat-error>
-      </mat-form-field>
-
-      <mat-form-field
-        class="w-full"
-        appearance="fill"
         hintLabel="Select to account."
       >
         <mat-label>To</mat-label>
@@ -130,10 +112,11 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
+    public data: {
       relation?: Document<InstructionRelation>;
       collections: Document<Collection>[];
       accounts: Document<InstructionAccount>[];
+      from: string;
     }
   ) {}
 
@@ -143,6 +126,14 @@ export class EditRelationComponent implements OnInit, OnDestroy {
         {
           from: this.data.relation.data.from,
           to: this.data.relation.data.to,
+        },
+        { emitEvent: false }
+      );
+    } else {
+      this.relationGroup.setValue(
+        {
+          from: this.data.from,
+          to: null,
         },
         { emitEvent: false }
       );

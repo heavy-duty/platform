@@ -1,8 +1,7 @@
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByWorkspace, getProgramAccounts } from '../../operations';
-import { BULLDOZER_PROGRAM_ID } from '../../programs';
+import { getFiltersByInstruction, getProgramAccounts } from '../../operations';
 import {
   Document,
   InstructionAccount,
@@ -10,15 +9,15 @@ import {
 } from '../../utils';
 import { createInstructionAccountDocument } from './utils';
 
-export const getInstructionAccountsByWorkspace = (
+export const getInstructionAccountsByInstruction = (
   connection: Connection,
-  workspacePublicKey: PublicKey
+  instructionPublicKey: PublicKey
 ): Observable<Document<InstructionAccount>[]> => {
-  return getProgramAccounts(connection, BULLDOZER_PROGRAM_ID, {
+  return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByWorkspace(
+    filters: getFiltersByInstruction(
       INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
-      workspacePublicKey
+      instructionPublicKey
     ),
   }).pipe(
     map((programAccounts) =>

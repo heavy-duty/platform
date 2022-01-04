@@ -1,38 +1,27 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
-import { filter, map, startWith } from 'rxjs';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ViewApplicationStore } from './view-application.store';
 
 @Component({
   selector: 'bd-view-application',
-  template: ` <router-outlet></router-outlet> `,
+  template: `
+    <ng-container *ngIf="application$ | ngrxPush as application">
+      <header bdPageHeader>
+        <h1>
+          {{ application.data.name }}
+        </h1>
+        <p>Visualize all the details about this application.</p>
+      </header>
+
+      <main></main>
+    </ng-container>
+  `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [ViewApplicationStore],
 })
-export class ViewApplicationComponent implements OnInit {
-  constructor(
-    private readonly _applicationStore: ApplicationStore,
-    private readonly _route: ActivatedRoute,
-    private readonly _router: Router
-  ) {}
+export class ViewApplicationComponent {
+  @HostBinding('class') class = 'block p-4';
+  readonly application$ = this._viewApplicationStore.application$;
 
-  ngOnInit() {
-    this._applicationStore.selectApplication(
-      this._router.events.pipe(
-        filter(
-          (event): event is NavigationStart => event instanceof NavigationStart
-        ),
-        map((event) => {
-          const urlAsArray = event.url.split('/').filter((segment) => segment);
-
-          if (urlAsArray[2] !== 'applications') {
-            return null;
-          } else {
-            return urlAsArray[3];
-          }
-        }),
-        startWith(this._route.snapshot.paramMap.get('applicationId') || null)
-      )
-    );
-  }
+  constructor(private readonly _viewApplicationStore: ViewApplicationStore) {}
 }

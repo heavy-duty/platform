@@ -15,58 +15,46 @@ import {
 export const getDeleteWorkspaceInstructions = (
   authority: PublicKey,
   workspacePublicKey: PublicKey,
-  workspaceApplicationPublicKeys: PublicKey[],
-  workspaceApplicationCollectionPublicKeys: PublicKey[],
-  workspaceApplicationCollectionAttributePublicKeys: PublicKey[],
-  workspaceApplicationInstructionPublicKeys: PublicKey[],
-  workspaceApplicationInstructionArgumentPublicKeys: PublicKey[],
-  workspaceApplicationInstructionAccountPublicKeys: PublicKey[],
-  workspaceApplicationInstructionRelationPublicKeys: PublicKey[]
+  applicationPublicKeys: PublicKey[],
+  collectionPublicKeys: PublicKey[],
+  collectionAttributePublicKeys: PublicKey[],
+  instructionPublicKeys: PublicKey[],
+  instructionArgumentPublicKeys: PublicKey[],
+  instructionAccountPublicKeys: PublicKey[],
+  instructionRelationPublicKeys: PublicKey[]
 ): TransactionInstruction[] => [
   getDeleteWorkspaceInstruction(authority, workspacePublicKey),
-  ...workspaceApplicationPublicKeys.map((workspaceApplicationPublicKey) =>
-    getDeleteApplicationInstruction(authority, workspaceApplicationPublicKey)
+  ...applicationPublicKeys.map((applicationPublicKey) =>
+    getDeleteApplicationInstruction(authority, applicationPublicKey)
   ),
-  ...workspaceApplicationCollectionPublicKeys.map(
-    (workspaceApplicationCollectionPublicKey) =>
-      getDeleteCollectionInstruction(
-        authority,
-        workspaceApplicationCollectionPublicKey
-      )
+  ...collectionPublicKeys.map((collectionPublicKey) =>
+    getDeleteCollectionInstruction(authority, collectionPublicKey)
   ),
-  ...workspaceApplicationCollectionAttributePublicKeys.map(
-    (workspaceApplicationCollectionAttributePublicKey) =>
-      getDeleteCollectionAttributeInstruction(
-        authority,
-        workspaceApplicationCollectionAttributePublicKey
-      )
+  ...collectionAttributePublicKeys.map((collectionAttributePublicKey) =>
+    getDeleteCollectionAttributeInstruction(
+      authority,
+      collectionAttributePublicKey
+    )
   ),
-  ...workspaceApplicationInstructionPublicKeys.map(
-    (workspaceApplicationInstructionPublicKey) =>
-      getDeleteInstructionInstruction(
-        authority,
-        workspaceApplicationInstructionPublicKey
-      )
+  ...instructionPublicKeys.map((instructionPublicKey) =>
+    getDeleteInstructionInstruction(authority, instructionPublicKey)
   ),
-  ...workspaceApplicationInstructionArgumentPublicKeys.map(
-    (workspaceApplicationInstructionArgumentPublicKey) =>
-      getDeleteInstructionArgumentInstruction(
-        authority,
-        workspaceApplicationInstructionArgumentPublicKey
-      )
+  ...instructionArgumentPublicKeys.map((instructionArgumentPublicKey) =>
+    getDeleteInstructionArgumentInstruction(
+      authority,
+      instructionArgumentPublicKey
+    )
   ),
-  ...workspaceApplicationInstructionAccountPublicKeys.map(
-    (workspaceApplicationInstructionAccountPublicKey) =>
-      getDeleteInstructionAccountInstruction(
-        authority,
-        workspaceApplicationInstructionAccountPublicKey
-      )
+  ...instructionAccountPublicKeys.map((instructionAccountPublicKey) =>
+    getDeleteInstructionAccountInstruction(
+      authority,
+      instructionAccountPublicKey
+    )
   ),
-  ...workspaceApplicationInstructionRelationPublicKeys.map(
-    (workspaceApplicationInstructionRelationPublicKey) =>
-      getDeleteInstructionRelationInstruction(
-        authority,
-        workspaceApplicationInstructionRelationPublicKey
-      )
+  ...instructionRelationPublicKeys.map((instructionRelationPublicKey) =>
+    getDeleteInstructionRelationInstruction(
+      authority,
+      instructionRelationPublicKey
+    )
   ),
 ];

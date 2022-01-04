@@ -1,26 +1,11 @@
 import { Injectable } from '@angular/core';
-import {
-  Application,
-  Collection,
-  CollectionAttribute,
-  Document,
-  Instruction,
-  InstructionAccount,
-  InstructionArgument,
-  InstructionRelation,
-  Workspace,
-} from '@heavy-duty/bulldozer-devkit';
-import {
-  generateWorkspaceMetadata,
-  generateWorkspaceZip,
-} from '@heavy-duty/bulldozer-generator';
+import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
   concatMap,
-  forkJoin,
-  map,
+  merge,
   Observable,
   Subject,
   switchMap,
@@ -29,38 +14,18 @@ import {
 import {
   WorkspaceActions,
   WorkspaceCreated,
-  WorkspaceDeleted,
   WorkspaceInit,
   WorkspaceUpdated,
 } from './actions/workspace.actions';
 
-interface WorkspaceData {
-  applications: Document<Application>[];
-  collections: Document<Collection>[];
-  collectionAttributes: Document<CollectionAttribute>[];
-  instructions: Document<Instruction>[];
-  instructionArguments: Document<InstructionArgument>[];
-  instructionAccounts: Document<InstructionAccount>[];
-  instructionRelations: Document<InstructionRelation>[];
-}
-
-interface ViewModel extends WorkspaceData {
+interface ViewModel {
   workspaceId: string | null;
-  workspaces: Document<Workspace>[];
-  error: unknown | null;
+  workspacesMap: Map<string, Document<Workspace>>;
 }
 
-const initialState = {
+const initialState: ViewModel = {
   workspaceId: null,
-  workspaces: [],
-  applications: [],
-  collections: [],
-  collectionAttributes: [],
-  instructions: [],
-  instructionArguments: [],
-  instructionAccounts: [],
-  instructionRelations: [],
-  error: null,
+  workspacesMap: new Map<string, Document<Workspace>>(),
 };
 
 @Injectable()
@@ -73,136 +38,115 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     new WorkspaceInit()
   );
   readonly events$ = this._events.asObservable();
-  readonly workspaces$ = this.select(({ workspaces }) => workspaces);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
+  readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
+    Array.from(workspacesMap, ([, workspace]) => workspace)
+  );
   readonly workspace$ = this.select(
-    this.workspaces$,
+    this.workspacesMap$,
     this.workspaceId$,
     (workspaces, workspaceId) =>
-      workspaces.find(({ id }) => id === workspaceId) || null
-  );
-  readonly applications$ = this.select(({ applications }) => applications);
-  readonly collections$ = this.select(({ collections }) => collections);
-  readonly collectionAttributes$ = this.select(
-    ({ collectionAttributes }) => collectionAttributes
-  );
-  readonly instructions$ = this.select(({ instructions }) => instructions);
-  readonly instructionArguments$ = this.select(
-    ({ instructionArguments }) => instructionArguments
-  );
-  readonly instructionAccounts$ = this.select(
-    ({ instructionAccounts }) => instructionAccounts
-  );
-  readonly instructionRelations$ = this.select(
-    ({ instructionRelations }) => instructionRelations
+      (workspaceId && workspaces.get(workspaceId)) || null
   );
 
   constructor(private readonly _bulldozerProgramStore: BulldozerProgramStore) {
     super(initialState);
   }
 
-  readonly addWorkspaceData = this.updater(
-    (state, workspaceData: WorkspaceData) => ({
-      ...state,
-      applications: [...state.applications, ...workspaceData.applications],
-      collections: [...state.collections, ...workspaceData.collections],
-      collectionAttributes: [
-        ...state.collectionAttributes,
-        ...workspaceData.collectionAttributes,
-      ],
-      instructions: [...state.instructions, ...workspaceData.instructions],
-      instructionArguments: [
-        ...state.instructionArguments,
-        ...workspaceData.instructionArguments,
-      ],
-      instructionAccounts: [
-        ...state.instructionAccounts,
-        ...workspaceData.instructionAccounts,
-      ],
-      instructionRelations: [
-        ...state.instructionRelations,
-        ...workspaceData.instructionRelations,
-      ],
-    })
+  private readonly _setWorkspace = this.updater(
+    (state, newWorkspace: Document<Workspace>) => {
+      const workspacesMap = new Map(state.workspacesMap);
+      workspacesMap.set(newWorkspace.id, newWorkspace);
+      return {
+        ...state,
+        workspacesMap,
+      };
+    }
   );
 
-  readonly loadWorkspaces = this.effect(() =>
-    this.reload$.pipe(
-      switchMap(() =>
-        this._bulldozerProgramStore.getWorkspacesByAuthority().pipe(
-          tapResponse(
-            (workspaces) => this.patchState({ workspaces }),
-            (error) => this._error.next(error)
-          )
-        )
-      ),
-      switchMap((workspaces) =>
-        forkJoin(
-          workspaces.map((workspace) =>
-            forkJoin([
-              this._bulldozerProgramStore.getApplicationsByWorkspace(
-                workspace.id
-              ),
-              forkJoin([
-                this._bulldozerProgramStore.getCollectionsByWorkspace(
-                  workspace.id
-                ),
-                this._bulldozerProgramStore.getCollectionAttributesByWorkspace(
-                  workspace.id
-                ),
-              ]),
-              forkJoin([
-                this._bulldozerProgramStore.getInstructionsByWorkspace(
-                  workspace.id
-                ),
-                this._bulldozerProgramStore.getInstructionArgumentsByWorkspace(
-                  workspace.id
-                ),
-                this._bulldozerProgramStore.getInstructionAccountsByWorkspace(
-                  workspace.id
-                ),
-                this._bulldozerProgramStore.getInstructionRelationsByWorkspace(
-                  workspace.id
-                ),
-              ]),
-            ]).pipe(
-              map(
-                ([
-                  applications,
-                  [collections, collectionAttributes],
-                  [
-                    instructions,
-                    instructionArguments,
-                    instructionAccounts,
-                    instructionRelations,
-                  ],
-                ]) => ({
-                  applications,
-                  collections,
-                  collectionAttributes,
-                  instructions,
-                  instructionArguments,
-                  instructionAccounts,
-                  instructionRelations,
+  private readonly _addWorkspace = this.updater(
+    (state, newWorkspace: Document<Workspace>) => {
+      if (state.workspacesMap.has(newWorkspace.id)) {
+        return state;
+      }
+      const workspacesMap = new Map(state.workspacesMap);
+      workspacesMap.set(newWorkspace.id, newWorkspace);
+      return {
+        ...state,
+        workspacesMap,
+      };
+    }
+  );
+
+  private readonly _removeWorkspace = this.updater(
+    (state, workspaceId: string) => {
+      const workspacesMap = new Map(state.workspacesMap);
+      workspacesMap.delete(workspaceId);
+      return {
+        ...state,
+        workspacesMap,
+      };
+    }
+  );
+
+  private readonly _watchWorkspaces = this.effect(
+    (workspaces$: Observable<Document<Workspace>[]>) =>
+      workspaces$.pipe(
+        switchMap((workspaces) =>
+          merge(
+            ...workspaces.map((workspace) =>
+              this._bulldozerProgramStore.onWorkspaceUpdated(workspace.id).pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeWorkspace(workspace.id);
+                  } else {
+                    this._setWorkspace(changes);
+                  }
                 })
               )
             )
           )
         )
-      ),
-      tapResponse(
-        (workspacesData) => {
-          workspacesData.forEach((workspaceData) =>
-            this.addWorkspaceData(workspaceData)
-          );
-        },
-        (error) => this._error.next(error)
+      )
+  );
+
+  private readonly _onWorkspaceByAuthorityChanges = this.effect((action$) =>
+    action$.pipe(
+      switchMap(() =>
+        this._bulldozerProgramStore
+          .onWorkspaceByAuthorityChanges()
+          .pipe(tap((workspace) => this._addWorkspace(workspace)))
       )
     )
   );
 
-  readonly selectWorkspace = this.effect((workspaceId$: Observable<string>) =>
-    workspaceId$.pipe(tap((workspaceId) => this.patchState({ workspaceId })))
+  readonly setWorkspaceId = this.effect(
+    (workspaceId$: Observable<string | null>) =>
+      workspaceId$.pipe(tap((workspaceId) => this.patchState({ workspaceId })))
+  );
+
+  readonly loadWorkspaces = this.effect((action$) =>
+    action$.pipe(
+      concatMap(() =>
+        this._bulldozerProgramStore.getWorkspacesByAuthority().pipe(
+          tapResponse(
+            (workspaces) => {
+              this.patchState({
+                workspacesMap: workspaces.reduce(
+                  (workspacesMap, workspace) =>
+                    workspacesMap.set(workspace.id, workspace),
+                  new Map<string, Document<Workspace>>()
+                ),
+              });
+              this._onWorkspaceByAuthorityChanges();
+              this._watchWorkspaces(workspaces);
+            },
+            (error) => this._error.next(error)
+          )
+        )
+      )
+    )
   );
 
   readonly createWorkspace = this.effect(
@@ -242,8 +186,9 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly deleteWorkspace = this.effect(
     (workspace$: Observable<Document<Workspace>>) =>
-      workspace$.pipe(
-        concatMap((workspace) => {
+      workspace$
+        .pipe
+        /* concatMap((workspace) => {
           const workspaceData = this.getWorkspaceData(workspace.id);
 
           return this._bulldozerProgramStore
@@ -263,14 +208,15 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
                 (error) => this._error.next(error)
               )
             );
-        })
-      )
+        }) */
+        ()
   );
 
   readonly downloadWorkspace = this.effect(
     (workspace$: Observable<Document<Workspace>>) =>
-      workspace$.pipe(
-        map((workspace) => {
+      workspace$
+        .pipe
+        /* map((workspace) => {
           const workspaceData = this.getWorkspaceData(workspace.id);
 
           return generateWorkspaceZip(
@@ -285,82 +231,11 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
               workspaceData.instructionRelations
             )
           );
-        })
-      )
+        }) */
+        ()
   );
 
   reload() {
-    this._reload.next(null);
-  }
-
-  getWorkspaceData(workspaceId: string) {
-    return {
-      applications: this.get().applications.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      collections: this.get().collections.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      collectionAttributes: this.get().collectionAttributes.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      instructions: this.get().instructions.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      instructionArguments: this.get().instructionArguments.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      instructionAccounts: this.get().instructionAccounts.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-      instructionRelations: this.get().instructionRelations.filter(
-        ({ data }) => data.workspace === workspaceId
-      ),
-    };
-  }
-
-  getApplicationData(applicationId: string) {
-    return {
-      collections: this.get().collections.filter(
-        ({ data }) => data.application === applicationId
-      ),
-      collectionAttributes: this.get().collectionAttributes.filter(
-        ({ data }) => data.application === applicationId
-      ),
-      instructions: this.get().instructions.filter(
-        ({ data }) => data.application === applicationId
-      ),
-      instructionArguments: this.get().instructionArguments.filter(
-        ({ data }) => data.application === applicationId
-      ),
-      instructionAccounts: this.get().instructionAccounts.filter(
-        ({ data }) => data.application === applicationId
-      ),
-      instructionRelations: this.get().instructionRelations.filter(
-        ({ data }) => data.application === applicationId
-      ),
-    };
-  }
-
-  getInstructionData(instructionId: string) {
-    return {
-      instructionArguments: this.get().instructionArguments.filter(
-        ({ data }) => data.instruction === instructionId
-      ),
-      instructionAccounts: this.get().instructionAccounts.filter(
-        ({ data }) => data.instruction === instructionId
-      ),
-      instructionRelations: this.get().instructionRelations.filter(
-        ({ data }) => data.instruction === instructionId
-      ),
-    };
-  }
-
-  getCollectionData(collectionId: string) {
-    return {
-      collectionAttributes: this.get().collectionAttributes.filter(
-        ({ data }) => data.collection === collectionId
-      ),
-    };
+    // this._reload.next(null);
   }
 }
