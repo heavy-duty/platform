@@ -213,7 +213,7 @@ describe('collection attribute', () => {
     assert.equal(error.code, 6012);
   });
 
-  it('should fail when providing wrong collection to delete', async () => {
+  it('should fail when providing wrong "collection" to delete', async () => {
     // arrange
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
