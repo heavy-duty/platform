@@ -5,6 +5,7 @@ import {
   Document,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -95,78 +96,76 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchCollectionAttributes = this.effect(
-    (collectionAttributes$: Observable<Document<CollectionAttribute>[]>) =>
-      collectionAttributes$.pipe(
-        switchMap((collectionAttributes) =>
-          merge(
-            ...collectionAttributes.map((collectionAttribute) =>
-              this._bulldozerProgramStore
-                .onCollectionAttributeUpdated(collectionAttribute.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeCollectionAttribute(collectionAttribute.id);
-                    } else {
-                      this._setCollectionAttribute(changes);
-                    }
-                  })
-                )
-            )
+  readonly setCollectionId = this.updater(
+    (state, collectionId: string | null) => ({
+      ...state,
+      collectionId,
+    })
+  );
+
+  readonly watchCollectionAttributes = this.effect(() =>
+    this.collectionAttributes$.pipe(
+      switchMap((collectionAttributes) =>
+        merge(
+          ...collectionAttributes.map((collectionAttribute) =>
+            this._bulldozerProgramStore
+              .onCollectionAttributeUpdated(collectionAttribute.id)
+              .pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeCollectionAttribute(collectionAttribute.id);
+                  } else {
+                    this._setCollectionAttribute(changes);
+                  }
+                })
+              )
           )
         )
       )
+    )
   );
 
-  private readonly _onCollectionAttributeByCollectionChanges = this.effect(
-    (collectionId$: Observable<string>) =>
-      collectionId$.pipe(
-        switchMap((collectionId) =>
-          this._bulldozerProgramStore
-            .onCollectionAttributeByCollectionChanges(collectionId)
-            .pipe(
-              tap((collectionAttribute) =>
-                this._addCollectionAttribute(collectionAttribute)
-              )
+  readonly onCollectionAttributeByCollectionChanges = this.effect(() =>
+    this.collectionId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((collectionId) =>
+        this._bulldozerProgramStore
+          .onCollectionAttributeByCollectionChanges(collectionId)
+          .pipe(
+            tap({
+              next: (collectionAttribute) =>
+                this._addCollectionAttribute(collectionAttribute),
+              complete: () => console.log('do I complete?'),
+            })
+          )
+      )
+    )
+  );
+
+  readonly loadCollectionAttributes = this.effect(() =>
+    this.collectionId$.pipe(
+      isNotNullOrUndefined,
+      concatMap((collectionId) =>
+        this._bulldozerProgramStore
+          .getCollectionAttributesByCollection(collectionId)
+          .pipe(
+            tapResponse(
+              (collectionAttributes) =>
+                this.patchState({
+                  collectionAttributesMap: collectionAttributes.reduce(
+                    (collectionAttributesMap, collectionAttribute) =>
+                      collectionAttributesMap.set(
+                        collectionAttribute.id,
+                        collectionAttribute
+                      ),
+                    new Map<string, Document<CollectionAttribute>>()
+                  ),
+                }),
+              (error) => this._error.next(error)
             )
-        )
+          )
       )
-  );
-
-  readonly setCollectionId = this.effect(
-    (collectionId$: Observable<string | null>) =>
-      collectionId$.pipe(
-        tap((collectionId) => this.patchState({ collectionId }))
-      )
-  );
-
-  readonly loadCollectionAttributes = this.effect(
-    (collectionId$: Observable<string>) =>
-      collectionId$.pipe(
-        concatMap((collectionId) =>
-          this._bulldozerProgramStore
-            .getCollectionAttributesByCollection(collectionId)
-            .pipe(
-              tapResponse(
-                (collectionAttributes) => {
-                  this.patchState({
-                    collectionAttributesMap: collectionAttributes.reduce(
-                      (collectionAttributesMap, collectionAttribute) =>
-                        collectionAttributesMap.set(
-                          collectionAttribute.id,
-                          collectionAttribute
-                        ),
-                      new Map<string, Document<CollectionAttribute>>()
-                    ),
-                  });
-                  this._watchCollectionAttributes(collectionAttributes);
-                  this._onCollectionAttributeByCollectionChanges(collectionId);
-                },
-                (error) => this._error.next(error)
-              )
-            )
-        )
-      )
+    )
   );
 
   readonly createCollectionAttribute = this.effect(

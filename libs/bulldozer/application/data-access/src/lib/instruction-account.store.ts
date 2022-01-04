@@ -5,6 +5,7 @@ import {
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -17,10 +18,12 @@ import {
 } from './actions/instruction.actions';
 
 interface ViewModel {
+  instructionId: string | null;
   instructionAccountsMap: Map<string, Document<InstructionAccount>>;
 }
 
 const initialState: ViewModel = {
+  instructionId: null,
   instructionAccountsMap: new Map<string, Document<InstructionAccount>>(),
 };
 
@@ -34,6 +37,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     new InstructionInit()
   );
   readonly events$ = this._events.asObservable();
+  readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instructionAccountsMap$ = this.select(
     ({ instructionAccountsMap }) => instructionAccountsMap
   );
@@ -92,71 +96,74 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchInstructionAccounts = this.effect(
-    (instructionAccounts$: Observable<Document<InstructionAccount>[]>) =>
-      instructionAccounts$.pipe(
-        switchMap((instructionAccounts) =>
-          merge(
-            ...instructionAccounts.map((instructionAccount) =>
-              this._bulldozerProgramStore
-                .onInstructionAccountUpdated(instructionAccount.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeInstructionAccount(instructionAccount.id);
-                    } else {
-                      this._setInstructionAccount(changes);
-                    }
-                  })
-                )
-            )
+  readonly setInstructionId = this.updater(
+    (state, instructionId: string | null) => ({
+      ...state,
+      instructionId,
+    })
+  );
+
+  readonly watchInstructionAccounts = this.effect(() =>
+    this.instructionAccounts$.pipe(
+      switchMap((instructionAccounts) =>
+        merge(
+          ...instructionAccounts.map((instructionAccount) =>
+            this._bulldozerProgramStore
+              .onInstructionAccountUpdated(instructionAccount.id)
+              .pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeInstructionAccount(instructionAccount.id);
+                  } else {
+                    this._setInstructionAccount(changes);
+                  }
+                })
+              )
           )
         )
       )
+    )
   );
 
-  private readonly _onInstructionAccountByInstructionChanges = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        switchMap((instructionId) =>
-          this._bulldozerProgramStore
-            .onInstructionAccountByInstructionChanges(instructionId)
-            .pipe(
-              tap((instructionAccount) =>
-                this._addInstructionAccount(instructionAccount)
-              )
+  readonly onInstructionAccountByInstructionChanges = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((instructionId) =>
+        this._bulldozerProgramStore
+          .onInstructionAccountByInstructionChanges(instructionId)
+          .pipe(
+            tap((instructionAccount) =>
+              this._addInstructionAccount(instructionAccount)
             )
-        )
+          )
       )
+    )
   );
 
-  readonly loadInstructionAccounts = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        concatMap((instructionId) =>
-          this._bulldozerProgramStore
-            .getInstructionAccountsByInstruction(instructionId)
-            .pipe(
-              tapResponse(
-                (instructionAccounts) => {
-                  this.patchState({
-                    instructionAccountsMap: instructionAccounts.reduce(
-                      (instructionAccountsMap, instructionAccount) =>
-                        instructionAccountsMap.set(
-                          instructionAccount.id,
-                          instructionAccount
-                        ),
-                      new Map<string, Document<InstructionAccount>>()
-                    ),
-                  });
-                  this._watchInstructionAccounts(instructionAccounts);
-                  this._onInstructionAccountByInstructionChanges(instructionId);
-                },
-                (error) => this._error.next(error)
-              )
+  readonly loadInstructionAccounts = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      concatMap((instructionId) =>
+        this._bulldozerProgramStore
+          .getInstructionAccountsByInstruction(instructionId)
+          .pipe(
+            tapResponse(
+              (instructionAccounts) =>
+                this.patchState({
+                  instructionAccountsMap: instructionAccounts.reduce(
+                    (instructionAccountsMap, instructionAccount) =>
+                      instructionAccountsMap.set(
+                        instructionAccount.id,
+                        instructionAccount
+                      ),
+                    new Map<string, Document<InstructionAccount>>()
+                  ),
+                }),
+              (error) => this._error.next(error)
             )
-        )
+          )
       )
+    )
   );
 
   readonly createInstructionAccount = this.effect(

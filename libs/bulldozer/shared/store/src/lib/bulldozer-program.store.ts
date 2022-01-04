@@ -589,7 +589,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
         onCollectionAttributeByCollectionChanges(
           connection,
           new PublicKey(collectionId)
-        ).pipe(tap(() => this._events.next(new CollectionAttributeCreated())))
+        ).pipe(
+          tap({
+            next: () => this._events.next(new CollectionAttributeCreated()),
+            complete: () => console.log('i should complete'),
+          })
+        )
       )
     );
   }

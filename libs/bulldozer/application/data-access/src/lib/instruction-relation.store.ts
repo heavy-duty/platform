@@ -5,6 +5,7 @@ import {
   InstructionRelationDto,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -95,80 +96,74 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchInstructionRelations = this.effect(
-    (instructionRelations$: Observable<Document<InstructionRelation>[]>) =>
-      instructionRelations$.pipe(
-        switchMap((instructionRelations) =>
-          merge(
-            ...instructionRelations.map((instructionRelation) =>
-              this._bulldozerProgramStore
-                .onInstructionRelationUpdated(instructionRelation.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeInstructionRelation(instructionRelation.id);
-                    } else {
-                      this._setInstructionRelation(changes);
-                    }
-                  })
-                )
-            )
+  readonly watchInstructionRelations = this.effect(() =>
+    this.instructionRelations$.pipe(
+      switchMap((instructionRelations) =>
+        merge(
+          ...instructionRelations.map((instructionRelation) =>
+            this._bulldozerProgramStore
+              .onInstructionRelationUpdated(instructionRelation.id)
+              .pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeInstructionRelation(instructionRelation.id);
+                  } else {
+                    this._setInstructionRelation(changes);
+                  }
+                })
+              )
           )
         )
       )
+    )
   );
 
-  private readonly _onInstructionRelationByInstructionChanges = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        switchMap((instructionId) =>
-          this._bulldozerProgramStore
-            .onInstructionRelationByInstructionChanges(instructionId)
-            .pipe(
-              tap((instructionRelation) =>
-                this._addInstructionRelation(instructionRelation)
-              )
+  readonly onInstructionRelationByInstructionChanges = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((instructionId) =>
+        this._bulldozerProgramStore
+          .onInstructionRelationByInstructionChanges(instructionId)
+          .pipe(
+            tap((instructionRelation) =>
+              this._addInstructionRelation(instructionRelation)
             )
-        )
+          )
       )
+    )
   );
 
-  readonly setInstructionId = this.effect(
-    (instructionId$: Observable<string | null>) =>
-      instructionId$.pipe(
-        tap((instructionId) => this.patchState({ instructionId }))
-      )
+  readonly setInstructionId = this.updater(
+    (state, instructionId: string | null) => ({
+      ...state,
+      instructionId,
+    })
   );
 
-  readonly loadInstructionRelations = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        concatMap((instructionId) =>
-          this._bulldozerProgramStore
-            .getInstructionRelationsByInstruction(instructionId)
-            .pipe(
-              tapResponse(
-                (instructionRelations) => {
-                  this.patchState({
-                    instructionRelationsMap: instructionRelations.reduce(
-                      (instructionRelationsMap, instructionRelation) =>
-                        instructionRelationsMap.set(
-                          instructionRelation.id,
-                          instructionRelation
-                        ),
-                      new Map<string, Document<InstructionRelation>>()
-                    ),
-                  });
-                  this._watchInstructionRelations(instructionRelations);
-                  this._onInstructionRelationByInstructionChanges(
-                    instructionId
-                  );
-                },
-                (error) => this._error.next(error)
-              )
+  readonly loadInstructionRelations = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      concatMap((instructionId) =>
+        this._bulldozerProgramStore
+          .getInstructionRelationsByInstruction(instructionId)
+          .pipe(
+            tapResponse(
+              (instructionRelations) =>
+                this.patchState({
+                  instructionRelationsMap: instructionRelations.reduce(
+                    (instructionRelationsMap, instructionRelation) =>
+                      instructionRelationsMap.set(
+                        instructionRelation.id,
+                        instructionRelation
+                      ),
+                    new Map<string, Document<InstructionRelation>>()
+                  ),
+                }),
+              (error) => this._error.next(error)
             )
-        )
+          )
       )
+    )
   );
 
   readonly createInstructionRelation = this.effect(

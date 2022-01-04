@@ -5,6 +5,7 @@ import {
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -17,10 +18,12 @@ import {
 } from './actions/instruction.actions';
 
 interface ViewModel {
+  instructionId: string | null;
   instructionArgumentsMap: Map<string, Document<InstructionArgument>>;
 }
 
 const initialState: ViewModel = {
+  instructionId: null,
   instructionArgumentsMap: new Map<string, Document<InstructionArgument>>(),
 };
 
@@ -34,6 +37,7 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     new InstructionInit()
   );
   readonly events$ = this._events.asObservable();
+  readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instructionArgumentsMap$ = this.select(
     ({ instructionArgumentsMap }) => instructionArgumentsMap
   );
@@ -92,73 +96,74 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchInstructionArguments = this.effect(
-    (instructionArguments$: Observable<Document<InstructionArgument>[]>) =>
-      instructionArguments$.pipe(
-        switchMap((instructionArguments) =>
-          merge(
-            ...instructionArguments.map((instructionArgument) =>
-              this._bulldozerProgramStore
-                .onInstructionArgumentUpdated(instructionArgument.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeInstructionArgument(instructionArgument.id);
-                    } else {
-                      this._setInstructionArgument(changes);
-                    }
-                  })
-                )
-            )
+  readonly setInstructionId = this.updater(
+    (state, instructionId: string | null) => ({
+      ...state,
+      instructionId,
+    })
+  );
+
+  readonly watchInstructionArguments = this.effect(() =>
+    this.instructionArguments$.pipe(
+      switchMap((instructionArguments) =>
+        merge(
+          ...instructionArguments.map((instructionArgument) =>
+            this._bulldozerProgramStore
+              .onInstructionArgumentUpdated(instructionArgument.id)
+              .pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeInstructionArgument(instructionArgument.id);
+                  } else {
+                    this._setInstructionArgument(changes);
+                  }
+                })
+              )
           )
         )
       )
+    )
   );
 
-  private readonly _onInstructionArgumentByInstructionChanges = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        switchMap((instructionId) =>
-          this._bulldozerProgramStore
-            .onInstructionArgumentByInstructionChanges(instructionId)
-            .pipe(
-              tap((instructionArgument) =>
-                this._addInstructionArgument(instructionArgument)
-              )
+  readonly onInstructionArgumentByInstructionChanges = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((instructionId) =>
+        this._bulldozerProgramStore
+          .onInstructionArgumentByInstructionChanges(instructionId)
+          .pipe(
+            tap((instructionArgument) =>
+              this._addInstructionArgument(instructionArgument)
             )
-        )
+          )
       )
+    )
   );
 
-  readonly loadInstructionArguments = this.effect(
-    (instructionId$: Observable<string>) =>
-      instructionId$.pipe(
-        concatMap((instructionId) =>
-          this._bulldozerProgramStore
-            .getInstructionArgumentsByInstruction(instructionId)
-            .pipe(
-              tapResponse(
-                (instructionArguments) => {
-                  this.patchState({
-                    instructionArgumentsMap: instructionArguments.reduce(
-                      (instructionArgumentsMap, instructionArgument) =>
-                        instructionArgumentsMap.set(
-                          instructionArgument.id,
-                          instructionArgument
-                        ),
-                      new Map<string, Document<InstructionArgument>>()
-                    ),
-                  });
-                  this._watchInstructionArguments(instructionArguments);
-                  this._onInstructionArgumentByInstructionChanges(
-                    instructionId
-                  );
-                },
-                (error) => this._error.next(error)
-              )
+  readonly loadInstructionArguments = this.effect(() =>
+    this.instructionId$.pipe(
+      isNotNullOrUndefined,
+      concatMap((instructionId) =>
+        this._bulldozerProgramStore
+          .getInstructionArgumentsByInstruction(instructionId)
+          .pipe(
+            tapResponse(
+              (instructionArguments) =>
+                this.patchState({
+                  instructionArgumentsMap: instructionArguments.reduce(
+                    (instructionArgumentsMap, instructionArgument) =>
+                      instructionArgumentsMap.set(
+                        instructionArgument.id,
+                        instructionArgument
+                      ),
+                    new Map<string, Document<InstructionArgument>>()
+                  ),
+                }),
+              (error) => this._error.next(error)
             )
-        )
+          )
       )
+    )
   );
 
   readonly createInstructionArgument = this.effect(

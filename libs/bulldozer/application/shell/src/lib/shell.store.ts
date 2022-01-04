@@ -34,15 +34,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
-import {
-  concatMap,
-  exhaustMap,
-  filter,
-  merge,
-  Observable,
-  Subject,
-  tap,
-} from 'rxjs';
+import { exhaustMap, filter, merge, Observable, Subject, tap } from 'rxjs';
 
 export type TabKind = 'collections' | 'instructions';
 
@@ -226,52 +218,6 @@ export class ShellStore extends ComponentStore<ViewModel> {
           panelClass: `success-snackbar`,
           duration: 3000,
         });
-      })
-    )
-  );
-
-  readonly loadData = this.effect((action$) =>
-    action$.pipe(
-      concatMap(() => {
-        this._workspaceStore.loadWorkspaces();
-
-        return merge(
-          this._workspaceStore.workspace$.pipe(
-            isNotNullOrUndefined,
-            tap((workspace) =>
-              this._applicationStore.loadApplications(workspace.id)
-            )
-          ),
-          this._applicationStore.applicationId$.pipe(
-            isNotNullOrUndefined,
-            tap((applicationId) => {
-              this._collectionStore.loadCollections(applicationId);
-              this._instructionStore.loadInstructions(applicationId);
-            })
-          ),
-          this._collectionStore.collectionId$.pipe(
-            isNotNullOrUndefined,
-            tap((collectionId) => {
-              this._collectionAttributeStore.loadCollectionAttributes(
-                collectionId
-              );
-            })
-          ),
-          this._instructionStore.instructionId$.pipe(
-            isNotNullOrUndefined,
-            tap((instructionId) => {
-              this._instructionArgumentStore.loadInstructionArguments(
-                instructionId
-              );
-              this._instructionAccountStore.loadInstructionAccounts(
-                instructionId
-              );
-              this._instructionRelationStore.loadInstructionRelations(
-                instructionId
-              );
-            })
-          )
-        );
       })
     )
   );
@@ -480,6 +426,31 @@ export class ShellStore extends ComponentStore<ViewModel> {
     } else {
       return 'Unknown error';
     }
+  }
+
+  loadData() {
+    this._workspaceStore.loadWorkspaces();
+    this._applicationStore.loadApplications(
+      this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
+    );
+    this._collectionStore.loadCollections(
+      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
+    );
+    this._collectionAttributeStore.setCollectionId(
+      this._collectionStore.collectionId$
+    );
+    this._instructionStore.loadInstructions(
+      this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
+    );
+    this._instructionAccountStore.setInstructionId(
+      this._instructionStore.instructionId$
+    );
+    this._instructionArgumentStore.setInstructionId(
+      this._instructionStore.instructionId$
+    );
+    this._instructionRelationStore.setInstructionId(
+      this._instructionStore.instructionId$
+    );
   }
 
   closeTab(event: Event, tabId: string) {
