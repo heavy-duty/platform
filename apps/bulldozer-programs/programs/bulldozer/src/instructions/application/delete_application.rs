@@ -9,6 +9,7 @@ pub struct DeleteApplication<'info> {
     has_one = authority,
     close = authority,
     constraint = application.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
+    constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions
   )]
   pub application: Account<'info, Application>,
   pub authority: Signer<'info>,

@@ -121,4 +121,45 @@ describe('application', () => {
     // assert
     assert.equal(error.code, 6022);
   });
+
+  it('should fail when deleting application with instructions', async () => {
+    // arrange
+    const newApplicationName = 'sample';
+    const newApplication = Keypair.generate();
+    const instructionName = 'sample';
+    const instruction = Keypair.generate();
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createApplication(newApplicationName, {
+        accounts: {
+          application: newApplication.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newApplication],
+      });
+      await program.rpc.createInstruction(instructionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instruction],
+      });
+      await program.rpc.deleteApplication({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: newApplication.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6024);
+  });
 });

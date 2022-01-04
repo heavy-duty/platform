@@ -51,4 +51,8 @@ pub enum ErrorCode {
   CantDeleteApplicationWithCollections,
   #[msg("Application provided doesnt match collection")]
   ApplicationDoesntMatchCollection,
+  #[msg("Cant delete application with instructions")]
+  CantDeleteApplicationWithInstructions,
+  #[msg("Application provided doesnt match instruction")]
+  ApplicationDoesntMatchInstruction,
 }

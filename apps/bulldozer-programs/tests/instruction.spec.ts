@@ -57,11 +57,15 @@ describe('instruction', () => {
     const account = await program.account.instruction.fetch(
       instruction.publicKey
     );
+    const applicationAccount = await program.account.application.fetch(
+      application.publicKey
+    );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.equal(account.name, instructionName);
     assert.equal(account.body, '');
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
+    assert.equal(applicationAccount.quantityOfInstructions, 1);
   });
 
   it('should update account', async () => {
@@ -112,13 +116,18 @@ describe('instruction', () => {
       accounts: {
         authority: program.provider.wallet.publicKey,
         instruction: instruction.publicKey,
+        application: application.publicKey,
       },
     });
     // assert
     const account = await program.account.instruction.fetchNullable(
       instruction.publicKey
     );
+    const applicationAccount = await program.account.application.fetch(
+      application.publicKey
+    );
     assert.equal(account, null);
+    assert.equal(applicationAccount.quantityOfInstructions, 0);
   });
 
   it('should fail when deleting instruction with arguments', async () => {
@@ -162,11 +171,13 @@ describe('instruction', () => {
         accounts: {
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
         },
       });
     } catch (err) {
       error = err;
     }
+    console.log(error);
     // assert
     assert.equal(error.code, 6018);
   });
@@ -210,6 +221,7 @@ describe('instruction', () => {
         accounts: {
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
         },
       });
     } catch (err) {
@@ -217,5 +229,47 @@ describe('instruction', () => {
     }
     // assert
     assert.equal(error.code, 6020);
+  });
+
+  it('should fail when providing wrong "application" to delete', async () => {
+    // arrange
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createApplication(newApplicationName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newApplication],
+      });
+      await program.rpc.createInstruction(newInstructionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newInstruction],
+      });
+      await program.rpc.deleteInstruction({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6025);
   });
 });

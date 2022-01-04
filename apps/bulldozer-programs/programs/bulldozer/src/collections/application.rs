@@ -6,4 +6,5 @@ pub struct Application {
   pub workspace: Pubkey,
   pub name: String,
   pub quantity_of_collections: u8,
+  pub quantity_of_instructions: u8,
 }

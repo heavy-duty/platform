@@ -14,6 +14,7 @@ pub struct CreateInstruction<'info> {
     )]
   pub instruction: Box<Account<'info, Instruction>>,
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(mut)]
   pub application: Box<Account<'info, Application>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -29,5 +30,6 @@ pub fn handler(ctx: Context<CreateInstruction>, name: String) -> ProgramResult {
   ctx.accounts.instruction.body = "".to_string();
   ctx.accounts.instruction.quantity_of_arguments = 0;
   ctx.accounts.instruction.quantity_of_accounts = 0;
+  ctx.accounts.application.quantity_of_instructions += 1;
   Ok(())
 }
