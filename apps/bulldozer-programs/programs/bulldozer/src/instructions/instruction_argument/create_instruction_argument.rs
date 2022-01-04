@@ -16,6 +16,7 @@ pub struct CreateInstructionArgument<'info> {
   pub argument: Box<Account<'info, InstructionArgument>>,
   pub workspace: Box<Account<'info, Workspace>>,
   pub application: Box<Account<'info, Application>>,
+  #[account(mut)]
   pub instruction: Box<Account<'info, Instruction>>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -29,5 +30,6 @@ pub fn handler(ctx: Context<CreateInstructionArgument>, dto: AttributeDto) -> Pr
   ctx.accounts.argument.application = ctx.accounts.application.key();
   ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
   ctx.accounts.argument.data = Attribute::create(dto)?;
+  ctx.accounts.instruction.quantity_of_arguments += 1;
   Ok(())
 }

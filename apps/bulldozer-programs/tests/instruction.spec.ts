@@ -1,7 +1,12 @@
-import { Idl, Program, Provider, setProvider } from '@project-serum/anchor';
+import {
+  Idl,
+  Program,
+  ProgramError,
+  Provider,
+  setProvider,
+} from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -114,5 +119,55 @@ describe('instruction', () => {
       instruction.publicKey
     );
     assert.equal(account, null);
+  });
+
+  it('should fail when deleting instruction with arguments', async () => {
+    // arrange
+    const instructionName = 'sample';
+    const instruction = Keypair.generate();
+    const argument = Keypair.generate();
+    const dto = {
+      name: 'arg1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstruction(instructionName, {
+        accounts: {
+          instruction: instruction.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [instruction],
+      });
+      await program.rpc.createInstructionArgument(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          argument: argument.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [argument],
+      });
+      await program.rpc.deleteInstruction({
+        accounts: {
+          instruction: instruction.publicKey,
+          authority: program.provider.wallet.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6018);
   });
 });

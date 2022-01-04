@@ -7,7 +7,6 @@ import {
 } from '@project-serum/anchor';
 import { Keypair, SystemProgram } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -75,18 +74,31 @@ describe('instruction argument', () => {
       signers: [instructionArgument],
     });
     // assert
-    const account = await program.account.instructionArgument.fetch(
-      instructionArgument.publicKey
+    const instructionArgumentAccount =
+      await program.account.instructionArgument.fetch(
+        instructionArgument.publicKey
+      );
+    const instructionAccount = await program.account.instruction.fetch(
+      instruction.publicKey
     );
-    assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.ok(account.workspace.equals(workspace.publicKey));
-    assert.ok(account.application.equals(application.publicKey));
-    assert.ok(account.instruction.equals(instruction.publicKey));
-    assert.equal(account.data.name, dto.name);
-    assert.ok('boolean' in account.data.kind);
-    assert.equal(account.data.kind.boolean.id, dto.kind);
-    assert.equal(account.data.kind.boolean.size, 1);
-    assert.equal(account.data.modifier, null);
+    assert.ok(
+      instructionArgumentAccount.authority.equals(
+        program.provider.wallet.publicKey
+      )
+    );
+    assert.ok(instructionArgumentAccount.workspace.equals(workspace.publicKey));
+    assert.ok(
+      instructionArgumentAccount.application.equals(application.publicKey)
+    );
+    assert.ok(
+      instructionArgumentAccount.instruction.equals(instruction.publicKey)
+    );
+    assert.equal(instructionArgumentAccount.data.name, dto.name);
+    assert.ok('boolean' in instructionArgumentAccount.data.kind);
+    assert.equal(instructionArgumentAccount.data.kind.boolean.id, dto.kind);
+    assert.equal(instructionArgumentAccount.data.kind.boolean.size, 1);
+    assert.equal(instructionArgumentAccount.data.modifier, null);
+    assert.equal(instructionAccount.quantityOfArguments, 1);
   });
 
   it('should update account', async () => {
@@ -125,6 +137,7 @@ describe('instruction argument', () => {
       accounts: {
         authority: program.provider.wallet.publicKey,
         argument: instructionArgument.publicKey,
+        instruction: instruction.publicKey,
       },
     });
     // assert
@@ -132,7 +145,11 @@ describe('instruction argument', () => {
       await program.account.instructionArgument.fetchNullable(
         instructionArgument.publicKey
       );
+    const instructionAccount = await program.account.instruction.fetch(
+      instruction.publicKey
+    );
     assert.equal(argumentAccount, null);
+    assert.equal(instructionAccount.quantityOfArguments, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {
@@ -195,5 +212,56 @@ describe('instruction argument', () => {
     }
     // assert
     assert.equal(error.code, 6012);
+  });
+
+  it('should fail when providing wrong "instruction" to delete', async () => {
+    // arrange
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const newArgument = Keypair.generate();
+    const dto = {
+      name: 'arg1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstruction(newInstructionName, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newInstruction],
+      });
+      await program.rpc.createInstructionArgument(dto, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+          argument: newArgument.publicKey,
+          systemProgram: SystemProgram.programId,
+        },
+        signers: [newArgument],
+      });
+      await program.rpc.deleteInstructionArgument({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          instruction: instruction.publicKey,
+          argument: newArgument.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6019);
   });
 });

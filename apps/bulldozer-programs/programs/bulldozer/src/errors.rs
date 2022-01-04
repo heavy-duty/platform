@@ -39,4 +39,8 @@ pub enum ErrorCode {
   FromDoesntMatchRelation,
   #[msg("To provided doesnt match relation")]
   ToDoesntMatchRelation,
+  #[msg("Cant delete instruction with arguments")]
+  CantDeleteInstructionWithArguments,
+  #[msg("Instruction provided doesnt match argument")]
+  InstructionDoesntMatchArgument,
 }

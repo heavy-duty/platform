@@ -7,4 +7,5 @@ pub struct Instruction {
   pub application: Pubkey,
   pub name: String,
   pub body: String,
+  pub quantity_of_arguments: u8,
 }
