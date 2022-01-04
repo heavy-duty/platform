@@ -4,7 +4,7 @@ import {
   getDeleteInstructionAccountInstruction,
   getDeleteInstructionArgumentInstruction,
   getDeleteInstructionRelationInstruction,
-} from '..';
+} from '../..';
 
 export const getDeleteInstructionInstructions = (
   authority: PublicKey,

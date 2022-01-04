@@ -2,14 +2,12 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { getDeleteApplicationInstruction } from '.';
 import {
   getDeleteCollectionAttributeInstruction,
-  getDeleteCollectionInstruction,
-} from '../../collection';
-import {
   getDeleteInstructionAccountInstruction,
   getDeleteInstructionArgumentInstruction,
-  getDeleteInstructionInstruction,
   getDeleteInstructionRelationInstruction,
-} from '../../instruction';
+} from '../..';
+import { getDeleteCollectionInstruction } from '../../collection';
+import { getDeleteInstructionInstruction } from '../../instruction';
 
 export const getDeleteApplicationInstructions = (
   authority: PublicKey,
