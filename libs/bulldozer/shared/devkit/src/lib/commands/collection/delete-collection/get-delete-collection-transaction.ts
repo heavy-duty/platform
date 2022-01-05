@@ -1,21 +1,21 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
-import { getDeleteCollectionInstructions } from '.';
+import { getDeleteCollectionInstruction } from '.';
 import { createTransaction } from '../../../operations';
-import { addAllInstructionsToTransaction } from '../../../operators';
+import { addInstructionToTransaction } from '../../../operators';
 
 export const getDeleteCollectionTransaction = (
   connection: Connection,
   authority: PublicKey,
-  collectionPublicKey: PublicKey,
-  collectionAttributePublicKeys: PublicKey[]
+  applicationPublicKey: PublicKey,
+  collectionPublicKey: PublicKey
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
-    addAllInstructionsToTransaction(
-      getDeleteCollectionInstructions(
+    addInstructionToTransaction(
+      getDeleteCollectionInstruction(
         authority,
-        collectionPublicKey,
-        collectionAttributePublicKeys
+        applicationPublicKey,
+        collectionPublicKey
       )
     )
   );

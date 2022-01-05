@@ -75,7 +75,7 @@ export type Bulldozer = {
         },
         {
           name: 'workspace';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -126,6 +126,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -143,7 +148,7 @@ export type Bulldozer = {
         },
         {
           name: 'application';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -199,6 +204,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'application';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -226,7 +236,7 @@ export type Bulldozer = {
         },
         {
           name: 'collection';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -281,6 +291,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'collection';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -303,7 +318,7 @@ export type Bulldozer = {
         },
         {
           name: 'application';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -375,6 +390,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'application';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -402,7 +422,7 @@ export type Bulldozer = {
         },
         {
           name: 'instruction';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -457,6 +477,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'instruction';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -484,7 +509,7 @@ export type Bulldozer = {
         },
         {
           name: 'instruction';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -539,6 +564,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'instruction';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -571,12 +601,12 @@ export type Bulldozer = {
         },
         {
           name: 'from';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
           name: 'to';
-          isMut: false;
+          isMut: true;
           isSigner: false;
         },
         {
@@ -632,6 +662,16 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'from';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'to';
+          isMut: true;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
@@ -657,6 +697,14 @@ export type Bulldozer = {
           {
             name: 'name';
             type: 'string';
+          },
+          {
+            name: 'quantityOfCollections';
+            type: 'u8';
+          },
+          {
+            name: 'quantityOfInstructions';
+            type: 'u8';
           }
         ];
       };
@@ -681,6 +729,10 @@ export type Bulldozer = {
           {
             name: 'name';
             type: 'string';
+          },
+          {
+            name: 'quantityOfAttributes';
+            type: 'u8';
           }
         ];
       };
@@ -739,6 +791,14 @@ export type Bulldozer = {
           {
             name: 'body';
             type: 'string';
+          },
+          {
+            name: 'quantityOfArguments';
+            type: 'u8';
+          },
+          {
+            name: 'quantityOfAccounts';
+            type: 'u8';
           }
         ];
       };
@@ -769,6 +829,10 @@ export type Bulldozer = {
             type: {
               defined: 'BaseAccount';
             };
+          },
+          {
+            name: 'quantityOfRelations';
+            type: 'u8';
           }
         ];
       };
@@ -851,6 +915,10 @@ export type Bulldozer = {
           {
             name: 'name';
             type: 'string';
+          },
+          {
+            name: 'quantityOfApplications';
+            type: 'u8';
           }
         ];
       };
@@ -1217,6 +1285,81 @@ export type Bulldozer = {
       code: 6012;
       name: 'MissingMaxLength';
       msg: 'Missing Max Length';
+    },
+    {
+      code: 6013;
+      name: 'CantDeleteCollectionWithAttributes';
+      msg: 'Cant delete collection with attributes';
+    },
+    {
+      code: 6014;
+      name: 'CollectionDoesntMatchAttribute';
+      msg: 'Collection provided doesnt match attribute';
+    },
+    {
+      code: 6015;
+      name: 'CantDeleteAccountWithRelations';
+      msg: 'Cant delete account with relations';
+    },
+    {
+      code: 6016;
+      name: 'FromDoesntMatchRelation';
+      msg: 'From provided doesnt match relation';
+    },
+    {
+      code: 6017;
+      name: 'ToDoesntMatchRelation';
+      msg: 'To provided doesnt match relation';
+    },
+    {
+      code: 6018;
+      name: 'CantDeleteInstructionWithArguments';
+      msg: 'Cant delete instruction with arguments';
+    },
+    {
+      code: 6019;
+      name: 'InstructionDoesntMatchArgument';
+      msg: 'Instruction provided doesnt match argument';
+    },
+    {
+      code: 6020;
+      name: 'CantDeleteInstructionWithAccounts';
+      msg: 'Cant delete instruction with accounts';
+    },
+    {
+      code: 6021;
+      name: 'InstructionDoesntMatchAccount';
+      msg: 'Instruction provided doesnt match account';
+    },
+    {
+      code: 6022;
+      name: 'CantDeleteApplicationWithCollections';
+      msg: 'Cant delete application with collections';
+    },
+    {
+      code: 6023;
+      name: 'ApplicationDoesntMatchCollection';
+      msg: 'Application provided doesnt match collection';
+    },
+    {
+      code: 6024;
+      name: 'CantDeleteApplicationWithInstructions';
+      msg: 'Cant delete application with instructions';
+    },
+    {
+      code: 6025;
+      name: 'ApplicationDoesntMatchInstruction';
+      msg: 'Application provided doesnt match instruction';
+    },
+    {
+      code: 6026;
+      name: 'CantDeleteWorkspaceWithApplications';
+      msg: 'Cant delete workspace with applications';
+    },
+    {
+      code: 6027;
+      name: 'WorkspaceDoesntMatchApplication';
+      msg: 'Workspace provided doesnt match application';
     }
   ];
 };
@@ -1298,7 +1441,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'workspace',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1349,6 +1492,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1366,7 +1514,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'application',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1422,6 +1570,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'application',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1449,7 +1602,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'collection',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1504,6 +1657,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'collection',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1526,7 +1684,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'application',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1598,6 +1756,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'application',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1625,7 +1788,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'instruction',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1680,6 +1843,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'instruction',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1707,7 +1875,7 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'instruction',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1762,6 +1930,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'instruction',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1794,12 +1967,12 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'from',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
           name: 'to',
-          isMut: false,
+          isMut: true,
           isSigner: false,
         },
         {
@@ -1855,6 +2028,16 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'from',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'to',
+          isMut: true,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
@@ -1881,6 +2064,14 @@ export const IDL: Bulldozer = {
             name: 'name',
             type: 'string',
           },
+          {
+            name: 'quantityOfCollections',
+            type: 'u8',
+          },
+          {
+            name: 'quantityOfInstructions',
+            type: 'u8',
+          },
         ],
       },
     },
@@ -1904,6 +2095,10 @@ export const IDL: Bulldozer = {
           {
             name: 'name',
             type: 'string',
+          },
+          {
+            name: 'quantityOfAttributes',
+            type: 'u8',
           },
         ],
       },
@@ -1963,6 +2158,14 @@ export const IDL: Bulldozer = {
             name: 'body',
             type: 'string',
           },
+          {
+            name: 'quantityOfArguments',
+            type: 'u8',
+          },
+          {
+            name: 'quantityOfAccounts',
+            type: 'u8',
+          },
         ],
       },
     },
@@ -1992,6 +2195,10 @@ export const IDL: Bulldozer = {
             type: {
               defined: 'BaseAccount',
             },
+          },
+          {
+            name: 'quantityOfRelations',
+            type: 'u8',
           },
         ],
       },
@@ -2074,6 +2281,10 @@ export const IDL: Bulldozer = {
           {
             name: 'name',
             type: 'string',
+          },
+          {
+            name: 'quantityOfApplications',
+            type: 'u8',
           },
         ],
       },
@@ -2440,6 +2651,81 @@ export const IDL: Bulldozer = {
       code: 6012,
       name: 'MissingMaxLength',
       msg: 'Missing Max Length',
+    },
+    {
+      code: 6013,
+      name: 'CantDeleteCollectionWithAttributes',
+      msg: 'Cant delete collection with attributes',
+    },
+    {
+      code: 6014,
+      name: 'CollectionDoesntMatchAttribute',
+      msg: 'Collection provided doesnt match attribute',
+    },
+    {
+      code: 6015,
+      name: 'CantDeleteAccountWithRelations',
+      msg: 'Cant delete account with relations',
+    },
+    {
+      code: 6016,
+      name: 'FromDoesntMatchRelation',
+      msg: 'From provided doesnt match relation',
+    },
+    {
+      code: 6017,
+      name: 'ToDoesntMatchRelation',
+      msg: 'To provided doesnt match relation',
+    },
+    {
+      code: 6018,
+      name: 'CantDeleteInstructionWithArguments',
+      msg: 'Cant delete instruction with arguments',
+    },
+    {
+      code: 6019,
+      name: 'InstructionDoesntMatchArgument',
+      msg: 'Instruction provided doesnt match argument',
+    },
+    {
+      code: 6020,
+      name: 'CantDeleteInstructionWithAccounts',
+      msg: 'Cant delete instruction with accounts',
+    },
+    {
+      code: 6021,
+      name: 'InstructionDoesntMatchAccount',
+      msg: 'Instruction provided doesnt match account',
+    },
+    {
+      code: 6022,
+      name: 'CantDeleteApplicationWithCollections',
+      msg: 'Cant delete application with collections',
+    },
+    {
+      code: 6023,
+      name: 'ApplicationDoesntMatchCollection',
+      msg: 'Application provided doesnt match collection',
+    },
+    {
+      code: 6024,
+      name: 'CantDeleteApplicationWithInstructions',
+      msg: 'Cant delete application with instructions',
+    },
+    {
+      code: 6025,
+      name: 'ApplicationDoesntMatchInstruction',
+      msg: 'Application provided doesnt match instruction',
+    },
+    {
+      code: 6026,
+      name: 'CantDeleteWorkspaceWithApplications',
+      msg: 'Cant delete workspace with applications',
+    },
+    {
+      code: 6027,
+      name: 'WorkspaceDoesntMatchApplication',
+      msg: 'Workspace provided doesnt match application',
     },
   ],
 };

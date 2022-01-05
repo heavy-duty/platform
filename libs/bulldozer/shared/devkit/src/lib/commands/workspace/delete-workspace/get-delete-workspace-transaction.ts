@@ -1,34 +1,17 @@
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
-import { getDeleteWorkspaceInstructions } from '.';
+import { getDeleteWorkspaceInstruction } from '.';
 import { createTransaction } from '../../../operations';
-import { addAllInstructionsToTransaction } from '../../../operators';
+import { addInstructionToTransaction } from '../../../operators';
 
 export const getDeleteWorkspaceTransaction = (
   connection: Connection,
   authority: PublicKey,
-  workspacePublicKey: PublicKey,
-  applicationPublicKeys: PublicKey[],
-  collectionPublicKeys: PublicKey[],
-  collectionAttributePublicKeys: PublicKey[],
-  instructionPublicKeys: PublicKey[],
-  instructionArgumentPublicKeys: PublicKey[],
-  instructionAccountPublicKeys: PublicKey[],
-  instructionRelationPublicKeys: PublicKey[]
+  workspacePublicKey: PublicKey
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
-    addAllInstructionsToTransaction(
-      getDeleteWorkspaceInstructions(
-        authority,
-        workspacePublicKey,
-        applicationPublicKeys,
-        collectionPublicKeys,
-        collectionAttributePublicKeys,
-        instructionPublicKeys,
-        instructionArgumentPublicKeys,
-        instructionAccountPublicKeys,
-        instructionRelationPublicKeys
-      )
+    addInstructionToTransaction(
+      getDeleteWorkspaceInstruction(authority, workspacePublicKey)
     )
   );
 };

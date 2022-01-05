@@ -7,12 +7,14 @@ import { addInstructionToTransaction } from '../../../operators';
 export const getDeleteCollectionAttributeTransaction = (
   connection: Connection,
   authority: PublicKey,
+  collectionPublicKey: PublicKey,
   collectionAttributePublicKey: PublicKey
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
     addInstructionToTransaction(
       getDeleteCollectionAttributeInstruction(
         authority,
+        collectionPublicKey,
         collectionAttributePublicKey
       )
     )

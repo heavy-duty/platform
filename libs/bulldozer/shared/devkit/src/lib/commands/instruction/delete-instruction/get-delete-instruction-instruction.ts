@@ -3,11 +3,13 @@ import { bulldozerProgram } from '../../../programs';
 
 export const getDeleteInstructionInstruction = (
   authority: PublicKey,
+  applicationPublicKey: PublicKey,
   instructionPublicKey: PublicKey
 ): TransactionInstruction => {
   return bulldozerProgram.instruction.deleteInstruction({
     accounts: {
       instruction: instructionPublicKey,
+      application: applicationPublicKey,
       authority: authority,
     },
   });

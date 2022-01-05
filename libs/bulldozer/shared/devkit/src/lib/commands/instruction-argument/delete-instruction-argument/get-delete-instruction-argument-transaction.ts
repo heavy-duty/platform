@@ -7,12 +7,14 @@ import { addInstructionToTransaction } from '../../../operators';
 export const getDeleteInstructionArgumentTransaction = (
   connection: Connection,
   authority: PublicKey,
+  instructionPublicKey: PublicKey,
   instructionArgumentPublicKey: PublicKey
 ): Observable<Transaction> => {
   return createTransaction(connection, authority).pipe(
     addInstructionToTransaction(
       getDeleteInstructionArgumentInstruction(
         authority,
+        instructionPublicKey,
         instructionArgumentPublicKey
       )
     )
