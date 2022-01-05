@@ -1,2 +1,2 @@
-export * from './get-update-collection-attribute-instruction';
-export * from './get-update-collection-attribute-transaction';
+export * from './create-update-collection-attribute-instruction';
+export * from './create-update-collection-attribute-transaction';

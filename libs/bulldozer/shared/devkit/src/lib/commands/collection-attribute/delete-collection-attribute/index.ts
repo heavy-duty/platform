@@ -1,2 +1,2 @@
-export * from './get-delete-collection-attribute-instruction';
-export * from './get-delete-collection-attribute-transaction';
+export * from './create-delete-collection-attribute-instruction';
+export * from './create-delete-collection-attribute-transaction';

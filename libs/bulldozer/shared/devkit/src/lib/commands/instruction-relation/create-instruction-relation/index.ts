@@ -1,2 +1,2 @@
-export * from './get-create-instruction-relation-instruction';
-export * from './get-create-instruction-relation-transaction';
+export * from './create-create-instruction-relation-instruction';
+export * from './create-create-instruction-relation-transaction';

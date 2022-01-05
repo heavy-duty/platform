@@ -1,2 +1,2 @@
-export * from './get-update-collection-instruction';
-export * from './get-update-collection-transaction';
+export * from './create-update-collection-instruction';
+export * from './create-update-collection-transaction';

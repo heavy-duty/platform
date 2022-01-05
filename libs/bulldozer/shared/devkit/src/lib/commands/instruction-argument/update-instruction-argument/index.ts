@@ -1,2 +1,2 @@
-export * from './get-update-instruction-argument-instruction';
-export * from './get-update-instruction-argument-transaction';
+export * from './create-update-instruction-argument-instruction';
+export * from './create-update-instruction-argument-transaction';

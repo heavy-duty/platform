@@ -1,2 +1,2 @@
-export * from './get-delete-workspace-instruction';
-export * from './get-delete-workspace-transaction';
+export * from './create-delete-workspace-instruction';
+export * from './create-delete-workspace-transaction';

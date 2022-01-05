@@ -1,2 +1,2 @@
-export * from './get-create-application-instruction';
-export * from './get-create-application-transaction';
+export * from './create-create-application-instruction';
+export * from './create-create-application-transaction';

@@ -3,6 +3,31 @@ import {
   Collection,
   CollectionAttribute,
   CollectionAttributeDto,
+  createCreateApplicationTransaction,
+  createCreateCollectionAttributeTransaction,
+  createCreateCollectionTransaction,
+  createCreateInstructionAccountTransaction,
+  createCreateInstructionArgumentTransaction,
+  createCreateInstructionRelationTransaction,
+  createCreateInstructionTransaction,
+  createCreateWorkspaceTransaction,
+  createDeleteApplicationTransaction,
+  createDeleteCollectionAttributeTransaction,
+  createDeleteCollectionTransaction,
+  createDeleteInstructionAccountTransaction,
+  createDeleteInstructionArgumentTransaction,
+  createDeleteInstructionRelationTransaction,
+  createDeleteInstructionTransaction,
+  createDeleteWorkspaceTransaction,
+  createUpdateApplicationTransaction,
+  createUpdateCollectionAttributeTransaction,
+  createUpdateCollectionTransaction,
+  createUpdateInstructionAccountTransaction,
+  createUpdateInstructionArgumentTransaction,
+  createUpdateInstructionBodyTransaction,
+  createUpdateInstructionRelationTransaction,
+  createUpdateInstructionTransaction,
+  createUpdateWorkspaceTransaction,
   Document,
   findInstructionRelationAddress,
   getApplication,
@@ -10,36 +35,11 @@ import {
   getCollection,
   getCollectionAttributesByCollection,
   getCollectionsByApplication,
-  getCreateApplicationTransaction,
-  getCreateCollectionAttributeTransaction,
-  getCreateCollectionTransaction,
-  getCreateInstructionAccountTransaction,
-  getCreateInstructionArgumentTransaction,
-  getCreateInstructionRelationTransaction,
-  getCreateInstructionTransaction,
-  getCreateWorkspaceTransaction,
-  getDeleteApplicationTransaction,
-  getDeleteCollectionAttributeTransaction,
-  getDeleteCollectionTransaction,
-  getDeleteInstructionAccountTransaction,
-  getDeleteInstructionArgumentTransaction,
-  getDeleteInstructionRelationTransaction,
-  getDeleteInstructionTransaction,
-  getDeleteWorkspaceTransaction,
   getInstruction,
   getInstructionAccountsByInstruction,
   getInstructionArgumentsByInstruction,
   getInstructionRelationsByInstruction,
   getInstructionsByApplication,
-  getUpdateApplicationTransaction,
-  getUpdateCollectionAttributeTransaction,
-  getUpdateCollectionTransaction,
-  getUpdateInstructionAccountTransaction,
-  getUpdateInstructionArgumentTransaction,
-  getUpdateInstructionBodyTransaction,
-  getUpdateInstructionRelationTransaction,
-  getUpdateInstructionTransaction,
-  getUpdateWorkspaceTransaction,
   getWorkspace,
   getWorkspacesByAuthority,
   Instruction,
@@ -204,7 +204,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateWorkspaceTransaction(
+        createCreateWorkspaceTransaction(
           connection,
           authority,
           workspaceKeypair,
@@ -217,7 +217,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateWorkspace(workspaceId: string, workspaceName: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateWorkspaceTransaction(
+        createUpdateWorkspaceTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -230,7 +230,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   deleteWorkspace(workspaceId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteWorkspaceTransaction(
+        createDeleteWorkspaceTransaction(
           connection,
           authority,
           new PublicKey(workspaceId)
@@ -290,7 +290,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateApplicationTransaction(
+        createCreateApplicationTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -312,7 +312,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateApplication(applicationId: string, applicationName: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateApplicationTransaction(
+        createUpdateApplicationTransaction(
           connection,
           authority,
           new PublicKey(applicationId),
@@ -325,7 +325,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   deleteApplication(workspaceId: string, applicationId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteApplicationTransaction(
+        createDeleteApplicationTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -391,7 +391,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateCollectionTransaction(
+        createCreateCollectionTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -414,7 +414,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateCollection(collectionId: string, collectionName: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateCollectionTransaction(
+        createUpdateCollectionTransaction(
           connection,
           authority,
           new PublicKey(collectionId),
@@ -427,7 +427,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   deleteCollection(applicationId: string, collectionId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteCollectionTransaction(
+        createDeleteCollectionTransaction(
           connection,
           authority,
           new PublicKey(applicationId),
@@ -489,7 +489,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateCollectionAttributeTransaction(
+        createCreateCollectionAttributeTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -516,7 +516,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateCollectionAttributeTransaction(
+        createUpdateCollectionAttributeTransaction(
           connection,
           authority,
           new PublicKey(collectionAttributeId),
@@ -532,7 +532,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteCollectionAttributeTransaction(
+        createDeleteCollectionAttributeTransaction(
           connection,
           authority,
           new PublicKey(collectionId),
@@ -610,7 +610,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateInstructionTransaction(
+        createCreateInstructionTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -633,7 +633,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateInstruction(instructionId: string, instructionName: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateInstructionTransaction(
+        createUpdateInstructionTransaction(
           connection,
           authority,
           new PublicKey(instructionId),
@@ -646,7 +646,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   updateInstructionBody(instructionId: string, instructionBody: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateInstructionBodyTransaction(
+        createUpdateInstructionBodyTransaction(
           connection,
           authority,
           new PublicKey(instructionId),
@@ -659,7 +659,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   deleteInstruction(applicationId: string, instructionId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteInstructionTransaction(
+        createDeleteInstructionTransaction(
           connection,
           authority,
           new PublicKey(applicationId),
@@ -721,7 +721,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateInstructionAccountTransaction(
+        createCreateInstructionAccountTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -748,7 +748,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateInstructionAccountTransaction(
+        createUpdateInstructionAccountTransaction(
           connection,
           authority,
           new PublicKey(instructionAccountId),
@@ -764,7 +764,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteInstructionAccountTransaction(
+        createDeleteInstructionAccountTransaction(
           connection,
           authority,
           new PublicKey(instructionId),
@@ -831,7 +831,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getCreateInstructionArgumentTransaction(
+        createCreateInstructionArgumentTransaction(
           connection,
           authority,
           new PublicKey(workspaceId),
@@ -858,7 +858,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateInstructionArgumentTransaction(
+        createUpdateInstructionArgumentTransaction(
           connection,
           authority,
           new PublicKey(instructionArgumentId),
@@ -874,7 +874,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteInstructionArgumentTransaction(
+        createDeleteInstructionArgumentTransaction(
           connection,
           authority,
           new PublicKey(instructionId),
@@ -945,7 +945,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(toId)
         ).pipe(
           concatMap(([relationPublicKey, relationBump]) =>
-            getCreateInstructionRelationTransaction(
+            createCreateInstructionRelationTransaction(
               connection,
               authority,
               new PublicKey(workspaceId),
@@ -970,7 +970,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getUpdateInstructionRelationTransaction(
+        createUpdateInstructionRelationTransaction(
           connection,
           authority,
           new PublicKey(instructionRelationId),
@@ -988,7 +988,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
-        getDeleteInstructionRelationTransaction(
+        createDeleteInstructionRelationTransaction(
           connection,
           authority,
           new PublicKey(fromId),
