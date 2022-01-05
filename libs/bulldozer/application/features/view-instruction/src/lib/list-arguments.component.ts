@@ -71,7 +71,7 @@ import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteArgument(argument.id)"
+                  (click)="onDeleteArgument(argument)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -95,13 +95,13 @@ export class ListArgumentsComponent {
   @Input() connected?: boolean | null = null;
   @Input() arguments?: Document<InstructionArgument>[] | null = null;
   @Output() updateArgument = new EventEmitter<Document<InstructionArgument>>();
-  @Output() deleteArgument = new EventEmitter<string>();
+  @Output() deleteArgument = new EventEmitter<Document<InstructionArgument>>();
 
   onUpdateArgument(argument: Document<InstructionArgument>) {
     this.updateArgument.emit(argument);
   }
 
-  onDeleteArgument(argumentId: string) {
-    this.deleteArgument.emit(argumentId);
+  onDeleteArgument(argument: Document<InstructionArgument>) {
+    this.deleteArgument.emit(argument);
   }
 }

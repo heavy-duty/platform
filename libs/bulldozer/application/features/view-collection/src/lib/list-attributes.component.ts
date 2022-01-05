@@ -71,7 +71,7 @@ import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteAttribute(attribute.id)"
+                  (click)="onDeleteAttribute(attribute)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -95,13 +95,13 @@ export class ListAttributesComponent {
   @Input() connected?: boolean | null = null;
   @Input() attributes?: Document<CollectionAttribute>[] | null = null;
   @Output() updateAttribute = new EventEmitter<Document<CollectionAttribute>>();
-  @Output() deleteAttribute = new EventEmitter<string>();
+  @Output() deleteAttribute = new EventEmitter<Document<CollectionAttribute>>();
 
   onUpdateAttribute(attributes: Document<CollectionAttribute>) {
     this.updateAttribute.emit(attributes);
   }
 
-  onDeleteAttribute(attributeId: string) {
-    this.deleteAttribute.emit(attributeId);
+  onDeleteAttribute(attribute: Document<CollectionAttribute>) {
+    this.deleteAttribute.emit(attribute);
   }
 }

@@ -91,40 +91,31 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchWorkspaces = this.effect(
-    (workspaces$: Observable<Document<Workspace>[]>) =>
-      workspaces$.pipe(
-        switchMap((workspaces) =>
-          merge(
-            ...workspaces.map((workspace) =>
-              this._bulldozerProgramStore.onWorkspaceUpdated(workspace.id).pipe(
-                tap((changes) => {
-                  if (!changes) {
-                    this._removeWorkspace(workspace.id);
-                  } else {
-                    this._setWorkspace(changes);
-                  }
-                })
-              )
+  readonly setWorkspaceId = this.updater(
+    (state, workspaceId: string | null) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
+  readonly watchWorkspaces = this.effect(() =>
+    this.workspaces$.pipe(
+      switchMap((workspaces) =>
+        merge(
+          ...workspaces.map((workspace) =>
+            this._bulldozerProgramStore.onWorkspaceUpdated(workspace.id).pipe(
+              tap((changes) => {
+                if (!changes) {
+                  this._removeWorkspace(workspace.id);
+                } else {
+                  this._setWorkspace(changes);
+                }
+              })
             )
           )
         )
       )
-  );
-
-  private readonly _onWorkspaceByAuthorityChanges = this.effect((action$) =>
-    action$.pipe(
-      switchMap(() =>
-        this._bulldozerProgramStore
-          .onWorkspaceByAuthorityChanges()
-          .pipe(tap((workspace) => this._addWorkspace(workspace)))
-      )
     )
-  );
-
-  readonly setWorkspaceId = this.effect(
-    (workspaceId$: Observable<string | null>) =>
-      workspaceId$.pipe(tap((workspaceId) => this.patchState({ workspaceId })))
   );
 
   readonly loadWorkspaces = this.effect((action$) =>
@@ -132,20 +123,22 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
       concatMap(() =>
         this._bulldozerProgramStore.getWorkspacesByAuthority().pipe(
           tapResponse(
-            (workspaces) => {
+            (workspaces) =>
               this.patchState({
                 workspacesMap: workspaces.reduce(
                   (workspacesMap, workspace) =>
                     workspacesMap.set(workspace.id, workspace),
                   new Map<string, Document<Workspace>>()
                 ),
-              });
-              this._onWorkspaceByAuthorityChanges();
-              this._watchWorkspaces(workspaces);
-            },
+              }),
             (error) => this._error.next(error)
           )
         )
+      ),
+      switchMap(() =>
+        this._bulldozerProgramStore
+          .onWorkspaceByAuthorityChanges()
+          .pipe(tap((workspace) => this._addWorkspace(workspace)))
       )
     )
   );

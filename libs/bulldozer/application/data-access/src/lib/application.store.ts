@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -20,11 +21,13 @@ import {
 } from './actions/application.actions';
 
 interface ViewModel {
+  workspaceId: string | null;
   applicationId: string | null;
   applicationsMap: Map<string, Document<Application>>;
 }
 
 const initialState: ViewModel = {
+  workspaceId: null,
   applicationId: null,
   applicationsMap: new Map<string, Document<Application>>(),
 };
@@ -39,6 +42,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     new ApplicationInit()
   );
   readonly events$ = this._events.asObservable();
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly applicationsMap$ = this.select(
     ({ applicationsMap }) => applicationsMap
@@ -95,65 +99,69 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchApplications = this.effect(
-    (applications$: Observable<Document<Application>[]>) =>
-      applications$.pipe(
-        switchMap((applications) =>
-          merge(
-            ...applications.map((application) =>
-              this._bulldozerProgramStore
-                .onApplicationUpdated(application.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeApplication(application.id);
-                    } else {
-                      this._setApplication(changes);
-                    }
-                  })
-                )
-            )
+  readonly setApplicationId = this.updater(
+    (state, applicationId: string | null) => ({
+      ...state,
+      applicationId,
+    })
+  );
+
+  readonly setWorkspaceId = this.updater(
+    (state, workspaceId: string | null) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
+  readonly watchApplications = this.effect(() =>
+    this.applications$.pipe(
+      switchMap((applications) =>
+        merge(
+          ...applications.map((application) =>
+            this._bulldozerProgramStore
+              .onApplicationUpdated(application.id)
+              .pipe(
+                tap((changes) => {
+                  if (!changes) {
+                    this._removeApplication(application.id);
+                  } else {
+                    this._setApplication(changes);
+                  }
+                })
+              )
           )
         )
       )
+    )
   );
 
-  private readonly _onApplicationByWorkspaceChanges = this.effect(
-    (workspaceId$: Observable<string>) =>
-      workspaceId$.pipe(
-        switchMap((workspaceId) =>
-          this._bulldozerProgramStore
-            .onApplicationByWorkspaceChanges(workspaceId)
-            .pipe(tap((application) => this._addApplication(application)))
-        )
+  readonly onApplicationByWorkspaceChanges = this.effect(() =>
+    this.workspaceId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((workspaceId) =>
+        this._bulldozerProgramStore
+          .onApplicationByWorkspaceChanges(workspaceId)
+          .pipe(tap((application) => this._addApplication(application)))
       )
+    )
   );
 
-  readonly setApplicationId = this.effect(
-    (applicationId$: Observable<string | null>) =>
-      applicationId$.pipe(
-        tap((applicationId) => this.patchState({ applicationId }))
-      )
-  );
-
-  readonly loadApplications = this.effect((workspaceId$: Observable<string>) =>
-    workspaceId$.pipe(
+  readonly loadApplications = this.effect(() =>
+    this.workspaceId$.pipe(
+      isNotNullOrUndefined,
       concatMap((workspaceId) =>
         this._bulldozerProgramStore
           .getApplicationsByWorkspace(workspaceId)
           .pipe(
             tapResponse(
-              (applications) => {
+              (applications) =>
                 this.patchState({
                   applicationsMap: applications.reduce(
                     (applicationsMap, application) =>
                       applicationsMap.set(application.id, application),
                     new Map<string, Document<Application>>()
                   ),
-                });
-                this._onApplicationByWorkspaceChanges(workspaceId);
-                this._watchApplications(applications);
-              },
+                }),
               (error) => this._error.next(error)
             )
           )

@@ -417,6 +417,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
   );
 
   private getErrorMessage(error: unknown) {
+    console.log(error);
     if (typeof error === 'string') {
       return error;
     } else if (error instanceof WalletError) {
@@ -430,16 +431,16 @@ export class ShellStore extends ComponentStore<ViewModel> {
 
   loadData() {
     this._workspaceStore.loadWorkspaces();
-    this._applicationStore.loadApplications(
+    this._applicationStore.setWorkspaceId(
       this._workspaceStore.workspaceId$.pipe(isNotNullOrUndefined)
     );
-    this._collectionStore.loadCollections(
+    this._collectionStore.setApplicationId(
       this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
     );
     this._collectionAttributeStore.setCollectionId(
       this._collectionStore.collectionId$
     );
-    this._instructionStore.loadInstructions(
+    this._instructionStore.setApplicationId(
       this._applicationStore.applicationId$.pipe(isNotNullOrUndefined)
     );
     this._instructionAccountStore.setInstructionId(

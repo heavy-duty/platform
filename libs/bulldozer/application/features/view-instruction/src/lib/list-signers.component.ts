@@ -75,7 +75,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteSigner(signer.id)"
+                  (click)="onDeleteSigner(signer)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -99,13 +99,13 @@ export class ListSignersComponent {
   @Input() connected?: boolean | null = null;
   @Input() signers?: Document<InstructionAccount>[] | null;
   @Output() updateSigner = new EventEmitter<Document<InstructionAccount>>();
-  @Output() deleteSigner = new EventEmitter<string>();
+  @Output() deleteSigner = new EventEmitter<Document<InstructionAccount>>();
 
   onUpdateSigner(signer: Document<InstructionAccount>) {
     this.updateSigner.emit(signer);
   }
 
-  onDeleteSigner(signerId: string) {
-    this.deleteSigner.emit(signerId);
+  onDeleteSigner(signer: Document<InstructionAccount>) {
+    this.deleteSigner.emit(signer);
   }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
+import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -96,72 +97,67 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _watchCollections = this.effect(
-    (collections$: Observable<Document<Collection>[]>) =>
-      collections$.pipe(
-        switchMap((collections) =>
-          merge(
-            ...collections.map((collection) =>
-              this._bulldozerProgramStore
-                .onCollectionUpdated(collection.id)
-                .pipe(
-                  tap((changes) => {
-                    if (!changes) {
-                      this._removeCollection(collection.id);
-                    } else {
-                      this._setCollection(changes);
-                    }
-                  })
-                )
+  readonly setCollectionId = this.updater(
+    (state, collectionId: string | null) => ({
+      ...state,
+      collectionId,
+    })
+  );
+
+  readonly setApplicationId = this.updater(
+    (state, applicationId: string | null) => ({
+      ...state,
+      applicationId,
+    })
+  );
+
+  readonly watchCollections = this.effect(() =>
+    this.collections$.pipe(
+      switchMap((collections) =>
+        merge(
+          ...collections.map((collection) =>
+            this._bulldozerProgramStore.onCollectionUpdated(collection.id).pipe(
+              tap((changes) => {
+                if (!changes) {
+                  this._removeCollection(collection.id);
+                } else {
+                  this._setCollection(changes);
+                }
+              })
             )
           )
         )
       )
+    )
   );
 
-  private readonly _onCollectionByApplicationChanges = this.effect(
-    (applicationId$: Observable<string>) =>
-      applicationId$.pipe(
-        switchMap((applicationId) =>
-          this._bulldozerProgramStore
-            .onCollectionByApplicationChanges(applicationId)
-            .pipe(tap((collection) => this._addCollection(collection)))
-        )
+  readonly onCollectionByApplicationChanges = this.effect(() =>
+    this.applicationId$.pipe(
+      isNotNullOrUndefined,
+      switchMap((applicationId) =>
+        this._bulldozerProgramStore
+          .onCollectionByApplicationChanges(applicationId)
+          .pipe(tap((collection) => this._addCollection(collection)))
       )
+    )
   );
 
-  readonly setApplicationId = this.effect(
-    (applicationId$: Observable<string | null>) =>
-      applicationId$.pipe(
-        tap((applicationId) => this.patchState({ applicationId }))
-      )
-  );
-
-  readonly setCollectionId = this.effect(
-    (collectionId$: Observable<string | null>) =>
-      collectionId$.pipe(
-        tap((collectionId) => this.patchState({ collectionId }))
-      )
-  );
-
-  readonly loadCollections = this.effect((applicationId$: Observable<string>) =>
-    applicationId$.pipe(
+  readonly loadCollections = this.effect(() =>
+    this.applicationId$.pipe(
+      isNotNullOrUndefined,
       concatMap((applicationId) =>
         this._bulldozerProgramStore
           .getCollectionsByApplication(applicationId)
           .pipe(
             tapResponse(
-              (collections) => {
+              (collections) =>
                 this.patchState({
                   collectionsMap: collections.reduce(
                     (collectionsMap, collection) =>
                       collectionsMap.set(collection.id, collection),
                     new Map<string, Document<Collection>>()
                   ),
-                });
-                this._watchCollections(collections);
-                this._onCollectionByApplicationChanges(applicationId);
-              },
+                }),
               (error) => this._error.next(error)
             )
           )

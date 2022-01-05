@@ -168,11 +168,11 @@ export class ViewCollectionStore extends ComponentStore<object> {
   );
 
   readonly deleteCollectionAttribute = this.effect(
-    (collectionAttribute$: Observable<string>) =>
+    (collectionAttribute$: Observable<Document<CollectionAttribute>>) =>
       collectionAttribute$.pipe(
-        tap((collectionAttributeId: string) =>
+        tap((collectionAttribute) =>
           this._collectionAttributeStore.deleteCollectionAttribute(
-            collectionAttributeId
+            collectionAttribute
           )
         )
       )

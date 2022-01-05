@@ -317,11 +317,11 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly deleteInstructionArgument = this.effect(
-    (instructionArgumentId$: Observable<string>) =>
-      instructionArgumentId$.pipe(
-        tap((instructionArgumentId) =>
+    (instructionArgument$: Observable<Document<InstructionArgument>>) =>
+      instructionArgument$.pipe(
+        tap((instructionArgument) =>
           this._instructionArgumentStore.deleteInstructionArgument(
-            instructionArgumentId
+            instructionArgument
           )
         )
       )
@@ -407,11 +407,11 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly deleteInstructionDocument = this.effect(
-    (instructionAccountId$: Observable<string>) =>
-      instructionAccountId$.pipe(
-        tap((instructionAccountId) =>
+    (instructionAccount$: Observable<Document<InstructionAccount>>) =>
+      instructionAccount$.pipe(
+        tap((instructionAccount) =>
           this._instructionAccountStore.deleteInstructionAccount(
-            instructionAccountId
+            instructionAccount
           )
         )
       )
@@ -495,11 +495,11 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly deleteInstructionSigner = this.effect(
-    (instructionAccountId$: Observable<string>) =>
-      instructionAccountId$.pipe(
-        tap((instructionAccountId) =>
+    (instructionAccount$: Observable<Document<InstructionAccount>>) =>
+      instructionAccount$.pipe(
+        tap((instructionAccount) =>
           this._instructionAccountStore.deleteInstructionAccount(
-            instructionAccountId
+            instructionAccount
           )
         )
       )
@@ -583,11 +583,11 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly deleteInstructionRelation = this.effect(
-    (instructionRelationId$: Observable<string>) =>
-      instructionRelationId$.pipe(
-        tap((instructionRelationId) =>
+    (instructionRelation$: Observable<Document<InstructionRelation>>) =>
+      instructionRelation$.pipe(
+        tap((instructionRelation) =>
           this._instructionRelationStore.deleteInstructionRelation(
-            instructionRelationId
+            instructionRelation
           )
         )
       )

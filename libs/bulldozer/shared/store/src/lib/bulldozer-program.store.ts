@@ -64,6 +64,7 @@ import {
   onInstructionUpdated,
   onWorkspaceByAuthorityChanges,
   onWorkspaceUpdated,
+  parseBulldozerError,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
@@ -71,6 +72,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import {
+  catchError,
   combineLatest,
   concatMap,
   Observable,
@@ -174,7 +176,8 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
                 connection,
                 Array.isArray(transactions) ? transactions : [transactions]
               )
-            )
+            ),
+            catchError((error) => throwError(() => parseBulldozerError(error)))
           );
         })
       );

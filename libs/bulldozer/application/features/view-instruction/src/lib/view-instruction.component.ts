@@ -180,8 +180,10 @@ export class ViewInstructionComponent {
     this._viewInstructionStore.updateInstructionArgument(instructionArgument);
   }
 
-  onDeleteInstructionArgument(instructionArgumentId: string) {
-    this._viewInstructionStore.deleteInstructionArgument(instructionArgumentId);
+  onDeleteInstructionArgument(
+    instructionArgument: Document<InstructionArgument>
+  ) {
+    this._viewInstructionStore.deleteInstructionArgument(instructionArgument);
   }
 
   onCreateInstructionDocument(
@@ -202,8 +204,10 @@ export class ViewInstructionComponent {
     this._viewInstructionStore.updateInstructionDocument(instructionAccount);
   }
 
-  onDeleteInstructionDocument(instructionAccountId: string) {
-    this._viewInstructionStore.deleteInstructionDocument(instructionAccountId);
+  onDeleteInstructionDocument(
+    instructionAccount: Document<InstructionAccount>
+  ) {
+    this._viewInstructionStore.deleteInstructionDocument(instructionAccount);
   }
 
   onCreateInstructionSigner(
@@ -222,8 +226,8 @@ export class ViewInstructionComponent {
     this._viewInstructionStore.updateInstructionSigner(instructionAccount);
   }
 
-  onDeleteInstructionSigner(instructionAccountId: string) {
-    this._viewInstructionStore.deleteInstructionSigner(instructionAccountId);
+  onDeleteInstructionSigner(instructionAccount: Document<InstructionAccount>) {
+    this._viewInstructionStore.deleteInstructionSigner(instructionAccount);
   }
 
   onCreateInstructionRelation(
@@ -246,7 +250,9 @@ export class ViewInstructionComponent {
     this._viewInstructionStore.updateInstructionRelation(instructionRelation);
   }
 
-  onDeleteInstructionRelation(relationId: string) {
-    this._viewInstructionStore.deleteInstructionRelation(relationId);
+  onDeleteInstructionRelation(
+    instructionRelation: Document<InstructionRelation>
+  ) {
+    this._viewInstructionStore.deleteInstructionRelation(instructionRelation);
   }
 }

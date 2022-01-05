@@ -122,7 +122,7 @@ import {
                         </button>
                         <button
                           mat-menu-item
-                          (click)="onDeleteRelation(relation.id)"
+                          (click)="onDeleteRelation(relation)"
                           [disabled]="connected === false"
                         >
                           <mat-icon>delete</mat-icon>
@@ -161,7 +161,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteDocument(document.id)"
+                  (click)="onDeleteDocument(document)"
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -194,17 +194,17 @@ export class ListDocumentsComponent {
       })[]
     | null;
   @Output() updateDocument = new EventEmitter<Document<InstructionAccount>>();
-  @Output() deleteDocument = new EventEmitter<string>();
+  @Output() deleteDocument = new EventEmitter<Document<InstructionAccount>>();
   @Output() createRelation = new EventEmitter<string>();
   @Output() updateRelation = new EventEmitter<Document<InstructionRelation>>();
-  @Output() deleteRelation = new EventEmitter<string>();
+  @Output() deleteRelation = new EventEmitter<Document<InstructionRelation>>();
 
   onUpdateDocument(document: Document<InstructionAccount>) {
     this.updateDocument.emit(document);
   }
 
-  onDeleteDocument(documentId: string) {
-    this.deleteDocument.emit(documentId);
+  onDeleteDocument(document: Document<InstructionAccount>) {
+    this.deleteDocument.emit(document);
   }
 
   onCreateRelation(documentId: string) {
@@ -219,7 +219,7 @@ export class ListDocumentsComponent {
     this.updateRelation.emit(relation);
   }
 
-  onDeleteRelation(relationId: string) {
-    this.deleteRelation.emit(relationId);
+  onDeleteRelation(instructionRelation: Document<InstructionRelation>) {
+    this.deleteRelation.emit(instructionRelation);
   }
 }

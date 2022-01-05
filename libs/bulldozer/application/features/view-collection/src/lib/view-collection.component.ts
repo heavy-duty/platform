@@ -91,7 +91,9 @@ export class ViewCollectionComponent {
     this._viewCollectionStore.updateCollectionAttribute(collectionAttribute);
   }
 
-  onDeleteCollectionAttribute(collectionAttributeId: string) {
-    this._viewCollectionStore.deleteCollectionAttribute(collectionAttributeId);
+  onDeleteCollectionAttribute(
+    collectionAttribute: Document<CollectionAttribute>
+  ) {
+    this._viewCollectionStore.deleteCollectionAttribute(collectionAttribute);
   }
 }
