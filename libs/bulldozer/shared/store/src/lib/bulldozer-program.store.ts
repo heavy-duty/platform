@@ -224,37 +224,13 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteWorkspace(
-    workspaceId: string,
-    applicationIds: string[],
-    collectionIds: string[],
-    collectionAttributeIds: string[],
-    instructionIds: string[],
-    instructionArgumentIds: string[],
-    instructionAccountIds: string[],
-    instructionRelationIds: string[]
-  ) {
+  deleteWorkspace(workspaceId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteWorkspaceTransaction(
           connection,
           authority,
-          new PublicKey(workspaceId),
-          applicationIds.map((applicationId) => new PublicKey(applicationId)),
-          collectionIds.map((collectionId) => new PublicKey(collectionId)),
-          collectionAttributeIds.map(
-            (collectionAttributeId) => new PublicKey(collectionAttributeId)
-          ),
-          instructionIds.map((instructionId) => new PublicKey(instructionId)),
-          instructionArgumentIds.map(
-            (instructionArgumentId) => new PublicKey(instructionArgumentId)
-          ),
-          instructionAccountIds.map(
-            (instructionAccountId) => new PublicKey(instructionAccountId)
-          ),
-          instructionRelationIds.map(
-            (instructionRelationId) => new PublicKey(instructionRelationId)
-          )
+          new PublicKey(workspaceId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
@@ -343,35 +319,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteApplication(
-    applicationId: string,
-    collectionIds: string[],
-    collectionAttributeIds: string[],
-    instructionIds: string[],
-    instructionArgumentIds: string[],
-    instructionAccountIds: string[],
-    instructionRelationIds: string[]
-  ) {
+  deleteApplication(workspaceId: string, applicationId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteApplicationTransaction(
           connection,
           authority,
-          new PublicKey(applicationId),
-          collectionIds.map((collectionId) => new PublicKey(collectionId)),
-          collectionAttributeIds.map(
-            (collectionAttributeId) => new PublicKey(collectionAttributeId)
-          ),
-          instructionIds.map((instructionId) => new PublicKey(instructionId)),
-          instructionArgumentIds.map(
-            (instructionArgumentId) => new PublicKey(instructionArgumentId)
-          ),
-          instructionAccountIds.map(
-            (instructionAccountId) => new PublicKey(instructionAccountId)
-          ),
-          instructionRelationIds.map(
-            (instructionRelationId) => new PublicKey(instructionRelationId)
-          )
+          new PublicKey(workspaceId),
+          new PublicKey(applicationId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
@@ -466,16 +421,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteCollection(collectionId: string, collectionAttributeIds: string[]) {
+  deleteCollection(applicationId: string, collectionId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteCollectionTransaction(
           connection,
           authority,
-          new PublicKey(collectionId),
-          collectionAttributeIds.map(
-            (collectionAttributeId) => new PublicKey(collectionAttributeId)
-          )
+          new PublicKey(applicationId),
+          new PublicKey(collectionId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
@@ -570,12 +523,16 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteCollectionAttribute(collectionAttributeId: string) {
+  deleteCollectionAttribute(
+    collectionId: string,
+    collectionAttributeId: string
+  ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteCollectionAttributeTransaction(
           connection,
           authority,
+          new PublicKey(collectionId),
           new PublicKey(collectionAttributeId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
@@ -696,27 +653,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstruction(
-    instructionId: string,
-    instructionArgumentIds: string[],
-    instructionAccountIds: string[],
-    instructionRelationIds: string[]
-  ) {
+  deleteInstruction(applicationId: string, instructionId: string) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteInstructionTransaction(
           connection,
           authority,
-          new PublicKey(instructionId),
-          instructionArgumentIds.map(
-            (instructionArgumentId) => new PublicKey(instructionArgumentId)
-          ),
-          instructionAccountIds.map(
-            (instructionAccountId) => new PublicKey(instructionAccountId)
-          ),
-          instructionRelationIds.map(
-            (instructionRelationId) => new PublicKey(instructionRelationId)
-          )
+          new PublicKey(applicationId),
+          new PublicKey(instructionId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
     );
@@ -811,12 +755,16 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionAccount(instructionAccountId: string) {
+  deleteInstructionAccount(
+    instructionId: string,
+    instructionAccountId: string
+  ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteInstructionAccountTransaction(
           connection,
           authority,
+          new PublicKey(instructionId),
           new PublicKey(instructionAccountId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
@@ -917,12 +865,16 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionArgument(instructionArgumentId: string) {
+  deleteInstructionArgument(
+    instructionId: string,
+    instructionArgumentId: string
+  ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteInstructionArgumentTransaction(
           connection,
           authority,
+          new PublicKey(instructionId),
           new PublicKey(instructionArgumentId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )
@@ -1026,12 +978,18 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  deleteInstructionRelation(instructionRelationId: string) {
+  deleteInstructionRelation(
+    fromId: string,
+    toId: string,
+    instructionRelationId: string
+  ) {
     return this.context.pipe(
       concatMap(({ connection, authority }) =>
         getDeleteInstructionRelationTransaction(
           connection,
           authority,
+          new PublicKey(fromId),
+          new PublicKey(toId),
           new PublicKey(instructionRelationId)
         ).pipe(this._signSendAndConfirmTransactions(connection))
       )

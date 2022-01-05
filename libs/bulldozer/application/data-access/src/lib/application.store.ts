@@ -14,6 +14,7 @@ import {
 import {
   ApplicationActions,
   ApplicationCreated,
+  ApplicationDeleted,
   ApplicationInit,
   ApplicationUpdated,
 } from './actions/application.actions';
@@ -199,31 +200,18 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
   readonly deleteApplication = this.effect(
     (application$: Observable<Document<Application>>) =>
-      application$
-        .pipe
-        /* concatMap((application) => {
-          const applicationData = this._workspaceStore.getApplicationData(
-            application.id
-          );
-
-          return this._bulldozerProgramStore
-            .deleteApplication(
-              application.id,
-              applicationData.collections.map(({ id }) => id),
-              applicationData.collectionAttributes.map(({ id }) => id),
-              applicationData.instructions.map(({ id }) => id),
-              applicationData.instructionArguments.map(({ id }) => id),
-              applicationData.instructionAccounts.map(({ id }) => id),
-              applicationData.instructionRelations.map(({ id }) => id)
-            )
+      application$.pipe(
+        concatMap((application) =>
+          this._bulldozerProgramStore
+            .deleteApplication(application.data.workspace, application.id)
             .pipe(
               tapResponse(
                 () => this._events.next(new ApplicationDeleted(application.id)),
                 (error) => this._error.next(error)
               )
-            );
-        }) */
-        ()
+            )
+        )
+      )
   );
 
   reload() {

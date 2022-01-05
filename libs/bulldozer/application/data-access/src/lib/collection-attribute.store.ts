@@ -132,11 +132,9 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
         this._bulldozerProgramStore
           .onCollectionAttributeByCollectionChanges(collectionId)
           .pipe(
-            tap({
-              next: (collectionAttribute) =>
-                this._addCollectionAttribute(collectionAttribute),
-              complete: () => console.log('do I complete?'),
-            })
+            tap((collectionAttribute) =>
+              this._addCollectionAttribute(collectionAttribute)
+            )
           )
       )
     )
@@ -221,16 +219,19 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteCollectionAttribute = this.effect(
-    (attributeId$: Observable<string>) =>
-      attributeId$.pipe(
-        concatMap((attributeId) =>
+    (collectionAttribute$: Observable<Document<CollectionAttribute>>) =>
+      collectionAttribute$.pipe(
+        concatMap((collectionAttribute) =>
           this._bulldozerProgramStore
-            .deleteCollectionAttribute(attributeId)
+            .deleteCollectionAttribute(
+              collectionAttribute.data.collection,
+              collectionAttribute.id
+            )
             .pipe(
               tapResponse(
                 () =>
                   this._events.next(
-                    new CollectionAttributeDeleted(attributeId)
+                    new CollectionAttributeDeleted(collectionAttribute.id)
                   ),
                 (error) => this._error.next(error)
               )

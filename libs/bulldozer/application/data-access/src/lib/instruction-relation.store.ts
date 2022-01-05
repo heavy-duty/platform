@@ -221,16 +221,20 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionRelation = this.effect(
-    (instructionRelationId$: Observable<string>) =>
-      instructionRelationId$.pipe(
-        concatMap((instructionRelationId) =>
+    (instructionRelation$: Observable<Document<InstructionRelation>>) =>
+      instructionRelation$.pipe(
+        concatMap((instructionRelation) =>
           this._bulldozerProgramStore
-            .deleteInstructionRelation(instructionRelationId)
+            .deleteInstructionRelation(
+              instructionRelation.data.from,
+              instructionRelation.data.to,
+              instructionRelation.id
+            )
             .pipe(
               tapResponse(
                 () =>
                   this._events.next(
-                    new InstructionRelationDeleted(instructionRelationId)
+                    new InstructionRelationDeleted(instructionRelation.id)
                   ),
                 (error) => this._error.next(error)
               )

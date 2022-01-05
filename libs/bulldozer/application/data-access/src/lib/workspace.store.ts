@@ -14,6 +14,7 @@ import {
 import {
   WorkspaceActions,
   WorkspaceCreated,
+  WorkspaceDeleted,
   WorkspaceInit,
   WorkspaceUpdated,
 } from './actions/workspace.actions';
@@ -186,30 +187,16 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly deleteWorkspace = this.effect(
     (workspace$: Observable<Document<Workspace>>) =>
-      workspace$
-        .pipe
-        /* concatMap((workspace) => {
-          const workspaceData = this.getWorkspaceData(workspace.id);
-
-          return this._bulldozerProgramStore
-            .deleteWorkspace(
-              workspace.id,
-              workspaceData.applications.map(({ id }) => id),
-              workspaceData.collections.map(({ id }) => id),
-              workspaceData.collectionAttributes.map(({ id }) => id),
-              workspaceData.instructions.map(({ id }) => id),
-              workspaceData.instructionArguments.map(({ id }) => id),
-              workspaceData.instructionAccounts.map(({ id }) => id),
-              workspaceData.instructionRelations.map(({ id }) => id)
+      workspace$.pipe(
+        concatMap((workspace) =>
+          this._bulldozerProgramStore.deleteWorkspace(workspace.id).pipe(
+            tapResponse(
+              () => this._events.next(new WorkspaceDeleted(workspace.id)),
+              (error) => this._error.next(error)
             )
-            .pipe(
-              tapResponse(
-                () => this._events.next(new WorkspaceDeleted(workspace.id)),
-                (error) => this._error.next(error)
-              )
-            );
-        }) */
-        ()
+          )
+        )
+      )
   );
 
   readonly downloadWorkspace = this.effect(

@@ -219,16 +219,23 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionAccount = this.effect(
-    (argumentId$: Observable<string>) =>
-      argumentId$.pipe(
-        concatMap((argumentId) =>
-          this._bulldozerProgramStore.deleteInstructionAccount(argumentId).pipe(
-            tapResponse(
-              () =>
-                this._events.next(new InstructionAccountDeleted(argumentId)),
-              (error) => this._error.next(error)
+    (instructionAccount$: Observable<Document<InstructionAccount>>) =>
+      instructionAccount$.pipe(
+        concatMap((instructionAccount) =>
+          this._bulldozerProgramStore
+            .deleteInstructionAccount(
+              instructionAccount.data.instruction,
+              instructionAccount.id
             )
-          )
+            .pipe(
+              tapResponse(
+                () =>
+                  this._events.next(
+                    new InstructionAccountDeleted(instructionAccount.id)
+                  ),
+                (error) => this._error.next(error)
+              )
+            )
         )
       )
   );

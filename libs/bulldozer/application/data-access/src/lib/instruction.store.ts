@@ -14,6 +14,7 @@ import {
 import {
   InstructionActions,
   InstructionCreated,
+  InstructionDeleted,
   InstructionInit,
   InstructionUpdated,
 } from './actions/instruction.actions';
@@ -224,28 +225,18 @@ export class InstructionStore extends ComponentStore<ViewModel> {
 
   readonly deleteInstruction = this.effect(
     (instruction$: Observable<Document<Instruction>>) =>
-      instruction$
-        .pipe
-        /* concatMap((instruction) => {
-          const instructionData = this._workspaceStore.getInstructionData(
-            instruction.id
-          );
-
-          return this._bulldozerProgramStore
-            .deleteInstruction(
-              instruction.id,
-              instructionData.instructionArguments.map(({ id }) => id),
-              instructionData.instructionAccounts.map(({ id }) => id),
-              instructionData.instructionRelations.map(({ id }) => id)
-            )
+      instruction$.pipe(
+        concatMap((instruction) =>
+          this._bulldozerProgramStore
+            .deleteInstruction(instruction.data.application, instruction.id)
             .pipe(
               tapResponse(
                 () => this._events.next(new InstructionDeleted(instruction.id)),
                 (error) => this._error.next(error)
               )
-            );
-        }) */
-        ()
+            )
+        )
+      )
   );
 
   reload() {

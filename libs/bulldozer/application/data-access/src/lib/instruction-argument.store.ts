@@ -219,15 +219,20 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionArgument = this.effect(
-    (argumentId$: Observable<string>) =>
-      argumentId$.pipe(
-        concatMap((argumentId) =>
+    (instructionArgument$: Observable<Document<InstructionArgument>>) =>
+      instructionArgument$.pipe(
+        concatMap((instructionArgument) =>
           this._bulldozerProgramStore
-            .deleteInstructionArgument(argumentId)
+            .deleteInstructionArgument(
+              instructionArgument.data.instruction,
+              instructionArgument.id
+            )
             .pipe(
               tapResponse(
                 () =>
-                  this._events.next(new InstructionArgumentDeleted(argumentId)),
+                  this._events.next(
+                    new InstructionArgumentDeleted(instructionArgument.id)
+                  ),
                 (error) => this._error.next(error)
               )
             )

@@ -14,6 +14,7 @@ import {
 import {
   CollectionActions,
   CollectionCreated,
+  CollectionDeleted,
   CollectionInit,
   CollectionUpdated,
 } from './actions/collection.actions';
@@ -213,26 +214,18 @@ export class CollectionStore extends ComponentStore<ViewModel> {
 
   readonly deleteCollection = this.effect(
     (collection$: Observable<Document<Collection>>) =>
-      collection$
-        .pipe
-        /* concatMap((collection) => {
-          const collectionData = this._workspaceStore.getCollectionData(
-            collection.id
-          );
-
-          return this._bulldozerProgramStore
-            .deleteCollection(
-              collection.id,
-              collectionData.collectionAttributes.map(({ id }) => id)
-            )
+      collection$.pipe(
+        concatMap((collection) =>
+          this._bulldozerProgramStore
+            .deleteCollection(collection.data.application, collection.id)
             .pipe(
               tapResponse(
                 () => this._events.next(new CollectionDeleted(collection.id)),
                 (error) => this._error.next(error)
               )
-            );
-        }) */
-        ()
+            )
+        )
+      )
   );
 
   reload() {
