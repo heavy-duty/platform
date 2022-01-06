@@ -1,19 +1,16 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import { map } from 'rxjs/operators';
-import {
-  fromProgramAccountChange,
-  getFiltersByAuthority,
-} from '../../operations';
-import { WORKSPACE_ACCOUNT_NAME } from '../../utils';
+import { encodeFilters, fromProgramAccountChange } from '../../operations';
+import { WorkspaceFilters, WORKSPACE_ACCOUNT_NAME } from '../../utils';
 import { createWorkspaceDocument } from './utils';
 
-export const onWorkspaceByAuthorityChanges = (
+export const onWorkspacesChanges = (
   connection: Connection,
-  authority: PublicKey
+  filters: WorkspaceFilters
 ) =>
   fromProgramAccountChange(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByAuthority(WORKSPACE_ACCOUNT_NAME, authority),
+    filters: encodeFilters(WORKSPACE_ACCOUNT_NAME, filters),
   }).pipe(
     map(({ keyedAccountInfo }) =>
       createWorkspaceDocument(

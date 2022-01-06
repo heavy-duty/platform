@@ -125,12 +125,12 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onInstructionAccountByInstructionChanges = this.effect(() =>
+  readonly onInstructionAccountsChanges = this.effect(() =>
     this.instructionId$.pipe(
       isNotNullOrUndefined,
       switchMap((instructionId) =>
         this._bulldozerProgramStore
-          .onInstructionAccountByInstructionChanges(instructionId)
+          .onInstructionAccountsChanges({ instruction: instructionId })
           .pipe(
             tap((instructionAccount) =>
               this._addInstructionAccount(instructionAccount)
@@ -145,7 +145,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       concatMap((instructionId) =>
         this._bulldozerProgramStore
-          .getInstructionAccountsByInstruction(instructionId)
+          .getInstructionAccounts({ instruction: instructionId })
           .pipe(
             tapResponse(
               (instructionAccounts) =>

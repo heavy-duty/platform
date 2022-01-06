@@ -20,8 +20,15 @@ export class WorkspaceDeleted implements Action<string> {
   constructor(public payload: string) {}
 }
 
+export class WorkspaceDownloaded implements Action<string> {
+  type = WorkspaceActionTypes.WorkspaceDonwloaded;
+
+  constructor(public payload: string) {}
+}
+
 export type WorkspaceActions =
   | WorkspaceInit
   | WorkspaceCreated
   | WorkspaceUpdated
-  | WorkspaceDeleted;
+  | WorkspaceDeleted
+  | WorkspaceDownloaded;

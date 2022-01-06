@@ -170,8 +170,8 @@ export class ShellComponent implements OnInit {
     this._shellStore.deleteWorkspace(workspace);
   }
 
-  onDownloadWorkspace(workspace: Document<Workspace>) {
-    this._shellStore.downloadWorkspace(workspace);
+  onDownloadWorkspace(workspaceId: string) {
+    this._shellStore.downloadWorkspace(workspaceId);
   }
 
   onCreateApplication(workspaceId: string) {

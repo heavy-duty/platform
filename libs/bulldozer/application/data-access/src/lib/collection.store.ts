@@ -136,7 +136,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       switchMap((applicationId) =>
         this._bulldozerProgramStore
-          .onCollectionByApplicationChanges(applicationId)
+          .onCollectionsChanges({ application: applicationId })
           .pipe(tap((collection) => this._addCollection(collection)))
       )
     )
@@ -147,7 +147,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       concatMap((applicationId) =>
         this._bulldozerProgramStore
-          .getCollectionsByApplication(applicationId)
+          .getCollections({ application: applicationId })
           .pipe(
             tapResponse(
               (collections) =>

@@ -125,12 +125,12 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onCollectionAttributeByCollectionChanges = this.effect(() =>
+  readonly onCollectionAttributesChanges = this.effect(() =>
     this.collectionId$.pipe(
       isNotNullOrUndefined,
       switchMap((collectionId) =>
         this._bulldozerProgramStore
-          .onCollectionAttributeByCollectionChanges(collectionId)
+          .onCollectionAttributesChanges({ collection: collectionId })
           .pipe(
             tap((collectionAttribute) =>
               this._addCollectionAttribute(collectionAttribute)
@@ -145,7 +145,7 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       concatMap((collectionId) =>
         this._bulldozerProgramStore
-          .getCollectionAttributesByCollection(collectionId)
+          .getCollectionAttributes({ collection: collectionId })
           .pipe(
             tapResponse(
               (collectionAttributes) =>

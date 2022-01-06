@@ -133,3 +133,72 @@ export interface Document<T> {
   data: T;
   metadata: AccountInfo<Buffer>;
 }
+
+export const AUTHORITY_FIELD_LABEL = 'authority';
+export const WORKSPACE_FIELD_LABEL = 'workspace';
+export const APPLICATION_FIELD_LABEL = 'application';
+export const COLLECTION_FIELD_LABEL = 'collection';
+export const INSTRUCTION_FIELD_LABEL = 'instruction';
+
+export type FieldLabel =
+  | typeof AUTHORITY_FIELD_LABEL
+  | typeof WORKSPACE_FIELD_LABEL
+  | typeof APPLICATION_FIELD_LABEL
+  | typeof INSTRUCTION_FIELD_LABEL
+  | typeof COLLECTION_FIELD_LABEL;
+
+export type Filters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL
+    | typeof COLLECTION_FIELD_LABEL
+    | typeof INSTRUCTION_FIELD_LABEL]: string;
+}>;
+
+export type WorkspaceFilters = Partial<{
+  [key in typeof AUTHORITY_FIELD_LABEL]: string;
+}>;
+export type ApplicationFilters = Partial<{
+  [key in typeof AUTHORITY_FIELD_LABEL | typeof WORKSPACE_FIELD_LABEL]: string;
+}>;
+export type CollectionFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL]: string;
+}>;
+export type CollectionAttributeFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL
+    | typeof COLLECTION_FIELD_LABEL]: string;
+}>;
+export type InstructionFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL]: string;
+}>;
+export type InstructionAccountFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL
+    | typeof INSTRUCTION_FIELD_LABEL]: string;
+}>;
+export type InstructionArgumentFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL
+    | typeof INSTRUCTION_FIELD_LABEL]: string;
+}>;
+export type InstructionRelationFilters = Partial<{
+  [key in
+    | typeof AUTHORITY_FIELD_LABEL
+    | typeof WORKSPACE_FIELD_LABEL
+    | typeof APPLICATION_FIELD_LABEL
+    | typeof INSTRUCTION_FIELD_LABEL]: string;
+}>;

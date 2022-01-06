@@ -135,12 +135,12 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onApplicationByWorkspaceChanges = this.effect(() =>
+  readonly onApplicationsChanges = this.effect(() =>
     this.workspaceId$.pipe(
       isNotNullOrUndefined,
       switchMap((workspaceId) =>
         this._bulldozerProgramStore
-          .onApplicationByWorkspaceChanges(workspaceId)
+          .onApplicationsChanges({ workspace: workspaceId })
           .pipe(tap((application) => this._addApplication(application)))
       )
     )
@@ -151,7 +151,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       concatMap((workspaceId) =>
         this._bulldozerProgramStore
-          .getApplicationsByWorkspace(workspaceId)
+          .getApplications({ workspace: workspaceId })
           .pipe(
             tapResponse(
               (applications) =>

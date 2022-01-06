@@ -19,9 +19,6 @@
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],
-      "@heavy-duty/bulldozer-generator": [
-        "libs/bulldozer/shared/generator/src/index.ts"
-      ],
       "@heavy-duty/bulldozer-store": [
         "libs/bulldozer/shared/store/src/index.ts"
       ],
@@ -57,9 +54,6 @@
       ],
       "@heavy-duty/bulldozer/application/features/edit-workspace": [
         "libs/bulldozer/application/features/edit-workspace/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/application/features/navigation": [
-        "libs/bulldozer/application/features/navigation/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/features/unauthorized-access": [
         "libs/bulldozer/application/features/unauthorized-access/src/index.ts"
@@ -106,6 +100,10 @@
       "@heavy-duty/bulldozer/application/utils/services/dark-theme": [
         "libs/bulldozer/application/utils/services/dark-theme/src/index.ts"
       ],
+      "@heavy-duty/code-generator-2": [
+        "libs/bulldozer/shared/generator2/src/index.ts"
+      ],
+      "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ng-anchor": ["libs/shared/ng-anchor/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
         "libs/shared/utils/operators/src/index.ts"

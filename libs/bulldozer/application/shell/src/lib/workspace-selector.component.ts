@@ -45,7 +45,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
                 [attr.aria-label]="
                   'Download ' + workspace.data.name + ' workspace'
                 "
-                (click)="onDownloadWorkspace(workspace)"
+                (click)="onDownloadWorkspace(workspace.id)"
               >
                 <mat-icon>download</mat-icon>
               </button>
@@ -111,7 +111,7 @@ export class WorkspaceSelectorComponent {
   @Output() createWorkspace = new EventEmitter();
   @Output() updateWorkspace = new EventEmitter<Document<Workspace>>();
   @Output() deleteWorkspace = new EventEmitter<Document<Workspace>>();
-  @Output() downloadWorkspace = new EventEmitter<Document<Workspace>>();
+  @Output() downloadWorkspace = new EventEmitter<string>();
 
   private _closeMenu() {
     if (this._workspaceMenu) {
@@ -134,8 +134,8 @@ export class WorkspaceSelectorComponent {
     this.deleteWorkspace.emit(workspace);
   }
 
-  onDownloadWorkspace(workspace: Document<Workspace>) {
+  onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
-    this.downloadWorkspace.emit(workspace);
+    this.downloadWorkspace.emit(workspaceId);
   }
 }

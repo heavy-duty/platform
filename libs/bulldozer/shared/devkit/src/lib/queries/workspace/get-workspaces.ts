@@ -1,17 +1,22 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByAuthority, getProgramAccounts } from '../../operations';
-import { Document, Workspace, WORKSPACE_ACCOUNT_NAME } from '../../utils';
+import { encodeFilters, getProgramAccounts } from '../../operations';
+import {
+  Document,
+  Workspace,
+  WorkspaceFilters,
+  WORKSPACE_ACCOUNT_NAME,
+} from '../../utils';
 import { createWorkspaceDocument } from './utils';
 
-export const getWorkspacesByAuthority = (
+export const getWorkspaces = (
   connection: Connection,
-  authority: PublicKey
+  filters: WorkspaceFilters
 ): Observable<Document<Workspace>[]> => {
   return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByAuthority(WORKSPACE_ACCOUNT_NAME, authority),
+    filters: encodeFilters(WORKSPACE_ACCOUNT_NAME, filters),
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>

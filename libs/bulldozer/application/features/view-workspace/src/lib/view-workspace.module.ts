@@ -9,7 +9,6 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { NavigationModule } from '@heavy-duty/bulldozer/application/features/navigation';
 import { PageHeaderModule } from '@heavy-duty/bulldozer/application/ui/directives/page-header';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ApplicationSelectorComponent } from './application-selector.component';
@@ -36,7 +35,6 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     MatTooltipModule,
     LayoutModule,
     ReactiveComponentModule,
-    NavigationModule,
     PageHeaderModule,
   ],
   declarations: [

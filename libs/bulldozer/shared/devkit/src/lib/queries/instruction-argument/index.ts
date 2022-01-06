@@ -1,3 +1,3 @@
-export * from './get-instruction-arguments-by-instruction';
-export * from './on-instruction-argument-by-instruction-changes';
+export * from './get-instruction-arguments';
 export * from './on-instruction-argument-updated';
+export * from './on-instruction-arguments-changes';

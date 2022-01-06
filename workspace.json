@@ -12,7 +12,6 @@
     "bulldozer-application-features-edit-relation": "libs/bulldozer/application/features/edit-relation",
     "bulldozer-application-features-edit-signer": "libs/bulldozer/application/features/edit-signer",
     "bulldozer-application-features-edit-workspace": "libs/bulldozer/application/features/edit-workspace",
-    "bulldozer-application-features-navigation": "libs/bulldozer/application/features/navigation",
     "bulldozer-application-features-unauthorized-access": "libs/bulldozer/application/features/unauthorized-access",
     "bulldozer-application-features-view-application": "libs/bulldozer/application/features/view-application",
     "bulldozer-application-features-view-collection": "libs/bulldozer/application/features/view-collection",

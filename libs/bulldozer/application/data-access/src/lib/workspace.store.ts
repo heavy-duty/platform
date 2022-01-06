@@ -15,6 +15,7 @@ import {
   WorkspaceActions,
   WorkspaceCreated,
   WorkspaceDeleted,
+  WorkspaceDownloaded,
   WorkspaceInit,
   WorkspaceUpdated,
 } from './actions/workspace.actions';
@@ -192,27 +193,17 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly downloadWorkspace = this.effect(
-    (workspace$: Observable<Document<Workspace>>) =>
-      workspace$
-        .pipe
-        /* map((workspace) => {
-          const workspaceData = this.getWorkspaceData(workspace.id);
-
-          return generateWorkspaceZip(
-            workspace,
-            generateWorkspaceMetadata(
-              workspaceData.applications,
-              workspaceData.collections,
-              workspaceData.collectionAttributes,
-              workspaceData.instructions,
-              workspaceData.instructionArguments,
-              workspaceData.instructionAccounts,
-              workspaceData.instructionRelations
-            )
-          );
-        }) */
-        ()
+  readonly downloadWorkspace = this.effect((workspaceId$: Observable<string>) =>
+    workspaceId$.pipe(
+      concatMap((workspaceId) =>
+        this._bulldozerProgramStore.downloadWorkspace(workspaceId).pipe(
+          tapResponse(
+            () => this._events.next(new WorkspaceDownloaded(workspaceId)),
+            (error) => this._error.next(error)
+          )
+        )
+      )
+    )
   );
 
   reload() {

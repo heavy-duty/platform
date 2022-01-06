@@ -206,7 +206,7 @@ export const generateWorkspaceZip = (
   metadata.applications.forEach((application) => {
     // Creating application folder and adding main files
     const applicationFolder = programsFolder?.folder(
-      application.name.normalCase
+      application.name.snakeCase
     );
     applicationFolder?.file('Xargo.toml', getTemplateByType('program.xargo'));
     applicationFolder?.file(

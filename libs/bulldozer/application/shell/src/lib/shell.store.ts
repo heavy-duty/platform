@@ -263,11 +263,10 @@ export class ShellStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly downloadWorkspace = this.effect(
-    (workspace$: Observable<Document<Workspace>>) =>
-      workspace$.pipe(
-        tap((workspace) => this._workspaceStore.downloadWorkspace(workspace))
-      )
+  readonly downloadWorkspace = this.effect((workspaceId$: Observable<string>) =>
+    workspaceId$.pipe(
+      tap((workspaceId) => this._workspaceStore.downloadWorkspace(workspaceId))
+    )
   );
 
   readonly createApplication = this.effect((workspaceId$: Observable<string>) =>

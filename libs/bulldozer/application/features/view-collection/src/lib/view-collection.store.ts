@@ -2,7 +2,6 @@ import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
-import { generateCollectionCode } from '@heavy-duty/bulldozer-generator';
 import {
   ApplicationStore,
   CollectionAttributeStore,
@@ -12,6 +11,7 @@ import {
 } from '@heavy-duty/bulldozer/application/data-access';
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
+import { generateCollectionCode } from '@heavy-duty/generator';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';

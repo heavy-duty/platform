@@ -3,6 +3,16 @@
   "sourceRoot": "libs/bulldozer/shared/generator/src",
   "projectType": "library",
   "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/bulldozer/shared/generator",
+        "main": "libs/bulldozer/shared/generator/src/index.ts",
+        "tsConfig": "libs/bulldozer/shared/generator/tsconfig.lib.json",
+        "assets": ["libs/bulldozer/shared/generator/*.md"]
+      }
+    },
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],

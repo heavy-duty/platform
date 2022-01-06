@@ -3,6 +3,7 @@ export enum WorkspaceActionTypes {
   WorkspaceCreated = 'Workspace created',
   WorkspaceUpdated = 'Workspace updated',
   WorkspaceDeleted = 'Workspace deleted',
+  WorkspaceDonwloaded = 'Workspace donwloaded',
 }
 
 export enum ApplicationActionTypes {

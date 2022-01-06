@@ -1,24 +1,22 @@
-import { Connection, PublicKey } from '@solana/web3.js';
+import { Connection } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { getFiltersByInstruction, getProgramAccounts } from '../../operations';
+import { encodeFilters, getProgramAccounts } from '../../operations';
 import {
   Document,
   InstructionAccount,
+  InstructionAccountFilters,
   INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
 } from '../../utils';
 import { createInstructionAccountDocument } from './utils';
 
-export const getInstructionAccountsByInstruction = (
+export const getInstructionAccounts = (
   connection: Connection,
-  instructionPublicKey: PublicKey
+  filters: InstructionAccountFilters
 ): Observable<Document<InstructionAccount>[]> => {
   return getProgramAccounts(connection, {
     commitment: connection.commitment,
-    filters: getFiltersByInstruction(
-      INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
-      instructionPublicKey
-    ),
+    filters: encodeFilters(INSTRUCTION_ACCOUNT_ACCOUNT_NAME, filters),
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>

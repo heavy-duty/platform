@@ -9,7 +9,6 @@ import {
   InstructionArgument,
   InstructionRelation,
 } from '@heavy-duty/bulldozer-devkit';
-import { generateInstructionCode } from '@heavy-duty/bulldozer-generator';
 import {
   ApplicationStore,
   CollectionStore,
@@ -25,6 +24,7 @@ import { EditDocumentComponent } from '@heavy-duty/bulldozer/application/feature
 import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
 import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
+import { generateInstructionCode } from '@heavy-duty/generator';
 import {
   isNotNullOrUndefined,
   isTruthy,
