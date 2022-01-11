@@ -122,6 +122,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionAccount],
         });
@@ -149,6 +150,7 @@ describe('instruction account', () => {
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionAccount],
         remainingAccounts: [
@@ -172,6 +174,7 @@ describe('instruction account', () => {
       assert.equal(account.kind.document.id, argumentsData.kind);
       assert.ok(account.kind.document.collection.equals(collection.publicKey));
       assert.equal(account.modifier, null);
+      assert.ok(account.createdAt.eq(account.updatedAt));
     });
 
     it('should remove collection when changing the kind', async () => {
@@ -187,6 +190,7 @@ describe('instruction account', () => {
         accounts: {
           authority: program.provider.wallet.publicKey,
           account: instructionAccount.publicKey,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
       });
       // assert
@@ -195,6 +199,7 @@ describe('instruction account', () => {
       );
       assert.ok('signer' in account.kind);
       assert.equal(account.kind.signer.id, argumentsData.kind);
+      assert.ok(account.createdAt.lte(account.updatedAt));
     });
 
     it('should delete', async () => {
@@ -215,6 +220,7 @@ describe('instruction account', () => {
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionAccount],
         remainingAccounts: [
@@ -259,6 +265,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionPayerAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionPayerAccount],
         });
@@ -281,6 +288,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionAccount],
           remainingAccounts: [
@@ -321,6 +329,7 @@ describe('instruction account', () => {
           accounts: {
             authority: program.provider.wallet.publicKey,
             account: instructionAccount.publicKey,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           remainingAccounts: [
             {
@@ -359,6 +368,7 @@ describe('instruction account', () => {
               instruction: instruction.publicKey,
               account: instructionAccount.publicKey,
               systemProgram: SystemProgram.programId,
+              clock: SYSVAR_CLOCK_PUBKEY,
             },
             signers: [instructionAccount],
             remainingAccounts: [
@@ -402,6 +412,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionAccount],
           remainingAccounts: [
@@ -452,6 +463,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionCloseAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionCloseAccount],
         });
@@ -474,6 +486,7 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
             systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
           signers: [instructionAccount],
           remainingAccounts: [
@@ -523,6 +536,7 @@ describe('instruction account', () => {
           accounts: {
             authority: program.provider.wallet.publicKey,
             account: instructionAccount.publicKey,
+            clock: SYSVAR_CLOCK_PUBKEY,
           },
         });
         // assert
@@ -558,6 +572,7 @@ describe('instruction account', () => {
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionAccount],
       });
@@ -601,6 +616,7 @@ describe('instruction account', () => {
           instruction: instruction.publicKey,
           account: instructionAccount1.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionAccount1],
         remainingAccounts: [
@@ -619,6 +635,7 @@ describe('instruction account', () => {
           instruction: instruction.publicKey,
           account: instructionAccount2.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionAccount2],
         remainingAccounts: [
@@ -701,6 +718,7 @@ describe('instruction account', () => {
         instruction: instruction.publicKey,
         account: instructionAccount.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [instructionAccount],
       remainingAccounts: [
@@ -751,6 +769,7 @@ describe('instruction account', () => {
         instruction: instruction.publicKey,
         account: instructionAccount.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [instructionAccount],
       remainingAccounts: [
@@ -811,6 +830,7 @@ describe('instruction account', () => {
           instruction: newInstruction.publicKey,
           account: newAccount.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [newAccount],
       });

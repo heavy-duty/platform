@@ -88,6 +88,7 @@ describe('instruction relation', () => {
         instruction: instruction.publicKey,
         account: from.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [from],
     });
@@ -99,6 +100,7 @@ describe('instruction relation', () => {
         instruction: instruction.publicKey,
         account: to.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [to],
     });
@@ -194,6 +196,7 @@ describe('instruction relation', () => {
         instruction: instruction.publicKey,
         account: newFrom.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [newFrom],
     });
@@ -205,6 +208,7 @@ describe('instruction relation', () => {
         instruction: instruction.publicKey,
         account: newTo.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [newTo],
     });
@@ -298,6 +302,7 @@ describe('instruction relation', () => {
           instruction: instruction.publicKey,
           account: newFrom.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [newFrom],
       });
@@ -355,6 +360,7 @@ describe('instruction relation', () => {
           instruction: instruction.publicKey,
           account: newTo.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [newTo],
       });

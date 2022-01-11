@@ -245,6 +245,7 @@ describe('instruction', () => {
           instruction: instruction.publicKey,
           account: account.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [account],
       });

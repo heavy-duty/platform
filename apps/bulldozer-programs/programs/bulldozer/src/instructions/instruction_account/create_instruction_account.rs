@@ -19,13 +19,14 @@ pub struct CreateInstructionAccountArguments {
 #[instruction(arguments: CreateInstructionAccountArguments)]
 pub struct CreateInstructionAccount<'info> {
   #[account(
-        init,
-        payer = authority,
-        // discriminator + authority + workspace + application
-        // instruction + name (size 32 + 4 ?) + kind + modifier
-        // collection + payer + close + space + quantity of relations
-        space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3 + 1
-    )]
+    init,
+    payer = authority,
+    // discriminator + authority + workspace + application
+    // instruction + name (size 32 + 4 ?) + kind + modifier
+    // collection + payer + close + space + quantity of relations
+    // created at + updated at
+    space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3 + 1 + 8 + 8
+  )]
   pub account: Box<Account<'info, InstructionAccount>>,
   pub workspace: Box<Account<'info, Workspace>>,
   pub application: Box<Account<'info, Application>>,
@@ -34,6 +35,7 @@ pub struct CreateInstructionAccount<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
+  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(ctx: &Context<CreateInstructionAccount>, arguments: &CreateInstructionAccountArguments) -> std::result::Result<bool, ProgramError> {
@@ -76,5 +78,7 @@ pub fn handler(ctx: Context<CreateInstructionAccount>, arguments: CreateInstruct
   )?;
   ctx.accounts.account.quantity_of_relations = 0;
   ctx.accounts.instruction.quantity_of_accounts += 1;
+  ctx.accounts.account.created_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.account.updated_at = ctx.accounts.clock.unix_timestamp;
   Ok(())
 }

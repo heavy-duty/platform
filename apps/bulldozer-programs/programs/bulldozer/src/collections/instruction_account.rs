@@ -15,4 +15,6 @@ pub struct InstructionAccount {
   pub close: Option<Pubkey>,
   pub space: Option<u16>,
   pub quantity_of_relations: u8,
+  pub created_at: i64,
+  pub updated_at: i64,
 }
