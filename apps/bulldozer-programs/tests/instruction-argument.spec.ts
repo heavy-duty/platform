@@ -65,7 +65,7 @@ describe('instruction argument', () => {
 
   it('should create account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 0,
       modifier: null,
@@ -74,7 +74,7 @@ describe('instruction argument', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.createInstructionArgument(dto, {
+    await program.rpc.createInstructionArgument(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
@@ -82,6 +82,7 @@ describe('instruction argument', () => {
         instruction: instruction.publicKey,
         argument: instructionArgument.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [instructionArgument],
     });
@@ -105,17 +106,25 @@ describe('instruction argument', () => {
     assert.ok(
       instructionArgumentAccount.instruction.equals(instruction.publicKey)
     );
-    assert.equal(instructionArgumentAccount.data.name, dto.name);
-    assert.ok('boolean' in instructionArgumentAccount.data.kind);
-    assert.equal(instructionArgumentAccount.data.kind.boolean.id, dto.kind);
-    assert.equal(instructionArgumentAccount.data.kind.boolean.size, 1);
-    assert.equal(instructionArgumentAccount.data.modifier, null);
+    assert.equal(instructionArgumentAccount.name, argumentsData.name);
+    assert.ok('boolean' in instructionArgumentAccount.kind);
+    assert.equal(
+      instructionArgumentAccount.kind.boolean.id,
+      argumentsData.kind
+    );
+    assert.equal(instructionArgumentAccount.kind.boolean.size, 1);
+    assert.equal(instructionArgumentAccount.modifier, null);
     assert.equal(instructionAccount.quantityOfArguments, 1);
+    assert.ok(
+      instructionArgumentAccount.createdAt.eq(
+        instructionArgumentAccount.updatedAt
+      )
+    );
   });
 
   it('should update account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 1,
       modifier: 0,
@@ -124,23 +133,25 @@ describe('instruction argument', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.updateInstructionArgument(dto, {
+    await program.rpc.updateInstructionArgument(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         argument: instructionArgument.publicKey,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
     });
     // assert
     const account = await program.account.instructionArgument.fetch(
       instructionArgument.publicKey
     );
-    assert.equal(account.data.name, dto.name);
-    assert.ok('number' in account.data.kind);
-    assert.equal(account.data.kind.number.id, dto.kind);
-    assert.equal(account.data.kind.number.size, dto.max);
-    assert.ok('array' in account.data.modifier);
-    assert.equal(account.data.modifier.array.id, dto.modifier);
-    assert.equal(account.data.modifier.array.size, dto.size);
+    assert.equal(account.name, argumentsData.name);
+    assert.ok('number' in account.kind);
+    assert.equal(account.kind.number.id, argumentsData.kind);
+    assert.equal(account.kind.number.size, argumentsData.max);
+    assert.ok('array' in account.modifier);
+    assert.equal(account.modifier.array.id, argumentsData.modifier);
+    assert.equal(account.modifier.array.size, argumentsData.size);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete account', async () => {
@@ -166,7 +177,7 @@ describe('instruction argument', () => {
 
   it('should fail when max is not provided with a number', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 1,
       modifier: 0,
@@ -177,7 +188,7 @@ describe('instruction argument', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -185,6 +196,7 @@ describe('instruction argument', () => {
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionArgument],
       });
@@ -197,7 +209,7 @@ describe('instruction argument', () => {
 
   it('should fail when max length is not provided with a string', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 2,
       modifier: 0,
@@ -208,7 +220,7 @@ describe('instruction argument', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -216,6 +228,7 @@ describe('instruction argument', () => {
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionArgument],
       });
@@ -231,7 +244,7 @@ describe('instruction argument', () => {
     const newInstruction = Keypair.generate();
     const newInstructionName = 'sample';
     const newArgument = Keypair.generate();
-    const dto = {
+    const argumentsData = {
       name: 'arg1_name',
       kind: 0,
       modifier: null,
@@ -256,7 +269,7 @@ describe('instruction argument', () => {
           signers: [newInstruction],
         }
       );
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -264,6 +277,7 @@ describe('instruction argument', () => {
           instruction: newInstruction.publicKey,
           argument: newArgument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [newArgument],
       });

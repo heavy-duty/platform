@@ -65,7 +65,7 @@ describe('collection attribute', () => {
 
   it('should create account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 0,
       modifier: null,
@@ -74,7 +74,7 @@ describe('collection attribute', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.createCollectionAttribute(dto, {
+    await program.rpc.createCollectionAttribute(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
@@ -82,6 +82,7 @@ describe('collection attribute', () => {
         collection: collection.publicKey,
         attribute: attribute.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [attribute],
     });
@@ -96,11 +97,14 @@ describe('collection attribute', () => {
         program.provider.wallet.publicKey
       )
     );
-    assert.equal(collectionAttributeAccount.data.name, dto.name);
-    assert.ok('boolean' in collectionAttributeAccount.data.kind);
-    assert.equal(collectionAttributeAccount.data.kind.boolean.id, dto.kind);
-    assert.equal(collectionAttributeAccount.data.kind.boolean.size, 1);
-    assert.equal(collectionAttributeAccount.data.modifier, null);
+    assert.equal(collectionAttributeAccount.name, argumentsData.name);
+    assert.ok('boolean' in collectionAttributeAccount.kind);
+    assert.equal(
+      collectionAttributeAccount.kind.boolean.id,
+      argumentsData.kind
+    );
+    assert.equal(collectionAttributeAccount.kind.boolean.size, 1);
+    assert.equal(collectionAttributeAccount.modifier, null);
     assert.ok(
       collectionAttributeAccount.collection.equals(collection.publicKey)
     );
@@ -109,11 +113,16 @@ describe('collection attribute', () => {
     );
     assert.ok(collectionAttributeAccount.workspace.equals(workspace.publicKey));
     assert.equal(collectionAccount.quantityOfAttributes, 1);
+    assert.ok(
+      collectionAttributeAccount.createdAt.eq(
+        collectionAttributeAccount.updatedAt
+      )
+    );
   });
 
   it('should update account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr2_name',
       kind: 1,
       modifier: 0,
@@ -122,23 +131,25 @@ describe('collection attribute', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.updateCollectionAttribute(dto, {
+    await program.rpc.updateCollectionAttribute(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         attribute: attribute.publicKey,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
     });
     // assert
     const account = await program.account.collectionAttribute.fetch(
       attribute.publicKey
     );
-    assert.equal(account.data.name, dto.name);
-    assert.ok('number' in account.data.kind);
-    assert.equal(account.data.kind.number.id, dto.kind);
-    assert.equal(account.data.kind.number.size, dto.max);
-    assert.ok('array' in account.data.modifier);
-    assert.equal(account.data.modifier.array.id, dto.modifier);
-    assert.equal(account.data.modifier.array.size, dto.size);
+    assert.equal(account.name, argumentsData.name);
+    assert.ok('number' in account.kind);
+    assert.equal(account.kind.number.id, argumentsData.kind);
+    assert.equal(account.kind.number.size, argumentsData.max);
+    assert.ok('array' in account.modifier);
+    assert.equal(account.modifier.array.id, argumentsData.modifier);
+    assert.equal(account.modifier.array.size, argumentsData.size);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete account', async () => {
@@ -158,14 +169,13 @@ describe('collection attribute', () => {
     const collectionAccount = await program.account.collection.fetch(
       collection.publicKey
     );
-    console.log(collectionAccount);
     assert.equal(collectionAttributeAccount, null);
     assert.equal(collectionAccount.quantityOfAttributes, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 1,
       modifier: null,
@@ -176,7 +186,7 @@ describe('collection attribute', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createCollectionAttribute(dto, {
+      await program.rpc.createCollectionAttribute(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -184,6 +194,7 @@ describe('collection attribute', () => {
           collection: collection.publicKey,
           attribute: attribute.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [attribute],
       });
@@ -196,7 +207,7 @@ describe('collection attribute', () => {
 
   it('should fail when max length is not provided with a string', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 2,
       modifier: null,
@@ -207,7 +218,7 @@ describe('collection attribute', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createCollectionAttribute(dto, {
+      await program.rpc.createCollectionAttribute(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -215,6 +226,7 @@ describe('collection attribute', () => {
           collection: collection.publicKey,
           attribute: attribute.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [attribute],
       });
@@ -230,7 +242,7 @@ describe('collection attribute', () => {
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
     const newAttribute = Keypair.generate();
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 0,
       modifier: null,
@@ -255,7 +267,7 @@ describe('collection attribute', () => {
           signers: [newCollection],
         }
       );
-      await program.rpc.createCollectionAttribute(dto, {
+      await program.rpc.createCollectionAttribute(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -263,6 +275,7 @@ describe('collection attribute', () => {
           collection: newCollection.publicKey,
           attribute: newAttribute.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [newAttribute],
       });

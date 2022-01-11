@@ -1,17 +1,32 @@
 use crate::collections::{
-  Application, Attribute, AttributeDto, Instruction, InstructionArgument, Workspace,
+  Application, Instruction, InstructionArgument, Workspace,
 };
 use anchor_lang::prelude::*;
+use crate::utils::{
+  get_attribute_kind,
+  get_attribute_modifier
+};
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct CreateInstructionArgumentArguments {
+  pub name: String,
+  pub kind: u8,
+  pub modifier: Option<u8>,
+  pub size: Option<u32>,
+  pub max: Option<u32>,
+  pub max_length: Option<u32>,
+}
 
 #[derive(Accounts)]
-#[instruction(dto: AttributeDto)]
+#[instruction(arguments: CreateInstructionArgumentArguments)]
 pub struct CreateInstructionArgument<'info> {
   #[account(
         init,
         payer = authority,
         // discriminator + authority + workspace + application
         // instruction + name (size 32 + 4 ?) + kind + modifier
-        space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6,
+        // created at + updated at
+        space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6 + 8 + 8,
     )]
   pub argument: Box<Account<'info, InstructionArgument>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -21,15 +36,20 @@ pub struct CreateInstructionArgument<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
+  pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateInstructionArgument>, dto: AttributeDto) -> ProgramResult {
+pub fn handler(ctx: Context<CreateInstructionArgument>, arguments: CreateInstructionArgumentArguments) -> ProgramResult {
   msg!("Create instruction argument");
   ctx.accounts.argument.authority = ctx.accounts.authority.key();
   ctx.accounts.argument.workspace = ctx.accounts.workspace.key();
   ctx.accounts.argument.application = ctx.accounts.application.key();
   ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.argument.data = Attribute::create(dto)?;
+  ctx.accounts.argument.name = arguments.name;
+  ctx.accounts.argument.kind = get_attribute_kind(Some(arguments.kind), arguments.max, arguments.max_length)?;
+  ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
   ctx.accounts.instruction.quantity_of_arguments += 1;
+  ctx.accounts.argument.created_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.argument.updated_at = ctx.accounts.clock.unix_timestamp;
   Ok(())
 }

@@ -53,16 +53,16 @@ pub mod bulldozer {
 
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
-    dto: AttributeDto,
+    arguments: CreateCollectionAttributeArguments,
   ) -> ProgramResult {
-    instructions::create_collection_attribute::handler(ctx, dto)
+    instructions::create_collection_attribute::handler(ctx, arguments)
   }
 
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
-    dto: AttributeDto,
+    arguments: UpdateCollectionAttributeArguments,
   ) -> ProgramResult {
-    instructions::update_collection_attribute::handler(ctx, dto)
+    instructions::update_collection_attribute::handler(ctx, arguments)
   }
 
   pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
@@ -90,16 +90,16 @@ pub mod bulldozer {
 
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
-    dto: AttributeDto,
+    arguments: CreateInstructionArgumentArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_argument::handler(ctx, dto)
+    instructions::create_instruction_argument::handler(ctx, arguments)
   }
 
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
-    dto: AttributeDto,
+    arguments: UpdateInstructionArgumentArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_argument::handler(ctx, dto)
+    instructions::update_instruction_argument::handler(ctx, arguments)
   }
 
   pub fn delete_instruction_argument(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {

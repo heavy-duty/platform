@@ -127,7 +127,7 @@ describe('collection', () => {
     const collectionName = 'sample';
     const collection = Keypair.generate();
     const attribute = Keypair.generate();
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 0,
       modifier: null,
@@ -152,7 +152,7 @@ describe('collection', () => {
           signers: [collection],
         }
       );
-      await program.rpc.createCollectionAttribute(dto, {
+      await program.rpc.createCollectionAttribute(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -160,6 +160,7 @@ describe('collection', () => {
           collection: collection.publicKey,
           attribute: attribute.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [attribute],
       });

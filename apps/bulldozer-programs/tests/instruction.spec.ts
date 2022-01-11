@@ -157,7 +157,7 @@ describe('instruction', () => {
     const instructionName = 'sample';
     const instruction = Keypair.generate();
     const argument = Keypair.generate();
-    const dto = {
+    const argumentsData = {
       name: 'arg1_name',
       kind: 0,
       modifier: null,
@@ -182,7 +182,7 @@ describe('instruction', () => {
           signers: [instruction],
         }
       );
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -190,6 +190,7 @@ describe('instruction', () => {
           instruction: instruction.publicKey,
           argument: argument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [argument],
       });
@@ -213,7 +214,7 @@ describe('instruction', () => {
     const instructionName = 'sample';
     const instruction = Keypair.generate();
     const account = Keypair.generate();
-    const dto = {
+    const argumentsData = {
       name: 'data',
       kind: 1,
       modifier: null,
@@ -236,7 +237,7 @@ describe('instruction', () => {
           signers: [instruction],
         }
       );
-      await program.rpc.createInstructionAccount(dto, {
+      await program.rpc.createInstructionAccount(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
