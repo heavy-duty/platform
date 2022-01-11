@@ -55,26 +55,34 @@ describe('instruction account', () => {
         signers: [application],
       }
     );
-    await program.rpc.createCollection(collectionName, {
-      accounts: {
-        collection: collection.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        authority: program.provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [collection],
-    });
-    await program.rpc.createCollection(anotherCollectionName, {
-      accounts: {
-        collection: anotherCollection.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        authority: program.provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [anotherCollection],
-    });
+    await program.rpc.createCollection(
+      { name: collectionName },
+      {
+        accounts: {
+          collection: collection.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [collection],
+      }
+    );
+    await program.rpc.createCollection(
+      { name: anotherCollectionName },
+      {
+        accounts: {
+          collection: anotherCollection.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [anotherCollection],
+      }
+    );
     await program.rpc.createInstruction(instructionName, {
       accounts: {
         authority: program.provider.wallet.publicKey,

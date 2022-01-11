@@ -47,16 +47,20 @@ describe('collection attribute', () => {
         signers: [application],
       }
     );
-    await program.rpc.createCollection(collectionName, {
-      accounts: {
-        collection: collection.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        authority: program.provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [collection],
-    });
+    await program.rpc.createCollection(
+      { name: collectionName },
+      {
+        accounts: {
+          collection: collection.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [collection],
+      }
+    );
   });
 
   it('should create account', async () => {
@@ -237,16 +241,20 @@ describe('collection attribute', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createCollection(newCollectionName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          collection: newCollection.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newCollection],
-      });
+      await program.rpc.createCollection(
+        { name: newCollectionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            collection: newCollection.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newCollection],
+        }
+      );
       await program.rpc.createCollectionAttribute(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,

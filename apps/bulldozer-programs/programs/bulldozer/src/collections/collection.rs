@@ -6,5 +6,7 @@ pub struct Collection {
   pub workspace: Pubkey,
   pub application: Pubkey,
   pub name: String,
-  pub quantity_of_attributes: u8
+  pub quantity_of_attributes: u8,
+  pub created_at: i64,
+  pub updated_at: i64,
 }

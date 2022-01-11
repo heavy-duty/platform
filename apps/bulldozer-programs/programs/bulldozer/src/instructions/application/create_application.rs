@@ -7,7 +7,7 @@ pub struct CreateApplicationArguments {
 }
 
 #[derive(Accounts)]
-#[instruction(name: String)]
+#[instruction(arguments: CreateApplicationArguments)]
 pub struct CreateApplication<'info> {
   #[account(
         init,

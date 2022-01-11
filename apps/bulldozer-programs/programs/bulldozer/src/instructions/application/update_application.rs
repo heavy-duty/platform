@@ -7,7 +7,7 @@ pub struct UpdateApplicationArguments {
 }
 
 #[derive(Accounts)]
-#[instruction(name: String)]
+#[instruction(arguments: UpdateApplicationArguments)]
 pub struct UpdateApplication<'info> {
   #[account(mut, has_one = authority)]
   pub application: Box<Account<'info, Application>>,

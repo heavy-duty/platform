@@ -39,12 +39,12 @@ pub mod bulldozer {
     instructions::delete_application::handler(ctx)
   }
 
-  pub fn create_collection(ctx: Context<CreateCollection>, name: String) -> ProgramResult {
-    instructions::create_collection::handler(ctx, name)
+  pub fn create_collection(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
+    instructions::create_collection::handler(ctx, arguments)
   }
 
-  pub fn update_collection(ctx: Context<UpdateCollection>, name: String) -> ProgramResult {
-    instructions::update_collection::handler(ctx, name)
+  pub fn update_collection(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> ProgramResult {
+    instructions::update_collection::handler(ctx, arguments)
   }
 
   pub fn delete_collection(ctx: Context<DeleteCollection>) -> ProgramResult {

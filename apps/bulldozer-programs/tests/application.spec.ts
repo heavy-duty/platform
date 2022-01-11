@@ -126,16 +126,20 @@ describe('application', () => {
           signers: [newApplication],
         }
       );
-      await program.rpc.createCollection(collectionName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: newApplication.publicKey,
-          collection: collection.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [collection],
-      });
+      await program.rpc.createCollection(
+        { name: collectionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: newApplication.publicKey,
+            collection: collection.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [collection],
+        }
+      );
       await program.rpc.deleteApplication({
         accounts: {
           authority: program.provider.wallet.publicKey,

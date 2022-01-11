@@ -7,7 +7,7 @@ pub struct UpdateWorkspaceArguments {
 }
 
 #[derive(Accounts)]
-#[instruction(name: String)]
+#[instruction(arguments: UpdateWorkspaceArguments)]
 pub struct UpdateWorkspace<'info> {
   #[account(mut, has_one = authority)]
   pub workspace: Box<Account<'info, Workspace>>,

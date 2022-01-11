@@ -51,16 +51,20 @@ describe('collection', () => {
     // arrange
     const collectionName = 'things';
     // act
-    await program.rpc.createCollection(collectionName, {
-      accounts: {
-        collection: collection.publicKey,
-        application: application.publicKey,
-        workspace: workspace.publicKey,
-        authority: program.provider.wallet.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [collection],
-    });
+    await program.rpc.createCollection(
+      { name: collectionName },
+      {
+        accounts: {
+          collection: collection.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [collection],
+      }
+    );
     // assert
     const account = await program.account.collection.fetch(
       collection.publicKey
@@ -73,23 +77,29 @@ describe('collection', () => {
     assert.ok(account.application.equals(application.publicKey));
     assert.equal(account.name, collectionName);
     assert.equal(applicationAccount.quantityOfCollections, 1);
+    assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
   it('should update account', async () => {
     // arrange
     const collectionName = 'things2';
     // act
-    await program.rpc.updateCollection(collectionName, {
-      accounts: {
-        collection: collection.publicKey,
-        authority: program.provider.wallet.publicKey,
-      },
-    });
+    await program.rpc.updateCollection(
+      { name: collectionName },
+      {
+        accounts: {
+          collection: collection.publicKey,
+          authority: program.provider.wallet.publicKey,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     // assert
     const account = await program.account.collection.fetch(
       collection.publicKey
     );
     assert.equal(account.name, collectionName);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete account', async () => {
@@ -128,16 +138,20 @@ describe('collection', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createCollection(collectionName, {
-        accounts: {
-          collection: collection.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
-          authority: program.provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [collection],
-      });
+      await program.rpc.createCollection(
+        { name: collectionName },
+        {
+          accounts: {
+            collection: collection.publicKey,
+            application: application.publicKey,
+            workspace: workspace.publicKey,
+            authority: program.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [collection],
+        }
+      );
       await program.rpc.createCollectionAttribute(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -185,16 +199,20 @@ describe('collection', () => {
           signers: [newApplication],
         }
       );
-      await program.rpc.createCollection(newCollectionName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: newApplication.publicKey,
-          collection: newCollection.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newCollection],
-      });
+      await program.rpc.createCollection(
+        { name: newCollectionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: newApplication.publicKey,
+            collection: newCollection.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newCollection],
+        }
+      );
       await program.rpc.deleteCollection({
         accounts: {
           authority: program.provider.wallet.publicKey,

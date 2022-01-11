@@ -7,7 +7,7 @@ pub struct CreateWorkspaceArguments {
 }
 
 #[derive(Accounts)]
-#[instruction(name: String)]
+#[instruction(arguments: CreateWorkspaceArguments)]
 pub struct CreateWorkspace<'info> {
   #[account(
         init,
