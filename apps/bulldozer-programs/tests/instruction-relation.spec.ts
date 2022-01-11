@@ -114,18 +114,22 @@ describe('instruction relation', () => {
 
   it('should create', async () => {
     // act
-    await program.rpc.createInstructionRelation(relationBump, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        from: from.publicKey,
-        to: to.publicKey,
-        relation: relationPublicKey,
-        systemProgram: SystemProgram.programId,
-      },
-    });
+    await program.rpc.createInstructionRelation(
+      { bump: relationBump },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: from.publicKey,
+          to: to.publicKey,
+          relation: relationPublicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     // assert
     const instructionRelationAccount =
       await program.account.instructionRelation.fetch(relationPublicKey);
@@ -151,6 +155,11 @@ describe('instruction relation', () => {
     assert.ok(instructionRelationAccount.to.equals(to.publicKey));
     assert.equal(fromAccount.quantityOfRelations, 1);
     assert.equal(toAccount.quantityOfRelations, 1);
+    assert.ok(
+      instructionRelationAccount.createdAt.eq(
+        instructionRelationAccount.updatedAt
+      )
+    );
   });
 
   it('should update', async () => {
@@ -161,6 +170,7 @@ describe('instruction relation', () => {
         from: to.publicKey,
         to: from.publicKey,
         relation: relationPublicKey,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
     });
     // assert
@@ -169,6 +179,7 @@ describe('instruction relation', () => {
     );
     assert.ok(account.from.equals(to.publicKey));
     assert.ok(account.to.equals(from.publicKey));
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete', async () => {
@@ -206,18 +217,22 @@ describe('instruction relation', () => {
         ],
         program.programId
       );
-    await program.rpc.createInstructionRelation(newRelationBump, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        from: newFrom.publicKey,
-        to: newTo.publicKey,
-        relation: newRelationPublicKey,
-        systemProgram: SystemProgram.programId,
-      },
-    });
+    await program.rpc.createInstructionRelation(
+      { bump: newRelationBump },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+          relation: newRelationPublicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     await program.rpc.deleteInstructionRelation({
       accounts: {
         authority: program.provider.wallet.publicKey,
@@ -246,18 +261,22 @@ describe('instruction relation', () => {
     );
     // act
     try {
-      await program.rpc.createInstructionRelation(relationBump, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: from.publicKey,
-          to: from.publicKey,
-          relation: relationPublicKey,
-          systemProgram: SystemProgram.programId,
-        },
-      });
+      await program.rpc.createInstructionRelation(
+        { bump: relationBump },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            from: from.publicKey,
+            to: from.publicKey,
+            relation: relationPublicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+        }
+      );
     } catch (err) {
       error = err;
     }
@@ -291,18 +310,22 @@ describe('instruction relation', () => {
           ],
           program.programId
         );
-      await program.rpc.createInstructionRelation(newRelationBump, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: newFrom.publicKey,
-          to: to.publicKey,
-          relation: newRelationPublicKey,
-          systemProgram: SystemProgram.programId,
-        },
-      });
+      await program.rpc.createInstructionRelation(
+        { bump: newRelationBump },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            from: newFrom.publicKey,
+            to: to.publicKey,
+            relation: newRelationPublicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+        }
+      );
       await program.rpc.deleteInstructionRelation({
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -344,18 +367,22 @@ describe('instruction relation', () => {
           ],
           program.programId
         );
-      await program.rpc.createInstructionRelation(newRelationBump, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: from.publicKey,
-          to: newTo.publicKey,
-          relation: newRelationPublicKey,
-          systemProgram: SystemProgram.programId,
-        },
-      });
+      await program.rpc.createInstructionRelation(
+        { bump: newRelationBump },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            from: from.publicKey,
+            to: newTo.publicKey,
+            relation: newRelationPublicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+        }
+      );
       await program.rpc.deleteInstructionRelation({
         accounts: {
           authority: program.provider.wallet.publicKey,

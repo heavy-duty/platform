@@ -636,18 +636,22 @@ describe('instruction account', () => {
           ],
           program.programId
         );
-      await program.rpc.createInstructionRelation(relationBump, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: instructionAccount1.publicKey,
-          to: instructionAccount2.publicKey,
-          relation: relationPublicKey,
-          systemProgram: SystemProgram.programId,
-        },
-      });
+      await program.rpc.createInstructionRelation(
+        { bump: relationBump },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            from: instructionAccount1.publicKey,
+            to: instructionAccount2.publicKey,
+            relation: relationPublicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+        }
+      );
       await program.rpc.deleteInstructionAccount({
         accounts: {
           authority: program.provider.wallet.publicKey,

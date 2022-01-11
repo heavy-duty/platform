@@ -126,9 +126,9 @@ pub mod bulldozer {
 
   pub fn create_instruction_relation(
     ctx: Context<CreateInstructionRelation>,
-    bump: u8,
+    arguments: CreateInstructionRelationArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_relation::handler(ctx, bump)
+    instructions::create_instruction_relation::handler(ctx, arguments)
   }
 
   pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
