@@ -94,15 +94,19 @@ describe('workspace', () => {
           signers: [newWorkspace],
         }
       );
-      await program.rpc.createApplication(applicationName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: newWorkspace.publicKey,
-          application: application.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [application],
-      });
+      await program.rpc.createApplication(
+        { name: applicationName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: newWorkspace.publicKey,
+            application: application.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [application],
+        }
+      );
       await program.rpc.deleteWorkspace({
         accounts: {
           authority: program.provider.wallet.publicKey,

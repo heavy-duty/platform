@@ -7,4 +7,6 @@ pub struct Application {
   pub name: String,
   pub quantity_of_collections: u8,
   pub quantity_of_instructions: u8,
+  pub created_at: i64,
+  pub updated_at: i64,
 }

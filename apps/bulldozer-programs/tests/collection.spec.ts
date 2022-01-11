@@ -32,15 +32,19 @@ describe('collection', () => {
         signers: [workspace],
       }
     );
-    await program.rpc.createApplication(applicationName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [application],
-    });
+    await program.rpc.createApplication(
+      { name: applicationName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [application],
+      }
+    );
   });
 
   it('should create account', async () => {
@@ -168,15 +172,19 @@ describe('collection', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(newApplicationName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: newApplication.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newApplication],
-      });
+      await program.rpc.createApplication(
+        { name: newApplicationName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: newApplication.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newApplication],
+        }
+      );
       await program.rpc.createCollection(newCollectionName, {
         accounts: {
           authority: program.provider.wallet.publicKey,

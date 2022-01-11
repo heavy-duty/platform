@@ -35,15 +35,19 @@ describe('application', () => {
 
   it('should create account', async () => {
     // act
-    await program.rpc.createApplication(applicationName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        application: application.publicKey,
-        workspace: workspace.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [application],
-    });
+    await program.rpc.createApplication(
+      { name: applicationName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [application],
+      }
+    );
     // assert
     const account = await program.account.application.fetch(
       application.publicKey
@@ -55,23 +59,29 @@ describe('application', () => {
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.equal(account.name, applicationName);
     assert.equal(workspaceAccount.quantityOfApplications, 1);
+    assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
   it('should update account', async () => {
     // arrange
     const applicationName = 'my-app2';
     // act
-    await program.rpc.updateApplication(applicationName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        application: application.publicKey,
-      },
-    });
+    await program.rpc.updateApplication(
+      { name: applicationName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          application: application.publicKey,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     // assert
     const account = await program.account.application.fetch(
       application.publicKey
     );
     assert.equal(account.name, applicationName);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete account', async () => {
@@ -103,15 +113,19 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(newApplicationName, {
-        accounts: {
-          application: newApplication.publicKey,
-          workspace: workspace.publicKey,
-          authority: program.provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newApplication],
-      });
+      await program.rpc.createApplication(
+        { name: newApplicationName },
+        {
+          accounts: {
+            application: newApplication.publicKey,
+            workspace: workspace.publicKey,
+            authority: program.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newApplication],
+        }
+      );
       await program.rpc.createCollection(collectionName, {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -145,15 +159,19 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(newApplicationName, {
-        accounts: {
-          application: newApplication.publicKey,
-          workspace: workspace.publicKey,
-          authority: program.provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newApplication],
-      });
+      await program.rpc.createApplication(
+        { name: newApplicationName },
+        {
+          accounts: {
+            application: newApplication.publicKey,
+            workspace: workspace.publicKey,
+            authority: program.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newApplication],
+        }
+      );
       await program.rpc.createInstruction(instructionName, {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -199,15 +217,19 @@ describe('application', () => {
           signers: [newWorkspace],
         }
       );
-      await program.rpc.createApplication(newApplicationName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: newWorkspace.publicKey,
-          application: newApplication.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newApplication],
-      });
+      await program.rpc.createApplication(
+        { name: newApplicationName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: newWorkspace.publicKey,
+            application: newApplication.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newApplication],
+        }
+      );
       await program.rpc.deleteApplication({
         accounts: {
           authority: program.provider.wallet.publicKey,

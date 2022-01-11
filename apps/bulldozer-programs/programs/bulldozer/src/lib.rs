@@ -27,12 +27,12 @@ pub mod bulldozer {
     instructions::delete_workspace::handler(ctx)
   }
 
-  pub fn create_application(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
-    instructions::create_application::handler(ctx, name)
+  pub fn create_application(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
+    instructions::create_application::handler(ctx, arguments)
   }
 
-  pub fn update_application(ctx: Context<UpdateApplication>, name: String) -> ProgramResult {
-    instructions::update_application::handler(ctx, name)
+  pub fn update_application(ctx: Context<UpdateApplication>, arguments: UpdateApplicationArguments) -> ProgramResult {
+    instructions::update_application::handler(ctx, arguments)
   }
 
   pub fn delete_application(ctx: Context<DeleteApplication>) -> ProgramResult {
