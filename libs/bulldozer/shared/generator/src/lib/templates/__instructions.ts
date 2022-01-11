@@ -48,7 +48,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
 }
 
 {{#if instruction.handler}}
-pub fn handler(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.arguments}}, {{this.data.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}}) -> ProgramResult {
+pub fn handle(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.arguments}}, {{this.data.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}}) -> ProgramResult {
   {{#each instruction.handler}}
   {{{this}}}
   {{/each}}

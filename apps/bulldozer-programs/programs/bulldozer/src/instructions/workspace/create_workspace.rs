@@ -23,7 +23,7 @@ pub struct CreateWorkspace<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
   msg!("Create workspace");
   ctx.accounts.workspace.name = arguments.name;
   ctx.accounts.workspace.authority = ctx.accounts.authority.key();

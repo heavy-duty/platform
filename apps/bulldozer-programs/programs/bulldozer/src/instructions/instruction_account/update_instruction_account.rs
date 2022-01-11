@@ -36,7 +36,7 @@ pub fn validate(ctx: &Context<UpdateInstructionAccount>, arguments: &UpdateInstr
   }
 }
 
-pub fn handler(ctx: Context<UpdateInstructionAccount>, arguments: UpdateInstructionAccountArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateInstructionAccount>, arguments: UpdateInstructionAccountArguments) -> ProgramResult {
   msg!("Update instruction account");
   ctx.accounts.account.name = arguments.name;
   ctx.accounts.account.kind = get_account_kind(

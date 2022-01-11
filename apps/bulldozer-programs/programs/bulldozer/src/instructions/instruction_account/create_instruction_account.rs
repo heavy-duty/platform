@@ -53,7 +53,7 @@ pub fn validate(ctx: &Context<CreateInstructionAccount>, arguments: &CreateInstr
   }
 }
 
-pub fn handler(ctx: Context<CreateInstructionAccount>, arguments: CreateInstructionAccountArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstructionAccount>, arguments: CreateInstructionAccountArguments) -> ProgramResult {
   msg!("Create instruction account");
   ctx.accounts.account.authority = ctx.accounts.authority.key();
   ctx.accounts.account.workspace = ctx.accounts.workspace.key();

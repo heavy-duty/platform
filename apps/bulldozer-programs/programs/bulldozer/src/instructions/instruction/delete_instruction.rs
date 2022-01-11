@@ -20,7 +20,7 @@ pub struct DeleteInstruction<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteInstruction>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteInstruction>) -> ProgramResult {
   msg!("Delete instruction");
   ctx.accounts.application.quantity_of_instructions -= 1;
   Ok(())

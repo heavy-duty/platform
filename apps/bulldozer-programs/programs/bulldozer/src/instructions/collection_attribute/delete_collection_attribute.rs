@@ -18,7 +18,7 @@ pub struct DeleteCollectionAttribute<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
   msg!("Delete collection attribute");
   ctx.accounts.collection.quantity_of_attributes -= 1;
   Ok(())

@@ -42,7 +42,7 @@ pub struct CreateInstructionArgument<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateInstructionArgument>, arguments: CreateInstructionArgumentArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstructionArgument>, arguments: CreateInstructionArgumentArguments) -> ProgramResult {
   msg!("Create instruction argument");
   ctx.accounts.argument.authority = ctx.accounts.authority.key();
   ctx.accounts.argument.workspace = ctx.accounts.workspace.key();

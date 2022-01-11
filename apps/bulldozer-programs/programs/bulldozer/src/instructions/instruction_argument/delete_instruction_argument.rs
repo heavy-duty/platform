@@ -18,7 +18,7 @@ pub struct DeleteInstructionArgument<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {
   msg!("Delete instruction argument");
   ctx.accounts.instruction.quantity_of_arguments -= 1;
   Ok(())

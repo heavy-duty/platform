@@ -30,7 +30,7 @@ pub struct UpdateInstructionArgument<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<UpdateInstructionArgument>, arguments: UpdateInstructionArgumentArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateInstructionArgument>, arguments: UpdateInstructionArgumentArguments) -> ProgramResult {
   msg!("Update instruction argument");
   ctx.accounts.argument.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;

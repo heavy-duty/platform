@@ -42,7 +42,7 @@ pub struct CreateCollectionAttribute<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateCollectionAttribute>, arguments: CreateCollectionAttributeArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateCollectionAttribute>, arguments: CreateCollectionAttributeArguments) -> ProgramResult {
   msg!("Create collection attribute");
   ctx.accounts.attribute.authority = ctx.accounts.authority.key();
   ctx.accounts.attribute.workspace = ctx.accounts.workspace.key();

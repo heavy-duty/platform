@@ -30,7 +30,7 @@ pub struct UpdateCollectionAttribute<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<UpdateCollectionAttribute>, arguments: UpdateCollectionAttributeArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateCollectionAttribute>, arguments: UpdateCollectionAttributeArguments) -> ProgramResult {
   msg!("Update collection attribute");
   ctx.accounts.attribute.name = arguments.name;
   ctx.accounts.attribute.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;

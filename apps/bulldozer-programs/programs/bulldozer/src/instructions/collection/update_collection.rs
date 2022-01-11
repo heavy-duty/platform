@@ -15,7 +15,7 @@ pub struct UpdateCollection<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> ProgramResult {
   msg!("Update collection");
   ctx.accounts.collection.name = arguments.name;
   ctx.accounts.collection.updated_at = ctx.accounts.clock.unix_timestamp;

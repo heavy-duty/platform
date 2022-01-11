@@ -19,7 +19,7 @@ pub struct DeleteCollection<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteCollection>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteCollection>) -> ProgramResult {
   msg!("Delete collection");
   ctx.accounts.application.quantity_of_collections -= 1;
   Ok(())

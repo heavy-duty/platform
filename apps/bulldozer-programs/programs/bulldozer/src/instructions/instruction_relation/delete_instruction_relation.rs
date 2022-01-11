@@ -23,7 +23,7 @@ pub struct DeleteInstructionRelation<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
   msg!("Delete instruction relation");
   ctx.accounts.from.quantity_of_relations -= 1;
   ctx.accounts.to.quantity_of_relations -= 1;

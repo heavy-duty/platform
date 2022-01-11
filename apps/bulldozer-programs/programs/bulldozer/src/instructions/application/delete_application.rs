@@ -20,7 +20,7 @@ pub struct DeleteApplication<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(ctx: Context<DeleteApplication>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteApplication>) -> ProgramResult {
   msg!("Delete application");
   ctx.accounts.workspace.quantity_of_applications -= 1;
   Ok(())

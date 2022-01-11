@@ -26,7 +26,7 @@ pub struct CreateApplication<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
   msg!("Create application");
   ctx.accounts.application.name = arguments.name;
   ctx.accounts.application.authority = ctx.accounts.authority.key();

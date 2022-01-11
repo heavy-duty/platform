@@ -14,7 +14,7 @@ pub struct DeleteWorkspace<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handler(_ctx: Context<DeleteWorkspace>) -> ProgramResult {
+pub fn handle(_ctx: Context<DeleteWorkspace>) -> ProgramResult {
   msg!("Delete workspace");
   Ok(())
 }

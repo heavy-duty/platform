@@ -26,7 +26,7 @@ pub struct CreateCollection<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
   msg!("Create collection");
   ctx.accounts.collection.name = arguments.name;
   ctx.accounts.collection.authority = ctx.accounts.authority.key();

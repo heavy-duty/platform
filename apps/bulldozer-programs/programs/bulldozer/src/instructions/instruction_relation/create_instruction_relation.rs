@@ -39,7 +39,7 @@ pub struct CreateInstructionRelation<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateInstructionRelation>, arguments: CreateInstructionRelationArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstructionRelation>, arguments: CreateInstructionRelationArguments) -> ProgramResult {
   msg!("Create instruction relation");
   ctx.accounts.relation.authority = ctx.accounts.authority.key();
   ctx.accounts.relation.workspace = ctx.accounts.workspace.key();

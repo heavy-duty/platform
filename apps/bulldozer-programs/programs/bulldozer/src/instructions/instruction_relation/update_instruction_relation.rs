@@ -11,7 +11,7 @@ pub struct UpdateInstructionRelation<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
   msg!("Update instruction relation");
   ctx.accounts.relation.from = ctx.accounts.from.key();
   ctx.accounts.relation.to = ctx.accounts.to.key();

@@ -27,7 +27,7 @@ pub struct CreateInstruction<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
   msg!("Create instruction");
   ctx.accounts.instruction.authority = ctx.accounts.authority.key();
   ctx.accounts.instruction.workspace = ctx.accounts.workspace.key();

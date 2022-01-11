@@ -16,7 +16,7 @@ pub struct UpdateInstruction<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handler(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
   msg!("Update instruction");
   ctx.accounts.instruction.name = arguments.name;
   ctx.accounts.instruction.updated_at = ctx.accounts.clock.unix_timestamp;
