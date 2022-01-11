@@ -51,16 +51,20 @@ describe('instruction', () => {
     // arrange
     const instructionName = 'create_document';
     // act
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
@@ -74,23 +78,29 @@ describe('instruction', () => {
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.equal(applicationAccount.quantityOfInstructions, 1);
+    assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
   it('should update account', async () => {
     // arrange
     const instructionName = 'update_document';
     // act
-    await program.rpc.updateInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        instruction: instruction.publicKey,
-      },
-    });
+    await program.rpc.updateInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          instruction: instruction.publicKey,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
     );
     assert.equal(account.name, instructionName);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should update instruction body', async () => {
@@ -105,12 +115,16 @@ describe('instruction', () => {
       ctx.accounts.argument.application = ctx.accounts.application.key();
     `;
     // act
-    await program.rpc.updateInstructionBody(instructionBody, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        instruction: instruction.publicKey,
-      },
-    });
+    await program.rpc.updateInstructionBody(
+      { body: instructionBody },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          instruction: instruction.publicKey,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      }
+    );
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
@@ -154,16 +168,20 @@ describe('instruction', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstruction(instructionName, {
-        accounts: {
-          instruction: instruction.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
-          authority: program.provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [instruction],
-      });
+      await program.rpc.createInstruction(
+        { name: instructionName },
+        {
+          accounts: {
+            instruction: instruction.publicKey,
+            application: application.publicKey,
+            workspace: workspace.publicKey,
+            authority: program.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [instruction],
+        }
+      );
       await program.rpc.createInstructionArgument(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -204,16 +222,20 @@ describe('instruction', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstruction(instructionName, {
-        accounts: {
-          instruction: instruction.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
-          authority: program.provider.wallet.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [instruction],
-      });
+      await program.rpc.createInstruction(
+        { name: instructionName },
+        {
+          accounts: {
+            instruction: instruction.publicKey,
+            application: application.publicKey,
+            workspace: workspace.publicKey,
+            authority: program.provider.wallet.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [instruction],
+        }
+      );
       await program.rpc.createInstructionAccount(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,
@@ -261,16 +283,20 @@ describe('instruction', () => {
           signers: [newApplication],
         }
       );
-      await program.rpc.createInstruction(newInstructionName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: newApplication.publicKey,
-          instruction: newInstruction.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newInstruction],
-      });
+      await program.rpc.createInstruction(
+        { name: newInstructionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: newApplication.publicKey,
+            instruction: newInstruction.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newInstruction],
+        }
+      );
       await program.rpc.deleteInstruction({
         accounts: {
           authority: program.provider.wallet.publicKey,

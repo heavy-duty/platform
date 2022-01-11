@@ -69,19 +69,19 @@ pub mod bulldozer {
     instructions::delete_collection_attribute::handler(ctx)
   }
 
-  pub fn create_instruction(ctx: Context<CreateInstruction>, name: String) -> ProgramResult {
-    instructions::create_instruction::handler(ctx, name)
+  pub fn create_instruction(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
+    instructions::create_instruction::handler(ctx, arguments)
   }
 
-  pub fn update_instruction(ctx: Context<UpdateInstruction>, name: String) -> ProgramResult {
-    instructions::update_instruction::handler(ctx, name)
+  pub fn update_instruction(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
+    instructions::update_instruction::handler(ctx, arguments)
   }
 
   pub fn update_instruction_body(
     ctx: Context<UpdateInstructionBody>,
-    body: String,
+    arguments: UpdateInstructionBodyArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_body::handler(ctx, body)
+    instructions::update_instruction_body::handler(ctx, arguments)
   }
 
   pub fn delete_instruction(ctx: Context<DeleteInstruction>) -> ProgramResult {

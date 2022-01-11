@@ -83,16 +83,20 @@ describe('instruction account', () => {
         signers: [anotherCollection],
       }
     );
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
   });
 
   describe('document', () => {
@@ -669,16 +673,20 @@ describe('instruction account', () => {
       space: null,
     };
     // act
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
     await program.rpc.createInstructionAccount(dto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
@@ -715,16 +723,20 @@ describe('instruction account', () => {
       space: null,
     };
     // act
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
     await program.rpc.createInstructionAccount(dto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
@@ -771,16 +783,20 @@ describe('instruction account', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstruction(newInstructionName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: newInstruction.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newInstruction],
-      });
+      await program.rpc.createInstruction(
+        { name: newInstructionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: newInstruction.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newInstruction],
+        }
+      );
       await program.rpc.createInstructionAccount(dto, {
         accounts: {
           authority: program.provider.wallet.publicKey,

@@ -66,16 +66,20 @@ describe('instruction relation', () => {
         signers: [application],
       }
     );
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
     await program.rpc.createInstructionAccount(fromDto, {
       accounts: {
         authority: program.provider.wallet.publicKey,
