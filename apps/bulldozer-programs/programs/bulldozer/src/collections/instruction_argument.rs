@@ -8,7 +8,7 @@ pub struct InstructionArgument {
   pub application: Pubkey,
   pub instruction: Pubkey,
   pub name: String,
-  pub kind: Option<AttributeKinds>,
+  pub kind: AttributeKinds,
   pub modifier: Option<AttributeModifiers>,
   pub created_at: i64,
   pub updated_at: i64,

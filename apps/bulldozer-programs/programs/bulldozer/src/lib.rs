@@ -6,7 +6,6 @@ mod errors;
 mod instructions;
 mod utils;
 
-use collections::*;
 use instructions::*;
 
 declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
@@ -106,18 +105,20 @@ pub mod bulldozer {
     instructions::delete_instruction_argument::handler(ctx)
   }
 
+  #[access_control(instructions::create_instruction_account::validate(&ctx, &arguments))]
   pub fn create_instruction_account(
     ctx: Context<CreateInstructionAccount>,
-    dto: AccountDto,
+    arguments: CreateInstructionAccountArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_account::handler(ctx, dto)
+    instructions::create_instruction_account::handler(ctx, arguments)
   }
 
+  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
-    dto: AccountDto,
+    arguments: UpdateInstructionAccountArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_account::handler(ctx, dto)
+    instructions::update_instruction_account::handler(ctx, arguments)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
