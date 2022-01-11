@@ -5,7 +5,7 @@ import {
   Provider,
   setProvider,
 } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 import { assert } from 'chai';
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
@@ -20,14 +20,18 @@ describe('collection', () => {
   const workspaceName = 'my-workspace';
 
   before(async () => {
-    await program.rpc.createWorkspace(workspaceName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [workspace],
-    });
+    await program.rpc.createWorkspace(
+      { name: workspaceName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [workspace],
+      }
+    );
     await program.rpc.createApplication(applicationName, {
       accounts: {
         authority: program.provider.wallet.publicKey,

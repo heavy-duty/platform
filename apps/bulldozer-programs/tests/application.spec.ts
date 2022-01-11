@@ -5,7 +5,7 @@ import {
   Provider,
   setProvider,
 } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 import { assert } from 'chai';
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
@@ -19,14 +19,18 @@ describe('application', () => {
   const applicationName = 'my-app';
 
   before(async () => {
-    await program.rpc.createWorkspace(workspaceName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [workspace],
-    });
+    await program.rpc.createWorkspace(
+      { name: workspaceName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [workspace],
+      }
+    );
   });
 
   it('should create account', async () => {
@@ -183,14 +187,18 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createWorkspace(newWorkspaceName, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: newWorkspace.publicKey,
-          systemProgram: SystemProgram.programId,
-        },
-        signers: [newWorkspace],
-      });
+      await program.rpc.createWorkspace(
+        { name: newWorkspaceName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: newWorkspace.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newWorkspace],
+        }
+      );
       await program.rpc.createApplication(newApplicationName, {
         accounts: {
           authority: program.provider.wallet.publicKey,
