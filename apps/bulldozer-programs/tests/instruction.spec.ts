@@ -204,7 +204,6 @@ describe('instruction', () => {
     } catch (err) {
       error = err;
     }
-    console.log(error);
     // assert
     assert.equal(error.code, 6018);
   });

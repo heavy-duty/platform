@@ -1,6 +1,7 @@
 import {
   PublicKey,
   SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
@@ -22,6 +23,7 @@ export const createCreateCollectionAttributeInstruction = (
       application: applicationPublicKey,
       authority,
       systemProgram: SystemProgram.programId,
+      clock: SYSVAR_CLOCK_PUBKEY,
     },
   });
 };

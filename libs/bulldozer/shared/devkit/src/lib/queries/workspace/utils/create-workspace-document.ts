@@ -18,5 +18,7 @@ export const createWorkspaceDocument = (
       name: decodedAccount.name,
       authority: decodedAccount.authority.toBase58(),
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

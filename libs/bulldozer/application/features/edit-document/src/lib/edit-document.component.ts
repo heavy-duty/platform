@@ -236,10 +236,10 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
             this.data.document.data.modifier !== null
               ? this.data.document.data.modifier.id
               : null,
-          collection: this.data.document.data.collection || null,
-          space: this.data.document.data.space,
-          payer: this.data.document.data.payer || null,
-          close: this.data.document.data.close || null,
+          collection: this.data.document.data.kind.collection || null,
+          space: this.data.document.data.modifier?.space,
+          payer: this.data.document.data.modifier?.payer || null,
+          close: this.data.document.data.modifier?.close || null,
         },
         { emitEvent: false }
       );

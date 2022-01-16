@@ -103,13 +103,13 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchInstructionAccounts = this.effect(() =>
+  readonly onInstructionAccountChanges = this.effect(() =>
     this.instructionAccounts$.pipe(
       switchMap((instructionAccounts) =>
         merge(
           ...instructionAccounts.map((instructionAccount) =>
             this._bulldozerProgramStore
-              .onInstructionAccountUpdated(instructionAccount.id)
+              .onInstructionAccountChanges(instructionAccount.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -125,12 +125,12 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onInstructionAccountsChanges = this.effect(() =>
+  readonly onInstructionAccountCreated = this.effect(() =>
     this.instructionId$.pipe(
       isNotNullOrUndefined,
       switchMap((instructionId) =>
         this._bulldozerProgramStore
-          .onInstructionAccountsChanges({ instruction: instructionId })
+          .onInstructionAccountCreated({ instruction: instructionId })
           .pipe(
             tap((instructionAccount) =>
               this._addInstructionAccount(instructionAccount)

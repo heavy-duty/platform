@@ -1,6 +1,7 @@
 import {
   PublicKey,
   SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
@@ -15,16 +16,20 @@ export const createCreateInstructionRelationInstruction = (
   fromAccount: PublicKey,
   toAccount: PublicKey
 ): TransactionInstruction => {
-  return bulldozerProgram.instruction.createInstructionRelation(relationBump, {
-    accounts: {
-      relation: relationPublicKey,
-      workspace: workspacePublicKey,
-      instruction: instructionPublicKey,
-      application: applicationPublicKey,
-      from: new PublicKey(fromAccount),
-      to: new PublicKey(toAccount),
-      authority,
-      systemProgram: SystemProgram.programId,
-    },
-  });
+  return bulldozerProgram.instruction.createInstructionRelation(
+    { bump: relationBump },
+    {
+      accounts: {
+        relation: relationPublicKey,
+        workspace: workspacePublicKey,
+        instruction: instructionPublicKey,
+        application: applicationPublicKey,
+        from: new PublicKey(fromAccount),
+        to: new PublicKey(toAccount),
+        authority,
+        systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
 };

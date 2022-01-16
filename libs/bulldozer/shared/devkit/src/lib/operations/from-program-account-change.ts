@@ -1,24 +1,27 @@
 import {
+  Commitment,
   Connection,
   Context,
-  GetProgramAccountsConfig,
+  GetProgramAccountsFilter,
   KeyedAccountInfo,
+  PublicKey,
 } from '@solana/web3.js';
 import { fromEventPattern, Observable } from 'rxjs';
-import { BULLDOZER_PROGRAM_ID } from '../programs';
 
 export const fromProgramAccountChange = (
   connection: Connection,
-  config: GetProgramAccountsConfig
+  programId: PublicKey,
+  commitment?: Commitment,
+  filters?: GetProgramAccountsFilter[]
 ): Observable<{ keyedAccountInfo: KeyedAccountInfo; context: Context }> =>
   fromEventPattern<{ keyedAccountInfo: KeyedAccountInfo; context: Context }>(
     (addHandler) =>
       connection.onProgramAccountChange(
-        BULLDOZER_PROGRAM_ID,
+        programId,
         (keyedAccountInfo, context) =>
           addHandler({ keyedAccountInfo, context }),
-        config.commitment,
-        config.filters
+        commitment,
+        filters
       ),
     (removeHandler, id) =>
       connection.removeProgramAccountChangeListener(id).then(removeHandler)

@@ -4,6 +4,8 @@ export * from './decode-attribute-enum';
 export * from './encode-filters';
 export * from './find-instruction-relation-address';
 export * from './from-account.change';
+export * from './from-document-changes';
+export * from './from-document-created';
 export * from './from-program-account-change';
 export * from './get-account-info';
 export * from './get-program-accounts';

@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { ConnectionStore } from '@heavy-duty/bulldozer-store';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
   getPhantomWallet,

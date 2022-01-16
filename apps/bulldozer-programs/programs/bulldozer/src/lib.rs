@@ -50,6 +50,7 @@ pub mod bulldozer {
     instructions::delete_collection::handle(ctx)
   }
 
+  #[access_control(instructions::create_collection_attribute::validate(&ctx, &arguments))]
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
     arguments: CreateCollectionAttributeArguments,
@@ -57,6 +58,7 @@ pub mod bulldozer {
     instructions::create_collection_attribute::handle(ctx, arguments)
   }
 
+  #[access_control(instructions::update_collection_attribute::validate(&ctx, &arguments))]
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
     arguments: UpdateCollectionAttributeArguments,
@@ -87,6 +89,7 @@ pub mod bulldozer {
     instructions::delete_instruction::handle(ctx)
   }
 
+  #[access_control(instructions::create_instruction_argument::validate(&ctx, &arguments))]
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
     arguments: CreateInstructionArgumentArguments,
@@ -94,6 +97,7 @@ pub mod bulldozer {
     instructions::create_instruction_argument::handle(ctx, arguments)
   }
 
+  #[access_control(instructions::update_instruction_argument::validate(&ctx, &arguments))]
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
     arguments: UpdateInstructionArgumentArguments,

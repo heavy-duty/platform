@@ -1,3 +1,4 @@
+import { BN } from '@project-serum/anchor';
 import { AccountInfo } from '@solana/web3.js';
 
 export interface CollectionAttributeDto {
@@ -108,15 +109,15 @@ export interface InstructionAccount {
   kind: {
     id: number;
     name: string;
+    collection: string | null;
   };
   modifier: {
     id: number;
     name: string;
+    space: number | null;
+    payer: string | null;
+    close: string | null;
   } | null;
-  collection: string | null;
-  space: number | null;
-  payer: string | null;
-  close: string | null;
 }
 
 export interface InstructionRelation {
@@ -132,6 +133,8 @@ export interface Document<T> {
   id: string;
   data: T;
   metadata: AccountInfo<Buffer>;
+  createdAt: BN;
+  updatedAt: BN;
 }
 
 export const AUTHORITY_FIELD_LABEL = 'authority';

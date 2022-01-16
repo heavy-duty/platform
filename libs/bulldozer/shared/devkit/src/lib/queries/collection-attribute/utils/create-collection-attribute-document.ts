@@ -15,16 +15,15 @@ export const createCollectionAttributeDocument = (
     COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
     account.data
   );
-  const decodedKind = decodeAttributeEnum(decodedAccount.data.kind);
+  const decodedKind = decodeAttributeEnum(decodedAccount.kind);
   const decodedModifier =
-    decodedAccount.data.modifier &&
-    decodeAttributeEnum(decodedAccount.data.modifier);
+    decodedAccount.modifier && decodeAttributeEnum(decodedAccount.modifier);
 
   return {
     id: publicKey.toBase58(),
     metadata: account,
     data: {
-      name: decodedAccount.data.name,
+      name: decodedAccount.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
@@ -34,5 +33,7 @@ export const createCollectionAttributeDocument = (
       max: decodedKind?.id === 1 ? decodedKind.size : null,
       maxLength: decodedKind?.id === 2 ? decodedKind.size : null,
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

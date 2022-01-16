@@ -111,12 +111,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchCollections = this.effect(() =>
+  readonly onCollectionChanges = this.effect(() =>
     this.collections$.pipe(
       switchMap((collections) =>
         merge(
           ...collections.map((collection) =>
-            this._bulldozerProgramStore.onCollectionUpdated(collection.id).pipe(
+            this._bulldozerProgramStore.onCollectionChanges(collection.id).pipe(
               tap((changes) => {
                 if (!changes) {
                   this._removeCollection(collection.id);
@@ -131,12 +131,12 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onCollectionByApplicationChanges = this.effect(() =>
+  readonly onCollectionCreated = this.effect(() =>
     this.applicationId$.pipe(
       isNotNullOrUndefined,
       switchMap((applicationId) =>
         this._bulldozerProgramStore
-          .onCollectionsChanges({ application: applicationId })
+          .onCollectionCreated({ application: applicationId })
           .pipe(tap((collection) => this._addCollection(collection)))
       )
     )

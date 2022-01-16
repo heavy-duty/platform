@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import {
+  Application,
   ApplicationFilters,
   Collection,
   CollectionAttribute,
@@ -33,6 +34,22 @@ import {
   createUpdateWorkspaceTransaction,
   Document,
   findInstructionRelationAddress,
+  fromApplicationChanges,
+  fromApplicationCreated,
+  fromCollectionAttributeChanges,
+  fromCollectionAttributeCreated,
+  fromCollectionChanges,
+  fromCollectionCreated,
+  fromInstructionAccountChanges,
+  fromInstructionAccountCreated,
+  fromInstructionArgumentChanges,
+  fromInstructionArgumentCreated,
+  fromInstructionChanges,
+  fromInstructionCreated,
+  fromInstructionRelationChanges,
+  fromInstructionRelationCreated,
+  fromWorkspaceChanges,
+  fromWorkspaceCreated,
   getApplication,
   getApplications,
   getCollection,
@@ -55,22 +72,6 @@ import {
   InstructionFilters,
   InstructionRelation,
   InstructionRelationFilters,
-  onApplicationsChanges,
-  onApplicationUpdated,
-  onCollectionAttributesChanges,
-  onCollectionAttributeUpdated,
-  onCollectionsChanges,
-  onCollectionUpdated,
-  onInstructionAccountsChanges,
-  onInstructionAccountUpdated,
-  onInstructionArgumentsChanges,
-  onInstructionArgumentUpdated,
-  onInstructionRelationsChanges,
-  onInstructionRelationUpdated,
-  onInstructionsChanges,
-  onInstructionUpdated,
-  onWorkspacesChanges,
-  onWorkspaceUpdated,
   parseBulldozerError,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
@@ -78,7 +79,7 @@ import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
 } from '@heavy-duty/generator';
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
@@ -94,33 +95,8 @@ import {
   throwError,
   withLatestFrom,
 } from 'rxjs';
-import {
-  ApplicationCreated,
-  ApplicationDeleted,
-  ApplicationUpdated,
-  BulldozerActions,
-  CollectionAttributeCreated,
-  CollectionAttributeDeleted,
-  CollectionAttributeUpdated,
-  CollectionCreated,
-  CollectionDeleted,
-  CollectionUpdated,
-  InstructionAccountCreated,
-  InstructionAccountDeleted,
-  InstructionAccountUpdated,
-  InstructionArgumentCreated,
-  InstructionArgumentDeleted,
-  InstructionArgumentUpdated,
-  InstructionCreated,
-  InstructionDeleted,
-  InstructionRelationCreated,
-  InstructionRelationDeleted,
-  InstructionRelationUpdated,
-  InstructionUpdated,
-  WorkspaceCreated,
-  WorkspaceDeleted,
-  WorkspaceUpdated,
-} from './actions';
+import { BulldozerActions, InstructionCreated } from './actions';
+import { ConnectionStore } from './connection-store';
 import {
   confirmTransaction,
   isNotNullOrUndefined,
@@ -178,7 +154,9 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               : this._walletStore.signTransaction(transactions);
 
           if (!signer) {
-            return throwError(() => 'Current wallet does not support signing.');
+            return throwError(
+              () => new Error('Current wallet does not support signing.')
+            );
           }
 
           return signer.pipe(
@@ -300,28 +278,22 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onWorkspaceByAuthorityChanges() {
+  onWorkspaceChanges(
+    workspaceId: string
+  ): Observable<Document<Workspace> | null> {
     return this.context.pipe(
-      concatMap(({ connection, authority }) =>
-        onWorkspacesChanges(connection, {
-          authority: authority.toBase58(),
-        }).pipe(tap(() => this._events.next(new WorkspaceCreated())))
+      concatMap(({ connection }) =>
+        fromWorkspaceChanges(connection, new PublicKey(workspaceId))
       )
     );
   }
 
-  onWorkspaceUpdated(workspaceId: string) {
+  onWorkspaceByAuthorityCreated() {
     return this.context.pipe(
-      concatMap(({ connection }) =>
-        onWorkspaceUpdated(connection, new PublicKey(workspaceId)).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new WorkspaceUpdated(changes));
-            } else {
-              this._events.next(new WorkspaceDeleted(workspaceId));
-            }
-          })
-        )
+      concatMap(({ connection, authority }) =>
+        fromWorkspaceCreated(connection, {
+          authority: authority.toBase58(),
+        })
       )
     );
   }
@@ -390,29 +362,19 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onApplicationsChanges(filters: ApplicationFilters = {}) {
+  onApplicationChanges(
+    applicationId: string
+  ): Observable<Document<Application> | null> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onApplicationsChanges(connection, filters).pipe(
-          tap(() => this._events.next(new ApplicationCreated()))
-        )
+        fromApplicationChanges(connection, new PublicKey(applicationId))
       )
     );
   }
 
-  onApplicationUpdated(applicationId: string) {
+  onApplicationCreated(filters: ApplicationFilters = {}) {
     return this.context.pipe(
-      concatMap(({ connection }) =>
-        onApplicationUpdated(connection, new PublicKey(applicationId)).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new ApplicationUpdated(changes));
-            } else {
-              this._events.next(new ApplicationDeleted(applicationId));
-            }
-          })
-        )
-      )
+      concatMap(({ connection }) => fromApplicationCreated(connection, filters))
     );
   }
 
@@ -487,28 +449,16 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onCollectionsChanges(filters: CollectionFilters = {}) {
+  onCollectionCreated(filters: CollectionFilters = {}) {
     return this.context.pipe(
-      concatMap(({ connection }) =>
-        onCollectionsChanges(connection, filters).pipe(
-          tap(() => this._events.next(new CollectionCreated()))
-        )
-      )
+      concatMap(({ connection }) => fromCollectionCreated(connection, filters))
     );
   }
 
-  onCollectionUpdated(collectionId: string) {
+  onCollectionChanges(collectionId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onCollectionUpdated(connection, new PublicKey(collectionId)).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new CollectionUpdated(changes));
-            } else {
-              this._events.next(new CollectionDeleted(collectionId));
-            }
-          })
-        )
+        fromCollectionChanges(connection, new PublicKey(collectionId))
       )
     );
   }
@@ -586,32 +536,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onCollectionAttributesChanges(filters: CollectionAttributeFilters) {
+  onCollectionAttributeCreated(filters: CollectionAttributeFilters) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onCollectionAttributesChanges(connection, filters).pipe(
-          tap(() => this._events.next(new CollectionAttributeCreated()))
-        )
+        fromCollectionAttributeCreated(connection, filters)
       )
     );
   }
 
-  onCollectionAttributeUpdated(collectionAttributeId: string) {
+  onCollectionAttributeChanges(collectionAttributeId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onCollectionAttributeUpdated(
+        fromCollectionAttributeChanges(
           connection,
           new PublicKey(collectionAttributeId)
-        ).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new CollectionAttributeUpdated(changes));
-            } else {
-              this._events.next(
-                new CollectionAttributeDeleted(collectionAttributeId)
-              );
-            }
-          })
         )
       )
     );
@@ -703,28 +641,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionsChanges(filters: InstructionFilters) {
+  onInstructionCreated(filters: InstructionFilters) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionsChanges(connection, filters).pipe(
+        fromInstructionCreated(connection, filters).pipe(
           tap(() => this._events.next(new InstructionCreated()))
         )
       )
     );
   }
 
-  onInstructionUpdated(instructionId: string) {
+  onInstructionChanges(instructionId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionUpdated(connection, new PublicKey(instructionId)).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new InstructionUpdated(changes));
-            } else {
-              this._events.next(new InstructionDeleted(instructionId));
-            }
-          })
-        )
+        fromInstructionChanges(connection, new PublicKey(instructionId))
       )
     );
   }
@@ -800,32 +730,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionAccountsChanges(filters: InstructionAccountFilters) {
+  onInstructionAccountCreated(filters: InstructionAccountFilters) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionAccountsChanges(connection, filters).pipe(
-          tap(() => this._events.next(new InstructionAccountCreated()))
-        )
+        fromInstructionAccountCreated(connection, filters)
       )
     );
   }
 
-  onInstructionAccountUpdated(instructionAccountId: string) {
+  onInstructionAccountChanges(instructionAccountId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionAccountUpdated(
+        fromInstructionAccountChanges(
           connection,
           new PublicKey(instructionAccountId)
-        ).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new InstructionAccountUpdated(changes));
-            } else {
-              this._events.next(
-                new InstructionAccountDeleted(instructionAccountId)
-              );
-            }
-          })
         )
       )
     );
@@ -904,32 +822,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionArgumentsChanges(filters: InstructionArgumentFilters) {
+  onInstructionArgumentCreated(filters: InstructionArgumentFilters) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionArgumentsChanges(connection, filters).pipe(
-          tap(() => this._events.next(new InstructionArgumentCreated()))
-        )
+        fromInstructionArgumentCreated(connection, filters)
       )
     );
   }
 
-  onInstructionArgumentUpdated(instructionArgumentId: string) {
+  onInstructionArgumentChanges(instructionArgumentId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionArgumentUpdated(
+        fromInstructionArgumentChanges(
           connection,
           new PublicKey(instructionArgumentId)
-        ).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new InstructionArgumentUpdated(changes));
-            } else {
-              this._events.next(
-                new InstructionArgumentDeleted(instructionArgumentId)
-              );
-            }
-          })
         )
       )
     );
@@ -1013,32 +919,20 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionRelationsChanges(filters: InstructionRelationFilters) {
+  onInstructionRelationCreated(filters: InstructionRelationFilters) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionRelationsChanges(connection, filters).pipe(
-          tap(() => this._events.next(new InstructionRelationCreated()))
-        )
+        fromInstructionRelationCreated(connection, filters)
       )
     );
   }
 
-  onInstructionRelationUpdated(instructionRelationId: string) {
+  onInstructionRelationChanges(instructionRelationId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        onInstructionRelationUpdated(
+        fromInstructionRelationChanges(
           connection,
           new PublicKey(instructionRelationId)
-        ).pipe(
-          tap((changes) => {
-            if (changes) {
-              this._events.next(new InstructionRelationUpdated(changes));
-            } else {
-              this._events.next(
-                new InstructionRelationDeleted(instructionRelationId)
-              );
-            }
-          })
         )
       )
     );

@@ -99,12 +99,12 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchWorkspaces = this.effect(() =>
+  readonly onWorkspaceChanges = this.effect(() =>
     this.workspaces$.pipe(
       switchMap((workspaces) =>
         merge(
           ...workspaces.map((workspace) =>
-            this._bulldozerProgramStore.onWorkspaceUpdated(workspace.id).pipe(
+            this._bulldozerProgramStore.onWorkspaceChanges(workspace.id).pipe(
               tap((changes) => {
                 if (!changes) {
                   this._removeWorkspace(workspace.id);
@@ -115,6 +115,16 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             )
           )
         )
+      )
+    )
+  );
+
+  readonly onWorkspaceCreated = this.effect(() =>
+    this.workspaces$.pipe(
+      switchMap(() =>
+        this._bulldozerProgramStore
+          .onWorkspaceByAuthorityCreated()
+          .pipe(tap((workspace) => this._addWorkspace(workspace)))
       )
     )
   );
@@ -135,11 +145,6 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             (error) => this._error.next(error)
           )
         )
-      ),
-      switchMap(() =>
-        this._bulldozerProgramStore
-          .onWorkspaceByAuthorityChanges()
-          .pipe(tap((workspace) => this._addWorkspace(workspace)))
       )
     )
   );

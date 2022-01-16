@@ -116,21 +116,22 @@ export class ViewInstructionStore extends ComponentStore<object> {
             ),
           collection: collections.reduce(
             (found: Document<Collection> | null, collection) =>
-              !found && instructionAccount.data.collection === collection.id
+              !found &&
+              instructionAccount.data.kind.collection === collection.id
                 ? collection
                 : null,
             null
           ),
           payer: instructionAccounts.reduce(
             (found: Document<InstructionAccount> | null, payer) =>
-              !found && instructionAccount.data.payer === payer.id
+              !found && instructionAccount.data.modifier?.payer === payer.id
                 ? payer
                 : null,
             null
           ),
           close: instructionAccounts.reduce(
             (found: Document<InstructionAccount> | null, close) =>
-              !found && instructionAccount.data.close === close.id
+              !found && instructionAccount.data.modifier?.close === close.id
                 ? close
                 : null,
             null

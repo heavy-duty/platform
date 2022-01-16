@@ -1,4 +1,8 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+  PublicKey,
+  SYSVAR_CLOCK_PUBKEY,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 
 export const createUpdateInstructionBodyInstruction = (
@@ -6,10 +10,14 @@ export const createUpdateInstructionBodyInstruction = (
   instructionPublicKey: PublicKey,
   instructionBody: string
 ): TransactionInstruction => {
-  return bulldozerProgram.instruction.updateInstructionBody(instructionBody, {
-    accounts: {
-      instruction: instructionPublicKey,
-      authority: authority,
-    },
-  });
+  return bulldozerProgram.instruction.updateInstructionBody(
+    { body: instructionBody },
+    {
+      accounts: {
+        instruction: instructionPublicKey,
+        authority: authority,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
 };

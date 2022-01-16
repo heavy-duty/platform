@@ -15,16 +15,15 @@ export const createInstructionArgumentDocument = (
     INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
     account.data
   );
-  const decodedKind = decodeAttributeEnum(decodedAccount.data.kind);
+  const decodedKind = decodeAttributeEnum(decodedAccount.kind);
   const decodedModifier =
-    decodedAccount.data.modifer &&
-    decodeAttributeEnum(decodedAccount.data.modifer);
+    decodedAccount.modifer && decodeAttributeEnum(decodedAccount.modifer);
 
   return {
     id: publicKey.toBase58(),
     metadata: account,
     data: {
-      name: decodedAccount.data.name,
+      name: decodedAccount.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
@@ -34,5 +33,7 @@ export const createInstructionArgumentDocument = (
       max: decodedKind.id === 1 ? decodedKind.size : null,
       maxLength: decodedKind.id === 2 ? decodedKind.size : null,
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

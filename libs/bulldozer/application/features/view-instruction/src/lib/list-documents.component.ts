@@ -54,7 +54,7 @@ import {
                   >
                     <ng-container *ngSwitchCase="0">
                       ({{ document.data.modifier.name }}: space
-                      {{ document.data.space }})
+                      {{ document.data.modifier.space }})
                     </ng-container>
                     <ng-container *ngSwitchCase="1">
                       ({{ document.data.modifier.name }})

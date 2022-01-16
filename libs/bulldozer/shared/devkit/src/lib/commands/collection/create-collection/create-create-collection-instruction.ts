@@ -1,6 +1,7 @@
 import {
   PublicKey,
   SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
@@ -12,13 +13,17 @@ export const createCreateCollectionInstruction = (
   collectionPublicKey: PublicKey,
   collectionName: string
 ): TransactionInstruction => {
-  return bulldozerProgram.instruction.createCollection(collectionName, {
-    accounts: {
-      workspace: workspacePublicKey,
-      application: applicationPublicKey,
-      collection: collectionPublicKey,
-      authority,
-      systemProgram: SystemProgram.programId,
-    },
-  });
+  return bulldozerProgram.instruction.createCollection(
+    { name: collectionName },
+    {
+      accounts: {
+        workspace: workspacePublicKey,
+        application: applicationPublicKey,
+        collection: collectionPublicKey,
+        authority,
+        systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
 };

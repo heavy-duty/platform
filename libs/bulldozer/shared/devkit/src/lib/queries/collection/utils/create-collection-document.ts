@@ -20,5 +20,7 @@ export const createCollectionDocument = (
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

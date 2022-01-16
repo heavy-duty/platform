@@ -113,13 +113,13 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchInstructions = this.effect(() =>
+  readonly onInstructionChanges = this.effect(() =>
     this.instructions$.pipe(
       switchMap((instructions) =>
         merge(
           ...instructions.map((instruction) =>
             this._bulldozerProgramStore
-              .onInstructionUpdated(instruction.id)
+              .onInstructionChanges(instruction.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -135,12 +135,12 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onInstructionsChanges = this.effect(() =>
+  readonly onInstructionCreated = this.effect(() =>
     this.applicationId$.pipe(
       isNotNullOrUndefined,
       switchMap((applicationId) =>
         this._bulldozerProgramStore
-          .onInstructionsChanges({ application: applicationId })
+          .onInstructionCreated({ application: applicationId })
           .pipe(tap((instruction) => this._addInstruction(instruction)))
       )
     )

@@ -1,6 +1,7 @@
 import {
   PublicKey,
   SystemProgram,
+  SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
@@ -24,6 +25,7 @@ export const createCreateInstructionAccountInstruction = (
         instruction: instructionPublicKey,
         account: instructionAccountPublicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       remainingAccounts: [
         instructionAccountDto.collection &&

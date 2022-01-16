@@ -26,5 +26,7 @@ export const createInstructionRelationDocument = (
       from: decodedAccount.from.toBase58(),
       to: decodedAccount.to.toBase58(),
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

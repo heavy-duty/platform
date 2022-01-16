@@ -1,4 +1,8 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+  PublicKey,
+  SYSVAR_CLOCK_PUBKEY,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 
 export const createUpdateWorkspaceInstruction = (
@@ -6,10 +10,14 @@ export const createUpdateWorkspaceInstruction = (
   workspacePublicKey: PublicKey,
   workspaceName: string
 ): TransactionInstruction => {
-  return bulldozerProgram.instruction.updateWorkspace(workspaceName, {
-    accounts: {
-      workspace: workspacePublicKey,
-      authority: authority,
-    },
-  });
+  return bulldozerProgram.instruction.updateWorkspace(
+    { name: workspaceName },
+    {
+      accounts: {
+        workspace: workspacePublicKey,
+        authority: authority,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
 };

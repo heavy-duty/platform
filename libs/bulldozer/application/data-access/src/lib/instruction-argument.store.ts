@@ -103,13 +103,13 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchInstructionArguments = this.effect(() =>
+  readonly onInstructionArgumentChanges = this.effect(() =>
     this.instructionArguments$.pipe(
       switchMap((instructionArguments) =>
         merge(
           ...instructionArguments.map((instructionArgument) =>
             this._bulldozerProgramStore
-              .onInstructionArgumentUpdated(instructionArgument.id)
+              .onInstructionArgumentChanges(instructionArgument.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -125,12 +125,12 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onInstructionArgumentsChanges = this.effect(() =>
+  readonly onInstructionArgumentCreated = this.effect(() =>
     this.instructionId$.pipe(
       isNotNullOrUndefined,
       switchMap((instructionId) =>
         this._bulldozerProgramStore
-          .onInstructionArgumentsChanges({ instruction: instructionId })
+          .onInstructionArgumentCreated({ instruction: instructionId })
           .pipe(
             tap((instructionArgument) =>
               this._addInstructionArgument(instructionArgument)

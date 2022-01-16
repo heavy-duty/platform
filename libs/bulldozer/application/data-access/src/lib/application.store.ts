@@ -113,13 +113,13 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchApplications = this.effect(() =>
+  readonly onApplicationChanges = this.effect(() =>
     this.applications$.pipe(
       switchMap((applications) =>
         merge(
           ...applications.map((application) =>
             this._bulldozerProgramStore
-              .onApplicationUpdated(application.id)
+              .onApplicationChanges(application.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -135,12 +135,12 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onApplicationsChanges = this.effect(() =>
+  readonly onApplicationCreated = this.effect(() =>
     this.workspaceId$.pipe(
       isNotNullOrUndefined,
       switchMap((workspaceId) =>
         this._bulldozerProgramStore
-          .onApplicationsChanges({ workspace: workspaceId })
+          .onApplicationCreated({ workspace: workspaceId })
           .pipe(tap((application) => this._addApplication(application)))
       )
     )

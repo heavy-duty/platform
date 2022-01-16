@@ -28,8 +28,6 @@ pub struct CreateCollectionAttribute<'info> {
     // collection + name (size 32 + 4 ?) + kind + modifier
     // created at + updated at
     space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6 + 8 + 8,
-    constraint = arguments.kind == 0 || arguments.kind == 1 && arguments.max != None || arguments.kind == 2 @ ErrorCode::MissingMax,
-    constraint = arguments.kind == 0 || arguments.kind == 1 || arguments.kind == 2 && arguments.max_length != None @ ErrorCode::MissingMaxLength,
   )]
   pub attribute: Box<Account<'info, CollectionAttribute>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -40,6 +38,18 @@ pub struct CreateCollectionAttribute<'info> {
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
   pub clock: Sysvar<'info, Clock>,
+}
+
+pub fn validate(_ctx: &Context<CreateCollectionAttribute>, arguments: &CreateCollectionAttributeArguments) -> std::result::Result<bool, ProgramError> {
+  match (
+    arguments.kind,
+    arguments.max,
+    arguments.max_length,
+  ) {
+    (1, None, _) => Err(ErrorCode::MissingMax.into()),
+    (2, _, None) => Err(ErrorCode::MissingMaxLength.into()),
+    _ => Ok(true)
+  }
 }
 
 pub fn handle(ctx: Context<CreateCollectionAttribute>, arguments: CreateCollectionAttributeArguments) -> ProgramResult {

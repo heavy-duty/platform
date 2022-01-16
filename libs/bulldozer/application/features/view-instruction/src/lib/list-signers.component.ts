@@ -46,8 +46,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
                     [ngSwitch]="signer.data.modifier.id"
                   >
                     <ng-container *ngSwitchCase="0">
-                      ({{ signer.data.modifier.name }}: space
-                      {{ signer.data.space }})
+                      ({{ signer.data.modifier.name }}
                     </ng-container>
                     <ng-container *ngSwitchCase="1">
                       ({{ signer.data.modifier.name }})

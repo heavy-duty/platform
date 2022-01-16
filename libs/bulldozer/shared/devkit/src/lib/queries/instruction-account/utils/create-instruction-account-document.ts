@@ -1,5 +1,5 @@
 import { AccountInfo, PublicKey } from '@solana/web3.js';
-import { decodeAccountEnum } from '../../../operations';
+import { decodeAccountKind, decodeAccountModifier } from '../../../operations';
 import { bulldozerProgram } from '../../../programs';
 import {
   Document,
@@ -20,21 +20,17 @@ export const createInstructionAccountDocument = (
     id: publicKey.toBase58(),
     metadata: account,
     data: {
-      name: decodedAccount.data.name,
+      name: decodedAccount.name,
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       application: decodedAccount.application.toBase58(),
       instruction: decodedAccount.instruction.toBase58(),
-      kind: decodeAccountEnum(decodedAccount.data.kind),
+      kind: decodeAccountKind(decodedAccount.kind),
       modifier:
-        decodedAccount.data.modifier &&
-        decodeAccountEnum(decodedAccount.data.modifier),
-      collection:
-        decodedAccount.data.collection &&
-        decodedAccount.data.collection.toBase58(),
-      close: decodedAccount.data.close && decodedAccount.data.close.toBase58(),
-      payer: decodedAccount.data.payer && decodedAccount.data.payer.toBase58(),
-      space: decodedAccount.data.space,
+        decodedAccount.modifier &&
+        decodeAccountModifier(decodedAccount.modifier),
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

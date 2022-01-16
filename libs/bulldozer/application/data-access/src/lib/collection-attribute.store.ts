@@ -103,13 +103,13 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly watchCollectionAttributes = this.effect(() =>
+  readonly onCollectionAttributeChanges = this.effect(() =>
     this.collectionAttributes$.pipe(
       switchMap((collectionAttributes) =>
         merge(
           ...collectionAttributes.map((collectionAttribute) =>
             this._bulldozerProgramStore
-              .onCollectionAttributeUpdated(collectionAttribute.id)
+              .onCollectionAttributeChanges(collectionAttribute.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -125,12 +125,12 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly onCollectionAttributesChanges = this.effect(() =>
+  readonly onCollectionAttributeCreated = this.effect(() =>
     this.collectionId$.pipe(
       isNotNullOrUndefined,
       switchMap((collectionId) =>
         this._bulldozerProgramStore
-          .onCollectionAttributesChanges({ collection: collectionId })
+          .onCollectionAttributeCreated({ collection: collectionId })
           .pipe(
             tap((collectionAttribute) =>
               this._addCollectionAttribute(collectionAttribute)
@@ -176,6 +176,7 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
       }>
     ) =>
       request$.pipe(
+        tap((a) => console.log(a)),
         concatMap(({ workspaceId, applicationId, collectionId, data }) =>
           this._bulldozerProgramStore
             .createCollectionAttribute(

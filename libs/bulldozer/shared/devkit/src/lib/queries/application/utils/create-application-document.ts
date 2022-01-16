@@ -23,5 +23,7 @@ export const createApplicationDocument = (
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
     },
+    createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

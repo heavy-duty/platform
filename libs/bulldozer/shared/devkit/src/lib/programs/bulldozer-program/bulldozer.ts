@@ -19,12 +19,19 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'CreateWorkspaceArguments';
+          };
         }
       ];
     },
@@ -40,12 +47,19 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'UpdateWorkspaceArguments';
+          };
         }
       ];
     },
@@ -87,12 +101,19 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'CreateApplicationArguments';
+          };
         }
       ];
     },
@@ -108,12 +129,19 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'UpdateApplicationArguments';
+          };
         }
       ];
     },
@@ -165,12 +193,19 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'CreateCollectionArguments';
+          };
         }
       ];
     },
@@ -186,12 +221,19 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'UpdateCollectionArguments';
+          };
         }
       ];
     },
@@ -248,13 +290,18 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AttributeDto';
+            defined: 'CreateCollectionAttributeArguments';
           };
         }
       ];
@@ -271,13 +318,18 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AttributeDto';
+            defined: 'UpdateCollectionAttributeArguments';
           };
         }
       ];
@@ -330,12 +382,19 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'CreateInstructionArguments';
+          };
         }
       ];
     },
@@ -351,12 +410,19 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'name';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'UpdateInstructionArguments';
+          };
         }
       ];
     },
@@ -372,12 +438,19 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'body';
-          type: 'string';
+          name: 'arguments';
+          type: {
+            defined: 'UpdateInstructionBodyArguments';
+          };
         }
       ];
     },
@@ -434,13 +507,18 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AttributeDto';
+            defined: 'CreateInstructionArgumentArguments';
           };
         }
       ];
@@ -457,13 +535,18 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AttributeDto';
+            defined: 'UpdateInstructionArgumentArguments';
           };
         }
       ];
@@ -521,13 +604,18 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AccountDto';
+            defined: 'CreateInstructionAccountArguments';
           };
         }
       ];
@@ -544,13 +632,18 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'dto';
+          name: 'arguments';
           type: {
-            defined: 'AccountDto';
+            defined: 'UpdateInstructionAccountArguments';
           };
         }
       ];
@@ -618,12 +711,19 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [
         {
-          name: 'bump';
-          type: 'u8';
+          name: 'arguments';
+          type: {
+            defined: 'CreateInstructionRelationArguments';
+          };
         }
       ];
     },
@@ -649,6 +749,11 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'clock';
+          isMut: false;
+          isSigner: false;
         }
       ];
       args: [];
@@ -705,6 +810,14 @@ export type Bulldozer = {
           {
             name: 'quantityOfInstructions';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -733,6 +846,14 @@ export type Bulldozer = {
           {
             name: 'quantityOfAttributes';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -759,10 +880,30 @@ export type Bulldozer = {
             type: 'publicKey';
           },
           {
-            name: 'data';
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
             type: {
-              defined: 'Attribute';
+              defined: 'AttributeKinds';
             };
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: {
+                defined: 'AttributeModifiers';
+              };
+            };
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -799,6 +940,14 @@ export type Bulldozer = {
           {
             name: 'quantityOfAccounts';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -825,14 +974,58 @@ export type Bulldozer = {
             type: 'publicKey';
           },
           {
-            name: 'data';
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
             type: {
-              defined: 'BaseAccount';
+              defined: 'AccountKinds';
+            };
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: {
+                defined: 'AccountModifiers';
+              };
+            };
+          },
+          {
+            name: 'collection';
+            type: {
+              option: 'publicKey';
+            };
+          },
+          {
+            name: 'payer';
+            type: {
+              option: 'publicKey';
+            };
+          },
+          {
+            name: 'close';
+            type: {
+              option: 'publicKey';
+            };
+          },
+          {
+            name: 'space';
+            type: {
+              option: 'u16';
             };
           },
           {
             name: 'quantityOfRelations';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -859,10 +1052,30 @@ export type Bulldozer = {
             type: 'publicKey';
           },
           {
-            name: 'data';
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
             type: {
-              defined: 'Attribute';
+              defined: 'AttributeKinds';
             };
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: {
+                defined: 'AttributeModifiers';
+              };
+            };
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -899,6 +1112,14 @@ export type Bulldozer = {
           {
             name: 'bump';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -919,6 +1140,14 @@ export type Bulldozer = {
           {
             name: 'quantityOfApplications';
             type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
+            type: 'i64';
           }
         ];
       };
@@ -926,7 +1155,31 @@ export type Bulldozer = {
   ];
   types: [
     {
-      name: 'AttributeDto';
+      name: 'CreateApplicationArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'CreateCollectionArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'CreateCollectionAttributeArguments';
       type: {
         kind: 'struct';
         fields: [
@@ -966,35 +1219,19 @@ export type Bulldozer = {
       };
     },
     {
-      name: 'Attribute';
+      name: 'CreateInstructionArguments';
       type: {
         kind: 'struct';
         fields: [
           {
             name: 'name';
             type: 'string';
-          },
-          {
-            name: 'kind';
-            type: {
-              option: {
-                defined: 'AttributeKinds';
-              };
-            };
-          },
-          {
-            name: 'modifier';
-            type: {
-              option: {
-                defined: 'AttributeModifiers';
-              };
-            };
           }
         ];
       };
     },
     {
-      name: 'AccountDto';
+      name: 'CreateInstructionAccountArguments';
       type: {
         kind: 'struct';
         fields: [
@@ -1022,7 +1259,7 @@ export type Bulldozer = {
       };
     },
     {
-      name: 'BaseAccount';
+      name: 'CreateInstructionArgumentArguments';
       type: {
         kind: 'struct';
         fields: [
@@ -1032,36 +1269,152 @@ export type Bulldozer = {
           },
           {
             name: 'kind';
-            type: {
-              option: {
-                defined: 'AccountKinds';
-              };
-            };
+            type: 'u8';
           },
           {
             name: 'modifier';
             type: {
-              option: {
-                defined: 'AccountModifiers';
-              };
+              option: 'u8';
             };
           },
           {
-            name: 'collection';
+            name: 'size';
             type: {
-              option: 'publicKey';
+              option: 'u32';
             };
           },
           {
-            name: 'payer';
+            name: 'max';
             type: {
-              option: 'publicKey';
+              option: 'u32';
             };
           },
           {
-            name: 'close';
+            name: 'maxLength';
             type: {
-              option: 'publicKey';
+              option: 'u32';
+            };
+          }
+        ];
+      };
+    },
+    {
+      name: 'CreateInstructionRelationArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'bump';
+            type: 'u8';
+          }
+        ];
+      };
+    },
+    {
+      name: 'CreateWorkspaceArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateApplicationArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateCollectionArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateCollectionAttributeArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
+            type: 'u8';
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: 'u8';
+            };
+          },
+          {
+            name: 'size';
+            type: {
+              option: 'u32';
+            };
+          },
+          {
+            name: 'max';
+            type: {
+              option: 'u32';
+            };
+          },
+          {
+            name: 'maxLength';
+            type: {
+              option: 'u32';
+            };
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateInstructionArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateInstructionAccountArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
+            type: 'u8';
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: 'u8';
             };
           },
           {
@@ -1069,6 +1422,70 @@ export type Bulldozer = {
             type: {
               option: 'u16';
             };
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateInstructionArgumentArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'kind';
+            type: 'u8';
+          },
+          {
+            name: 'modifier';
+            type: {
+              option: 'u8';
+            };
+          },
+          {
+            name: 'size';
+            type: {
+              option: 'u32';
+            };
+          },
+          {
+            name: 'max';
+            type: {
+              option: 'u32';
+            };
+          },
+          {
+            name: 'maxLength';
+            type: {
+              option: 'u32';
+            };
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateInstructionBodyArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'body';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateWorkspaceArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'name';
+            type: 'string';
           }
         ];
       };
@@ -1084,6 +1501,10 @@ export type Bulldozer = {
               {
                 name: 'id';
                 type: 'u8';
+              },
+              {
+                name: 'collection';
+                type: 'publicKey';
               }
             ];
           },
@@ -1110,6 +1531,18 @@ export type Bulldozer = {
               {
                 name: 'id';
                 type: 'u8';
+              },
+              {
+                name: 'space';
+                type: {
+                  option: 'u16';
+                };
+              },
+              {
+                name: 'payer';
+                type: {
+                  option: 'publicKey';
+                };
               }
             ];
           },
@@ -1119,6 +1552,12 @@ export type Bulldozer = {
               {
                 name: 'id';
                 type: 'u8';
+              },
+              {
+                name: 'close';
+                type: {
+                  option: 'publicKey';
+                };
               }
             ];
           }
@@ -1386,11 +1825,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'CreateWorkspaceArguments',
+          },
         },
       ],
     },
@@ -1407,11 +1853,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'UpdateWorkspaceArguments',
+          },
         },
       ],
     },
@@ -1454,11 +1907,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'CreateApplicationArguments',
+          },
         },
       ],
     },
@@ -1475,11 +1935,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'UpdateApplicationArguments',
+          },
         },
       ],
     },
@@ -1532,11 +1999,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'CreateCollectionArguments',
+          },
         },
       ],
     },
@@ -1553,11 +2027,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'UpdateCollectionArguments',
+          },
         },
       ],
     },
@@ -1615,12 +2096,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AttributeDto',
+            defined: 'CreateCollectionAttributeArguments',
           },
         },
       ],
@@ -1638,12 +2124,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AttributeDto',
+            defined: 'UpdateCollectionAttributeArguments',
           },
         },
       ],
@@ -1697,11 +2188,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'CreateInstructionArguments',
+          },
         },
       ],
     },
@@ -1718,11 +2216,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'name',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'UpdateInstructionArguments',
+          },
         },
       ],
     },
@@ -1739,11 +2244,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'body',
-          type: 'string',
+          name: 'arguments',
+          type: {
+            defined: 'UpdateInstructionBodyArguments',
+          },
         },
       ],
     },
@@ -1801,12 +2313,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AttributeDto',
+            defined: 'CreateInstructionArgumentArguments',
           },
         },
       ],
@@ -1824,12 +2341,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AttributeDto',
+            defined: 'UpdateInstructionArgumentArguments',
           },
         },
       ],
@@ -1888,12 +2410,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AccountDto',
+            defined: 'CreateInstructionAccountArguments',
           },
         },
       ],
@@ -1911,12 +2438,17 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'dto',
+          name: 'arguments',
           type: {
-            defined: 'AccountDto',
+            defined: 'UpdateInstructionAccountArguments',
           },
         },
       ],
@@ -1985,11 +2517,18 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
+        },
       ],
       args: [
         {
-          name: 'bump',
-          type: 'u8',
+          name: 'arguments',
+          type: {
+            defined: 'CreateInstructionRelationArguments',
+          },
         },
       ],
     },
@@ -2015,6 +2554,11 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'clock',
+          isMut: false,
+          isSigner: false,
         },
       ],
       args: [],
@@ -2072,6 +2616,14 @@ export const IDL: Bulldozer = {
             name: 'quantityOfInstructions',
             type: 'u8',
           },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
+          },
         ],
       },
     },
@@ -2100,6 +2652,14 @@ export const IDL: Bulldozer = {
             name: 'quantityOfAttributes',
             type: 'u8',
           },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
+          },
         ],
       },
     },
@@ -2125,10 +2685,30 @@ export const IDL: Bulldozer = {
             type: 'publicKey',
           },
           {
-            name: 'data',
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
             type: {
-              defined: 'Attribute',
+              defined: 'AttributeKinds',
             },
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: {
+                defined: 'AttributeModifiers',
+              },
+            },
+          },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
           },
         ],
       },
@@ -2166,6 +2746,14 @@ export const IDL: Bulldozer = {
             name: 'quantityOfAccounts',
             type: 'u8',
           },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
+          },
         ],
       },
     },
@@ -2191,14 +2779,58 @@ export const IDL: Bulldozer = {
             type: 'publicKey',
           },
           {
-            name: 'data',
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
             type: {
-              defined: 'BaseAccount',
+              defined: 'AccountKinds',
+            },
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: {
+                defined: 'AccountModifiers',
+              },
+            },
+          },
+          {
+            name: 'collection',
+            type: {
+              option: 'publicKey',
+            },
+          },
+          {
+            name: 'payer',
+            type: {
+              option: 'publicKey',
+            },
+          },
+          {
+            name: 'close',
+            type: {
+              option: 'publicKey',
+            },
+          },
+          {
+            name: 'space',
+            type: {
+              option: 'u16',
             },
           },
           {
             name: 'quantityOfRelations',
             type: 'u8',
+          },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
           },
         ],
       },
@@ -2225,10 +2857,30 @@ export const IDL: Bulldozer = {
             type: 'publicKey',
           },
           {
-            name: 'data',
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
             type: {
-              defined: 'Attribute',
+              defined: 'AttributeKinds',
             },
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: {
+                defined: 'AttributeModifiers',
+              },
+            },
+          },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
           },
         ],
       },
@@ -2266,6 +2918,14 @@ export const IDL: Bulldozer = {
             name: 'bump',
             type: 'u8',
           },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
+          },
         ],
       },
     },
@@ -2286,13 +2946,45 @@ export const IDL: Bulldozer = {
             name: 'quantityOfApplications',
             type: 'u8',
           },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
+            type: 'i64',
+          },
         ],
       },
     },
   ],
   types: [
     {
-      name: 'AttributeDto',
+      name: 'CreateApplicationArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'CreateCollectionArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'CreateCollectionAttributeArguments',
       type: {
         kind: 'struct',
         fields: [
@@ -2332,7 +3024,7 @@ export const IDL: Bulldozer = {
       },
     },
     {
-      name: 'Attribute',
+      name: 'CreateInstructionArguments',
       type: {
         kind: 'struct',
         fields: [
@@ -2340,27 +3032,11 @@ export const IDL: Bulldozer = {
             name: 'name',
             type: 'string',
           },
-          {
-            name: 'kind',
-            type: {
-              option: {
-                defined: 'AttributeKinds',
-              },
-            },
-          },
-          {
-            name: 'modifier',
-            type: {
-              option: {
-                defined: 'AttributeModifiers',
-              },
-            },
-          },
         ],
       },
     },
     {
-      name: 'AccountDto',
+      name: 'CreateInstructionAccountArguments',
       type: {
         kind: 'struct',
         fields: [
@@ -2388,7 +3064,7 @@ export const IDL: Bulldozer = {
       },
     },
     {
-      name: 'BaseAccount',
+      name: 'CreateInstructionArgumentArguments',
       type: {
         kind: 'struct',
         fields: [
@@ -2398,36 +3074,152 @@ export const IDL: Bulldozer = {
           },
           {
             name: 'kind',
-            type: {
-              option: {
-                defined: 'AccountKinds',
-              },
-            },
+            type: 'u8',
           },
           {
             name: 'modifier',
             type: {
-              option: {
-                defined: 'AccountModifiers',
-              },
+              option: 'u8',
             },
           },
           {
-            name: 'collection',
+            name: 'size',
             type: {
-              option: 'publicKey',
+              option: 'u32',
             },
           },
           {
-            name: 'payer',
+            name: 'max',
             type: {
-              option: 'publicKey',
+              option: 'u32',
             },
           },
           {
-            name: 'close',
+            name: 'maxLength',
             type: {
-              option: 'publicKey',
+              option: 'u32',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: 'CreateInstructionRelationArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'bump',
+            type: 'u8',
+          },
+        ],
+      },
+    },
+    {
+      name: 'CreateWorkspaceArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateApplicationArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateCollectionArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateCollectionAttributeArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
+            type: 'u8',
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: 'u8',
+            },
+          },
+          {
+            name: 'size',
+            type: {
+              option: 'u32',
+            },
+          },
+          {
+            name: 'max',
+            type: {
+              option: 'u32',
+            },
+          },
+          {
+            name: 'maxLength',
+            type: {
+              option: 'u32',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateInstructionArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateInstructionAccountArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
+            type: 'u8',
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: 'u8',
             },
           },
           {
@@ -2435,6 +3227,70 @@ export const IDL: Bulldozer = {
             type: {
               option: 'u16',
             },
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateInstructionArgumentArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'kind',
+            type: 'u8',
+          },
+          {
+            name: 'modifier',
+            type: {
+              option: 'u8',
+            },
+          },
+          {
+            name: 'size',
+            type: {
+              option: 'u32',
+            },
+          },
+          {
+            name: 'max',
+            type: {
+              option: 'u32',
+            },
+          },
+          {
+            name: 'maxLength',
+            type: {
+              option: 'u32',
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateInstructionBodyArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'body',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateWorkspaceArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'name',
+            type: 'string',
           },
         ],
       },
@@ -2450,6 +3306,10 @@ export const IDL: Bulldozer = {
               {
                 name: 'id',
                 type: 'u8',
+              },
+              {
+                name: 'collection',
+                type: 'publicKey',
               },
             ],
           },
@@ -2477,6 +3337,18 @@ export const IDL: Bulldozer = {
                 name: 'id',
                 type: 'u8',
               },
+              {
+                name: 'space',
+                type: {
+                  option: 'u16',
+                },
+              },
+              {
+                name: 'payer',
+                type: {
+                  option: 'publicKey',
+                },
+              },
             ],
           },
           {
@@ -2485,6 +3357,12 @@ export const IDL: Bulldozer = {
               {
                 name: 'id',
                 type: 'u8',
+              },
+              {
+                name: 'close',
+                type: {
+                  option: 'publicKey',
+                },
               },
             ],
           },

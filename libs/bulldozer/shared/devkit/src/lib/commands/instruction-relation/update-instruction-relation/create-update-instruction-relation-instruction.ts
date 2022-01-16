@@ -1,4 +1,8 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+  PublicKey,
+  SYSVAR_CLOCK_PUBKEY,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 
 export const createUpdateInstructionRelationInstruction = (
@@ -13,6 +17,7 @@ export const createUpdateInstructionRelationInstruction = (
       from: fromPublicKey,
       to: toPublicKey,
       authority,
+      clock: SYSVAR_CLOCK_PUBKEY,
     },
   });
 };

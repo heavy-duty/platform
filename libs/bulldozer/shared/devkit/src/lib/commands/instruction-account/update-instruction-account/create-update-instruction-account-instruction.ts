@@ -1,4 +1,8 @@
-import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import {
+  PublicKey,
+  SYSVAR_CLOCK_PUBKEY,
+  TransactionInstruction,
+} from '@solana/web3.js';
 import { bulldozerProgram } from '../../../programs';
 import { InstructionAccountDto } from '../../../utils';
 
@@ -13,6 +17,7 @@ export const createUpdateInstructionAccountInstruction = (
       accounts: {
         authority,
         account: instructionAccountPublicKey,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       remainingAccounts: [
         instructionAccountDto.collection &&

@@ -2,16 +2,9 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
+import { ConnectionStore } from '@heavy-duty/bulldozer-store';
 import { PROGRAM_CONFIGS } from '@heavy-duty/ng-anchor';
-<<<<<<< HEAD
-import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
-=======
-import {
-  ConnectionStore,
-  WalletStore,
-  WALLET_CONFIG,
-} from '@heavy-duty/wallet-adapter';
->>>>>>> 005b4b4... refactor(bulldozer-client): re-organize libraries
+import { HdWalletAdapterModule, WalletStore } from '@heavy-duty/wallet-adapter';
 import * as bulldozerIdl from '../assets/json/bulldozer.json';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
