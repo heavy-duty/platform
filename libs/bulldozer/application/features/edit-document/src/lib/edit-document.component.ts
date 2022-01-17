@@ -62,7 +62,7 @@ import { Subject, takeUntil } from 'rxjs';
             *ngFor="let collection of data?.collections"
             [value]="collection.id"
           >
-            {{ collection.data.name }} |
+            {{ collection.name }} |
             {{ collection.id | obscureAddress }}
           </mat-option>
         </mat-select>
@@ -118,7 +118,7 @@ import { Subject, takeUntil } from 'rxjs';
             *ngFor="let account of data?.accounts"
             [value]="account.id"
           >
-            {{ account.data.name }} |
+            {{ account.name }} |
             {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
@@ -138,7 +138,7 @@ import { Subject, takeUntil } from 'rxjs';
             *ngFor="let account of data?.accounts"
             [value]="account.id"
           >
-            {{ account.data.name }} |
+            {{ account.name }} |
             {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
@@ -231,7 +231,7 @@ export class EditDocumentComponent implements OnInit, OnDestroy {
     if (this.data?.document) {
       this.documentGroup.setValue(
         {
-          name: this.data.document.data.name,
+          name: this.data.document.name,
           modifier:
             this.data.document.data.modifier !== null
               ? this.data.document.data.modifier.id

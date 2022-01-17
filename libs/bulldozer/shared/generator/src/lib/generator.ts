@@ -7,6 +7,7 @@ import {
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
+  Relation,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
@@ -31,7 +32,7 @@ export const generateInstructionCode = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[],
+  instructionRelations: Relation<InstructionRelation>[],
   collections: Document<Collection>[]
 ) => {
   const formattedInstruction = formatInstruction(
@@ -43,7 +44,7 @@ export const generateInstructionCode = (
   );
   const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
-      account.data.collection && account.data.collection.data.name !== null
+      account.data.collection && account.data.collection.name !== null
         ? collections.set(account.data.collection.id, account.data.collection)
         : collections,
     new Map([])
@@ -73,10 +74,10 @@ export const generateCollectionCode = (
   );
 };
 
-export const generateModCode = (entries: { data: { name: string } }[]) => {
+export const generateModCode = (entries: { name: string }[]) => {
   return generateCode(
     {
-      entries: entries.map((entry) => formatName(entry.data.name)),
+      entries: entries.map((entry) => formatName(entry.name)),
     },
     getTemplateByType('mod')
   );
@@ -108,7 +109,7 @@ export const generateWorkspaceMetadata = (
   instructions: Document<Instruction>[],
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[]
+  instructionRelations: Relation<InstructionRelation>[]
 ): WorkspaceMetadata => {
   return {
     applications: applications.map((application) => {
@@ -127,7 +128,7 @@ export const generateWorkspaceMetadata = (
             ({ data }) => data.application === application.id
           )
         ),
-        name: formatName(application.data.name),
+        name: formatName(application.name),
         collections: filteredCollections.map((collection) => ({
           template: generateCollectionCode(
             collection,
@@ -135,7 +136,7 @@ export const generateWorkspaceMetadata = (
               ({ data }) => data.collection === collection.id
             )
           ),
-          name: formatName(collection.data.name),
+          name: formatName(collection.name),
         })),
         instructions: filteredInstructions.map((instruction) => ({
           template: generateInstructionCode(
@@ -151,7 +152,7 @@ export const generateWorkspaceMetadata = (
             ),
             collections
           ),
-          name: formatName(instruction.data.name),
+          name: formatName(instruction.name),
         })),
         collectionsMod: {
           template: generateModCode(filteredCollections),
@@ -169,7 +170,7 @@ export const generateWorkspaceZip = (
   metadata: WorkspaceMetadata
 ) => {
   const zip = new JSZip();
-  const workspaceName = formatName(workspace.data.name);
+  const workspaceName = formatName(workspace.name);
   const workspaceFolder = zip.folder(workspaceName.snakeCase);
 
   workspaceFolder?.file;

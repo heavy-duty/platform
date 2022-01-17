@@ -104,7 +104,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
       switchMap((workspaces) =>
         merge(
           ...workspaces.map((workspace) =>
-            this._bulldozerProgramStore.onWorkspaceChanges(workspace.id).pipe(
+            this._bulldozerProgramStore.onWorkspaceChange(workspace.id).pipe(
               tap((changes) => {
                 if (!changes) {
                   this._removeWorkspace(workspace.id);

@@ -5,7 +5,7 @@ import {
   Document,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -109,7 +109,7 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
         merge(
           ...collectionAttributes.map((collectionAttribute) =>
             this._bulldozerProgramStore
-              .onCollectionAttributeChanges(collectionAttribute.id)
+              .onCollectionAttributeChange(collectionAttribute.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -176,7 +176,6 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
       }>
     ) =>
       request$.pipe(
-        tap((a) => console.log(a)),
         concatMap(({ workspaceId, applicationId, collectionId, data }) =>
           this._bulldozerProgramStore
             .createCollectionAttribute(

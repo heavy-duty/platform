@@ -5,7 +5,7 @@ import {
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -109,7 +109,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
         merge(
           ...instructionAccounts.map((instructionAccount) =>
             this._bulldozerProgramStore
-              .onInstructionAccountChanges(instructionAccount.id)
+              .onInstructionAccountChange(instructionAccount.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {

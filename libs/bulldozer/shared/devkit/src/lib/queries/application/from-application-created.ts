@@ -1,19 +1,19 @@
+import { ReactiveConnection } from '@heavy-duty/rx-solana';
 import { Observable } from 'rxjs';
-import { fromDocumentCreated } from '../../operations';
-import { ReactiveConnection } from '../../reactive-connection';
 import {
   Application,
   ApplicationFilters,
   APPLICATION_ACCOUNT_NAME,
+  createApplicationDocument,
   Document,
+  fromAccountCreated,
 } from '../../utils';
-import { createApplicationDocument } from './utils';
 
 export const fromApplicationCreated = (
   connection: ReactiveConnection,
   filters: ApplicationFilters
 ): Observable<Document<Application>> =>
-  fromDocumentCreated(
+  fromAccountCreated(
     connection,
     filters,
     APPLICATION_ACCOUNT_NAME,

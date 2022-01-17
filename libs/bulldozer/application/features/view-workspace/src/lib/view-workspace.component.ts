@@ -7,7 +7,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     <ng-container *ngIf="workspace$ | ngrxPush as workspace">
       <header bdPageHeader>
         <h1>
-          {{ workspace.data.name }}
+          {{ workspace.name }}
         </h1>
         <p>Visualize all the details about this workspace.</p>
       </header>

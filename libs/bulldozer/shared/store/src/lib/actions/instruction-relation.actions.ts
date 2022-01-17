@@ -1,4 +1,4 @@
-import { Document, InstructionRelation } from '@heavy-duty/bulldozer-devkit';
+import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
 import { Action, InstructionRelationActionTypes } from './types';
 
 export class InstructionRelationCreated implements Action<void> {
@@ -6,11 +6,11 @@ export class InstructionRelationCreated implements Action<void> {
 }
 
 export class InstructionRelationUpdated
-  implements Action<Document<InstructionRelation>>
+  implements Action<Relation<InstructionRelation>>
 {
   type = InstructionRelationActionTypes.InstructionRelationUpdated;
 
-  constructor(public payload: Document<InstructionRelation>) {}
+  constructor(public payload: Relation<InstructionRelation>) {}
 }
 
 export class InstructionRelationDeleted implements Action<string> {

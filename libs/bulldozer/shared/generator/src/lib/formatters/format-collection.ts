@@ -30,16 +30,16 @@ export const formatCollection = (
   collection: Document<Collection>,
   collectionAttributes: Document<CollectionAttribute>[]
 ) => ({
-  name: formatName(collection.data.name),
+  name: formatName(collection.name),
   attributes:
     collectionAttributes &&
     collectionAttributes
       .filter((attribute) => attribute.data.collection === collection.id)
       .map((attribute) => ({
         id: attribute.id,
+        name: formatName(attribute.name),
         data: {
           ...attribute.data,
-          name: formatName(attribute.data.name),
           kind: {
             ...attribute.data.kind,
             name: getAttributeKindName(

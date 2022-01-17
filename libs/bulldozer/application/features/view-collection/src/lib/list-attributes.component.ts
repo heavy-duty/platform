@@ -34,7 +34,7 @@ import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
               </div>
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ attribute.data.name }}
+                  {{ attribute.name }}
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:

@@ -1,26 +1,27 @@
+import { getProgramAccounts } from '@heavy-duty/rx-solana';
 import { Connection } from '@solana/web3.js';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { encodeFilters, getProgramAccounts } from '../../operations';
+import { map, Observable } from 'rxjs';
 import {
-  Document,
+  BULLDOZER_PROGRAM_ID,
+  createInstructionRelationRelation,
+  encodeFilters,
   InstructionRelation,
   InstructionRelationFilters,
   INSTRUCTION_RELATION_ACCOUNT_NAME,
+  Relation,
 } from '../../utils';
-import { createInstructionRelationDocument } from './utils';
 
 export const getInstructionRelations = (
   connection: Connection,
   filters: InstructionRelationFilters
-): Observable<Document<InstructionRelation>[]> => {
-  return getProgramAccounts(connection, {
+): Observable<Relation<InstructionRelation>[]> => {
+  return getProgramAccounts(connection, BULLDOZER_PROGRAM_ID, {
     commitment: connection.commitment,
     filters: encodeFilters(INSTRUCTION_RELATION_ACCOUNT_NAME, filters),
   }).pipe(
     map((programAccounts) =>
       programAccounts.map(({ pubkey, account }) =>
-        createInstructionRelationDocument(pubkey, account)
+        createInstructionRelationRelation(pubkey, account)
       )
     )
   );

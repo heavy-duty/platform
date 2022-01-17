@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import {
-  Document,
   InstructionRelation,
   InstructionRelationDto,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
 import { concatMap, switchMap, tap } from 'rxjs/operators';
@@ -19,12 +19,12 @@ import {
 
 interface ViewModel {
   instructionId: string | null;
-  instructionRelationsMap: Map<string, Document<InstructionRelation>>;
+  instructionRelationsMap: Map<string, Relation<InstructionRelation>>;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  instructionRelationsMap: new Map<string, Document<InstructionRelation>>(),
+  instructionRelationsMap: new Map<string, Relation<InstructionRelation>>(),
 };
 
 @Injectable()
@@ -55,7 +55,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
   }
 
   private readonly _setInstructionRelation = this.updater(
-    (state, newInstructionRelation: Document<InstructionRelation>) => {
+    (state, newInstructionRelation: Relation<InstructionRelation>) => {
       const instructionRelationsMap = new Map(state.instructionRelationsMap);
       instructionRelationsMap.set(
         newInstructionRelation.id,
@@ -69,7 +69,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
   );
 
   private readonly _addInstructionRelation = this.updater(
-    (state, newInstructionRelation: Document<InstructionRelation>) => {
+    (state, newInstructionRelation: Relation<InstructionRelation>) => {
       if (state.instructionRelationsMap.has(newInstructionRelation.id)) {
         return state;
       }
@@ -102,7 +102,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
         merge(
           ...instructionRelations.map((instructionRelation) =>
             this._bulldozerProgramStore
-              .onInstructionRelationChanges(instructionRelation.id)
+              .onInstructionRelationChange(instructionRelation.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {
@@ -156,7 +156,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
                         instructionRelation.id,
                         instructionRelation
                       ),
-                    new Map<string, Document<InstructionRelation>>()
+                    new Map<string, Relation<InstructionRelation>>()
                   ),
                 }),
               (error) => this._error.next(error)
@@ -199,7 +199,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
   readonly updateInstructionRelation = this.effect(
     (
       request$: Observable<{
-        instructionRelation: Document<InstructionRelation>;
+        instructionRelation: Relation<InstructionRelation>;
         changes: InstructionRelationDto;
       }>
     ) =>
@@ -221,13 +221,13 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionRelation = this.effect(
-    (instructionRelation$: Observable<Document<InstructionRelation>>) =>
+    (instructionRelation$: Observable<Relation<InstructionRelation>>) =>
       instructionRelation$.pipe(
         concatMap((instructionRelation) =>
           this._bulldozerProgramStore
             .deleteInstructionRelation(
-              instructionRelation.data.from,
-              instructionRelation.data.to,
+              instructionRelation.from,
+              instructionRelation.to,
               instructionRelation.id
             )
             .pipe(

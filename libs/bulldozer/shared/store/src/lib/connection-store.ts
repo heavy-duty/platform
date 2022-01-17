@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ReactiveConnection } from '@heavy-duty/bulldozer-devkit';
+import { ReactiveConnection } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import { ConnectionConfig } from '@solana/web3.js';
 import { combineLatest, tap } from 'rxjs';

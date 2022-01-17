@@ -239,7 +239,7 @@ export class EditArgumentComponent implements OnInit {
     if (this.data?.instructionArgument) {
       this.argumentGroup.setValue(
         {
-          name: this.data.instructionArgument.data.name,
+          name: this.data.instructionArgument.name,
           kind: this.data.instructionArgument.data.kind.id,
           modifier:
             this.data.instructionArgument.data?.modifier !== null

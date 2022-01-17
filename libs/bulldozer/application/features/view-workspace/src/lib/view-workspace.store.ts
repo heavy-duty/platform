@@ -4,7 +4,7 @@ import {
   TabStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import { combineLatest } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
@@ -52,7 +52,7 @@ export class ViewWorkspaceStore extends ComponentStore<object> {
       tap(([, workspace]) =>
         this._tabStore.openTab({
           id: workspace.id,
-          label: workspace.data.name,
+          label: workspace.name,
           url: `/workspaces/${workspace.id}`,
         })
       )

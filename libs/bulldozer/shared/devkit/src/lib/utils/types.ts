@@ -1,5 +1,5 @@
 import { BN } from '@project-serum/anchor';
-import { AccountInfo } from '@solana/web3.js';
+import { AccountInfo, PublicKey } from '@solana/web3.js';
 
 export interface CollectionAttributeDto {
   name: string;
@@ -36,20 +36,17 @@ export interface InstructionRelationDto {
 
 export interface Workspace {
   authority: string;
-  name: string;
 }
 
 export interface Application {
   authority: string;
   workspace: string;
-  name: string;
 }
 
 export interface Collection {
   authority: string;
   workspace: string;
   application: string;
-  name: string;
 }
 
 export interface CollectionAttribute {
@@ -57,7 +54,6 @@ export interface CollectionAttribute {
   workspace: string;
   application: string;
   collection: string;
-  name: string;
   kind: {
     id: number;
     name: string;
@@ -76,7 +72,6 @@ export interface Instruction {
   authority: string;
   workspace: string;
   application: string;
-  name: string;
   body: string;
 }
 
@@ -85,7 +80,6 @@ export interface InstructionArgument {
   workspace: string;
   application: string;
   instruction: string;
-  name: string;
   kind: {
     id: number;
     name: string;
@@ -105,7 +99,6 @@ export interface InstructionAccount {
   workspace: string;
   application: string;
   instruction: string;
-  name: string;
   kind: {
     id: number;
     name: string;
@@ -125,16 +118,23 @@ export interface InstructionRelation {
   workspace: string;
   application: string;
   instruction: string;
-  from: string;
-  to: string;
 }
 
-export interface Document<T> {
+export interface Account<T> {
   id: string;
   data: T;
   metadata: AccountInfo<Buffer>;
   createdAt: BN;
   updatedAt: BN;
+}
+
+export interface Document<T> extends Account<T> {
+  name: string;
+}
+
+export interface Relation<T> extends Account<T> {
+  from: string;
+  to: string;
 }
 
 export const AUTHORITY_FIELD_LABEL = 'authority';
@@ -205,3 +205,8 @@ export type InstructionRelationFilters = Partial<{
     | typeof APPLICATION_FIELD_LABEL
     | typeof INSTRUCTION_FIELD_LABEL]: string;
 }>;
+
+export type AccountFactory<ResultAccount> = (
+  publicKey: PublicKey,
+  accountInfo: AccountInfo<Buffer>
+) => ResultAccount;

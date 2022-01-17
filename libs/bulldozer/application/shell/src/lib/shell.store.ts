@@ -29,7 +29,7 @@ import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/feat
 import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
@@ -416,8 +416,6 @@ export class ShellStore extends ComponentStore<ViewModel> {
   );
 
   private getErrorMessage(error: unknown) {
-    console.log(error);
-
     if (typeof error === 'string') {
       return error;
     } else if (error instanceof WalletError) {

@@ -1,19 +1,19 @@
+import { ReactiveConnection } from '@heavy-duty/rx-solana';
 import { Observable } from 'rxjs';
-import { fromDocumentCreated } from '../../operations';
-import { ReactiveConnection } from '../../reactive-connection';
 import {
+  createWorkspaceDocument,
   Document,
+  fromAccountCreated,
   Workspace,
   WorkspaceFilters,
   WORKSPACE_ACCOUNT_NAME,
 } from '../../utils';
-import { createWorkspaceDocument } from './utils';
 
 export const fromWorkspaceCreated = (
   connection: ReactiveConnection,
   filters: WorkspaceFilters
 ): Observable<Document<Workspace>> =>
-  fromDocumentCreated(
+  fromAccountCreated(
     connection,
     filters,
     WORKSPACE_ACCOUNT_NAME,

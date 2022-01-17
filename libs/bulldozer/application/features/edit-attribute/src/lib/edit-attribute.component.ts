@@ -243,7 +243,7 @@ export class EditAttributeComponent implements OnInit, OnDestroy {
     if (this.data?.collectionAttribute) {
       this.attributeGroup.setValue(
         {
-          name: this.data.collectionAttribute.data.name,
+          name: this.data.collectionAttribute.name,
           kind: this.data.collectionAttribute.data.kind.id,
           modifier:
             this.data.collectionAttribute.data.modifier !== null

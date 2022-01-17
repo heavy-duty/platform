@@ -1,8 +1,10 @@
+import {
+  addInstructionToTransaction,
+  createTransaction,
+} from '@heavy-duty/rx-solana';
 import { Connection, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { createDeleteApplicationInstruction } from '.';
-import { createTransaction } from '../../../operations';
-import { addInstructionToTransaction } from '../../../operators';
 
 export const createDeleteApplicationTransaction = (
   connection: Connection,

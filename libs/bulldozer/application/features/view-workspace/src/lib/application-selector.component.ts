@@ -15,7 +15,7 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title>
             <ng-container *ngIf="application; else noApplicationSelected">
-              {{ application.data.name }}
+              {{ application.name }}
             </ng-container>
             <ng-template #noApplicationSelected>Applications</ng-template>
           </mat-panel-title>
@@ -39,16 +39,16 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
               'applications',
               application.id
             ]"
-            [matTooltip]="application.data.name"
+            [matTooltip]="application.name"
             matTooltipShowDelay="500"
           >
-            {{ application.data.name }}
+            {{ application.name }}
           </a>
 
           <button
             mat-icon-button
             [attr.aria-label]="
-              'More options of ' + application.data.name + ' application'
+              'More options of ' + application.name + ' application'
             "
             [matMenuTriggerFor]="applicationOptionsMenu"
           >

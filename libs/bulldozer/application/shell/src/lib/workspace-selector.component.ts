@@ -14,9 +14,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
   template: `
     <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
       {{
-        activeWorkspace === null
-          ? 'Select workspace'
-          : activeWorkspace?.data?.name
+        activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
       }}
     </button>
     <mat-menu #menu="matMenu" class="px-4 py-2">
@@ -33,18 +31,16 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
             <p class="text-xl font-bold mb-0 flex justify-between">
               <span
                 class="flex-grow leading-8 overflow-hidden"
-                [matTooltip]="workspace.data.name"
+                [matTooltip]="workspace.name"
                 matTooltipShowDelay="500"
               >
-                {{ workspace.data.name }}
+                {{ workspace.name }}
               </span>
               <button
                 mat-icon-button
                 color="primary"
                 class="w-8 h-8 leading-8 flex-shrink-0"
-                [attr.aria-label]="
-                  'Download ' + workspace.data.name + ' workspace'
-                "
+                [attr.aria-label]="'Download ' + workspace.name + ' workspace'"
                 (click)="onDownloadWorkspace(workspace.id)"
               >
                 <mat-icon>download</mat-icon>

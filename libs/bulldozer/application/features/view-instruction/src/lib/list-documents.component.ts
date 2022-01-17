@@ -10,6 +10,7 @@ import {
   Document,
   InstructionAccount,
   InstructionRelation,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
@@ -45,7 +46,7 @@ import {
 
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ document.data.name }}
+                  {{ document.name }}
 
                   <span
                     class="text-xs font-thin"
@@ -63,7 +64,7 @@ import {
                 </h3>
                 <p class="text-xs mb-0 italic" *ngIf="document.collection">
                   Collection:
-                  {{ document.collection.data.name }}
+                  {{ document.collection.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
@@ -77,13 +78,13 @@ import {
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="document.close">
                   Close:
-                  {{ document.close.data.name }} ({{
+                  {{ document.close.name }} ({{
                     document.close.id | obscureAddress
                   }})
                 </p>
                 <p class="text-xs mb-0 italic" *ngIf="document.payer">
                   Payer:
-                  {{ document.payer.data.name }} ({{
+                  {{ document.payer.name }} ({{
                     document.payer.id | obscureAddress
                   }})
                 </p>
@@ -96,7 +97,7 @@ import {
                       *ngFor="let relation of document.relations"
                       class="text-xs"
                     >
-                      {{ relation.to.data.name }} ({{
+                      {{ relation.extras.to.name }} ({{
                         relation.id | obscureAddress
                       }})
                       <button
@@ -104,7 +105,7 @@ import {
                         mat-icon-button
                         [attr.aria-label]="
                           'More options of ' +
-                          relation.to.data.name +
+                          relation.extras.to.name +
                           ' has one relation'
                         "
                         [matMenuTriggerFor]="documentRelationMenu"
@@ -185,8 +186,8 @@ export class ListDocumentsComponent {
   @Input() connected?: boolean | null = null;
   @Input() documents?:
     | (Document<InstructionAccount> & {
-        relations: (Document<InstructionRelation> & {
-          to: Document<InstructionAccount>;
+        relations: (Relation<InstructionRelation> & {
+          extras: { to: Document<InstructionAccount> };
         })[];
         close: Document<InstructionAccount> | null;
         collection: Document<Collection> | null;
@@ -196,8 +197,8 @@ export class ListDocumentsComponent {
   @Output() updateDocument = new EventEmitter<Document<InstructionAccount>>();
   @Output() deleteDocument = new EventEmitter<Document<InstructionAccount>>();
   @Output() createRelation = new EventEmitter<string>();
-  @Output() updateRelation = new EventEmitter<Document<InstructionRelation>>();
-  @Output() deleteRelation = new EventEmitter<Document<InstructionRelation>>();
+  @Output() updateRelation = new EventEmitter<Relation<InstructionRelation>>();
+  @Output() deleteRelation = new EventEmitter<Relation<InstructionRelation>>();
 
   onUpdateDocument(document: Document<InstructionAccount>) {
     this.updateDocument.emit(document);
@@ -212,14 +213,14 @@ export class ListDocumentsComponent {
   }
 
   onUpdateRelation(
-    relation: Document<InstructionRelation> & {
-      to: Document<InstructionAccount>;
+    relation: Relation<InstructionRelation> & {
+      extras: { to: Document<InstructionAccount> };
     }
   ) {
     this.updateRelation.emit(relation);
   }
 
-  onDeleteRelation(instructionRelation: Document<InstructionRelation>) {
+  onDeleteRelation(instructionRelation: Relation<InstructionRelation>) {
     this.deleteRelation.emit(instructionRelation);
   }
 }

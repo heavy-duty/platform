@@ -18,6 +18,7 @@ import {
   Document,
   InstructionAccount,
   InstructionRelation,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { Subject } from 'rxjs';
 
@@ -54,7 +55,7 @@ export const equalValidator =
             *ngFor="let account of data?.accounts"
             [value]="account.id"
           >
-            {{ account.data.name }} |
+            {{ account.name }} |
             {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
@@ -113,7 +114,7 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      relation?: Document<InstructionRelation>;
+      relation?: Relation<InstructionRelation>;
       collections: Document<Collection>[];
       accounts: Document<InstructionAccount>[];
       from: string;
@@ -124,8 +125,8 @@ export class EditRelationComponent implements OnInit, OnDestroy {
     if (this.data?.relation) {
       this.relationGroup.setValue(
         {
-          from: this.data.relation.data.from,
-          to: this.data.relation.data.to,
+          from: this.data.relation.from,
+          to: this.data.relation.to,
         },
         { emitEvent: false }
       );

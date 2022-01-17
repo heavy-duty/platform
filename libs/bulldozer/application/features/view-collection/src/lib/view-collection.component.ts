@@ -9,7 +9,7 @@ import { ViewCollectionStore } from './view-collection.store';
       <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
         <header bdPageHeader>
           <h1>
-            {{ collection.data.name }}
+            {{ collection.name }}
             <button
               mat-icon-button
               color="primary"

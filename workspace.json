@@ -33,6 +33,7 @@
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
     "bulldozer-shared-store": "libs/bulldozer/shared/store",
+    "shared-rx-solana": "libs/shared/rx-solana",
     "shared-ng-anchor": "libs/shared/ng-anchor",
     "shared-utils-operators": "libs/shared/utils/operators",
     "wallet-adapter-data-access": "libs/wallet-adapter/data-access",

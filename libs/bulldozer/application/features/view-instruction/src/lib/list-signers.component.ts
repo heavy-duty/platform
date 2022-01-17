@@ -38,7 +38,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ signer.data.name }}
+                  {{ signer.name }}
 
                   <span
                     class="text-xs font-thin"

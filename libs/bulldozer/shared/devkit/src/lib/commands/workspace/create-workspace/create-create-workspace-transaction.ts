@@ -1,11 +1,11 @@
+import {
+  addInstructionToTransaction,
+  createTransaction,
+  partialSignTransaction,
+} from '@heavy-duty/rx-solana';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { Observable } from 'rxjs';
 import { createCreateWorkspaceInstruction } from '.';
-import { createTransaction } from '../../../operations';
-import {
-  addInstructionToTransaction,
-  partialSignTransaction,
-} from '../../../operators';
 
 export const createCreateWorkspaceTransaction = (
   connection: Connection,

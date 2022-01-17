@@ -12,7 +12,7 @@ import {
 import { EditAttributeComponent } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { generateCollectionCode } from '@heavy-duty/generator';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { combineLatest, Observable } from 'rxjs';
@@ -112,7 +112,7 @@ export class ViewCollectionStore extends ComponentStore<object> {
       tap(([, collection]) =>
         this._tabStore.openTab({
           id: collection.id,
-          label: collection.data.name,
+          label: collection.name,
           url: `/workspaces/${collection.data.workspace}/applications/${collection.data.application}/collections/${collection.id}`,
         })
       )

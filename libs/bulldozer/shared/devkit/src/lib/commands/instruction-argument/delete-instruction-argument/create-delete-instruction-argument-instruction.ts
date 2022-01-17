@@ -1,5 +1,5 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { bulldozerProgram } from '../../../programs';
+import { bulldozerProgram } from '../../../utils';
 
 export const createDeleteInstructionArgumentInstruction = (
   authority: PublicKey,

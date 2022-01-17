@@ -1,9 +1,7 @@
+import { getAccountInfo } from '@heavy-duty/rx-solana';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { getAccountInfo } from '../../operations';
-import { Application, Document } from '../../utils';
-import { createApplicationDocument } from './utils';
+import { map, Observable } from 'rxjs';
+import { Application, createApplicationDocument, Document } from '../../utils';
 
 export const getApplication = (
   connection: Connection,

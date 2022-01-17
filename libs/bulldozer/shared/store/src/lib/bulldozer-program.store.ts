@@ -34,21 +34,21 @@ import {
   createUpdateWorkspaceTransaction,
   Document,
   findInstructionRelationAddress,
-  fromApplicationChanges,
+  fromApplicationChange,
   fromApplicationCreated,
-  fromCollectionAttributeChanges,
+  fromCollectionAttributeChange,
   fromCollectionAttributeCreated,
-  fromCollectionChanges,
+  fromCollectionChange,
   fromCollectionCreated,
-  fromInstructionAccountChanges,
+  fromInstructionAccountChange,
   fromInstructionAccountCreated,
-  fromInstructionArgumentChanges,
+  fromInstructionArgumentChange,
   fromInstructionArgumentCreated,
-  fromInstructionChanges,
+  fromInstructionChange,
   fromInstructionCreated,
-  fromInstructionRelationChanges,
+  fromInstructionRelationChange,
   fromInstructionRelationCreated,
-  fromWorkspaceChanges,
+  fromWorkspaceChange,
   fromWorkspaceCreated,
   getApplication,
   getApplications,
@@ -73,12 +73,18 @@ import {
   InstructionRelation,
   InstructionRelationFilters,
   parseBulldozerError,
+  Relation,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
 } from '@heavy-duty/generator';
+import {
+  confirmTransaction,
+  isNotNullOrUndefined,
+  sendAndConfirmTransactions,
+} from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program } from '@project-serum/anchor';
@@ -97,11 +103,6 @@ import {
 } from 'rxjs';
 import { BulldozerActions, InstructionCreated } from './actions';
 import { ConnectionStore } from './connection-store';
-import {
-  confirmTransaction,
-  isNotNullOrUndefined,
-  sendAndConfirmTransactions,
-} from './operators';
 
 interface ViewModel {
   reader: Program | null;
@@ -278,12 +279,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onWorkspaceChanges(
+  onWorkspaceChange(
     workspaceId: string
   ): Observable<Document<Workspace> | null> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromWorkspaceChanges(connection, new PublicKey(workspaceId))
+        fromWorkspaceChange(connection, new PublicKey(workspaceId))
       )
     );
   }
@@ -325,12 +326,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           applicationName
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [applicationKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [applicationKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -362,12 +362,12 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onApplicationChanges(
+  onApplicationChange(
     applicationId: string
   ): Observable<Document<Application> | null> {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromApplicationChanges(connection, new PublicKey(applicationId))
+        fromApplicationChange(connection, new PublicKey(applicationId))
       )
     );
   }
@@ -412,12 +412,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           collectionName
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [collectionKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [collectionKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -455,10 +454,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onCollectionChanges(collectionId: string) {
+  onCollectionChange(collectionId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromCollectionChanges(connection, new PublicKey(collectionId))
+        fromCollectionChange(connection, new PublicKey(collectionId))
       )
     );
   }
@@ -493,12 +492,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           collectionAttributeDto
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [collectionAttributeKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [collectionAttributeKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -544,10 +542,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onCollectionAttributeChanges(collectionAttributeId: string) {
+  onCollectionAttributeChange(collectionAttributeId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromCollectionAttributeChanges(
+        fromCollectionAttributeChange(
           connection,
           new PublicKey(collectionAttributeId)
         )
@@ -591,12 +589,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           instructionName
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [instructionKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [instructionKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -651,10 +648,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionChanges(instructionId: string) {
+  onInstructionChange(instructionId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromInstructionChanges(connection, new PublicKey(instructionId))
+        fromInstructionChange(connection, new PublicKey(instructionId))
       )
     );
   }
@@ -687,12 +684,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           instructionAccountDto
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [instructionAccountKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [instructionAccountKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -738,10 +734,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionAccountChanges(instructionAccountId: string) {
+  onInstructionAccountChange(instructionAccountId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromInstructionAccountChanges(
+        fromInstructionAccountChange(
           connection,
           new PublicKey(instructionAccountId)
         )
@@ -779,12 +775,11 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           instructionArgumentDto
         ).pipe(
           concatMap((transaction) =>
-            this._walletStore
-              .sendTransaction(transaction, connection, {
-                signers: [instructionArgumentKeypair],
-              })
-              .pipe(confirmTransaction(connection))
-          )
+            this._walletStore.sendTransaction(transaction, connection, {
+              signers: [instructionArgumentKeypair],
+            })
+          ),
+          concatMap((signature) => confirmTransaction(connection, signature))
         )
       )
     );
@@ -830,10 +825,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionArgumentChanges(instructionArgumentId: string) {
+  onInstructionArgumentChange(instructionArgumentId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromInstructionArgumentChanges(
+        fromInstructionArgumentChange(
           connection,
           new PublicKey(instructionArgumentId)
         )
@@ -843,7 +838,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
 
   getInstructionRelations(
     filters: InstructionRelationFilters
-  ): Observable<Document<InstructionRelation>[]> {
+  ): Observable<Relation<InstructionRelation>[]> {
     return this.context.pipe(
       concatMap(({ connection }) =>
         getInstructionRelations(connection, filters)
@@ -927,10 +922,10 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     );
   }
 
-  onInstructionRelationChanges(instructionRelationId: string) {
+  onInstructionRelationChange(instructionRelationId: string) {
     return this.context.pipe(
       concatMap(({ connection }) =>
-        fromInstructionRelationChanges(
+        fromInstructionRelationChange(
           connection,
           new PublicKey(instructionRelationId)
         )

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -119,7 +119,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
         merge(
           ...instructions.map((instruction) =>
             this._bulldozerProgramStore
-              .onInstructionChanges(instruction.id)
+              .onInstructionChange(instruction.id)
               .pipe(
                 tap((changes) => {
                   if (!changes) {

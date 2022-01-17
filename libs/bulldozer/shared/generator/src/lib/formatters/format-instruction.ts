@@ -5,6 +5,7 @@ import {
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
@@ -37,9 +38,9 @@ export const formatInstructionArguments = (
     .filter((argument) => argument.data.instruction === instructionId)
     .map((argument) => ({
       id: argument.id,
+      name: formatName(argument.name),
       data: {
         ...argument.data,
-        name: formatName(argument.data.name),
         kind: {
           ...argument.data.kind,
           name: getArgumentKindName(
@@ -54,13 +55,13 @@ export const formatInstructionArguments = (
 const getInstructionAccountRelations = (
   instructionAccount: Document<InstructionAccount>,
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[]
+  instructionRelations: Relation<InstructionRelation>[]
 ) => {
   return instructionRelations
-    .filter((relation) => relation.data.from === instructionAccount.id)
+    .filter((relation) => relation.from === instructionAccount.id)
     .map((relation) => {
       const toAccount = instructionAccounts.find(
-        ({ id }) => id === relation.data.to
+        ({ id }) => id === relation.to
       );
 
       if (!toAccount) {
@@ -73,10 +74,7 @@ const getInstructionAccountRelations = (
           ...relation.data,
           toAccount: {
             ...toAccount,
-            data: {
-              ...toAccount.data,
-              name: formatName(toAccount.data.name),
-            },
+            name: formatName(toAccount.name),
           },
         },
       };
@@ -101,10 +99,7 @@ const getInstructionAccountPayer = (
 
   return {
     ...payerAccount,
-    data: {
-      ...payerAccount.data,
-      name: formatName(payerAccount.data.name),
-    },
+    name: formatName(payerAccount.name),
   };
 };
 
@@ -126,10 +121,7 @@ const getInstructionAccountCollection = (
 
   return {
     ...collectionAccount,
-    data: {
-      ...collectionAccount.data,
-      name: formatName(collectionAccount.data.name),
-    },
+    name: formatName(collectionAccount.name),
   };
 };
 
@@ -151,17 +143,14 @@ const getInstructionAccountClose = (
 
   return {
     ...closeAccount,
-    data: {
-      ...closeAccount.data,
-      name: formatName(closeAccount.data.name),
-    },
+    name: formatName(closeAccount.name),
   };
 };
 
 const formatInstructionAccounts = (
   instructionId: string,
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[],
+  instructionRelations: Relation<InstructionRelation>[],
   collections: Document<Collection>[]
 ) =>
   instructionAccounts
@@ -171,6 +160,7 @@ const formatInstructionAccounts = (
     )
     .map((instructionAccount) => ({
       id: instructionAccount.id,
+      name: formatName(instructionAccount.name),
       data: {
         ...instructionAccount.data,
         collection: getInstructionAccountCollection(
@@ -185,13 +175,12 @@ const formatInstructionAccounts = (
           instructionAccount,
           instructionAccounts
         ),
-        name: formatName(instructionAccount.data.name),
         relations: getInstructionAccountRelations(
           instructionAccount,
           instructionAccounts,
           instructionRelations
         ),
-        space: instructionAccount.data.modifier?.space || 0,
+        space: instructionAccount.data.modifier?.space,
       },
     }));
 
@@ -199,10 +188,10 @@ export const formatInstruction = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Document<InstructionRelation>[],
+  instructionRelations: Relation<InstructionRelation>[],
   collections: Document<Collection>[]
 ) => ({
-  name: formatName(instruction.data.name),
+  name: formatName(instruction.name),
   handler: instruction.data.body.split('\n'),
   initializesAccount: instructionAccounts.some(
     (account) => account.data.modifier?.id === 0

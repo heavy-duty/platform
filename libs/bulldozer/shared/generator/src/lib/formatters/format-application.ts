@@ -13,12 +13,12 @@ export const formatApplication = (
 ) => {
   return {
     id: application.id,
-    name: formatName(application.data.name),
+    name: formatName(application.name),
     instructions: instructions.map((instruction) => ({
       ...instruction,
       data: {
         ...instruction.data,
-        name: formatName(instruction.data.name),
+        name: formatName(instruction.name),
       },
       arguments: formatInstructionArguments(
         instruction.id,

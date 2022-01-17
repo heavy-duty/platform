@@ -85,7 +85,7 @@ export class EditCollectionComponent implements OnInit {
     if (this.data?.collection) {
       this.collectionGroup.setValue(
         {
-          name: this.data.collection.data.name,
+          name: this.data.collection.name,
         },
         { emitEvent: false }
       );

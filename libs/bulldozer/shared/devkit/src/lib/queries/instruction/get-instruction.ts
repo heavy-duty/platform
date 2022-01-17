@@ -1,18 +1,16 @@
+import { getAccountInfo } from '@heavy-duty/rx-solana';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { getAccountInfo } from '../../operations';
-import { Document, Instruction } from '../../utils';
-import { createInstructionDocument } from './utils';
+import { map, Observable } from 'rxjs';
+import { createInstructionDocument, Document, Instruction } from '../../utils';
 
 export const getInstruction = (
   connection: Connection,
-  collectionPublicKey: PublicKey
+  instructionPublicKey: PublicKey
 ): Observable<Document<Instruction> | null> => {
-  return getAccountInfo(connection, collectionPublicKey).pipe(
+  return getAccountInfo(connection, instructionPublicKey).pipe(
     map(
       (account) =>
-        account && createInstructionDocument(collectionPublicKey, account)
+        account && createInstructionDocument(instructionPublicKey, account)
     )
   );
 };

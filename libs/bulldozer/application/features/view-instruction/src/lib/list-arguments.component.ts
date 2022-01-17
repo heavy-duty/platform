@@ -34,7 +34,7 @@ import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
               </div>
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ argument.data.name }}
+                  {{ argument.name }}
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:

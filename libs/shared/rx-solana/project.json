@@ -1,0 +1,33 @@
+{
+  "root": "libs/shared/rx-solana",
+  "sourceRoot": "libs/shared/rx-solana/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/shared//rx-solana",
+        "main": "libs/shared/rx-solana/src/index.ts",
+        "tsConfig": "libs/shared/rx-solana/tsconfig.lib.json",
+        "assets": ["libs/shared/rx-solana/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/shared/rx-solana/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/shared/rx-solana"],
+      "options": {
+        "jestConfig": "libs/shared/rx-solana/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

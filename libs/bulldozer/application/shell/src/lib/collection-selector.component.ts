@@ -30,16 +30,16 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
               'collections',
               collection.id
             ]"
-            [matTooltip]="collection.data.name"
+            [matTooltip]="collection.name"
             matTooltipShowDelay="500"
           >
-            {{ collection.data.name }}
+            {{ collection.name }}
           </a>
 
           <button
             mat-icon-button
             [attr.aria-label]="
-              'More options of ' + collection.data.name + ' collection'
+              'More options of ' + collection.name + ' collection'
             "
             [matMenuTriggerFor]="collectionOptionsMenu"
           >

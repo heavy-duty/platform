@@ -5,6 +5,7 @@ import {
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { ViewInstructionStore } from './view-instruction.store';
 
@@ -15,7 +16,7 @@ import { ViewInstructionStore } from './view-instruction.store';
       <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
         <header bdPageHeader>
           <h1>
-            {{ instruction.data.name }}
+            {{ instruction.name }}
             <button
               mat-icon-button
               color="primary"
@@ -245,13 +246,13 @@ export class ViewInstructionComponent {
   }
 
   onUpdateInstructionRelation(
-    instructionRelation: Document<InstructionRelation>
+    instructionRelation: Relation<InstructionRelation>
   ) {
     this._viewInstructionStore.updateInstructionRelation(instructionRelation);
   }
 
   onDeleteInstructionRelation(
-    instructionRelation: Document<InstructionRelation>
+    instructionRelation: Relation<InstructionRelation>
   ) {
     this._viewInstructionStore.deleteInstructionRelation(instructionRelation);
   }

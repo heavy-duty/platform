@@ -85,7 +85,7 @@ export class EditApplicationComponent implements OnInit {
     if (this.data?.application) {
       this.applicationGroup.setValue(
         {
-          name: this.data.application.data.name,
+          name: this.data.application.name,
         },
         { emitEvent: false }
       );

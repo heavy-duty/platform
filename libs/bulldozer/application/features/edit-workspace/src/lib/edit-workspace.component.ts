@@ -93,7 +93,7 @@ export class EditWorkspaceComponent implements OnInit {
     if (this.data?.workspace) {
       this.workspaceGroup.setValue(
         {
-          name: this.data.workspace.data.name,
+          name: this.data.workspace.name,
         },
         { emitEvent: false }
       );

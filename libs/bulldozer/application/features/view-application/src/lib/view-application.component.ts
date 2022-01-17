@@ -7,7 +7,7 @@ import { ViewApplicationStore } from './view-application.store';
     <ng-container *ngIf="application$ | ngrxPush as application">
       <header bdPageHeader>
         <h1>
-          {{ application.data.name }}
+          {{ application.name }}
         </h1>
         <p>Visualize all the details about this application.</p>
       </header>

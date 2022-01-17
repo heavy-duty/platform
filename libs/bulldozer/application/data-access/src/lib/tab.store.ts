@@ -13,7 +13,7 @@ import {
   WorkspaceDeleted,
   WorkspaceUpdated,
 } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import { Observable, of } from 'rxjs';
 import { concatMap, filter, tap, withLatestFrom } from 'rxjs/operators';
@@ -113,7 +113,7 @@ export class TabStore extends ComponentStore<ViewModel> {
       tap((event) =>
         this._setTabLabel({
           tabId: event.payload.id,
-          label: event.payload.data.name,
+          label: event.payload.name,
         })
       )
     )

@@ -8,6 +8,7 @@ import {
   InstructionAccount,
   InstructionArgument,
   InstructionRelation,
+  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import {
   ApplicationStore,
@@ -25,10 +26,7 @@ import { EditRelationComponent } from '@heavy-duty/bulldozer/application/feature
 import { EditSignerComponent } from '@heavy-duty/bulldozer/application/features/edit-signer';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import { generateInstructionCode } from '@heavy-duty/generator';
-import {
-  isNotNullOrUndefined,
-  isTruthy,
-} from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -90,16 +88,16 @@ export class ViewInstructionStore extends ComponentStore<object> {
         .map((instructionAccount) => ({
           ...instructionAccount,
           relations: instructionRelations
-            .filter(({ data }) => data.from === instructionAccount.id)
+            .filter(({ from }) => from === instructionAccount.id)
             .reduce(
               (
-                relations: (Document<InstructionRelation> & {
-                  to: Document<InstructionAccount>;
+                relations: (Relation<InstructionRelation> & {
+                  extras: { to: Document<InstructionAccount> };
                 })[],
                 instructionRelation
               ) => {
                 const toAccount = instructionAccounts.find(
-                  ({ id }) => id === instructionRelation.data.to
+                  ({ id }) => id === instructionRelation.to
                 );
 
                 return toAccount
@@ -107,7 +105,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
                       ...relations,
                       {
                         ...instructionRelation,
-                        to: toAccount,
+                        extras: { to: toAccount },
                       },
                     ]
                   : relations;
@@ -245,7 +243,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
       tap(([, instruction]) =>
         this._tabStore.openTab({
           id: instruction.id,
-          label: instruction.data.name,
+          label: instruction.name,
           url: `/workspaces/${instruction.data.workspace}/applications/${instruction.data.application}/instructions/${instruction.id}`,
         })
       )
@@ -552,7 +550,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly updateInstructionRelation = this.effect(
-    (instructionRelation$: Observable<Document<InstructionRelation>>) =>
+    (instructionRelation$: Observable<Relation<InstructionRelation>>) =>
       instructionRelation$.pipe(
         concatMap((instructionRelation) =>
           of(instructionRelation).pipe(
@@ -565,7 +563,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
               data: {
                 relation: instructionRelation,
                 accounts: instructionAccounts.filter(
-                  ({ id }) => id !== instructionRelation.data.from
+                  ({ id }) => id !== instructionRelation.from
                 ),
               },
             })
@@ -584,7 +582,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
   );
 
   readonly deleteInstructionRelation = this.effect(
-    (instructionRelation$: Observable<Document<InstructionRelation>>) =>
+    (instructionRelation$: Observable<Relation<InstructionRelation>>) =>
       instructionRelation$.pipe(
         tap((instructionRelation) =>
           this._instructionRelationStore.deleteInstructionRelation(

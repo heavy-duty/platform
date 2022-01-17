@@ -3,8 +3,7 @@ import {
   SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { bulldozerProgram } from '../../../programs';
-import { InstructionArgumentDto } from '../../../utils';
+import { bulldozerProgram, InstructionArgumentDto } from '../../../utils';
 
 export const createUpdateInstructionArgumentInstruction = (
   authority: PublicKey,

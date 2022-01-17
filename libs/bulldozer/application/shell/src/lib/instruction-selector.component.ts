@@ -30,16 +30,16 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
               'instructions',
               instruction.id
             ]"
-            [matTooltip]="instruction.data.name"
+            [matTooltip]="instruction.name"
             matTooltipShowDelay="500"
           >
-            {{ instruction.data.name }}
+            {{ instruction.name }}
           </a>
 
           <button
             mat-icon-button
             [attr.aria-label]="
-              'More options of ' + instruction.data.name + ' instruction'
+              'More options of ' + instruction.name + ' instruction'
             "
             [matMenuTriggerFor]="instructionOptionsMenu"
           >

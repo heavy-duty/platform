@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
@@ -116,7 +116,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
       switchMap((collections) =>
         merge(
           ...collections.map((collection) =>
-            this._bulldozerProgramStore.onCollectionChanges(collection.id).pipe(
+            this._bulldozerProgramStore.onCollectionChange(collection.id).pipe(
               tap((changes) => {
                 if (!changes) {
                   this._removeCollection(collection.id);

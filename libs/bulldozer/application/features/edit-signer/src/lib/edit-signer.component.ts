@@ -88,7 +88,7 @@ export class EditSignerComponent implements OnInit {
     if (this.data?.signer) {
       this.signerGroup.setValue(
         {
-          name: this.data.signer.data.name,
+          name: this.data.signer.name,
           saveChanges: this.data.signer.data.modifier?.id === 1,
         },
         { emitEvent: false }

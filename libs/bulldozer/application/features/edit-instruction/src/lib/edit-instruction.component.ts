@@ -83,7 +83,7 @@ export class EditInstructionComponent implements OnInit {
     if (this.data?.instruction) {
       this.instructionGroup.setValue(
         {
-          name: this.data.instruction.data.name,
+          name: this.data.instruction.name,
         },
         { emitEvent: false }
       );
