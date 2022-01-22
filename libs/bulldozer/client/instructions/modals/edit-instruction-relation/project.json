@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/instructions/modals/edit-instruction-relation",
+  "sourceRoot": "libs/bulldozer/client/instructions/modals/edit-instruction-relation/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/instructions/modals/edit-instruction-relation"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-relation/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/instructions/modals/edit-instruction-relation/src/**/*.ts",
+          "libs/bulldozer/client/instructions/modals/edit-instruction-relation/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

@@ -16,6 +16,109 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@bulldozer-client/application-explorer": [
+        "libs/bulldozer/client/applications/components/application-explorer/src/index.ts"
+      ],
+      "@bulldozer-client/application-tab": [
+        "libs/bulldozer/client/applications/components/application-tab/src/index.ts"
+      ],
+      "@bulldozer-client/auth-guard": [
+        "libs/bulldozer/client/shared/guards/auth-guard/src/index.ts"
+      ],
+      "@bulldozer-client/code-editor": [
+        "libs/bulldozer/client/shared/components/code-editor/src/index.ts"
+      ],
+      "@bulldozer-client/collection-attributes-list": [
+        "libs/bulldozer/client/collections/components/collection-attributes-list/src/index.ts"
+      ],
+      "@bulldozer-client/collection-explorer": [
+        "libs/bulldozer/client/collections/components/collection-explorer/src/index.ts"
+      ],
+      "@bulldozer-client/collection-tab": [
+        "libs/bulldozer/client/collections/components/collection-tab/src/index.ts"
+      ],
+      "@bulldozer-client/dark-theme": [
+        "libs/bulldozer/client/shared/directives/dark-theme/src/index.ts"
+      ],
+      "@bulldozer-client/dark-theme-service": [
+        "libs/bulldozer/client/shared/services/dark-theme-service/src/index.ts"
+      ],
+      "@bulldozer-client/dark-theme-switch": [
+        "libs/bulldozer/client/shared/components/dark-theme-switch/src/index.ts"
+      ],
+      "@bulldozer-client/edit-application": [
+        "libs/bulldozer/client/applications/modals/edit-application/src/index.ts"
+      ],
+      "@bulldozer-client/edit-collection": [
+        "libs/bulldozer/client/collections/modals/edit-collection/src/index.ts"
+      ],
+      "@bulldozer-client/edit-collection-attribute": [
+        "libs/bulldozer/client/collections/modals/edit-collection-attribute/src/index.ts"
+      ],
+      "@bulldozer-client/edit-instruction": [
+        "libs/bulldozer/client/instructions/modals/edit-instruction/src/index.ts"
+      ],
+      "@bulldozer-client/edit-instruction-argument": [
+        "libs/bulldozer/client/instructions/modals/edit-instruction-argument/src/index.ts"
+      ],
+      "@bulldozer-client/edit-instruction-document": [
+        "libs/bulldozer/client/instructions/modals/edit-instruction-document/src/index.ts"
+      ],
+      "@bulldozer-client/edit-instruction-relation": [
+        "libs/bulldozer/client/instructions/modals/edit-instruction-relation/src/index.ts"
+      ],
+      "@bulldozer-client/edit-instruction-signer": [
+        "libs/bulldozer/client/instructions/modals/edit-instruction-signer/src/index.ts"
+      ],
+      "@bulldozer-client/edit-workspace": [
+        "libs/bulldozer/client/workspaces/modals/edit-workspace/src/index.ts"
+      ],
+      "@bulldozer-client/instruction-arguments-list": [
+        "libs/bulldozer/client/instructions/components/instruction-arguments-list/src/index.ts"
+      ],
+      "@bulldozer-client/instruction-documents-list": [
+        "libs/bulldozer/client/instructions/components/instruction-documents-list/src/index.ts"
+      ],
+      "@bulldozer-client/instruction-explorer": [
+        "libs/bulldozer/client/instructions/components/instruction-explorer/src/index.ts"
+      ],
+      "@bulldozer-client/instruction-signers-list": [
+        "libs/bulldozer/client/instructions/components/instruction-signers-list/src/index.ts"
+      ],
+      "@bulldozer-client/instruction-tab": [
+        "libs/bulldozer/client/instructions/components/instruction-tab/src/index.ts"
+      ],
+      "@bulldozer-client/obscure-address": [
+        "libs/bulldozer/client/shared/pipes/obscure-address/src/index.ts"
+      ],
+      "@bulldozer-client/page-header": [
+        "libs/bulldozer/client/shared/directives/page-header/src/index.ts"
+      ],
+      "@bulldozer-client/section-header": [
+        "libs/bulldozer/client/shared/directives/section-header/src/index.ts"
+      ],
+      "@bulldozer-client/shell": ["libs/bulldozer/client/shell/src/index.ts"],
+      "@bulldozer-client/view-application": [
+        "libs/bulldozer/client/applications/pages/view-application/src/index.ts"
+      ],
+      "@bulldozer-client/view-collection": [
+        "libs/bulldozer/client/collections/pages/view-collection/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction": [
+        "libs/bulldozer/client/instructions/pages/view-instruction/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace/src/index.ts"
+      ],
+      "@bulldozer-client/workspace-explorer": [
+        "libs/bulldozer/client/workspaces/components/workspace-explorer/src/index.ts"
+      ],
+      "@bulldozer-client/workspace-selector": [
+        "libs/bulldozer/client/workspaces/components/workspace-selector/src/index.ts"
+      ],
+      "@bulldozer-client/workspace-tab": [
+        "libs/bulldozer/client/workspaces/components/workspace-tab/src/index.ts"
+      ],
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],

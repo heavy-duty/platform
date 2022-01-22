@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/workspaces/modals/edit-workspace",
+  "sourceRoot": "libs/bulldozer/client/workspaces/modals/edit-workspace/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/workspaces/modals/edit-workspace"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/workspaces/modals/edit-workspace/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/workspaces/modals/edit-workspace/src/**/*.ts",
+          "libs/bulldozer/client/workspaces/modals/edit-workspace/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
