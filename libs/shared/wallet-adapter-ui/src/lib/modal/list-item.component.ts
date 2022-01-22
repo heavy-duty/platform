@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { Wallet } from '@solana/wallet-adapter-base';
+import { Wallet } from '@heavy-duty/wallet-adapter';
 
 @Component({
   selector: 'hd-wallet-list-item',
   template: `
     <ng-container *ngIf="wallet">
-      <p>{{ wallet.name }}</p>
+      <p>{{ wallet.adapter.name }}</p>
 
       <hd-wallet-icon [wallet]="wallet"></hd-wallet-icon>
     </ng-container>

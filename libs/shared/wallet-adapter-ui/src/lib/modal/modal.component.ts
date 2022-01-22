@@ -9,7 +9,8 @@ import {
   MatSelectionList,
   MatSelectionListChange,
 } from '@angular/material/list';
-import { Wallet, WalletName } from '@solana/wallet-adapter-base';
+import { Wallet } from '@heavy-duty/wallet-adapter';
+import { WalletName } from '@solana/wallet-adapter-base';
 import { BehaviorSubject } from 'rxjs';
 
 @Component({
@@ -33,7 +34,7 @@ import { BehaviorSubject } from 'rxjs';
       >
         <mat-list-option
           *ngFor="let wallet of featured; last as isLast"
-          [value]="wallet.name"
+          [value]="wallet.adapter.name"
           [ngClass]="{
             'bottom-separator': more.length > 0 || !isLast
           }"
@@ -44,7 +45,7 @@ import { BehaviorSubject } from 'rxjs';
           <ng-container *ngIf="expanded">
             <mat-list-option
               *ngFor="let wallet of more; last as isLast"
-              [value]="wallet.name"
+              [value]="wallet.adapter.name"
               class="bottom-separator"
             >
               <hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>

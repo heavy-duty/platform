@@ -1,11 +1,11 @@
 import { Component, Input } from '@angular/core';
-import { Wallet } from '@solana/wallet-adapter-base';
+import { Wallet } from '@heavy-duty/wallet-adapter';
 
 @Component({
   selector: 'hd-wallet-icon',
   template: `
     <ng-container *ngIf="wallet">
-      <img [src]="wallet.icon | sanitizeUrl" alt="" />
+      <img [src]="wallet.adapter.icon | sanitizeUrl" alt="" />
     </ng-container>
   `,
   styles: [
