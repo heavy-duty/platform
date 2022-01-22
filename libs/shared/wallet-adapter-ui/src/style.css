@@ -1,5 +1,6 @@
 .wallet-modal .mat-dialog-container,
 .wallet-modal .mat-list-text,
-.wallet-modal .mat-expansion-panel-body {
+.wallet-modal .mat-expansion-panel-body,
+.wallet-modal .mat-list-base {
   padding: 0 !important;
 }

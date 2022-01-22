@@ -1,15 +1,6 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  ViewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatExpansionPanel } from '@angular/material/expansion';
-import {
-  MatSelectionList,
-  MatSelectionListChange,
-} from '@angular/material/list';
+import { MatSelectionListChange } from '@angular/material/list';
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
@@ -38,7 +29,11 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
         >
           <hd-wallet-list-item [wallet]="wallet"></hd-wallet-list-item>
         </mat-list-option>
-        <mat-expansion-panel class="mat-elevation-z0" disabled>
+        <mat-expansion-panel
+          #expansionPanel="matExpansionPanel"
+          class="mat-elevation-z0"
+          disabled
+        >
           <ng-template matExpansionPanelContent>
             <mat-list-option
               *ngFor="let wallet of otherWallets"
@@ -53,10 +48,10 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
       <button
         *ngIf="otherWallets.length > 0"
         class="toggle-expand"
-        (click)="onToggleExpand()"
-        mat-stroked-button
+        (click)="expansionPanel.toggle()"
+        mat-button
       >
-        <hd-wallet-expand [expanded]="matExpansionPanel?.expanded || null">
+        <hd-wallet-expand [expanded]="expansionPanel?.expanded || null">
         </hd-wallet-expand>
       </button>
     </ng-container>
@@ -72,6 +67,49 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
         </button>
         <h2>You'll need a wallet on Solana to continue</h2>
       </header>
+
+      <button
+        (click)="onGettingStarted()"
+        color="primary"
+        mat-flat-button
+        class="getting-started"
+      >
+        Get started
+      </button>
+
+      <mat-expansion-panel
+        #expansionPanel="matExpansionPanel"
+        class="mat-elevation-z0"
+        disabled
+      >
+        <ng-template matExpansionPanelContent>
+          <mat-selection-list
+            [multiple]="false"
+            (selectionChange)="onSelectionChange($event)"
+          >
+            <mat-list-option
+              *ngFor="let wallet of otherWallets"
+              [value]="wallet.adapter.name"
+            >
+              <hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
+            </mat-list-option>
+          </mat-selection-list>
+        </ng-template>
+      </mat-expansion-panel>
+
+      <button
+        *ngIf="otherWallets.length > 0"
+        class="toggle-expand"
+        (click)="expansionPanel.toggle()"
+        mat-button
+      >
+        <hd-wallet-expand
+          [expanded]="expansionPanel?.expanded || null"
+          expandText="Already have a wallet? View options"
+          collapseText="Hide options"
+        >
+        </hd-wallet-expand>
+      </button>
     </ng-container>
   `,
   styles: [
@@ -108,17 +146,15 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
         margin: 1rem 1rem 1rem auto;
       }
 
-      .mat-list-base {
-        padding: 0 !important;
+      .getting-started {
+        display: block;
+        margin: 2rem auto;
       }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WalletModalComponent {
-  @ViewChild(MatSelectionList) matSelectionList: MatSelectionList | null = null;
-  @ViewChild(MatExpansionPanel) matExpansionPanel: MatExpansionPanel | null =
-    null;
   readonly installedWallets: Wallet[];
   readonly otherWallets: Wallet[];
   readonly getStartedWallet: Wallet;
@@ -145,11 +181,11 @@ export class WalletModalComponent {
       ? this.installedWallets[0]
       : data.wallets.find(
           (wallet: { adapter: { name: WalletName } }) =>
-            wallet.adapter.name === 'Torus'
+            wallet.adapter.name === 'Phantom'
         ) ||
         data.wallets.find(
           (wallet: { adapter: { name: WalletName } }) =>
-            wallet.adapter.name === 'Phantom'
+            wallet.adapter.name === 'Torus'
         ) ||
         data.wallets.find(
           (wallet: { readyState: WalletReadyState }) =>
@@ -159,11 +195,10 @@ export class WalletModalComponent {
   }
 
   onSelectionChange({ options }: MatSelectionListChange): void {
-    const [option] = options;
-    this._matDialogRef.close(option.value);
+    this._matDialogRef.close(options[0].value);
   }
 
-  onToggleExpand() {
-    this.matExpansionPanel?.toggle();
+  onGettingStarted(): void {
+    this._matDialogRef.close(this.getStartedWallet.adapter.name);
   }
 }

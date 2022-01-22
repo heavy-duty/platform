@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 @Component({
   selector: 'hd-wallet-expand',
   template: `
-    <p>{{ expanded ? 'Less' : 'More' }} options</p>
+    <p>{{ expanded ? collapseText : expandText }}</p>
     <mat-icon [ngClass]="{ expanded: expanded }">expand_more</mat-icon>
   `,
   styles: [
@@ -30,4 +30,6 @@ import { Component, Input } from '@angular/core';
 })
 export class WalletExpandComponent {
   @Input() expanded: boolean | null = null;
+  @Input() expandText = 'More options';
+  @Input() collapseText = 'Less options';
 }

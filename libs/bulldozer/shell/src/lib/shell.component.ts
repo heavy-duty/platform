@@ -10,7 +10,6 @@ import {
   SolflareWalletAdapter,
   SolletExtensionWalletAdapter,
   SolletWalletAdapter,
-  TorusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 @Component({
@@ -31,7 +30,6 @@ export class ShellComponent implements OnInit {
       new PhantomWalletAdapter(),
       new SlopeWalletAdapter(),
       new SolflareWalletAdapter(),
-      new TorusWalletAdapter(),
       new LedgerWalletAdapter(),
       new SolletWalletAdapter({ network: WalletAdapterNetwork.Devnet }),
       new SolletExtensionWalletAdapter({
