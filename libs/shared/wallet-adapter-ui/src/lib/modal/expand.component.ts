@@ -4,7 +4,7 @@ import { Component, Input } from '@angular/core';
   selector: 'hd-wallet-expand',
   template: `
     <p>{{ expanded ? 'Less' : 'More' }} options</p>
-    <mat-icon> {{ expanded ? 'expand_less' : 'expand_more' }}</mat-icon>
+    <mat-icon [ngClass]="{ expanded: expanded }">expand_more</mat-icon>
   `,
   styles: [
     `
@@ -16,6 +16,14 @@ import { Component, Input } from '@angular/core';
 
       p {
         margin: 0;
+      }
+
+      mat-icon {
+        transition: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      mat-icon.expanded {
+        transform: rotate(180deg);
       }
     `,
   ],

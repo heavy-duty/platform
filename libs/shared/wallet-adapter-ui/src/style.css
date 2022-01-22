@@ -1,8 +1,5 @@
-.wallet-modal .mat-dialog-container {
-  padding: 0;
-  width: 320px;
-}
-
-.wallet-modal .mat-list-text {
+.wallet-modal .mat-dialog-container,
+.wallet-modal .mat-list-text,
+.wallet-modal .mat-expansion-panel-body {
   padding: 0 !important;
 }

@@ -8,7 +8,6 @@ import {
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { combineLatest } from 'rxjs';
 import { map } from 'rxjs/operators';
-
 import { ButtonColor } from '../shared/types';
 
 @Component({

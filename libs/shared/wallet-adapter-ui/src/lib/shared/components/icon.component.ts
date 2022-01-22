@@ -11,8 +11,8 @@ import { Wallet } from '@heavy-duty/wallet-adapter';
   styles: [
     `
       :host {
-        width: 1.5rem;
-        height: 1.5rem;
+        width: 1.75rem;
+        height: 1.75rem;
       }
 
       img {
