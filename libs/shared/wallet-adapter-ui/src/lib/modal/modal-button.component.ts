@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { WalletName } from '@solana/wallet-adapter-base';
-
 import { ButtonColor } from '../shared/types';
 
 @Component({

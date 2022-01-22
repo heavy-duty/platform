@@ -1,60 +1,115 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Inject,
-  ViewChild,
-} from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import {
-  MatSelectionList,
-  MatSelectionListChange,
-} from '@angular/material/list';
-import { Wallet, WalletName } from '@solana/wallet-adapter-base';
-import { BehaviorSubject } from 'rxjs';
+import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatSelectionListChange } from '@angular/material/list';
+import { Wallet } from '@heavy-duty/wallet-adapter';
+import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 @Component({
   selector: 'hd-wallet-modal',
   template: `
-    <mat-toolbar color="primary">
-      <h2 mat-dialog-title>Select Wallet</h2>
-      <button
-        mat-icon-button
-        mat-dialog-close
-        aria-label="Close wallet adapter selection"
-      >
-        <mat-icon>close</mat-icon>
-      </button>
-    </mat-toolbar>
+    <ng-container *ngIf="installedWallets.length > 0">
+      <header>
+        <button
+          mat-icon-button
+          mat-dialog-close
+          aria-label="Close wallet adapter selection"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <h2>Connect a wallet on Solana to continue</h2>
+      </header>
 
-    <ng-container *ngrxLet="expanded$; let expanded">
       <mat-selection-list
         [multiple]="false"
         (selectionChange)="onSelectionChange($event)"
       >
         <mat-list-option
-          *ngFor="let wallet of featured; last as isLast"
-          [value]="wallet.name"
-          [ngClass]="{
-            'bottom-separator': more.length > 0 || !isLast
-          }"
+          *ngFor="let wallet of installedWallets"
+          [value]="wallet.adapter.name"
         >
-          <hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
+          <hd-wallet-list-item [wallet]="wallet"></hd-wallet-list-item>
         </mat-list-option>
-        <ng-container *ngIf="more.length > 0">
-          <ng-container *ngIf="expanded">
+        <mat-expansion-panel
+          #expansionPanel="matExpansionPanel"
+          class="mat-elevation-z0"
+          disabled
+        >
+          <ng-template matExpansionPanelContent>
             <mat-list-option
-              *ngFor="let wallet of more; last as isLast"
-              [value]="wallet.name"
-              class="bottom-separator"
+              *ngFor="let wallet of otherWallets"
+              [value]="wallet.adapter.name"
             >
               <hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
             </mat-list-option>
-          </ng-container>
-          <mat-list-option [value]="null">
-            <hd-wallet-expand [expanded]="expanded"> </hd-wallet-expand>
-          </mat-list-option>
-        </ng-container>
+          </ng-template>
+        </mat-expansion-panel>
       </mat-selection-list>
+
+      <button
+        *ngIf="otherWallets.length > 0"
+        class="toggle-expand"
+        (click)="expansionPanel.toggle()"
+        mat-button
+      >
+        <hd-wallet-expand [expanded]="expansionPanel?.expanded || null">
+        </hd-wallet-expand>
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="installedWallets.length === 0">
+      <header>
+        <button
+          mat-icon-button
+          mat-dialog-close
+          aria-label="Close wallet adapter selection"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+        <h2>You'll need a wallet on Solana to continue</h2>
+      </header>
+
+      <button
+        (click)="onGettingStarted()"
+        color="primary"
+        mat-flat-button
+        class="getting-started"
+      >
+        Get started
+      </button>
+
+      <mat-expansion-panel
+        #expansionPanel="matExpansionPanel"
+        class="mat-elevation-z0"
+        disabled
+      >
+        <ng-template matExpansionPanelContent>
+          <mat-selection-list
+            [multiple]="false"
+            (selectionChange)="onSelectionChange($event)"
+          >
+            <mat-list-option
+              *ngFor="let wallet of otherWallets"
+              [value]="wallet.adapter.name"
+            >
+              <hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
+            </mat-list-option>
+          </mat-selection-list>
+        </ng-template>
+      </mat-expansion-panel>
+
+      <button
+        *ngIf="otherWallets.length > 0"
+        class="toggle-expand"
+        (click)="expansionPanel.toggle()"
+        mat-button
+      >
+        <hd-wallet-expand
+          [expanded]="expansionPanel?.expanded || null"
+          expandText="Already have a wallet? View options"
+          collapseText="Hide options"
+        >
+        </hd-wallet-expand>
+      </button>
     </ng-container>
   `,
   styles: [
@@ -68,27 +123,41 @@ import { BehaviorSubject } from 'rxjs';
         margin: 0;
       }
 
-      .mat-toolbar {
-        justify-content: space-between;
+      header {
+        margin-bottom: 2.5rem;
       }
 
-      .mat-list-base {
-        padding: 0 !important;
+      header h2 {
+        font-size: 1.5rem;
+        text-align: center;
+        padding: 0 3rem;
+        font-weight: bold;
       }
 
-      .bottom-separator {
-        border-bottom: solid 1px rgb(255 255 255 / 10%);
+      header button {
+        display: block;
+        margin-left: auto;
+        margin-right: 1rem;
+        margin-top: 1rem;
+      }
+
+      .toggle-expand {
+        display: block;
+        margin: 1rem 1rem 1rem auto;
+      }
+
+      .getting-started {
+        display: block;
+        margin: 2rem auto;
       }
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WalletModalComponent {
-  @ViewChild(MatSelectionList) matSelectionList: MatSelectionList | null = null;
-  private readonly _expanded = new BehaviorSubject(false);
-  readonly expanded$ = this._expanded.asObservable();
-  readonly featured: Wallet[];
-  readonly more: Wallet[];
+  readonly installedWallets: Wallet[];
+  readonly otherWallets: Wallet[];
+  readonly getStartedWallet: Wallet;
 
   constructor(
     private readonly _matDialogRef: MatDialogRef<
@@ -97,21 +166,39 @@ export class WalletModalComponent {
     >,
     @Inject(MAT_DIALOG_DATA) data: { wallets: Wallet[]; featured: number }
   ) {
-    this.featured = data.wallets.slice(0, data.featured);
-    this.more = data.wallets.slice(data.featured);
+    this.installedWallets = data.wallets.filter(
+      (wallet) => wallet.readyState === WalletReadyState.Installed
+    );
+    this.otherWallets = [
+      ...data.wallets.filter(
+        (wallet) => wallet.readyState === WalletReadyState.Loadable
+      ),
+      ...data.wallets.filter(
+        (wallet) => wallet.readyState === WalletReadyState.NotDetected
+      ),
+    ];
+    this.getStartedWallet = this.installedWallets.length
+      ? this.installedWallets[0]
+      : data.wallets.find(
+          (wallet: { adapter: { name: WalletName } }) =>
+            wallet.adapter.name === 'Phantom'
+        ) ||
+        data.wallets.find(
+          (wallet: { adapter: { name: WalletName } }) =>
+            wallet.adapter.name === 'Torus'
+        ) ||
+        data.wallets.find(
+          (wallet: { readyState: WalletReadyState }) =>
+            wallet.readyState === WalletReadyState.Loadable
+        ) ||
+        this.otherWallets[0];
   }
 
   onSelectionChange({ options }: MatSelectionListChange): void {
-    const [option] = options;
+    this._matDialogRef.close(options[0].value);
+  }
 
-    if (option.value === null) {
-      // Mat list options doesn't allow selecting a selected option.
-      // Once the modal expands, the collapse button is selected and
-      // cannot be selected again.
-      this.matSelectionList?.deselectAll();
-      this._expanded.next(!this._expanded.getValue());
-    } else {
-      this._matDialogRef.close(option.value);
-    }
+  onGettingStarted(): void {
+    this._matDialogRef.close(this.getStartedWallet.adapter.name);
   }
 }

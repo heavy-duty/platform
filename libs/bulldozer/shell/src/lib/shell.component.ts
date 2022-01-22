@@ -4,11 +4,12 @@ import { ProgramStore } from '@heavy-duty/ng-anchor';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
-  getPhantomWallet,
-  getSlopeWallet,
-  getSolflareWallet,
-  getSolletWallet,
-  getSolongWallet,
+  LedgerWalletAdapter,
+  PhantomWalletAdapter,
+  SlopeWalletAdapter,
+  SolflareWalletAdapter,
+  SolletExtensionWalletAdapter,
+  SolletWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 @Component({
@@ -25,12 +26,15 @@ export class ShellComponent implements OnInit {
 
   ngOnInit() {
     this._connectionStore.setEndpoint('http://localhost:8899');
-    this._walletStore.setWallets([
-      getPhantomWallet(),
-      getSolletWallet({ network: WalletAdapterNetwork.Devnet }),
-      getSlopeWallet(),
-      getSolflareWallet(),
-      getSolongWallet(),
+    this._walletStore.setAdapters([
+      new PhantomWalletAdapter(),
+      new SlopeWalletAdapter(),
+      new SolflareWalletAdapter(),
+      new LedgerWalletAdapter(),
+      new SolletWalletAdapter({ network: WalletAdapterNetwork.Devnet }),
+      new SolletExtensionWalletAdapter({
+        network: WalletAdapterNetwork.Devnet,
+      }),
     ]);
     this._programStore.loadConnection(this._connectionStore.connection$);
     this._programStore.loadWallet(this._walletStore.anchorWallet$);

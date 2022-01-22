@@ -6,8 +6,8 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Wallet, WalletName } from '@solana/wallet-adapter-base';
-
+import { Wallet } from '@heavy-duty/wallet-adapter';
+import { WalletName } from '@solana/wallet-adapter-base';
 import { WalletModalComponent } from './modal.component';
 
 @Directive({ selector: 'button[hdWalletModalButton]' })
@@ -23,6 +23,8 @@ export class WalletModalButtonDirective {
         WalletName
       >(WalletModalComponent, {
         panelClass: 'wallet-modal',
+        maxWidth: '380px',
+        maxHeight: '90vh',
         data: {
           wallets: this.wallets,
           featured: this.featured,
