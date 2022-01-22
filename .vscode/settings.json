@@ -23,6 +23,7 @@
     "core",
     "bulldozer-programs",
     "bulldozer-client",
-    "editor"
+    "editor",
+    "wallet-adapter"
   ]
 }
