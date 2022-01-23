@@ -1,6 +1,9 @@
 {
   "name": "@heavy-duty/wallet-adapter-cdk",
   "version": "0.1.0-alpha.2",
+  "publishConfig": {
+    "access": "public"
+  },
   "peerDependencies": {
     "@angular/common": "^13.1.0",
     "@angular/core": "^13.1.0"
