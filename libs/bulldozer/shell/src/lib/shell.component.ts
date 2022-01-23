@@ -14,7 +14,7 @@ import {
 
 @Component({
   selector: 'bd-shell',
-  template: ` <router-outlet></router-outlet> `,
+  template: `<router-outlet></router-outlet>`,
   providers: [ProgramStore, BulldozerProgramStore],
 })
 export class ShellComponent implements OnInit {

@@ -50,7 +50,7 @@ jobs:
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana-keygen new -o $HOME/.config/solana/id.json
           echo "Installing Serum >> "
-          npm i -g @project-serum/anchor@${{ env.ANCHOR_VERSION }} 
+          npm i -g @project-serum/anchor@${{ env.ANCHOR_VERSION }}
           npm i -g @project-serum/anchor-cli@${{ env.ANCHOR_VERSION }}
           echo "Installing others dependencies >>"
           npm i -g typescript
@@ -60,7 +60,7 @@ jobs:
         name: 🔦 Linting Bulldozer Platform projects
         run: |
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          npx nx affected --target=build --base=origin/master
+          npx nx affected --target=lint --base=origin/master
       - id: testing-projects
         name: 🧪 Testing Bulldozer Platform projects
         run: |

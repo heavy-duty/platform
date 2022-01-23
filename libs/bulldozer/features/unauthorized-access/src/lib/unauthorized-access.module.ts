@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { WalletAdapterUiModule } from '@heavy-duty/wallet-adapter-ui';
-
+import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { UnauthorizedAccessComponent } from './unauthorized-access.component';
 
 @NgModule({
@@ -11,7 +10,7 @@ import { UnauthorizedAccessComponent } from './unauthorized-access.component';
     RouterModule.forChild([
       { path: '', pathMatch: 'full', component: UnauthorizedAccessComponent },
     ]),
-    WalletAdapterUiModule,
+    HdWalletAdapterMaterialModule,
   ],
   declarations: [UnauthorizedAccessComponent],
   exports: [UnauthorizedAccessComponent],
