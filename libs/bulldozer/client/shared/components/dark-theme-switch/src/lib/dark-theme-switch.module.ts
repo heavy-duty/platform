@@ -1,13 +1,18 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
+import { DarkThemeSwitchComponent } from './dark-theme-switch.component';
 
 @NgModule({
+  declarations: [DarkThemeSwitchComponent],
   imports: [
     CommonModule,
-    RouterModule.forChild([
-      /* {path: '', pathMatch: 'full', component: InsertYourComponentHere} */
-    ]),
+    MatIconModule,
+    MatButtonModule,
+    DarkThemeDirectivesModule,
   ],
+  exports: [DarkThemeSwitchComponent],
 })
 export class DarkThemeSwitchModule {}

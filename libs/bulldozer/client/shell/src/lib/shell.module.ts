@@ -1,9 +1,22 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
+import { AuthGuard } from '@bulldozer-client/auth-guard';
+import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
+import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
+import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
+import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { WalletAdapterUiModule } from '@heavy-duty/wallet-adapter-ui';
+import { ReactiveComponentModule } from '@ngrx/component';
 import { ShellComponent } from './shell.component';
 
 @NgModule({
+  declarations: [ShellComponent],
   imports: [
     CommonModule,
     RouterModule.forChild([
@@ -54,6 +67,17 @@ import { ShellComponent } from './shell.component';
         redirectTo: 'workspaces',
       },
     ]),
+    MatButtonModule,
+    MatIconModule,
+    MatSidenavModule,
+    MatSnackBarModule,
+    MatToolbarModule,
+    ReactiveComponentModule,
+    WalletAdapterUiModule,
+    DarkThemeDirectiveModule,
+    DarkThemeSwitchModule,
+    WorkspaceExplorerModule,
+    WorkspaceSelectorModule,
   ],
 })
 export class ShellModule {}

@@ -21,12 +21,11 @@ import {
 } from './actions/workspace.actions';
 
 interface ViewModel {
-  workspaceId: string | null;
+  workspaceId?: string;
   workspacesMap: Map<string, Document<Workspace>>;
 }
 
 const initialState: ViewModel = {
-  workspaceId: null,
   workspacesMap: new Map<string, Document<Workspace>>(),
 };
 
@@ -93,7 +92,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly setWorkspaceId = this.updater(
-    (state, workspaceId: string | null) => ({
+    (state, workspaceId: string | undefined) => ({
       ...state,
       workspaceId,
     })

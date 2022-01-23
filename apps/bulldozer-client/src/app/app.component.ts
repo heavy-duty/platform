@@ -3,11 +3,11 @@ import { ConnectionStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
-  getPhantomWallet,
-  getSlopeWallet,
-  getSolflareWallet,
-  getSolletWallet,
-  getSolongWallet,
+  PhantomWalletAdapter,
+  SlopeWalletAdapter,
+  SolflareWalletAdapter,
+  SolletWalletAdapter,
+  SolongWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 @Component({
@@ -23,12 +23,12 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this._connectionStore.setEndpoint('http://localhost:8899');
-    this._walletStore.setWallets([
-      getPhantomWallet(),
-      getSolletWallet({ network: WalletAdapterNetwork.Devnet }),
-      getSlopeWallet(),
-      getSolflareWallet(),
-      getSolongWallet(),
+    this._walletStore.setAdapters([
+      new PhantomWalletAdapter(),
+      new SolletWalletAdapter({ network: WalletAdapterNetwork.Devnet }),
+      new SlopeWalletAdapter(),
+      new SolflareWalletAdapter(),
+      new SolongWalletAdapter(),
     ]);
   }
 }

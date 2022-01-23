@@ -1,13 +1,10 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NgModule } from '@angular/core';
+import { DarkThemeDirective } from './dark-theme.directive';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    RouterModule.forChild([
-      /* {path: '', pathMatch: 'full', component: InsertYourComponentHere} */
-    ]),
-  ],
+  declarations: [DarkThemeDirective],
+  imports: [CommonModule],
+  exports: [DarkThemeDirective],
 })
-export class DarkThemeModule {}
+export class DarkThemeDirectiveModule {}

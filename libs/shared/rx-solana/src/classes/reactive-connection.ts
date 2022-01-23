@@ -1,8 +1,4 @@
 import {
-  fromAccountChange,
-  fromProgramAccountChange,
-} from '@heavy-duty/rx-solana';
-import {
   AccountInfo,
   Commitment,
   Connection,
@@ -13,6 +9,7 @@ import {
   PublicKey,
 } from '@solana/web3.js';
 import { map, Observable } from 'rxjs';
+import { fromAccountChange, fromProgramAccountChange } from '../observables';
 import { shareWhileSubscribed } from '../operators';
 
 export class ReactiveConnection extends Connection {
