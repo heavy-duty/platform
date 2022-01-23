@@ -334,8 +334,6 @@ export class WalletStore extends ComponentStore<WalletState> {
 
   // Select a new wallet
   selectWallet(walletName: WalletName | null) {
-    console.log(walletName);
-    console.log(this);
     this._name.next(walletName);
   }
 
