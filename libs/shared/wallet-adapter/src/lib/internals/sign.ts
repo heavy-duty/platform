@@ -14,7 +14,7 @@ export const signMessage = (
 ): ((message: Uint8Array) => Observable<Uint8Array>) => {
   return (message: Uint8Array) => {
     if (!connected) {
-      return throwError(errorHandler(new WalletNotConnectedError()));
+      return throwError(() => errorHandler(new WalletNotConnectedError()));
     }
 
     return from(defer(() => adapter.signMessage(message)));
@@ -28,7 +28,7 @@ export const signTransaction = (
 ): ((transaction: Transaction) => Observable<Transaction>) => {
   return (transaction: Transaction) => {
     if (!connected) {
-      return throwError(errorHandler(new WalletNotConnectedError()));
+      return throwError(() => errorHandler(new WalletNotConnectedError()));
     }
 
     return from(defer(() => adapter.signTransaction(transaction)));
@@ -42,7 +42,7 @@ export const signAllTransactions = (
 ): ((transactions: Transaction[]) => Observable<Transaction[]>) => {
   return (transactions: Transaction[]) => {
     if (!connected) {
-      return throwError(errorHandler(new WalletNotConnectedError()));
+      return throwError(() => errorHandler(new WalletNotConnectedError()));
     }
 
     return from(defer(() => adapter.signAllTransactions(transactions)));

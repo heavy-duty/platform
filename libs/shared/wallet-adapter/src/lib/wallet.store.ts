@@ -19,6 +19,7 @@ import {
   combineLatest,
   defer,
   EMPTY,
+  firstValueFrom,
   from,
   fromEvent,
   merge,
@@ -137,9 +138,9 @@ export class WalletStore extends ComponentStore<WalletState> {
         ? {
             publicKey,
             signTransaction: (transaction: Transaction) =>
-              adapterSignTransaction(transaction).toPromise(),
+              firstValueFrom(adapterSignTransaction(transaction)),
             signAllTransactions: (transactions: Transaction[]) =>
-              adapterSignAllTransactions(transactions).toPromise(),
+              firstValueFrom(adapterSignAllTransactions(transactions)),
           }
         : undefined;
     },
