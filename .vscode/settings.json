@@ -25,5 +25,10 @@
     "bulldozer-client",
     "editor",
     "wallet-adapter"
-  ]
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": true
+  }
 }

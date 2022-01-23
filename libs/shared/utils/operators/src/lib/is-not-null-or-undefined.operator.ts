@@ -1,5 +1,4 @@
-import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, Observable } from 'rxjs';
 
 export const isNotNullOrUndefined = <T>(
   source: Observable<T | null | undefined>

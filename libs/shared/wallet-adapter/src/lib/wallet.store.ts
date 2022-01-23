@@ -16,28 +16,26 @@ import {
   TransactionSignature,
 } from '@solana/web3.js';
 import {
+  catchError,
   combineLatest,
+  concatMap,
   defer,
   EMPTY,
+  filter,
+  finalize,
+  first,
   firstValueFrom,
   from,
   fromEvent,
   merge,
   Observable,
   of,
-  throwError,
-} from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  filter,
-  finalize,
-  first,
   pairwise,
   switchMap,
   tap,
+  throwError,
   withLatestFrom,
-} from 'rxjs/operators';
+} from 'rxjs';
 import {
   fromAdapterEvent,
   handleEvent,

@@ -13,9 +13,7 @@ import {
 } from '@heavy-duty/bulldozer/application/data-access';
 import { Workspace } from '@heavy-duty/bulldozer/application/utils/types';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { Subject } from 'rxjs';
-import { filter, takeUntil } from 'rxjs/operators';
-
+import { filter, Subject, takeUntil } from 'rxjs';
 import { ApplicationShellStore } from './shell.store';
 
 @Component({

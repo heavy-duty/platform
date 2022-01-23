@@ -14,21 +14,18 @@ import { sendAndConfirmRawTransaction } from '@solana/web3.js';
 import {
   BehaviorSubject,
   combineLatest,
+  concatMap,
   defer,
+  exhaustMap,
+  filter,
   from,
   Observable,
   Subject,
-  throwError,
-} from 'rxjs';
-import {
-  concatMap,
-  exhaustMap,
-  filter,
   switchMap,
   tap,
+  throwError,
   withLatestFrom,
-} from 'rxjs/operators';
-
+} from 'rxjs';
 import {
   ApplicationActions,
   ApplicationCreated,

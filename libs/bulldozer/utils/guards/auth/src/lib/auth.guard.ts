@@ -6,7 +6,7 @@ import {
   RouterStateSnapshot,
 } from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

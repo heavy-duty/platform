@@ -1,7 +1,6 @@
 import { Component, ContentChild, ElementRef, Input } from '@angular/core';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { combineLatest, map } from 'rxjs';
 import { ButtonColor } from '../shared/types';
 
 @Component({

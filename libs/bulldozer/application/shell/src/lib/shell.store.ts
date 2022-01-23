@@ -26,8 +26,18 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
-import { combineLatest, merge, Observable, of, Subject } from 'rxjs';
-import { concatMap, filter, map, tap, withLatestFrom } from 'rxjs/operators';
+import {
+  combineLatest,
+  concatMap,
+  filter,
+  map,
+  merge,
+  Observable,
+  of,
+  Subject,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 export type TabKind = 'collections' | 'instructions';
 

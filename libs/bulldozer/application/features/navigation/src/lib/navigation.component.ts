@@ -18,9 +18,7 @@ import {
 } from '@heavy-duty/bulldozer/application/utils/types';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
-
+import { combineLatest, map } from 'rxjs';
 import { NavigationStore } from './navigation.store';
 
 @Component({
@@ -134,7 +132,7 @@ export class NavigationComponent {
     private readonly _collectionStore: CollectionStore,
     private readonly _instructionStore: InstructionStore,
     private readonly _bulldozerProgramStore: BulldozerProgramStore
-  ) { }
+  ) {}
 
   onCreateWorkspace() {
     this._workspaceStore.createWorkspace();

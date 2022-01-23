@@ -2,9 +2,7 @@ import { Inject, Injectable } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Program, Provider } from '@project-serum/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
-import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
-
+import { Observable, tap } from 'rxjs';
 import { PROGRAM_CONFIGS } from './program.provider';
 import { DummyWallet, ProgramConfig, ProgramConfigs, Wallet } from './utils';
 

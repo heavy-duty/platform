@@ -1,7 +1,7 @@
 import { Inject, Injectable, InjectionToken, Optional } from '@angular/core';
 import { ComponentStore } from '@ngrx/component-store';
 import { Connection, ConnectionConfig } from '@solana/web3.js';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 import { isNotNull } from './internals';
 
 export const CONNECTION_CONFIG = new InjectionToken<ConnectionConfig>(

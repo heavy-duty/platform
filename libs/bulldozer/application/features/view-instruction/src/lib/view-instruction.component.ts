@@ -5,7 +5,6 @@ import {
   OnInit,
 } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { InstructionStore } from '@heavy-duty/bulldozer/application/data-access';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
 import {
@@ -13,7 +12,8 @@ import {
   InstructionArgument,
   InstructionRelationExtended,
 } from '@heavy-duty/bulldozer/application/utils/types';
-import { filter, map, startWith } from 'rxjs/operators';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'bd-view-instruction',

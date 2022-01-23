@@ -1,7 +1,6 @@
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { combineLatest } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { combineLatest, map, shareReplay } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

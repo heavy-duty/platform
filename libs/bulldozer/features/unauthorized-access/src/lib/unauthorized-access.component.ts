@@ -7,8 +7,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { Subject } from 'rxjs';
-import { filter, takeUntil, withLatestFrom } from 'rxjs/operators';
+import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 
 @Component({
   selector: 'bd-unauthorized-access',

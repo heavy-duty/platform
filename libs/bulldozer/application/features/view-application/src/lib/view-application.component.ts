@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute, NavigationStart, Router } from '@angular/router';
 import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
-import { filter, map, startWith } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'bd-view-application',

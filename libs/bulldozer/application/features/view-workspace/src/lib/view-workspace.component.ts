@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { WorkspaceStore } from '@heavy-duty/bulldozer/application/data-access';
-import { filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs';
 
 @Component({
   selector: 'bd-view-workspace',

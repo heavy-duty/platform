@@ -22,9 +22,20 @@ import {
   SystemProgram,
   Transaction,
 } from '@solana/web3.js';
-import { combineLatest, defer, forkJoin, from, Observable, of } from 'rxjs';
-import { concatMap, map, mergeMap, take, tap, toArray } from 'rxjs/operators';
-
+import {
+  combineLatest,
+  concatMap,
+  defer,
+  forkJoin,
+  from,
+  map,
+  mergeMap,
+  Observable,
+  of,
+  take,
+  tap,
+  toArray,
+} from 'rxjs';
 import {
   ApplicationParser,
   CollectionAttributeParser,

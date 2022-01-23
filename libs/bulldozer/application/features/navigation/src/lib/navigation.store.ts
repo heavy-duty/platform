@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs/operators';
+import { tap } from 'rxjs';
 
 interface ViewModel {
   isHandset: boolean;

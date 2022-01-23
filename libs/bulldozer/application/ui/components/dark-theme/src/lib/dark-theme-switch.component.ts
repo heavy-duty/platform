@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
-import { map } from 'rxjs/operators';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'bd-dark-theme-switch',

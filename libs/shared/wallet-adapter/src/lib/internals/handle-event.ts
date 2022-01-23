@@ -1,5 +1,4 @@
-import { Observable, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { Observable, of, switchMap } from 'rxjs';
 
 export const handleEvent =
   <SourceType, OutputType>(
