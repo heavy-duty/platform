@@ -14,9 +14,8 @@ import { RouterModule } from '@angular/router';
 import { DarkThemeSwitchModule } from '@heavy-duty/bulldozer/application/ui/components/dark-theme';
 import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
 import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
-import { WalletAdapterUiModule } from '@heavy-duty/wallet-adapter-ui';
+import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { ReactiveComponentModule } from '@ngrx/component';
-
 import { ApplicationSelectorComponent } from './application-selector.component';
 import { CollectionSelectorComponent } from './collection-selector.component';
 import { InstructionSelectorComponent } from './instruction-selector.component';
@@ -38,7 +37,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     MatToolbarModule,
     MatTooltipModule,
     ReactiveComponentModule,
-    WalletAdapterUiModule,
+    HdWalletAdapterMaterialModule,
     ObscureAddressModule,
     DarkThemeDirectivesModule,
     DarkThemeSwitchModule,

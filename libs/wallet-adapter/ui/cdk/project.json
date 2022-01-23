@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/wallet-adapter/ui/cdk",
+  "sourceRoot": "libs/wallet-adapter/ui/cdk/src",
+  "prefix": "hd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/wallet-adapter/ui/cdk"],
+      "options": {
+        "project": "libs/wallet-adapter/ui/cdk/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/wallet-adapter/ui/cdk/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/wallet-adapter/ui/cdk/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/wallet-adapter/ui/cdk"],
+      "options": {
+        "jestConfig": "libs/wallet-adapter/ui/cdk/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/wallet-adapter/ui/cdk/src/**/*.ts",
+          "libs/wallet-adapter/ui/cdk/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

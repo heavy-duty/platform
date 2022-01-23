@@ -1,10 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
-
-import { ShellComponent } from './shell.component';
 import { AuthGuard } from '@heavy-duty/bulldozer/utils/guards/auth';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { ShellComponent } from './shell.component';
 
 @NgModule({
   declarations: [ShellComponent],

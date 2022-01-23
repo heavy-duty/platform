@@ -25,7 +25,7 @@
         ],
         "styles": [
           "apps/bulldozer-client/src/styles.scss",
-          "libs/shared/wallet-adapter-ui/src/style.css"
+          "libs/wallet-adapter/ui/material/src/style.css"
         ],
         "scripts": [],
         "customWebpackConfig": {
