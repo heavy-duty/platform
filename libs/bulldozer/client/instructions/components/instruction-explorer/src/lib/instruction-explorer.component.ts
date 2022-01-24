@@ -5,8 +5,8 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
 @Component({
   selector: 'bd-instruction-explorer',
   template: `
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
+    <mat-expansion-panel togglePosition="before">
+      <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Instructions </mat-panel-title>
           <button
@@ -22,6 +22,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
       <mat-nav-list dense>
         <mat-list-item *ngFor="let instruction of instructions$ | ngrxPush">
           <a
+            class="pl-8 pr-0"
             matLine
             [routerLink]="[
               '/workspaces',

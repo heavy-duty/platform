@@ -3,7 +3,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ApplicationStore } from '@heavy-duty/bulldozer-store';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Observable } from 'rxjs';
@@ -29,7 +28,7 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
           .open(EditApplicationComponent)
           .afterClosed()
           .pipe(
-            isNotNullOrUndefined,
+            filter((data) => data),
             tap(({ name }) => this._applicationStore.createApplication(name))
           )
       )

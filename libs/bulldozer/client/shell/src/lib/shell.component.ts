@@ -8,7 +8,7 @@ import { ShellStore } from './shell.store';
     <mat-sidenav-container fullscreen>
       <mat-sidenav
         #drawer
-        class="w-52"
+        class="w-64"
         fixedInViewport
         [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
         [mode]="(isHandset$ | async) ? 'over' : 'side'"

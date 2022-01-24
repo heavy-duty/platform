@@ -5,39 +5,36 @@ import { ApplicationExplorerStore } from './application-explorer.store';
 @Component({
   selector: 'bd-application-explorer',
   template: `
+    <button
+      mat-raised-button
+      color="primary"
+      class="block mx-auto mb-4"
+      [disabled]="(connected$ | ngrxPush) === false"
+      aria-label="Create application"
+      (click)="onCreateApplication()"
+    >
+      Create application
+    </button>
+
     <ng-container *ngrxLet="applications$; let applications">
       <mat-expansion-panel
         *ngFor="let application of applications"
         class="flex-shrink-0"
         togglePosition="before"
       >
-        <mat-expansion-panel-header>
+        <mat-expansion-panel-header class="pl-4 pr-0">
           <div class="flex justify-between items-center flex-grow">
-            <mat-panel-title>
-              <a
-                matLine
-                [routerLink]="[
-                  '/workspaces',
-                  application.data.workspace,
-                  'applications',
-                  application.id
-                ]"
-                [matTooltip]="application.name"
-                matTooltipShowDelay="500"
-              >
-                {{ application.name }}
-              </a>
-
-              <button
-                mat-icon-button
-                [attr.aria-label]="
-                  'More options of ' + application.name + ' application'
-                "
-                [matMenuTriggerFor]="applicationOptionsMenu"
-              >
-                <mat-icon>more_horiz</mat-icon>
-              </button>
-            </mat-panel-title>
+            <mat-panel-title> {{ application.name }} </mat-panel-title>
+            <button
+              mat-icon-button
+              [attr.aria-label]="
+                'More options of ' + application.name + ' application'
+              "
+              [matMenuTriggerFor]="applicationOptionsMenu"
+              (click)="$event.stopPropagation()"
+            >
+              <mat-icon>more_horiz</mat-icon>
+            </button>
           </div>
         </mat-expansion-panel-header>
 
@@ -67,16 +64,6 @@ import { ApplicationExplorerStore } from './application-explorer.store';
         </mat-menu>
       </mat-expansion-panel>
     </ng-container>
-
-    <button
-      mat-raised-button
-      color="primary"
-      [disabled]="(connected$ | ngrxPush) === false"
-      aria-label="Create application"
-      (click)="onCreateApplication($event)"
-    >
-      Create application
-    </button>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -90,10 +77,7 @@ export class ApplicationExplorerComponent {
     private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
-  onCreateApplication(event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-
+  onCreateApplication() {
     this._applicationExplorerStore.createApplication();
   }
 

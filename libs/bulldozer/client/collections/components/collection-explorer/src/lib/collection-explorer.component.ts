@@ -5,8 +5,8 @@ import { CollectionExplorerStore } from './collection-explorer.store';
 @Component({
   selector: 'bd-collection-explorer',
   template: `
-    <mat-expansion-panel>
-      <mat-expansion-panel-header>
+    <mat-expansion-panel togglePosition="before">
+      <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Collections </mat-panel-title>
           <button
@@ -20,7 +20,10 @@ import { CollectionExplorerStore } from './collection-explorer.store';
         </div>
       </mat-expansion-panel-header>
       <mat-nav-list dense>
-        <mat-list-item *ngFor="let collection of collections$ | ngrxPush">
+        <mat-list-item
+          *ngFor="let collection of collections$ | ngrxPush"
+          class="pl-8 pr-0"
+        >
           <a
             matLine
             [routerLink]="[
