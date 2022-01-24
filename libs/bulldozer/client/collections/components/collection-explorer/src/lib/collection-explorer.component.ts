@@ -71,10 +71,11 @@ import { CollectionExplorerStore } from './collection-explorer.store';
   providers: [CollectionExplorerStore],
 })
 export class CollectionExplorerComponent {
-  @Input() workspaceId?: string;
-  @Input() applicationId?: string;
-  connected$ = this._collectionExplorerStore.connected$;
-  collections$ = this._collectionExplorerStore.collections$;
+  @Input() set applicationId(value: string | undefined) {
+    this._collectionExplorerStore.setApplicationId(value);
+  }
+  readonly connected$ = this._collectionExplorerStore.connected$;
+  readonly collections$ = this._collectionExplorerStore.collections$;
 
   constructor(private _collectionExplorerStore: CollectionExplorerStore) {}
 
@@ -82,14 +83,7 @@ export class CollectionExplorerComponent {
     event.stopPropagation();
     event.preventDefault();
 
-    if (!this.workspaceId || !this.applicationId) {
-      return;
-    }
-
-    this._collectionExplorerStore.createCollection({
-      workspaceId: this.workspaceId,
-      applicationId: this.applicationId,
-    });
+    this._collectionExplorerStore.createCollection();
   }
 
   onEditCollection(collection: Document<Collection>) {

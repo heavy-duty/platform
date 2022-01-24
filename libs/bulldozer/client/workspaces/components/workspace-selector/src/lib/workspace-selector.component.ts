@@ -9,7 +9,9 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
     <ng-container *ngrxLet="activeWorkspace$; let activeWorkspace">
       <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
         {{
-          activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
+          activeWorkspace === undefined
+            ? 'Select workspace'
+            : activeWorkspace?.name
         }}
       </button>
       <mat-menu #menu="matMenu" class="px-4 py-2">

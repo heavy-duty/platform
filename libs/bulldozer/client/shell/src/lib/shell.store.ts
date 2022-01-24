@@ -2,28 +2,24 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import {
-  ApplicationActionTypes,
   ApplicationStore,
-  CollectionActionTypes,
+  BulldozerProgramStore,
   CollectionAttributeStore,
   CollectionStore,
   InstructionAccountStore,
-  InstructionActionTypes,
   InstructionArgumentStore,
   InstructionRelationStore,
   InstructionStore,
-  TabStore,
-  WorkspaceActionTypes,
   WorkspaceStore,
-} from '@heavy-duty/bulldozer/application/data-access';
+} from '@heavy-duty/bulldozer-store';
+import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
-import { merge, Subject } from 'rxjs';
-import { filter, tap } from 'rxjs/operators';
+import { filter, map, merge, startWith, Subject, tap } from 'rxjs';
 
 interface ViewModel {
   isHandset: boolean;
@@ -56,11 +52,11 @@ export class ShellStore extends ComponentStore<ViewModel> {
     private readonly _instructionAccountStore: InstructionAccountStore,
     private readonly _instructionRelationStore: InstructionRelationStore,
     private readonly _breakpointObserver: BreakpointObserver,
-    private readonly _matDialog: MatDialog
+    private readonly _matDialog: MatDialog,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _route: ActivatedRoute
   ) {
     super(initialState);
-
-    this._workspaceStore.loadWorkspaces();
   }
 
   readonly loadHandset = this.effect(() =>
@@ -69,7 +65,18 @@ export class ShellStore extends ComponentStore<ViewModel> {
       .pipe(tap((result) => this.patchState({ isHandset: result.matches })))
   );
 
-  readonly redirectUnauthorized = this.effect(() =>
+  readonly loadWorkspaceId$ = this.effect(() =>
+    this._router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => event.url.split('/').filter((segment) => segment)[1]),
+      startWith(this._route.snapshot.paramMap.get('workspaceId')),
+      tap((workspaceId) =>
+        this._bulldozerProgramStore.setWorkspaceId(workspaceId || undefined)
+      )
+    )
+  );
+
+  /*   readonly redirectUnauthorized = this.effect(() =>
     this._walletStore.connected$.pipe(
       filter((connected) => !connected),
       tap(() =>
@@ -80,7 +87,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
         })
       )
     )
-  );
+  ); */
 
   readonly notifyErrors = this.effect(() =>
     merge(
@@ -101,7 +108,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly notifyWorkspaceSuccess = this.effect(() =>
+  /* readonly notifyWorkspaceSuccess = this.effect(() =>
     this._workspaceStore.events$.pipe(
       filter((event) => event.type !== WorkspaceActionTypes.WorkspaceInit),
       tap((event) => {
@@ -196,7 +203,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
         });
       })
     )
-  );
+  ); */
 
   private getErrorMessage(error: unknown) {
     if (typeof error === 'string') {

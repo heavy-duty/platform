@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { WorkspaceStore } from '@heavy-duty/bulldozer/application/data-access';
+import {
+  BulldozerProgramStore,
+  WorkspaceStore,
+} from '@heavy-duty/bulldozer-store';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -11,13 +14,19 @@ import { exhaustMap, tap } from 'rxjs/operators';
 
 @Injectable()
 export class WorkspaceSelectorStore extends ComponentStore<object> {
-  readonly workspace$ = this._workspaceStore.workspace$;
   readonly workspaces$ = this._workspaceStore.workspaces$;
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaceId$ = this._workspaceStore.workspaceId$;
+  readonly workspaceId$ = this._bulldozerProgramStore.workspaceId$;
+  readonly workspace$ = this.select(
+    this.workspaces$,
+    this.workspaceId$,
+    (workspaces, workspaceId) =>
+      workspaces.find((workspace) => workspace.id === workspaceId)
+  );
 
   constructor(
     private readonly _walletStore: WalletStore,
+    private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _matDialog: MatDialog
   ) {
@@ -32,7 +41,7 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
           .afterClosed()
           .pipe(
             isNotNullOrUndefined,
-            tap((data) => this._workspaceStore.createWorkspace({ data }))
+            tap(({ name }) => this._workspaceStore.createWorkspace(name))
           )
       )
     )
@@ -47,10 +56,10 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
             .afterClosed()
             .pipe(
               isNotNullOrUndefined,
-              tap((changes) =>
+              tap(({ name }) =>
                 this._workspaceStore.updateWorkspace({
-                  workspace,
-                  changes,
+                  workspaceId: workspace.id,
+                  workspaceName: name,
                 })
               )
             )
@@ -61,7 +70,7 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
   readonly deleteWorkspace = this.effect(
     (workspace$: Observable<Document<Workspace>>) =>
       workspace$.pipe(
-        tap((workspace) => this._workspaceStore.deleteWorkspace(workspace))
+        tap((workspace) => this._workspaceStore.deleteWorkspace(workspace.id))
       )
   );
 

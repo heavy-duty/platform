@@ -87,7 +87,6 @@ import {
 } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { Program } from '@project-serum/anchor';
 import { Connection, Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import {
   catchError,
@@ -105,14 +104,10 @@ import { BulldozerActions, InstructionCreated } from './actions';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
-  reader: Program | null;
-  writer: Program | null;
+  workspaceId?: string;
 }
 
-const initialState = {
-  reader: null,
-  writer: null,
-};
+const initialState = {};
 
 @Injectable()
 export class BulldozerProgramStore extends ComponentStore<ViewModel> {
@@ -120,6 +115,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   readonly events$ = this._events
     .asObservable()
     .pipe(shareReplay({ refCount: true, bufferSize: 1 }));
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
   get context() {
     return of(null).pipe(
@@ -145,7 +141,14 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
     super(initialState);
   }
 
-  private _signSendAndConfirmTransactions(connection: Connection) {
+  readonly setWorkspaceId = this.updater(
+    (state, workspaceId: string | undefined) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
+  signSendAndConfirmTransactions(connection: Connection) {
     return (source: Observable<Transaction | Transaction[]>) =>
       source.pipe(
         concatMap((transactions) => {
@@ -199,7 +202,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           workspaceKeypair,
           workspaceName
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -212,7 +215,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(workspaceId),
           workspaceName
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -224,7 +227,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           connection,
           authority,
           new PublicKey(workspaceId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -344,7 +347,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(applicationId),
           applicationName
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -357,7 +360,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(workspaceId),
           new PublicKey(applicationId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -430,7 +433,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(collectionId),
           collectionName
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -443,7 +446,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(applicationId),
           new PublicKey(collectionId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -513,7 +516,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(collectionAttributeId),
           collectionAttributeDto
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -529,7 +532,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(collectionId),
           new PublicKey(collectionAttributeId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -607,7 +610,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           instructionName
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -620,7 +623,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           instructionBody
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -633,7 +636,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(applicationId),
           new PublicKey(instructionId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -705,7 +708,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionAccountId),
           instructionAccountDto
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -721,7 +724,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           new PublicKey(instructionAccountId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -796,7 +799,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionArgumentId),
           instructionArgumentDto
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -812,7 +815,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(instructionId),
           new PublicKey(instructionArgumentId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -872,7 +875,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
               new PublicKey(toId)
             )
           ),
-          this._signSendAndConfirmTransactions(connection)
+          this.signSendAndConfirmTransactions(connection)
         )
       )
     );
@@ -891,7 +894,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(instructionRelationId),
           new PublicKey(fromId),
           new PublicKey(toId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }
@@ -909,7 +912,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
           new PublicKey(fromId),
           new PublicKey(toId),
           new PublicKey(instructionRelationId)
-        ).pipe(this._signSendAndConfirmTransactions(connection))
+        ).pipe(this.signSendAndConfirmTransactions(connection))
       )
     );
   }

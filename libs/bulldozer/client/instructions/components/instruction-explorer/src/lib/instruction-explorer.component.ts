@@ -71,10 +71,11 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
   providers: [InstructionExplorerStore],
 })
 export class InstructionExplorerComponent {
-  @Input() workspaceId?: string;
-  @Input() applicationId?: string;
-  connected$ = this._instructionExplorerStore.connected$;
-  instructions$ = this._instructionExplorerStore.instructions$;
+  @Input() set applicationId(value: string | undefined) {
+    this._instructionExplorerStore.setApplicationId(value);
+  }
+  readonly connected$ = this._instructionExplorerStore.connected$;
+  readonly instructions$ = this._instructionExplorerStore.instructions$;
 
   constructor(private _instructionExplorerStore: InstructionExplorerStore) {}
 
@@ -82,14 +83,7 @@ export class InstructionExplorerComponent {
     event.stopPropagation();
     event.preventDefault();
 
-    if (!this.workspaceId || !this.applicationId) {
-      return;
-    }
-
-    this._instructionExplorerStore.createInstruction({
-      workspaceId: this.workspaceId,
-      applicationId: this.applicationId,
-    });
+    this._instructionExplorerStore.createInstruction();
   }
 
   onEditInstruction(instruction: Document<Instruction>) {

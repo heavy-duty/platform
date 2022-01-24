@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { ApplicationStore } from '@heavy-duty/bulldozer/application/data-access';
+import { ApplicationStore } from '@heavy-duty/bulldozer-store';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -22,20 +22,15 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
     super({});
   }
 
-  readonly createApplication = this.effect((workspaceId$: Observable<string>) =>
-    workspaceId$.pipe(
-      exhaustMap((workspaceId) =>
+  readonly createApplication = this.effect(($) =>
+    $.pipe(
+      exhaustMap(() =>
         this._matDialog
           .open(EditApplicationComponent)
           .afterClosed()
           .pipe(
             isNotNullOrUndefined,
-            tap((data) =>
-              this._applicationStore.createApplication({
-                workspaceId,
-                data,
-              })
-            )
+            tap(({ name }) => this._applicationStore.createApplication(name))
           )
       )
     )
@@ -50,10 +45,10 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
             .afterClosed()
             .pipe(
               filter((changes) => changes),
-              tap((changes) =>
+              tap(({ name }) =>
                 this._applicationStore.updateApplication({
-                  application,
-                  changes,
+                  applicationId: application.id,
+                  applicationName: name,
                 })
               )
             )
@@ -65,7 +60,7 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
     (application$: Observable<Document<Application>>) =>
       application$.pipe(
         tap((application) =>
-          this._applicationStore.deleteApplication(application)
+          this._applicationStore.deleteApplication(application.id)
         )
       )
   );

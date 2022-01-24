@@ -2,11 +2,8 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { ConnectionStore } from '@heavy-duty/bulldozer-store';
-import { PROGRAM_CONFIGS } from '@heavy-duty/ng-anchor';
-import { HdWalletAdapterModule, WalletStore } from '@heavy-duty/wallet-adapter';
-import * as bulldozerIdl from '../assets/json/bulldozer.json';
-import { environment } from '../environments/environment';
+import { BulldozerProgramModule } from '@heavy-duty/bulldozer-store';
+import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -27,19 +24,7 @@ import { AppComponent } from './app.component';
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
-  ],
-  providers: [
-    {
-      provide: PROGRAM_CONFIGS,
-      useValue: {
-        bulldozer: {
-          id: environment.bulldozerProgramId,
-          idl: bulldozerIdl,
-        },
-      },
-    },
-    ConnectionStore,
-    WalletStore,
+    BulldozerProgramModule.forRoot(),
   ],
   bootstrap: [AppComponent],
 })

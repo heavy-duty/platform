@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ApplicationExplorerStore } from './application-explorer.store';
 
@@ -38,19 +38,15 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                 <mat-icon>more_horiz</mat-icon>
               </button>
             </mat-panel-title>
-
-            <bd-collection-explorer
-              [workspaceId]="workspaceId"
-              [applicationId]="application.id"
-            >
-            </bd-collection-explorer>
-            <bd-instruction-explorer
-              [workspaceId]="workspaceId"
-              [applicationId]="application.id"
-            >
-            </bd-instruction-explorer>
           </div>
         </mat-expansion-panel-header>
+
+        <bd-collection-explorer [applicationId]="application.id">
+        </bd-collection-explorer>
+
+        <bd-instruction-explorer [applicationId]="application.id">
+        </bd-instruction-explorer>
+
         <mat-menu #applicationOptionsMenu="matMenu">
           <button
             mat-menu-item
@@ -73,7 +69,8 @@ import { ApplicationExplorerStore } from './application-explorer.store';
     </ng-container>
 
     <button
-      mat-icon-button
+      mat-raised-button
+      color="primary"
       [disabled]="(connected$ | ngrxPush) === false"
       aria-label="Create application"
       (click)="onCreateApplication($event)"
@@ -86,23 +83,18 @@ import { ApplicationExplorerStore } from './application-explorer.store';
   providers: [ApplicationExplorerStore],
 })
 export class ApplicationExplorerComponent {
-  @Input() workspaceId?: string;
   readonly connected$ = this._applicationExplorerStore.connected$;
   readonly applications$ = this._applicationExplorerStore.applications$;
 
   constructor(
-    public readonly _applicationExplorerStore: ApplicationExplorerStore
+    private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
   onCreateApplication(event: Event) {
     event.stopPropagation();
     event.preventDefault();
 
-    if (!this.workspaceId) {
-      return;
-    }
-
-    this._applicationExplorerStore.createApplication(this.workspaceId);
+    this._applicationExplorerStore.createApplication();
   }
 
   onEditApplication(application: Document<Application>) {

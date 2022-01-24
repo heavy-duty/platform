@@ -2,21 +2,15 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import {
-  ApplicationDeleted,
+  /* ApplicationDeleted,
   ApplicationUpdated,
-  BulldozerActions,
+  BulldozerActions, */
   BulldozerProgramStore,
-  CollectionDeleted,
-  CollectionUpdated,
-  InstructionDeleted,
-  InstructionUpdated,
-  WorkspaceDeleted,
-  WorkspaceUpdated,
 } from '@heavy-duty/bulldozer-store';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import { Observable, of } from 'rxjs';
-import { concatMap, filter, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, tap, withLatestFrom } from 'rxjs/operators';
 
 export interface Tab {
   id: string;
@@ -95,7 +89,7 @@ export class TabStore extends ComponentStore<ViewModel> {
     selected: null,
   }));
 
-  readonly keepTabsUpdated = this.effect(() =>
+  /* readonly keepTabsUpdated = this.effect(() =>
     this._bulldozerProgramStore.events$.pipe(
       filter(
         (
@@ -136,7 +130,7 @@ export class TabStore extends ComponentStore<ViewModel> {
       ),
       tap((event) => this.closeTab(event.payload))
     )
-  );
+  ); */
 
   readonly closeTab = this.effect((tabId$: Observable<string>) =>
     tabId$.pipe(
