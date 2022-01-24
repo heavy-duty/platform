@@ -7,17 +7,17 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTabsModule } from '@angular/material/tabs';
 import { RouterModule } from '@angular/router';
 import { NavigationModule } from '@heavy-duty/bulldozer/application/features/navigation';
+import { AuthGuard } from '@heavy-duty/bulldozer/application/utils/guards/auth';
 import { ReactiveComponentModule } from '@ngrx/component';
-
-import { ApplicationShellComponent } from './shell.component';
+import { ShellComponent } from './shell.component';
 
 @NgModule({
   imports: [
     CommonModule,
     RouterModule.forChild([
       {
-        path: '',
-        component: ApplicationShellComponent,
+        path: 'workspaces',
+        component: ShellComponent,
         children: [
           {
             path: ':workspaceId',
@@ -27,6 +27,18 @@ import { ApplicationShellComponent } from './shell.component';
               ).then((m) => m.ViewWorkspaceModule),
           },
         ],
+        canActivate: [AuthGuard],
+      },
+      {
+        path: 'unauthorized-access',
+        loadChildren: () =>
+          import(
+            '@heavy-duty/bulldozer/application/features/unauthorized-access'
+          ).then((m) => m.UnauthorizedAccessModule),
+      },
+      {
+        path: '**',
+        redirectTo: 'workspaces',
       },
     ]),
     MatButtonModule,
@@ -37,7 +49,8 @@ import { ApplicationShellComponent } from './shell.component';
     ReactiveComponentModule,
     NavigationModule,
   ],
-  declarations: [ApplicationShellComponent],
-  exports: [ApplicationShellComponent],
+  declarations: [ShellComponent],
+  exports: [ShellComponent],
+  providers: [AuthGuard],
 })
-export class ApplicationShellModule {}
+export class ShellModule {}

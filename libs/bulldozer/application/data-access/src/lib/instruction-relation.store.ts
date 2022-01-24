@@ -5,8 +5,8 @@ import {
   InstructionAccount,
   InstructionRelation,
 } from '@heavy-duty/bulldozer-devkit';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { EditRelationComponent } from '@heavy-duty/bulldozer/application/features/edit-relation';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import { concatMap, exhaustMap, filter } from 'rxjs/operators';

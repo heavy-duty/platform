@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import {
   ApplicationActionTypes,
   ApplicationStore,
@@ -15,7 +16,6 @@ import {
   WorkspaceActionTypes,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
@@ -51,7 +51,7 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ApplicationShellStore extends ComponentStore<ViewModel> {
+export class ShellStore extends ComponentStore<ViewModel> {
   private readonly _error = new Subject();
   readonly error$ = this._error.asObservable();
   readonly tabs$ = this.select(

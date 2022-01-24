@@ -17,7 +17,10 @@
     "baseUrl": ".",
     "paths": {
       "@heavy-duty/bulldozer-devkit": [
-        "libs/shared/bulldozer-devkit/src/index.ts"
+        "libs/bulldozer/shared/devkit/src/index.ts"
+      ],
+      "@heavy-duty/bulldozer-store": [
+        "libs/bulldozer/shared/store/src/index.ts"
       ],
       "@heavy-duty/bulldozer/application/data-access": [
         "libs/bulldozer/application/data-access/src/index.ts"
@@ -55,6 +58,9 @@
       "@heavy-duty/bulldozer/application/features/navigation": [
         "libs/bulldozer/application/features/navigation/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/features/unauthorized-access": [
+        "libs/bulldozer/application/features/unauthorized-access/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/features/view-application": [
         "libs/bulldozer/application/features/view-application/src/index.ts"
       ],
@@ -82,6 +88,9 @@
       "@heavy-duty/bulldozer/application/ui/directives/section-header": [
         "libs/bulldozer/application/ui/directives/section-header/src/index.ts"
       ],
+      "@heavy-duty/bulldozer/application/utils/guards/auth": [
+        "libs/bulldozer/application/utils/guards/auth/src/index.ts"
+      ],
       "@heavy-duty/bulldozer/application/utils/pipes/obscure-address": [
         "libs/bulldozer/application/utils/pipes/obscure-address/src/index.ts"
       ],
@@ -96,16 +105,6 @@
       ],
       "@heavy-duty/bulldozer/application/utils/services/dark-theme": [
         "libs/bulldozer/application/utils/services/dark-theme/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/data-access": [
-        "libs/bulldozer/data-access/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/features/unauthorized-access": [
-        "libs/bulldozer/features/unauthorized-access/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/shell": ["libs/bulldozer/shell/src/index.ts"],
-      "@heavy-duty/bulldozer/utils/guards/auth": [
-        "libs/bulldozer/utils/guards/auth/src/index.ts"
       ],
       "@heavy-duty/ng-anchor": ["libs/shared/ng-anchor/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [

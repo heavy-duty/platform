@@ -11,12 +11,12 @@ import {
   InstructionRelation,
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { EditWorkspaceComponent } from '@heavy-duty/bulldozer/application/features/edit-workspace';
 import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
 } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,

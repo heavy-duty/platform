@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { EditInstructionComponent } from '@heavy-duty/bulldozer/application/features/edit-instruction';
 import { generateInstructionCode } from '@heavy-duty/bulldozer/application/utils/services/code-generator';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/shared/utils/operators';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {

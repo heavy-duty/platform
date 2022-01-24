@@ -5,6 +5,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { Router } from '@angular/router';
+import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import {
   ApplicationStore,
   CollectionAttributeStore,
@@ -17,8 +18,14 @@ import {
   WorkspaceStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+<<<<<<< HEAD
 import { filter, Subject, takeUntil } from 'rxjs';
 import { ApplicationShellStore } from './shell.store';
+=======
+import { Subject } from 'rxjs';
+import { filter, takeUntil } from 'rxjs/operators';
+import { ShellStore } from './shell.store';
+>>>>>>> 005b4b4... refactor(bulldozer-client): re-organize libraries
 
 @Component({
   selector: 'bd-application-shell',
@@ -58,6 +65,7 @@ import { ApplicationShellStore } from './shell.store';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    BulldozerProgramStore,
     WorkspaceStore,
     ApplicationStore,
     CollectionStore,
@@ -67,18 +75,18 @@ import { ApplicationShellStore } from './shell.store';
     InstructionDocumentStore,
     InstructionSignerStore,
     InstructionRelationStore,
-    ApplicationShellStore,
+    ShellStore,
   ],
 })
-export class ApplicationShellComponent implements OnInit, OnDestroy {
+export class ShellComponent implements OnInit, OnDestroy {
   private readonly _destroy = new Subject();
   private readonly _destroy$ = this._destroy.asObservable();
   readonly applicationId$ = this._applicationStore.applicationId$;
-  readonly tabs$ = this._applicationShellStore.tabs$;
-  readonly selectedTab$ = this._applicationShellStore.selected$;
+  readonly tabs$ = this._shellStore.tabs$;
+  readonly selectedTab$ = this._shellStore.selected$;
 
   constructor(
-    private readonly _applicationShellStore: ApplicationShellStore,
+    private readonly _shellStore: ShellStore,
     private readonly _applicationStore: ApplicationStore,
     private readonly _walletStore: WalletStore,
     private readonly _router: Router
@@ -107,6 +115,6 @@ export class ApplicationShellComponent implements OnInit, OnDestroy {
   onCloseTab(event: Event, tabId: string) {
     event.stopPropagation();
     event.preventDefault();
-    this._applicationShellStore.closeTab(tabId);
+    this._shellStore.closeTab(tabId);
   }
 }

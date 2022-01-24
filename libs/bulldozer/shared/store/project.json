@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/shared/store",
+  "sourceRoot": "libs/bulldozer/shared/store/src",
+  "prefix": "bd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/bulldozer/shared/store"],
+      "options": {
+        "project": "libs/bulldozer/shared/store/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/bulldozer/shared/store/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/bulldozer/shared/store/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/shared/store"],
+      "options": {
+        "jestConfig": "libs/bulldozer/shared/store/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/shared/store/src/**/*.ts",
+          "libs/bulldozer/shared/store/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}
