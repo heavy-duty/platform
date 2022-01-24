@@ -18,7 +18,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
 
     <ng-container *ngrxLet="applications$; let applications">
       <mat-expansion-panel
-        *ngFor="let application of applications"
+        *ngFor="let application of applications; trackBy: identify"
         class="flex-shrink-0"
         togglePosition="before"
       >
@@ -87,5 +87,9 @@ export class ApplicationExplorerComponent {
 
   onDeleteApplication(application: Document<Application>) {
     this._applicationExplorerStore.deleteApplication(application);
+  }
+
+  identify(_: number, document: Document<Application>) {
+    return document.id;
   }
 }
