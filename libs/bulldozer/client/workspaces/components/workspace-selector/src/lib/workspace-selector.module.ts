@@ -6,6 +6,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { EditWorkspaceComponentModule } from '@bulldozer-client/edit-workspace';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceSelectorComponent } from './workspace-selector.component';
@@ -23,6 +24,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     MatTooltipModule,
     ReactiveComponentModule,
     StopPropagationModule,
+    EditWorkspaceComponentModule,
   ],
 })
 export class WorkspaceSelectorModule {}

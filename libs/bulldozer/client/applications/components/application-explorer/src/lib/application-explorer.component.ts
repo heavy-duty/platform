@@ -1,7 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ApplicationStore } from '@heavy-duty/bulldozer-store';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -10,7 +9,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
       mat-raised-button
       color="primary"
       class="block mx-auto mb-4"
-      [disabled]="(connected$ | ngrxPush) === false"
+      [disabled]="!connected"
       aria-label="Create application"
       bdEditApplicationTrigger
       (editApplication)="onCreateApplication($event)"
@@ -41,14 +40,14 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
         </mat-expansion-panel-header>
 
         <bd-collection-explorer
+          [connected]="connected"
           [applicationId]="application.id"
-          [connected]="(connected$ | ngrxPush) ?? false"
         >
         </bd-collection-explorer>
 
         <bd-instruction-explorer
+          [connected]="connected"
           [applicationId]="application.id"
-          [connected]="(connected$ | ngrxPush) ?? false"
         >
         </bd-instruction-explorer>
 
@@ -70,7 +69,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             bdEditApplicationTrigger
             [application]="application"
             (editApplication)="onUpdateApplication(application.id, $event)"
-            [disabled]="(connected$ | ngrxPush) === false"
+            [disabled]="!connected"
           >
             <mat-icon>edit</mat-icon>
             <span>Edit application</span>
@@ -78,7 +77,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
           <button
             mat-menu-item
             (click)="onDeleteApplication(application.id)"
-            [disabled]="(connected$ | ngrxPush) === false"
+            [disabled]="!connected"
           >
             <mat-icon>delete</mat-icon>
             <span>Delete application</span>
@@ -91,13 +90,10 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ApplicationExplorerComponent {
-  readonly connected$ = this._walletStore.connected$;
+  @Input() connected = false;
   readonly applications$ = this._applicationStore.applications$;
 
-  constructor(
-    private readonly _walletStore: WalletStore,
-    private readonly _applicationStore: ApplicationStore
-  ) {}
+  constructor(private readonly _applicationStore: ApplicationStore) {}
 
   onCreateApplication(name: string) {
     this._applicationStore.createApplication(name);

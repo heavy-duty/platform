@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
 @Component({
   selector: 'bd-workspace-explorer',
@@ -9,11 +9,15 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
           <img src="assets/images/logo.png" class="w-4/6" />
         </figure>
         <h2 class="mt-4 text-center">BULLDOZER</h2>
-        <bd-application-explorer></bd-application-explorer>
+        <bd-application-explorer
+          [connected]="connected"
+        ></bd-application-explorer>
       </div>
     </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WorkspaceExplorerComponent {}
+export class WorkspaceExplorerComponent {
+  @Input() connected = false;
+}

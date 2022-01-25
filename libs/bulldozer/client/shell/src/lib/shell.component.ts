@@ -3,6 +3,7 @@ import {
   RouteStore,
   TabStore,
 } from '@heavy-duty/bulldozer/application/data-access';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ShellStore } from './shell.store';
 
 @Component({
@@ -13,16 +14,22 @@ import { ShellStore } from './shell.store';
         #drawer
         class="w-64"
         fixedInViewport
-        [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-        [mode]="(isHandset$ | async) ? 'over' : 'side'"
-        [opened]="(isHandset$ | async) === false"
+        [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
+        [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
+        [opened]="(isHandset$ | ngrxPush) === false"
       >
-        <bd-workspace-explorer></bd-workspace-explorer>
+        <bd-workspace-explorer
+          [connected]="(connected$ | ngrxPush) ?? false"
+        ></bd-workspace-explorer>
       </mat-sidenav>
       <mat-sidenav-content>
         <mat-toolbar color="primary" class="shadow-xl sticky top-0 z-10">
           <div class="ml-auto flex items-center">
-            <bd-workspace-selector class="mr-6"></bd-workspace-selector>
+            <bd-workspace-selector
+              class="mr-6"
+              [connected]="(connected$ | ngrxPush) ?? false"
+              [workspaceId]="workspaceId$ | ngrxPush"
+            ></bd-workspace-selector>
 
             <hd-wallet-multi-button
               class="bd-custom-color mr-6 h-auto leading-none"
@@ -43,8 +50,14 @@ export class ShellComponent {
   readonly tabs$ = this._shellStore.tabs$;
   readonly selectedTab$ = this._shellStore.selectedTab$;
   readonly isHandset$ = this._shellStore.isHandset$;
+  readonly connected$ = this._walletStore.connected$;
+  readonly workspaceId$ = this._routerStore.workspaceId$;
 
-  constructor(private readonly _shellStore: ShellStore) {}
+  constructor(
+    private readonly _shellStore: ShellStore,
+    private readonly _walletStore: WalletStore,
+    private readonly _routerStore: RouteStore
+  ) {}
 
   onCloseTab(event: Event, tabId: string) {
     this._shellStore.closeTab(event, tabId);

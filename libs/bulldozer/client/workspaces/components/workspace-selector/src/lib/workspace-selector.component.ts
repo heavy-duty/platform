@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  ViewChild,
+} from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { WorkspaceStore } from '@heavy-duty/bulldozer-store';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -68,7 +73,10 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                   type="button"
                   mat-raised-button
                   color="primary"
-                  (click)="onEditWorkspace(workspace)"
+                  bdEditWorkspaceTrigger
+                  [workspace]="workspace"
+                  (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
+                  [disabled]="!connected"
                 >
                   Edit
                 </button>
@@ -76,7 +84,8 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                   type="button"
                   mat-raised-button
                   color="primary"
-                  (click)="onDeleteWorkspace(workspace)"
+                  (click)="onDeleteWorkspace(workspace.id)"
+                  [disabled]="!connected"
                 >
                   Delete
                 </button>
@@ -90,7 +99,9 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           type="button"
           mat-raised-button
           color="primary"
-          (click)="onCreateWorkspace()"
+          bdEditWorkspaceTrigger
+          (editWorkspace)="onCreateWorkspace($event)"
+          [disabled]="!connected"
         >
           New workspace
         </button>
@@ -103,11 +114,16 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
+  @Input() connected = false;
+  @Input() set workspaceId(value: string | undefined) {
+    this._workspaceSelectorStore.setWorkspaceId(value);
+  }
   readonly workspace$ = this._workspaceSelectorStore.workspace$;
-  readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
+  readonly workspaces$ = this._workspaceStore.workspaces$;
 
   constructor(
-    private readonly _workspaceSelectorStore: WorkspaceSelectorStore
+    private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
+    private readonly _workspaceStore: WorkspaceStore
   ) {}
 
   private _closeMenu() {
@@ -116,23 +132,23 @@ export class WorkspaceSelectorComponent {
     }
   }
 
-  onCreateWorkspace() {
+  onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.createWorkspace();
+    this._workspaceStore.createWorkspace(workspaceName);
   }
 
-  onEditWorkspace(workspace: Document<Workspace>) {
+  onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.updateWorkspace(workspace);
+    this._workspaceStore.updateWorkspace({ workspaceId, workspaceName });
   }
 
-  onDeleteWorkspace(workspace: Document<Workspace>) {
+  onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.deleteWorkspace(workspace);
+    this._workspaceStore.deleteWorkspace(workspaceId);
   }
 
   onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.downloadWorkspace(workspaceId);
+    this._workspaceStore.downloadWorkspace(workspaceId);
   }
 }
