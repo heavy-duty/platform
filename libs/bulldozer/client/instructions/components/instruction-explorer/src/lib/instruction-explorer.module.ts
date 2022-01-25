@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { EditInstructionModule } from '@bulldozer-client/edit-instruction';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { InstructionExplorerComponent } from './instruction-explorer.component';
@@ -23,6 +24,7 @@ import { InstructionExplorerComponent } from './instruction-explorer.component';
     MatTooltipModule,
     ReactiveComponentModule,
     StopPropagationModule,
+    EditInstructionModule,
   ],
   declarations: [InstructionExplorerComponent],
   exports: [InstructionExplorerComponent],

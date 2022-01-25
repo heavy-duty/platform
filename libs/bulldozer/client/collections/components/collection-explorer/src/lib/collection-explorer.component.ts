@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
+import { CollectionStore } from '@heavy-duty/bulldozer-store';
 import { CollectionExplorerStore } from './collection-explorer.store';
 
 @Component({
@@ -17,7 +17,8 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             [disabled]="!connected"
             aria-label="Create collection"
             bdStopPropagation
-            (click)="onCreateCollection(applicationId)"
+            bdEditCollectionTrigger
+            (editCollection)="onCreateCollection(applicationId, $event)"
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -56,7 +57,9 @@ import { CollectionExplorerStore } from './collection-explorer.store';
           <mat-menu #collectionOptionsMenu="matMenu">
             <button
               mat-menu-item
-              (click)="onEditCollection(collection)"
+              bdEditCollectionTrigger
+              [collection]="collection"
+              (editCollection)="onUpdateCollection(applicationId, $event)"
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -64,7 +67,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteCollection(collection)"
+              (click)="onDeleteCollection(applicationId, collection.id)"
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -85,17 +88,20 @@ export class CollectionExplorerComponent {
   readonly applicationId$ = this._collectionExplorerStore.applicationId$;
   readonly collections$ = this._collectionExplorerStore.collections$;
 
-  constructor(private _collectionExplorerStore: CollectionExplorerStore) {}
+  constructor(
+    private _collectionStore: CollectionStore,
+    private _collectionExplorerStore: CollectionExplorerStore
+  ) {}
 
-  onCreateCollection(applicationId: string) {
-    this._collectionExplorerStore.createCollection({ applicationId });
+  onCreateCollection(applicationId: string, collectionName: string) {
+    this._collectionStore.createCollection({ applicationId, collectionName });
   }
 
-  onEditCollection(collection: Document<Collection>) {
-    this._collectionExplorerStore.updateCollection({ collection });
+  onUpdateCollection(collectionId: string, collectionName: string) {
+    this._collectionStore.updateCollection({ collectionId, collectionName });
   }
 
-  onDeleteCollection(collection: Document<Collection>) {
-    this._collectionExplorerStore.deleteCollection({ collection });
+  onDeleteCollection(applicationId: string, collectionId: string) {
+    this._collectionStore.deleteCollection({ applicationId, collectionId });
   }
 }

@@ -5,8 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { EditInstructionArgumentModule } from '@bulldozer-client/edit-instruction-argument';
 import { SectionHeaderModule } from '@bulldozer-client/section-header';
-import { EditArgumentModule } from '@heavy-duty/bulldozer/application/features/edit-argument';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { InstructionArgumentsListComponent } from './instruction-arguments-list.component';
 
@@ -21,7 +21,7 @@ import { InstructionArgumentsListComponent } from './instruction-arguments-list.
     MatMenuModule,
     ReactiveComponentModule,
     SectionHeaderModule,
-    EditArgumentModule,
+    EditInstructionArgumentModule,
   ],
   exports: [InstructionArgumentsListComponent],
 })

@@ -6,9 +6,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { RouterModule } from '@angular/router';
+import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instruction-document';
+import { EditInstructionRelationModule } from '@bulldozer-client/edit-instruction-relation';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { SectionHeaderModule } from '@bulldozer-client/section-header';
-import { EditDocumentModule } from '@heavy-duty/bulldozer/application/features/edit-document';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { InstructionDocumentsListComponent } from './instruction-documents-list.component';
 
@@ -24,8 +25,9 @@ import { InstructionDocumentsListComponent } from './instruction-documents-list.
     MatMenuModule,
     ReactiveComponentModule,
     SectionHeaderModule,
-    EditDocumentModule,
     ObscureAddressModule,
+    EditInstructionDocumentModule,
+    EditInstructionRelationModule,
   ],
   exports: [InstructionDocumentsListComponent],
 })

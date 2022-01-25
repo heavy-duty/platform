@@ -14,7 +14,12 @@ import { ViewCollectionStore } from './view-collection.store';
         </header>
 
         <main>
-          <bd-collection-attributes-list class="block mb-16">
+          <bd-collection-attributes-list
+            class="block mb-16"
+            [connected]="(connected$ | ngrxPush) ?? false"
+            [applicationId]="collection.data.application"
+            [collectionId]="collection.id"
+          >
           </bd-collection-attributes-list>
         </main>
       </div>

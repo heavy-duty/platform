@@ -5,8 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
+import { EditCollectionAttributeModule } from '@bulldozer-client/edit-collection-attribute';
 import { SectionHeaderModule } from '@bulldozer-client/section-header';
-import { EditAttributeModule } from '@heavy-duty/bulldozer/application/features/edit-attribute';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { CollectionAttributesListComponent } from './collection-attributes-list.component';
 
@@ -21,7 +21,7 @@ import { CollectionAttributesListComponent } from './collection-attributes-list.
     MatMenuModule,
     ReactiveComponentModule,
     SectionHeaderModule,
-    EditAttributeModule,
+    EditCollectionAttributeModule,
   ],
   exports: [CollectionAttributesListComponent],
 })

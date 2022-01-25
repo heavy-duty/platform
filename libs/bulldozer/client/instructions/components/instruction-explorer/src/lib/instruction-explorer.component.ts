@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
+import { InstructionStore } from '@heavy-duty/bulldozer-store';
 import { InstructionExplorerStore } from './instruction-explorer.store';
 
 @Component({
@@ -17,7 +17,8 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             [disabled]="!connected"
             aria-label="Create instruction"
             bdStopPropagation
-            (click)="onCreateInstruction(applicationId)"
+            bdEditInstructionTrigger
+            (editInstruction)="onCreateInstruction(applicationId, $event)"
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -54,7 +55,9 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
           <mat-menu #instructionOptionsMenu="matMenu">
             <button
               mat-menu-item
-              (click)="onEditInstruction(instruction)"
+              bdEditInstructionTrigger
+              [instruction]="instruction"
+              (editInstruction)="onUpdateInstruction(applicationId, $event)"
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -62,7 +65,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteInstruction(instruction)"
+              (click)="onDeleteInstruction(applicationId, instruction.id)"
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -83,17 +86,26 @@ export class InstructionExplorerComponent {
   readonly applicationId$ = this._instructionExplorerStore.applicationId$;
   readonly instructions$ = this._instructionExplorerStore.instructions$;
 
-  constructor(private _instructionExplorerStore: InstructionExplorerStore) {}
+  constructor(
+    private readonly _instructionStore: InstructionStore,
+    private readonly _instructionExplorerStore: InstructionExplorerStore
+  ) {}
 
-  onCreateInstruction(applicationId: string) {
-    this._instructionExplorerStore.createInstruction({ applicationId });
+  onCreateInstruction(applicationId: string, instructionName: string) {
+    this._instructionStore.createInstruction({
+      applicationId,
+      instructionName,
+    });
   }
 
-  onEditInstruction(instruction: Document<Instruction>) {
-    this._instructionExplorerStore.updateInstruction({ instruction });
+  onUpdateInstruction(instructionId: string, instructionName: string) {
+    this._instructionStore.updateInstruction({
+      instructionId,
+      instructionName,
+    });
   }
 
-  onDeleteInstruction(instruction: Document<Instruction>) {
-    this._instructionExplorerStore.deleteInstruction({ instruction });
+  onDeleteInstruction(applicationId: string, instructionId: string) {
+    this._instructionStore.deleteInstruction({ applicationId, instructionId });
   }
 }

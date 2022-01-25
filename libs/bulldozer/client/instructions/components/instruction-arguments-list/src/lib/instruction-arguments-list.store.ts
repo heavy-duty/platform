@@ -1,18 +1,19 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
 import { InstructionArgumentStore } from '@heavy-duty/bulldozer-store';
-import { RouteStore } from '@heavy-duty/bulldozer/application/data-access';
-import { EditArgumentComponent } from '@heavy-duty/bulldozer/application/features/edit-argument';
-import { isTruthy } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
-import { exhaustMap, Observable, tap } from 'rxjs';
+
+interface ViewModel {
+  instructionId?: string;
+}
+
+const initialState = {};
 
 @Injectable()
-export class InstructionArgumentsListStore extends ComponentStore<object> {
+export class InstructionArgumentsListStore extends ComponentStore<ViewModel> {
+  readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly instructionArguments$ = this.select(
     this._instructionArgumentStore.instructionArguments$,
-    this._routeStore.instructionId$,
+    this.instructionId$,
     (instructionArguments, instructionId) =>
       instructionArguments.filter(
         (instructionArgument) =>
@@ -21,68 +22,15 @@ export class InstructionArgumentsListStore extends ComponentStore<object> {
   );
 
   constructor(
-    private readonly _instructionArgumentStore: InstructionArgumentStore,
-    private readonly _matDialog: MatDialog,
-    private readonly _routeStore: RouteStore
+    private readonly _instructionArgumentStore: InstructionArgumentStore
   ) {
-    super({});
+    super(initialState);
   }
 
-  readonly createInstructionArgument = this.effect(
-    (
-      $: Observable<{
-        applicationId: string;
-        instructionId: string;
-      }>
-    ) =>
-      $.pipe(
-        exhaustMap(({ applicationId, instructionId }) =>
-          this._matDialog
-            .open(EditArgumentComponent)
-            .afterClosed()
-            .pipe(
-              isTruthy,
-              tap((data) =>
-                this._instructionArgumentStore.createInstructionArgument({
-                  applicationId,
-                  instructionId,
-                  instructionArgumentDto: data,
-                })
-              )
-            )
-        )
-      )
-  );
-
-  readonly updateInstructionArgument = this.effect(
-    ($: Observable<{ instructionArgument: Document<InstructionArgument> }>) =>
-      $.pipe(
-        exhaustMap(({ instructionArgument }) =>
-          this._matDialog
-            .open(EditArgumentComponent, { data: { instructionArgument } })
-            .afterClosed()
-            .pipe(
-              isTruthy,
-              tap((changes) =>
-                this._instructionArgumentStore.updateInstructionArgument({
-                  instructionArgumentId: instructionArgument.id,
-                  instructionArgumentDto: changes,
-                })
-              )
-            )
-        )
-      )
-  );
-
-  readonly deleteInstructionArgument = this.effect(
-    ($: Observable<{ instructionArgument: Document<InstructionArgument> }>) =>
-      $.pipe(
-        tap(({ instructionArgument }) =>
-          this._instructionArgumentStore.deleteInstructionArgument({
-            instructionArgumentId: instructionArgument.id,
-            instructionId: instructionArgument.data.instruction,
-          })
-        )
-      )
+  readonly setInstructionId = this.updater(
+    (state, instructionId: string | undefined) => ({
+      ...state,
+      instructionId,
+    })
   );
 }

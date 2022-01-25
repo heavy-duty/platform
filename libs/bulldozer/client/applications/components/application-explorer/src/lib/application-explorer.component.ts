@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { ApplicationExplorerStore } from './application-explorer.store';
+import { ApplicationStore } from '@heavy-duty/bulldozer-store';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -11,7 +12,8 @@ import { ApplicationExplorerStore } from './application-explorer.store';
       class="block mx-auto mb-4"
       [disabled]="(connected$ | ngrxPush) === false"
       aria-label="Create application"
-      (click)="onCreateApplication()"
+      bdEditApplicationTrigger
+      (editApplication)="onCreateApplication($event)"
     >
       Create application
     </button>
@@ -65,7 +67,9 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           </a>
           <button
             mat-menu-item
-            (click)="onEditApplication(application)"
+            bdEditApplicationTrigger
+            [application]="application"
+            (editApplication)="onUpdateApplication(application.id, $event)"
             [disabled]="(connected$ | ngrxPush) === false"
           >
             <mat-icon>edit</mat-icon>
@@ -73,7 +77,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           </button>
           <button
             mat-menu-item
-            (click)="onDeleteApplication(application)"
+            (click)="onDeleteApplication(application.id)"
             [disabled]="(connected$ | ngrxPush) === false"
           >
             <mat-icon>delete</mat-icon>
@@ -85,26 +89,29 @@ import { ApplicationExplorerStore } from './application-explorer.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ApplicationExplorerStore],
 })
 export class ApplicationExplorerComponent {
-  readonly connected$ = this._applicationExplorerStore.connected$;
-  readonly applications$ = this._applicationExplorerStore.applications$;
+  readonly connected$ = this._walletStore.connected$;
+  readonly applications$ = this._applicationStore.applications$;
 
   constructor(
-    private readonly _applicationExplorerStore: ApplicationExplorerStore
+    private readonly _walletStore: WalletStore,
+    private readonly _applicationStore: ApplicationStore
   ) {}
 
-  onCreateApplication() {
-    this._applicationExplorerStore.createApplication();
+  onCreateApplication(name: string) {
+    this._applicationStore.createApplication(name);
   }
 
-  onEditApplication(application: Document<Application>) {
-    this._applicationExplorerStore.updateApplication(application);
+  onUpdateApplication(applicationId: string, applicationName: string) {
+    this._applicationStore.updateApplication({
+      applicationId,
+      applicationName,
+    });
   }
 
-  onDeleteApplication(application: Document<Application>) {
-    this._applicationExplorerStore.deleteApplication(application);
+  onDeleteApplication(applicationId: string) {
+    this._applicationStore.deleteApplication(applicationId);
   }
 
   identify(_: number, document: Document<Application>) {

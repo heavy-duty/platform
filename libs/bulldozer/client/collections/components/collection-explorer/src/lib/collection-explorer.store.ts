@@ -1,13 +1,6 @@
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { CollectionStore } from '@heavy-duty/bulldozer-store';
-import { EditCollectionComponent } from '@heavy-duty/bulldozer/application/features/edit-collection';
-import { isTruthy } from '@heavy-duty/rx-solana';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable } from 'rxjs';
-import { exhaustMap, tap } from 'rxjs/operators';
 
 interface ViewModel {
   applicationId?: string;
@@ -17,7 +10,6 @@ const initialState = {};
 
 @Injectable()
 export class CollectionExplorerStore extends ComponentStore<ViewModel> {
-  readonly connected$ = this._walletStore.connected$;
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly collections$ = this.select(
     this._collectionStore.collections$,
@@ -28,11 +20,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
       )
   );
 
-  constructor(
-    private readonly _walletStore: WalletStore,
-    private readonly _collectionStore: CollectionStore,
-    private readonly _matDialog: MatDialog
-  ) {
+  constructor(private readonly _collectionStore: CollectionStore) {
     super(initialState);
   }
 
@@ -41,57 +29,5 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
       ...state,
       applicationId,
     })
-  );
-
-  readonly createCollection = this.effect(
-    ($: Observable<{ applicationId: string }>) =>
-      $.pipe(
-        exhaustMap(({ applicationId }) =>
-          this._matDialog
-            .open(EditCollectionComponent)
-            .afterClosed()
-            .pipe(
-              isTruthy,
-              tap(({ name }) =>
-                this._collectionStore.createCollection({
-                  applicationId,
-                  collectionName: name,
-                })
-              )
-            )
-        )
-      )
-  );
-
-  readonly updateCollection = this.effect(
-    ($: Observable<{ collection: Document<Collection> }>) =>
-      $.pipe(
-        exhaustMap(({ collection }) =>
-          this._matDialog
-            .open(EditCollectionComponent, { data: { collection } })
-            .afterClosed()
-            .pipe(
-              isTruthy,
-              tap(({ name }) =>
-                this._collectionStore.updateCollection({
-                  collectionId: collection.id,
-                  collectionName: name,
-                })
-              )
-            )
-        )
-      )
-  );
-
-  readonly deleteCollection = this.effect(
-    ($: Observable<{ collection: Document<Collection> }>) =>
-      $.pipe(
-        tap(({ collection }) =>
-          this._collectionStore.deleteCollection({
-            applicationId: collection.data.application,
-            collectionId: collection.id,
-          })
-        )
-      )
   );
 }
