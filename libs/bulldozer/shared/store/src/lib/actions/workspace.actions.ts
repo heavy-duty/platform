@@ -1,18 +1,22 @@
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { Action, WorkspaceActionTypes } from './types';
+import {
+  Action,
+  WORKSPACE_CREATED,
+  WORKSPACE_DELETED,
+  WORKSPACE_UPDATED,
+} from './types';
 
 export class WorkspaceCreated implements Action<void> {
-  type = WorkspaceActionTypes.WorkspaceCreated;
+  type: typeof WORKSPACE_CREATED = WORKSPACE_CREATED;
 }
 
-export class WorkspaceUpdated implements Action<Document<Workspace>> {
-  type = WorkspaceActionTypes.WorkspaceUpdated;
+export class WorkspaceUpdated implements Action<string> {
+  type: typeof WORKSPACE_UPDATED = WORKSPACE_UPDATED;
 
-  constructor(public payload: Document<Workspace>) {}
+  constructor(public payload: string) {}
 }
 
 export class WorkspaceDeleted implements Action<string> {
-  type = WorkspaceActionTypes.WorkspaceDeleted;
+  type: typeof WORKSPACE_DELETED = WORKSPACE_DELETED;
 
   constructor(public payload: string) {}
 }

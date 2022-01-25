@@ -1,20 +1,22 @@
-import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
-import { Action, InstructionRelationActionTypes } from './types';
+import {
+  Action,
+  INSTRUCTION_RELATION_CREATED,
+  INSTRUCTION_RELATION_DELETED,
+  INSTRUCTION_RELATION_UPDATED,
+} from './types';
 
 export class InstructionRelationCreated implements Action<void> {
-  type = InstructionRelationActionTypes.InstructionRelationCreated;
+  type: typeof INSTRUCTION_RELATION_CREATED = INSTRUCTION_RELATION_CREATED;
 }
 
-export class InstructionRelationUpdated
-  implements Action<Relation<InstructionRelation>>
-{
-  type = InstructionRelationActionTypes.InstructionRelationUpdated;
+export class InstructionRelationUpdated implements Action<string> {
+  type: typeof INSTRUCTION_RELATION_UPDATED = INSTRUCTION_RELATION_UPDATED;
 
-  constructor(public payload: Relation<InstructionRelation>) {}
+  constructor(public payload: string) {}
 }
 
 export class InstructionRelationDeleted implements Action<string> {
-  type = InstructionRelationActionTypes.InstructionRelationDeleted;
+  type: typeof INSTRUCTION_RELATION_DELETED = INSTRUCTION_RELATION_DELETED;
 
   constructor(public payload: string) {}
 }

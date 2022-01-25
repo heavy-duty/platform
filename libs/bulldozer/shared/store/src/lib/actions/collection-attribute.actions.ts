@@ -1,20 +1,22 @@
-import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
-import { Action, CollectionAttributeActionTypes } from './types';
+import {
+  Action,
+  COLLECTION_ATTRIBUTE_CREATED,
+  COLLECTION_ATTRIBUTE_DELETED,
+  COLLECTION_ATTRIBUTE_UPDATED,
+} from './types';
 
 export class CollectionAttributeCreated implements Action<void> {
-  type = CollectionAttributeActionTypes.CollectionAttributeCreated;
+  type: typeof COLLECTION_ATTRIBUTE_CREATED = COLLECTION_ATTRIBUTE_CREATED;
 }
 
-export class CollectionAttributeUpdated
-  implements Action<Document<CollectionAttribute>>
-{
-  type = CollectionAttributeActionTypes.CollectionAttributeUpdated;
+export class CollectionAttributeUpdated implements Action<string> {
+  type: typeof COLLECTION_ATTRIBUTE_UPDATED = COLLECTION_ATTRIBUTE_UPDATED;
 
-  constructor(public payload: Document<CollectionAttribute>) {}
+  constructor(public payload: string) {}
 }
 
 export class CollectionAttributeDeleted implements Action<string> {
-  type = CollectionAttributeActionTypes.CollectionAttributeDeleted;
+  type: typeof COLLECTION_ATTRIBUTE_DELETED = COLLECTION_ATTRIBUTE_DELETED;
 
   constructor(public payload: string) {}
 }

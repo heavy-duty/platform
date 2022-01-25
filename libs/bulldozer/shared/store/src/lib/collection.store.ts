@@ -13,7 +13,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
-  catchError,
   combineLatest,
   concatMap,
   EMPTY,
@@ -22,12 +21,19 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import {
+  CollectionActions,
+  CollectionCreated,
+  CollectionDeleted,
+  CollectionUpdated,
+} from './actions';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   collectionsMap: Map<string, Document<Collection>>;
   error?: unknown;
+  event?: CollectionActions;
 }
 
 const initialState: ViewModel = {
@@ -36,6 +42,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class CollectionStore extends ComponentStore<ViewModel> {
+  readonly event$ = this.select(({ event }) => event);
   readonly error$ = this.select(({ error }) => error);
   readonly collectionsMap$ = this.select(
     ({ collectionsMap }) => collectionsMap
@@ -92,6 +99,13 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     ...state,
     error,
   }));
+
+  private readonly _setEvent = this.updater(
+    (state, event: CollectionActions) => ({
+      ...state,
+      event,
+    })
+  );
 
   readonly onCollectionChanges = this.effect(() =>
     combineLatest([this._connectionStore.connection$, this.collections$]).pipe(
@@ -203,10 +217,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () => this._setEvent(new CollectionCreated()),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -235,10 +249,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () => this._setEvent(new CollectionUpdated(collectionId)),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -267,10 +281,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () => this._setEvent(new CollectionDeleted(collectionId)),
+                (error) => this._setError(error)
+              )
             );
           }
         )

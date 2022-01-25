@@ -1,20 +1,22 @@
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
-import { Action, InstructionAccountActionTypes } from './types';
+import {
+  Action,
+  INSTRUCTION_ACCOUNT_CREATED,
+  INSTRUCTION_ACCOUNT_DELETED,
+  INSTRUCTION_ACCOUNT_UPDATED,
+} from './types';
 
 export class InstructionAccountCreated implements Action<void> {
-  type = InstructionAccountActionTypes.InstructionAccountCreated;
+  type: typeof INSTRUCTION_ACCOUNT_CREATED = INSTRUCTION_ACCOUNT_CREATED;
 }
 
-export class InstructionAccountUpdated
-  implements Action<Document<InstructionAccount>>
-{
-  type = InstructionAccountActionTypes.InstructionAccountUpdated;
+export class InstructionAccountUpdated implements Action<string> {
+  type: typeof INSTRUCTION_ACCOUNT_UPDATED = INSTRUCTION_ACCOUNT_UPDATED;
 
-  constructor(public payload: Document<InstructionAccount>) {}
+  constructor(public payload: string) {}
 }
 
 export class InstructionAccountDeleted implements Action<string> {
-  type = InstructionAccountActionTypes.InstructionAccountDeleted;
+  type: typeof INSTRUCTION_ACCOUNT_DELETED = INSTRUCTION_ACCOUNT_DELETED;
 
   constructor(public payload: string) {}
 }

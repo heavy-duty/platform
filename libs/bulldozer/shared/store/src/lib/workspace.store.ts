@@ -25,7 +25,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
-  catchError,
   combineLatest,
   concatMap,
   EMPTY,
@@ -35,12 +34,19 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import {
+  WorkspaceActions,
+  WorkspaceCreated,
+  WorkspaceDeleted,
+  WorkspaceUpdated,
+} from './actions';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   workspacesMap: Map<string, Document<Workspace>>;
   error?: unknown;
+  event?: WorkspaceActions;
 }
 
 const initialState = {
@@ -49,6 +55,7 @@ const initialState = {
 
 @Injectable()
 export class WorkspaceStore extends ComponentStore<ViewModel> {
+  readonly event$ = this.select(({ event }) => event);
   readonly error$ = this.select(({ error }) => error);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
   readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
@@ -97,6 +104,13 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         workspacesMap,
       };
     }
+  );
+
+  private readonly _setEvent = this.updater(
+    (state, event: WorkspaceActions) => ({
+      ...state,
+      event,
+    })
   );
 
   private readonly _setError = this.updater((state, error: unknown) => ({
@@ -204,10 +218,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
           this._bulldozerProgramStore.signSendAndConfirmTransactions(
             connection
           ),
-          catchError((error) => {
-            this._setError(error);
-            return EMPTY;
-          })
+          tapResponse(
+            () => this._setEvent(new WorkspaceCreated()),
+            (error) => this._setError(error)
+          )
         );
       })
     )
@@ -234,10 +248,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
             ),
-            catchError((error) => {
-              this._setError(error);
-              return EMPTY;
-            })
+            tapResponse(
+              () => this._setEvent(new WorkspaceUpdated(workspaceId)),
+              (error) => this._setError(error)
+            )
           );
         })
       )
@@ -262,11 +276,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
           this._bulldozerProgramStore.signSendAndConfirmTransactions(
             connection
           ),
-          catchError((error) => {
-            console.log('im called', error);
-            this._setError(error);
-            return EMPTY;
-          })
+          tapResponse(
+            () => this._setEvent(new WorkspaceDeleted(workspaceId)),
+            (error) => this._setError(error)
+          )
         );
       })
     )

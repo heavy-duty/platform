@@ -13,7 +13,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
-  catchError,
   combineLatest,
   concatMap,
   EMPTY,
@@ -22,12 +21,19 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import {
+  ApplicationActions,
+  ApplicationCreated,
+  ApplicationDeleted,
+  ApplicationUpdated,
+} from './actions';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   applicationsMap: Map<string, Document<Application>>;
   error?: unknown;
+  event?: ApplicationActions;
 }
 
 const initialState: ViewModel = {
@@ -36,6 +42,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class ApplicationStore extends ComponentStore<ViewModel> {
+  readonly event$ = this.select(({ event }) => event);
   readonly error$ = this.select(({ error }) => error);
   readonly applicationsMap$ = this.select(
     ({ applicationsMap }) => applicationsMap
@@ -94,6 +101,13 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     ...state,
     error,
   }));
+
+  private readonly _setEvent = this.updater(
+    (state, event: ApplicationActions) => ({
+      ...state,
+      event,
+    })
+  );
 
   readonly onApplicationChanges = this.effect(() =>
     combineLatest([this._connectionStore.connection$, this.applications$]).pipe(
@@ -201,10 +215,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
             ),
-            catchError((error) => {
-              this._setError(error);
-              return EMPTY;
-            })
+            tapResponse(
+              () => this._setEvent(new ApplicationCreated()),
+              (error) => this._setError(error)
+            )
           );
         })
       )
@@ -234,10 +248,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () => this._setEvent(new ApplicationUpdated(applicationId)),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -266,10 +280,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
             ),
-            catchError((error) => {
-              this._setError(error);
-              return EMPTY;
-            })
+            tapResponse(
+              () => this._setEvent(new ApplicationDeleted(applicationId)),
+              (error) => this._setError(error)
+            )
           );
         })
       )

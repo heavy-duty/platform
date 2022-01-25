@@ -14,7 +14,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { PublicKey } from '@solana/web3.js';
 import {
-  catchError,
   combineLatest,
   concatMap,
   EMPTY,
@@ -23,11 +22,18 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import {
+  InstructionRelationActions,
+  InstructionRelationCreated,
+  InstructionRelationDeleted,
+  InstructionRelationUpdated,
+} from './actions';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   error?: unknown;
+  event?: InstructionRelationActions;
   instructionRelationsMap: Map<string, Relation<InstructionRelation>>;
 }
 
@@ -37,6 +43,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class InstructionRelationStore extends ComponentStore<ViewModel> {
+  readonly event$ = this.select(({ event }) => event);
   readonly error$ = this.select(({ error }) => error);
   readonly instructionRelationsMap$ = this.select(
     ({ instructionRelationsMap }) => instructionRelationsMap
@@ -98,6 +105,13 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
         instructionRelationsMap,
       };
     }
+  );
+
+  private readonly _setEvent = this.updater(
+    (state, event: InstructionRelationActions) => ({
+      ...state,
+      event,
+    })
   );
 
   private readonly _setError = this.updater((state, error: unknown) => ({
@@ -239,10 +253,10 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
                     this._bulldozerProgramStore.signSendAndConfirmTransactions(
                       connection
                     ),
-                    catchError((error) => {
-                      this._setError(error);
-                      return EMPTY;
-                    })
+                    tapResponse(
+                      () => this._setEvent(new InstructionRelationCreated()),
+                      (error) => this._setError(error)
+                    )
                   )
               )
             );
@@ -280,10 +294,13 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () =>
+                  this._setEvent(
+                    new InstructionRelationUpdated(instructionRelationId)
+                  ),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -319,10 +336,13 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () =>
+                  this._setEvent(
+                    new InstructionRelationDeleted(instructionRelationId)
+                  ),
+                (error) => this._setError(error)
+              )
             );
           }
         )

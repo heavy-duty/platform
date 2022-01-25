@@ -14,7 +14,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
-  catchError,
   combineLatest,
   concatMap,
   EMPTY,
@@ -23,10 +22,17 @@ import {
   of,
   switchMap,
 } from 'rxjs';
+import {
+  CollectionAttributeActions,
+  CollectionAttributeCreated,
+  CollectionAttributeDeleted,
+  CollectionAttributeUpdated,
+} from './actions';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
+  event?: CollectionAttributeActions;
   error?: unknown;
   collectionAttributesMap: Map<string, Document<CollectionAttribute>>;
 }
@@ -37,6 +43,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class CollectionAttributeStore extends ComponentStore<ViewModel> {
+  readonly event$ = this.select(({ event }) => event);
   readonly error$ = this.select(({ error }) => error);
   readonly collectionAttributesMap$ = this.select(
     ({ collectionAttributesMap }) => collectionAttributesMap
@@ -104,6 +111,13 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     ...state,
     error,
   }));
+
+  private readonly _setEvent = this.updater(
+    (state, event: CollectionAttributeActions) => ({
+      ...state,
+      event,
+    })
+  );
 
   readonly onCollectionAttributeChanges = this.effect(() =>
     combineLatest([
@@ -232,10 +246,10 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () => this._setEvent(new CollectionAttributeCreated()),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -273,10 +287,13 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () =>
+                  this._setEvent(
+                    new CollectionAttributeUpdated(collectionAttributeId)
+                  ),
+                (error) => this._setError(error)
+              )
             );
           }
         )
@@ -319,10 +336,13 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
               ),
-              catchError((error) => {
-                this._setError(error);
-                return EMPTY;
-              })
+              tapResponse(
+                () =>
+                  this._setEvent(
+                    new CollectionAttributeDeleted(collectionAttributeId)
+                  ),
+                (error) => this._setError(error)
+              )
             );
           }
         )

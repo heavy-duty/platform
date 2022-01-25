@@ -1,18 +1,22 @@
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { Action, ApplicationActionTypes } from './types';
+import {
+  Action,
+  APPLICATION_CREATED,
+  APPLICATION_DELETED,
+  APPLICATION_UPDATED,
+} from './types';
 
 export class ApplicationCreated implements Action<void> {
-  type = ApplicationActionTypes.ApplicationCreated;
+  type: typeof APPLICATION_CREATED = APPLICATION_CREATED;
 }
 
-export class ApplicationUpdated implements Action<Document<Application>> {
-  type = ApplicationActionTypes.ApplicationUpdated;
+export class ApplicationUpdated implements Action<string> {
+  type: typeof APPLICATION_UPDATED = APPLICATION_UPDATED;
 
-  constructor(public payload: Document<Application>) {}
+  constructor(public payload: string) {}
 }
 
 export class ApplicationDeleted implements Action<string> {
-  type = ApplicationActionTypes.ApplicationDeleted;
+  type: typeof APPLICATION_DELETED = APPLICATION_DELETED;
 
   constructor(public payload: string) {}
 }
