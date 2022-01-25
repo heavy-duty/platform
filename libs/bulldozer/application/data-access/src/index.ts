@@ -6,6 +6,7 @@ export * from './lib/instruction-account.store';
 export * from './lib/instruction-argument.store';
 export * from './lib/instruction-relation.store';
 export * from './lib/instruction.store';
+export * from './lib/notification.store';
 export * from './lib/route.store';
 export * from './lib/tab.store';
 export * from './lib/workspace.store';

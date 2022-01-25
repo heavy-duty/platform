@@ -22,7 +22,7 @@ import {
   generateWorkspaceZip,
 } from '@heavy-duty/generator';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   catchError,
@@ -33,15 +33,14 @@ import {
   merge,
   Observable,
   of,
-  Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   workspacesMap: Map<string, Document<Workspace>>;
+  error?: unknown;
 }
 
 const initialState = {
@@ -50,8 +49,7 @@ const initialState = {
 
 @Injectable()
 export class WorkspaceStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
+  readonly error$ = this.select(({ error }) => error);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
   readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
     Array.from(workspacesMap, ([, workspace]) => workspace)
@@ -101,6 +99,11 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setError = this.updater((state, error: unknown) => ({
+    ...state,
+    error,
+  }));
+
   readonly onWorkspaceChanges = this.effect(() =>
     combineLatest([this._connectionStore.connection$, this.workspaces$]).pipe(
       switchMap(([connection, workspaces]) => {
@@ -111,13 +114,16 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         return merge(
           ...workspaces.map((workspace) =>
             fromWorkspaceChange(connection, new PublicKey(workspace.id)).pipe(
-              tap((changes) => {
-                if (!changes) {
-                  this._removeWorkspace(workspace.id);
-                } else {
-                  this._setWorkspace(changes);
-                }
-              })
+              tapResponse(
+                (changes) => {
+                  if (!changes) {
+                    this._removeWorkspace(workspace.id);
+                  } else {
+                    this._setWorkspace(changes);
+                  }
+                },
+                (error) => this._setError(error)
+              )
             )
           )
         );
@@ -138,7 +144,12 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
         return fromWorkspaceCreated(connection, {
           authority: authority.toBase58(),
-        }).pipe(tap((workspace) => this._addWorkspace(workspace)));
+        }).pipe(
+          tapResponse(
+            (workspace) => this._addWorkspace(workspace),
+            (error) => this._setError(error)
+          )
+        );
       })
     )
   );
@@ -155,21 +166,18 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
         return getWorkspaces(connection, {
           authority: authority.toBase58(),
-        }).pipe(
-          catchError((error) => {
-            console.error(error);
-            return EMPTY;
-          })
-        );
+        });
       }),
-      tap((workspaces) =>
-        this.patchState({
-          workspacesMap: workspaces.reduce(
-            (workspacesMap, workspace) =>
-              workspacesMap.set(workspace.id, workspace),
-            new Map<string, Document<Workspace>>()
-          ),
-        })
+      tapResponse(
+        (workspaces) =>
+          this.patchState({
+            workspacesMap: workspaces.reduce(
+              (workspacesMap, workspace) =>
+                workspacesMap.set(workspace.id, workspace),
+              new Map<string, Document<Workspace>>()
+            ),
+          }),
+        (error) => this._setError(error)
       )
     )
   );
@@ -193,7 +201,13 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
           workspaceKeypair,
           workspaceName
         ).pipe(
-          this._bulldozerProgramStore.signSendAndConfirmTransactions(connection)
+          this._bulldozerProgramStore.signSendAndConfirmTransactions(
+            connection
+          ),
+          catchError((error) => {
+            this._setError(error);
+            return EMPTY;
+          })
         );
       })
     )
@@ -219,7 +233,11 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
           ).pipe(
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
-            )
+            ),
+            catchError((error) => {
+              this._setError(error);
+              return EMPTY;
+            })
           );
         })
       )
@@ -241,7 +259,14 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
           authority,
           new PublicKey(workspaceId)
         ).pipe(
-          this._bulldozerProgramStore.signSendAndConfirmTransactions(connection)
+          this._bulldozerProgramStore.signSendAndConfirmTransactions(
+            connection
+          ),
+          catchError((error) => {
+            console.log('im called', error);
+            this._setError(error);
+            return EMPTY;
+          })
         );
       })
     )
@@ -270,7 +295,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             getInstructionRelations(connection, { workspace: workspaceId }),
           ]),
         ]).pipe(
-          tap(
+          tapResponse(
             ([
               workspace,
               applications,
@@ -294,7 +319,8 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
                   instructionAccounts,
                   instructionRelations
                 )
-              )
+              ),
+            (error) => this._setError(error)
           )
         );
       })

@@ -11,7 +11,7 @@ import {
   getCollectionAttributes,
 } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   catchError,
@@ -21,14 +21,13 @@ import {
   merge,
   Observable,
   of,
-  Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
+  error?: unknown;
   collectionAttributesMap: Map<string, Document<CollectionAttribute>>;
 }
 
@@ -38,8 +37,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class CollectionAttributeStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
+  readonly error$ = this.select(({ error }) => error);
   readonly collectionAttributesMap$ = this.select(
     ({ collectionAttributesMap }) => collectionAttributesMap
   );
@@ -102,6 +100,11 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setError = this.updater((state, error: unknown) => ({
+    ...state,
+    error,
+  }));
+
   readonly onCollectionAttributeChanges = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
@@ -118,13 +121,16 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
               connection,
               new PublicKey(collectionAttribute.id)
             ).pipe(
-              tap((changes) => {
-                if (!changes) {
-                  this._removeCollectionAttribute(collectionAttribute.id);
-                } else {
-                  this._setCollectionAttribute(changes);
-                }
-              })
+              tapResponse(
+                (changes) => {
+                  if (!changes) {
+                    this._removeCollectionAttribute(collectionAttribute.id);
+                  } else {
+                    this._setCollectionAttribute(changes);
+                  }
+                },
+                (error) => this._setError(error)
+              )
             )
           )
         );
@@ -146,8 +152,10 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
         return fromCollectionAttributeCreated(connection, {
           workspace: workspaceId,
         }).pipe(
-          tap((collectionAttribute) =>
-            this._addCollectionAttribute(collectionAttribute)
+          tapResponse(
+            (collectionAttribute) =>
+              this._addCollectionAttribute(collectionAttribute),
+            (error) => this._setError(error)
           )
         );
       })
@@ -166,24 +174,21 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
 
         return getCollectionAttributes(connection, {
           workspace: workspaceId,
-        }).pipe(
-          catchError((error) => {
-            console.error(error);
-            return EMPTY;
-          })
-        );
+        });
       }),
-      tap((collectionAttributes) =>
-        this.patchState({
-          collectionAttributesMap: collectionAttributes.reduce(
-            (collectionAttributesMap, collectionAttribute) =>
-              collectionAttributesMap.set(
-                collectionAttribute.id,
-                collectionAttribute
-              ),
-            new Map<string, Document<CollectionAttribute>>()
-          ),
-        })
+      tapResponse(
+        (collectionAttributes) =>
+          this.patchState({
+            collectionAttributesMap: collectionAttributes.reduce(
+              (collectionAttributesMap, collectionAttribute) =>
+                collectionAttributesMap.set(
+                  collectionAttribute.id,
+                  collectionAttribute
+                ),
+              new Map<string, Document<CollectionAttribute>>()
+            ),
+          }),
+        (error) => this._setError(error)
       )
     )
   );
@@ -226,7 +231,11 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -263,7 +272,11 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -305,7 +318,11 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )

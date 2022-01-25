@@ -11,7 +11,7 @@ import {
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   catchError,
@@ -21,14 +21,13 @@ import {
   merge,
   Observable,
   of,
-  Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
+  error?: unknown;
   instructionAccountsMap: Map<string, Document<InstructionAccount>>;
 }
 
@@ -38,8 +37,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class InstructionAccountStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
+  readonly error$ = this.select(({ error }) => error);
   readonly instructionAccountsMap$ = this.select(
     ({ instructionAccountsMap }) => instructionAccountsMap
   );
@@ -102,6 +100,11 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setError = this.updater((state, error: unknown) => ({
+    ...state,
+    error,
+  }));
+
   readonly onInstructionAccountChanges = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
@@ -118,13 +121,16 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
               connection,
               new PublicKey(instructionAccount.id)
             ).pipe(
-              tap((changes) => {
-                if (!changes) {
-                  this._removeInstructionAccount(instructionAccount.id);
-                } else {
-                  this._setInstructionAccount(changes);
-                }
-              })
+              tapResponse(
+                (changes) => {
+                  if (!changes) {
+                    this._removeInstructionAccount(instructionAccount.id);
+                  } else {
+                    this._setInstructionAccount(changes);
+                  }
+                },
+                (error) => this._setError(error)
+              )
             )
           )
         );
@@ -146,8 +152,10 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
         return fromInstructionAccountCreated(connection, {
           workspace: workspaceId,
         }).pipe(
-          tap((instructionAccount) =>
-            this._addInstructionAccount(instructionAccount)
+          tapResponse(
+            (instructionAccount) =>
+              this._addInstructionAccount(instructionAccount),
+            (error) => this._setError(error)
           )
         );
       })
@@ -166,24 +174,21 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
 
         return getInstructionAccounts(connection, {
           workspace: workspaceId,
-        }).pipe(
-          catchError((error) => {
-            console.error(error);
-            return EMPTY;
-          })
-        );
+        });
       }),
-      tap((instructionAccounts) =>
-        this.patchState({
-          instructionAccountsMap: instructionAccounts.reduce(
-            (instructionAccountsMap, instructionAccount) =>
-              instructionAccountsMap.set(
-                instructionAccount.id,
-                instructionAccount
-              ),
-            new Map<string, Document<InstructionAccount>>()
-          ),
-        })
+      tapResponse(
+        (instructionAccounts) =>
+          this.patchState({
+            instructionAccountsMap: instructionAccounts.reduce(
+              (instructionAccountsMap, instructionAccount) =>
+                instructionAccountsMap.set(
+                  instructionAccount.id,
+                  instructionAccount
+                ),
+              new Map<string, Document<InstructionAccount>>()
+            ),
+          }),
+        (error) => this._setError(error)
       )
     )
   );
@@ -226,7 +231,11 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -263,7 +272,11 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -300,7 +313,11 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )

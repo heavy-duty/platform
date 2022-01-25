@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { filter, map, startWith, Subject, tap } from 'rxjs';
+import { filter, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId?: string;
@@ -16,8 +16,6 @@ const initialState: ViewModel = {};
 
 @Injectable()
 export class RouteStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
@@ -26,56 +24,30 @@ export class RouteStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _router: Router,
     private readonly _walletStore: WalletStore,
-    private readonly _route: ActivatedRoute,
     private readonly _bulldozerProgramStore: BulldozerProgramStore
   ) {
     super(initialState);
+
+    this._bulldozerProgramStore.setWorkspaceId(this.workspaceId$);
   }
 
-  readonly loadWorkspaceId$ = this.effect(() =>
+  readonly loadIds$ = this.effect(() =>
     this._router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.url.split('/').filter((segment) => segment)[1]),
-      startWith(this._route.snapshot.paramMap.get('workspaceId')),
-      tap((workspaceId) => {
-        // store locally the workspaceId
-        this.patchState({ workspaceId: workspaceId || undefined });
-        // set the workspace active in the program store
-        this._bulldozerProgramStore.setWorkspaceId(workspaceId || undefined);
+      tap((event) => {
+        const urlAsArray = event.url.split('/').filter((segment) => segment);
+
+        this.patchState({
+          workspaceId:
+            urlAsArray[0] === 'workspaces' ? urlAsArray[1] : undefined,
+          applicationId:
+            urlAsArray[2] === 'applications' ? urlAsArray[3] : undefined,
+          collectionId:
+            urlAsArray[4] === 'collections' ? urlAsArray[5] : undefined,
+          instructionId:
+            urlAsArray[4] === 'instructions' ? urlAsArray[5] : undefined,
+        });
       })
-    )
-  );
-
-  readonly loadApplicationId$ = this.effect(() =>
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.url.split('/').filter((segment) => segment)[3]),
-      startWith(this._route.snapshot.paramMap.get('applicationId')),
-      tap((applicationId) =>
-        this.patchState({ applicationId: applicationId || undefined })
-      )
-    )
-  );
-
-  readonly loadCollectionId$ = this.effect(() =>
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.url.split('/').filter((segment) => segment)[5]),
-      startWith(this._route.snapshot.paramMap.get('collectionId')),
-      tap((collectionId) =>
-        this.patchState({ collectionId: collectionId || undefined })
-      )
-    )
-  );
-
-  readonly loadInstructionId$ = this.effect(() =>
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.url.split('/').filter((segment) => segment)[5]),
-      startWith(this._route.snapshot.paramMap.get('instructionId')),
-      tap((instructionId) =>
-        this.patchState({ instructionId: instructionId || undefined })
-      )
     )
   );
 

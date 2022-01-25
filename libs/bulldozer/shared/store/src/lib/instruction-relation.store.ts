@@ -11,7 +11,7 @@ import {
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { PublicKey } from '@solana/web3.js';
 import {
   catchError,
@@ -21,14 +21,13 @@ import {
   merge,
   Observable,
   of,
-  Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
+  error?: unknown;
   instructionRelationsMap: Map<string, Relation<InstructionRelation>>;
 }
 
@@ -38,8 +37,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class InstructionRelationStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
+  readonly error$ = this.select(({ error }) => error);
   readonly instructionRelationsMap$ = this.select(
     ({ instructionRelationsMap }) => instructionRelationsMap
   );
@@ -102,6 +100,11 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setError = this.updater((state, error: unknown) => ({
+    ...state,
+    error,
+  }));
+
   readonly onInstructionRelationChanges = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
@@ -118,13 +121,16 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
               connection,
               new PublicKey(instructionRelation.id)
             ).pipe(
-              tap((changes) => {
-                if (!changes) {
-                  this._removeInstructionRelation(instructionRelation.id);
-                } else {
-                  this._setInstructionRelation(changes);
-                }
-              })
+              tapResponse(
+                (changes) => {
+                  if (!changes) {
+                    this._removeInstructionRelation(instructionRelation.id);
+                  } else {
+                    this._setInstructionRelation(changes);
+                  }
+                },
+                (error) => this._setError(error)
+              )
             )
           )
         );
@@ -146,8 +152,10 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
         return fromInstructionRelationCreated(connection, {
           workspace: workspaceId,
         }).pipe(
-          tap((instructionRelation) =>
-            this._addInstructionRelation(instructionRelation)
+          tapResponse(
+            (instructionRelation) =>
+              this._addInstructionRelation(instructionRelation),
+            (error) => this._setError(error)
           )
         );
       })
@@ -166,24 +174,21 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
 
         return getInstructionRelations(connection, {
           workspace: workspaceId,
-        }).pipe(
-          catchError((error) => {
-            console.error(error);
-            return EMPTY;
-          })
-        );
+        });
       }),
-      tap((instructionRelations) =>
-        this.patchState({
-          instructionRelationsMap: instructionRelations.reduce(
-            (instructionRelationsMap, instructionRelation) =>
-              instructionRelationsMap.set(
-                instructionRelation.id,
-                instructionRelation
-              ),
-            new Map<string, Relation<InstructionRelation>>()
-          ),
-        })
+      tapResponse(
+        (instructionRelations) =>
+          this.patchState({
+            instructionRelationsMap: instructionRelations.reduce(
+              (instructionRelationsMap, instructionRelation) =>
+                instructionRelationsMap.set(
+                  instructionRelation.id,
+                  instructionRelation
+                ),
+              new Map<string, Relation<InstructionRelation>>()
+            ),
+          }),
+        (error) => this._setError(error)
       )
     )
   );
@@ -233,7 +238,11 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
                   ).pipe(
                     this._bulldozerProgramStore.signSendAndConfirmTransactions(
                       connection
-                    )
+                    ),
+                    catchError((error) => {
+                      this._setError(error);
+                      return EMPTY;
+                    })
                   )
               )
             );
@@ -270,7 +279,11 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -305,7 +318,11 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )

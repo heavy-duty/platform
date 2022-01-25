@@ -11,12 +11,14 @@ import {
   InstructionStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer-store';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
+import {
+  NotificationStore,
+  TabStore,
+} from '@heavy-duty/bulldozer/application/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { ProgramError } from '@project-serum/anchor';
-import { WalletError } from '@solana/wallet-adapter-base';
-import { merge, Subject, tap } from 'rxjs';
+import { Subject, tap } from 'rxjs';
 
 interface ViewModel {
   isHandset: boolean;
@@ -47,7 +49,8 @@ export class ShellStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentStore: InstructionArgumentStore,
     private readonly _instructionAccountStore: InstructionAccountStore,
     private readonly _instructionRelationStore: InstructionRelationStore,
-    private readonly _breakpointObserver: BreakpointObserver
+    private readonly _breakpointObserver: BreakpointObserver,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -59,18 +62,10 @@ export class ShellStore extends ComponentStore<ViewModel> {
   );
 
   readonly notifyErrors = this.effect(() =>
-    merge(
-      this._workspaceStore.error$,
-      this._applicationStore.error$,
-      this._collectionStore.error$,
-      this._collectionAttributeStore.error$,
-      this._instructionStore.error$,
-      this._instructionArgumentStore.error$,
-      this._instructionAccountStore.error$,
-      this._instructionRelationStore.error$
-    ).pipe(
+    this._notificationStore.error$.pipe(
+      isNotNullOrUndefined,
       tap((error) =>
-        this._matSnackBar.open(this.getErrorMessage(error), 'Close', {
+        this._matSnackBar.open(error, 'Close', {
           panelClass: `error-snackbar`,
         })
       )
@@ -173,18 +168,6 @@ export class ShellStore extends ComponentStore<ViewModel> {
       })
     )
   ); */
-
-  private getErrorMessage(error: unknown) {
-    if (typeof error === 'string') {
-      return error;
-    } else if (error instanceof WalletError) {
-      return error.name;
-    } else if (error instanceof ProgramError) {
-      return error.message;
-    } else {
-      return 'Unknown error';
-    }
-  }
 
   closeTab(event: Event, tabId: string) {
     event.stopPropagation();

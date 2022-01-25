@@ -10,7 +10,7 @@ import {
   getApplications,
 } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
 import {
   catchError,
@@ -20,15 +20,14 @@ import {
   merge,
   Observable,
   of,
-  Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
   applicationsMap: Map<string, Document<Application>>;
+  error?: unknown;
 }
 
 const initialState: ViewModel = {
@@ -37,8 +36,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class ApplicationStore extends ComponentStore<ViewModel> {
-  private readonly _error = new Subject();
-  readonly error$ = this._error.asObservable();
+  readonly error$ = this.select(({ error }) => error);
   readonly applicationsMap$ = this.select(
     ({ applicationsMap }) => applicationsMap
   );
@@ -92,6 +90,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setError = this.updater((state, error: unknown) => ({
+    ...state,
+    error,
+  }));
+
   readonly onApplicationChanges = this.effect(() =>
     combineLatest([this._connectionStore.connection$, this.applications$]).pipe(
       switchMap(([connection, applications]) => {
@@ -105,13 +108,16 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
               connection,
               new PublicKey(application.id)
             ).pipe(
-              tap((changes) => {
-                if (!changes) {
-                  this._removeApplication(application.id);
-                } else {
-                  this._setApplication(changes);
-                }
-              })
+              tapResponse(
+                (changes) => {
+                  if (!changes) {
+                    this._removeApplication(application.id);
+                  } else {
+                    this._setApplication(changes);
+                  }
+                },
+                (error) => this._setError(error)
+              )
             )
           )
         );
@@ -132,7 +138,12 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
         return fromApplicationCreated(connection, {
           workspace: workspaceId,
-        }).pipe(tap((application) => this._addApplication(application)));
+        }).pipe(
+          tapResponse(
+            (application) => this._addApplication(application),
+            (error) => this._setError(error)
+          )
+        );
       })
     )
   );
@@ -149,21 +160,18 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
         return getApplications(connection, {
           workspace: workspaceId,
-        }).pipe(
-          catchError((error) => {
-            console.error(error);
-            return EMPTY;
-          })
-        );
+        });
       }),
-      tap((applications) =>
-        this.patchState({
-          applicationsMap: applications.reduce(
-            (applicationsMap, application) =>
-              applicationsMap.set(application.id, application),
-            new Map<string, Document<Application>>()
-          ),
-        })
+      tapResponse(
+        (applications) =>
+          this.patchState({
+            applicationsMap: applications.reduce(
+              (applicationsMap, application) =>
+                applicationsMap.set(application.id, application),
+              new Map<string, Document<Application>>()
+            ),
+          }),
+        (error) => this._setError(error)
       )
     )
   );
@@ -192,7 +200,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
           ).pipe(
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
-            )
+            ),
+            catchError((error) => {
+              this._setError(error);
+              return EMPTY;
+            })
           );
         })
       )
@@ -221,7 +233,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection
-              )
+              ),
+              catchError((error) => {
+                this._setError(error);
+                return EMPTY;
+              })
             );
           }
         )
@@ -249,7 +265,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
           ).pipe(
             this._bulldozerProgramStore.signSendAndConfirmTransactions(
               connection
-            )
+            ),
+            catchError((error) => {
+              this._setError(error);
+              return EMPTY;
+            })
           );
         })
       )
