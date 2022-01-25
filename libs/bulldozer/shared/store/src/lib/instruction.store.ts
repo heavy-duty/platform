@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   createCreateInstructionTransaction,
   createDeleteInstructionTransaction,
+  createUpdateInstructionBodyTransaction,
   createUpdateInstructionTransaction,
   Document,
   fromInstructionChange,
@@ -9,7 +10,6 @@ import {
   getInstructions,
   Instruction,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
@@ -25,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -230,6 +231,36 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               authority,
               new PublicKey(instructionId),
               instructionName
+            ).pipe(
+              this._bulldozerProgramStore.signSendAndConfirmTransactions(
+                connection
+              )
+            );
+          }
+        )
+      )
+  );
+
+  readonly updateInstructionBody = this.effect(
+    (
+      request$: Observable<{ instructionId: string; instructionBody: string }>
+    ) =>
+      combineLatest([
+        this._connectionStore.connection$,
+        this._walletStore.publicKey$,
+        request$,
+      ]).pipe(
+        concatMap(
+          ([connection, authority, { instructionId, instructionBody }]) => {
+            if (!connection || !authority) {
+              return of(null);
+            }
+
+            return createUpdateInstructionBodyTransaction(
+              connection,
+              authority,
+              new PublicKey(instructionId),
+              instructionBody
             ).pipe(
               this._bulldozerProgramStore.signSendAndConfirmTransactions(
                 connection

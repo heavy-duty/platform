@@ -53,15 +53,15 @@ import { ShellComponent } from './shell.component';
               ),
           },
         ],
-        // canActivate: [AuthGuard],
+        canActivate: [AuthGuard],
       },
-      /* {
+      {
         path: 'unauthorized-access',
         loadChildren: () =>
           import(
             '@heavy-duty/bulldozer/application/features/unauthorized-access'
           ).then((m) => m.UnauthorizedAccessModule),
-      }, */
+      },
       {
         path: '**',
         redirectTo: 'workspaces',

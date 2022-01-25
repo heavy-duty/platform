@@ -10,7 +10,6 @@ import {
   InstructionAccount,
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
@@ -26,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -154,11 +154,10 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadInstructionAccounts = this.effect(($) =>
+  readonly loadInstructionAccounts = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
       this._bulldozerProgramStore.workspaceId$,
-      $,
     ]).pipe(
       concatMap(([connection, workspaceId]) => {
         if (!connection || !workspaceId) {
@@ -193,7 +192,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
     (
       request$: Observable<{
         instructionAccountDto: InstructionAccountDto;
-        instructionAccountId: string;
+        instructionId: string;
         applicationId: string;
       }>
     ) =>
@@ -208,7 +207,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
             connection,
             authority,
             workspaceId,
-            { instructionAccountDto, applicationId, instructionAccountId },
+            { instructionAccountDto, applicationId, instructionId },
           ]) => {
             if (!connection || !authority || !workspaceId) {
               return of(null);
@@ -221,7 +220,7 @@ export class InstructionAccountStore extends ComponentStore<ViewModel> {
               authority,
               new PublicKey(workspaceId),
               new PublicKey(applicationId),
-              new PublicKey(instructionAccountId),
+              new PublicKey(instructionId),
               instructionAccountKeypair,
               instructionAccountDto
             ).pipe(

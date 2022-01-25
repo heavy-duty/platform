@@ -5,15 +5,19 @@ import { CollectionExplorerStore } from './collection-explorer.store';
 @Component({
   selector: 'bd-collection-explorer',
   template: `
-    <mat-expansion-panel togglePosition="before">
+    <mat-expansion-panel
+      togglePosition="before"
+      *ngIf="applicationId$ | ngrxPush as applicationId"
+    >
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Collections </mat-panel-title>
           <button
             mat-icon-button
-            [disabled]="(connected$ | ngrxPush) === false"
+            [disabled]="!connected"
             aria-label="Create collection"
-            (click)="onCreateCollection($event)"
+            bdStopPropagation
+            (click)="onCreateCollection(applicationId)"
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -53,7 +57,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             <button
               mat-menu-item
               (click)="onEditCollection(collection)"
-              [disabled]="(connected$ | ngrxPush) === false"
+              [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
               <span>Edit collection</span>
@@ -61,7 +65,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             <button
               mat-menu-item
               (click)="onDeleteCollection(collection)"
-              [disabled]="(connected$ | ngrxPush) === false"
+              [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
               <span>Delete collection</span>
@@ -74,26 +78,24 @@ import { CollectionExplorerStore } from './collection-explorer.store';
   providers: [CollectionExplorerStore],
 })
 export class CollectionExplorerComponent {
+  @Input() connected = false;
   @Input() set applicationId(value: string | undefined) {
     this._collectionExplorerStore.setApplicationId(value);
   }
-  readonly connected$ = this._collectionExplorerStore.connected$;
+  readonly applicationId$ = this._collectionExplorerStore.applicationId$;
   readonly collections$ = this._collectionExplorerStore.collections$;
 
   constructor(private _collectionExplorerStore: CollectionExplorerStore) {}
 
-  onCreateCollection(event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    this._collectionExplorerStore.createCollection();
+  onCreateCollection(applicationId: string) {
+    this._collectionExplorerStore.createCollection({ applicationId });
   }
 
   onEditCollection(collection: Document<Collection>) {
-    this._collectionExplorerStore.updateCollection(collection);
+    this._collectionExplorerStore.updateCollection({ collection });
   }
 
   onDeleteCollection(collection: Document<Collection>) {
-    this._collectionExplorerStore.deleteCollection(collection);
+    this._collectionExplorerStore.deleteCollection({ collection });
   }
 }

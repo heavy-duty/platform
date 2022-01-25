@@ -10,7 +10,6 @@ import {
   InstructionRelation,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { PublicKey } from '@solana/web3.js';
@@ -26,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -154,11 +154,10 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadInstructionRelations = this.effect(($) =>
+  readonly loadInstructionRelations = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
       this._bulldozerProgramStore.workspaceId$,
-      $,
     ]).pipe(
       concatMap(([connection, workspaceId]) => {
         if (!connection || !workspaceId) {
@@ -194,7 +193,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
       request$: Observable<{
         from: string;
         to: string;
-        instructionRelationId: string;
+        instructionId: string;
         applicationId: string;
       }>
     ) =>
@@ -209,7 +208,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
             connection,
             authority,
             workspaceId,
-            { from, to, applicationId, instructionRelationId },
+            { from, to, applicationId, instructionId },
           ]) => {
             if (!connection || !authority || !workspaceId) {
               return of(null);
@@ -226,7 +225,7 @@ export class InstructionRelationStore extends ComponentStore<ViewModel> {
                     authority,
                     new PublicKey(workspaceId),
                     new PublicKey(applicationId),
-                    new PublicKey(instructionRelationId),
+                    new PublicKey(instructionId),
                     instructionRelationPublicKey,
                     instructionRelationBump,
                     new PublicKey(from),

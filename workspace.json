@@ -55,6 +55,7 @@
     "bulldozer-client-shared-directives-dark-theme": "libs/bulldozer/client/shared/directives/dark-theme",
     "bulldozer-client-shared-directives-page-header": "libs/bulldozer/client/shared/directives/page-header",
     "bulldozer-client-shared-directives-section-header": "libs/bulldozer/client/shared/directives/section-header",
+    "bulldozer-client-shared-directives-stop-propagation": "libs/bulldozer/client/shared/directives/stop-propagation",
     "bulldozer-client-shared-guards-auth-guard": "libs/bulldozer/client/shared/guards/auth-guard",
     "bulldozer-client-shared-pipes-obscure-address": "libs/bulldozer/client/shared/pipes/obscure-address",
     "bulldozer-client-shared-services-dark-theme-service": "libs/bulldozer/client/shared/services/dark-theme-service",
@@ -69,9 +70,9 @@
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
     "bulldozer-shared-store": "libs/bulldozer/shared/store",
     "shared-ng-anchor": "libs/shared/ng-anchor",
+    "shared-rx-solana": "libs/shared/rx-solana",
     "wallet-adapter-data-access": "libs/wallet-adapter/data-access",
     "wallet-adapter-ui-cdk": "libs/wallet-adapter/ui/cdk",
-    "wallet-adapter-ui-material": "libs/wallet-adapter/ui/material",
-    "shared-rx-solana": "libs/shared/rx-solana"
+    "wallet-adapter-ui-material": "libs/wallet-adapter/ui/material"
   }
 }

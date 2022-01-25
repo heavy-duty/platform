@@ -9,7 +9,6 @@ import {
   fromApplicationCreated,
   getApplications,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
@@ -25,6 +24,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -177,8 +177,6 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         applicationName$,
       ]).pipe(
         concatMap(([connection, authority, workspaceId, applicationName]) => {
-          console.log({ connection, authority, workspaceId });
-
           if (!connection || !authority || !workspaceId) {
             return of(null);
           }

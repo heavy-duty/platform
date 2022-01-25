@@ -42,6 +42,7 @@ pub fn validate(_ctx: &Context<UpdateInstructionArgument>, arguments: &UpdateIns
 
 pub fn handle(ctx: Context<UpdateInstructionArgument>, arguments: UpdateInstructionArgumentArguments) -> ProgramResult {
   msg!("Update instruction argument");
+  ctx.accounts.argument.name = arguments.name;
   ctx.accounts.argument.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
   ctx.accounts.argument.updated_at = ctx.accounts.clock.unix_timestamp;

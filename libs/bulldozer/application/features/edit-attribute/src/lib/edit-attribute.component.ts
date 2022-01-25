@@ -8,8 +8,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document } from '@heavy-duty/bulldozer-devkit';
-import { CollectionAttribute } from '@heavy-duty/bulldozer/application/utils/types';
+import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

@@ -13,7 +13,7 @@ import {
   Collection,
   Document,
   InstructionAccount,
-} from '@heavy-duty/bulldozer/application/utils/types';
+} from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

@@ -31,20 +31,38 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                 'More options of ' + application.name + ' application'
               "
               [matMenuTriggerFor]="applicationOptionsMenu"
-              (click)="$event.stopPropagation()"
+              bdStopPropagation
             >
               <mat-icon>more_horiz</mat-icon>
             </button>
           </div>
         </mat-expansion-panel-header>
 
-        <bd-collection-explorer [applicationId]="application.id">
+        <bd-collection-explorer
+          [applicationId]="application.id"
+          [connected]="(connected$ | ngrxPush) ?? false"
+        >
         </bd-collection-explorer>
 
-        <bd-instruction-explorer [applicationId]="application.id">
+        <bd-instruction-explorer
+          [applicationId]="application.id"
+          [connected]="(connected$ | ngrxPush) ?? false"
+        >
         </bd-instruction-explorer>
 
         <mat-menu #applicationOptionsMenu="matMenu">
+          <a
+            mat-menu-item
+            [routerLink]="[
+              '/workspaces',
+              application.data.workspace,
+              'applications',
+              application.id
+            ]"
+          >
+            <mat-icon>launch</mat-icon>
+            <span>View application</span>
+          </a>
           <button
             mat-menu-item
             (click)="onEditApplication(application)"

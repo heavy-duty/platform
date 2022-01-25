@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/shared/directives/stop-propagation",
+  "sourceRoot": "libs/bulldozer/client/shared/directives/stop-propagation/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/shared/directives/stop-propagation"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/shared/directives/stop-propagation/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/shared/directives/stop-propagation/src/**/*.ts",
+          "libs/bulldozer/client/shared/directives/stop-propagation/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

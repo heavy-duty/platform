@@ -10,7 +10,6 @@ import {
   fromCollectionAttributeCreated,
   getCollectionAttributes,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
@@ -26,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -154,11 +154,10 @@ export class CollectionAttributeStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadCollectionAttributes = this.effect(($) =>
+  readonly loadCollectionAttributes = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
       this._bulldozerProgramStore.workspaceId$,
-      $,
     ]).pipe(
       concatMap(([connection, workspaceId]) => {
         if (!connection || !workspaceId) {

@@ -10,7 +10,6 @@ import {
   InstructionArgument,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
-import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Keypair, PublicKey } from '@solana/web3.js';
@@ -26,6 +25,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import { BulldozerProgramStore } from './bulldozer-program.store';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
@@ -154,11 +154,10 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly loadInstructionArguments = this.effect(($) =>
+  readonly loadInstructionArguments = this.effect(() =>
     combineLatest([
       this._connectionStore.connection$,
       this._bulldozerProgramStore.workspaceId$,
-      $,
     ]).pipe(
       concatMap(([connection, workspaceId]) => {
         if (!connection || !workspaceId) {
@@ -193,7 +192,7 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
     (
       request$: Observable<{
         instructionArgumentDto: InstructionArgumentDto;
-        instructionArgumentId: string;
+        instructionId: string;
         applicationId: string;
       }>
     ) =>
@@ -208,7 +207,7 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
             connection,
             authority,
             workspaceId,
-            { instructionArgumentDto, applicationId, instructionArgumentId },
+            { instructionArgumentDto, applicationId, instructionId },
           ]) => {
             if (!connection || !authority || !workspaceId) {
               return of(null);
@@ -221,7 +220,7 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
               authority,
               new PublicKey(workspaceId),
               new PublicKey(applicationId),
-              new PublicKey(instructionArgumentId),
+              new PublicKey(instructionId),
               instructionArgumentKeypair,
               instructionArgumentDto
             ).pipe(
@@ -255,6 +254,8 @@ export class InstructionArgumentStore extends ComponentStore<ViewModel> {
             if (!connection || !authority) {
               return of(null);
             }
+
+            console.log(instructionArgumentId, instructionArgumentDto);
 
             return createUpdateInstructionArgumentTransaction(
               connection,

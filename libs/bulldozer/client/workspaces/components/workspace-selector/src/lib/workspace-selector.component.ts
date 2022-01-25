@@ -6,7 +6,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
 @Component({
   selector: 'bd-workspace-selector',
   template: `
-    <ng-container *ngrxLet="activeWorkspace$; let activeWorkspace">
+    <ng-container *ngrxLet="workspace$; let activeWorkspace">
       <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
         {{
           activeWorkspace === undefined
@@ -15,7 +15,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
         }}
       </button>
       <mat-menu #menu="matMenu" class="px-4 py-2">
-        <mat-list role="list" class="p-0" (click)="$event.stopPropagation()">
+        <mat-list role="list" class="p-0" bdStopPropagation>
           <mat-list-item
             *ngFor="let workspace of workspaces$ | ngrxPush"
             role="listitem"
@@ -103,7 +103,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
-  readonly activeWorkspace$ = this._workspaceSelectorStore.workspace$;
+  readonly workspace$ = this._workspaceSelectorStore.workspace$;
   readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
 
   constructor(

@@ -2,8 +2,7 @@ import { Component, HostBinding, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document } from '@heavy-duty/bulldozer-devkit';
-import { InstructionArgument } from '@heavy-duty/bulldozer/application/utils/types';
+import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({

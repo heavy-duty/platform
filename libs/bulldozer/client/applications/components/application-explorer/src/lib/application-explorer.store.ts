@@ -3,10 +3,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ApplicationStore } from '@heavy-duty/bulldozer-store';
 import { EditApplicationComponent } from '@heavy-duty/bulldozer/application/features/edit-application';
+import { isTruthy } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { Observable } from 'rxjs';
-import { exhaustMap, filter, tap } from 'rxjs/operators';
+import { exhaustMap, tap } from 'rxjs/operators';
 
 @Injectable()
 export class ApplicationExplorerStore extends ComponentStore<object> {
@@ -28,7 +29,7 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
           .open(EditApplicationComponent)
           .afterClosed()
           .pipe(
-            filter((data) => data),
+            isTruthy,
             tap(({ name }) => this._applicationStore.createApplication(name))
           )
       )
@@ -43,7 +44,7 @@ export class ApplicationExplorerStore extends ComponentStore<object> {
             .open(EditApplicationComponent, { data: { application } })
             .afterClosed()
             .pipe(
-              filter((changes) => changes),
+              isTruthy,
               tap(({ name }) =>
                 this._applicationStore.updateApplication({
                   applicationId: application.id,

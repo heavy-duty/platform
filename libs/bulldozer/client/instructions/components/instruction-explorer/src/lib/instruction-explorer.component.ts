@@ -5,15 +5,19 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
 @Component({
   selector: 'bd-instruction-explorer',
   template: `
-    <mat-expansion-panel togglePosition="before">
+    <mat-expansion-panel
+      togglePosition="before"
+      *ngIf="applicationId$ | ngrxPush as applicationId"
+    >
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Instructions </mat-panel-title>
           <button
             mat-icon-button
-            [disabled]="(connected$ | ngrxPush) === false"
+            [disabled]="!connected"
             aria-label="Create instruction"
-            (click)="onCreateInstruction($event)"
+            bdStopPropagation
+            (click)="onCreateInstruction(applicationId)"
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -51,7 +55,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             <button
               mat-menu-item
               (click)="onEditInstruction(instruction)"
-              [disabled]="(connected$ | ngrxPush) === false"
+              [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
               <span>Edit instruction</span>
@@ -59,7 +63,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             <button
               mat-menu-item
               (click)="onDeleteInstruction(instruction)"
-              [disabled]="(connected$ | ngrxPush) === false"
+              [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
               <span>Delete instruction</span>
@@ -72,26 +76,24 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
   providers: [InstructionExplorerStore],
 })
 export class InstructionExplorerComponent {
+  @Input() connected = false;
   @Input() set applicationId(value: string | undefined) {
     this._instructionExplorerStore.setApplicationId(value);
   }
-  readonly connected$ = this._instructionExplorerStore.connected$;
+  readonly applicationId$ = this._instructionExplorerStore.applicationId$;
   readonly instructions$ = this._instructionExplorerStore.instructions$;
 
   constructor(private _instructionExplorerStore: InstructionExplorerStore) {}
 
-  onCreateInstruction(event: Event) {
-    event.stopPropagation();
-    event.preventDefault();
-
-    this._instructionExplorerStore.createInstruction();
+  onCreateInstruction(applicationId: string) {
+    this._instructionExplorerStore.createInstruction({ applicationId });
   }
 
   onEditInstruction(instruction: Document<Instruction>) {
-    this._instructionExplorerStore.updateInstruction(instruction);
+    this._instructionExplorerStore.updateInstruction({ instruction });
   }
 
   onDeleteInstruction(instruction: Document<Instruction>) {
-    this._instructionExplorerStore.deleteInstruction(instruction);
+    this._instructionExplorerStore.deleteInstruction({ instruction });
   }
 }

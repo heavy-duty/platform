@@ -1,11 +1,8 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import {
   ApplicationStore,
-  BulldozerProgramStore,
   CollectionAttributeStore,
   CollectionStore,
   InstructionAccountStore,
@@ -19,7 +16,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';
-import { filter, map, merge, startWith, Subject, tap } from 'rxjs';
+import { merge, Subject, tap } from 'rxjs';
 
 interface ViewModel {
   isHandset: boolean;
@@ -39,7 +36,6 @@ export class ShellStore extends ComponentStore<ViewModel> {
   readonly connected$ = this._walletStore.connected$;
 
   constructor(
-    private readonly _router: Router,
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _matSnackBar: MatSnackBar,
@@ -51,10 +47,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentStore: InstructionArgumentStore,
     private readonly _instructionAccountStore: InstructionAccountStore,
     private readonly _instructionRelationStore: InstructionRelationStore,
-    private readonly _breakpointObserver: BreakpointObserver,
-    private readonly _matDialog: MatDialog,
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _route: ActivatedRoute
+    private readonly _breakpointObserver: BreakpointObserver
   ) {
     super(initialState);
   }
@@ -64,30 +57,6 @@ export class ShellStore extends ComponentStore<ViewModel> {
       .observe(Breakpoints.Handset)
       .pipe(tap((result) => this.patchState({ isHandset: result.matches })))
   );
-
-  readonly loadWorkspaceId$ = this.effect(() =>
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => event.url.split('/').filter((segment) => segment)[1]),
-      startWith(this._route.snapshot.paramMap.get('workspaceId')),
-      tap((workspaceId) =>
-        this._bulldozerProgramStore.setWorkspaceId(workspaceId || undefined)
-      )
-    )
-  );
-
-  /*   readonly redirectUnauthorized = this.effect(() =>
-    this._walletStore.connected$.pipe(
-      filter((connected) => !connected),
-      tap(() =>
-        this._router.navigate(['/unauthorized-access'], {
-          queryParams: {
-            redirect: this._router.routerState.snapshot.url,
-          },
-        })
-      )
-    )
-  ); */
 
   readonly notifyErrors = this.effect(() =>
     merge(

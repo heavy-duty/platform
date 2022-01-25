@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
+import {
+  RouteStore,
+  TabStore,
+} from '@heavy-duty/bulldozer/application/data-access';
 import { ShellStore } from './shell.store';
 
 @Component({
@@ -33,7 +36,7 @@ import { ShellStore } from './shell.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [ShellStore, TabStore],
+  providers: [ShellStore, TabStore, RouteStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent {
