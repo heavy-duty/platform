@@ -208,6 +208,7 @@
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ng-anchor": ["libs/shared/ng-anchor/src/index.ts"],
+      "@heavy-duty/ngx-solana": ["libs/shared/ngx-solana/src/index.ts"],
       "@heavy-duty/rx-solana": ["libs/shared/rx-solana/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
         "libs/shared/utils/operators/src/index.ts"

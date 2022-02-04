@@ -70,6 +70,7 @@
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
     "bulldozer-shared-store": "libs/bulldozer/shared/store",
     "shared-ng-anchor": "libs/shared/ng-anchor",
+    "shared-ngx-solana": "libs/shared/ngx-solana",
     "shared-rx-solana": "libs/shared/rx-solana",
     "wallet-adapter-data-access": "libs/wallet-adapter/data-access",
     "wallet-adapter-ui-cdk": "libs/wallet-adapter/ui/cdk",
