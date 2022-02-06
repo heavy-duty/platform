@@ -77,12 +77,11 @@ export class ShellComponent {
   readonly selectedTab$ = this._shellStore.selectedTab$;
   readonly isHandset$ = this._shellStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaceId$ = this._routeStore.workspaceId$;
+  readonly workspaceId$ = this._shellStore.workspaceId$;
 
   constructor(
     private readonly _shellStore: ShellStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _routeStore: RouteStore
+    private readonly _walletStore: WalletStore
   ) {}
 
   onCloseTab(tabId: string) {

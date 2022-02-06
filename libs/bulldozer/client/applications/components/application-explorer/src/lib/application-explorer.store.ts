@@ -4,7 +4,6 @@ import {
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { RouteStore } from '@heavy-duty/bulldozer/application/data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -51,15 +50,11 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _routeStore: RouteStore,
     private readonly _applicationApiService: ApplicationApiService,
     private readonly _applicationSocketService: ApplicationSocketService,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
-
-    this._loadApplications(this._routeStore.workspaceId$);
-    this._handleApplicationCreated(this._routeStore.workspaceId$);
   }
 
   private readonly _setApplication = this.updater(
@@ -107,31 +102,6 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     (state, workspaceId: string | null) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleApplicationCreated = this.effect(
-    (workspaceId$: Observable<string | null>) =>
-      workspaceId$.pipe(
-        switchMap((workspaceId) => {
-          if (workspaceId === null) {
-            return of(null);
-          }
-
-          return this._applicationSocketService
-            .applicationCreated({
-              workspace: workspaceId,
-            })
-            .pipe(
-              tapResponse(
-                (application) => {
-                  this._addApplication(application);
-                  this._handleApplicationChanges(application.id);
-                },
-                (error) => this._setError(error)
-              )
-            );
-        })
-      )
-  );
-
   private readonly _handleApplicationChanges = this.effect(
     (applicationId$: Observable<string>) =>
       applicationId$.pipe(
@@ -159,34 +129,57 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
       )
   );
 
-  private readonly _loadApplications = this.effect(
-    (workspaceId$: Observable<string | null>) =>
-      workspaceId$.pipe(
-        tap(() => this.patchState({ loading: true })),
-        switchMap((workspaceId) => {
-          if (workspaceId === null) {
-            return of([]);
-          }
+  protected readonly _handleApplicationCreated = this.effect(() =>
+    this.workspaceId$.pipe(
+      switchMap((workspaceId) => {
+        if (workspaceId === null) {
+          return of(null);
+        }
 
-          return this._applicationApiService.find({ workspace: workspaceId });
-        }),
-        tapResponse(
-          (applications) => {
-            this.patchState({
-              applicationsMap: applications.reduce(
-                (applicationsMap, application) =>
-                  applicationsMap.set(application.id, application),
-                new Map<string, Document<Application>>()
-              ),
-              loading: false,
-            });
-            applications.forEach(({ id }) => {
-              this._handleApplicationChanges(id);
-            });
-          },
-          (error) => this._setError(error)
-        )
+        return this._applicationSocketService
+          .applicationCreated({
+            workspace: workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              (application) => {
+                this._addApplication(application);
+                this._handleApplicationChanges(application.id);
+              },
+              (error) => this._setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  protected readonly _loadApplications = this.effect(() =>
+    this.workspaceId$.pipe(
+      tap(() => this.patchState({ loading: true })),
+      switchMap((workspaceId) => {
+        if (workspaceId === null) {
+          return of([]);
+        }
+
+        return this._applicationApiService.find({ workspace: workspaceId });
+      }),
+      tapResponse(
+        (applications) => {
+          this.patchState({
+            applicationsMap: applications.reduce(
+              (applicationsMap, application) =>
+                applicationsMap.set(application.id, application),
+              new Map<string, Document<Application>>()
+            ),
+            loading: false,
+          });
+          applications.forEach(({ id }) => {
+            this._handleApplicationChanges(id);
+          });
+        },
+        (error) => this._setError(error)
       )
+    )
   );
 
   readonly createApplication = this.effect(

@@ -1,12 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import {
-  /* ApplicationDeleted,
-  ApplicationUpdated,
-  BulldozerActions, */
-  BulldozerProgramStore,
-} from '@heavy-duty/bulldozer-store';
 import { ComponentStore } from '@ngrx/component-store';
 import { concatMap, Observable, of, tap, withLatestFrom } from 'rxjs';
 import { RouteStore } from './route.store';
@@ -40,26 +34,11 @@ export class TabStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
     private readonly _routeStore: RouteStore,
     private readonly _router: Router
   ) {
     super(initialState);
   }
-
-  private readonly _selectTab = this.updater((state, selected: string) => ({
-    ...state,
-    selected,
-  }));
-
-  private readonly _setTabLabel = this.updater(
-    (state, { tabId, label }: { tabId: string; label: string }) => ({
-      ...state,
-      tabs: state.tabs.map((tab) =>
-        tab.id === tabId ? { ...tab, label } : tab
-      ),
-    })
-  );
 
   private readonly _removeTab = this.updater((state, tabId: string) => ({
     ...state,
@@ -88,49 +67,6 @@ export class TabStore extends ComponentStore<ViewModel> {
     tabs: [],
     selected: null,
   }));
-
-  /* readonly keepTabsUpdated = this.effect(() =>
-    this._bulldozerProgramStore.events$.pipe(
-      filter(
-        (
-          event: BulldozerActions
-        ): event is
-          | WorkspaceUpdated
-          | ApplicationUpdated
-          | CollectionUpdated
-          | InstructionUpdated =>
-          event instanceof WorkspaceUpdated ||
-          event instanceof ApplicationUpdated ||
-          event instanceof CollectionUpdated ||
-          event instanceof InstructionUpdated
-      ),
-      tap((event) =>
-        this._setTabLabel({
-          tabId: event.payload.id,
-          label: event.payload.name,
-        })
-      )
-    )
-  );
-
-  readonly closeTabsOnDelete = this.effect(() =>
-    this._bulldozerProgramStore.events$.pipe(
-      filter(
-        (
-          event: BulldozerActions
-        ): event is
-          | WorkspaceDeleted
-          | ApplicationDeleted
-          | CollectionDeleted
-          | InstructionDeleted =>
-          event instanceof WorkspaceDeleted ||
-          event instanceof ApplicationDeleted ||
-          event instanceof CollectionDeleted ||
-          event instanceof InstructionDeleted
-      ),
-      tap((event) => this.closeTab(event.payload))
-    )
-  ); */
 
   readonly closeTab = this.effect((tabId$: Observable<string>) =>
     tabId$.pipe(
