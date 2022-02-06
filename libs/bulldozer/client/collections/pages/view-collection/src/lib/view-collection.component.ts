@@ -1,4 +1,8 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
+import { ViewCollectionCodeStore } from './view-collection-code.store';
 import { ViewCollectionStore } from './view-collection.store';
 
 @Component({
@@ -17,8 +21,10 @@ import { ViewCollectionStore } from './view-collection.store';
           <bd-collection-attributes-list
             class="block mb-16"
             [connected]="(connected$ | ngrxPush) ?? false"
-            [applicationId]="collection.data.application"
-            [collectionId]="collection.id"
+            [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
+            (createCollectionAttribute)="onCreateCollectionAttribute($event)"
+            (updateCollectionAttribute)="onUpdateCollectionAttribute($event)"
+            (deleteCollectionAttribute)="onDeleteCollectionAttribute($event)"
           >
           </bd-collection-attributes-list>
         </main>
@@ -34,14 +40,44 @@ import { ViewCollectionStore } from './view-collection.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ViewCollectionStore],
+  providers: [
+    ViewCollectionStore,
+    ViewCollectionAttributesStore,
+    ViewCollectionCodeStore,
+  ],
 })
 export class ViewCollectionComponent {
   @HostBinding('class') class = 'block';
-  readonly connected$ = this._viewCollectionStore.connected$;
+  readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._viewCollectionStore.collection$;
-  readonly rustCodeCollection$ = this._viewCollectionStore.rustCode$;
-  readonly editorOptions$ = this._viewCollectionStore.editorOptions$;
+  readonly collectionAttributes$ =
+    this._viewCollectionAttributesStore.collectionAttributes$;
+  readonly rustCodeCollection$ = this._viewCollectionCodeStore.rustCode$;
+  readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
 
-  constructor(private readonly _viewCollectionStore: ViewCollectionStore) {}
+  constructor(
+    private readonly _viewCollectionStore: ViewCollectionStore,
+    private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore,
+    private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
+    private readonly _walletStore: WalletStore
+  ) {}
+
+  onCreateCollectionAttribute(collectionAttributeDto: CollectionAttributeDto) {
+    this._viewCollectionAttributesStore.createCollectionAttribute({
+      collectionAttributeDto,
+    });
+  }
+
+  onUpdateCollectionAttribute(request: {
+    collectionAttributeId: string;
+    collectionAttributeDto: CollectionAttributeDto;
+  }) {
+    this._viewCollectionAttributesStore.updateCollectionAttribute(request);
+  }
+
+  onDeleteCollectionAttribute(collectionAttributeId: string) {
+    this._viewCollectionAttributesStore.deleteCollectionAttribute({
+      collectionAttributeId,
+    });
+  }
 }

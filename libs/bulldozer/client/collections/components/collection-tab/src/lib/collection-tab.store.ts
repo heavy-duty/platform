@@ -1,22 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  map,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { concatMap, Observable, of, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
   collection: Document<Collection> | null;
@@ -29,23 +18,17 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewCollectionStore extends ComponentStore<ViewModel> {
+export class CollectionTabStore extends ComponentStore<ViewModel> {
   readonly collection$ = this.select(({ collection }) => collection);
 
   constructor(
-    private readonly _route: ActivatedRoute,
-    private readonly _tabStore: TabStore,
     private readonly _collectionApiService: CollectionApiService,
     private readonly _collectionSocketService: CollectionSocketService
   ) {
     super(initialState);
-
-    this.loadCollection(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
-    );
   }
 
-  protected readonly loadCollection = this.effect(
+  readonly loadCollection$ = this.effect(
     (collectionId$: Observable<string | null>) =>
       collectionId$.pipe(
         switchMap((collectionId) => {
@@ -70,18 +53,5 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
           (error) => this.patchState({ error })
         )
       )
-  );
-
-  protected readonly openTab = this.effect(() =>
-    this.collection$.pipe(
-      isNotNullOrUndefined,
-      tap((collection) =>
-        this._tabStore.openTab({
-          id: collection.id,
-          kind: 'collection',
-          url: `/workspaces/${collection.data.workspace}/applications/${collection.data.application}/collections/${collection.id}`,
-        })
-      )
-    )
   );
 }

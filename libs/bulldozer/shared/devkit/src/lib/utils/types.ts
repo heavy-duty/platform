@@ -62,6 +62,47 @@ export interface DeleteApplicationParams {
   applicationId: string;
 }
 
+export interface CreateCollectionParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  collectionId: string;
+  collectionName: string;
+}
+
+export interface UpdateCollectionParams {
+  authority: string;
+  collectionId: string;
+  collectionName: string;
+}
+
+export interface DeleteCollectionParams {
+  authority: string;
+  applicationId: string;
+  collectionId: string;
+}
+
+export interface CreateCollectionAttributeParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  collectionId: string;
+  collectionAttributeId: string;
+  collectionAttributeDto: CollectionAttributeDto;
+}
+
+export interface UpdateCollectionAttributeParams {
+  authority: string;
+  collectionAttributeId: string;
+  collectionAttributeDto: CollectionAttributeDto;
+}
+
+export interface DeleteCollectionAttributeParams {
+  authority: string;
+  collectionId: string;
+  collectionAttributeId: string;
+}
+
 export interface Collection {
   authority: string;
   workspace: string;

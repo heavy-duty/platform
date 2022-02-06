@@ -4,7 +4,11 @@ import {
   SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { bulldozerProgram, CollectionAttributeDto } from '../../../utils';
+import {
+  bulldozerProgram,
+  CollectionAttributeDto,
+  CreateCollectionAttributeParams,
+} from '../../../utils';
 
 export const createCreateCollectionAttributeInstruction = (
   authority: PublicKey,
@@ -25,4 +29,23 @@ export const createCreateCollectionAttributeInstruction = (
       clock: SYSVAR_CLOCK_PUBKEY,
     },
   });
+};
+
+export const createCreateCollectionAttributeInstruction2 = (
+  params: CreateCollectionAttributeParams
+): TransactionInstruction => {
+  return bulldozerProgram.instruction.createCollectionAttribute(
+    params.collectionAttributeDto,
+    {
+      accounts: {
+        attribute: new PublicKey(params.collectionAttributeId),
+        workspace: new PublicKey(params.workspaceId),
+        collection: new PublicKey(params.collectionId),
+        application: new PublicKey(params.applicationId),
+        authority: new PublicKey(params.authority),
+        systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
 };

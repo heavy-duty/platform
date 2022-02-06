@@ -9,6 +9,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { ApplicationTabModule } from '@bulldozer-client/application-tab';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
+import { CollectionTabModule } from '@bulldozer-client/collection-tab';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
@@ -84,6 +85,7 @@ import { ShellComponent } from './shell.component';
     WorkspaceExplorerModule,
     WorkspaceSelectorModule,
     ApplicationTabModule,
+    CollectionTabModule,
   ],
   providers: [AuthGuard],
 })

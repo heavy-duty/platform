@@ -22,7 +22,6 @@ import { ShellStore } from './shell.store';
         <bd-workspace-explorer
           [connected]="(connected$ | ngrxPush) ?? false"
           [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
-          [walletPublicKey]="(walletPublicKey$ | ngrxPush) ?? null"
         ></bd-workspace-explorer>
       </mat-sidenav>
       <mat-sidenav-content>
@@ -56,6 +55,12 @@ import { ShellStore } from './shell.store';
                 (closeTab)="onCloseTab(tab.id)"
                 bdStopPropagation
               ></bd-application-tab>
+              <bd-collection-tab
+                *ngSwitchCase="'collection'"
+                [collectionId]="tab.id"
+                (closeTab)="onCloseTab(tab.id)"
+                bdStopPropagation
+              ></bd-collection-tab>
             </ng-container>
           </div>
         </nav>
@@ -73,15 +78,12 @@ export class ShellComponent {
   readonly isHandset$ = this._shellStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
   readonly workspaceId$ = this._routeStore.workspaceId$;
-  readonly walletPublicKey$ = this._walletStore.publicKey$;
 
   constructor(
     private readonly _shellStore: ShellStore,
     private readonly _walletStore: WalletStore,
     private readonly _routeStore: RouteStore
-  ) {
-    this.tabs$.subscribe((a) => console.log(a));
-  }
+  ) {}
 
   onCloseTab(tabId: string) {
     this._shellStore.closeTab(tabId);

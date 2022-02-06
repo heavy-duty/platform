@@ -1,7 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { ApplicationApiService } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { PublicKey } from '@solana/web3.js';
 import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
@@ -44,6 +42,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
         <bd-collection-explorer
           [connected]="connected"
           [applicationId]="application.id"
+          [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
         >
         </bd-collection-explorer>
 
@@ -94,63 +93,33 @@ import { ApplicationExplorerStore } from './application-explorer.store';
 })
 export class ApplicationExplorerComponent {
   @Input() connected = false;
-  @Input() workspaceId: string | null = null;
-  @Input() walletPublicKey: PublicKey | null = null;
+  @Input() set workspaceId(value: string | null) {
+    this._applicationExplorerStore.setWorkspaceId(value);
+  }
+  readonly workspaceId$ = this._applicationExplorerStore.workspaceId$;
   readonly applications$ = this._applicationExplorerStore.applications$;
 
   constructor(
-    private readonly _applicationExplorerStore: ApplicationExplorerStore,
-    private readonly _applicationApiService: ApplicationApiService
+    private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
   onCreateApplication(name: string) {
-    if (!this.workspaceId) {
-      throw Error('WorkspaceId is missing.');
-    }
-
-    if (!this.walletPublicKey) {
-      throw Error('Wallet Public Key is missing.');
-    }
-
-    this._applicationApiService
-      .create({
-        applicationName: name,
-        authority: this.walletPublicKey.toBase58(),
-        workspaceId: this.workspaceId,
-      })
-      .subscribe();
+    this._applicationExplorerStore.createApplication({
+      applicationName: name,
+    });
   }
 
   onUpdateApplication(applicationId: string, applicationName: string) {
-    if (!this.walletPublicKey) {
-      throw Error('Wallet Public Key is missing.');
-    }
-
-    this._applicationApiService
-      .update({
-        applicationId,
-        applicationName,
-        authority: this.walletPublicKey.toBase58(),
-      })
-      .subscribe();
+    this._applicationExplorerStore.updateApplication({
+      applicationId,
+      applicationName,
+    });
   }
 
   onDeleteApplication(applicationId: string) {
-    if (!this.workspaceId) {
-      throw Error('WorkspaceId is missing.');
-    }
-
-    if (!this.walletPublicKey) {
-      throw Error('Wallet Public Key is missing.');
-    }
-
-    this._applicationApiService
-      .delete({
-        applicationId,
-        authority: this.walletPublicKey.toBase58(),
-        workspaceId: this.workspaceId,
-      })
-      .subscribe();
+    this._applicationExplorerStore.deleteApplication({
+      applicationId,
+    });
   }
 
   identify(_: number, document: Document<Application>) {

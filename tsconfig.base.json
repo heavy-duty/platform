@@ -40,6 +40,9 @@
       "@bulldozer-client/collection-tab": [
         "libs/bulldozer/client/collections/components/collection-tab/src/index.ts"
       ],
+      "@bulldozer-client/collections-data-access": [
+        "libs/bulldozer/client/collections/data-access/src/index.ts"
+      ],
       "@bulldozer-client/dark-theme": [
         "libs/bulldozer/client/shared/directives/dark-theme/src/index.ts"
       ],

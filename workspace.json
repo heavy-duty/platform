@@ -36,6 +36,7 @@
     "bulldozer-client-collections-components-collection-attributes-list": "libs/bulldozer/client/collections/components/collection-attributes-list",
     "bulldozer-client-collections-components-collection-explorer": "libs/bulldozer/client/collections/components/collection-explorer",
     "bulldozer-client-collections-components-collection-tab": "libs/bulldozer/client/collections/components/collection-tab",
+    "bulldozer-client-collections-data-access": "libs/bulldozer/client/collections/data-access",
     "bulldozer-client-collections-modals-edit-collection": "libs/bulldozer/client/collections/modals/edit-collection",
     "bulldozer-client-collections-modals-edit-collection-attribute": "libs/bulldozer/client/collections/modals/edit-collection-attribute",
     "bulldozer-client-collections-pages-view-collection": "libs/bulldozer/client/collections/pages/view-collection",

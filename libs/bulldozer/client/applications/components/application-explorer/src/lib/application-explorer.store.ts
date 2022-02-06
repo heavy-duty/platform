@@ -5,8 +5,11 @@ import {
 } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { RouteStore } from '@heavy-duty/bulldozer/application/data-access';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  concatMap,
+  EMPTY,
   filter,
   first,
   mergeMap,
@@ -16,16 +19,19 @@ import {
   takeUntil,
   takeWhile,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 
 interface ViewModel {
   loading: boolean;
+  workspaceId: string | null;
   applicationsMap: Map<string, Document<Application>>;
   error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
+  workspaceId: null,
   applicationsMap: new Map<string, Document<Application>>(),
   error: null,
 };
@@ -34,6 +40,7 @@ const initialState: ViewModel = {
 export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationsMap$ = this.select(
     ({ applicationsMap }) => applicationsMap
   );
@@ -46,7 +53,8 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _routeStore: RouteStore,
     private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationSocketService: ApplicationSocketService
+    private readonly _applicationSocketService: ApplicationSocketService,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
 
@@ -94,6 +102,10 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     ...state,
     error,
   }));
+
+  readonly setWorkspaceId = this.updater(
+    (state, workspaceId: string | null) => ({ ...state, workspaceId })
+  );
 
   private readonly _handleApplicationCreated = this.effect(
     (workspaceId$: Observable<string | null>) =>
@@ -174,6 +186,75 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
           },
           (error) => this._setError(error)
         )
+      )
+  );
+
+  readonly createApplication = this.effect(
+    ($: Observable<{ applicationName: string }>) =>
+      $.pipe(
+        concatMap((request) =>
+          of(request).pipe(
+            withLatestFrom(this.workspaceId$, this._walletStore.publicKey$)
+          )
+        ),
+        concatMap(([{ applicationName }, workspaceId, authority]) => {
+          if (workspaceId === null || authority === null) {
+            return EMPTY;
+          }
+
+          return this._applicationApiService.create({
+            applicationName,
+            authority: authority.toBase58(),
+            workspaceId,
+          });
+        })
+      )
+  );
+
+  readonly updateApplication = this.effect(
+    (
+      $: Observable<{
+        applicationId: string;
+        applicationName: string;
+      }>
+    ) =>
+      $.pipe(
+        concatMap((request) =>
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+        ),
+        concatMap(([{ applicationId, applicationName }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._applicationApiService.update({
+            applicationName,
+            authority: authority.toBase58(),
+            applicationId,
+          });
+        })
+      )
+  );
+
+  readonly deleteApplication = this.effect(
+    ($: Observable<{ applicationId: string }>) =>
+      $.pipe(
+        concatMap((request) =>
+          of(request).pipe(
+            withLatestFrom(this.workspaceId$, this._walletStore.publicKey$)
+          )
+        ),
+        concatMap(([{ applicationId }, workspaceId, authority]) => {
+          if (workspaceId === null || authority === null) {
+            return EMPTY;
+          }
+
+          return this._applicationApiService.delete({
+            authority: authority.toBase58(),
+            workspaceId,
+            applicationId,
+          });
+        })
       )
   );
 }

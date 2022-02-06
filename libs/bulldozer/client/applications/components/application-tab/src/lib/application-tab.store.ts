@@ -5,7 +5,7 @@ import {
 } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, Observable, of, startWith, switchMap, tap } from 'rxjs';
+import { concatMap, Observable, of, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
   application: Document<Application> | null;
@@ -36,8 +36,6 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
             return of(null);
           }
 
-          console.log('am I called?', applicationId);
-
           return this._applicationApiService
             .findByPublicKey(applicationId)
             .pipe(
@@ -48,14 +46,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
 
                 return this._applicationSocketService
                   .applicationChanges(applicationId)
-                  .pipe(
-                    tap({
-                      next: (app) => console.log('app changed', app),
-                      complete: () => console.log('i complete'),
-                      unsubscribe: () => console.log('i unsubscribe'),
-                    }),
-                    startWith(application)
-                  );
+                  .pipe(startWith(application));
               })
             );
         }),

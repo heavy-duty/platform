@@ -1,14 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { CollectionStore } from '@heavy-duty/bulldozer-store';
 import { CollectionExplorerStore } from './collection-explorer.store';
 
 @Component({
   selector: 'bd-collection-explorer',
   template: `
-    <mat-expansion-panel
-      togglePosition="before"
-      *ngIf="applicationId$ | ngrxPush as applicationId"
-    >
+    <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Collections </mat-panel-title>
@@ -18,7 +14,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             aria-label="Create collection"
             bdStopPropagation
             bdEditCollectionTrigger
-            (editCollection)="onCreateCollection(applicationId, $event)"
+            (editCollection)="onCreateCollection($event)"
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -59,7 +55,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
               mat-menu-item
               bdEditCollectionTrigger
               [collection]="collection"
-              (editCollection)="onUpdateCollection(applicationId, $event)"
+              (editCollection)="onUpdateCollection(collection.id, $event)"
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -67,7 +63,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteCollection(applicationId, collection.id)"
+              (click)="onDeleteCollection(collection.id)"
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -82,26 +78,35 @@ import { CollectionExplorerStore } from './collection-explorer.store';
 })
 export class CollectionExplorerComponent {
   @Input() connected = false;
-  @Input() set applicationId(value: string | undefined) {
+  @Input() set applicationId(value: string | null) {
     this._collectionExplorerStore.setApplicationId(value);
+  }
+  @Input() set workspaceId(value: string | null) {
+    this._collectionExplorerStore.setWorkspaceId(value);
   }
   readonly applicationId$ = this._collectionExplorerStore.applicationId$;
   readonly collections$ = this._collectionExplorerStore.collections$;
 
   constructor(
-    private _collectionStore: CollectionStore,
-    private _collectionExplorerStore: CollectionExplorerStore
+    private readonly _collectionExplorerStore: CollectionExplorerStore
   ) {}
 
-  onCreateCollection(applicationId: string, collectionName: string) {
-    this._collectionStore.createCollection({ applicationId, collectionName });
+  onCreateCollection(name: string) {
+    this._collectionExplorerStore.createCollection({
+      collectionName: name,
+    });
   }
 
   onUpdateCollection(collectionId: string, collectionName: string) {
-    this._collectionStore.updateCollection({ collectionId, collectionName });
+    this._collectionExplorerStore.updateCollection({
+      collectionId,
+      collectionName,
+    });
   }
 
-  onDeleteCollection(applicationId: string, collectionId: string) {
-    this._collectionStore.deleteCollection({ applicationId, collectionId });
+  onDeleteCollection(collectionId: string) {
+    this._collectionExplorerStore.deleteCollection({
+      collectionId,
+    });
   }
 }
