@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
 import {
   CollectionAttributeStore,
@@ -10,11 +10,9 @@ import {
   TabStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { generateCollectionCode } from '@heavy-duty/generator';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest } from 'rxjs';
-import { filter, map, startWith, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 @Injectable()
 export class ViewCollectionStore extends ComponentStore<object> {
@@ -62,7 +60,7 @@ export class ViewCollectionStore extends ComponentStore<object> {
     super({});
   }
 
-  readonly openTab$ = this.effect(() =>
+  /* readonly openTab$ = this.effect(() =>
     combineLatest([
       this._router.events.pipe(
         filter(
@@ -86,5 +84,5 @@ export class ViewCollectionStore extends ComponentStore<object> {
         })
       )
     )
-  );
+  ); */
 }

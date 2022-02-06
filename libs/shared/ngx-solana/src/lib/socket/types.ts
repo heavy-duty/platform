@@ -11,7 +11,15 @@ export interface RpcResultNotification {
 }
 
 export interface RpcAccountParamsNotification {
-  result: RpcResponseAndContext<AccountInfo<Buffer>>;
+  result: RpcResponseAndContext<AccountInfo<string>>;
+  subscription: number;
+}
+
+export interface RpcProgramAccountParamsNotification {
+  result: RpcResponseAndContext<{
+    pubkey: string;
+    account: AccountInfo<string>;
+  }>;
   subscription: number;
 }
 
@@ -30,4 +38,5 @@ export type RpcMessage =
   | RpcResultNotification
   | RpcNotification<null>
   | RpcNotification<RpcSignatureParamsNotification>
-  | RpcNotification<RpcAccountParamsNotification>;
+  | RpcNotification<RpcAccountParamsNotification>
+  | RpcNotification<RpcProgramAccountParamsNotification>;

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Inject, Injectable } from '@angular/core';
 import {
   AccountInfo,
+  GetProgramAccountsConfig,
   PublicKey,
   SignatureStatus,
   Transaction,
@@ -19,7 +20,7 @@ export class NgxSolanaApiService {
   ) {}
 
   createAndSendTransaction(
-    feePayer: PublicKey,
+    feePayer: string,
     beforeSendFunction: (transaction: Transaction) => Transaction
   ) {
     return this.getRecentBlockhash().pipe(
@@ -27,7 +28,7 @@ export class NgxSolanaApiService {
         this.sendTransaction(
           beforeSendFunction(
             new Transaction({
-              feePayer,
+              feePayer: new PublicKey(feePayer),
               recentBlockhash: blockhash,
             })
           )
@@ -36,17 +37,29 @@ export class NgxSolanaApiService {
     );
   }
 
-  getAccountInfo(pubkey: string) {
+  getAccountInfo(
+    pubkey: string,
+    commitment = 'confirmed'
+  ): Observable<AccountInfo<Buffer> | null> {
     return this._httpClient
       .post<{
-        value: AccountInfo<string>;
+        value: AccountInfo<[string, string]>;
         context: { slot: number };
-      }>(this._ngxSolanaConfig.apiEndpoint, pubkey, {
-        headers: {
-          'solana-rpc-method': 'getAccountInfo',
-        },
-      })
-      .pipe(map(({ value }) => value));
+      }>(
+        this._ngxSolanaConfig.apiEndpoint,
+        [pubkey, { encoding: 'base64', commitment }],
+        {
+          headers: {
+            'solana-rpc-method': 'getAccountInfo',
+          },
+        }
+      )
+      .pipe(
+        map(({ value }) => ({
+          ...value,
+          data: Buffer.from(value.data[0], 'base64'),
+        }))
+      );
   }
 
   getBalance(pubkey: string) {
@@ -59,6 +72,43 @@ export class NgxSolanaApiService {
         },
       }
     );
+  }
+
+  getProgramAccounts(programId: string, config?: GetProgramAccountsConfig) {
+    return this._httpClient
+      .post<
+        {
+          account: AccountInfo<[string, string]>;
+          pubkey: string;
+        }[]
+      >(
+        this._ngxSolanaConfig.apiEndpoint,
+        [
+          programId,
+          {
+            encoding: config?.encoding ?? 'base64',
+            commitment: config?.commitment ?? 'confirmed',
+            filters: config?.filters ?? [],
+            dataSlice: config?.dataSlice,
+          },
+        ],
+        {
+          headers: {
+            'solana-rpc-method': 'getProgramAccounts',
+          },
+        }
+      )
+      .pipe(
+        map((programAccounts) =>
+          programAccounts.map(({ pubkey, account }) => ({
+            pubkey,
+            account: {
+              ...account,
+              data: Buffer.from(account.data[0], 'base64'),
+            },
+          }))
+        )
+      );
   }
 
   getRecentBlockhash(): Observable<{ blockhash: string }> {

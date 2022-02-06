@@ -1,14 +1,11 @@
 import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   BulldozerProgramStore,
   WorkspaceStore,
 } from '@heavy-duty/bulldozer-store';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest } from 'rxjs';
-import { filter, map, startWith, tap } from 'rxjs/operators';
 
 @Injectable()
 export class ViewWorkspaceStore extends ComponentStore<object> {
@@ -28,7 +25,7 @@ export class ViewWorkspaceStore extends ComponentStore<object> {
     super({});
   }
 
-  readonly openTab$ = this.effect(() =>
+  /* readonly openTab$ = this.effect(() =>
     combineLatest([
       this._router.events.pipe(
         filter(
@@ -52,5 +49,5 @@ export class ViewWorkspaceStore extends ComponentStore<object> {
         })
       )
     )
-  );
+  ); */
 }

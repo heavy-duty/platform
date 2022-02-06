@@ -22,6 +22,9 @@
       "@bulldozer-client/application-tab": [
         "libs/bulldozer/client/applications/components/application-tab/src/index.ts"
       ],
+      "@bulldozer-client/applications-data-access": [
+        "libs/bulldozer/client/applications/data-access/src/index.ts"
+      ],
       "@bulldozer-client/auth-guard": [
         "libs/bulldozer/client/shared/guards/auth-guard/src/index.ts"
       ],

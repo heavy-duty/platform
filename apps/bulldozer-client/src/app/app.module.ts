@@ -3,7 +3,10 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { BulldozerProgramModule } from '@heavy-duty/bulldozer-store';
-import { NgxSolanaModule } from '@heavy-duty/ngx-solana';
+import {
+  ngxSolanaApiInterceptorProviders,
+  NgxSolanaModule,
+} from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
 import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
@@ -30,5 +33,6 @@ import { AppComponent } from './app.component';
     NgxSolanaModule.forRoot(environment.rpcEndpoint, environment.rpcWebsocket),
   ],
   bootstrap: [AppComponent],
+  providers: [ngxSolanaApiInterceptorProviders],
 })
 export class AppModule {}

@@ -1,10 +1,15 @@
 import { Inject, Injectable } from '@angular/core';
-import { AccountInfo, Commitment } from '@solana/web3.js';
+import {
+  AccountInfo,
+  Commitment,
+  GetProgramAccountsConfig,
+} from '@solana/web3.js';
 import { BehaviorSubject, first, map, Observable, switchMap } from 'rxjs';
 import { webSocket } from 'rxjs/webSocket';
 import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from '../ngx-solana.config';
 import { PING_DELAY_MS } from './constants';
 import { onAccountChange } from './on-account-change';
+import { onProgramAccountChange } from './on-program-account-change';
 import { onSignatureChange } from './on-signature-change';
 import { RpcMessage } from './types';
 
@@ -73,7 +78,31 @@ export class NgxSolanaSocketService {
       switchMap((webSocketSubject) =>
         onAccountChange(webSocketSubject, accountId, commitment)
       ),
-      map((message) => message.params.result.value)
+      map((message) => ({
+        ...message.params.result.value,
+        data: Buffer.from(message.params.result.value.data[0], 'base64'),
+      }))
+    );
+  }
+
+  onProgramAccountChange(
+    programId: string,
+    config?: GetProgramAccountsConfig
+  ): Observable<{ pubkey: string; account: AccountInfo<Buffer> }> {
+    return this._webSocketSubject$.pipe(
+      switchMap((webSocketSubject) =>
+        onProgramAccountChange(webSocketSubject, programId, config)
+      ),
+      map((message) => ({
+        pubkey: message.params.result.value.pubkey,
+        account: {
+          ...message.params.result.value.account,
+          data: Buffer.from(
+            message.params.result.value.account.data[0],
+            'base64'
+          ),
+        },
+      }))
     );
   }
 

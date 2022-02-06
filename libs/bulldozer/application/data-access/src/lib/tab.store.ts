@@ -7,15 +7,11 @@ import {
   BulldozerActions, */
   BulldozerProgramStore,
 } from '@heavy-duty/bulldozer-store';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, of } from 'rxjs';
-import { concatMap, tap, withLatestFrom } from 'rxjs/operators';
 
 export interface Tab {
   id: string;
-  label: string;
-  url: string;
+  kind: 'workspace' | 'application' | 'collection' | 'instruction';
 }
 
 interface ViewModel {
@@ -132,7 +128,7 @@ export class TabStore extends ComponentStore<ViewModel> {
     )
   ); */
 
-  readonly closeTab = this.effect((tabId$: Observable<string>) =>
+  /* readonly closeTab = this.effect((tabId$: Observable<string>) =>
     tabId$.pipe(
       tap((tabId) => this._removeTab(tabId)),
       concatMap(() =>
@@ -145,5 +141,5 @@ export class TabStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       tap((tab) => this._router.navigateByUrl(tab.url))
     )
-  );
+  ); */
 }

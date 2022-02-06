@@ -104,10 +104,12 @@ import { BulldozerActions, InstructionCreated } from './actions';
 import { ConnectionStore } from './connection-store';
 
 interface ViewModel {
-  workspaceId?: string;
+  workspaceId: string | null;
 }
 
-const initialState = {};
+const initialState = {
+  workspaceId: null,
+};
 
 @Injectable()
 export class BulldozerProgramStore extends ComponentStore<ViewModel> {
@@ -142,7 +144,7 @@ export class BulldozerProgramStore extends ComponentStore<ViewModel> {
   }
 
   readonly setWorkspaceId = this.updater(
-    (state, workspaceId: string | undefined) => ({
+    (state, workspaceId: string | null) => ({
       ...state,
       workspaceId,
     })

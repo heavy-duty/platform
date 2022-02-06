@@ -1,22 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   ApplicationApiService,
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  map,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { concatMap, Observable, of, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
   application: Document<Application> | null;
@@ -29,22 +18,14 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewApplicationStore extends ComponentStore<ViewModel> {
+export class ApplicationTabStore extends ComponentStore<ViewModel> {
   readonly application$ = this.select(({ application }) => application);
 
   constructor(
-    private readonly _route: ActivatedRoute,
-    private readonly _tabStore: TabStore,
     private readonly _applicationApiService: ApplicationApiService,
     private readonly _applicationSocketService: ApplicationSocketService
   ) {
     super(initialState);
-
-    this.loadApplication$(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
-      )
-    );
   }
 
   readonly loadApplication$ = this.effect(
@@ -74,17 +55,5 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
           (error) => this.patchState({ error })
         )
       )
-  );
-
-  readonly openTab$ = this.effect(() =>
-    this.application$.pipe(
-      isNotNullOrUndefined,
-      tap((application) =>
-        this._tabStore.openTab({
-          id: application.id,
-          kind: 'application',
-        })
-      )
-    )
   );
 }

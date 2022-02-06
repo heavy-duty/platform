@@ -30,6 +30,7 @@
     "bulldozer-client": "apps/bulldozer-client",
     "bulldozer-client-applications-components-application-explorer": "libs/bulldozer/client/applications/components/application-explorer",
     "bulldozer-client-applications-components-application-tab": "libs/bulldozer/client/applications/components/application-tab",
+    "bulldozer-client-applications-data-access": "libs/bulldozer/client/applications/data-access",
     "bulldozer-client-applications-modals-edit-application": "libs/bulldozer/client/applications/modals/edit-application",
     "bulldozer-client-applications-pages-view-application": "libs/bulldozer/client/applications/pages/view-application",
     "bulldozer-client-collections-components-collection-attributes-list": "libs/bulldozer/client/collections/components/collection-attributes-list",

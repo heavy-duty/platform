@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NavigationStart, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -14,11 +14,10 @@ import {
   TabStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { generateInstructionCode } from '@heavy-duty/generator';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, Observable } from 'rxjs';
-import { filter, map, startWith, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 @Injectable()
 export class ViewInstructionStore extends ComponentStore<object> {
@@ -93,7 +92,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
     super({});
   }
 
-  readonly openTab$ = this.effect(() =>
+  /* readonly openTab$ = this.effect(() =>
     combineLatest([
       this._router.events.pipe(
         filter(
@@ -117,7 +116,7 @@ export class ViewInstructionStore extends ComponentStore<object> {
         })
       )
     )
-  );
+  ); */
 
   readonly updateInstructionBody = this.effect(
     (

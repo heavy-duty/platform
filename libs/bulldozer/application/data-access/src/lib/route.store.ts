@@ -6,13 +6,18 @@ import { ComponentStore } from '@ngrx/component-store';
 import { filter, tap } from 'rxjs';
 
 interface ViewModel {
-  workspaceId?: string;
-  applicationId?: string;
-  collectionId?: string;
-  instructionId?: string;
+  workspaceId: string | null;
+  applicationId: string | null;
+  collectionId: string | null;
+  instructionId: string | null;
 }
 
-const initialState: ViewModel = {};
+const initialState: ViewModel = {
+  workspaceId: null,
+  applicationId: null,
+  collectionId: null,
+  instructionId: null,
+};
 
 @Injectable()
 export class RouteStore extends ComponentStore<ViewModel> {
@@ -38,14 +43,12 @@ export class RouteStore extends ComponentStore<ViewModel> {
         const urlAsArray = event.url.split('/').filter((segment) => segment);
 
         this.patchState({
-          workspaceId:
-            urlAsArray[0] === 'workspaces' ? urlAsArray[1] : undefined,
+          workspaceId: urlAsArray[0] === 'workspaces' ? urlAsArray[1] : null,
           applicationId:
-            urlAsArray[2] === 'applications' ? urlAsArray[3] : undefined,
-          collectionId:
-            urlAsArray[4] === 'collections' ? urlAsArray[5] : undefined,
+            urlAsArray[2] === 'applications' ? urlAsArray[3] : null,
+          collectionId: urlAsArray[4] === 'collections' ? urlAsArray[5] : null,
           instructionId:
-            urlAsArray[4] === 'instructions' ? urlAsArray[5] : undefined,
+            urlAsArray[4] === 'instructions' ? urlAsArray[5] : null,
         });
       })
     )

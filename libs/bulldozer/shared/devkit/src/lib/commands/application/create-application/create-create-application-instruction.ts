@@ -4,7 +4,7 @@ import {
   SYSVAR_CLOCK_PUBKEY,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { bulldozerProgram } from '../../../utils';
+import { bulldozerProgram, CreateApplicationParams } from '../../../utils';
 
 export const createCreateApplicationInstruction = (
   authority: PublicKey,
@@ -19,6 +19,23 @@ export const createCreateApplicationInstruction = (
         workspace: workspacePublicKey,
         application: applicationPublicKey,
         authority: authority,
+        systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
+      },
+    }
+  );
+};
+
+export const createCreateApplicationInstruction2 = (
+  params: CreateApplicationParams
+): TransactionInstruction => {
+  return bulldozerProgram.instruction.createApplication(
+    { name: params.applicationName },
+    {
+      accounts: {
+        workspace: new PublicKey(params.workspaceId),
+        application: new PublicKey(params.applicationId),
+        authority: new PublicKey(params.authority),
         systemProgram: SystemProgram.programId,
         clock: SYSVAR_CLOCK_PUBKEY,
       },

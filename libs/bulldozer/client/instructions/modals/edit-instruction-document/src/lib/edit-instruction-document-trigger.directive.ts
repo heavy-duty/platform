@@ -25,12 +25,6 @@ export class EditInstructionDocumentTriggerDirective {
       return;
     }
 
-    console.log({
-      document: this.instructionDocument,
-      collections: this.collections,
-      accounts: this.instructionAccounts,
-    });
-
     this._matDialog
       .open<
         EditInstructionDocumentComponent,

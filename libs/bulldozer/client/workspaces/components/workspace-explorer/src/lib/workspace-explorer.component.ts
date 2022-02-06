@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { PublicKey } from '@solana/web3.js';
 
 @Component({
   selector: 'bd-workspace-explorer',
@@ -11,6 +12,8 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         <h2 class="mt-4 text-center">BULLDOZER</h2>
         <bd-application-explorer
           [connected]="connected"
+          [workspaceId]="workspaceId"
+          [walletPublicKey]="walletPublicKey"
         ></bd-application-explorer>
       </div>
     </div>
@@ -20,4 +23,6 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 })
 export class WorkspaceExplorerComponent {
   @Input() connected = false;
+  @Input() workspaceId: string | null = null;
+  @Input() walletPublicKey: PublicKey | null = null;
 }

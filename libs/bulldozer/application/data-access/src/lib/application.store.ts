@@ -3,15 +3,7 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { BulldozerProgramStore } from '@heavy-duty/bulldozer-store';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  BehaviorSubject,
-  concatMap,
-  merge,
-  Observable,
-  Subject,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { BehaviorSubject, concatMap, Observable, Subject } from 'rxjs';
 import {
   ApplicationActions,
   ApplicationCreated,
@@ -113,7 +105,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly onApplicationChanges = this.effect(() =>
+  /* readonly onApplicationChanges = this.effect(() =>
     this.applications$.pipe(
       switchMap((applications) =>
         merge(
@@ -144,7 +136,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
           .pipe(tap((application) => this._addApplication(application)))
       )
     )
-  );
+  ); */
 
   readonly loadApplications = this.effect(() =>
     this.workspaceId$.pipe(
