@@ -26,7 +26,8 @@ export class ViewInstructionStore extends ComponentStore<object> {
     this._routeStore.instructionId$,
     this._instructionStore.instructions$,
     (instructionId, instructions) =>
-      instructions.find((instruction) => instruction.id === instructionId)
+      instructions.find((instruction) => instruction.id === instructionId) ??
+      null
   );
   readonly instructionBody$ = this.select(
     this.instruction$,

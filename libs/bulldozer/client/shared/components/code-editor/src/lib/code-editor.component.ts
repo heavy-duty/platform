@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CodeEditorOptions } from './types';
 
 @Component({
   selector: 'bd-code-editor',
@@ -13,9 +14,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
   styles: [],
 })
 export class CodeEditorComponent {
-  @Input() template?: string | null = null;
+  @Input() template: string | null = null;
   @Input() customClass = '';
-  @Input() options? = {
+  @Input() options: CodeEditorOptions | null = {
     theme: 'vs-light',
     language: 'rust',
     automaticLayout: true,

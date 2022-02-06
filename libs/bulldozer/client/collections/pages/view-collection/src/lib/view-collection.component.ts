@@ -32,8 +32,8 @@ import { ViewCollectionStore } from './view-collection.store';
       <div class="w-1/2 bd-custom-height-layout overflow-hidden">
         <bd-code-editor
           [customClass]="'bd-custom-monaco-editor'"
-          [template]="rustCodeCollection$ | ngrxPush"
-          [options]="editorOptions$ | ngrxPush"
+          [template]="(collectionCode$ | ngrxPush) ?? null"
+          [options]="(editorOptions$ | ngrxPush) ?? null"
         ></bd-code-editor>
       </div>
     </div>
@@ -52,7 +52,7 @@ export class ViewCollectionComponent {
   readonly collection$ = this._viewCollectionStore.collection$;
   readonly collectionAttributes$ =
     this._viewCollectionAttributesStore.collectionAttributes$;
-  readonly rustCodeCollection$ = this._viewCollectionCodeStore.rustCode$;
+  readonly collectionCode$ = this._viewCollectionCodeStore.code$;
   readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
 
   constructor(
