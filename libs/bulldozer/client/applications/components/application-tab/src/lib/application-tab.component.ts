@@ -1,4 +1,11 @@
-import { Component, HostBinding, Input, OnInit } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  HostBinding,
+  Input,
+  OnInit,
+  Output,
+} from '@angular/core';
 import { ApplicationTabStore } from './application-tab.store';
 
 @Component({
@@ -21,6 +28,7 @@ import { ApplicationTabStore } from './application-tab.store';
       <button
         mat-icon-button
         [attr.aria-label]="'Close ' + application.name + ' tab'"
+        (click)="onCloseTab()"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -31,11 +39,10 @@ import { ApplicationTabStore } from './application-tab.store';
 export class ApplicationTabComponent implements OnInit {
   @HostBinding('class') class = 'block w-full';
   @Input() applicationId: string | null = null;
+  @Output() closeTab = new EventEmitter();
   readonly application$ = this._applicationTabStore.application$;
 
-  constructor(private readonly _applicationTabStore: ApplicationTabStore) {
-    this._applicationTabStore.application$.subscribe((a) => console.log(a));
-  }
+  constructor(private readonly _applicationTabStore: ApplicationTabStore) {}
 
   ngOnInit() {
     if (this.applicationId === null) {
@@ -43,5 +50,9 @@ export class ApplicationTabComponent implements OnInit {
     }
 
     this._applicationTabStore.loadApplication$(this.applicationId);
+  }
+
+  onCloseTab() {
+    this.closeTab.emit();
   }
 }

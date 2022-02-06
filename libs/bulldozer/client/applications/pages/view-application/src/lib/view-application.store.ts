@@ -83,6 +83,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
         this._tabStore.openTab({
           id: application.id,
           kind: 'application',
+          url: `/workspaces/${application.data.workspace}/applications/${application.id}`,
         })
       )
     )

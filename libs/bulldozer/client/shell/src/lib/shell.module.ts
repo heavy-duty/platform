@@ -11,6 +11,7 @@ import { ApplicationTabModule } from '@bulldozer-client/application-tab';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
+import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
@@ -77,6 +78,7 @@ import { ShellComponent } from './shell.component';
     MatToolbarModule,
     ReactiveComponentModule,
     HdWalletAdapterMaterialModule,
+    StopPropagationModule,
     DarkThemeDirectiveModule,
     DarkThemeSwitchModule,
     WorkspaceExplorerModule,

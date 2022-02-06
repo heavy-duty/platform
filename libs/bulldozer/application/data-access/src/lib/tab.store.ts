@@ -8,10 +8,13 @@ import {
   BulldozerProgramStore,
 } from '@heavy-duty/bulldozer-store';
 import { ComponentStore } from '@ngrx/component-store';
+import { concatMap, Observable, of, tap, withLatestFrom } from 'rxjs';
+import { RouteStore } from './route.store';
 
 export interface Tab {
   id: string;
   kind: 'workspace' | 'application' | 'collection' | 'instruction';
+  url: string;
 }
 
 interface ViewModel {
@@ -38,6 +41,7 @@ export class TabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _bulldozerProgramStore: BulldozerProgramStore,
+    private readonly _routeStore: RouteStore,
     private readonly _router: Router
   ) {
     super(initialState);
@@ -128,18 +132,30 @@ export class TabStore extends ComponentStore<ViewModel> {
     )
   ); */
 
-  /* readonly closeTab = this.effect((tabId$: Observable<string>) =>
+  readonly closeTab = this.effect((tabId$: Observable<string>) =>
     tabId$.pipe(
       tap((tabId) => this._removeTab(tabId)),
       concatMap(() =>
         of(null).pipe(
-          withLatestFrom(this.tabs$, (_, tabs) =>
-            tabs.length > 0 ? tabs[0] : null
+          withLatestFrom(
+            this.tabs$,
+            this._routeStore.workspaceId$,
+            (_, tabs, workspaceId) => ({
+              tab: tabs.length > 0 ? tabs[0] : null,
+              workspaceId,
+            })
           )
         )
       ),
-      isNotNullOrUndefined,
-      tap((tab) => this._router.navigateByUrl(tab.url))
+      tap(({ tab, workspaceId }) => {
+        if (tab) {
+          this._router.navigateByUrl(tab.url);
+        }
+
+        if (!tab && workspaceId) {
+          this._router.navigate(['/workspaces', workspaceId]);
+        }
+      })
     )
-  ); */
+  );
 }

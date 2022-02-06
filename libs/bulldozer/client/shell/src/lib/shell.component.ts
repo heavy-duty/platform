@@ -53,6 +53,8 @@ import { ShellStore } from './shell.store';
               <bd-application-tab
                 *ngSwitchCase="'application'"
                 [applicationId]="tab.id"
+                (closeTab)="onCloseTab(tab.id)"
+                bdStopPropagation
               ></bd-application-tab>
             </ng-container>
           </div>
@@ -81,7 +83,7 @@ export class ShellComponent {
     this.tabs$.subscribe((a) => console.log(a));
   }
 
-  onCloseTab(event: Event, tabId: string) {
-    this._shellStore.closeTab(event, tabId);
+  onCloseTab(tabId: string) {
+    this._shellStore.closeTab(tabId);
   }
 }

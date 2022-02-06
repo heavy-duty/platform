@@ -72,9 +72,7 @@ export class ShellStore extends ComponentStore<ViewModel> {
     )
   );
 
-  closeTab(event: Event, tabId: string) {
-    event.stopPropagation();
-    event.preventDefault();
-    // this._tabStore.closeTab(tabId);
+  closeTab(tabId: string) {
+    this._tabStore.closeTab(tabId);
   }
 }
