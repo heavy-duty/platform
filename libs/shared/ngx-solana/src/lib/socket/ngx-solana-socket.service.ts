@@ -8,9 +8,11 @@ import { BehaviorSubject, first, map, Observable, switchMap } from 'rxjs';
 import { webSocket } from 'rxjs/webSocket';
 import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from '../ngx-solana.config';
 import { PING_DELAY_MS } from './constants';
+import { hashGetProgramAccountsRequest } from './hash-get-program-accounts-request';
 import { onAccountChange } from './on-account-change';
 import { onProgramAccountChange } from './on-program-account-change';
 import { onSignatureChange } from './on-signature-change';
+import { shareWhileSubscribed } from './share-while-subscribed';
 import { RpcMessage } from './types';
 
 @Injectable()
@@ -21,6 +23,23 @@ export class NgxSolanaSocketService {
     this._createWebSocket()
   );
   private readonly _webSocketSubject$ = this._webSocketSubject.asObservable();
+  private readonly _accountChanges = new Map<
+    string,
+    Observable<AccountInfo<Buffer>>
+  >();
+  private readonly _programAccountChanges = new Map<
+    string,
+    Observable<{
+      pubkey: string;
+      account: AccountInfo<Buffer>;
+    }>
+  >();
+  private readonly _signatureChanges = new Map<
+    string,
+    Observable<{
+      err: unknown;
+    }>
+  >();
 
   constructor(
     @Inject(NGX_SOLANA_CONFIG)
@@ -74,22 +93,41 @@ export class NgxSolanaSocketService {
     accountId: string,
     commitment: Commitment = 'confirmed'
   ): Observable<AccountInfo<Buffer>> {
-    return this._webSocketSubject$.pipe(
+    const cachedOnAccountChange = this._accountChanges.get(accountId);
+
+    if (cachedOnAccountChange !== undefined) {
+      return cachedOnAccountChange;
+    }
+
+    const onAccountChange$ = this._webSocketSubject$.pipe(
       switchMap((webSocketSubject) =>
         onAccountChange(webSocketSubject, accountId, commitment)
       ),
       map((message) => ({
         ...message.params.result.value,
         data: Buffer.from(message.params.result.value.data[0], 'base64'),
-      }))
+      })),
+      shareWhileSubscribed(() => this._accountChanges.delete(accountId))
     );
+
+    this._accountChanges.set(accountId, onAccountChange$);
+
+    return onAccountChange$;
   }
 
   onProgramAccountChange(
     programId: string,
     config?: GetProgramAccountsConfig
   ): Observable<{ pubkey: string; account: AccountInfo<Buffer> }> {
-    return this._webSocketSubject$.pipe(
+    const hashKey = hashGetProgramAccountsRequest(programId, config?.filters);
+    const cachedOnProgramAccountChange =
+      this._programAccountChanges.get(hashKey);
+
+    if (cachedOnProgramAccountChange !== undefined) {
+      return cachedOnProgramAccountChange;
+    }
+
+    const onProgramAccountChange$ = this._webSocketSubject$.pipe(
       switchMap((webSocketSubject) =>
         onProgramAccountChange(webSocketSubject, programId, config)
       ),
@@ -102,19 +140,31 @@ export class NgxSolanaSocketService {
             'base64'
           ),
         },
-      }))
+      })),
+      shareWhileSubscribed(() => this._programAccountChanges.delete(hashKey))
     );
+
+    return onProgramAccountChange$;
   }
 
   onSignatureChange(
     signature: string,
     commitment: Commitment = 'confirmed'
   ): Observable<{ err: unknown }> {
-    return this._webSocketSubject$.pipe(
+    const cachedOnSignatureChange = this._signatureChanges.get(signature);
+
+    if (cachedOnSignatureChange !== undefined) {
+      return cachedOnSignatureChange;
+    }
+
+    const onSignatureChange$ = this._webSocketSubject$.pipe(
       switchMap((webSocketSubject) =>
         onSignatureChange(webSocketSubject, signature, commitment)
       ),
-      map((message) => message.params.result.value)
+      map((message) => message.params.result.value),
+      shareWhileSubscribed(() => this._signatureChanges.delete(signature))
     );
+
+    return onSignatureChange$;
   }
 }

@@ -33,7 +33,9 @@ export class ApplicationTabComponent implements OnInit {
   @Input() applicationId: string | null = null;
   readonly application$ = this._applicationTabStore.application$;
 
-  constructor(private readonly _applicationTabStore: ApplicationTabStore) {}
+  constructor(private readonly _applicationTabStore: ApplicationTabStore) {
+    this._applicationTabStore.application$.subscribe((a) => console.log(a));
+  }
 
   ngOnInit() {
     if (this.applicationId === null) {
