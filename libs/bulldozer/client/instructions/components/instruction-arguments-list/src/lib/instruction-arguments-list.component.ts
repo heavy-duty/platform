@@ -10,7 +10,6 @@ import {
   InstructionArgument,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
-import { InstructionArgumentsListStore } from './instruction-arguments-list.store';
 
 @Component({
   selector: 'bd-instruction-arguments-list',
@@ -116,7 +115,6 @@ import { InstructionArgumentsListStore } from './instruction-arguments-list.stor
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [InstructionArgumentsListStore],
 })
 export class InstructionArgumentsListComponent {
   @Input() connected = false;
