@@ -3,6 +3,7 @@ import {
   CollectionAttributeApiService,
   CollectionAttributeSocketService,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   CollectionAttribute,
   CollectionAttributeDto,
@@ -29,18 +30,15 @@ import { ViewCollectionRouteStore } from './view-collection-route.store';
 interface ViewModel {
   loading: boolean;
   collectionAttributesMap: Map<string, Document<CollectionAttribute>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   collectionAttributesMap: new Map<string, Document<CollectionAttribute>>(),
-  error: null,
 };
 
 @Injectable()
 export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly collectionAttributesMap$ = this.select(
     ({ collectionAttributesMap }) => collectionAttributesMap
@@ -58,6 +56,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
     private readonly _collectionAttributeApiService: CollectionAttributeApiService,
     private readonly _collectionAttributeSocketService: CollectionAttributeSocketService,
     private readonly _viewCollectionRouteStore: ViewCollectionRouteStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -105,11 +104,6 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   private readonly _handleCollectionAttributeChanges = this.effect(
     (collectionAttributeId$: Observable<string>) =>
       collectionAttributeId$.pipe(
@@ -125,7 +119,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
                     this._setCollectionAttribute(changes);
                   }
                 },
-                (error) => this._setError(error)
+                (error) => this._notificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -156,7 +150,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
                 this._addCollectionAttribute(collectionAttribute);
                 this._handleCollectionAttributeChanges(collectionAttribute.id);
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -192,7 +186,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
             this._handleCollectionAttributeChanges(id)
           );
         },
-        (error) => this._setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -239,6 +233,11 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
               collectionId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Create attribute request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -266,6 +265,11 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
               collectionAttributeId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Update attribute request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -291,7 +295,12 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
             collectionAttributeId,
             collectionId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Delete attribute request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 }

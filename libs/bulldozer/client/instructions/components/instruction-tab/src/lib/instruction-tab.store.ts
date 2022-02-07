@@ -3,6 +3,7 @@ import {
   InstructionApiService,
   InstructionSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, of, startWith, switchMap } from 'rxjs';
@@ -10,13 +11,11 @@ import { concatMap, of, startWith, switchMap } from 'rxjs';
 interface ViewModel {
   instructionId: string | null;
   instruction: Document<Instruction> | null;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
   instruction: null,
-  error: null,
 };
 
 @Injectable()
@@ -28,7 +27,8 @@ export class InstructionTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService
+    private readonly _instructionSocketService: InstructionSocketService,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -58,7 +58,7 @@ export class InstructionTabStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (instruction) => this.patchState({ instruction }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationStore.setError({ error })
       )
     )
   );

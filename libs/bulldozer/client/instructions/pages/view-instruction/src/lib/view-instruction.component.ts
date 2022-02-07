@@ -11,7 +11,6 @@ import { ViewInstructionAccountsStore } from './view-instruction-accounts.store'
 import { ViewInstructionArgumentsStore } from './view-instruction-arguments.store';
 import { ViewInstructionCodeStore } from './view-instruction-code.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRelationsStore } from './view-instruction-relations.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 import { ViewInstructionSignersStore } from './view-instruction-signers.store';
@@ -111,7 +110,6 @@ import { ViewInstructionStore } from './view-instruction.store';
     ViewInstructionSignersStore,
     ViewInstructionCodeStore,
     ViewInstructionRouteStore,
-    ViewInstructionNotificationStore,
   ],
 })
 export class ViewInstructionComponent {

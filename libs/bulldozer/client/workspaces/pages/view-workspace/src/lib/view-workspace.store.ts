@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   WorkspaceApiService,
   WorkspaceSocketService,
@@ -28,7 +29,8 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _tabStore: TabStore,
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _workspaceSocketService: WorkspaceSocketService,
-    private readonly _viewWorkspaceRouteStore: ViewWorkspaceRouteStore
+    private readonly _viewWorkspaceRouteStore: ViewWorkspaceRouteStore,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -54,7 +56,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (workspace) => this.patchState({ workspace }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationStore.setError({ error })
       )
     )
   );

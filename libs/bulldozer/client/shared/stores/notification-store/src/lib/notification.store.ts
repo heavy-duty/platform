@@ -17,7 +17,7 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewInstructionNotificationStore extends ComponentStore<ViewModel> {
+export class NotificationStore extends ComponentStore<ViewModel> {
   private readonly _event$ = this.select(({ event }) => event);
   private readonly _error$ = this.select(({ error }) => error);
 

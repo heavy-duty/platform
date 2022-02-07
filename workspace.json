@@ -62,6 +62,7 @@
     "bulldozer-client-shared-guards-auth-guard": "libs/bulldozer/client/shared/guards/auth-guard",
     "bulldozer-client-shared-pipes-obscure-address": "libs/bulldozer/client/shared/pipes/obscure-address",
     "bulldozer-client-shared-services-dark-theme-service": "libs/bulldozer/client/shared/services/dark-theme-service",
+    "bulldozer-client-shared-stores-notification-store": "libs/bulldozer/client/shared/stores/notification-store",
     "bulldozer-client-shell": "libs/bulldozer/client/shell",
     "bulldozer-client-workspaces-components-workspace-explorer": "libs/bulldozer/client/workspaces/components/workspace-explorer",
     "bulldozer-client-workspaces-components-workspace-selector": "libs/bulldozer/client/workspaces/components/workspace-selector",

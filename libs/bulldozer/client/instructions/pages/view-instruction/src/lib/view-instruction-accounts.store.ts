@@ -3,6 +3,7 @@ import {
   InstructionAccountApiService,
   InstructionAccountSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   Document,
   InstructionAccount,
@@ -24,7 +25,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
@@ -56,7 +56,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionAccountSocketService: InstructionAccountSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
-    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -119,8 +119,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
                     this._setInstructionAccount(changes);
                   }
                 },
-                (error) =>
-                  this._viewInstructionNotificationStore.setError(error)
+                (error) => this._notificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -151,7 +150,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
                 this._addInstructionAccount(instructionAccount);
                 this._handleInstructionAccountChanges(instructionAccount.id);
               },
-              (error) => this._viewInstructionNotificationStore.setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -187,7 +186,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
             this._handleInstructionAccountChanges(id)
           );
         },
-        (error) => this._viewInstructionNotificationStore.setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -236,11 +235,8 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
           }
         ),
         tapResponse(
-          () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Create account request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+          () => this._notificationStore.setEvent('Create account request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -270,11 +266,8 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
           }
         ),
         tapResponse(
-          () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Update account request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+          () => this._notificationStore.setEvent('Update account request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -302,11 +295,8 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
           });
         }),
         tapResponse(
-          () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Delete account request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+          () => this._notificationStore.setEvent('Delete account request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );

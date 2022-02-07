@@ -3,6 +3,7 @@ import {
   ApplicationApiService,
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, of, startWith, switchMap } from 'rxjs';
@@ -28,7 +29,8 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationSocketService: ApplicationSocketService
+    private readonly _applicationSocketService: ApplicationSocketService,
+    private readonly _notificationService: NotificationStore
   ) {
     super(initialState);
   }
@@ -58,7 +60,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (application) => this.patchState({ application }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationService.setError({ error })
       )
     )
   );

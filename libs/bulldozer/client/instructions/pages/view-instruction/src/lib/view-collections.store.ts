@@ -3,6 +3,7 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -16,7 +17,6 @@ import {
   takeWhile,
   tap,
 } from 'rxjs';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionStore } from './view-instruction.store';
 
 interface ViewModel {
@@ -43,7 +43,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
     private readonly _collectionApiService: CollectionApiService,
     private readonly _collectionSocketService: CollectionSocketService,
     private readonly _viewInstructionStore: ViewInstructionStore,
-    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -97,7 +97,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
                   this._setCollection(changes);
                 }
               },
-              (error) => this._viewInstructionNotificationStore.setError(error)
+              (error) => this._notificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -128,7 +128,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
                 this._addCollection(collection);
                 this._handleCollectionChanges(collection.id);
               },
-              (error) => this._viewInstructionNotificationStore.setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -159,7 +159,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
           });
           collections.forEach(({ id }) => this._handleCollectionChanges(id));
         },
-        (error) => this._viewInstructionNotificationStore.setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );

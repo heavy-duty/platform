@@ -3,6 +3,7 @@ import {
   InstructionRelationApiService,
   InstructionRelationSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -20,7 +21,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
@@ -52,7 +52,7 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _instructionRelationSocketService: InstructionRelationSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
-    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -115,8 +115,7 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
                     this._setInstructionRelation(changes);
                   }
                 },
-                (error) =>
-                  this._viewInstructionNotificationStore.setError(error)
+                (error) => this._notificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -147,7 +146,7 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
                 this._addInstructionRelation(instructionRelation);
                 this._handleInstructionRelationChanges(instructionRelation.id);
               },
-              (error) => this._viewInstructionNotificationStore.setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -183,7 +182,7 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
             this._handleInstructionRelationChanges(id)
           );
         },
-        (error) => this._viewInstructionNotificationStore.setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -235,10 +234,8 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
         ),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Create relation request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Create relation request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -274,10 +271,8 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
         ),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Update relation request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Update relation request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -319,10 +314,8 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
         ),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Delete relation request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Delete relation request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );

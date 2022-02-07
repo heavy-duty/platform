@@ -3,6 +3,7 @@ import {
   InstructionApiService,
   InstructionSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
@@ -18,7 +19,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
@@ -39,7 +39,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     private readonly _instructionApiService: InstructionApiService,
     private readonly _instructionSocketService: InstructionSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
-    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -65,7 +65,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (instruction) => this.patchState({ instruction }),
-        (error) => this._viewInstructionNotificationStore.setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -106,11 +106,8 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
           });
         }),
         tapResponse(
-          () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Update body request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+          () => this._notificationStore.setEvent('Update body request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );

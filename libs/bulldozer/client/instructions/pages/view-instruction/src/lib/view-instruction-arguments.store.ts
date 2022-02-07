@@ -3,6 +3,7 @@ import {
   InstructionArgumentApiService,
   InstructionArgumentSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   Document,
   InstructionArgument,
@@ -24,7 +25,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
-import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
@@ -56,7 +56,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
     private readonly _instructionArgumentSocketService: InstructionArgumentSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
-    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -119,8 +119,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
                     this._setInstructionArgument(changes);
                   }
                 },
-                (error) =>
-                  this._viewInstructionNotificationStore.setError(error)
+                (error) => this._notificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -151,7 +150,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
                 this._addInstructionArgument(instructionArgument);
                 this._handleInstructionArgumentChanges(instructionArgument.id);
               },
-              (error) => this._viewInstructionNotificationStore.setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -187,7 +186,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
             this._handleInstructionArgumentChanges(id)
           );
         },
-        (error) => this._viewInstructionNotificationStore.setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -237,10 +236,8 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         ),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Create argument request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Create argument request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -271,10 +268,8 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         ),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Update argument request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Update argument request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -303,10 +298,8 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         }),
         tapResponse(
           () =>
-            this._viewInstructionNotificationStore.setEvent(
-              'Delete argument request sent'
-            ),
-          (error) => this._viewInstructionNotificationStore.setError(error)
+            this._notificationStore.setEvent('Delete argument request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );

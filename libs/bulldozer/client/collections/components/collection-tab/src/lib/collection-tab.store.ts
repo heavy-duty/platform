@@ -3,6 +3,7 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, of, startWith, switchMap } from 'rxjs';
@@ -10,13 +11,11 @@ import { concatMap, of, startWith, switchMap } from 'rxjs';
 interface ViewModel {
   collectionId: string | null;
   collection: Document<Collection> | null;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   collectionId: null,
   collection: null,
-  error: null,
 };
 
 @Injectable()
@@ -28,7 +27,8 @@ export class CollectionTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService
+    private readonly _collectionSocketService: CollectionSocketService,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -58,7 +58,7 @@ export class CollectionTabStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (collection) => this.patchState({ collection }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationStore.setError({ error })
       )
     )
   );

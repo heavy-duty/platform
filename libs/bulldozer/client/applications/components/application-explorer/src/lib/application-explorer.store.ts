@@ -3,6 +3,7 @@ import {
   ApplicationApiService,
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -25,19 +26,16 @@ interface ViewModel {
   loading: boolean;
   workspaceId: string | null;
   applicationsMap: Map<string, Document<Application>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   workspaceId: null,
   applicationsMap: new Map<string, Document<Application>>(),
-  error: null,
 };
 
 @Injectable()
 export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationsMap$ = this.select(
@@ -52,7 +50,8 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _applicationApiService: ApplicationApiService,
     private readonly _applicationSocketService: ApplicationSocketService,
-    private readonly _walletStore: WalletStore
+    private readonly _walletStore: WalletStore,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -93,11 +92,6 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   readonly setWorkspaceId = this.updater(
     (state, workspaceId: string | null) => ({ ...state, workspaceId })
   );
@@ -115,7 +109,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
                   this._setApplication(changes);
                 }
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -146,7 +140,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
                 this._addApplication(application);
                 this._handleApplicationChanges(application.id);
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -177,7 +171,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             this._handleApplicationChanges(id);
           });
         },
-        (error) => this._setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -200,7 +194,12 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             authority: authority.toBase58(),
             workspaceId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Create application request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -225,7 +224,12 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             authority: authority.toBase58(),
             applicationId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Update application request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -247,7 +251,12 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             workspaceId,
             applicationId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Delete application request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 }

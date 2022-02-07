@@ -3,6 +3,7 @@ import {
   ApplicationApiService,
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
@@ -28,7 +29,8 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
     private readonly _tabStore: TabStore,
     private readonly _applicationApiService: ApplicationApiService,
     private readonly _applicationSocketService: ApplicationSocketService,
-    private readonly _viewApplicationRouteStore: ViewApplicationRouteStore
+    private readonly _viewApplicationRouteStore: ViewApplicationRouteStore,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -54,7 +56,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (application) => this.patchState({ application }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationStore.setError({ error })
       )
     )
   );

@@ -3,6 +3,7 @@ import {
   InstructionApiService,
   InstructionSocketService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -26,7 +27,6 @@ interface ViewModel {
   workspaceId: string | null;
   applicationId: string | null;
   instructionsMap: Map<string, Document<Instruction>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
@@ -34,12 +34,10 @@ const initialState: ViewModel = {
   workspaceId: null,
   applicationId: null,
   instructionsMap: new Map<string, Document<Instruction>>(),
-  error: null,
 };
 
 @Injectable()
 export class InstructionExplorerStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
@@ -55,7 +53,8 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService
+    private readonly _instructionSocketService: InstructionSocketService,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -96,11 +95,6 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   readonly setApplicationId = this.updater(
     (state, applicationId: string | null) => ({ ...state, applicationId })
   );
@@ -122,7 +116,7 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
                   this._setInstruction(changes);
                 }
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -153,7 +147,7 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
                 this._addInstruction(instruction);
                 this._handleInstructionChanges(instruction.id);
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -182,7 +176,7 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
           });
           instructions.forEach(({ id }) => this._handleInstructionChanges(id));
         },
-        (error) => this._setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -216,6 +210,11 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
               applicationId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Create instruction request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -241,7 +240,12 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
             authority: authority?.toBase58(),
             instructionId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Update instruction request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -263,7 +267,12 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
             instructionId,
             applicationId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Delete instruction request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 }

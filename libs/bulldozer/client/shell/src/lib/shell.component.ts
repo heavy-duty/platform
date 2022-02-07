@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
-  NotificationStore,
   RouteStore,
   TabStore,
 } from '@heavy-duty/bulldozer/application/data-access';

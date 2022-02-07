@@ -10,6 +10,7 @@ import {
   InstructionArgumentApiService,
   InstructionRelationApiService,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   WorkspaceApiService,
   WorkspaceSocketService,
@@ -41,19 +42,16 @@ interface ViewModel {
   loading: boolean;
   workspaceId: string | null;
   workspacesMap: Map<string, Document<Workspace>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   workspaceId: null,
   workspacesMap: new Map<string, Document<Workspace>>(),
-  error: null,
 };
 
 @Injectable()
 export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
@@ -77,7 +75,8 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _workspaceSocketService: WorkspaceSocketService,
-    private readonly _walletStore: WalletStore
+    private readonly _walletStore: WalletStore,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -118,11 +117,6 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   readonly setWorkspaceId = this.updater(
     (state, workspaceId: string | null) => ({ ...state, workspaceId })
   );
@@ -140,7 +134,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
                   this._setWorkspace(changes);
                 }
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -171,7 +165,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
                 this._addWorkspace(workspace);
                 this._handleWorkspaceChanges(workspace.id);
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -204,7 +198,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             this._handleWorkspaceChanges(id);
           });
         },
-        (error) => this._setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -226,7 +220,12 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             workspaceName,
             authority: authority.toBase58(),
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Create workspace request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -251,7 +250,12 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             authority: authority.toBase58(),
             workspaceId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Update workspace request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -270,7 +274,12 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             authority: authority.toBase58(),
             workspaceId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Delete workspace request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -330,7 +339,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
                     instructionRelations
                   )
                 ),
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
         })

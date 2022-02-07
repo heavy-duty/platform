@@ -3,6 +3,7 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -26,7 +27,6 @@ interface ViewModel {
   workspaceId: string | null;
   applicationId: string | null;
   collectionsMap: Map<string, Document<Collection>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
@@ -34,12 +34,10 @@ const initialState: ViewModel = {
   workspaceId: null,
   applicationId: null,
   collectionsMap: new Map<string, Document<Collection>>(),
-  error: null,
 };
 
 @Injectable()
 export class CollectionExplorerStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
@@ -53,7 +51,8 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService
+    private readonly _collectionSocketService: CollectionSocketService,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -94,11 +93,6 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   readonly setApplicationId = this.updater(
     (state, applicationId: string | null) => ({ ...state, applicationId })
   );
@@ -120,7 +114,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
                   this._setCollection(changes);
                 }
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -151,7 +145,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
                 this._addCollection(collection);
                 this._handleCollectionChanges(collection.id);
               },
-              (error) => this._setError(error)
+              (error) => this._notificationStore.setError(error)
             )
           );
       })
@@ -180,7 +174,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
           });
           collections.forEach(({ id }) => this._handleCollectionChanges(id));
         },
-        (error) => this._setError(error)
+        (error) => this._notificationStore.setError(error)
       )
     )
   );
@@ -214,6 +208,11 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
               applicationId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Create collection request sent'),
+          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -239,7 +238,12 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
             authority: authority?.toBase58(),
             collectionId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Update collection request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 
@@ -261,7 +265,12 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
             collectionId,
             applicationId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._notificationStore.setEvent('Delete collection request sent'),
+          (error) => this._notificationStore.setError(error)
+        )
       )
   );
 }

@@ -3,6 +3,7 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
@@ -12,12 +13,10 @@ import { ViewCollectionRouteStore } from './view-collection-route.store';
 
 interface ViewModel {
   collection: Document<Collection> | null;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   collection: null,
-  error: null,
 };
 
 @Injectable()
@@ -28,7 +27,8 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
     private readonly _tabStore: TabStore,
     private readonly _collectionApiService: CollectionApiService,
     private readonly _collectionSocketService: CollectionSocketService,
-    private readonly _viewCollectionRouteStore: ViewCollectionRouteStore
+    private readonly _viewCollectionRouteStore: ViewCollectionRouteStore,
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
   }
@@ -54,7 +54,7 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (collection) => this.patchState({ collection }),
-        (error) => this.patchState({ error })
+        (error) => this._notificationStore.setError({ error })
       )
     )
   );
