@@ -40,17 +40,15 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._collectionApiService.findById(collectionId).pipe(
-          concatMap((collection) => {
-            if (!collection) {
-              return of(null);
-            }
-
-            return this._collectionSocketService
-              .collectionChanges(collectionId)
-              .pipe(startWith(collection));
-          })
-        );
+        return this._collectionApiService
+          .findById(collectionId)
+          .pipe(
+            concatMap((collection) =>
+              this._collectionSocketService
+                .collectionChanges(collectionId)
+                .pipe(startWith(collection))
+            )
+          );
       }),
       tapResponse(
         (collection) => this.patchState({ collection }),

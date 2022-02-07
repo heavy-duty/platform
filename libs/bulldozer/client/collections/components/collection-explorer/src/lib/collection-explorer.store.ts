@@ -132,23 +132,20 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
     this.applicationId$.pipe(
       switchMap((applicationId) => {
         if (applicationId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._collectionSocketService
-          .collectionCreated({
-            application: applicationId,
-          })
-          .pipe(
-            tapResponse(
-              (collection) => {
-                this._addCollection(collection);
-                this._handleCollectionChanges(collection.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._collectionSocketService.collectionCreated({
+          application: applicationId,
+        });
+      }),
+      tapResponse(
+        (collection) => {
+          this._addCollection(collection);
+          this._handleCollectionChanges(collection.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

@@ -42,17 +42,15 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._applicationApiService.findById(applicationId).pipe(
-          concatMap((application) => {
-            if (!application) {
-              return of(null);
-            }
-
-            return this._applicationSocketService
-              .applicationChanges(applicationId)
-              .pipe(startWith(application));
-          })
-        );
+        return this._applicationApiService
+          .findById(applicationId)
+          .pipe(
+            concatMap((application) =>
+              this._applicationSocketService
+                .applicationChanges(applicationId)
+                .pipe(startWith(application))
+            )
+          );
       }),
       tapResponse(
         (application) => this.patchState({ application }),

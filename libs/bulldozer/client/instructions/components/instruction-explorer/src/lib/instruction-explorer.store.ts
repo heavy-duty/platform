@@ -134,23 +134,20 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
     this.applicationId$.pipe(
       switchMap((applicationId) => {
         if (applicationId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._instructionSocketService
-          .instructionCreated({
-            application: applicationId,
-          })
-          .pipe(
-            tapResponse(
-              (instruction) => {
-                this._addInstruction(instruction);
-                this._handleInstructionChanges(instruction.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._instructionSocketService.instructionCreated({
+          application: applicationId,
+        });
+      }),
+      tapResponse(
+        (instruction) => {
+          this._addInstruction(instruction);
+          this._handleInstructionChanges(instruction.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

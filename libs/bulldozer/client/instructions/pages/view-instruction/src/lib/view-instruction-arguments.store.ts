@@ -137,23 +137,22 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     this._viewInstructionRouteStore.instructionId$.pipe(
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._instructionArgumentSocketService
-          .instructionArgumentCreated({
+        return this._instructionArgumentSocketService.instructionArgumentCreated(
+          {
             instruction: instructionId,
-          })
-          .pipe(
-            tapResponse(
-              (instructionArgument) => {
-                this._addInstructionArgument(instructionArgument);
-                this._handleInstructionArgumentChanges(instructionArgument.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          }
+        );
+      }),
+      tapResponse(
+        (instructionArgument) => {
+          this._addInstructionArgument(instructionArgument);
+          this._handleInstructionArgumentChanges(instructionArgument.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

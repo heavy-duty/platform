@@ -51,17 +51,15 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._instructionApiService.findById(instructionId).pipe(
-          concatMap((instruction) => {
-            if (!instruction) {
-              return of(null);
-            }
-
-            return this._instructionSocketService
-              .instructionChanges(instructionId)
-              .pipe(startWith(instruction));
-          })
-        );
+        return this._instructionApiService
+          .findById(instructionId)
+          .pipe(
+            concatMap((instruction) =>
+              this._instructionSocketService
+                .instructionChanges(instructionId)
+                .pipe(startWith(instruction))
+            )
+          );
       }),
       tapResponse(
         (instruction) => this.patchState({ instruction }),

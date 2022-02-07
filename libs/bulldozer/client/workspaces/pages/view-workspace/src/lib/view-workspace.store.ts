@@ -42,17 +42,15 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._workspaceApiService.findById(workspaceId).pipe(
-          concatMap((workspace) => {
-            if (!workspace) {
-              return of(null);
-            }
-
-            return this._workspaceSocketService
-              .workspaceChanges(workspaceId)
-              .pipe(startWith(workspace));
-          })
-        );
+        return this._workspaceApiService
+          .findById(workspaceId)
+          .pipe(
+            concatMap((workspace) =>
+              this._workspaceSocketService
+                .workspaceChanges(workspaceId)
+                .pipe(startWith(workspace))
+            )
+          );
       }),
       tapResponse(
         (workspace) => this.patchState({ workspace }),

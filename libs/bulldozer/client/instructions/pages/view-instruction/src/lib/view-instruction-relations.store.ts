@@ -133,23 +133,22 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
     this._viewInstructionRouteStore.instructionId$.pipe(
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._instructionRelationSocketService
-          .instructionRelationCreated({
+        return this._instructionRelationSocketService.instructionRelationCreated(
+          {
             instruction: instructionId,
-          })
-          .pipe(
-            tapResponse(
-              (instructionRelation) => {
-                this._addInstructionRelation(instructionRelation);
-                this._handleInstructionRelationChanges(instructionRelation.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          }
+        );
+      }),
+      tapResponse(
+        (instructionRelation) => {
+          this._addInstructionRelation(instructionRelation);
+          this._handleInstructionRelationChanges(instructionRelation.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

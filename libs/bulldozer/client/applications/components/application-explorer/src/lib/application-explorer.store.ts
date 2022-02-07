@@ -127,23 +127,20 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     this.workspaceId$.pipe(
       switchMap((workspaceId) => {
         if (workspaceId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._applicationSocketService
-          .applicationCreated({
-            workspace: workspaceId,
-          })
-          .pipe(
-            tapResponse(
-              (application) => {
-                this._addApplication(application);
-                this._handleApplicationChanges(application.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._applicationSocketService.applicationCreated({
+          workspace: workspaceId,
+        });
+      }),
+      tapResponse(
+        (application) => {
+          this._addApplication(application);
+          this._handleApplicationChanges(application.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

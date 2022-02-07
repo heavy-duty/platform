@@ -137,23 +137,22 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
     this._viewCollectionRouteStore.collectionId$.pipe(
       switchMap((collectionId) => {
         if (collectionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._collectionAttributeSocketService
-          .collectionAttributeCreated({
+        return this._collectionAttributeSocketService.collectionAttributeCreated(
+          {
             collection: collectionId,
-          })
-          .pipe(
-            tapResponse(
-              (collectionAttribute) => {
-                this._addCollectionAttribute(collectionAttribute);
-                this._handleCollectionAttributeChanges(collectionAttribute.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          }
+        );
+      }),
+      tapResponse(
+        (collectionAttribute) => {
+          this._addCollectionAttribute(collectionAttribute);
+          this._handleCollectionAttributeChanges(collectionAttribute.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

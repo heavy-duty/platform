@@ -7,6 +7,7 @@ import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  EMPTY,
   filter,
   first,
   mergeMap,
@@ -115,23 +116,20 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
     this._viewInstructionStore.instruction$.pipe(
       switchMap((instruction) => {
         if (instruction === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._collectionSocketService
-          .collectionCreated({
-            application: instruction.data.application,
-          })
-          .pipe(
-            tapResponse(
-              (collection) => {
-                this._addCollection(collection);
-                this._handleCollectionChanges(collection.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._collectionSocketService.collectionCreated({
+          application: instruction.data.application,
+        });
+      }),
+      tapResponse(
+        (collection) => {
+          this._addCollection(collection);
+          this._handleCollectionChanges(collection.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

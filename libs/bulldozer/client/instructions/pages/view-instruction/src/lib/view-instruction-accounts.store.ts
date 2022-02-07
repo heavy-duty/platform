@@ -137,23 +137,20 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
     this._viewInstructionRouteStore.instructionId$.pipe(
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._instructionAccountSocketService
-          .instructionAccountCreated({
-            instruction: instructionId,
-          })
-          .pipe(
-            tapResponse(
-              (instructionAccount) => {
-                this._addInstructionAccount(instructionAccount);
-                this._handleInstructionAccountChanges(instructionAccount.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._instructionAccountSocketService.instructionAccountCreated({
+          instruction: instructionId,
+        });
+      }),
+      tapResponse(
+        (instructionAccount) => {
+          this._addInstructionAccount(instructionAccount);
+          this._handleInstructionAccountChanges(instructionAccount.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 

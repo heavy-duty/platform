@@ -152,23 +152,20 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     this._walletStore.publicKey$.pipe(
       switchMap((authority) => {
         if (authority === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._workspaceSocketService
-          .workspaceCreated({
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              (workspace) => {
-                this._addWorkspace(workspace);
-                this._handleWorkspaceChanges(workspace.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+        return this._workspaceSocketService.workspaceCreated({
+          authority: authority.toBase58(),
+        });
+      }),
+      tapResponse(
+        (workspace) => {
+          this._addWorkspace(workspace);
+          this._handleWorkspaceChanges(workspace.id);
+        },
+        (error) => this._notificationStore.setError(error)
+      )
     )
   );
 
