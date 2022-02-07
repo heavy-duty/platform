@@ -86,18 +86,19 @@ import { ShellStore } from './shell.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent {
-  readonly tabs$ = this._shellStore.tabs$;
-  readonly selectedTab$ = this._shellStore.selectedTab$;
   readonly isHandset$ = this._shellStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
   readonly workspaceId$ = this._shellStore.workspaceId$;
+  readonly tabs$ = this._tabStore.tabs$;
+  readonly selectedTab$ = this._tabStore.selected$;
 
   constructor(
     private readonly _shellStore: ShellStore,
-    private readonly _walletStore: WalletStore
+    private readonly _walletStore: WalletStore,
+    private readonly _tabStore: TabStore
   ) {}
 
   onCloseTab(tabId: string) {
-    this._shellStore.closeTab(tabId);
+    this._tabStore.closeTab(tabId);
   }
 }
