@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { DarkThemeDirectivesModule } from '@heavy-duty/bulldozer/application/ui/directives/dark-theme';
+import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchComponent } from './dark-theme-switch.component';
 
 @NgModule({
@@ -11,7 +11,7 @@ import { DarkThemeSwitchComponent } from './dark-theme-switch.component';
     CommonModule,
     MatIconModule,
     MatButtonModule,
-    DarkThemeDirectivesModule,
+    DarkThemeDirectiveModule,
   ],
   exports: [DarkThemeSwitchComponent],
 })

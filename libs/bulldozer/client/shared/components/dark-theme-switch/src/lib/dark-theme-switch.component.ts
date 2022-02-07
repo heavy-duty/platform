@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DarkThemeService } from '@heavy-duty/bulldozer/application/utils/services/dark-theme';
+import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
 import { map } from 'rxjs/operators';
 
 @Component({

@@ -8,7 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { ObscureAddressModule } from '@heavy-duty/bulldozer/application/utils/pipes/obscure-address';
+import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { EditInstructionDocumentTriggerDirective } from './edit-instruction-document-trigger.directive';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
 
