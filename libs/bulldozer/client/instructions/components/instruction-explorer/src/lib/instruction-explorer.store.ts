@@ -137,17 +137,20 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._instructionSocketService.instructionCreated({
-          application: applicationId,
-        });
-      }),
-      tapResponse(
-        (instruction) => {
-          this._addInstruction(instruction);
-          this._handleInstructionChanges(instruction.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._instructionSocketService
+          .instructionCreated({
+            application: applicationId,
+          })
+          .pipe(
+            tapResponse(
+              (instruction) => {
+                this._addInstruction(instruction);
+                this._handleInstructionChanges(instruction.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -156,25 +159,30 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((applicationId) => {
         if (applicationId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._instructionApiService.find({ application: applicationId });
-      }),
-      tapResponse(
-        (instructions) => {
-          this.patchState({
-            instructionsMap: instructions.reduce(
-              (instructionsMap, instruction) =>
-                instructionsMap.set(instruction.id, instruction),
-              new Map<string, Document<Instruction>>()
-            ),
-            loading: false,
-          });
-          instructions.forEach(({ id }) => this._handleInstructionChanges(id));
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._instructionApiService
+          .find({ application: applicationId })
+          .pipe(
+            tapResponse(
+              (instructions) => {
+                this.patchState({
+                  instructionsMap: instructions.reduce(
+                    (instructionsMap, instruction) =>
+                      instructionsMap.set(instruction.id, instruction),
+                    new Map<string, Document<Instruction>>()
+                  ),
+                  loading: false,
+                });
+                instructions.forEach(({ id }) =>
+                  this._handleInstructionChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -200,18 +208,23 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionApiService.create({
-              instructionName,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-            });
+            return this._instructionApiService
+              .create({
+                instructionName,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create instruction request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create instruction request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -232,17 +245,22 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._instructionApiService.update({
-            instructionName,
-            authority: authority?.toBase58(),
-            instructionId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update instruction request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._instructionApiService
+            .update({
+              instructionName,
+              authority: authority?.toBase58(),
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update instruction request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -259,17 +277,22 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._instructionApiService.delete({
-            authority: authority.toBase58(),
-            instructionId,
-            applicationId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete instruction request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._instructionApiService
+            .delete({
+              authority: authority.toBase58(),
+              instructionId,
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete instruction request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

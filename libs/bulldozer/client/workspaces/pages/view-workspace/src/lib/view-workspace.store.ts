@@ -8,7 +8,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, of, startWith, switchMap, tap } from 'rxjs';
+import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
 import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
 
 interface ViewModel {
@@ -39,23 +39,21 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     this._viewWorkspaceRouteStore.workspaceId$.pipe(
       switchMap((workspaceId) => {
         if (workspaceId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._workspaceApiService
-          .findById(workspaceId)
-          .pipe(
-            concatMap((workspace) =>
-              this._workspaceSocketService
-                .workspaceChanges(workspaceId)
-                .pipe(startWith(workspace))
-            )
-          );
-      }),
-      tapResponse(
-        (workspace) => this.patchState({ workspace }),
-        (error) => this._notificationStore.setError({ error })
-      )
+        return this._workspaceApiService.findById(workspaceId).pipe(
+          concatMap((workspace) =>
+            this._workspaceSocketService
+              .workspaceChanges(workspaceId)
+              .pipe(startWith(workspace))
+          ),
+          tapResponse(
+            (workspace) => this.patchState({ workspace }),
+            (error) => this._notificationStore.setError({ error })
+          )
+        );
+      })
     )
   );
 

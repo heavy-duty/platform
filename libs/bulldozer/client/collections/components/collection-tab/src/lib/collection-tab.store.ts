@@ -6,7 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, of, startWith, switchMap } from 'rxjs';
+import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
   collectionId: string | null;
@@ -41,23 +41,21 @@ export class CollectionTabStore extends ComponentStore<ViewModel> {
     this._collectionId$.pipe(
       switchMap((collectionId) => {
         if (collectionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._collectionApiService
-          .findById(collectionId)
-          .pipe(
-            concatMap((collection) =>
-              this._collectionSocketService
-                .collectionChanges(collectionId)
-                .pipe(startWith(collection))
-            )
-          );
-      }),
-      tapResponse(
-        (collection) => this.patchState({ collection }),
-        (error) => this._notificationStore.setError({ error })
-      )
+        return this._collectionApiService.findById(collectionId).pipe(
+          concatMap((collection) =>
+            this._collectionSocketService
+              .collectionChanges(collectionId)
+              .pipe(startWith(collection))
+          ),
+          tapResponse(
+            (collection) => this.patchState({ collection }),
+            (error) => this._notificationStore.setError({ error })
+          )
+        );
+      })
     )
   );
 }

@@ -6,7 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, of, startWith, switchMap } from 'rxjs';
+import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
   applicationId: string | null;
@@ -43,23 +43,21 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
     this._applicationId$.pipe(
       switchMap((applicationId) => {
         if (applicationId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._applicationApiService
-          .findById(applicationId)
-          .pipe(
-            concatMap((application) =>
-              this._applicationSocketService
-                .applicationChanges(applicationId)
-                .pipe(startWith(application))
-            )
-          );
-      }),
-      tapResponse(
-        (application) => this.patchState({ application }),
-        (error) => this._notificationService.setError({ error })
-      )
+        return this._applicationApiService.findById(applicationId).pipe(
+          concatMap((application) =>
+            this._applicationSocketService
+              .applicationChanges(applicationId)
+              .pipe(startWith(application))
+          ),
+          tapResponse(
+            (application) => this.patchState({ application }),
+            (error) => this._notificationService.setError({ error })
+          )
+        );
+      })
     )
   );
 }

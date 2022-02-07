@@ -130,17 +130,20 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._applicationSocketService.applicationCreated({
-          workspace: workspaceId,
-        });
-      }),
-      tapResponse(
-        (application) => {
-          this._addApplication(application);
-          this._handleApplicationChanges(application.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._applicationSocketService
+          .applicationCreated({
+            workspace: workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              (application) => {
+                this._addApplication(application);
+                this._handleApplicationChanges(application.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -149,27 +152,30 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((workspaceId) => {
         if (workspaceId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._applicationApiService.find({ workspace: workspaceId });
-      }),
-      tapResponse(
-        (applications) => {
-          this.patchState({
-            applicationsMap: applications.reduce(
-              (applicationsMap, application) =>
-                applicationsMap.set(application.id, application),
-              new Map<string, Document<Application>>()
-            ),
-            loading: false,
-          });
-          applications.forEach(({ id }) => {
-            this._handleApplicationChanges(id);
-          });
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._applicationApiService
+          .find({ workspace: workspaceId })
+          .pipe(
+            tapResponse(
+              (applications) => {
+                this.patchState({
+                  applicationsMap: applications.reduce(
+                    (applicationsMap, application) =>
+                      applicationsMap.set(application.id, application),
+                    new Map<string, Document<Application>>()
+                  ),
+                  loading: false,
+                });
+                applications.forEach(({ id }) => {
+                  this._handleApplicationChanges(id);
+                });
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -186,17 +192,22 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._applicationApiService.create({
-            applicationName,
-            authority: authority.toBase58(),
-            workspaceId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create application request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._applicationApiService
+            .create({
+              applicationName,
+              authority: authority.toBase58(),
+              workspaceId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create application request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -216,17 +227,22 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._applicationApiService.update({
-            applicationName,
-            authority: authority.toBase58(),
-            applicationId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update application request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._applicationApiService
+            .update({
+              applicationName,
+              authority: authority.toBase58(),
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update application request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -243,17 +259,22 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._applicationApiService.delete({
-            authority: authority.toBase58(),
-            workspaceId,
-            applicationId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete application request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._applicationApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete application request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

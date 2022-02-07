@@ -155,17 +155,20 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._workspaceSocketService.workspaceCreated({
-          authority: authority.toBase58(),
-        });
-      }),
-      tapResponse(
-        (workspace) => {
-          this._addWorkspace(workspace);
-          this._handleWorkspaceChanges(workspace.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._workspaceSocketService
+          .workspaceCreated({
+            authority: authority.toBase58(),
+          })
+          .pipe(
+            tapResponse(
+              (workspace) => {
+                this._addWorkspace(workspace);
+                this._handleWorkspaceChanges(workspace.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -174,29 +177,32 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((authority) => {
         if (authority === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._workspaceApiService.find({
-          authority: authority.toBase58(),
-        });
-      }),
-      tapResponse(
-        (workspaces) => {
-          this.patchState({
-            workspacesMap: workspaces.reduce(
-              (workspacesMap, workspace) =>
-                workspacesMap.set(workspace.id, workspace),
-              new Map<string, Document<Workspace>>()
-            ),
-            loading: false,
-          });
-          workspaces.forEach(({ id }) => {
-            this._handleWorkspaceChanges(id);
-          });
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._workspaceApiService
+          .find({
+            authority: authority.toBase58(),
+          })
+          .pipe(
+            tapResponse(
+              (workspaces) => {
+                this.patchState({
+                  workspacesMap: workspaces.reduce(
+                    (workspacesMap, workspace) =>
+                      workspacesMap.set(workspace.id, workspace),
+                    new Map<string, Document<Workspace>>()
+                  ),
+                  loading: false,
+                });
+                workspaces.forEach(({ id }) => {
+                  this._handleWorkspaceChanges(id);
+                });
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -213,16 +219,21 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._workspaceApiService.create({
-            workspaceName,
-            authority: authority.toBase58(),
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create workspace request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._workspaceApiService
+            .create({
+              workspaceName,
+              authority: authority.toBase58(),
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create workspace request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -242,17 +253,22 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._workspaceApiService.update({
-            workspaceName,
-            authority: authority.toBase58(),
-            workspaceId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update workspace request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._workspaceApiService
+            .update({
+              workspaceName,
+              authority: authority.toBase58(),
+              workspaceId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update workspace request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -267,16 +283,21 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._workspaceApiService.delete({
-            authority: authority.toBase58(),
-            workspaceId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete workspace request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._workspaceApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete workspace request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 

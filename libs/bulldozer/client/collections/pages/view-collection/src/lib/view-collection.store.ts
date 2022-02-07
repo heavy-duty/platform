@@ -8,7 +8,7 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, of, startWith, switchMap, tap } from 'rxjs';
+import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
 import { ViewCollectionRouteStore } from './view-collection-route.store';
 
 interface ViewModel {
@@ -37,7 +37,7 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
     this._viewCollectionRouteStore.collectionId$.pipe(
       switchMap((collectionId) => {
         if (collectionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
         return this._collectionApiService
@@ -48,12 +48,14 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
                 .collectionChanges(collectionId)
                 .pipe(startWith(collection))
             )
+          )
+          .pipe(
+            tapResponse(
+              (collection) => this.patchState({ collection }),
+              (error) => this._notificationStore.setError({ error })
+            )
           );
-      }),
-      tapResponse(
-        (collection) => this.patchState({ collection }),
-        (error) => this._notificationStore.setError({ error })
-      )
+      })
     )
   );
 

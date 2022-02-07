@@ -48,23 +48,21 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     this._viewInstructionRouteStore.instructionId$.pipe(
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of(null);
+          return EMPTY;
         }
 
-        return this._instructionApiService
-          .findById(instructionId)
-          .pipe(
-            concatMap((instruction) =>
-              this._instructionSocketService
-                .instructionChanges(instructionId)
-                .pipe(startWith(instruction))
-            )
-          );
-      }),
-      tapResponse(
-        (instruction) => this.patchState({ instruction }),
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._instructionApiService.findById(instructionId).pipe(
+          concatMap((instruction) =>
+            this._instructionSocketService
+              .instructionChanges(instructionId)
+              .pipe(startWith(instruction))
+          ),
+          tapResponse(
+            (instruction) => this.patchState({ instruction }),
+            (error) => this._notificationStore.setError(error)
+          )
+        );
+      })
     )
   );
 
@@ -97,16 +95,20 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._instructionApiService.updateBody({
-            instructionId: instruction.id,
-            instructionBody,
-            authority: authority.toBase58(),
-          });
-        }),
-        tapResponse(
-          () => this._notificationStore.setEvent('Update body request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._instructionApiService
+            .updateBody({
+              instructionId: instruction.id,
+              instructionBody,
+              authority: authority.toBase58(),
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent('Update body request sent'),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

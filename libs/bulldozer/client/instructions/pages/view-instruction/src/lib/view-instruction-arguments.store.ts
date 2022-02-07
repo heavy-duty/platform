@@ -140,19 +140,20 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._instructionArgumentSocketService.instructionArgumentCreated(
-          {
+        return this._instructionArgumentSocketService
+          .instructionArgumentCreated({
             instruction: instructionId,
-          }
-        );
-      }),
-      tapResponse(
-        (instructionArgument) => {
-          this._addInstructionArgument(instructionArgument);
-          this._handleInstructionArgumentChanges(instructionArgument.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+          })
+          .pipe(
+            tapResponse(
+              (instructionArgument) => {
+                this._addInstructionArgument(instructionArgument);
+                this._handleInstructionArgumentChanges(instructionArgument.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -161,32 +162,35 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._instructionArgumentApiService.find({
-          instruction: instructionId,
-        });
-      }),
-      tapResponse(
-        (instructionArguments) => {
-          this.patchState({
-            instructionArgumentsMap: instructionArguments.reduce(
-              (instructionArgumentsMap, instructionArgument) =>
-                instructionArgumentsMap.set(
-                  instructionArgument.id,
-                  instructionArgument
-                ),
-              new Map<string, Document<InstructionArgument>>()
-            ),
-            loading: false,
-          });
-          instructionArguments.forEach(({ id }) =>
-            this._handleInstructionArgumentChanges(id)
+        return this._instructionArgumentApiService
+          .find({
+            instruction: instructionId,
+          })
+          .pipe(
+            tapResponse(
+              (instructionArguments) => {
+                this.patchState({
+                  instructionArgumentsMap: instructionArguments.reduce(
+                    (instructionArgumentsMap, instructionArgument) =>
+                      instructionArgumentsMap.set(
+                        instructionArgument.id,
+                        instructionArgument
+                      ),
+                    new Map<string, Document<InstructionArgument>>()
+                  ),
+                  loading: false,
+                });
+                instructionArguments.forEach(({ id }) =>
+                  this._handleInstructionArgumentChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
           );
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+      })
     )
   );
 
@@ -224,19 +228,24 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionArgumentApiService.create({
-              instructionArgumentDto,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-            });
+            return this._instructionArgumentApiService
+              .create({
+                instructionArgumentDto,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+                instructionId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create argument request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create argument request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -258,17 +267,22 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionArgumentApiService.update({
-              instructionArgumentDto,
-              authority: authority.toBase58(),
-              instructionArgumentId,
-            });
+            return this._instructionArgumentApiService
+              .update({
+                instructionArgumentDto,
+                authority: authority.toBase58(),
+                instructionArgumentId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Update argument request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update argument request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -289,17 +303,22 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._instructionArgumentApiService.delete({
-            authority: authority.toBase58(),
-            instructionArgumentId,
-            instructionId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete argument request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._instructionArgumentApiService
+            .delete({
+              authority: authority.toBase58(),
+              instructionArgumentId,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete argument request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

@@ -140,17 +140,20 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._instructionAccountSocketService.instructionAccountCreated({
-          instruction: instructionId,
-        });
-      }),
-      tapResponse(
-        (instructionAccount) => {
-          this._addInstructionAccount(instructionAccount);
-          this._handleInstructionAccountChanges(instructionAccount.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._instructionAccountSocketService
+          .instructionAccountCreated({
+            instruction: instructionId,
+          })
+          .pipe(
+            tapResponse(
+              (instructionAccount) => {
+                this._addInstructionAccount(instructionAccount);
+                this._handleInstructionAccountChanges(instructionAccount.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -159,32 +162,35 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._instructionAccountApiService.find({
-          instruction: instructionId,
-        });
-      }),
-      tapResponse(
-        (instructionAccounts) => {
-          this.patchState({
-            instructionAccountsMap: instructionAccounts.reduce(
-              (instructionAccountsMap, instructionAccount) =>
-                instructionAccountsMap.set(
-                  instructionAccount.id,
-                  instructionAccount
-                ),
-              new Map<string, Document<InstructionAccount>>()
-            ),
-            loading: false,
-          });
-          instructionAccounts.forEach(({ id }) =>
-            this._handleInstructionAccountChanges(id)
+        return this._instructionAccountApiService
+          .find({
+            instruction: instructionId,
+          })
+          .pipe(
+            tapResponse(
+              (instructionAccounts) => {
+                this.patchState({
+                  instructionAccountsMap: instructionAccounts.reduce(
+                    (instructionAccountsMap, instructionAccount) =>
+                      instructionAccountsMap.set(
+                        instructionAccount.id,
+                        instructionAccount
+                      ),
+                    new Map<string, Document<InstructionAccount>>()
+                  ),
+                  loading: false,
+                });
+                instructionAccounts.forEach(({ id }) =>
+                  this._handleInstructionAccountChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
           );
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+      })
     )
   );
 
@@ -222,18 +228,24 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionAccountApiService.create({
-              instructionAccountDto,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-            });
+            return this._instructionAccountApiService
+              .create({
+                instructionAccountDto,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+                instructionId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create account request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () => this._notificationStore.setEvent('Create account request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -255,16 +267,22 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionAccountApiService.update({
-              instructionAccountDto,
-              authority: authority.toBase58(),
-              instructionAccountId,
-            });
+            return this._instructionAccountApiService
+              .update({
+                instructionAccountDto,
+                authority: authority.toBase58(),
+                instructionAccountId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Update account request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () => this._notificationStore.setEvent('Update account request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -285,16 +303,22 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._instructionAccountApiService.delete({
-            authority: authority.toBase58(),
-            instructionAccountId,
-            instructionId,
-          });
-        }),
-        tapResponse(
-          () => this._notificationStore.setEvent('Delete account request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._instructionAccountApiService
+            .delete({
+              authority: authority.toBase58(),
+              instructionAccountId,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete account request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

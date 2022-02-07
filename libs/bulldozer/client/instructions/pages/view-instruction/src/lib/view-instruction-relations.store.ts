@@ -136,19 +136,20 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._instructionRelationSocketService.instructionRelationCreated(
-          {
+        return this._instructionRelationSocketService
+          .instructionRelationCreated({
             instruction: instructionId,
-          }
-        );
-      }),
-      tapResponse(
-        (instructionRelation) => {
-          this._addInstructionRelation(instructionRelation);
-          this._handleInstructionRelationChanges(instructionRelation.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+          })
+          .pipe(
+            tapResponse(
+              (instructionRelation) => {
+                this._addInstructionRelation(instructionRelation);
+                this._handleInstructionRelationChanges(instructionRelation.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -157,32 +158,35 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((instructionId) => {
         if (instructionId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._instructionRelationApiService.find({
-          instruction: instructionId,
-        });
-      }),
-      tapResponse(
-        (instructionRelations) => {
-          this.patchState({
-            instructionRelationsMap: instructionRelations.reduce(
-              (instructionRelationsMap, instructionRelation) =>
-                instructionRelationsMap.set(
-                  instructionRelation.id,
-                  instructionRelation
-                ),
-              new Map<string, Relation<InstructionRelation>>()
-            ),
-            loading: false,
-          });
-          instructionRelations.forEach(({ id }) =>
-            this._handleInstructionRelationChanges(id)
+        return this._instructionRelationApiService
+          .find({
+            instruction: instructionId,
+          })
+          .pipe(
+            tapResponse(
+              (instructionRelations) => {
+                this.patchState({
+                  instructionRelationsMap: instructionRelations.reduce(
+                    (instructionRelationsMap, instructionRelation) =>
+                      instructionRelationsMap.set(
+                        instructionRelation.id,
+                        instructionRelation
+                      ),
+                    new Map<string, Relation<InstructionRelation>>()
+                  ),
+                  loading: false,
+                });
+                instructionRelations.forEach(({ id }) =>
+                  this._handleInstructionRelationChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
           );
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+      })
     )
   );
 
@@ -221,20 +225,25 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionRelationApiService.create({
-              fromAccountId,
-              toAccountId,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-            });
+            return this._instructionRelationApiService
+              .create({
+                fromAccountId,
+                toAccountId,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+                instructionId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create relation request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create relation request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -260,18 +269,23 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionRelationApiService.update({
-              instructionRelationId,
-              fromAccountId,
-              toAccountId,
-              authority: authority.toBase58(),
-            });
+            return this._instructionRelationApiService
+              .update({
+                instructionRelationId,
+                fromAccountId,
+                toAccountId,
+                authority: authority.toBase58(),
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Update relation request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update relation request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -303,18 +317,23 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._instructionRelationApiService.delete({
-              authority: authority.toBase58(),
-              instructionRelationId,
-              fromAccountId,
-              toAccountId,
-            });
+            return this._instructionRelationApiService
+              .delete({
+                authority: authority.toBase58(),
+                instructionRelationId,
+                fromAccountId,
+                toAccountId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Delete relation request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete relation request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );

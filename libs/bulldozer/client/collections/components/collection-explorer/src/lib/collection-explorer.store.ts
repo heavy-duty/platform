@@ -135,17 +135,20 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._collectionSocketService.collectionCreated({
-          application: applicationId,
-        });
-      }),
-      tapResponse(
-        (collection) => {
-          this._addCollection(collection);
-          this._handleCollectionChanges(collection.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._collectionSocketService
+          .collectionCreated({
+            application: applicationId,
+          })
+          .pipe(
+            tapResponse(
+              (collection) => {
+                this._addCollection(collection);
+                this._handleCollectionChanges(collection.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -154,25 +157,30 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((applicationId) => {
         if (applicationId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._collectionApiService.find({ application: applicationId });
-      }),
-      tapResponse(
-        (collections) => {
-          this.patchState({
-            collectionsMap: collections.reduce(
-              (collectionsMap, collection) =>
-                collectionsMap.set(collection.id, collection),
-              new Map<string, Document<Collection>>()
-            ),
-            loading: false,
-          });
-          collections.forEach(({ id }) => this._handleCollectionChanges(id));
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._collectionApiService
+          .find({ application: applicationId })
+          .pipe(
+            tapResponse(
+              (collections) => {
+                this.patchState({
+                  collectionsMap: collections.reduce(
+                    (collectionsMap, collection) =>
+                      collectionsMap.set(collection.id, collection),
+                    new Map<string, Document<Collection>>()
+                  ),
+                  loading: false,
+                });
+                collections.forEach(({ id }) =>
+                  this._handleCollectionChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -198,18 +206,23 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._collectionApiService.create({
-              collectionName,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-            });
+            return this._collectionApiService
+              .create({
+                collectionName,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create collection request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create collection request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -230,17 +243,22 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._collectionApiService.update({
-            collectionName,
-            authority: authority?.toBase58(),
-            collectionId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update collection request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._collectionApiService
+            .update({
+              collectionName,
+              authority: authority?.toBase58(),
+              collectionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update collection request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -257,17 +275,22 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._collectionApiService.delete({
-            authority: authority.toBase58(),
-            collectionId,
-            applicationId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete collection request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._collectionApiService
+            .delete({
+              authority: authority.toBase58(),
+              collectionId,
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete collection request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

@@ -140,19 +140,20 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._collectionAttributeSocketService.collectionAttributeCreated(
-          {
+        return this._collectionAttributeSocketService
+          .collectionAttributeCreated({
             collection: collectionId,
-          }
-        );
-      }),
-      tapResponse(
-        (collectionAttribute) => {
-          this._addCollectionAttribute(collectionAttribute);
-          this._handleCollectionAttributeChanges(collectionAttribute.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+          })
+          .pipe(
+            tapResponse(
+              (collectionAttribute) => {
+                this._addCollectionAttribute(collectionAttribute);
+                this._handleCollectionAttributeChanges(collectionAttribute.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -161,32 +162,35 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((collectionId) => {
         if (collectionId === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._collectionAttributeApiService.find({
-          collection: collectionId,
-        });
-      }),
-      tapResponse(
-        (collectionAttributes) => {
-          this.patchState({
-            collectionAttributesMap: collectionAttributes.reduce(
-              (collectionAttributesMap, collectionAttribute) =>
-                collectionAttributesMap.set(
-                  collectionAttribute.id,
-                  collectionAttribute
-                ),
-              new Map<string, Document<CollectionAttribute>>()
-            ),
-            loading: false,
-          });
-          collectionAttributes.forEach(({ id }) =>
-            this._handleCollectionAttributeChanges(id)
+        return this._collectionAttributeApiService
+          .find({
+            collection: collectionId,
+          })
+          .pipe(
+            tapResponse(
+              (collectionAttributes) => {
+                this.patchState({
+                  collectionAttributesMap: collectionAttributes.reduce(
+                    (collectionAttributesMap, collectionAttribute) =>
+                      collectionAttributesMap.set(
+                        collectionAttribute.id,
+                        collectionAttribute
+                      ),
+                    new Map<string, Document<CollectionAttribute>>()
+                  ),
+                  loading: false,
+                });
+                collectionAttributes.forEach(({ id }) =>
+                  this._handleCollectionAttributeChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
           );
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+      })
     )
   );
 
@@ -224,19 +228,24 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._collectionAttributeApiService.create({
-              collectionAttributeDto,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              collectionId,
-            });
+            return this._collectionAttributeApiService
+              .create({
+                collectionAttributeDto,
+                authority: authority.toBase58(),
+                workspaceId,
+                applicationId,
+                collectionId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Create attribute request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Create attribute request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -258,17 +267,22 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
               return EMPTY;
             }
 
-            return this._collectionAttributeApiService.update({
-              collectionAttributeDto,
-              authority: authority?.toBase58(),
-              collectionAttributeId,
-            });
+            return this._collectionAttributeApiService
+              .update({
+                collectionAttributeDto,
+                authority: authority?.toBase58(),
+                collectionAttributeId,
+              })
+              .pipe(
+                tapResponse(
+                  () =>
+                    this._notificationStore.setEvent(
+                      'Update attribute request sent'
+                    ),
+                  (error) => this._notificationStore.setError(error)
+                )
+              );
           }
-        ),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Update attribute request sent'),
-          (error) => this._notificationStore.setError(error)
         )
       )
   );
@@ -289,17 +303,22 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          return this._collectionAttributeApiService.delete({
-            authority: authority.toBase58(),
-            collectionAttributeId,
-            collectionId,
-          });
-        }),
-        tapResponse(
-          () =>
-            this._notificationStore.setEvent('Delete attribute request sent'),
-          (error) => this._notificationStore.setError(error)
-        )
+          return this._collectionAttributeApiService
+            .delete({
+              authority: authority.toBase58(),
+              collectionAttributeId,
+              collectionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete attribute request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }
