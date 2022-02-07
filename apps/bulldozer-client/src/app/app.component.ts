@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { ConnectionStore } from '@heavy-duty/bulldozer-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 import {
@@ -16,13 +15,9 @@ import {
   styles: [],
 })
 export class AppComponent implements OnInit {
-  constructor(
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore
-  ) {}
+  constructor(private readonly _walletStore: WalletStore) {}
 
   ngOnInit() {
-    this._connectionStore.setEndpoint('http://localhost:8899');
     this._walletStore.setAdapters([
       new PhantomWalletAdapter(),
       new SolletWalletAdapter({ network: WalletAdapterNetwork.Devnet }),

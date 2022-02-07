@@ -51,7 +51,6 @@
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
-    "bulldozer-shared-store": "libs/bulldozer/shared/store",
     "shared-ng-anchor": "libs/shared/ng-anchor",
     "shared-ngx-solana": "libs/shared/ngx-solana",
     "shared-rx-solana": "libs/shared/rx-solana",

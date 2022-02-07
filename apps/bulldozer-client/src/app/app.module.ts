@@ -2,7 +2,6 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
-import { BulldozerProgramModule } from '@heavy-duty/bulldozer-store';
 import {
   ngxSolanaApiInterceptorProviders,
   NgxSolanaModule,
@@ -29,7 +28,6 @@ import { AppComponent } from './app.component';
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
-    BulldozerProgramModule.forRoot(),
     NgxSolanaModule.forRoot(environment.rpcEndpoint, environment.rpcWebsocket),
   ],
   bootstrap: [AppComponent],
