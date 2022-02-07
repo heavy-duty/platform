@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ConfigStore } from '@bulldozer-client/config-store';
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import { TabStore } from '@bulldozer-client/tab-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ShellStore } from './shell.store';
 
 @Component({
   selector: 'bd-shell',
@@ -48,10 +49,10 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [TabStore, NotificationStore, ConfigStore],
+  providers: [ShellStore, TabStore, NotificationStore, ConfigStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   readonly isHandset$ = this._configStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
   readonly workspaceId$ = this._configStore.workspaceId$;
@@ -61,8 +62,13 @@ export class ShellComponent {
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
-    private readonly _configStore: ConfigStore
+    private readonly _configStore: ConfigStore,
+    private readonly _shellStore: ShellStore
   ) {}
+
+  ngOnInit() {
+    this._shellStore.redirectUnauthorized();
+  }
 
   onCloseTab(tabId: string) {
     this._tabStore.closeTab(tabId);

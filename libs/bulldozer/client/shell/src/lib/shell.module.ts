@@ -59,9 +59,9 @@ import { ShellComponent } from './shell.component';
       {
         path: 'unauthorized-access',
         loadChildren: () =>
-          import(
-            '@heavy-duty/bulldozer/application/features/unauthorized-access'
-          ).then((m) => m.UnauthorizedAccessModule),
+          import('@bulldozer-client/unauthorized-access').then(
+            (m) => m.UnauthorizedAccessModule
+          ),
       },
       {
         path: '**',
