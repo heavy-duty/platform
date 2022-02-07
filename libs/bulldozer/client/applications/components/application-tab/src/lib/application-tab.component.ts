@@ -3,8 +3,10 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  OnInit,
   Output,
 } from '@angular/core';
+import { filter, first, pairwise } from 'rxjs';
 import { ApplicationTabStore } from './application-tab.store';
 
 @Component({
@@ -12,7 +14,7 @@ import { ApplicationTabStore } from './application-tab.store';
   template: `
     <div
       *ngIf="application$ | ngrxPush as application"
-      class="flex items-center justify-between p-0"
+      class="flex items-stretch p-0"
     >
       <a
         [routerLink]="[
@@ -21,6 +23,7 @@ import { ApplicationTabStore } from './application-tab.store';
           'applications',
           application.id
         ]"
+        class="flex items-center pl-4 flex-grow"
       >
         {{ application.name }}
       </a>
@@ -35,7 +38,7 @@ import { ApplicationTabStore } from './application-tab.store';
   `,
   providers: [ApplicationTabStore],
 })
-export class ApplicationTabComponent {
+export class ApplicationTabComponent implements OnInit {
   @HostBinding('class') class = 'block w-full';
   @Input() set applicationId(value: string | null) {
     this._applicationTabStore.setApplicationId(value);
@@ -44,6 +47,16 @@ export class ApplicationTabComponent {
   readonly application$ = this._applicationTabStore.application$;
 
   constructor(private readonly _applicationTabStore: ApplicationTabStore) {}
+
+  ngOnInit() {
+    this.application$
+      .pipe(
+        pairwise(),
+        filter(([, application]) => application === null),
+        first()
+      )
+      .subscribe(() => this.onCloseTab());
+  }
 
   onCloseTab() {
     this.closeTab.emit();

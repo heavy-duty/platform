@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   CollectionApiService,
   CollectionSocketService,
@@ -8,15 +7,8 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  map,
-  Observable,
-  of,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { concatMap, of, startWith, switchMap, tap } from 'rxjs';
+import { ViewCollectionRouteStore } from './view-collection-route.store';
 
 interface ViewModel {
   collection: Document<Collection> | null;
@@ -33,43 +25,38 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   readonly collection$ = this.select(({ collection }) => collection);
 
   constructor(
-    private readonly _route: ActivatedRoute,
     private readonly _tabStore: TabStore,
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService
+    private readonly _collectionSocketService: CollectionSocketService,
+    private readonly _viewCollectionRouteStore: ViewCollectionRouteStore
   ) {
     super(initialState);
-
-    this.loadCollection(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
-    );
   }
 
-  protected readonly loadCollection = this.effect(
-    (collectionId$: Observable<string | null>) =>
-      collectionId$.pipe(
-        switchMap((collectionId) => {
-          if (collectionId === null) {
-            return of(null);
-          }
+  protected readonly loadCollection = this.effect(() =>
+    this._viewCollectionRouteStore.collectionId$.pipe(
+      switchMap((collectionId) => {
+        if (collectionId === null) {
+          return of(null);
+        }
 
-          return this._collectionApiService.findByPublicKey(collectionId).pipe(
-            concatMap((collection) => {
-              if (!collection) {
-                return of(null);
-              }
+        return this._collectionApiService.findById(collectionId).pipe(
+          concatMap((collection) => {
+            if (!collection) {
+              return of(null);
+            }
 
-              return this._collectionSocketService
-                .collectionChanges(collectionId)
-                .pipe(startWith(collection));
-            })
-          );
-        }),
-        tapResponse(
-          (collection) => this.patchState({ collection }),
-          (error) => this.patchState({ error })
-        )
+            return this._collectionSocketService
+              .collectionChanges(collectionId)
+              .pipe(startWith(collection));
+          })
+        );
+      }),
+      tapResponse(
+        (collection) => this.patchState({ collection }),
+        (error) => this.patchState({ error })
       )
+    )
   );
 
   protected readonly openTab = this.effect(() =>

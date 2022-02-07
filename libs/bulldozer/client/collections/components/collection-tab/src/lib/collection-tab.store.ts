@@ -44,7 +44,7 @@ export class CollectionTabStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._collectionApiService.findByPublicKey(collectionId).pipe(
+        return this._collectionApiService.findById(collectionId).pipe(
           concatMap((collection) => {
             if (!collection) {
               return of(null);

@@ -19,15 +19,15 @@ export class InstructionRelationSocketService {
   ) {}
 
   instructionRelationChanges(
-    instructionRelationPublicKey: string
+    instructionRelationId: string
   ): Observable<Relation<InstructionRelation> | null> {
     return this._ngxSolanaSocketService
-      .onAccountChange(instructionRelationPublicKey)
+      .onAccountChange(instructionRelationId)
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createInstructionRelationRelation(
-                new PublicKey(instructionRelationPublicKey),
+                new PublicKey(instructionRelationId),
                 accountInfo
               )
             : null

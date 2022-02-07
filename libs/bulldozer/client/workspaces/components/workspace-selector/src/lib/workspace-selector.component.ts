@@ -5,7 +5,6 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
-import { WorkspaceStore } from '@heavy-duty/bulldozer-store';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -14,9 +13,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
     <ng-container *ngrxLet="workspace$; let activeWorkspace">
       <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
         {{
-          activeWorkspace === undefined
-            ? 'Select workspace'
-            : activeWorkspace?.name
+          activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
         }}
       </button>
       <mat-menu #menu="matMenu" class="px-4 py-2">
@@ -115,15 +112,14 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
   @Input() connected = false;
-  @Input() set workspaceId(value: string | undefined) {
+  @Input() set workspaceId(value: string | null) {
     this._workspaceSelectorStore.setWorkspaceId(value);
   }
   readonly workspace$ = this._workspaceSelectorStore.workspace$;
-  readonly workspaces$ = this._workspaceStore.workspaces$;
+  readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
 
   constructor(
-    private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
-    private readonly _workspaceStore: WorkspaceStore
+    private readonly _workspaceSelectorStore: WorkspaceSelectorStore
   ) {}
 
   private _closeMenu() {
@@ -134,21 +130,24 @@ export class WorkspaceSelectorComponent {
 
   onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspaceStore.createWorkspace(workspaceName);
+    this._workspaceSelectorStore.createWorkspace({ workspaceName });
   }
 
   onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspaceStore.updateWorkspace({ workspaceId, workspaceName });
+    this._workspaceSelectorStore.updateWorkspace({
+      workspaceId,
+      workspaceName,
+    });
   }
 
   onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceStore.deleteWorkspace(workspaceId);
+    this._workspaceSelectorStore.deleteWorkspace({ workspaceId });
   }
 
   onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceStore.downloadWorkspace(workspaceId);
+    this._workspaceSelectorStore.downloadWorkspace({ workspaceId });
   }
 }

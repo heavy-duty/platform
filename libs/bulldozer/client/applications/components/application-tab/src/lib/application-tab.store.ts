@@ -44,7 +44,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
           return of(null);
         }
 
-        return this._applicationApiService.findByPublicKey(applicationId).pipe(
+        return this._applicationApiService.findById(applicationId).pipe(
           concatMap((application) => {
             if (!application) {
               return of(null);

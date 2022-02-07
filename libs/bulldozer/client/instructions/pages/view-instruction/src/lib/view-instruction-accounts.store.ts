@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   InstructionAccountApiService,
   InstructionAccountSocketService,
@@ -16,7 +15,6 @@ import {
   EMPTY,
   filter,
   first,
-  map,
   mergeMap,
   Observable,
   of,
@@ -26,6 +24,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
   loading: boolean;
@@ -58,8 +57,8 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionAccountSocketService: InstructionAccountSocketService,
-    private readonly _walletStore: WalletStore,
-    private readonly _route: ActivatedRoute
+    private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
@@ -141,8 +140,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
   );
 
   protected readonly handleInstructionAccountCreated = this.effect(() =>
-    this._route.paramMap.pipe(
-      map((paramMap) => paramMap.get('instructionId')),
+    this._viewInstructionRouteStore.instructionId$.pipe(
       switchMap((instructionId) => {
         if (instructionId === null) {
           return of(null);
@@ -166,8 +164,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
   );
 
   protected readonly loadInstructionAccounts = this.effect(() =>
-    this._route.paramMap.pipe(
-      map((paramMap) => paramMap.get('instructionId')),
+    this._viewInstructionRouteStore.instructionId$.pipe(
       tap(() => this.patchState({ loading: true })),
       switchMap((instructionId) => {
         if (instructionId === null) {
@@ -210,15 +207,9 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(
             withLatestFrom(
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('workspaceId'))
-              ),
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('applicationId'))
-              ),
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('instructionId'))
-              ),
+              this._viewInstructionRouteStore.workspaceId$,
+              this._viewInstructionRouteStore.applicationId$,
+              this._viewInstructionRouteStore.instructionId$,
               this._walletStore.publicKey$
             )
           )
@@ -285,9 +276,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(
             withLatestFrom(
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('instructionId'))
-              ),
+              this._viewInstructionRouteStore.instructionId$,
               this._walletStore.publicKey$
             )
           )

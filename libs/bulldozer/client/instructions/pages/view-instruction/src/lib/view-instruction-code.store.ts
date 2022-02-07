@@ -84,6 +84,7 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
         this._viewInstructionRelationsStore.instructionRelations$,
       collections: this._viewCollectionsStore.collections$,
     }).pipe(
+      tap((a) => console.log(a)),
       tap(
         ({
           instruction,

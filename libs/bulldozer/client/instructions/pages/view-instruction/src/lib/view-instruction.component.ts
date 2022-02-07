@@ -12,6 +12,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 import { ViewInstructionCodeStore } from './view-instruction-code.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
 import { ViewInstructionRelationsStore } from './view-instruction-relations.store';
+import { ViewInstructionRouteStore } from './view-instruction-route.store';
 import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 import { ViewInstructionStore } from './view-instruction.store';
 
@@ -39,6 +40,8 @@ import { ViewInstructionStore } from './view-instruction.store';
           <bd-instruction-documents-list
             class="block mb-4"
             [connected]="(connected$ | ngrxPush) ?? false"
+            [collections]="(collections$ | ngrxPush) ?? null"
+            [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
             (createInstructionDocument)="onCreateInstructionAccount($event)"
             (updateInstructionDocument)="onUpdateInstructionAccount($event)"
@@ -100,20 +103,25 @@ import { ViewInstructionStore } from './view-instruction.store';
   providers: [
     ViewInstructionStore,
     ViewInstructionArgumentsStore,
+    ViewInstructionAccountsStore,
     ViewCollectionsStore,
     ViewInstructionRelationsStore,
     ViewInstructionDocumentsStore,
     ViewInstructionSignersStore,
     ViewInstructionCodeStore,
+    ViewInstructionRouteStore,
   ],
 })
 export class ViewInstructionComponent {
   @HostBinding('class') class = 'block';
   instructionBody = '';
   readonly connected$ = this._walletStore.connected$;
+  readonly collections$ = this._viewCollectionsStore.collections$;
   readonly instruction$ = this._viewInstructionStore.instruction$;
   readonly instructionArguments$ =
     this._viewInstructionArgumentsStore.instructionArguments$;
+  readonly instructionAccounts$ =
+    this._viewInstructionAccountsStore.instructionAccounts$;
   readonly instructionDocuments$ =
     this._viewInstructionDocumentsStore.instructionDocuments$;
   readonly instructionSigners$ =
@@ -133,7 +141,8 @@ export class ViewInstructionComponent {
     private readonly _viewInstructionAccountsStore: ViewInstructionAccountsStore,
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore,
-    private readonly _viewInstructionRelationsStore: ViewInstructionRelationsStore
+    private readonly _viewInstructionRelationsStore: ViewInstructionRelationsStore,
+    private readonly _viewCollectionsStore: ViewCollectionsStore
   ) {}
 
   onUpdateInstructionBody(instruction: Document<Instruction>) {
@@ -163,6 +172,7 @@ export class ViewInstructionComponent {
   }
 
   onCreateInstructionAccount(instructionAccountDto: InstructionAccountDto) {
+    console.log('am I called?');
     this._viewInstructionAccountsStore.createInstructionAccount({
       instructionAccountDto,
     });

@@ -143,7 +143,6 @@ import {
                           mat-menu-item
                           bdEditInstructionRelationTrigger
                           [instructionRelation]="relation"
-                          [collections]="collections"
                           [instructionAccounts]="instructionAccounts"
                           [from]="instructionDocument.id"
                           (editInstructionRelation)="
@@ -190,7 +189,6 @@ import {
                 <button
                   mat-menu-item
                   bdEditInstructionRelationTrigger
-                  [collections]="collections"
                   [instructionAccounts]="instructionAccounts"
                   [from]="instructionDocument.id"
                   (editInstructionRelation)="

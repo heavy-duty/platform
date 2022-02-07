@@ -3,6 +3,7 @@ import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
+import { ViewCollectionRouteStore } from './view-collection-route.store';
 import { ViewCollectionStore } from './view-collection.store';
 
 @Component({
@@ -44,6 +45,7 @@ import { ViewCollectionStore } from './view-collection.store';
     ViewCollectionStore,
     ViewCollectionAttributesStore,
     ViewCollectionCodeStore,
+    ViewCollectionRouteStore,
   ],
 })
 export class ViewCollectionComponent {

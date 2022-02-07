@@ -7,7 +7,7 @@ import {
   InstructionRelation,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { capitalize } from '../utils';
+import { capitalize, FormattedName } from '../utils';
 import { formatName } from './format-name';
 
 const getArgumentKindName = (id: number, name: string, size: number) => {
@@ -65,7 +65,7 @@ const getInstructionAccountRelations = (
       );
 
       if (!toAccount) {
-        throw Error('Relation references uknown account');
+        return null;
       }
 
       return {
@@ -78,7 +78,16 @@ const getInstructionAccountRelations = (
           },
         },
       };
-    });
+    })
+    .filter(
+      (
+        relation
+      ): relation is Relation<InstructionRelation> & {
+        data: {
+          toAccount: Document<InstructionAccount> & { name: FormattedName };
+        };
+      } => relation !== null
+    );
 };
 
 const getInstructionAccountPayer = (
@@ -94,7 +103,7 @@ const getInstructionAccountPayer = (
   );
 
   if (!payerAccount) {
-    throw Error('Payer references uknown account');
+    return null;
   }
 
   return {
@@ -116,7 +125,7 @@ const getInstructionAccountCollection = (
   );
 
   if (!collectionAccount) {
-    throw Error('Collection references uknown account');
+    return null;
   }
 
   return {
@@ -138,7 +147,7 @@ const getInstructionAccountClose = (
   );
 
   if (!closeAccount) {
-    throw Error('Close references uknown account');
+    return null;
   }
 
   return {

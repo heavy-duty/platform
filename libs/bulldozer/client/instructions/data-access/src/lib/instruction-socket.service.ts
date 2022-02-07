@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
-  COLLECTION_ACCOUNT_NAME,
   createInstructionDocument,
   Document,
   encodeFilters,
   Instruction,
   InstructionFilters,
+  INSTRUCTION_ACCOUNT_NAME,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
 import { PublicKey } from '@solana/web3.js';
@@ -19,15 +19,15 @@ export class InstructionSocketService {
   ) {}
 
   instructionChanges(
-    instructionPublicKey: string
+    instructionId: string
   ): Observable<Document<Instruction> | null> {
     return this._ngxSolanaSocketService
-      .onAccountChange(instructionPublicKey)
+      .onAccountChange(instructionId)
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createInstructionDocument(
-                new PublicKey(instructionPublicKey),
+                new PublicKey(instructionId),
                 accountInfo
               )
             : null
@@ -38,7 +38,7 @@ export class InstructionSocketService {
   instructionCreated(filters: InstructionFilters) {
     return this._ngxSolanaSocketService
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(COLLECTION_ACCOUNT_NAME, filters),
+        filters: encodeFilters(INSTRUCTION_ACCOUNT_NAME, filters),
         commitment: 'finalized',
       })
       .pipe(

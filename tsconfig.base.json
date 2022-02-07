@@ -131,6 +131,9 @@
       "@bulldozer-client/workspace-tab": [
         "libs/bulldozer/client/workspaces/components/workspace-tab/src/index.ts"
       ],
+      "@bulldozer-client/workspaces-data-access": [
+        "libs/bulldozer/client/workspaces/data-access/src/index.ts"
+      ],
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],

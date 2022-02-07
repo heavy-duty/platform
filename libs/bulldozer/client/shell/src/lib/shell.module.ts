@@ -12,9 +12,11 @@ import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { CollectionTabModule } from '@bulldozer-client/collection-tab';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
+import { InstructionTabModule } from '@bulldozer-client/instruction-tab';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { WorkspaceTabModule } from '@bulldozer-client/workspace-tab';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ShellComponent } from './shell.component';
@@ -84,8 +86,10 @@ import { ShellComponent } from './shell.component';
     DarkThemeSwitchModule,
     WorkspaceExplorerModule,
     WorkspaceSelectorModule,
+    WorkspaceTabModule,
     ApplicationTabModule,
     CollectionTabModule,
+    InstructionTabModule,
   ],
   providers: [AuthGuard],
 })

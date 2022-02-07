@@ -38,19 +38,14 @@ export class ApplicationApiService {
   }
 
   // get application
-  findByPublicKey(
-    applicationPublicKey: string
-  ): Observable<Document<Application> | null> {
+  findById(applicationId: string): Observable<Document<Application> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(applicationPublicKey)
+      .getAccountInfo(applicationId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
-            createApplicationDocument(
-              new PublicKey(applicationPublicKey),
-              accountInfo
-            )
+            createApplicationDocument(new PublicKey(applicationId), accountInfo)
         )
       );
   }

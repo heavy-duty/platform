@@ -3,8 +3,10 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  OnInit,
   Output,
 } from '@angular/core';
+import { filter, first, pairwise } from 'rxjs';
 import { CollectionTabStore } from './collection-tab.store';
 
 @Component({
@@ -12,7 +14,7 @@ import { CollectionTabStore } from './collection-tab.store';
   template: `
     <div
       *ngIf="collection$ | ngrxPush as collection"
-      class="flex items-center justify-between p-0"
+      class="flex items-stretch p-0"
     >
       <a
         [routerLink]="[
@@ -23,6 +25,7 @@ import { CollectionTabStore } from './collection-tab.store';
           'collections',
           collection.id
         ]"
+        class="flex items-center pl-4 flex-grow"
       >
         {{ collection.name }}
       </a>
@@ -37,7 +40,7 @@ import { CollectionTabStore } from './collection-tab.store';
   `,
   providers: [CollectionTabStore],
 })
-export class CollectionTabComponent {
+export class CollectionTabComponent implements OnInit {
   @HostBinding('class') class = 'block w-full';
   @Input() set collectionId(value: string | null) {
     this._collectionTabStore.setCollectionId(value);
@@ -46,6 +49,16 @@ export class CollectionTabComponent {
   readonly collection$ = this._collectionTabStore.collection$;
 
   constructor(private readonly _collectionTabStore: CollectionTabStore) {}
+
+  ngOnInit() {
+    this.collection$
+      .pipe(
+        pairwise(),
+        filter(([, collection]) => collection === null),
+        first()
+      )
+      .subscribe(() => this.onCloseTab());
+  }
 
   onCloseTab() {
     this.closeTab.emit();

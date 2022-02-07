@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   CollectionAttributeApiService,
   CollectionAttributeSocketService,
@@ -16,7 +15,6 @@ import {
   EMPTY,
   filter,
   first,
-  map,
   mergeMap,
   Observable,
   of,
@@ -26,6 +24,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewCollectionRouteStore } from './view-collection-route.store';
 
 interface ViewModel {
   loading: boolean;
@@ -58,8 +57,8 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _collectionAttributeApiService: CollectionAttributeApiService,
     private readonly _collectionAttributeSocketService: CollectionAttributeSocketService,
-    private readonly _walletStore: WalletStore,
-    private readonly _route: ActivatedRoute
+    private readonly _viewCollectionRouteStore: ViewCollectionRouteStore,
+    private readonly _walletStore: WalletStore
   ) {
     super(initialState);
   }
@@ -141,8 +140,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   );
 
   protected readonly handleCollectionAttributeCreated = this.effect(() =>
-    this._route.paramMap.pipe(
-      map((paramMap) => paramMap.get('collectionId')),
+    this._viewCollectionRouteStore.collectionId$.pipe(
       switchMap((collectionId) => {
         if (collectionId === null) {
           return of(null);
@@ -166,8 +164,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   );
 
   protected readonly loadCollectionAttributes = this.effect(() =>
-    this._route.paramMap.pipe(
-      map((paramMap) => paramMap.get('collectionId')),
+    this._viewCollectionRouteStore.collectionId$.pipe(
       tap(() => this.patchState({ loading: true })),
       switchMap((collectionId) => {
         if (collectionId === null) {
@@ -210,15 +207,9 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(
             withLatestFrom(
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('workspaceId'))
-              ),
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('applicationId'))
-              ),
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('collectionId'))
-              ),
+              this._viewCollectionRouteStore.workspaceId$,
+              this._viewCollectionRouteStore.applicationId$,
+              this._viewCollectionRouteStore.collectionId$,
               this._walletStore.publicKey$
             )
           )
@@ -285,9 +276,7 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(
             withLatestFrom(
-              this._route.paramMap.pipe(
-                map((paramMap) => paramMap.get('collectionId'))
-              ),
+              this._viewCollectionRouteStore.collectionId$,
               this._walletStore.publicKey$
             )
           )

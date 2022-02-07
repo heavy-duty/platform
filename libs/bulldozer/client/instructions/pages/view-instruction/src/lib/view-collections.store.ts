@@ -20,16 +20,12 @@ import { ViewInstructionStore } from './view-instruction.store';
 
 interface ViewModel {
   loading: boolean;
-  workspaceId: string | null;
-  applicationId: string | null;
   collectionsMap: Map<string, Document<Collection>>;
   error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  workspaceId: null,
-  applicationId: null,
   collectionsMap: new Map<string, Document<Collection>>(),
   error: null,
 };

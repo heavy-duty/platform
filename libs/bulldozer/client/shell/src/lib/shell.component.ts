@@ -30,6 +30,7 @@ import { ShellStore } from './shell.store';
             <bd-workspace-selector
               class="mr-6"
               [connected]="(connected$ | ngrxPush) ?? false"
+              [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -49,6 +50,12 @@ import { ShellStore } from './shell.store';
             [active]="(selectedTab$ | ngrxPush) === tab.id"
           >
             <ng-container [ngSwitch]="tab.kind">
+              <bd-workspace-tab
+                *ngSwitchCase="'workspace'"
+                [workspaceId]="tab.id"
+                (closeTab)="onCloseTab(tab.id)"
+                bdStopPropagation
+              ></bd-workspace-tab>
               <bd-application-tab
                 *ngSwitchCase="'application'"
                 [applicationId]="tab.id"
@@ -61,6 +68,12 @@ import { ShellStore } from './shell.store';
                 (closeTab)="onCloseTab(tab.id)"
                 bdStopPropagation
               ></bd-collection-tab>
+              <bd-instruction-tab
+                *ngSwitchCase="'instruction'"
+                [instructionId]="tab.id"
+                (closeTab)="onCloseTab(tab.id)"
+                bdStopPropagation
+              ></bd-instruction-tab>
             </ng-container>
           </div>
         </nav>

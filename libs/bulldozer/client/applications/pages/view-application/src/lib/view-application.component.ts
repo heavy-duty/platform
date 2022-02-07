@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ViewApplicationRouteStore } from './view-application-route.store';
 import { ViewApplicationStore } from './view-application.store';
 
 @Component({
@@ -17,7 +18,7 @@ import { ViewApplicationStore } from './view-application.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ViewApplicationStore],
+  providers: [ViewApplicationStore, ViewApplicationRouteStore],
 })
 export class ViewApplicationComponent {
   @HostBinding('class') class = 'block p-4';

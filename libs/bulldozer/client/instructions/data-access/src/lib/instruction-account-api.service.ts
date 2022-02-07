@@ -38,17 +38,17 @@ export class InstructionAccountApiService {
   }
 
   // get instruction account
-  findByPublicKey(
-    instructionAccountPublicKey: string
+  findById(
+    instructionAccountId: string
   ): Observable<Document<InstructionAccount> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(instructionAccountPublicKey)
+      .getAccountInfo(instructionAccountId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
             createInstructionAccountDocument(
-              new PublicKey(instructionAccountPublicKey),
+              new PublicKey(instructionAccountId),
               accountInfo
             )
         )

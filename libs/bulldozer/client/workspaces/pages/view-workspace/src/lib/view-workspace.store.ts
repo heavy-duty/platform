@@ -1,53 +1,74 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
 import {
-  BulldozerProgramStore,
-  WorkspaceStore,
-} from '@heavy-duty/bulldozer-store';
+  WorkspaceApiService,
+  WorkspaceSocketService,
+} from '@bulldozer-client/workspaces-data-access';
+import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
-import { ComponentStore } from '@ngrx/component-store';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { concatMap, of, startWith, switchMap, tap } from 'rxjs';
+import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
+
+interface ViewModel {
+  workspace: Document<Workspace> | null;
+  error: unknown | null;
+}
+
+const initialState: ViewModel = {
+  workspace: null,
+  error: null,
+};
 
 @Injectable()
-export class ViewWorkspaceStore extends ComponentStore<object> {
-  readonly workspace$ = this.select(
-    this._bulldozerProgramStore.workspaceId$,
-    this._workspaceStore.workspaces$,
-    (workspaceId, workspaces) =>
-      workspaces.find((workspace) => workspace.id === workspaceId)
-  );
+export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
+  readonly workspace$ = this.select(({ workspace }) => workspace);
 
   constructor(
-    private readonly _bulldozerProgramStore: BulldozerProgramStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _router: Router,
-    private readonly _tabStore: TabStore
+    private readonly _tabStore: TabStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
+    private readonly _workspaceSocketService: WorkspaceSocketService,
+    private readonly _viewWorkspaceRouteStore: ViewWorkspaceRouteStore
   ) {
-    super({});
+    super(initialState);
   }
 
-  /* readonly openTab$ = this.effect(() =>
-    combineLatest([
-      this._router.events.pipe(
-        filter(
-          (event): event is NavigationStart => event instanceof NavigationStart
-        ),
-        map((event) => event.url),
-        startWith(this._router.routerState.snapshot.url),
-        map((url) => url.split('/').filter((segment) => segment)),
-        filter(
-          (urlAsArray) =>
-            urlAsArray.length === 2 && urlAsArray[0] === 'workspaces'
-        )
-      ),
-      this.workspace$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      tap(([, workspace]) =>
+  protected readonly loadWorkspace = this.effect(() =>
+    this._viewWorkspaceRouteStore.workspaceId$.pipe(
+      switchMap((workspaceId) => {
+        if (workspaceId === null) {
+          return of(null);
+        }
+
+        return this._workspaceApiService.findById(workspaceId).pipe(
+          concatMap((workspace) => {
+            if (!workspace) {
+              return of(null);
+            }
+
+            return this._workspaceSocketService
+              .workspaceChanges(workspaceId)
+              .pipe(startWith(workspace));
+          })
+        );
+      }),
+      tapResponse(
+        (workspace) => this.patchState({ workspace }),
+        (error) => this.patchState({ error })
+      )
+    )
+  );
+
+  protected readonly openTab = this.effect(() =>
+    this.workspace$.pipe(
+      isNotNullOrUndefined,
+      tap((workspace) =>
         this._tabStore.openTab({
           id: workspace.id,
-          label: workspace.name,
+          kind: 'workspace',
           url: `/workspaces/${workspace.id}`,
         })
       )
     )
-  ); */
+  );
 }

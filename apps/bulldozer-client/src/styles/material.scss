@@ -117,15 +117,6 @@ mat-icon {
   }
 }
 
-.mat-tab-link a {
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
-  padding-left: 1rem;
-  text-align: left;
-  height: 100%;
-}
-
 .mat-fab.cdk-keyboard-focused,
 .mat-mini-fab.cdk-keyboard-focused {
   transform: scale(1.5);

@@ -21,11 +21,9 @@ export class EditInstructionDocumentTriggerDirective {
   @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
   @Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {
-    if (
-      !this.collections ||
-      !this.instructionAccounts ||
-      !this.instructionDocument
-    ) {
+    console.log(this);
+
+    if (!this.collections || !this.instructionAccounts) {
       return;
     }
 
@@ -33,7 +31,7 @@ export class EditInstructionDocumentTriggerDirective {
       .open<
         EditInstructionDocumentComponent,
         {
-          document?: Document<InstructionAccount>;
+          document: Document<InstructionAccount> | null;
           collections: Document<Collection>[];
           accounts: Document<InstructionAccount>[];
         },

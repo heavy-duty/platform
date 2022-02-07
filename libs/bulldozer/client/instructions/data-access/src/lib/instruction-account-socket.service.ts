@@ -19,15 +19,15 @@ export class InstructionAccountSocketService {
   ) {}
 
   instructionAccountChanges(
-    instructionAccountPublicKey: string
+    instructionAccountId: string
   ): Observable<Document<InstructionAccount> | null> {
     return this._ngxSolanaSocketService
-      .onAccountChange(instructionAccountPublicKey)
+      .onAccountChange(instructionAccountId)
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createInstructionAccountDocument(
-                new PublicKey(instructionAccountPublicKey),
+                new PublicKey(instructionAccountId),
                 accountInfo
               )
             : null

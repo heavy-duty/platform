@@ -19,15 +19,15 @@ export class ApplicationSocketService {
   ) {}
 
   applicationChanges(
-    applicationPublicKey: string
+    applicationId: string
   ): Observable<Document<Application> | null> {
     return this._ngxSolanaSocketService
-      .onAccountChange(applicationPublicKey)
+      .onAccountChange(applicationId)
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createApplicationDocument(
-                new PublicKey(applicationPublicKey),
+                new PublicKey(applicationId),
                 accountInfo
               )
             : null

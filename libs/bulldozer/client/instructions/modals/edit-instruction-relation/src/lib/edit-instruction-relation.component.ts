@@ -14,7 +14,6 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {
-  Collection,
   Document,
   InstructionAccount,
   InstructionRelation,
@@ -115,7 +114,6 @@ export class EditInstructionRelationComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     public data: {
       relation?: Relation<InstructionRelation>;
-      collections: Document<Collection>[];
       accounts: Document<InstructionAccount>[];
       from: string;
     }

@@ -22,7 +22,7 @@ import { map, Observable } from 'rxjs';
 export class CollectionAttributeApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
 
-  // get collections
+  // get collection attributes
   find(filters: CollectionAttributeFilters) {
     return this._ngxSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
@@ -37,29 +37,29 @@ export class CollectionAttributeApiService {
       );
   }
 
-  // get collection
-  findByPublicKey(
-    collectionPublicKey: string
+  // get collection attribute
+  findById(
+    collectionAttributeId: string
   ): Observable<Document<CollectionAttribute> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(collectionPublicKey)
+      .getAccountInfo(collectionAttributeId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
             createCollectionAttributeDocument(
-              new PublicKey(collectionPublicKey),
+              new PublicKey(collectionAttributeId),
               accountInfo
             )
         )
       );
   }
 
-  // create collection
+  // create collection attribute
   create(
     params: Omit<CreateCollectionAttributeParams, 'collectionAttributeId'>
   ) {
-    const collectionKeypair = Keypair.generate();
+    const collectionAttributeKeypair = Keypair.generate();
 
     return this._ngxSolanaApiService.createAndSendTransaction(
       params.authority,
@@ -67,16 +67,17 @@ export class CollectionAttributeApiService {
         transaction.add(
           createCreateCollectionAttributeInstruction2({
             ...params,
-            collectionAttributeId: collectionKeypair.publicKey.toBase58(),
+            collectionAttributeId:
+              collectionAttributeKeypair.publicKey.toBase58(),
           })
         );
-        transaction.partialSign(collectionKeypair);
+        transaction.partialSign(collectionAttributeKeypair);
         return transaction;
       }
     );
   }
 
-  // update collection
+  // update collection attribute
   update(params: UpdateCollectionAttributeParams) {
     return this._ngxSolanaApiService.createAndSendTransaction(
       params.authority,
@@ -85,7 +86,7 @@ export class CollectionAttributeApiService {
     );
   }
 
-  // delete collection
+  // delete collection attribute
   delete(params: DeleteCollectionAttributeParams) {
     return this._ngxSolanaApiService.createAndSendTransaction(
       params.authority,

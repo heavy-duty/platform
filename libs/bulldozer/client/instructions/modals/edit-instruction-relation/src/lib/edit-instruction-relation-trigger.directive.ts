@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {
-  Collection,
   Document,
   InstructionAccount,
   InstructionRelation,
@@ -19,18 +18,12 @@ import { EditInstructionRelationComponent } from './edit-instruction-relation.co
 @Directive({ selector: '[bdEditInstructionRelationTrigger]' })
 export class EditInstructionRelationTriggerDirective {
   @Input() instructionRelation: Relation<InstructionRelation> | null = null;
-  @Input() collections: Document<Collection>[] | null = null;
   @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =
     new EventEmitter<InstructionRelationDto>();
   @HostListener('click') onClick(): void {
-    if (
-      !this.collections ||
-      !this.instructionAccounts ||
-      !this.from ||
-      !this.instructionRelation
-    ) {
+    if (!this.instructionAccounts || !this.from) {
       return;
     }
 
@@ -38,8 +31,7 @@ export class EditInstructionRelationTriggerDirective {
       .open<
         EditInstructionRelationComponent,
         {
-          relation?: Relation<InstructionRelation>;
-          collections: Document<Collection>[];
+          relation: Relation<InstructionRelation> | null;
           accounts: Document<InstructionAccount>[];
           from: string;
         },
@@ -47,7 +39,6 @@ export class EditInstructionRelationTriggerDirective {
       >(EditInstructionRelationComponent, {
         data: {
           relation: this.instructionRelation,
-          collections: this.collections,
           accounts: this.instructionAccounts,
           from: this.from,
         },

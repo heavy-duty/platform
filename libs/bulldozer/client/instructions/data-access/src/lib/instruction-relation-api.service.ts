@@ -39,17 +39,17 @@ export class InstructionRelationApiService {
   }
 
   // get instruction
-  findByPublicKey(
-    instructionRelationPublicKey: string
+  findById(
+    instructionRelationId: string
   ): Observable<Relation<InstructionRelation> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(instructionRelationPublicKey)
+      .getAccountInfo(instructionRelationId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
             createInstructionRelationRelation(
-              new PublicKey(instructionRelationPublicKey),
+              new PublicKey(instructionRelationId),
               accountInfo
             )
         )

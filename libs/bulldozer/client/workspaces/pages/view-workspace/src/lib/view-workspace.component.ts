@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
@@ -17,7 +18,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ViewWorkspaceStore],
+  providers: [ViewWorkspaceStore, ViewWorkspaceRouteStore],
 })
 export class ViewWorkspaceComponent {
   @HostBinding('class') class = 'block p-4';

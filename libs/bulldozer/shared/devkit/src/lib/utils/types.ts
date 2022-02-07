@@ -43,6 +43,23 @@ export interface Application {
   workspace: string;
 }
 
+export interface CreateWorkspaceParams {
+  workspaceId: string;
+  authority: string;
+  workspaceName: string;
+}
+
+export interface UpdateWorkspaceParams {
+  authority: string;
+  workspaceId: string;
+  workspaceName: string;
+}
+
+export interface DeleteWorkspaceParams {
+  authority: string;
+  workspaceId: string;
+}
+
 export interface CreateApplicationParams {
   workspaceId: string;
   authority: string;

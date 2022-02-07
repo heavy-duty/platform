@@ -38,19 +38,14 @@ export class CollectionApiService {
   }
 
   // get collection
-  findByPublicKey(
-    collectionPublicKey: string
-  ): Observable<Document<Collection> | null> {
+  findById(collectionId: string): Observable<Document<Collection> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(collectionPublicKey)
+      .getAccountInfo(collectionId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
-            createCollectionDocument(
-              new PublicKey(collectionPublicKey),
-              accountInfo
-            )
+            createCollectionDocument(new PublicKey(collectionId), accountInfo)
         )
       );
   }

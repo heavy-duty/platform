@@ -40,19 +40,14 @@ export class InstructionApiService {
   }
 
   // get instruction
-  findByPublicKey(
-    instructionPublicKey: string
-  ): Observable<Document<Instruction> | null> {
+  findById(instructionId: string): Observable<Document<Instruction> | null> {
     return this._ngxSolanaApiService
-      .getAccountInfo(instructionPublicKey)
+      .getAccountInfo(instructionId)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
-            createInstructionDocument(
-              new PublicKey(instructionPublicKey),
-              accountInfo
-            )
+            createInstructionDocument(new PublicKey(instructionId), accountInfo)
         )
       );
   }

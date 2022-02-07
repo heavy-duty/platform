@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
   InstructionApiService,
   InstructionSocketService,
@@ -12,7 +11,6 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   concatMap,
   EMPTY,
-  map,
   Observable,
   of,
   startWith,
@@ -20,13 +18,16 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
+  instructionId: string | null;
   instruction: Document<Instruction> | null;
   error: unknown | null;
 }
 
 const initialState: ViewModel = {
+  instructionId: null,
   instruction: null,
   error: null,
 };
@@ -36,48 +37,39 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
   readonly instruction$ = this.select(({ instruction }) => instruction);
 
   constructor(
-    private readonly _route: ActivatedRoute,
     private readonly _tabStore: TabStore,
     private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService
+    private readonly _instructionSocketService: InstructionSocketService,
+    private readonly _viewInstructionRouteStore: ViewInstructionRouteStore
   ) {
     super(initialState);
-
-    this.loadInstruction(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
-      )
-    );
   }
 
-  protected readonly loadInstruction = this.effect(
-    (instructionId$: Observable<string | null>) =>
-      instructionId$.pipe(
-        switchMap((instructionId) => {
-          if (instructionId === null) {
-            return of(null);
-          }
+  protected readonly loadInstruction = this.effect(() =>
+    this._viewInstructionRouteStore.instructionId$.pipe(
+      switchMap((instructionId) => {
+        if (instructionId === null) {
+          return of(null);
+        }
 
-          return this._instructionApiService
-            .findByPublicKey(instructionId)
-            .pipe(
-              concatMap((instruction) => {
-                if (!instruction) {
-                  return of(null);
-                }
+        return this._instructionApiService.findById(instructionId).pipe(
+          concatMap((instruction) => {
+            if (!instruction) {
+              return of(null);
+            }
 
-                return this._instructionSocketService
-                  .instructionChanges(instructionId)
-                  .pipe(startWith(instruction));
-              })
-            );
-        }),
-        tapResponse(
-          (instruction) => this.patchState({ instruction }),
-          (error) => this.patchState({ error })
-        )
+            return this._instructionSocketService
+              .instructionChanges(instructionId)
+              .pipe(startWith(instruction));
+          })
+        );
+      }),
+      tapResponse(
+        (instruction) => this.patchState({ instruction }),
+        (error) => this.patchState({ error })
       )
+    )
   );
 
   protected readonly openTab = this.effect(() =>

@@ -19,15 +19,15 @@ export class CollectionAttributeSocketService {
   ) {}
 
   collectionAttributeChanges(
-    collectionAttributePublicKey: string
+    collectionAttributeId: string
   ): Observable<Document<CollectionAttribute> | null> {
     return this._ngxSolanaSocketService
-      .onAccountChange(collectionAttributePublicKey)
+      .onAccountChange(collectionAttributeId)
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createCollectionAttributeDocument(
-                new PublicKey(collectionAttributePublicKey),
+                new PublicKey(collectionAttributeId),
                 accountInfo
               )
             : null
