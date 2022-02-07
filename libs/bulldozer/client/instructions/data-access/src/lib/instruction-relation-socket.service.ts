@@ -5,7 +5,7 @@ import {
   encodeFilters,
   InstructionRelation,
   InstructionRelationFilters,
-  INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
+  INSTRUCTION_RELATION_ACCOUNT_NAME,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
@@ -40,7 +40,7 @@ export class InstructionRelationSocketService {
   ): Observable<Relation<InstructionRelation>> {
     return this._ngxSolanaSocketService
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_ACCOUNT_ACCOUNT_NAME, filters),
+        filters: encodeFilters(INSTRUCTION_RELATION_ACCOUNT_NAME, filters),
         commitment: 'finalized',
       })
       .pipe(
