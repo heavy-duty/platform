@@ -4,8 +4,8 @@ import {
   InstructionSocketService,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notification-store';
+import { TabStore } from '@bulldozer-client/tab-store';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';

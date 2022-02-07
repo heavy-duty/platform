@@ -1,10 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ConfigStore } from '@bulldozer-client/config-store';
 import { NotificationStore } from '@bulldozer-client/notification-store';
-import {
-  RouteStore,
-  TabStore,
-} from '@heavy-duty/bulldozer/application/data-access';
+import { TabStore } from '@bulldozer-client/tab-store';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 
 @Component({
@@ -41,47 +38,17 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
           </div>
         </mat-toolbar>
 
-        <nav mat-tab-nav-bar>
-          <div
-            mat-tab-link
-            class="flex items-center justify-between p-0"
-            *ngFor="let tab of tabs$ | ngrxPush"
-            [active]="(selectedTab$ | ngrxPush) === tab.id"
-          >
-            <ng-container [ngSwitch]="tab.kind">
-              <bd-workspace-tab
-                *ngSwitchCase="'workspace'"
-                [workspaceId]="tab.id"
-                (closeTab)="onCloseTab(tab.id)"
-                bdStopPropagation
-              ></bd-workspace-tab>
-              <bd-application-tab
-                *ngSwitchCase="'application'"
-                [applicationId]="tab.id"
-                (closeTab)="onCloseTab(tab.id)"
-                bdStopPropagation
-              ></bd-application-tab>
-              <bd-collection-tab
-                *ngSwitchCase="'collection'"
-                [collectionId]="tab.id"
-                (closeTab)="onCloseTab(tab.id)"
-                bdStopPropagation
-              ></bd-collection-tab>
-              <bd-instruction-tab
-                *ngSwitchCase="'instruction'"
-                [instructionId]="tab.id"
-                (closeTab)="onCloseTab(tab.id)"
-                bdStopPropagation
-              ></bd-instruction-tab>
-            </ng-container>
-          </div>
-        </nav>
+        <bd-tab-list
+          [tabs]="(tabs$ | ngrxPush) ?? null"
+          [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
+          (closeTab)="onCloseTab($event)"
+        ></bd-tab-list>
 
         <router-outlet></router-outlet>
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [TabStore, RouteStore, NotificationStore, ConfigStore],
+  providers: [TabStore, NotificationStore, ConfigStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent {

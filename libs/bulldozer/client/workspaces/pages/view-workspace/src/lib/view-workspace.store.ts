@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notification-store';
+import { TabStore } from '@bulldozer-client/tab-store';
 import {
   WorkspaceApiService,
   WorkspaceSocketService,
 } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';

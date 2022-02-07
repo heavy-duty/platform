@@ -116,6 +116,12 @@
       "@bulldozer-client/stop-propagation": [
         "libs/bulldozer/client/shared/directives/stop-propagation/src/index.ts"
       ],
+      "@bulldozer-client/tab-list": [
+        "libs/bulldozer/client/shared/components/tab-list/src/index.ts"
+      ],
+      "@bulldozer-client/tab-store": [
+        "libs/bulldozer/client/shared/stores/tab-store/src/index.ts"
+      ],
       "@bulldozer-client/view-application": [
         "libs/bulldozer/client/applications/pages/view-application/src/index.ts"
       ],
