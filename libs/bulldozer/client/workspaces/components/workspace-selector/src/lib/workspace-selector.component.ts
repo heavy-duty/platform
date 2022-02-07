@@ -5,6 +5,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
+import { ConfigStore } from '@bulldozer-client/config-store';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -57,6 +58,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                       activeWorkspace?.id !== workspace.id,
                     'opacity-50 italic': activeWorkspace?.id === workspace.id
                   }"
+                  (click)="onActivateWorkspace(workspace.id)"
                 >
                   {{
                     activeWorkspace?.id === workspace.id ? 'Active' : 'Activate'
@@ -112,14 +114,12 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
   @Input() connected = false;
-  @Input() set workspaceId(value: string | null) {
-    this._workspaceSelectorStore.setWorkspaceId(value);
-  }
   readonly workspace$ = this._workspaceSelectorStore.workspace$;
   readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
 
   constructor(
-    private readonly _workspaceSelectorStore: WorkspaceSelectorStore
+    private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
+    private readonly _configStore: ConfigStore
   ) {}
 
   private _closeMenu() {
@@ -149,5 +149,9 @@ export class WorkspaceSelectorComponent {
   onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
     this._workspaceSelectorStore.downloadWorkspace({ workspaceId });
+  }
+
+  onActivateWorkspace(workspaceId: string) {
+    this._configStore.setWorkspaceId(workspaceId);
   }
 }

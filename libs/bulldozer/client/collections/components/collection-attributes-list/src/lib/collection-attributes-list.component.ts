@@ -96,7 +96,12 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteCollectionAttribute(collectionAttribute.id)"
+                  (click)="
+                    onDeleteCollectionAttribute(
+                      collectionAttribute.data.collection,
+                      collectionAttribute.id
+                    )
+                  "
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -125,7 +130,10 @@ export class CollectionAttributesListComponent {
     collectionAttributeId: string;
     collectionAttributeDto: CollectionAttributeDto;
   }>();
-  @Output() deleteCollectionAttribute = new EventEmitter<string>();
+  @Output() deleteCollectionAttribute = new EventEmitter<{
+    collectionId: string;
+    collectionAttributeId: string;
+  }>();
 
   onCreateCollectionAttribute(collectionAttributeDto: CollectionAttributeDto) {
     this.createCollectionAttribute.emit(collectionAttributeDto);
@@ -141,7 +149,13 @@ export class CollectionAttributesListComponent {
     });
   }
 
-  onDeleteCollectionAttribute(collectionAttributeId: string) {
-    this.deleteCollectionAttribute.emit(collectionAttributeId);
+  onDeleteCollectionAttribute(
+    collectionId: string,
+    collectionAttributeId: string
+  ) {
+    this.deleteCollectionAttribute.emit({
+      collectionId,
+      collectionAttributeId,
+    });
   }
 }

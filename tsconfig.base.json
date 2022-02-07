@@ -43,6 +43,9 @@
       "@bulldozer-client/collections-data-access": [
         "libs/bulldozer/client/collections/data-access/src/index.ts"
       ],
+      "@bulldozer-client/config-store": [
+        "libs/bulldozer/client/shared/stores/config-store/src/index.ts"
+      ],
       "@bulldozer-client/dark-theme": [
         "libs/bulldozer/client/shared/directives/dark-theme/src/index.ts"
       ],

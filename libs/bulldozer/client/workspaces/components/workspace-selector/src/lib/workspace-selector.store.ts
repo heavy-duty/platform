@@ -4,6 +4,7 @@ import {
   CollectionApiService,
   CollectionAttributeApiService,
 } from '@bulldozer-client/collections-data-access';
+import { ConfigStore } from '@bulldozer-client/config-store';
 import {
   InstructionAccountApiService,
   InstructionApiService,
@@ -40,26 +41,23 @@ import {
 
 interface ViewModel {
   loading: boolean;
-  workspaceId: string | null;
   workspacesMap: Map<string, Document<Workspace>>;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  workspaceId: null,
   workspacesMap: new Map<string, Document<Workspace>>(),
 };
 
 @Injectable()
 export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
-  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
   readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
     Array.from(workspacesMap, ([, workspace]) => workspace)
   );
   readonly workspace$ = this.select(
-    this.workspaceId$,
+    this._configStore.workspaceId$,
     this.workspaces$,
     (workspaceId, workspaces) =>
       workspaces.find(({ id }) => id === workspaceId) ?? null
@@ -76,7 +74,8 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _workspaceSocketService: WorkspaceSocketService,
     private readonly _walletStore: WalletStore,
-    private readonly _notificationStore: NotificationStore
+    private readonly _notificationStore: NotificationStore,
+    private readonly _configStore: ConfigStore
   ) {
     super(initialState);
   }
@@ -115,10 +114,6 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
         workspacesMap,
       };
     }
-  );
-
-  readonly setWorkspaceId = this.updater(
-    (state, workspaceId: string | null) => ({ ...state, workspaceId })
   );
 
   private readonly _handleWorkspaceChanges = this.effect(
@@ -210,12 +205,10 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     ($: Observable<{ workspaceName: string }>) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(this.workspaceId$, this._walletStore.publicKey$)
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(([{ workspaceName }, workspaceId, authority]) => {
-          if (workspaceId === null || authority === null) {
+        concatMap(([{ workspaceName }, authority]) => {
+          if (authority === null) {
             return EMPTY;
           }
 

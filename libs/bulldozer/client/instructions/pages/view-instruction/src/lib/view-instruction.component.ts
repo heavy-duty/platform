@@ -33,9 +33,13 @@ import { ViewInstructionStore } from './view-instruction.store';
             class="block mb-4"
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionArguments]="(instructionArguments$ | ngrxPush) ?? null"
-            (createInstructionArgument)="onCreateInstructionArgument($event)"
+            (createInstructionArgument)="
+              onCreateInstructionArgument(instruction, $event)
+            "
             (updateInstructionArgument)="onUpdateInstructionArgument($event)"
-            (deleteInstructionArgument)="onDeleteInstructionArgument($event)"
+            (deleteInstructionArgument)="
+              onDeleteInstructionArgument(instruction.id, $event)
+            "
           ></bd-instruction-arguments-list>
           <bd-instruction-documents-list
             class="block mb-4"
@@ -43,10 +47,20 @@ import { ViewInstructionStore } from './view-instruction.store';
             [collections]="(collections$ | ngrxPush) ?? null"
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
-            (createInstructionDocument)="onCreateInstructionAccount($event)"
+            (createInstructionDocument)="
+              onCreateInstructionAccount(instruction, $event)
+            "
             (updateInstructionDocument)="onUpdateInstructionAccount($event)"
-            (deleteInstructionDocument)="onDeleteInstructionAccount($event)"
-            (createInstructionRelation)="onCreateInstructionRelation($event)"
+            (deleteInstructionDocument)="
+              onDeleteInstructionAccount(instruction.id, $event)
+            "
+            (createInstructionRelation)="
+              onCreateInstructionRelation(
+                instruction,
+                $event.fromAccountId,
+                $event.toAccountId
+              )
+            "
             (updateInstructionRelation)="onUpdateInstructionRelation($event)"
             (deleteInstructionRelation)="onDeleteInstructionRelation($event)"
           >
@@ -55,9 +69,13 @@ import { ViewInstructionStore } from './view-instruction.store';
             class="block"
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
-            (createInstructionSigner)="onCreateInstructionAccount($event)"
+            (createInstructionSigner)="
+              onCreateInstructionAccount(instruction, $event)
+            "
             (updateInstructionSigner)="onUpdateInstructionAccount($event)"
-            (deleteInstructionSigner)="onDeleteInstructionAccount($event)"
+            (deleteInstructionSigner)="
+              onDeleteInstructionAccount(instruction.id, $event)
+            "
           >
           </bd-instruction-signers-list>
         </main>
@@ -80,7 +98,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 <button
                   mat-raised-button
                   color="primary"
-                  (click)="onUpdateInstructionBody(instruction)"
+                  (click)="onUpdateInstructionBody(instruction.id)"
                 >
                   Save
                 </button>
@@ -145,15 +163,19 @@ export class ViewInstructionComponent {
     private readonly _viewCollectionsStore: ViewCollectionsStore
   ) {}
 
-  onUpdateInstructionBody(instruction: Document<Instruction>) {
+  onUpdateInstructionBody(instructionId: string) {
     this._viewInstructionStore.updateInstructionBody({
-      instruction,
+      instructionId,
       instructionBody: this.instructionBody,
     });
   }
 
-  onCreateInstructionArgument(instructionArgumentDto: InstructionArgumentDto) {
+  onCreateInstructionArgument(
+    instruction: Document<Instruction>,
+    instructionArgumentDto: InstructionArgumentDto
+  ) {
     this._viewInstructionArgumentsStore.createInstructionArgument({
+      instruction,
       instructionArgumentDto,
     });
   }
@@ -165,14 +187,22 @@ export class ViewInstructionComponent {
     this._viewInstructionArgumentsStore.updateInstructionArgument(request);
   }
 
-  onDeleteInstructionArgument(instructionArgumentId: string) {
+  onDeleteInstructionArgument(
+    instructionId: string,
+    instructionArgumentId: string
+  ) {
     this._viewInstructionArgumentsStore.deleteInstructionArgument({
+      instructionId,
       instructionArgumentId,
     });
   }
 
-  onCreateInstructionAccount(instructionAccountDto: InstructionAccountDto) {
+  onCreateInstructionAccount(
+    instruction: Document<Instruction>,
+    instructionAccountDto: InstructionAccountDto
+  ) {
     this._viewInstructionAccountsStore.createInstructionAccount({
+      instruction,
       instructionAccountDto,
     });
   }
@@ -184,17 +214,26 @@ export class ViewInstructionComponent {
     this._viewInstructionAccountsStore.updateInstructionAccount(request);
   }
 
-  onDeleteInstructionAccount(instructionAccountId: string) {
+  onDeleteInstructionAccount(
+    instructionId: string,
+    instructionAccountId: string
+  ) {
     this._viewInstructionAccountsStore.deleteInstructionAccount({
+      instructionId,
       instructionAccountId,
     });
   }
 
-  onCreateInstructionRelation(request: {
-    fromAccountId: string;
-    toAccountId: string;
-  }) {
-    this._viewInstructionRelationsStore.createInstructionRelation(request);
+  onCreateInstructionRelation(
+    instruction: Document<Instruction>,
+    fromAccountId: string,
+    toAccountId: string
+  ) {
+    this._viewInstructionRelationsStore.createInstructionRelation({
+      instruction,
+      fromAccountId,
+      toAccountId,
+    });
   }
 
   onUpdateInstructionRelation(request: {

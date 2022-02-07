@@ -6,6 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   Document,
+  Instruction,
   InstructionArgument,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
@@ -197,56 +198,37 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
   readonly createInstructionArgument = this.effect(
     (
       $: Observable<{
+        instruction: Document<Instruction>;
         instructionArgumentDto: InstructionArgumentDto;
       }>
     ) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.workspaceId$,
-              this._viewInstructionRouteStore.applicationId$,
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(
-          ([
-            { instructionArgumentDto },
-            workspaceId,
-            applicationId,
-            instructionId,
-            authority,
-          ]) => {
-            if (
-              workspaceId === null ||
-              applicationId === null ||
-              instructionId === null ||
-              authority === null
-            ) {
-              return EMPTY;
-            }
-
-            return this._instructionArgumentApiService
-              .create({
-                instructionArgumentDto,
-                authority: authority.toBase58(),
-                workspaceId,
-                applicationId,
-                instructionId,
-              })
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._notificationStore.setEvent(
-                      'Create argument request sent'
-                    ),
-                  (error) => this._notificationStore.setError(error)
-                )
-              );
+        concatMap(([{ instruction, instructionArgumentDto }, authority]) => {
+          if (instruction === null || authority === null) {
+            return EMPTY;
           }
-        )
+
+          return this._instructionArgumentApiService
+            .create({
+              instructionArgumentDto,
+              authority: authority.toBase58(),
+              workspaceId: instruction.data.workspace,
+              applicationId: instruction.data.application,
+              instructionId: instruction.id,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create argument request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -288,18 +270,13 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionArgument = this.effect(
-    ($: Observable<{ instructionArgumentId: string }>) =>
+    ($: Observable<{ instructionId: string; instructionArgumentId: string }>) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(([{ instructionArgumentId }, instructionId, authority]) => {
-          if (instructionId === null || authority === null) {
+        concatMap(([{ instructionId, instructionArgumentId }, authority]) => {
+          if (authority === null) {
             return EMPTY;
           }
 

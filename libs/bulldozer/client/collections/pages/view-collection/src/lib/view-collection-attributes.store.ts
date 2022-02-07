@@ -5,6 +5,7 @@ import {
 } from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
+  Collection,
   CollectionAttribute,
   CollectionAttributeDto,
   Document,
@@ -197,56 +198,37 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   readonly createCollectionAttribute = this.effect(
     (
       $: Observable<{
+        collection: Document<Collection>;
         collectionAttributeDto: CollectionAttributeDto;
       }>
     ) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewCollectionRouteStore.workspaceId$,
-              this._viewCollectionRouteStore.applicationId$,
-              this._viewCollectionRouteStore.collectionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(
-          ([
-            { collectionAttributeDto },
-            workspaceId,
-            applicationId,
-            collectionId,
-            authority,
-          ]) => {
-            if (
-              workspaceId === null ||
-              applicationId === null ||
-              collectionId === null ||
-              authority === null
-            ) {
-              return EMPTY;
-            }
-
-            return this._collectionAttributeApiService
-              .create({
-                collectionAttributeDto,
-                authority: authority.toBase58(),
-                workspaceId,
-                applicationId,
-                collectionId,
-              })
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._notificationStore.setEvent(
-                      'Create attribute request sent'
-                    ),
-                  (error) => this._notificationStore.setError(error)
-                )
-              );
+        concatMap(([{ collection, collectionAttributeDto }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
           }
-        )
+
+          return this._collectionAttributeApiService
+            .create({
+              collectionAttributeDto,
+              authority: authority.toBase58(),
+              workspaceId: collection.data.workspace,
+              applicationId: collection.data.application,
+              collectionId: collection.id,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create attribute request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -288,18 +270,13 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteCollectionAttribute = this.effect(
-    ($: Observable<{ collectionAttributeId: string }>) =>
+    ($: Observable<{ collectionId: string; collectionAttributeId: string }>) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewCollectionRouteStore.collectionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(([{ collectionAttributeId }, collectionId, authority]) => {
-          if (collectionId === null || authority === null) {
+        concatMap(([{ collectionId, collectionAttributeId }, authority]) => {
+          if (authority === null) {
             return EMPTY;
           }
 

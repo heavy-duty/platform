@@ -4,7 +4,12 @@ import {
   InstructionRelationSocketService,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notification-store';
-import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
+import {
+  Document,
+  Instruction,
+  InstructionRelation,
+  Relation,
+} from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -195,33 +200,16 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
       $: Observable<{
         fromAccountId: string;
         toAccountId: string;
+        instruction: Document<Instruction>;
       }>
     ) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.workspaceId$,
-              this._viewInstructionRouteStore.applicationId$,
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
         concatMap(
-          ([
-            { fromAccountId, toAccountId },
-            workspaceId,
-            applicationId,
-            instructionId,
-            authority,
-          ]) => {
-            if (
-              workspaceId === null ||
-              applicationId === null ||
-              instructionId === null ||
-              authority === null
-            ) {
+          ([{ fromAccountId, toAccountId, instruction }, authority]) => {
+            if (instruction === null || authority === null) {
               return EMPTY;
             }
 
@@ -230,9 +218,9 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
                 fromAccountId,
                 toAccountId,
                 authority: authority.toBase58(),
-                workspaceId,
-                applicationId,
-                instructionId,
+                workspaceId: instruction.data.workspace,
+                applicationId: instruction.data.application,
+                instructionId: instruction.id,
               })
               .pipe(
                 tapResponse(
@@ -300,20 +288,14 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
     ) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
         concatMap(
           ([
             { instructionRelationId, fromAccountId, toAccountId },
-            instructionId,
             authority,
           ]) => {
-            if (instructionId === null || authority === null) {
+            if (authority === null) {
               return EMPTY;
             }
 

@@ -6,6 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   Document,
+  Instruction,
   InstructionAccount,
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
@@ -197,56 +198,37 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
   readonly createInstructionAccount = this.effect(
     (
       $: Observable<{
+        instruction: Document<Instruction>;
         instructionAccountDto: InstructionAccountDto;
       }>
     ) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.workspaceId$,
-              this._viewInstructionRouteStore.applicationId$,
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(
-          ([
-            { instructionAccountDto },
-            workspaceId,
-            applicationId,
-            instructionId,
-            authority,
-          ]) => {
-            if (
-              workspaceId === null ||
-              applicationId === null ||
-              instructionId === null ||
-              authority === null
-            ) {
-              return EMPTY;
-            }
-
-            return this._instructionAccountApiService
-              .create({
-                instructionAccountDto,
-                authority: authority.toBase58(),
-                workspaceId,
-                applicationId,
-                instructionId,
-              })
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._notificationStore.setEvent(
-                      'Create account request sent'
-                    ),
-                  (error) => this._notificationStore.setError(error)
-                )
-              );
+        concatMap(([{ instruction, instructionAccountDto }, authority]) => {
+          if (instruction === null || authority === null) {
+            return EMPTY;
           }
-        )
+
+          return this._instructionAccountApiService
+            .create({
+              instructionAccountDto,
+              authority: authority.toBase58(),
+              workspaceId: instruction.data.workspace,
+              applicationId: instruction.data.application,
+              instructionId: instruction.id,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create account request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 
@@ -288,18 +270,13 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionAccount = this.effect(
-    ($: Observable<{ instructionAccountId: string }>) =>
+    ($: Observable<{ instructionId: string; instructionAccountId: string }>) =>
       $.pipe(
         concatMap((request) =>
-          of(request).pipe(
-            withLatestFrom(
-              this._viewInstructionRouteStore.instructionId$,
-              this._walletStore.publicKey$
-            )
-          )
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(([{ instructionAccountId }, instructionId, authority]) => {
-          if (instructionId === null || authority === null) {
+        concatMap(([{ instructionId, instructionAccountId }, authority]) => {
+          if (authority === null) {
             return EMPTY;
           }
 

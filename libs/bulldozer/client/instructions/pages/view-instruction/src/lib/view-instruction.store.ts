@@ -82,7 +82,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
   readonly updateInstructionBody = this.effect(
     (
       request$: Observable<{
-        instruction: Document<Instruction>;
+        instructionId: string;
         instructionBody: string;
       }>
     ) =>
@@ -90,14 +90,14 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(([{ instruction, instructionBody }, authority]) => {
+        concatMap(([{ instructionId, instructionBody }, authority]) => {
           if (authority === null) {
             return EMPTY;
           }
 
           return this._instructionApiService
             .updateBody({
-              instructionId: instruction.id,
+              instructionId,
               instructionBody,
               authority: authority.toBase58(),
             })

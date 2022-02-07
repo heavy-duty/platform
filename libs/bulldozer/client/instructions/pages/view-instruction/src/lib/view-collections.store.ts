@@ -12,7 +12,6 @@ import {
   first,
   mergeMap,
   Observable,
-  of,
   switchMap,
   takeUntil,
   takeWhile,
@@ -119,17 +118,20 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._collectionSocketService.collectionCreated({
-          application: instruction.data.application,
-        });
-      }),
-      tapResponse(
-        (collection) => {
-          this._addCollection(collection);
-          this._handleCollectionChanges(collection.id);
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._collectionSocketService
+          .collectionCreated({
+            application: instruction.data.application,
+          })
+          .pipe(
+            tapResponse(
+              (collection) => {
+                this._addCollection(collection);
+                this._handleCollectionChanges(collection.id);
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 
@@ -138,27 +140,32 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
       tap(() => this.patchState({ loading: true })),
       switchMap((instruction) => {
         if (instruction === null) {
-          return of([]);
+          return EMPTY;
         }
 
-        return this._collectionApiService.find({
-          application: instruction.data.application,
-        });
-      }),
-      tapResponse(
-        (collections) => {
-          this.patchState({
-            collectionsMap: collections.reduce(
-              (collectionsMap, collection) =>
-                collectionsMap.set(collection.id, collection),
-              new Map<string, Document<Collection>>()
-            ),
-            loading: false,
-          });
-          collections.forEach(({ id }) => this._handleCollectionChanges(id));
-        },
-        (error) => this._notificationStore.setError(error)
-      )
+        return this._collectionApiService
+          .find({
+            application: instruction.data.application,
+          })
+          .pipe(
+            tapResponse(
+              (collections) => {
+                this.patchState({
+                  collectionsMap: collections.reduce(
+                    (collectionsMap, collection) =>
+                      collectionsMap.set(collection.id, collection),
+                    new Map<string, Document<Collection>>()
+                  ),
+                  loading: false,
+                });
+                collections.forEach(({ id }) =>
+                  this._handleCollectionChanges(id)
+                );
+              },
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
     )
   );
 }

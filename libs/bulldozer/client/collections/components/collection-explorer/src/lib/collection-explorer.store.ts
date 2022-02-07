@@ -246,7 +246,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
           return this._collectionApiService
             .update({
               collectionName,
-              authority: authority?.toBase58(),
+              authority: authority.toBase58(),
               collectionId,
             })
             .pipe(

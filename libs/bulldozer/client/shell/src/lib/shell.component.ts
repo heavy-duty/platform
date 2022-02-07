@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ConfigStore } from '@bulldozer-client/config-store';
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   RouteStore,
   TabStore,
 } from '@heavy-duty/bulldozer/application/data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ShellStore } from './shell.store';
 
 @Component({
   selector: 'bd-shell',
@@ -30,7 +30,6 @@ import { ShellStore } from './shell.store';
             <bd-workspace-selector
               class="mr-6"
               [connected]="(connected$ | ngrxPush) ?? false"
-              [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -82,20 +81,20 @@ import { ShellStore } from './shell.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [ShellStore, TabStore, RouteStore, NotificationStore],
+  providers: [TabStore, RouteStore, NotificationStore, ConfigStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent {
-  readonly isHandset$ = this._shellStore.isHandset$;
+  readonly isHandset$ = this._configStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaceId$ = this._shellStore.workspaceId$;
+  readonly workspaceId$ = this._configStore.workspaceId$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
 
   constructor(
-    private readonly _shellStore: ShellStore,
     private readonly _walletStore: WalletStore,
-    private readonly _tabStore: TabStore
+    private readonly _tabStore: TabStore,
+    private readonly _configStore: ConfigStore
   ) {}
 
   onCloseTab(tabId: string) {

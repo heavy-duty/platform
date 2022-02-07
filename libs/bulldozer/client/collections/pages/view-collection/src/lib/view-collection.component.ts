@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
+import {
+  Collection,
+  CollectionAttributeDto,
+  Document,
+} from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
@@ -23,7 +27,9 @@ import { ViewCollectionStore } from './view-collection.store';
             class="block mb-16"
             [connected]="(connected$ | ngrxPush) ?? false"
             [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
-            (createCollectionAttribute)="onCreateCollectionAttribute($event)"
+            (createCollectionAttribute)="
+              onCreateCollectionAttribute(collection, $event)
+            "
             (updateCollectionAttribute)="onUpdateCollectionAttribute($event)"
             (deleteCollectionAttribute)="onDeleteCollectionAttribute($event)"
           >
@@ -64,8 +70,12 @@ export class ViewCollectionComponent {
     private readonly _walletStore: WalletStore
   ) {}
 
-  onCreateCollectionAttribute(collectionAttributeDto: CollectionAttributeDto) {
+  onCreateCollectionAttribute(
+    collection: Document<Collection>,
+    collectionAttributeDto: CollectionAttributeDto
+  ) {
     this._viewCollectionAttributesStore.createCollectionAttribute({
+      collection,
       collectionAttributeDto,
     });
   }
@@ -77,9 +87,10 @@ export class ViewCollectionComponent {
     this._viewCollectionAttributesStore.updateCollectionAttribute(request);
   }
 
-  onDeleteCollectionAttribute(collectionAttributeId: string) {
-    this._viewCollectionAttributesStore.deleteCollectionAttribute({
-      collectionAttributeId,
-    });
+  onDeleteCollectionAttribute(request: {
+    collectionId: string;
+    collectionAttributeId: string;
+  }) {
+    this._viewCollectionAttributesStore.deleteCollectionAttribute(request);
   }
 }

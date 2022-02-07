@@ -248,7 +248,7 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
           return this._instructionApiService
             .update({
               instructionName,
-              authority: authority?.toBase58(),
+              authority: authority.toBase58(),
               instructionId,
             })
             .pipe(
