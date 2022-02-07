@@ -24,23 +24,21 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
   loading: boolean;
   instructionArgumentsMap: Map<string, Document<InstructionArgument>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   instructionArgumentsMap: new Map<string, Document<InstructionArgument>>(),
-  error: null,
 };
 
 @Injectable()
 export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly instructionArgumentsMap$ = this.select(
     ({ instructionArgumentsMap }) => instructionArgumentsMap
@@ -58,6 +56,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
     private readonly _instructionArgumentSocketService: InstructionArgumentSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
+    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -105,11 +104,6 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   private readonly _handleInstructionArgumentChanges = this.effect(
     (instructionArgumentId$: Observable<string>) =>
       instructionArgumentId$.pipe(
@@ -125,7 +119,8 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
                     this._setInstructionArgument(changes);
                   }
                 },
-                (error) => this._setError(error)
+                (error) =>
+                  this._viewInstructionNotificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -156,7 +151,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
                 this._addInstructionArgument(instructionArgument);
                 this._handleInstructionArgumentChanges(instructionArgument.id);
               },
-              (error) => this._setError(error)
+              (error) => this._viewInstructionNotificationStore.setError(error)
             )
           );
       })
@@ -192,7 +187,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
             this._handleInstructionArgumentChanges(id)
           );
         },
-        (error) => this._setError(error)
+        (error) => this._viewInstructionNotificationStore.setError(error)
       )
     )
   );
@@ -239,6 +234,13 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
               instructionId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Create argument request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
         )
       )
   );
@@ -262,10 +264,17 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
 
             return this._instructionArgumentApiService.update({
               instructionArgumentDto,
-              authority: authority?.toBase58(),
+              authority: authority.toBase58(),
               instructionArgumentId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Update argument request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
         )
       )
   );
@@ -291,7 +300,14 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
             instructionArgumentId,
             instructionId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Delete argument request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
+        )
       )
   );
 }

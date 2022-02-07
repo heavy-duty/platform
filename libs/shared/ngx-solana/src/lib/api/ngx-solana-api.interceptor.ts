@@ -7,7 +7,7 @@ import {
   HttpResponse,
 } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { concatMap, Observable, of, throwError } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -69,11 +69,19 @@ export class NgxSolanaApiInterceptor implements HttpInterceptor {
         })
       )
       .pipe(
-        map((event) =>
-          event instanceof HttpResponse
-            ? event.clone({ body: event.body[0].result })
-            : event
-        )
+        concatMap((event) => {
+          if (event instanceof HttpResponse) {
+            const firstValue = event.body[0];
+
+            if ('error' in firstValue) {
+              return throwError(() => firstValue.error.data.err);
+            }
+
+            return of(event.clone({ body: firstValue.result }));
+          }
+
+          return of(event);
+        })
       );
   }
 }

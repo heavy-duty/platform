@@ -18,18 +18,15 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
-  instructionId: string | null;
   instruction: Document<Instruction> | null;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
-  instructionId: null,
   instruction: null,
-  error: null,
 };
 
 @Injectable()
@@ -41,7 +38,8 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
     private readonly _instructionSocketService: InstructionSocketService,
-    private readonly _viewInstructionRouteStore: ViewInstructionRouteStore
+    private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
+    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore
   ) {
     super(initialState);
   }
@@ -67,7 +65,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
       }),
       tapResponse(
         (instruction) => this.patchState({ instruction }),
-        (error) => this.patchState({ error })
+        (error) => this._viewInstructionNotificationStore.setError(error)
       )
     )
   );
@@ -96,7 +94,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        tap(([{ instruction, instructionBody }, authority]) => {
+        concatMap(([{ instruction, instructionBody }, authority]) => {
           if (authority === null) {
             return EMPTY;
           }
@@ -106,7 +104,14 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
             instructionBody,
             authority: authority.toBase58(),
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Update body request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
+        )
       )
   );
 }

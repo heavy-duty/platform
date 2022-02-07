@@ -9,6 +9,7 @@ import {
   DeleteInstructionArgumentParams,
   Document,
   encodeFilters,
+  getBulldozerError,
   InstructionArgument,
   InstructionArgumentFilters,
   INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
@@ -16,7 +17,7 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionArgumentApiService {
@@ -61,9 +62,8 @@ export class InstructionArgumentApiService {
   ) {
     const instructionArgumentKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) => {
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
           createCreateInstructionArgumentInstruction2({
             ...params,
@@ -73,25 +73,67 @@ export class InstructionArgumentApiService {
         );
         transaction.partialSign(instructionArgumentKeypair);
         return transaction;
-      }
-    );
+      })
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // update instruction argument
   update(params: UpdateInstructionArgumentParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createUpdateInstructionArgumentInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // delete instruction argument
   delete(params: DeleteInstructionArgumentParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createDeleteInstructionArgumentInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 }

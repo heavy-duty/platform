@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterModule } from '@angular/router';
 import { CodeEditorModule } from '@bulldozer-client/code-editor';
 import { InstructionArgumentsListModule } from '@bulldozer-client/instruction-arguments-list';
@@ -18,6 +19,7 @@ import { ViewInstructionComponent } from './view-instruction.component';
       { path: '', pathMatch: 'full', component: ViewInstructionComponent },
     ]),
     MatButtonModule,
+    MatSnackBarModule,
     ReactiveComponentModule,
     PageHeaderModule,
     CodeEditorModule,

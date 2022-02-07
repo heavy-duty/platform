@@ -16,23 +16,21 @@ import {
   takeWhile,
   tap,
 } from 'rxjs';
+import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionStore } from './view-instruction.store';
 
 interface ViewModel {
   loading: boolean;
   collectionsMap: Map<string, Document<Collection>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   collectionsMap: new Map<string, Document<Collection>>(),
-  error: null,
 };
 
 @Injectable()
 export class ViewCollectionsStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly collectionsMap$ = this.select(
     ({ collectionsMap }) => collectionsMap
@@ -44,7 +42,8 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _collectionApiService: CollectionApiService,
     private readonly _collectionSocketService: CollectionSocketService,
-    private readonly _viewInstructionStore: ViewInstructionStore
+    private readonly _viewInstructionStore: ViewInstructionStore,
+    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore
   ) {
     super(initialState);
   }
@@ -85,11 +84,6 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   private readonly _handleCollectionChanges = this.effect(
     (collectionId$: Observable<string>) =>
       collectionId$.pipe(
@@ -103,7 +97,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
                   this._setCollection(changes);
                 }
               },
-              (error) => this._setError(error)
+              (error) => this._viewInstructionNotificationStore.setError(error)
             ),
             takeUntil(
               this.loading$.pipe(
@@ -134,7 +128,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
                 this._addCollection(collection);
                 this._handleCollectionChanges(collection.id);
               },
-              (error) => this._setError(error)
+              (error) => this._viewInstructionNotificationStore.setError(error)
             )
           );
       })
@@ -165,7 +159,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
           });
           collections.forEach(({ id }) => this._handleCollectionChanges(id));
         },
-        (error) => this._setError(error)
+        (error) => this._viewInstructionNotificationStore.setError(error)
       )
     )
   );

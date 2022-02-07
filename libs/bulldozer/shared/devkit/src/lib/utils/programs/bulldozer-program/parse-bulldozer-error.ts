@@ -10,3 +10,13 @@ export const parseBulldozerError = (error: Error) => {
   }
   throw translatedErr;
 };
+
+export const getBulldozerError = (code: number) => {
+  const errorMsg = bulldozerIdlErrors.get(code);
+
+  if (errorMsg === undefined) {
+    return null;
+  }
+
+  return new ProgramError(code, errorMsg, code + ': ' + errorMsg);
+};

@@ -24,23 +24,21 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ViewInstructionNotificationStore } from './view-instruction-notification.store';
 import { ViewInstructionRouteStore } from './view-instruction-route.store';
 
 interface ViewModel {
   loading: boolean;
   instructionAccountsMap: Map<string, Document<InstructionAccount>>;
-  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
   instructionAccountsMap: new Map<string, Document<InstructionAccount>>(),
-  error: null,
 };
 
 @Injectable()
 export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
-  readonly error$ = this.select(({ error }) => error);
   readonly loading$ = this.select(({ loading }) => loading);
   readonly instructionAccountsMap$ = this.select(
     ({ instructionAccountsMap }) => instructionAccountsMap
@@ -58,6 +56,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionAccountSocketService: InstructionAccountSocketService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
+    private readonly _viewInstructionNotificationStore: ViewInstructionNotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
@@ -105,11 +104,6 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _setError = this.updater((state, error: unknown) => ({
-    ...state,
-    error,
-  }));
-
   private readonly _handleInstructionAccountChanges = this.effect(
     (instructionAccountId$: Observable<string>) =>
       instructionAccountId$.pipe(
@@ -125,7 +119,8 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
                     this._setInstructionAccount(changes);
                   }
                 },
-                (error) => this._setError(error)
+                (error) =>
+                  this._viewInstructionNotificationStore.setError(error)
               ),
               takeUntil(
                 this.loading$.pipe(
@@ -156,7 +151,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
                 this._addInstructionAccount(instructionAccount);
                 this._handleInstructionAccountChanges(instructionAccount.id);
               },
-              (error) => this._setError(error)
+              (error) => this._viewInstructionNotificationStore.setError(error)
             )
           );
       })
@@ -192,7 +187,7 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
             this._handleInstructionAccountChanges(id)
           );
         },
-        (error) => this._setError(error)
+        (error) => this._viewInstructionNotificationStore.setError(error)
       )
     )
   );
@@ -239,6 +234,13 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
               instructionId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Create account request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
         )
       )
   );
@@ -262,10 +264,17 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
 
             return this._instructionAccountApiService.update({
               instructionAccountDto,
-              authority: authority?.toBase58(),
+              authority: authority.toBase58(),
               instructionAccountId,
             });
           }
+        ),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Update account request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
         )
       )
   );
@@ -291,7 +300,14 @@ export class ViewInstructionAccountsStore extends ComponentStore<ViewModel> {
             instructionAccountId,
             instructionId,
           });
-        })
+        }),
+        tapResponse(
+          () =>
+            this._viewInstructionNotificationStore.setEvent(
+              'Delete account request sent'
+            ),
+          (error) => this._viewInstructionNotificationStore.setError(error)
+        )
       )
   );
 }
