@@ -1,123 +1,97 @@
 import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
+import { ActivatedRoute } from '@angular/router';
+import {
+  InstructionApiService,
+  InstructionSocketService,
+} from '@bulldozer-client/instructions-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import {
-  CollectionStore,
-  InstructionAccountStore,
-  InstructionArgumentStore,
-  InstructionRelationStore,
-  InstructionStore,
-} from '@heavy-duty/bulldozer-store';
-import {
-  RouteStore,
-  TabStore,
-} from '@heavy-duty/bulldozer/application/data-access';
-import { generateInstructionCode } from '@heavy-duty/generator';
+import { TabStore } from '@heavy-duty/bulldozer/application/data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
-import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import {
+  concatMap,
+  EMPTY,
+  map,
+  Observable,
+  of,
+  startWith,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
+
+interface ViewModel {
+  instruction: Document<Instruction> | null;
+  error: unknown | null;
+}
+
+const initialState: ViewModel = {
+  instruction: null,
+  error: null,
+};
 
 @Injectable()
-export class ViewInstructionStore extends ComponentStore<object> {
-  readonly connected$ = this._walletStore.connected$;
-  readonly instruction$ = this.select(
-    this._routeStore.instructionId$,
-    this._instructionStore.instructions$,
-    (instructionId, instructions) =>
-      instructions.find((instruction) => instruction.id === instructionId) ??
-      null
-  );
-  readonly instructionBody$ = this.select(
-    this.instruction$,
-    (instruction) => instruction && instruction.data.body
-  );
-  readonly instructionContext$ = this.select(
-    this.instruction$,
-    this._instructionArgumentStore.instructionArguments$,
-    this._instructionAccountStore.instructionAccounts$,
-    this._instructionRelationStore.instructionRelations$,
-    this._collectionStore.collections$,
-    this._routeStore.workspaceId$,
-    (
-      instruction,
-      instructionArguments,
-      instructionAccounts,
-      instructionRelations,
-      collections,
-      workspaceId
-    ) =>
-      instruction &&
-      generateInstructionCode(
-        instruction,
-        instructionArguments,
-        instructionAccounts,
-        instructionRelations,
-        collections.filter(({ data }) => data.workspace === workspaceId)
-      )
-  );
-  readonly commonEditorOptions = {
-    language: 'rust',
-    automaticLayout: true,
-    fontSize: 16,
-    wordWrap: true,
-  };
-  readonly contextEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
-    map((isDarkThemeEnabled) => ({
-      ...this.commonEditorOptions,
-      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-      readOnly: true,
-    }))
-  );
-  readonly handlerEditorOptions$ = this._themeService.isDarkThemeEnabled$.pipe(
-    map((isDarkThemeEnabled) => ({
-      ...this.commonEditorOptions,
-      theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-      readOnly: false,
-    }))
-  );
+export class ViewInstructionStore extends ComponentStore<ViewModel> {
+  readonly instruction$ = this.select(({ instruction }) => instruction);
 
   constructor(
-    private readonly _walletStore: WalletStore,
-    private readonly _collectionStore: CollectionStore,
-    private readonly _instructionStore: InstructionStore,
-    private readonly _instructionAccountStore: InstructionAccountStore,
-    private readonly _instructionArgumentStore: InstructionArgumentStore,
-    private readonly _instructionRelationStore: InstructionRelationStore,
-    private readonly _router: Router,
+    private readonly _route: ActivatedRoute,
     private readonly _tabStore: TabStore,
-    private readonly _routeStore: RouteStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _walletStore: WalletStore,
+    private readonly _instructionApiService: InstructionApiService,
+    private readonly _instructionSocketService: InstructionSocketService
   ) {
-    super({});
+    super(initialState);
+
+    this.loadInstruction(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('instructionId'))
+      )
+    );
   }
 
-  /* readonly openTab$ = this.effect(() =>
-    combineLatest([
-      this._router.events.pipe(
-        filter(
-          (event): event is NavigationStart => event instanceof NavigationStart
-        ),
-        map((event) => event.url),
-        startWith(this._router.routerState.snapshot.url),
-        map((url) => url.split('/').filter((segment) => segment)),
-        filter(
-          (urlAsArray) =>
-            urlAsArray.length === 2 && urlAsArray[0] === 'instructions'
+  protected readonly loadInstruction = this.effect(
+    (instructionId$: Observable<string | null>) =>
+      instructionId$.pipe(
+        switchMap((instructionId) => {
+          if (instructionId === null) {
+            return of(null);
+          }
+
+          return this._instructionApiService
+            .findByPublicKey(instructionId)
+            .pipe(
+              concatMap((instruction) => {
+                if (!instruction) {
+                  return of(null);
+                }
+
+                return this._instructionSocketService
+                  .instructionChanges(instructionId)
+                  .pipe(startWith(instruction));
+              })
+            );
+        }),
+        tapResponse(
+          (instruction) => this.patchState({ instruction }),
+          (error) => this.patchState({ error })
         )
-      ),
-      this.instruction$.pipe(isNotNullOrUndefined),
-    ]).pipe(
-      tap(([, instruction]) =>
+      )
+  );
+
+  protected readonly openTab = this.effect(() =>
+    this.instruction$.pipe(
+      isNotNullOrUndefined,
+      tap((instruction) =>
         this._tabStore.openTab({
           id: instruction.id,
-          label: instruction.name,
-          url: `/instructions/${instruction.id}`,
+          kind: 'instruction',
+          url: `/workspaces/${instruction.data.workspace}/applications/${instruction.data.application}/instructions/${instruction.id}`,
         })
       )
     )
-  ); */
+  );
 
   readonly updateInstructionBody = this.effect(
     (
@@ -127,12 +101,20 @@ export class ViewInstructionStore extends ComponentStore<object> {
       }>
     ) =>
       request$.pipe(
-        tap(({ instruction, instructionBody }) =>
-          this._instructionStore.updateInstructionBody({
+        concatMap((request) =>
+          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+        ),
+        tap(([{ instruction, instructionBody }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._instructionApiService.updateBody({
             instructionId: instruction.id,
             instructionBody,
-          })
-        )
+            authority: authority.toBase58(),
+          });
+        })
       )
   );
 }

@@ -16,12 +16,16 @@ import { EditInstructionDocumentComponent } from './edit-instruction-document.co
 
 @Directive({ selector: '[bdEditInstructionDocumentTrigger]' })
 export class EditInstructionDocumentTriggerDirective {
-  @Input() instructionDocument?: Document<InstructionAccount>;
-  @Input() collections?: Document<Collection>[];
-  @Input() instructionAccounts?: Document<InstructionAccount>[];
+  @Input() instructionDocument: Document<InstructionAccount> | null = null;
+  @Input() collections: Document<Collection>[] | null = null;
+  @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
   @Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {
-    if (!this.collections || !this.instructionAccounts) {
+    if (
+      !this.collections ||
+      !this.instructionAccounts ||
+      !this.instructionDocument
+    ) {
       return;
     }
 

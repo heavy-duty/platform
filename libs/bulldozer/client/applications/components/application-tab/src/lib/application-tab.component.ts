@@ -3,7 +3,6 @@ import {
   EventEmitter,
   HostBinding,
   Input,
-  OnInit,
   Output,
 } from '@angular/core';
 import { ApplicationTabStore } from './application-tab.store';
@@ -36,21 +35,15 @@ import { ApplicationTabStore } from './application-tab.store';
   `,
   providers: [ApplicationTabStore],
 })
-export class ApplicationTabComponent implements OnInit {
+export class ApplicationTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() applicationId: string | null = null;
+  @Input() set applicationId(value: string | null) {
+    this._applicationTabStore.setApplicationId(value);
+  }
   @Output() closeTab = new EventEmitter();
   readonly application$ = this._applicationTabStore.application$;
 
   constructor(private readonly _applicationTabStore: ApplicationTabStore) {}
-
-  ngOnInit() {
-    if (this.applicationId === null) {
-      throw new Error('ApplicationId is missing');
-    }
-
-    this._applicationTabStore.loadApplication$(this.applicationId);
-  }
 
   onCloseTab() {
     this.closeTab.emit();

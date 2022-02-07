@@ -18,14 +18,19 @@ import { EditInstructionRelationComponent } from './edit-instruction-relation.co
 
 @Directive({ selector: '[bdEditInstructionRelationTrigger]' })
 export class EditInstructionRelationTriggerDirective {
-  @Input() instructionRelation?: Relation<InstructionRelation>;
-  @Input() collections?: Document<Collection>[];
-  @Input() instructionAccounts?: Document<InstructionAccount>[];
+  @Input() instructionRelation: Relation<InstructionRelation> | null = null;
+  @Input() collections: Document<Collection>[] | null = null;
+  @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =
     new EventEmitter<InstructionRelationDto>();
   @HostListener('click') onClick(): void {
-    if (!this.collections || !this.instructionAccounts || !this.from) {
+    if (
+      !this.collections ||
+      !this.instructionAccounts ||
+      !this.from ||
+      !this.instructionRelation
+    ) {
       return;
     }
 

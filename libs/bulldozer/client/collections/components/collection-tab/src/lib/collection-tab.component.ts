@@ -3,7 +3,6 @@ import {
   EventEmitter,
   HostBinding,
   Input,
-  OnInit,
   Output,
 } from '@angular/core';
 import { CollectionTabStore } from './collection-tab.store';
@@ -38,21 +37,15 @@ import { CollectionTabStore } from './collection-tab.store';
   `,
   providers: [CollectionTabStore],
 })
-export class CollectionTabComponent implements OnInit {
+export class CollectionTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() collectionId: string | null = null;
+  @Input() set collectionId(value: string | null) {
+    this._collectionTabStore.setCollectionId(value);
+  }
   @Output() closeTab = new EventEmitter();
   readonly collection$ = this._collectionTabStore.collection$;
 
   constructor(private readonly _collectionTabStore: CollectionTabStore) {}
-
-  ngOnInit() {
-    if (this.collectionId === null) {
-      throw new Error('CollectionId is missing');
-    }
-
-    this._collectionTabStore.loadCollection$(this.collectionId);
-  }
 
   onCloseTab() {
     this.closeTab.emit();

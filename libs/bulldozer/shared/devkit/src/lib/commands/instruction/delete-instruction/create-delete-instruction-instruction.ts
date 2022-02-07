@@ -1,5 +1,5 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
-import { bulldozerProgram } from '../../../utils';
+import { bulldozerProgram, DeleteInstructionParams } from '../../../utils';
 
 export const createDeleteInstructionInstruction = (
   authority: PublicKey,
@@ -11,6 +11,18 @@ export const createDeleteInstructionInstruction = (
       instruction: instructionPublicKey,
       application: applicationPublicKey,
       authority: authority,
+    },
+  });
+};
+
+export const createDeleteInstructionInstruction2 = (
+  params: DeleteInstructionParams
+): TransactionInstruction => {
+  return bulldozerProgram.instruction.deleteInstruction({
+    accounts: {
+      application: new PublicKey(params.applicationId),
+      instruction: new PublicKey(params.instructionId),
+      authority: new PublicKey(params.authority),
     },
   });
 };

@@ -103,6 +103,99 @@ export interface DeleteCollectionAttributeParams {
   collectionAttributeId: string;
 }
 
+export interface CreateInstructionParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  instructionId: string;
+  instructionName: string;
+}
+
+export interface UpdateInstructionParams {
+  authority: string;
+  instructionId: string;
+  instructionName: string;
+}
+
+export interface UpdateInstructionBodyParams {
+  authority: string;
+  instructionId: string;
+  instructionBody: string;
+}
+
+export interface DeleteInstructionParams {
+  authority: string;
+  applicationId: string;
+  instructionId: string;
+}
+
+export interface CreateInstructionArgumentParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  instructionId: string;
+  instructionArgumentId: string;
+  instructionArgumentDto: InstructionArgumentDto;
+}
+
+export interface UpdateInstructionArgumentParams {
+  authority: string;
+  instructionArgumentId: string;
+  instructionArgumentDto: InstructionArgumentDto;
+}
+
+export interface DeleteInstructionArgumentParams {
+  authority: string;
+  instructionId: string;
+  instructionArgumentId: string;
+}
+
+export interface CreateInstructionAccountParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  instructionId: string;
+  instructionAccountId: string;
+  instructionAccountDto: InstructionAccountDto;
+}
+
+export interface UpdateInstructionAccountParams {
+  authority: string;
+  instructionAccountId: string;
+  instructionAccountDto: InstructionAccountDto;
+}
+
+export interface DeleteInstructionAccountParams {
+  authority: string;
+  instructionId: string;
+  instructionAccountId: string;
+}
+
+export interface CreateInstructionRelationParams {
+  workspaceId: string;
+  authority: string;
+  applicationId: string;
+  instructionId: string;
+  instructionRelationId: string;
+  instructionRelationBump: number;
+  fromAccountId: string;
+  toAccountId: string;
+}
+
+export interface UpdateInstructionRelationParams {
+  authority: string;
+  instructionRelationId: string;
+  fromAccountId: string;
+  toAccountId: string;
+}
+
+export interface DeleteInstructionRelationParams {
+  authority: string;
+  fromAccountId: string;
+  toAccountId: string;
+  instructionRelationId: string;
+}
+
 export interface Collection {
   authority: string;
   workspace: string;

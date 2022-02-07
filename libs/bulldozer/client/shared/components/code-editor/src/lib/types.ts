@@ -4,4 +4,5 @@ export interface CodeEditorOptions {
   automaticLayout: boolean;
   readOnly: boolean;
   fontSize: number;
+  wordWrap?: boolean;
 }

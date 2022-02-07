@@ -49,6 +49,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
         <bd-instruction-explorer
           [connected]="connected"
           [applicationId]="application.id"
+          [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
         >
         </bd-instruction-explorer>
 

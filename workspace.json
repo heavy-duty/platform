@@ -46,6 +46,7 @@
     "bulldozer-client-instructions-components-instruction-explorer": "libs/bulldozer/client/instructions/components/instruction-explorer",
     "bulldozer-client-instructions-components-instruction-signers-list": "libs/bulldozer/client/instructions/components/instruction-signers-list",
     "bulldozer-client-instructions-components-instruction-tab": "libs/bulldozer/client/instructions/components/instruction-tab",
+    "bulldozer-client-instructions-data-access": "libs/bulldozer/client/instructions/data-access",
     "bulldozer-client-instructions-modals-edit-instruction": "libs/bulldozer/client/instructions/modals/edit-instruction",
     "bulldozer-client-instructions-modals-edit-instruction-argument": "libs/bulldozer/client/instructions/modals/edit-instruction-argument",
     "bulldozer-client-instructions-modals-edit-instruction-document": "libs/bulldozer/client/instructions/modals/edit-instruction-document",

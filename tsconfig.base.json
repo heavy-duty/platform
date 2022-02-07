@@ -94,6 +94,9 @@
       "@bulldozer-client/instruction-tab": [
         "libs/bulldozer/client/instructions/components/instruction-tab/src/index.ts"
       ],
+      "@bulldozer-client/instructions-data-access": [
+        "libs/bulldozer/client/instructions/data-access/src/index.ts"
+      ],
       "@bulldozer-client/obscure-address": [
         "libs/bulldozer/client/shared/pipes/obscure-address/src/index.ts"
       ],

@@ -1,14 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { InstructionStore } from '@heavy-duty/bulldozer-store';
 import { InstructionExplorerStore } from './instruction-explorer.store';
 
 @Component({
   selector: 'bd-instruction-explorer',
   template: `
-    <mat-expansion-panel
-      togglePosition="before"
-      *ngIf="applicationId$ | ngrxPush as applicationId"
-    >
+    <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Instructions </mat-panel-title>
@@ -18,16 +14,18 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             aria-label="Create instruction"
             bdStopPropagation
             bdEditInstructionTrigger
-            (editInstruction)="onCreateInstruction(applicationId, $event)"
+            (editInstruction)="onCreateInstruction($event)"
           >
             <mat-icon>add</mat-icon>
           </button>
         </div>
       </mat-expansion-panel-header>
       <mat-nav-list dense>
-        <mat-list-item *ngFor="let instruction of instructions$ | ngrxPush">
+        <mat-list-item
+          *ngFor="let instruction of instructions$ | ngrxPush"
+          class="pl-8 pr-0"
+        >
           <a
-            class="pl-8 pr-0"
             matLine
             [routerLink]="[
               '/workspaces',
@@ -57,7 +55,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
               mat-menu-item
               bdEditInstructionTrigger
               [instruction]="instruction"
-              (editInstruction)="onUpdateInstruction(applicationId, $event)"
+              (editInstruction)="onUpdateInstruction(instruction.id, $event)"
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -65,7 +63,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteInstruction(applicationId, instruction.id)"
+              (click)="onDeleteInstruction(instruction.id)"
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -80,32 +78,35 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
 })
 export class InstructionExplorerComponent {
   @Input() connected = false;
-  @Input() set applicationId(value: string | undefined) {
+  @Input() set applicationId(value: string | null) {
     this._instructionExplorerStore.setApplicationId(value);
+  }
+  @Input() set workspaceId(value: string | null) {
+    this._instructionExplorerStore.setWorkspaceId(value);
   }
   readonly applicationId$ = this._instructionExplorerStore.applicationId$;
   readonly instructions$ = this._instructionExplorerStore.instructions$;
 
   constructor(
-    private readonly _instructionStore: InstructionStore,
     private readonly _instructionExplorerStore: InstructionExplorerStore
   ) {}
 
-  onCreateInstruction(applicationId: string, instructionName: string) {
-    this._instructionStore.createInstruction({
-      applicationId,
-      instructionName,
+  onCreateInstruction(name: string) {
+    this._instructionExplorerStore.createInstruction({
+      instructionName: name,
     });
   }
 
   onUpdateInstruction(instructionId: string, instructionName: string) {
-    this._instructionStore.updateInstruction({
+    this._instructionExplorerStore.updateInstruction({
       instructionId,
       instructionName,
     });
   }
 
-  onDeleteInstruction(applicationId: string, instructionId: string) {
-    this._instructionStore.deleteInstruction({ applicationId, instructionId });
+  onDeleteInstruction(instructionId: string) {
+    this._instructionExplorerStore.deleteInstruction({
+      instructionId,
+    });
   }
 }

@@ -5,20 +5,25 @@ import {
 } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, Observable, of, startWith, switchMap } from 'rxjs';
+import { concatMap, of, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
+  applicationId: string | null;
   application: Document<Application> | null;
   error: unknown | null;
 }
 
 const initialState: ViewModel = {
+  applicationId: null,
   application: null,
   error: null,
 };
 
 @Injectable()
 export class ApplicationTabStore extends ComponentStore<ViewModel> {
+  private readonly _applicationId$ = this.select(
+    ({ applicationId }) => applicationId
+  );
   readonly application$ = this.select(({ application }) => application);
 
   constructor(
@@ -28,32 +33,33 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
     super(initialState);
   }
 
-  readonly loadApplication$ = this.effect(
-    (applicationId$: Observable<string | null>) =>
-      applicationId$.pipe(
-        switchMap((applicationId) => {
-          if (applicationId === null) {
-            return of(null);
-          }
+  readonly setApplicationId = this.updater(
+    (state, applicationId: string | null) => ({ ...state, applicationId })
+  );
 
-          return this._applicationApiService
-            .findByPublicKey(applicationId)
-            .pipe(
-              concatMap((application) => {
-                if (!application) {
-                  return of(null);
-                }
+  protected readonly loadApplication = this.effect(() =>
+    this._applicationId$.pipe(
+      switchMap((applicationId) => {
+        if (applicationId === null) {
+          return of(null);
+        }
 
-                return this._applicationSocketService
-                  .applicationChanges(applicationId)
-                  .pipe(startWith(application));
-              })
-            );
-        }),
-        tapResponse(
-          (application) => this.patchState({ application }),
-          (error) => this.patchState({ error })
-        )
+        return this._applicationApiService.findByPublicKey(applicationId).pipe(
+          concatMap((application) => {
+            if (!application) {
+              return of(null);
+            }
+
+            return this._applicationSocketService
+              .applicationChanges(applicationId)
+              .pipe(startWith(application));
+          })
+        );
+      }),
+      tapResponse(
+        (application) => this.patchState({ application }),
+        (error) => this.patchState({ error })
       )
+    )
   );
 }

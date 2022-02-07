@@ -5,20 +5,25 @@ import {
 } from '@bulldozer-client/collections-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, Observable, of, startWith, switchMap } from 'rxjs';
+import { concatMap, of, startWith, switchMap } from 'rxjs';
 
 interface ViewModel {
+  collectionId: string | null;
   collection: Document<Collection> | null;
   error: unknown | null;
 }
 
 const initialState: ViewModel = {
+  collectionId: null,
   collection: null,
   error: null,
 };
 
 @Injectable()
 export class CollectionTabStore extends ComponentStore<ViewModel> {
+  private readonly _collectionId$ = this.select(
+    ({ collectionId }) => collectionId
+  );
   readonly collection$ = this.select(({ collection }) => collection);
 
   constructor(
@@ -28,30 +33,33 @@ export class CollectionTabStore extends ComponentStore<ViewModel> {
     super(initialState);
   }
 
-  readonly loadCollection$ = this.effect(
-    (collectionId$: Observable<string | null>) =>
-      collectionId$.pipe(
-        switchMap((collectionId) => {
-          if (collectionId === null) {
-            return of(null);
-          }
+  readonly setCollectionId = this.updater(
+    (state, collectionId: string | null) => ({ ...state, collectionId })
+  );
 
-          return this._collectionApiService.findByPublicKey(collectionId).pipe(
-            concatMap((collection) => {
-              if (!collection) {
-                return of(null);
-              }
+  protected readonly loadCollection = this.effect(() =>
+    this._collectionId$.pipe(
+      switchMap((collectionId) => {
+        if (collectionId === null) {
+          return of(null);
+        }
 
-              return this._collectionSocketService
-                .collectionChanges(collectionId)
-                .pipe(startWith(collection));
-            })
-          );
-        }),
-        tapResponse(
-          (collection) => this.patchState({ collection }),
-          (error) => this.patchState({ error })
-        )
+        return this._collectionApiService.findByPublicKey(collectionId).pipe(
+          concatMap((collection) => {
+            if (!collection) {
+              return of(null);
+            }
+
+            return this._collectionSocketService
+              .collectionChanges(collectionId)
+              .pipe(startWith(collection));
+          })
+        );
+      }),
+      tapResponse(
+        (collection) => this.patchState({ collection }),
+        (error) => this.patchState({ error })
       )
+    )
   );
 }
