@@ -12,11 +12,12 @@ import {
   DeleteApplicationParams,
   Document,
   encodeFilters,
+  getBulldozerError,
   UpdateApplicationParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationApiService {
@@ -54,9 +55,8 @@ export class ApplicationApiService {
   create(params: Omit<CreateApplicationParams, 'applicationId'>) {
     const applicationKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) => {
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
           createCreateApplicationInstruction2({
             ...params,
@@ -65,25 +65,67 @@ export class ApplicationApiService {
         );
         transaction.partialSign(applicationKeypair);
         return transaction;
-      }
-    );
+      })
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // update application
   update(params: UpdateApplicationParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createUpdateApplicationInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // delete application
   delete(params: DeleteApplicationParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createDeleteApplicationInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 }

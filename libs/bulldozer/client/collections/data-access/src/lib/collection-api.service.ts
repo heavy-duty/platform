@@ -12,11 +12,12 @@ import {
   DeleteCollectionParams,
   Document,
   encodeFilters,
+  getBulldozerError,
   UpdateCollectionParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
 import { Keypair, PublicKey } from '@solana/web3.js';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionApiService {
@@ -54,9 +55,8 @@ export class CollectionApiService {
   create(params: Omit<CreateCollectionParams, 'collectionId'>) {
     const collectionKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) => {
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
           createCreateCollectionInstruction2({
             ...params,
@@ -65,25 +65,67 @@ export class CollectionApiService {
         );
         transaction.partialSign(collectionKeypair);
         return transaction;
-      }
-    );
+      })
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // update collection
   update(params: UpdateCollectionParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createUpdateCollectionInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 
   // delete collection
   delete(params: DeleteCollectionParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) =>
+    return this._ngxSolanaApiService
+      .createAndSendTransaction(params.authority, (transaction) =>
         transaction.add(createDeleteCollectionInstruction2(params))
-    );
+      )
+      .pipe(
+        catchError((error) => {
+          if (
+            'InstructionError' in error &&
+            error.InstructionError.length === 2 &&
+            typeof error.InstructionError[1].Custom === 'number'
+          ) {
+            return throwError(() =>
+              getBulldozerError(error.InstructionError[1].Custom)
+            );
+          }
+
+          return throwError(() => error);
+        })
+      );
   }
 }
