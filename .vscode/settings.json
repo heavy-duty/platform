@@ -1,30 +1,11 @@
 {
-  "workbench.colorCustomizations": {
-    "activityBar.activeBackground": "#ffd03a",
-    "activityBar.activeBorder": "#009f79",
-    "activityBar.background": "#ffd03a",
-    "activityBar.foreground": "#15202b",
-    "activityBar.inactiveForeground": "#15202b99",
-    "activityBarBadge.background": "#009f79",
-    "activityBarBadge.foreground": "#e7e7e7",
-    "sash.hoverBorder": "#ffd03a",
-    "statusBar.background": "#ffc407",
-    "statusBar.foreground": "#15202b",
-    "statusBarItem.hoverBackground": "#d3a100",
-    "statusBarItem.remoteBackground": "#ffc407",
-    "statusBarItem.remoteForeground": "#15202b",
-    "titleBar.activeBackground": "#ffc407",
-    "titleBar.activeForeground": "#15202b",
-    "titleBar.inactiveBackground": "#ffc40799",
-    "titleBar.inactiveForeground": "#15202b99"
-  },
-  "peacock.color": "#ffc407",
   "conventionalCommits.scopes": [
     "core",
     "bulldozer-programs",
     "bulldozer-client",
     "editor",
-    "wallet-adapter"
+    "wallet-adapter",
+    "ngx-solana"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,

@@ -5,9 +5,8 @@ import {
   Provider,
   setProvider,
 } from '@project-serum/anchor';
-import { Keypair, SystemProgram } from '@solana/web3.js';
+import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 import { assert } from 'chai';
-
 import * as bulldozerIdl from '../target/idl/bulldozer.json';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
@@ -23,38 +22,50 @@ describe('instruction argument', () => {
   const workspaceName = 'my-workspace';
 
   before(async () => {
-    await program.rpc.createWorkspace(workspaceName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [workspace],
-    });
-    await program.rpc.createApplication(applicationName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [application],
-    });
-    await program.rpc.createInstruction(instructionName, {
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        systemProgram: SystemProgram.programId,
-      },
-      signers: [instruction],
-    });
+    await program.rpc.createWorkspace(
+      { name: workspaceName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [workspace],
+      }
+    );
+    await program.rpc.createApplication(
+      { name: applicationName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [application],
+      }
+    );
+    await program.rpc.createInstruction(
+      { name: instructionName },
+      {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [instruction],
+      }
+    );
   });
 
   it('should create account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 0,
       modifier: null,
@@ -63,7 +74,7 @@ describe('instruction argument', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.createInstructionArgument(dto, {
+    await program.rpc.createInstructionArgument(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
@@ -71,27 +82,49 @@ describe('instruction argument', () => {
         instruction: instruction.publicKey,
         argument: instructionArgument.publicKey,
         systemProgram: SystemProgram.programId,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
       signers: [instructionArgument],
     });
     // assert
-    const account = await program.account.instructionArgument.fetch(
-      instructionArgument.publicKey
+    const instructionArgumentAccount =
+      await program.account.instructionArgument.fetch(
+        instructionArgument.publicKey
+      );
+    const instructionAccount = await program.account.instruction.fetch(
+      instruction.publicKey
     );
-    assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-    assert.ok(account.workspace.equals(workspace.publicKey));
-    assert.ok(account.application.equals(application.publicKey));
-    assert.ok(account.instruction.equals(instruction.publicKey));
-    assert.equal(account.data.name, dto.name);
-    assert.ok('boolean' in account.data.kind);
-    assert.equal(account.data.kind.boolean.id, dto.kind);
-    assert.equal(account.data.kind.boolean.size, 1);
-    assert.equal(account.data.modifier, null);
+    assert.ok(
+      instructionArgumentAccount.authority.equals(
+        program.provider.wallet.publicKey
+      )
+    );
+    assert.ok(instructionArgumentAccount.workspace.equals(workspace.publicKey));
+    assert.ok(
+      instructionArgumentAccount.application.equals(application.publicKey)
+    );
+    assert.ok(
+      instructionArgumentAccount.instruction.equals(instruction.publicKey)
+    );
+    assert.equal(instructionArgumentAccount.name, argumentsData.name);
+    assert.ok('boolean' in instructionArgumentAccount.kind);
+    assert.equal(
+      instructionArgumentAccount.kind.boolean.id,
+      argumentsData.kind
+    );
+    assert.equal(instructionArgumentAccount.kind.boolean.size, 1);
+    assert.equal(instructionArgumentAccount.modifier, null);
+    assert.equal(instructionAccount.quantityOfArguments, 1);
+    assert.ok(
+      instructionArgumentAccount.createdAt.eq(
+        instructionArgumentAccount.updatedAt
+      )
+    );
   });
 
   it('should update account', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 1,
       modifier: 0,
@@ -100,23 +133,25 @@ describe('instruction argument', () => {
       maxLength: null,
     };
     // act
-    await program.rpc.updateInstructionArgument(dto, {
+    await program.rpc.updateInstructionArgument(argumentsData, {
       accounts: {
         authority: program.provider.wallet.publicKey,
         argument: instructionArgument.publicKey,
+        clock: SYSVAR_CLOCK_PUBKEY,
       },
     });
     // assert
     const account = await program.account.instructionArgument.fetch(
       instructionArgument.publicKey
     );
-    assert.equal(account.data.name, dto.name);
-    assert.ok('number' in account.data.kind);
-    assert.equal(account.data.kind.number.id, dto.kind);
-    assert.equal(account.data.kind.number.size, dto.max);
-    assert.ok('array' in account.data.modifier);
-    assert.equal(account.data.modifier.array.id, dto.modifier);
-    assert.equal(account.data.modifier.array.size, dto.size);
+    assert.equal(account.name, argumentsData.name);
+    assert.ok('number' in account.kind);
+    assert.equal(account.kind.number.id, argumentsData.kind);
+    assert.equal(account.kind.number.size, argumentsData.max);
+    assert.ok('array' in account.modifier);
+    assert.equal(account.modifier.array.id, argumentsData.modifier);
+    assert.equal(account.modifier.array.size, argumentsData.size);
+    assert.ok(account.createdAt.lte(account.updatedAt));
   });
 
   it('should delete account', async () => {
@@ -125,6 +160,7 @@ describe('instruction argument', () => {
       accounts: {
         authority: program.provider.wallet.publicKey,
         argument: instructionArgument.publicKey,
+        instruction: instruction.publicKey,
       },
     });
     // assert
@@ -132,12 +168,16 @@ describe('instruction argument', () => {
       await program.account.instructionArgument.fetchNullable(
         instructionArgument.publicKey
       );
+    const instructionAccount = await program.account.instruction.fetch(
+      instruction.publicKey
+    );
     assert.equal(argumentAccount, null);
+    assert.equal(instructionAccount.quantityOfArguments, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 1,
       modifier: 0,
@@ -148,7 +188,7 @@ describe('instruction argument', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -156,6 +196,7 @@ describe('instruction argument', () => {
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionArgument],
       });
@@ -168,7 +209,7 @@ describe('instruction argument', () => {
 
   it('should fail when max length is not provided with a string', async () => {
     // arrange
-    const dto = {
+    const argumentsData = {
       name: 'attr1_name',
       kind: 2,
       modifier: 0,
@@ -179,7 +220,7 @@ describe('instruction argument', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstructionArgument(dto, {
+      await program.rpc.createInstructionArgument(argumentsData, {
         accounts: {
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -187,6 +228,7 @@ describe('instruction argument', () => {
           instruction: instruction.publicKey,
           argument: instructionArgument.publicKey,
           systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
         },
         signers: [instructionArgument],
       });
@@ -195,5 +237,61 @@ describe('instruction argument', () => {
     }
     // assert
     assert.equal(error.code, 6012);
+  });
+
+  it('should fail when providing wrong "instruction" to delete', async () => {
+    // arrange
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const newArgument = Keypair.generate();
+    const argumentsData = {
+      name: 'arg1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError;
+    // act
+    try {
+      await program.rpc.createInstruction(
+        { name: newInstructionName },
+        {
+          accounts: {
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: newInstruction.publicKey,
+            systemProgram: SystemProgram.programId,
+            clock: SYSVAR_CLOCK_PUBKEY,
+          },
+          signers: [newInstruction],
+        }
+      );
+      await program.rpc.createInstructionArgument(argumentsData, {
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: newInstruction.publicKey,
+          argument: newArgument.publicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+        signers: [newArgument],
+      });
+      await program.rpc.deleteInstructionArgument({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          instruction: instruction.publicKey,
+          argument: newArgument.publicKey,
+        },
+      });
+    } catch (err) {
+      error = err;
+    }
+    // assert
+    assert.equal(error.code, 6019);
   });
 });

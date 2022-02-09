@@ -9,4 +9,6 @@ pub struct InstructionRelation {
   pub from: Pubkey,
   pub to: Pubkey,
   pub bump: u8,
+  pub created_at: i64,
+  pub updated_at: i64,
 }

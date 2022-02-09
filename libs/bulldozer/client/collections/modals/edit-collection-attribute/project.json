@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/collections/modals/edit-collection-attribute",
+  "sourceRoot": "libs/bulldozer/client/collections/modals/edit-collection-attribute/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/collections/modals/edit-collection-attribute"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/collections/modals/edit-collection-attribute/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/collections/modals/edit-collection-attribute/src/**/*.ts",
+          "libs/bulldozer/client/collections/modals/edit-collection-attribute/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

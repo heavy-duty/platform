@@ -1,4 +1,4 @@
-use crate::collections::Attribute;
+use crate::enums::{AttributeKinds, AttributeModifiers};
 use anchor_lang::prelude::*;
 
 #[account]
@@ -7,5 +7,9 @@ pub struct InstructionArgument {
   pub workspace: Pubkey,
   pub application: Pubkey,
   pub instruction: Pubkey,
-  pub data: Attribute,
+  pub name: String,
+  pub kind: AttributeKinds,
+  pub modifier: Option<AttributeModifiers>,
+  pub created_at: i64,
+  pub updated_at: i64,
 }

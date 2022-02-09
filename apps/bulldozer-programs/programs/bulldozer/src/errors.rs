@@ -29,4 +29,34 @@ pub enum ErrorCode {
   MissingMax,
   #[msg("Missing Max Length")]
   MissingMaxLength,
+  #[msg("Cant delete collection with attributes")]
+  CantDeleteCollectionWithAttributes,
+  #[msg("Collection provided doesnt match attribute")]
+  CollectionDoesntMatchAttribute,
+  #[msg("Cant delete account with relations")]
+  CantDeleteAccountWithRelations,
+  #[msg("From provided doesnt match relation")]
+  FromDoesntMatchRelation,
+  #[msg("To provided doesnt match relation")]
+  ToDoesntMatchRelation,
+  #[msg("Cant delete instruction with arguments")]
+  CantDeleteInstructionWithArguments,
+  #[msg("Instruction provided doesnt match argument")]
+  InstructionDoesntMatchArgument,
+  #[msg("Cant delete instruction with accounts")]
+  CantDeleteInstructionWithAccounts,
+  #[msg("Instruction provided doesnt match account")]
+  InstructionDoesntMatchAccount,
+  #[msg("Cant delete application with collections")]
+  CantDeleteApplicationWithCollections,
+  #[msg("Application provided doesnt match collection")]
+  ApplicationDoesntMatchCollection,
+  #[msg("Cant delete application with instructions")]
+  CantDeleteApplicationWithInstructions,
+  #[msg("Application provided doesnt match instruction")]
+  ApplicationDoesntMatchInstruction,
+  #[msg("Cant delete workspace with applications")]
+  CantDeleteWorkspaceWithApplications,
+  #[msg("Workspace provided doesnt match application")]
+  WorkspaceDoesntMatchApplication,
 }

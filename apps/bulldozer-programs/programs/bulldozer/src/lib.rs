@@ -6,7 +6,6 @@ mod errors;
 mod instructions;
 mod utils;
 
-use collections::*;
 use instructions::*;
 
 declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
@@ -15,127 +14,133 @@ declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
 pub mod bulldozer {
   use super::*;
 
-  pub fn create_workspace(ctx: Context<CreateWorkspace>, name: String) -> ProgramResult {
-    instructions::create_workspace::handler(ctx, name)
+  pub fn create_workspace(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
+    instructions::create_workspace::handle(ctx, arguments)
   }
 
-  pub fn update_workspace(ctx: Context<UpdateWorkspace>, name: String) -> ProgramResult {
-    instructions::update_workspace::handler(ctx, name)
+  pub fn update_workspace(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {
+    instructions::update_workspace::handle(ctx, arguments)
   }
 
   pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> ProgramResult {
-    instructions::delete_workspace::handler(ctx)
+    instructions::delete_workspace::handle(ctx)
   }
 
-  pub fn create_application(ctx: Context<CreateApplication>, name: String) -> ProgramResult {
-    instructions::create_application::handler(ctx, name)
+  pub fn create_application(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
+    instructions::create_application::handle(ctx, arguments)
   }
 
-  pub fn update_application(ctx: Context<UpdateApplication>, name: String) -> ProgramResult {
-    instructions::update_application::handler(ctx, name)
+  pub fn update_application(ctx: Context<UpdateApplication>, arguments: UpdateApplicationArguments) -> ProgramResult {
+    instructions::update_application::handle(ctx, arguments)
   }
 
   pub fn delete_application(ctx: Context<DeleteApplication>) -> ProgramResult {
-    instructions::delete_application::handler(ctx)
+    instructions::delete_application::handle(ctx)
   }
 
-  pub fn create_collection(ctx: Context<CreateCollection>, name: String) -> ProgramResult {
-    instructions::create_collection::handler(ctx, name)
+  pub fn create_collection(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
+    instructions::create_collection::handle(ctx, arguments)
   }
 
-  pub fn update_collection(ctx: Context<UpdateCollection>, name: String) -> ProgramResult {
-    instructions::update_collection::handler(ctx, name)
+  pub fn update_collection(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> ProgramResult {
+    instructions::update_collection::handle(ctx, arguments)
   }
 
   pub fn delete_collection(ctx: Context<DeleteCollection>) -> ProgramResult {
-    instructions::delete_collection::handler(ctx)
+    instructions::delete_collection::handle(ctx)
   }
 
+  #[access_control(instructions::create_collection_attribute::validate(&ctx, &arguments))]
   pub fn create_collection_attribute(
     ctx: Context<CreateCollectionAttribute>,
-    dto: AttributeDto,
+    arguments: CreateCollectionAttributeArguments,
   ) -> ProgramResult {
-    instructions::create_collection_attribute::handler(ctx, dto)
+    instructions::create_collection_attribute::handle(ctx, arguments)
   }
 
+  #[access_control(instructions::update_collection_attribute::validate(&ctx, &arguments))]
   pub fn update_collection_attribute(
     ctx: Context<UpdateCollectionAttribute>,
-    dto: AttributeDto,
+    arguments: UpdateCollectionAttributeArguments,
   ) -> ProgramResult {
-    instructions::update_collection_attribute::handler(ctx, dto)
+    instructions::update_collection_attribute::handle(ctx, arguments)
   }
 
   pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
-    instructions::delete_collection_attribute::handler(ctx)
+    instructions::delete_collection_attribute::handle(ctx)
   }
 
-  pub fn create_instruction(ctx: Context<CreateInstruction>, name: String) -> ProgramResult {
-    instructions::create_instruction::handler(ctx, name)
+  pub fn create_instruction(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
+    instructions::create_instruction::handle(ctx, arguments)
   }
 
-  pub fn update_instruction(ctx: Context<UpdateInstruction>, name: String) -> ProgramResult {
-    instructions::update_instruction::handler(ctx, name)
+  pub fn update_instruction(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
+    instructions::update_instruction::handle(ctx, arguments)
   }
 
   pub fn update_instruction_body(
     ctx: Context<UpdateInstructionBody>,
-    body: String,
+    arguments: UpdateInstructionBodyArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_body::handler(ctx, body)
+    instructions::update_instruction_body::handle(ctx, arguments)
   }
 
   pub fn delete_instruction(ctx: Context<DeleteInstruction>) -> ProgramResult {
-    instructions::delete_instruction::handler(ctx)
+    instructions::delete_instruction::handle(ctx)
   }
 
+  #[access_control(instructions::create_instruction_argument::validate(&ctx, &arguments))]
   pub fn create_instruction_argument(
     ctx: Context<CreateInstructionArgument>,
-    dto: AttributeDto,
+    arguments: CreateInstructionArgumentArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_argument::handler(ctx, dto)
+    instructions::create_instruction_argument::handle(ctx, arguments)
   }
 
+  #[access_control(instructions::update_instruction_argument::validate(&ctx, &arguments))]
   pub fn update_instruction_argument(
     ctx: Context<UpdateInstructionArgument>,
-    dto: AttributeDto,
+    arguments: UpdateInstructionArgumentArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_argument::handler(ctx, dto)
+    instructions::update_instruction_argument::handle(ctx, arguments)
   }
 
   pub fn delete_instruction_argument(ctx: Context<DeleteInstructionArgument>) -> ProgramResult {
-    instructions::delete_instruction_argument::handler(ctx)
+    instructions::delete_instruction_argument::handle(ctx)
   }
 
+  #[access_control(instructions::create_instruction_account::validate(&ctx, &arguments))]
   pub fn create_instruction_account(
     ctx: Context<CreateInstructionAccount>,
-    dto: AccountDto,
+    arguments: CreateInstructionAccountArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_account::handler(ctx, dto)
+    instructions::create_instruction_account::handle(ctx, arguments)
   }
 
+  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
-    dto: AccountDto,
+    arguments: UpdateInstructionAccountArguments,
   ) -> ProgramResult {
-    instructions::update_instruction_account::handler(ctx, dto)
+    instructions::update_instruction_account::handle(ctx, arguments)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
-    instructions::delete_instruction_account::handler(ctx)
+    instructions::delete_instruction_account::handle(ctx)
   }
 
   pub fn create_instruction_relation(
     ctx: Context<CreateInstructionRelation>,
-    bump: u8,
+    arguments: CreateInstructionRelationArguments,
   ) -> ProgramResult {
-    instructions::create_instruction_relation::handler(ctx, bump)
+    instructions::create_instruction_relation::handle(ctx, arguments)
   }
 
   pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
-    instructions::update_instruction_relation::handler(ctx)
+    instructions::update_instruction_relation::handle(ctx)
   }
 
   pub fn delete_instruction_relation(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
-    instructions::delete_instruction_relation::handler(ctx)
+    instructions::delete_instruction_relation::handle(ctx)
   }
 }

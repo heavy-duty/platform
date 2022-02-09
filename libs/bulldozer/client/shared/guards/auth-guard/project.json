@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/shared/guards/auth-guard",
+  "sourceRoot": "libs/bulldozer/client/shared/guards/auth-guard/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/client/shared/guards/auth-guard"],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/shared/guards/auth-guard/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/shared/guards/auth-guard/src/**/*.ts",
+          "libs/bulldozer/client/shared/guards/auth-guard/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

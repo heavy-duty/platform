@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/instructions/modals/edit-instruction-argument",
+  "sourceRoot": "libs/bulldozer/client/instructions/modals/edit-instruction-argument/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/instructions/modals/edit-instruction-argument"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-argument/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/instructions/modals/edit-instruction-argument/src/**/*.ts",
+          "libs/bulldozer/client/instructions/modals/edit-instruction-argument/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

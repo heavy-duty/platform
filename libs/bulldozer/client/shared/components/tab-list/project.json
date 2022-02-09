@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/shared/components/tab-list",
+  "sourceRoot": "libs/bulldozer/client/shared/components/tab-list/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/client/shared/components/tab-list"],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/shared/components/tab-list/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/shared/components/tab-list/src/**/*.ts",
+          "libs/bulldozer/client/shared/components/tab-list/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

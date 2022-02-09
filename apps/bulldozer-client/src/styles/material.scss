@@ -109,23 +109,12 @@ mat-icon {
   }
 
   .mat-expansion-panel-header {
-    padding: 0rem !important;
-    padding-left: 1rem !important;
     height: 3rem !important;
 
     .mat-expanded {
       height: 3rem !important;
     }
   }
-}
-
-.mat-tab-link a {
-  display: flex;
-  align-items: center;
-  flex-grow: 1;
-  padding-left: 1rem;
-  text-align: left;
-  height: 100%;
 }
 
 .mat-fab.cdk-keyboard-focused,

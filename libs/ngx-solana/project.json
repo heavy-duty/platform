@@ -1,0 +1,42 @@
+{
+  "projectType": "library",
+  "root": "libs/ngx-solana",
+  "sourceRoot": "libs/ngx-solana/src",
+  "prefix": "hd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/ngx-solana"],
+      "options": {
+        "project": "libs/ngx-solana/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/ngx-solana/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/ngx-solana/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/ngx-solana"],
+      "options": {
+        "jestConfig": "libs/ngx-solana/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/ngx-solana/src/**/*.ts",
+          "libs/ngx-solana/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

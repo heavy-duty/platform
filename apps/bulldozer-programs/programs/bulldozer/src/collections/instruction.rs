@@ -7,4 +7,8 @@ pub struct Instruction {
   pub application: Pubkey,
   pub name: String,
   pub body: String,
+  pub quantity_of_arguments: u8,
+  pub quantity_of_accounts: u8,
+  pub created_at: i64,
+  pub updated_at: i64,
 }

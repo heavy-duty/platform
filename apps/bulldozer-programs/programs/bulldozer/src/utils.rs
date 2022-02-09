@@ -14,3 +14,12 @@ pub fn get_remaining_account<'info, T: AccountSerialize + AccountDeserialize + O
     None => Ok(None),
   }
 }
+
+pub fn get_account_key<'info, T: AccountSerialize + AccountDeserialize + Owner + Clone>(
+  maybe_account: Option<Account<'info, T>>,
+) -> std::result::Result<Option<Pubkey>, ProgramError> {
+  match maybe_account {
+    Some(account) => Ok(Some(account.key())),
+    _ => Ok(None)
+  }
+}
