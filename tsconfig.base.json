@@ -158,7 +158,7 @@
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ngx-solana": ["libs/ngx-solana/src/index.ts"],
       "@heavy-duty/rx-solana": ["libs/rx-solana/src/index.ts"],
-      "@heavy-duty/rxjs-operators": ["libs/rxjs-operators/src/index.ts"],
+      "@heavy-duty/rxjs": ["libs/rxjs/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [
         "libs/shared/utils/operators/src/index.ts"
       ],

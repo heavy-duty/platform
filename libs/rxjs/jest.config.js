@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'rxjs-operators',
+  displayName: 'rxjs',
   preset: '../../jest.preset.js',
   globals: {
     'ts-jest': {
@@ -10,5 +10,5 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'ts-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  coverageDirectory: '../../coverage/libs/rxjs-operators',
+  coverageDirectory: '../../coverage/libs/rxjs',
 };

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs-operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { ProgramError } from '@project-serum/anchor';
 import { WalletError } from '@solana/wallet-adapter-base';

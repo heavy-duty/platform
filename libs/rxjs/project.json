@@ -1,0 +1,33 @@
+{
+  "root": "libs/rxjs",
+  "sourceRoot": "libs/rxjs/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/rxjs",
+        "main": "libs/rxjs/src/index.ts",
+        "tsConfig": "libs/rxjs/tsconfig.lib.json",
+        "assets": ["libs/rxjs/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["libs/rxjs/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/rxjs"],
+      "options": {
+        "jestConfig": "libs/rxjs/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

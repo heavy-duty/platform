@@ -6,7 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import { TabStore } from '@bulldozer-client/tab-store';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs-operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
 import { ViewCollectionRouteStore } from './view-collection-route.store';

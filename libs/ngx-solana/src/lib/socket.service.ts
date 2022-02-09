@@ -5,7 +5,7 @@ import {
   onSignatureChange,
   RpcMessage,
 } from '@heavy-duty/rx-solana';
-import { shareWhileSubscribed } from '@heavy-duty/rxjs-operators';
+import { shareWhileSubscribed } from '@heavy-duty/rxjs';
 import {
   AccountInfo,
   Commitment,

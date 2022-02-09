@@ -6,7 +6,7 @@ import {
   WorkspaceSocketService,
 } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs-operators';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
 import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
