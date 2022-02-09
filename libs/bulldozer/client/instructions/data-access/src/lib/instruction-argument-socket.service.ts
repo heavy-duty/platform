@@ -3,13 +3,11 @@ import {
   BULLDOZER_PROGRAM_ID,
   createInstructionArgumentDocument,
   Document,
-  encodeFilters,
   InstructionArgument,
   InstructionArgumentFilters,
-  INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
+  instructionArgumentQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
-import { PublicKey } from '@solana/web3.js';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +25,7 @@ export class InstructionArgumentSocketService {
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createInstructionArgumentDocument(
-                new PublicKey(instructionArgumentId),
+                instructionArgumentId,
                 accountInfo
               )
             : null
@@ -38,20 +36,19 @@ export class InstructionArgumentSocketService {
   instructionArgumentCreated(
     filters: InstructionArgumentFilters
   ): Observable<Document<InstructionArgument>> {
+    const query = instructionArgumentQueryBuilder()
+      .where(filters)
+      .setCommitment('finalized')
+      .build();
+
     return this._ngxSolanaSocketService
-      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_ARGUMENT_ACCOUNT_NAME, filters),
-        commitment: 'finalized',
-      })
+      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {
           if (account.lamports === 0) {
             return EMPTY;
           } else {
-            const document = createInstructionArgumentDocument(
-              new PublicKey(pubkey),
-              account
-            );
+            const document = createInstructionArgumentDocument(pubkey, account);
 
             if (document.createdAt.eq(document.updatedAt)) {
               return of(document);

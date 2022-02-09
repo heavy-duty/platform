@@ -3,21 +3,20 @@ import {
   BULLDOZER_PROGRAM_ID,
   CollectionAttribute,
   CollectionAttributeFilters,
-  COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
+  collectionAttributeQueryBuilder,
+  createCollectionAttribute,
   createCollectionAttributeDocument,
   CreateCollectionAttributeParams,
-  createCreateCollectionAttributeInstruction2,
-  createDeleteCollectionAttributeInstruction2,
-  createUpdateCollectionAttributeInstruction2,
+  deleteCollectionAttribute,
   DeleteCollectionAttributeParams,
   Document,
-  encodeFilters,
   getBulldozerError,
+  updateCollectionAttribute,
   UpdateCollectionAttributeParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { Keypair } from '@solana/web3.js';
+import { catchError, map, Observable, tap, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionAttributeApiService {
@@ -25,16 +24,19 @@ export class CollectionAttributeApiService {
 
   // get collection attributes
   find(filters: CollectionAttributeFilters) {
+    console.log(filters);
+    const query = collectionAttributeQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(COLLECTION_ATTRIBUTE_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
+        tap((a) => console.log(a)),
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createCollectionAttributeDocument(new PublicKey(pubkey), account)
+            createCollectionAttributeDocument(pubkey, account)
           )
-        )
+        ),
+        tap((a) => console.log(a))
       );
   }
 
@@ -49,7 +51,7 @@ export class CollectionAttributeApiService {
           (accountInfo) =>
             accountInfo &&
             createCollectionAttributeDocument(
-              new PublicKey(collectionAttributeId),
+              collectionAttributeId,
               accountInfo
             )
         )
@@ -62,10 +64,12 @@ export class CollectionAttributeApiService {
   ) {
     const collectionAttributeKeypair = Keypair.generate();
 
+    console.log(params);
+
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateCollectionAttributeInstruction2({
+          createCollectionAttribute({
             ...params,
             collectionAttributeId:
               collectionAttributeKeypair.publicKey.toBase58(),
@@ -75,19 +79,11 @@ export class CollectionAttributeApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -95,22 +91,14 @@ export class CollectionAttributeApiService {
   update(params: UpdateCollectionAttributeParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateCollectionAttributeInstruction2(params))
+        transaction.add(updateCollectionAttribute(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -118,22 +106,14 @@ export class CollectionAttributeApiService {
   delete(params: DeleteCollectionAttributeParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteCollectionAttributeInstruction2(params))
+        transaction.add(deleteCollectionAttribute(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

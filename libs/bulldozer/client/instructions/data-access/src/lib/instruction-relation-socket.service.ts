@@ -2,14 +2,12 @@ import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionRelationRelation,
-  encodeFilters,
   InstructionRelation,
   InstructionRelationFilters,
-  INSTRUCTION_RELATION_ACCOUNT_NAME,
+  instructionRelationQueryBuilder,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
-import { PublicKey } from '@solana/web3.js';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +25,7 @@ export class InstructionRelationSocketService {
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createInstructionRelationRelation(
-                new PublicKey(instructionRelationId),
+                instructionRelationId,
                 accountInfo
               )
             : null
@@ -38,20 +36,19 @@ export class InstructionRelationSocketService {
   instructionRelationCreated(
     filters: InstructionRelationFilters
   ): Observable<Relation<InstructionRelation>> {
+    const query = instructionRelationQueryBuilder()
+      .where(filters)
+      .setCommitment('finalized')
+      .build();
+
     return this._ngxSolanaSocketService
-      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_RELATION_ACCOUNT_NAME, filters),
-        commitment: 'finalized',
-      })
+      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {
           if (account.lamports === 0) {
             return EMPTY;
           } else {
-            const document = createInstructionRelationRelation(
-              new PublicKey(pubkey),
-              account
-            );
+            const document = createInstructionRelationRelation(pubkey, account);
 
             if (document.createdAt.eq(document.updatedAt)) {
               return of(document);

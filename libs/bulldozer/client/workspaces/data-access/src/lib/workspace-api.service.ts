@@ -1,22 +1,21 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
-  createCreateWorkspaceInstruction2,
-  createDeleteWorkspaceInstruction2,
-  createUpdateWorkspaceInstruction2,
+  createWorkspace,
   createWorkspaceDocument,
   CreateWorkspaceParams,
+  deleteWorkspace,
   DeleteWorkspaceParams,
   Document,
-  encodeFilters,
   getBulldozerError,
+  updateWorkspace,
   UpdateWorkspaceParams,
   Workspace,
   WorkspaceFilters,
-  WORKSPACE_ACCOUNT_NAME,
+  workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -25,14 +24,14 @@ export class WorkspaceApiService {
 
   // get workspaces
   find(filters: WorkspaceFilters) {
+    const query = workspaceQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(WORKSPACE_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createWorkspaceDocument(new PublicKey(pubkey), account)
+            createWorkspaceDocument(pubkey, account)
           )
         )
       );
@@ -45,8 +44,7 @@ export class WorkspaceApiService {
       .pipe(
         map(
           (accountInfo) =>
-            accountInfo &&
-            createWorkspaceDocument(new PublicKey(workspaceId), accountInfo)
+            accountInfo && createWorkspaceDocument(workspaceId, accountInfo)
         )
       );
   }
@@ -58,7 +56,7 @@ export class WorkspaceApiService {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateWorkspaceInstruction2({
+          createWorkspace({
             ...params,
             workspaceId: workspaceKeypair.publicKey.toBase58(),
           })
@@ -67,19 +65,11 @@ export class WorkspaceApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -87,22 +77,14 @@ export class WorkspaceApiService {
   update(params: UpdateWorkspaceParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateWorkspaceInstruction2(params))
+        transaction.add(updateWorkspace(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -110,22 +92,14 @@ export class WorkspaceApiService {
   delete(params: DeleteWorkspaceParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteWorkspaceInstruction2(params))
+        transaction.add(deleteWorkspace(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

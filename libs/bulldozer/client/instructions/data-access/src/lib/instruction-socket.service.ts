@@ -3,13 +3,11 @@ import {
   BULLDOZER_PROGRAM_ID,
   createInstructionDocument,
   Document,
-  encodeFilters,
   Instruction,
   InstructionFilters,
-  INSTRUCTION_ACCOUNT_NAME,
+  instructionQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
-import { PublicKey } from '@solana/web3.js';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -26,30 +24,26 @@ export class InstructionSocketService {
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0
-            ? createInstructionDocument(
-                new PublicKey(instructionId),
-                accountInfo
-              )
+            ? createInstructionDocument(instructionId, accountInfo)
             : null
         )
       );
   }
 
   instructionCreated(filters: InstructionFilters) {
+    const query = instructionQueryBuilder()
+      .where(filters)
+      .setCommitment('finalized')
+      .build();
+
     return this._ngxSolanaSocketService
-      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_ACCOUNT_NAME, filters),
-        commitment: 'finalized',
-      })
+      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {
           if (account.lamports === 0) {
             return EMPTY;
           } else {
-            const document = createInstructionDocument(
-              new PublicKey(pubkey),
-              account
-            );
+            const document = createInstructionDocument(pubkey, account);
 
             if (document.createdAt.eq(document.updatedAt)) {
               return of(document);

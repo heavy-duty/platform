@@ -1,23 +1,21 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
-  createCreateInstructionRelationInstruction2,
-  createDeleteInstructionRelationInstruction2,
+  createInstructionRelation,
   CreateInstructionRelationParams,
   createInstructionRelationRelation,
-  createUpdateInstructionRelationInstruction2,
+  deleteInstructionRelation,
   DeleteInstructionRelationParams,
-  encodeFilters,
   findInstructionRelationAddress,
   getBulldozerError,
   InstructionRelation,
   InstructionRelationFilters,
-  INSTRUCTION_RELATION_ACCOUNT_NAME,
+  instructionRelationQueryBuilder,
   Relation,
+  updateInstructionRelation,
   UpdateInstructionRelationParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -26,14 +24,14 @@ export class InstructionRelationApiService {
 
   // get instructions
   find(filters: InstructionRelationFilters) {
+    const query = instructionRelationQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_RELATION_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createInstructionRelationRelation(new PublicKey(pubkey), account)
+            createInstructionRelationRelation(pubkey, account)
           )
         )
       );
@@ -50,7 +48,7 @@ export class InstructionRelationApiService {
           (accountInfo) =>
             accountInfo &&
             createInstructionRelationRelation(
-              new PublicKey(instructionRelationId),
+              instructionRelationId,
               accountInfo
             )
         )
@@ -65,17 +63,17 @@ export class InstructionRelationApiService {
     >
   ) {
     return findInstructionRelationAddress(
-      new PublicKey(params.fromAccountId),
-      new PublicKey(params.toAccountId)
+      params.fromAccountId,
+      params.toAccountId
     ).pipe(
-      concatMap(([instructionRelationPublicKey, instructionRelationBump]) => {
+      concatMap(([instructionRelationId, instructionRelationBump]) => {
         return this._ngxSolanaApiService.createAndSendTransaction(
           params.authority,
           (transaction) =>
             transaction.add(
-              createCreateInstructionRelationInstruction2({
+              createInstructionRelation({
                 ...params,
-                instructionRelationId: instructionRelationPublicKey.toBase58(),
+                instructionRelationId,
                 instructionRelationBump,
               })
             )
@@ -101,22 +99,14 @@ export class InstructionRelationApiService {
   update(params: UpdateInstructionRelationParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateInstructionRelationInstruction2(params))
+        transaction.add(updateInstructionRelation(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -124,22 +114,14 @@ export class InstructionRelationApiService {
   delete(params: DeleteInstructionRelationParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteInstructionRelationInstruction2(params))
+        transaction.add(deleteInstructionRelation(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

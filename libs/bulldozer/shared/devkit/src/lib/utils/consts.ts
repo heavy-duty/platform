@@ -1,9 +1,3 @@
-export const LAYOUT_AUTHORITY_OFFSET = 8;
-export const LAYOUT_WORKSPACE_OFFSET = 40;
-export const LAYOUT_APPLICATION_OFFSET = 72;
-export const LAYOUT_COLLECTION_OFFSET = 104;
-export const LAYOUT_INSTRUCTION_OFFSET = 104;
-
 export const WORKSPACE_ACCOUNT_NAME = 'workspace';
 export const APPLICATION_ACCOUNT_NAME = 'application';
 export const COLLECTION_ACCOUNT_NAME = 'collection';
@@ -12,12 +6,3 @@ export const INSTRUCTION_ACCOUNT_NAME = 'instruction';
 export const INSTRUCTION_ARGUMENT_ACCOUNT_NAME = 'instructionArgument';
 export const INSTRUCTION_ACCOUNT_ACCOUNT_NAME = 'instructionAccount';
 export const INSTRUCTION_RELATION_ACCOUNT_NAME = 'instructionRelation';
-export type AccountName =
-  | typeof WORKSPACE_ACCOUNT_NAME
-  | typeof APPLICATION_ACCOUNT_NAME
-  | typeof COLLECTION_ACCOUNT_NAME
-  | typeof COLLECTION_ATTRIBUTE_ACCOUNT_NAME
-  | typeof INSTRUCTION_ACCOUNT_NAME
-  | typeof INSTRUCTION_ARGUMENT_ACCOUNT_NAME
-  | typeof INSTRUCTION_ACCOUNT_ACCOUNT_NAME
-  | typeof INSTRUCTION_RELATION_ACCOUNT_NAME;

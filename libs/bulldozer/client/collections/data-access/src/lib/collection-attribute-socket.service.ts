@@ -3,13 +3,11 @@ import {
   BULLDOZER_PROGRAM_ID,
   CollectionAttribute,
   CollectionAttributeFilters,
-  COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
+  collectionAttributeQueryBuilder,
   createCollectionAttributeDocument,
   Document,
-  encodeFilters,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
-import { PublicKey } from '@solana/web3.js';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -27,7 +25,7 @@ export class CollectionAttributeSocketService {
         map((accountInfo) =>
           accountInfo.lamports > 0
             ? createCollectionAttributeDocument(
-                new PublicKey(collectionAttributeId),
+                collectionAttributeId,
                 accountInfo
               )
             : null
@@ -36,20 +34,19 @@ export class CollectionAttributeSocketService {
   }
 
   collectionAttributeCreated(filters: CollectionAttributeFilters) {
+    const query = collectionAttributeQueryBuilder()
+      .where(filters)
+      .setCommitment('finalized')
+      .build();
+
     return this._ngxSolanaSocketService
-      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(COLLECTION_ATTRIBUTE_ACCOUNT_NAME, filters),
-        commitment: 'finalized',
-      })
+      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {
           if (account.lamports === 0) {
             return EMPTY;
           } else {
-            const document = createCollectionAttributeDocument(
-              new PublicKey(pubkey),
-              account
-            );
+            const document = createCollectionAttributeDocument(pubkey, account);
 
             if (document.createdAt.eq(document.updatedAt)) {
               return of(document);

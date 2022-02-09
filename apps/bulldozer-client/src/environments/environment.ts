@@ -4,7 +4,6 @@
 
 export const environment = {
   production: false,
-  bulldozerProgramId: 'GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef',
   rpcEndpoint: 'http://localhost:8899',
   rpcWebsocket: 'ws://localhost:8900',
   network: 'localnet',

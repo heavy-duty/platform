@@ -3,20 +3,19 @@ import {
   BULLDOZER_PROGRAM_ID,
   Collection,
   CollectionFilters,
-  COLLECTION_ACCOUNT_NAME,
+  collectionQueryBuilder,
+  createCollection,
   createCollectionDocument,
   CreateCollectionParams,
-  createCreateCollectionInstruction2,
-  createDeleteCollectionInstruction2,
-  createUpdateCollectionInstruction2,
+  deleteCollection,
   DeleteCollectionParams,
   Document,
-  encodeFilters,
   getBulldozerError,
+  updateCollection,
   UpdateCollectionParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -25,14 +24,14 @@ export class CollectionApiService {
 
   // get collections
   find(filters: CollectionFilters) {
+    const query = collectionQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(COLLECTION_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createCollectionDocument(new PublicKey(pubkey), account)
+            createCollectionDocument(pubkey, account)
           )
         )
       );
@@ -45,8 +44,7 @@ export class CollectionApiService {
       .pipe(
         map(
           (accountInfo) =>
-            accountInfo &&
-            createCollectionDocument(new PublicKey(collectionId), accountInfo)
+            accountInfo && createCollectionDocument(collectionId, accountInfo)
         )
       );
   }
@@ -58,7 +56,7 @@ export class CollectionApiService {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateCollectionInstruction2({
+          createCollection({
             ...params,
             collectionId: collectionKeypair.publicKey.toBase58(),
           })
@@ -67,19 +65,11 @@ export class CollectionApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -87,22 +77,14 @@ export class CollectionApiService {
   update(params: UpdateCollectionParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateCollectionInstruction2(params))
+        transaction.add(updateCollection(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -110,22 +92,14 @@ export class CollectionApiService {
   delete(params: DeleteCollectionParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteCollectionInstruction2(params))
+        transaction.add(deleteCollection(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

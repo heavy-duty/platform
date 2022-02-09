@@ -51,9 +51,9 @@
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
-    "shared-ng-anchor": "libs/shared/ng-anchor",
-    "shared-ngx-solana": "libs/shared/ngx-solana",
-    "shared-rx-solana": "libs/shared/rx-solana",
+    "ngx-solana": "libs/ngx-solana",
+    "rx-solana": "libs/rx-solana",
+    "rxjs-operators": "libs/rxjs-operators",
     "wallet-adapter-data-access": "libs/wallet-adapter/data-access",
     "wallet-adapter-ui-cdk": "libs/wallet-adapter/ui/cdk",
     "wallet-adapter-ui-material": "libs/wallet-adapter/ui/material"

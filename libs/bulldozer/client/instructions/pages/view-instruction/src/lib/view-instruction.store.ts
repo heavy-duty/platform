@@ -6,7 +6,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notification-store';
 import { TabStore } from '@bulldozer-client/tab-store';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rx-solana';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs-operators';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {

@@ -1,24 +1,23 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
-  createCreateInstructionInstruction2,
-  createDeleteInstructionInstruction2,
+  createInstruction,
   createInstructionDocument,
   CreateInstructionParams,
-  createUpdateInstructionBodyInstruction2,
-  createUpdateInstructionInstruction2,
+  deleteInstruction,
   DeleteInstructionParams,
   Document,
-  encodeFilters,
   getBulldozerError,
   Instruction,
   InstructionFilters,
-  INSTRUCTION_ACCOUNT_NAME,
+  instructionQueryBuilder,
+  updateInstruction,
+  updateInstructionBody,
   UpdateInstructionBodyParams,
   UpdateInstructionParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -27,14 +26,14 @@ export class InstructionApiService {
 
   // get instructions
   find(filters: InstructionFilters) {
+    const query = instructionQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createInstructionDocument(new PublicKey(pubkey), account)
+            createInstructionDocument(pubkey, account)
           )
         )
       );
@@ -47,8 +46,7 @@ export class InstructionApiService {
       .pipe(
         map(
           (accountInfo) =>
-            accountInfo &&
-            createInstructionDocument(new PublicKey(instructionId), accountInfo)
+            accountInfo && createInstructionDocument(instructionId, accountInfo)
         )
       );
   }
@@ -60,7 +58,7 @@ export class InstructionApiService {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateInstructionInstruction2({
+          createInstruction({
             ...params,
             instructionId: instructionKeypair.publicKey.toBase58(),
           })
@@ -69,19 +67,11 @@ export class InstructionApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -89,8 +79,7 @@ export class InstructionApiService {
   update(params: UpdateInstructionParams) {
     return this._ngxSolanaApiService.createAndSendTransaction(
       params.authority,
-      (transaction) =>
-        transaction.add(createUpdateInstructionInstruction2(params))
+      (transaction) => transaction.add(updateInstruction(params))
     );
   }
 
@@ -98,22 +87,14 @@ export class InstructionApiService {
   updateBody(params: UpdateInstructionBodyParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateInstructionBodyInstruction2(params))
+        transaction.add(updateInstructionBody(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -121,22 +102,14 @@ export class InstructionApiService {
   delete(params: DeleteInstructionParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteInstructionInstruction2(params))
+        transaction.add(deleteInstruction(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

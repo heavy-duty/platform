@@ -1,22 +1,21 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
-  createCreateInstructionAccountInstruction2,
-  createDeleteInstructionAccountInstruction2,
+  createInstructionAccount,
   createInstructionAccountDocument,
   CreateInstructionAccountParams,
-  createUpdateInstructionAccountInstruction2,
+  deleteInstructionAccount,
   DeleteInstructionAccountParams,
   Document,
-  encodeFilters,
   getBulldozerError,
   InstructionAccount,
   InstructionAccountFilters,
-  INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
+  instructionAccountQueryBuilder,
+  updateInstructionAccount,
   UpdateInstructionAccountParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -25,14 +24,14 @@ export class InstructionAccountApiService {
 
   // get instruction accounts
   find(filters: InstructionAccountFilters) {
+    const query = instructionAccountQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(INSTRUCTION_ACCOUNT_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createInstructionAccountDocument(new PublicKey(pubkey), account)
+            createInstructionAccountDocument(pubkey, account)
           )
         )
       );
@@ -48,10 +47,7 @@ export class InstructionAccountApiService {
         map(
           (accountInfo) =>
             accountInfo &&
-            createInstructionAccountDocument(
-              new PublicKey(instructionAccountId),
-              accountInfo
-            )
+            createInstructionAccountDocument(instructionAccountId, accountInfo)
         )
       );
   }
@@ -63,7 +59,7 @@ export class InstructionAccountApiService {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateInstructionAccountInstruction2({
+          createInstructionAccount({
             ...params,
             instructionAccountId:
               instructionAccountKeypair.publicKey.toBase58(),
@@ -73,19 +69,11 @@ export class InstructionAccountApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -93,22 +81,14 @@ export class InstructionAccountApiService {
   update(params: UpdateInstructionAccountParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateInstructionAccountInstruction2(params))
+        transaction.add(updateInstructionAccount(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -116,22 +96,14 @@ export class InstructionAccountApiService {
   delete(params: DeleteInstructionAccountParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteInstructionAccountInstruction2(params))
+        transaction.add(deleteInstructionAccount(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }

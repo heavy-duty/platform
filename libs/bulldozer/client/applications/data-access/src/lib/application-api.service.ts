@@ -2,21 +2,20 @@ import { Injectable } from '@angular/core';
 import {
   Application,
   ApplicationFilters,
-  APPLICATION_ACCOUNT_NAME,
+  applicationQueryBuilder,
   BULLDOZER_PROGRAM_ID,
+  createApplication,
   createApplicationDocument,
   CreateApplicationParams,
-  createCreateApplicationInstruction2,
-  createDeleteApplicationInstruction2,
-  createUpdateApplicationInstruction2,
+  deleteApplication,
   DeleteApplicationParams,
   Document,
-  encodeFilters,
   getBulldozerError,
+  updateApplication,
   UpdateApplicationParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair } from '@solana/web3.js';
 import { catchError, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -25,14 +24,14 @@ export class ApplicationApiService {
 
   // get applications
   find(filters: ApplicationFilters) {
+    const query = applicationQueryBuilder().where(filters).build();
+
     return this._ngxSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
-        filters: encodeFilters(APPLICATION_ACCOUNT_NAME, filters),
-      })
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
-            createApplicationDocument(new PublicKey(pubkey), account)
+            createApplicationDocument(pubkey, account)
           )
         )
       );
@@ -45,8 +44,7 @@ export class ApplicationApiService {
       .pipe(
         map(
           (accountInfo) =>
-            accountInfo &&
-            createApplicationDocument(new PublicKey(applicationId), accountInfo)
+            accountInfo && createApplicationDocument(applicationId, accountInfo)
         )
       );
   }
@@ -58,7 +56,7 @@ export class ApplicationApiService {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) => {
         transaction.add(
-          createCreateApplicationInstruction2({
+          createApplication({
             ...params,
             applicationId: applicationKeypair.publicKey.toBase58(),
           })
@@ -67,19 +65,11 @@ export class ApplicationApiService {
         return transaction;
       })
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -87,22 +77,14 @@ export class ApplicationApiService {
   update(params: UpdateApplicationParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createUpdateApplicationInstruction2(params))
+        transaction.add(updateApplication(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 
@@ -110,22 +92,14 @@ export class ApplicationApiService {
   delete(params: DeleteApplicationParams) {
     return this._ngxSolanaApiService
       .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(createDeleteApplicationInstruction2(params))
+        transaction.add(deleteApplication(params))
       )
       .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() =>
-              getBulldozerError(error.InstructionError[1].Custom)
-            );
-          }
-
-          return throwError(() => error);
-        })
+        catchError((error) =>
+          throwError(() =>
+            typeof error === 'number' ? getBulldozerError(error) : error
+          )
+        )
       );
   }
 }
