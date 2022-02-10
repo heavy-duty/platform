@@ -1,4 +1,4 @@
-import { BN } from '@project-serum/anchor';
+import { BN } from '@heavy-duty/anchor';
 import { AccountInfo } from '@solana/web3.js';
 import {
   APPLICATION_ACCOUNT_NAME,

@@ -4,7 +4,7 @@ import {
   ProgramError,
   Provider,
   setProvider,
-} from '@project-serum/anchor';
+} from '@heavy-duty/anchor';
 import {
   Keypair,
   PublicKey,

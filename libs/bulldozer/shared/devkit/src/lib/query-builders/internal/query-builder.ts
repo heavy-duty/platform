@@ -1,4 +1,4 @@
-import { BorshAccountsCoder, utils } from '@project-serum/anchor';
+import { BorshAccountsCoder, utils } from '@heavy-duty/anchor';
 import {
   Commitment,
   GetProgramAccountsFilter,

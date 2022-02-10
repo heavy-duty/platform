@@ -4,7 +4,7 @@ import {
   ProgramError,
   Provider,
   setProvider,
-} from '@project-serum/anchor';
+} from '@heavy-duty/anchor';
 import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
 import { assert } from 'chai';
 import * as bulldozerIdl from '../target/idl/bulldozer.json';

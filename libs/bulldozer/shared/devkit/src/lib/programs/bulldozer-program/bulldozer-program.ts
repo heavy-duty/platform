@@ -1,4 +1,4 @@
-import { Program } from '@project-serum/anchor';
+import { Program } from '@heavy-duty/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { Bulldozer, IDL } from './bulldozer';
 
