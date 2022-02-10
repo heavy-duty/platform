@@ -718,14 +718,7 @@ export type Bulldozer = {
           isSigner: false;
         }
       ];
-      args: [
-        {
-          name: 'arguments';
-          type: {
-            defined: 'CreateInstructionRelationArguments';
-          };
-        }
-      ];
+      args: [];
     },
     {
       name: 'updateInstructionRelation';
@@ -1294,18 +1287,6 @@ export type Bulldozer = {
             type: {
               option: 'u32';
             };
-          }
-        ];
-      };
-    },
-    {
-      name: 'CreateInstructionRelationArguments';
-      type: {
-        kind: 'struct';
-        fields: [
-          {
-            name: 'bump';
-            type: 'u8';
           }
         ];
       };
@@ -2523,14 +2504,7 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
       ],
-      args: [
-        {
-          name: 'arguments',
-          type: {
-            defined: 'CreateInstructionRelationArguments',
-          },
-        },
-      ],
+      args: [],
     },
     {
       name: 'updateInstructionRelation',
@@ -3099,18 +3073,6 @@ export const IDL: Bulldozer = {
             type: {
               option: 'u32',
             },
-          },
-        ],
-      },
-    },
-    {
-      name: 'CreateInstructionRelationArguments',
-      type: {
-        kind: 'struct',
-        fields: [
-          {
-            name: 'bump',
-            type: 'u8',
           },
         ],
       },
