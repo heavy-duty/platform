@@ -646,31 +646,27 @@ describe('instruction account', () => {
           },
         ],
       });
-      const [relationPublicKey, relationBump] =
-        await PublicKey.findProgramAddress(
-          [
-            Buffer.from('instruction_relation', 'utf8'),
-            instructionAccount1.publicKey.toBuffer(),
-            instructionAccount2.publicKey.toBuffer(),
-          ],
-          program.programId
-        );
-      await program.rpc.createInstructionRelation(
-        { bump: relationBump },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: application.publicKey,
-            instruction: instruction.publicKey,
-            from: instructionAccount1.publicKey,
-            to: instructionAccount2.publicKey,
-            relation: relationPublicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-        }
+      const [relationPublicKey] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from('instruction_relation', 'utf8'),
+          instructionAccount1.publicKey.toBuffer(),
+          instructionAccount2.publicKey.toBuffer(),
+        ],
+        program.programId
       );
+      await program.rpc.createInstructionRelation({
+        accounts: {
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: instructionAccount1.publicKey,
+          to: instructionAccount2.publicKey,
+          relation: relationPublicKey,
+          systemProgram: SystemProgram.programId,
+          clock: SYSVAR_CLOCK_PUBKEY,
+        },
+      });
       await program.rpc.deleteInstructionAccount({
         accounts: {
           authority: program.provider.wallet.publicKey,

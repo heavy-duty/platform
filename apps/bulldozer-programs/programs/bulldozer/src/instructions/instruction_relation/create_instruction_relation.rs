@@ -3,13 +3,7 @@ use crate::collections::{
 };
 use anchor_lang::prelude::*;
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct CreateInstructionRelationArguments {
-  pub bump: u8,
-}
-
 #[derive(Accounts)]
-#[instruction(arguments: CreateInstructionRelationArguments)]
 pub struct CreateInstructionRelation<'info> {
   #[account(
         init,
@@ -22,7 +16,7 @@ pub struct CreateInstructionRelation<'info> {
           from.key().as_ref(),
           to.key().as_ref()
         ],
-        bump = arguments.bump,
+        bump,
         constraint = from.key().as_ref() != to.key().as_ref()
     )]
   pub relation: Box<Account<'info, InstructionRelation>>,
@@ -39,7 +33,7 @@ pub struct CreateInstructionRelation<'info> {
   pub clock: Sysvar<'info, Clock>,
 }
 
-pub fn handle(ctx: Context<CreateInstructionRelation>, arguments: CreateInstructionRelationArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
   msg!("Create instruction relation");
   ctx.accounts.relation.authority = ctx.accounts.authority.key();
   ctx.accounts.relation.workspace = ctx.accounts.workspace.key();
@@ -47,7 +41,7 @@ pub fn handle(ctx: Context<CreateInstructionRelation>, arguments: CreateInstruct
   ctx.accounts.relation.instruction = ctx.accounts.instruction.key();
   ctx.accounts.relation.from = ctx.accounts.from.key();
   ctx.accounts.relation.to = ctx.accounts.to.key();
-  ctx.accounts.relation.bump = arguments.bump;
+  ctx.accounts.relation.bump = *ctx.bumps.get("relation").unwrap();
   ctx.accounts.from.quantity_of_relations += 1;
   ctx.accounts.to.quantity_of_relations += 1;
   ctx.accounts.relation.created_at = ctx.accounts.clock.unix_timestamp;

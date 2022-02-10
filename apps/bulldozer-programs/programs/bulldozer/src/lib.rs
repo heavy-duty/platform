@@ -130,10 +130,9 @@ pub mod bulldozer {
   }
 
   pub fn create_instruction_relation(
-    ctx: Context<CreateInstructionRelation>,
-    arguments: CreateInstructionRelationArguments,
+    ctx: Context<CreateInstructionRelation>
   ) -> ProgramResult {
-    instructions::create_instruction_relation::handle(ctx, arguments)
+    instructions::create_instruction_relation::handle(ctx)
   }
 
   pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
