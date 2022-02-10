@@ -1,24 +1,23 @@
 use crate::collections::{InstructionAccount, InstructionRelation};
 use anchor_lang::prelude::*;
-use crate::errors::ErrorCode;
 
 #[derive(Accounts)]
 pub struct DeleteInstructionRelation<'info> {
   #[account(
     mut,
     has_one = authority,
-    close = authority
+    close = authority,
+    seeds = [
+      b"instruction_relation".as_ref(),
+      from.key().as_ref(),
+      to.key().as_ref()
+    ],
+    bump = relation.bump
   )]
   pub relation: Account<'info, InstructionRelation>,
-  #[account(
-    mut,
-    constraint = relation.from == from.key() @ ErrorCode::FromDoesntMatchRelation
-  )]
+  #[account(mut)]
   pub from: Box<Account<'info, InstructionAccount>>,
-  #[account(
-    mut,
-    constraint = relation.to == to.key() @ ErrorCode::ToDoesntMatchRelation
-  )]
+  #[account(mut)]
   pub to: Box<Account<'info, InstructionAccount>>,
   pub authority: Signer<'info>,
 }

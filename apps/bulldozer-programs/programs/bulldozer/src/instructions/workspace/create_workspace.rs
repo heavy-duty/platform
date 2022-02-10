@@ -20,7 +20,6 @@ pub struct CreateWorkspace<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
@@ -28,7 +27,7 @@ pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments
   ctx.accounts.workspace.name = arguments.name;
   ctx.accounts.workspace.authority = ctx.accounts.authority.key();
   ctx.accounts.workspace.quantity_of_applications = 0;
-  ctx.accounts.workspace.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.workspace.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.workspace.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.workspace.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

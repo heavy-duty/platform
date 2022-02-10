@@ -1,23 +1,15 @@
-import {
-  Idl,
-  Program,
-  ProgramError,
-  Provider,
-  setProvider,
-} from '@heavy-duty/anchor';
-import {
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  SYSVAR_CLOCK_PUBKEY,
-} from '@solana/web3.js';
+import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { Keypair, PublicKey } from '@solana/web3.js';
 import { assert } from 'chai';
-import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('instruction relation', () => {
-  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
-  setProvider(Provider.env());
+  const program = new Program<Bulldozer>(
+    IDL,
+    BULLDOZER_PROGRAM_ID,
+    Provider.env()
+  );
   const instruction = Keypair.generate();
   const instructionName = 'create_document';
   const application = Keypair.generate();
@@ -41,69 +33,55 @@ describe('instruction relation', () => {
   let relationPublicKey: PublicKey;
 
   before(async () => {
-    await program.rpc.createWorkspace(
-      { name: workspaceName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [workspace],
-      }
-    );
-    await program.rpc.createApplication(
-      { name: applicationName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [application],
-      }
-    );
-    await program.rpc.createInstruction(
-      { name: instructionName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [instruction],
-      }
-    );
-    await program.rpc.createInstructionAccount(fromDto, {
-      accounts: {
+    await program.methods
+      .createWorkspace({ name: workspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([workspace])
+      .rpc();
+    await program.methods
+      .createApplication({ name: applicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+      })
+      .signers([application])
+      .rpc();
+    await program.methods
+      .createInstruction({ name: instructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+      })
+      .signers([instruction])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: from.publicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-      signers: [from],
-    });
-    await program.rpc.createInstructionAccount(toDto, {
-      accounts: {
+      })
+      .signers([from])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: to.publicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-      signers: [to],
-    });
+      })
+      .signers([to])
+      .rpc();
     [relationPublicKey] = await PublicKey.findProgramAddress(
       [
         Buffer.from('instruction_relation', 'utf8'),
@@ -116,26 +94,26 @@ describe('instruction relation', () => {
 
   it('should create', async () => {
     // act
-    await program.rpc.createInstructionRelation({
-      accounts: {
+    await program.methods
+      .createInstructionRelation()
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         from: from.publicKey,
         to: to.publicKey,
-        relation: relationPublicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-    });
+      })
+      .rpc();
     // assert
     const instructionRelationAccount =
-      await program.account.instructionRelation.fetch(relationPublicKey);
-    const fromAccount = await program.account.instructionAccount.fetch(
+      await program.account.instructionRelation.fetchNullable(
+        relationPublicKey
+      );
+    const fromAccount = await program.account.instructionAccount.fetchNullable(
       from.publicKey
     );
-    const toAccount = await program.account.instructionAccount.fetch(
+    const toAccount = await program.account.instructionAccount.fetchNullable(
       to.publicKey
     );
     assert.ok(
@@ -161,54 +139,32 @@ describe('instruction relation', () => {
     );
   });
 
-  it('should update', async () => {
-    // act
-    await program.rpc.updateInstructionRelation({
-      accounts: {
-        authority: program.provider.wallet.publicKey,
-        from: to.publicKey,
-        to: from.publicKey,
-        relation: relationPublicKey,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-    });
-    // assert
-    const account = await program.account.instructionRelation.fetch(
-      relationPublicKey
-    );
-    assert.ok(account.from.equals(to.publicKey));
-    assert.ok(account.to.equals(from.publicKey));
-    assert.ok(account.createdAt.lte(account.updatedAt));
-  });
-
   it('should delete', async () => {
     const newFrom = Keypair.generate();
     const newTo = Keypair.generate();
     // act
-    await program.rpc.createInstructionAccount(fromDto, {
-      accounts: {
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: newFrom.publicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-      signers: [newFrom],
-    });
-    await program.rpc.createInstructionAccount(toDto, {
-      accounts: {
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         account: newTo.publicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-      signers: [newTo],
-    });
+      })
+      .signers([newTo])
+      .rpc();
     const [newRelationPublicKey] = await PublicKey.findProgramAddress(
       [
         Buffer.from('instruction_relation', 'utf8'),
@@ -217,27 +173,25 @@ describe('instruction relation', () => {
       ],
       program.programId
     );
-    await program.rpc.createInstructionRelation({
-      accounts: {
+    await program.methods
+      .createInstructionRelation()
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
         from: newFrom.publicKey,
         to: newTo.publicKey,
-        relation: newRelationPublicKey,
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-    });
-    await program.rpc.deleteInstructionRelation({
-      accounts: {
+      })
+      .rpc();
+    await program.methods
+      .deleteInstructionRelation()
+      .accounts({
         authority: program.provider.wallet.publicKey,
-        relation: newRelationPublicKey,
         from: newFrom.publicKey,
         to: newTo.publicKey,
-      },
-    });
+      })
+      .rpc();
     // assert
     const instructionRelationAccount =
       await program.account.instructionRelation.fetchNullable(
@@ -248,141 +202,23 @@ describe('instruction relation', () => {
 
   it('should fail if from and to are equal', async () => {
     let error: ProgramError;
-    let [relationPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('instruction_relation', 'utf8'),
-        from.publicKey.toBuffer(),
-        from.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     // act
     try {
-      await program.rpc.createInstructionRelation({
-        accounts: {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           from: from.publicKey,
           to: from.publicKey,
-          relation: relationPublicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
     assert.equal(error.code, 2003);
-  });
-
-  it('should fail when providing wrong "from" to delete', async () => {
-    // arrange
-    const newFrom = Keypair.generate();
-    let error: ProgramError;
-    // act
-    try {
-      await program.rpc.createInstructionAccount(fromDto, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: newFrom.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [newFrom],
-      });
-      const [newRelationPublicKey] = await PublicKey.findProgramAddress(
-        [
-          Buffer.from('instruction_relation', 'utf8'),
-          newFrom.publicKey.toBuffer(),
-          to.publicKey.toBuffer(),
-        ],
-        program.programId
-      );
-      await program.rpc.createInstructionRelation({
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: newFrom.publicKey,
-          to: to.publicKey,
-          relation: newRelationPublicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      });
-      await program.rpc.deleteInstructionRelation({
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          relation: newRelationPublicKey,
-          from: from.publicKey,
-          to: to.publicKey,
-        },
-      });
-    } catch (err) {
-      error = err;
-    }
-    // assert
-    assert.equal(error.code, 6016);
-  });
-
-  it('should fail when providing wrong "to" to delete', async () => {
-    // arrange
-    const newTo = Keypair.generate();
-    let error: ProgramError;
-    // act
-    try {
-      await program.rpc.createInstructionAccount(toDto, {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: newTo.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [newTo],
-      });
-      const [newRelationPublicKey] = await PublicKey.findProgramAddress(
-        [
-          Buffer.from('instruction_relation', 'utf8'),
-          from.publicKey.toBuffer(),
-          newTo.publicKey.toBuffer(),
-        ],
-        program.programId
-      );
-      await program.rpc.createInstructionRelation({
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          from: from.publicKey,
-          to: newTo.publicKey,
-          relation: newRelationPublicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      });
-      await program.rpc.deleteInstructionRelation({
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          relation: newRelationPublicKey,
-          from: from.publicKey,
-          to: to.publicKey,
-        },
-      });
-    } catch (err) {
-      error = err;
-    }
-    // assert
-    assert.equal(error.code, 6017);
   });
 });

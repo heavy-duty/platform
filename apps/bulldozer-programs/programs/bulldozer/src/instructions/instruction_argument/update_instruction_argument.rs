@@ -25,7 +25,6 @@ pub struct UpdateInstructionArgument<'info> {
   )]
   pub argument: Box<Account<'info, InstructionArgument>>,
   pub authority: Signer<'info>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(_ctx: &Context<UpdateInstructionArgument>, arguments: &UpdateInstructionArgumentArguments) -> std::result::Result<bool, ProgramError> {
@@ -45,6 +44,6 @@ pub fn handle(ctx: Context<UpdateInstructionArgument>, arguments: UpdateInstruct
   ctx.accounts.argument.name = arguments.name;
   ctx.accounts.argument.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.argument.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.argument.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

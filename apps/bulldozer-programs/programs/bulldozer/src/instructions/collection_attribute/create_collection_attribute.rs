@@ -37,7 +37,6 @@ pub struct CreateCollectionAttribute<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(_ctx: &Context<CreateCollectionAttribute>, arguments: &CreateCollectionAttributeArguments) -> std::result::Result<bool, ProgramError> {
@@ -62,7 +61,7 @@ pub fn handle(ctx: Context<CreateCollectionAttribute>, arguments: CreateCollecti
   ctx.accounts.attribute.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.attribute.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
   ctx.accounts.collection.quantity_of_attributes += 1;
-  ctx.accounts.attribute.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.attribute.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.attribute.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.attribute.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

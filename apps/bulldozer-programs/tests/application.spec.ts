@@ -1,53 +1,42 @@
-import {
-  Idl,
-  Program,
-  ProgramError,
-  Provider,
-  setProvider,
-} from '@heavy-duty/anchor';
-import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
+import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { Keypair } from '@solana/web3.js';
 import { assert } from 'chai';
-import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('application', () => {
-  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
-  setProvider(Provider.env());
+  const program = new Program<Bulldozer>(
+    IDL,
+    BULLDOZER_PROGRAM_ID,
+    Provider.env()
+  );
   const workspaceName = 'my-workspace';
   const workspace = Keypair.generate();
   const application = Keypair.generate();
   const applicationName = 'my-app';
 
   before(async () => {
-    await program.rpc.createWorkspace(
-      { name: workspaceName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [workspace],
-      }
-    );
+    await program.methods
+      .createWorkspace({ name: workspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([workspace])
+      .rpc();
   });
 
   it('should create account', async () => {
     // act
-    await program.rpc.createApplication(
-      { name: applicationName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [application],
-      }
-    );
+    await program.methods
+      .createApplication({ name: applicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([application])
+      .rpc();
     // assert
     const account = await program.account.application.fetch(
       application.publicKey
@@ -66,16 +55,13 @@ describe('application', () => {
     // arrange
     const applicationName = 'my-app2';
     // act
-    await program.rpc.updateApplication(
-      { name: applicationName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          application: application.publicKey,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      }
-    );
+    await program.methods
+      .updateApplication({ name: applicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        application: application.publicKey,
+      })
+      .rpc();
     // assert
     const account = await program.account.application.fetch(
       application.publicKey
@@ -86,13 +72,14 @@ describe('application', () => {
 
   it('should delete account', async () => {
     // act
-    await program.rpc.deleteApplication({
-      accounts: {
+    await program.methods
+      .deleteApplication()
+      .accounts({
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
         workspace: workspace.publicKey,
-      },
-    });
+      })
+      .rpc();
     // assert
     const account = await program.account.application.fetchNullable(
       application.publicKey
@@ -113,45 +100,38 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(
-        { name: newApplicationName },
-        {
-          accounts: {
-            application: newApplication.publicKey,
-            workspace: workspace.publicKey,
-            authority: program.provider.wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newApplication],
-        }
-      );
-      await program.rpc.createCollection(
-        { name: collectionName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: newApplication.publicKey,
-            collection: collection.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [collection],
-        }
-      );
-      await program.rpc.deleteApplication({
-        accounts: {
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          application: newApplication.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+        })
+        .signers([newApplication])
+        .rpc();
+      await program.methods
+        .createCollection({ name: collectionName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          collection: collection.publicKey,
+        })
+        .signers([collection])
+        .rpc();
+      await program.methods
+        .deleteApplication()
+        .accounts({
           authority: program.provider.wallet.publicKey,
           application: newApplication.publicKey,
           workspace: workspace.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6022);
+    assert.equal(error.code, 6020);
   });
 
   it('should fail when deleting application with instructions', async () => {
@@ -163,45 +143,38 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(
-        { name: newApplicationName },
-        {
-          accounts: {
-            application: newApplication.publicKey,
-            workspace: workspace.publicKey,
-            authority: program.provider.wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newApplication],
-        }
-      );
-      await program.rpc.createInstruction(
-        { name: instructionName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: newApplication.publicKey,
-            instruction: instruction.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [instruction],
-        }
-      );
-      await program.rpc.deleteApplication({
-        accounts: {
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          application: newApplication.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+        })
+        .signers([newApplication])
+        .rpc();
+      await program.methods
+        .createInstruction({ name: instructionName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: instruction.publicKey,
+        })
+        .signers([instruction])
+        .rpc();
+      await program.methods
+        .deleteApplication()
+        .accounts({
           authority: program.provider.wallet.publicKey,
           application: newApplication.publicKey,
           workspace: workspace.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6024);
+    assert.equal(error.code, 6022);
   });
 
   it('should fail when providing wrong "workspace" to delete', async () => {
@@ -213,42 +186,35 @@ describe('application', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createWorkspace(
-        { name: newWorkspaceName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: newWorkspace.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newWorkspace],
-        }
-      );
-      await program.rpc.createApplication(
-        { name: newApplicationName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: newWorkspace.publicKey,
-            application: newApplication.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newApplication],
-        }
-      );
-      await program.rpc.deleteApplication({
-        accounts: {
+      await program.methods
+        .createWorkspace({ name: newWorkspaceName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+        })
+        .signers([newWorkspace])
+        .rpc();
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+        })
+        .signers([newApplication])
+        .rpc();
+      await program.methods
+        .deleteApplication()
+        .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: newApplication.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6027);
+    assert.equal(error.code, 6025);
   });
 });

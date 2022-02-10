@@ -1,18 +1,15 @@
-import {
-  Idl,
-  Program,
-  ProgramError,
-  Provider,
-  setProvider,
-} from '@heavy-duty/anchor';
-import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
+import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { Keypair } from '@solana/web3.js';
 import { assert } from 'chai';
-import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('instruction', () => {
-  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
-  setProvider(Provider.env());
+  const program = new Program<Bulldozer>(
+    IDL,
+    BULLDOZER_PROGRAM_ID,
+    Provider.env()
+  );
   const instruction = Keypair.generate();
   const application = Keypair.generate();
   const applicationName = 'my-app';
@@ -20,51 +17,39 @@ describe('instruction', () => {
   const workspaceName = 'my-workspace';
 
   before(async () => {
-    await program.rpc.createWorkspace(
-      { name: workspaceName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [workspace],
-      }
-    );
-    await program.rpc.createApplication(
-      { name: applicationName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [application],
-      }
-    );
+    await program.methods
+      .createWorkspace({ name: workspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([workspace])
+      .rpc();
+    await program.methods
+      .createApplication({ name: applicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+      })
+      .signers([application])
+      .rpc();
   });
 
   it('should create account', async () => {
     // arrange
     const instructionName = 'create_document';
     // act
-    await program.rpc.createInstruction(
-      { name: instructionName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [instruction],
-      }
-    );
+    await program.methods
+      .createInstruction({ name: instructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+      })
+      .signers([instruction])
+      .rpc();
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
@@ -85,16 +70,13 @@ describe('instruction', () => {
     // arrange
     const instructionName = 'update_document';
     // act
-    await program.rpc.updateInstruction(
-      { name: instructionName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          instruction: instruction.publicKey,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      }
-    );
+    await program.methods
+      .updateInstruction({ name: instructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        instruction: instruction.publicKey,
+      })
+      .rpc();
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
@@ -115,16 +97,13 @@ describe('instruction', () => {
       ctx.accounts.argument.application = ctx.accounts.application.key();
     `;
     // act
-    await program.rpc.updateInstructionBody(
-      { body: instructionBody },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          instruction: instruction.publicKey,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      }
-    );
+    await program.methods
+      .updateInstructionBody({ body: instructionBody })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        instruction: instruction.publicKey,
+      })
+      .rpc();
     // assert
     const account = await program.account.instruction.fetch(
       instruction.publicKey
@@ -134,13 +113,14 @@ describe('instruction', () => {
 
   it('should delete account', async () => {
     // act
-    await program.rpc.deleteInstruction({
-      accounts: {
+    await program.methods
+      .deleteInstruction()
+      .accounts({
         authority: program.provider.wallet.publicKey,
         instruction: instruction.publicKey,
         application: application.publicKey,
-      },
-    });
+      })
+      .rpc();
     // assert
     const account = await program.account.instruction.fetchNullable(
       instruction.publicKey
@@ -168,44 +148,40 @@ describe('instruction', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstruction(
-        { name: instructionName },
-        {
-          accounts: {
-            instruction: instruction.publicKey,
-            application: application.publicKey,
-            workspace: workspace.publicKey,
-            authority: program.provider.wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [instruction],
-        }
-      );
-      await program.rpc.createInstructionArgument(argumentsData, {
-        accounts: {
+      await program.methods
+        .createInstruction({ name: instructionName })
+        .accounts({
+          instruction: instruction.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+        })
+        .signers([instruction])
+        .rpc();
+      await program.methods
+        .createInstructionArgument(argumentsData)
+        .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           argument: argument.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [argument],
-      });
-      await program.rpc.deleteInstruction({
-        accounts: {
+        })
+        .signers([argument])
+        .rpc();
+      await program.methods
+        .deleteInstruction()
+        .accounts({
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6018);
+    assert.equal(error.code, 6016);
   });
 
   it('should fail when deleting instruction with accounts', async () => {
@@ -222,44 +198,40 @@ describe('instruction', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createInstruction(
-        { name: instructionName },
-        {
-          accounts: {
-            instruction: instruction.publicKey,
-            application: application.publicKey,
-            workspace: workspace.publicKey,
-            authority: program.provider.wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [instruction],
-        }
-      );
-      await program.rpc.createInstructionAccount(argumentsData, {
-        accounts: {
+      await program.methods
+        .createInstruction({ name: instructionName })
+        .accounts({
+          instruction: instruction.publicKey,
+          application: application.publicKey,
+          workspace: workspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+        })
+        .signers([instruction])
+        .rpc();
+      await program.methods
+        .createInstructionAccount(argumentsData)
+        .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
           account: account.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [account],
-      });
-      await program.rpc.deleteInstruction({
-        accounts: {
+        })
+        .signers([account])
+        .rpc();
+      await program.methods
+        .deleteInstruction()
+        .accounts({
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6020);
+    assert.equal(error.code, 6018);
   });
 
   it('should fail when providing wrong "application" to delete', async () => {
@@ -271,44 +243,37 @@ describe('instruction', () => {
     let error: ProgramError;
     // act
     try {
-      await program.rpc.createApplication(
-        { name: newApplicationName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: newApplication.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newApplication],
-        }
-      );
-      await program.rpc.createInstruction(
-        { name: newInstructionName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: newApplication.publicKey,
-            instruction: newInstruction.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newInstruction],
-        }
-      );
-      await program.rpc.deleteInstruction({
-        accounts: {
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+        })
+        .signers([newApplication])
+        .rpc();
+      await program.methods
+        .createInstruction({ name: newInstructionName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
+        })
+        .signers([newInstruction])
+        .rpc();
+      await program.methods
+        .deleteInstruction()
+        .accounts({
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
           instruction: newInstruction.publicKey,
-        },
-      });
+        })
+        .rpc();
     } catch (err) {
       error = err;
     }
     // assert
-    assert.equal(error.code, 6025);
+    assert.equal(error.code, 6023);
   });
 });

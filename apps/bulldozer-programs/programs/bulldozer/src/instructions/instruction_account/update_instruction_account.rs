@@ -18,7 +18,6 @@ pub struct UpdateInstructionAccount<'info> {
   #[account(mut, has_one = authority)]
   pub account: Box<Account<'info, InstructionAccount>>,
   pub authority: Signer<'info>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(ctx: &Context<UpdateInstructionAccount>, arguments: &UpdateInstructionAccountArguments) -> std::result::Result<bool, ProgramError> {
@@ -55,6 +54,6 @@ pub fn handle(ctx: Context<UpdateInstructionAccount>, arguments: UpdateInstructi
       get_remaining_account::<InstructionAccount>(ctx.remaining_accounts, 1)?
     )?
   )?;
-  ctx.accounts.account.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.account.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

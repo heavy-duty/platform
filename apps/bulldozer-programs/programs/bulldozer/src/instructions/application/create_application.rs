@@ -23,7 +23,6 @@ pub struct CreateApplication<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
@@ -34,7 +33,7 @@ pub fn handle(ctx: Context<CreateApplication>, arguments: CreateApplicationArgum
   ctx.accounts.application.quantity_of_collections = 0;
   ctx.accounts.application.quantity_of_instructions = 0;
   ctx.accounts.workspace.quantity_of_applications += 1;
-  ctx.accounts.application.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.application.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.application.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.application.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

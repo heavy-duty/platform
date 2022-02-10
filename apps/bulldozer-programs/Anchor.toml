@@ -1,3 +1,6 @@
+[features]
+seeds = true
+
 [programs.localnet]
 bulldozer = "GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef"
 
@@ -9,4 +12,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/**.spec.ts --parallel"
+test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/*.spec.ts --parallel"

@@ -23,7 +23,6 @@ pub struct CreateCollection<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
@@ -34,7 +33,7 @@ pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArgumen
   ctx.accounts.collection.workspace = ctx.accounts.workspace.key();
   ctx.accounts.collection.quantity_of_attributes = 0;
   ctx.accounts.application.quantity_of_collections += 1;
-  ctx.accounts.collection.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.collection.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.collection.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.collection.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

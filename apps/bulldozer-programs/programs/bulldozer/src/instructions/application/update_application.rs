@@ -12,12 +12,11 @@ pub struct UpdateApplication<'info> {
   #[account(mut, has_one = authority)]
   pub application: Box<Account<'info, Application>>,
   pub authority: Signer<'info>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<UpdateApplication>, arguments: UpdateApplicationArguments) -> ProgramResult {
   msg!("Update application");
   ctx.accounts.application.name = arguments.name;
-  ctx.accounts.application.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.application.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

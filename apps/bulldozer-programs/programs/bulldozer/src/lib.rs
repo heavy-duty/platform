@@ -135,10 +135,6 @@ pub mod bulldozer {
     instructions::create_instruction_relation::handle(ctx)
   }
 
-  pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
-    instructions::update_instruction_relation::handle(ctx)
-  }
-
   pub fn delete_instruction_relation(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
     instructions::delete_instruction_relation::handle(ctx)
   }
