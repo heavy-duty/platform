@@ -1,4 +1,4 @@
-import { AccountsCoder, utils } from '@project-serum/anchor';
+import { BorshAccountsCoder, utils } from '@project-serum/anchor';
 import {
   Commitment,
   GetProgramAccountsFilter,
@@ -64,7 +64,7 @@ const encodeFilters = (
       memcmp: {
         offset: 0,
         bytes: utils.bytes.bs58.encode(
-          AccountsCoder.accountDiscriminator(accountName)
+          BorshAccountsCoder.accountDiscriminator(accountName)
         ),
       },
     },
