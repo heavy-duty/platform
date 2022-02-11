@@ -1,16 +1,15 @@
 name: Bulldozer Platform ci
 on: pull_request
 
-strategy:
-  matrix:
-    node: [14]
-    solana: [1.8, 1.9]
-    anchor: [0.21.0]
-    os: [macos-latest, windows-latest, ubuntu-20.04]
-
 jobs:
   ci:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: [14]
+        solana: [1.8, 1.9]
+        anchor: [0.21.0]
+        os: [macos-latest, windows-latest, ubuntu-20.04]
     steps:
       - id: config-repo
         name: Pre config - 🧰 Checkout repo
