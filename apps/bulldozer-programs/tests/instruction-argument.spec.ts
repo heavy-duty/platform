@@ -172,7 +172,7 @@ describe('instruction argument', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -187,10 +187,10 @@ describe('instruction argument', () => {
         .signers([instructionArgument])
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6011);
+    assert.equal(error?.code, 6011);
   });
 
   it('should fail when max length is not provided with a string', async () => {
@@ -203,7 +203,7 @@ describe('instruction argument', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -218,10 +218,10 @@ describe('instruction argument', () => {
         .signers([instructionArgument])
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6012);
+    assert.equal(error?.code, 6012);
   });
 
   it('should fail when providing wrong "instruction" to delete', async () => {
@@ -237,7 +237,7 @@ describe('instruction argument', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -270,9 +270,9 @@ describe('instruction argument', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6017);
+    assert.equal(error?.code, 6017);
   });
 });

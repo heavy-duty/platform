@@ -88,7 +88,7 @@ describe('collection attribute', () => {
     assert.equal(decodedKind.id, argumentsData.kind);
     assert.equal(collectionAttributeAccount.modifier, null);
     assert.ok(
-      collectionAttributeAccount.collection.equals(collection.publicKey)
+      collectionAttributeAccount.collection?.equals(collection.publicKey)
     );
     assert.ok(
       collectionAttributeAccount.application.equals(application.publicKey)
@@ -168,7 +168,7 @@ describe('collection attribute', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -183,10 +183,10 @@ describe('collection attribute', () => {
         .signers([attribute])
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6011);
+    assert.equal(error?.code, 6011);
   });
 
   it('should fail when max length is not provided with a string', async () => {
@@ -199,7 +199,7 @@ describe('collection attribute', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -214,10 +214,10 @@ describe('collection attribute', () => {
         .signers([attribute])
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6012);
+    assert.equal(error?.code, 6012);
   });
 
   it('should fail when providing wrong "collection" to delete', async () => {
@@ -233,7 +233,7 @@ describe('collection attribute', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -266,9 +266,9 @@ describe('collection attribute', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6014);
+    assert.equal(error?.code, 6014);
   });
 });

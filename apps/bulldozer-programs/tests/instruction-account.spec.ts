@@ -87,7 +87,7 @@ describe('instruction account', () => {
         modifier: null,
         space: null,
       };
-      let error: ProgramError;
+      let error: ProgramError | null = null;
       // act
       try {
         await program.methods
@@ -102,10 +102,10 @@ describe('instruction account', () => {
           .signers([instructionAccount])
           .rpc();
       } catch (err) {
-        error = err;
+        error = err as ProgramError;
       }
       // assert
-      assert.equal(error.code, 6005);
+      assert.equal(error?.code, 6005);
     });
 
     it('should create', async () => {
@@ -283,8 +283,8 @@ describe('instruction account', () => {
           instructionAccount.publicKey
         );
         const decodedModifier = decodeAccountModifier(account.modifier as any);
-        assert.ok('init' in account.modifier);
         assert.equal(decodedModifier.id, argumentsData.modifier);
+        assert.equal(decodedModifier.name, 'init');
         assert.equal(
           decodedModifier.payer,
           instructionPayerAccount.publicKey.toBase58()
@@ -333,7 +333,7 @@ describe('instruction account', () => {
           modifier: 0,
           space: null,
         };
-        let error: ProgramError;
+        let error: ProgramError | null = null;
         // act
         try {
           await program.methods
@@ -360,10 +360,10 @@ describe('instruction account', () => {
             ])
             .rpc();
         } catch (err) {
-          error = err;
+          error = err as ProgramError;
         }
         // assert
-        assert.equal(error.code, 6007);
+        assert.equal(error?.code, 6007);
       });
     });
 
@@ -578,7 +578,7 @@ describe('instruction account', () => {
       modifier: null,
       space: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -637,10 +637,10 @@ describe('instruction account', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6015);
+    assert.equal(error?.code, 6015);
   });
 
   it('should increment instruction account quantity on create', async () => {
@@ -754,7 +754,7 @@ describe('instruction account', () => {
       modifier: null,
       space: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -787,9 +787,9 @@ describe('instruction account', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6019);
+    assert.equal(error?.code, 6019);
   });
 });

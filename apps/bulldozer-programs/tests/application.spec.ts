@@ -97,7 +97,7 @@ describe('application', () => {
     const newApplication = Keypair.generate();
     const collectionName = 'sample';
     const collection = Keypair.generate();
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -128,10 +128,10 @@ describe('application', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6020);
+    assert.equal(error?.code, 6020);
   });
 
   it('should fail when deleting application with instructions', async () => {
@@ -140,7 +140,7 @@ describe('application', () => {
     const newApplication = Keypair.generate();
     const instructionName = 'sample';
     const instruction = Keypair.generate();
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -171,10 +171,10 @@ describe('application', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6022);
+    assert.equal(error?.code, 6022);
   });
 
   it('should fail when providing wrong "workspace" to delete', async () => {
@@ -183,7 +183,7 @@ describe('application', () => {
     const newWorkspaceName = 'sample';
     const newApplication = Keypair.generate();
     const newApplicationName = 'sample';
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -212,9 +212,9 @@ describe('application', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6025);
+    assert.equal(error?.code, 6025);
   });
 });

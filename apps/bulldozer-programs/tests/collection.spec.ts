@@ -118,7 +118,7 @@ describe('collection', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -151,10 +151,10 @@ describe('collection', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6013);
+    assert.equal(error?.code, 6013);
   });
 
   it('should fail when providing wrong "application" to delete', async () => {
@@ -163,7 +163,7 @@ describe('collection', () => {
     const newApplicationName = 'sample';
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -194,9 +194,9 @@ describe('collection', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6021);
+    assert.equal(error?.code, 6021);
   });
 });

@@ -70,7 +70,7 @@ describe('workspace', () => {
     const newWorkspace = Keypair.generate();
     const applicationName = 'sample';
     const application = Keypair.generate();
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -98,9 +98,9 @@ describe('workspace', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6024);
+    assert.equal(error?.code, 6024);
   });
 });

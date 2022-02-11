@@ -145,7 +145,7 @@ describe('instruction', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -178,10 +178,10 @@ describe('instruction', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6016);
+    assert.equal(error?.code, 6016);
   });
 
   it('should fail when deleting instruction with accounts', async () => {
@@ -195,7 +195,7 @@ describe('instruction', () => {
       modifier: null,
       space: null,
     };
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -228,10 +228,10 @@ describe('instruction', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6018);
+    assert.equal(error?.code, 6018);
   });
 
   it('should fail when providing wrong "application" to delete', async () => {
@@ -240,7 +240,7 @@ describe('instruction', () => {
     const newApplicationName = 'sample';
     const newInstruction = Keypair.generate();
     const newInstructionName = 'sample';
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -271,9 +271,9 @@ describe('instruction', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6023);
+    assert.equal(error?.code, 6023);
   });
 });

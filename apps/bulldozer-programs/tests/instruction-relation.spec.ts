@@ -107,13 +107,11 @@ describe('instruction relation', () => {
       .rpc();
     // assert
     const instructionRelationAccount =
-      await program.account.instructionRelation.fetchNullable(
-        relationPublicKey
-      );
-    const fromAccount = await program.account.instructionAccount.fetchNullable(
+      await program.account.instructionRelation.fetch(relationPublicKey);
+    const fromAccount = await program.account.instructionAccount.fetch(
       from.publicKey
     );
-    const toAccount = await program.account.instructionAccount.fetchNullable(
+    const toAccount = await program.account.instructionAccount.fetch(
       to.publicKey
     );
     assert.ok(
@@ -201,7 +199,7 @@ describe('instruction relation', () => {
   });
 
   it('should fail if from and to are equal', async () => {
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
       await program.methods
@@ -216,9 +214,9 @@ describe('instruction relation', () => {
         })
         .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 2003);
+    assert.equal(error?.code, 2003);
   });
 });
