@@ -21,7 +21,7 @@
     "@angular/platform-browser": "13.2.2",
     "@angular/platform-browser-dynamic": "13.2.2",
     "@angular/router": "13.2.2",
-    "@heavy-duty/anchor": "^0.21.0-2",
+    "@heavy-duty/anchor": "^0.21.0-3",
     "@ngrx/component": "13.0.2",
     "@ngrx/component-store": "13.0.2",
     "@nrwl/angular": "13.8.0",

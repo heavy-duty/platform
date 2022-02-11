@@ -17,12 +17,22 @@ import {
   UpdateInstructionParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  addInstructionToTransaction,
+  partiallySignTransaction,
+} from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+
+  private handleError(error: unknown) {
+    return throwError(() =>
+      typeof error === 'number' ? getBulldozerError(error) : error
+    );
+  }
 
   // get instructions
   find(filters: InstructionFilters) {
@@ -55,61 +65,55 @@ export class InstructionApiService {
   create(params: Omit<CreateInstructionParams, 'instructionId'>) {
     const instructionKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) => {
-        transaction.add(
-          createInstruction({
-            ...params,
-            instructionId: instructionKeypair.publicKey.toBase58(),
-          })
-        );
-        transaction.partialSign(instructionKeypair);
-        return transaction;
-      })
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        createInstruction({
+          ...params,
+          instructionId: instructionKeypair.publicKey.toBase58(),
+        })
+      ),
+      partiallySignTransaction(instructionKeypair),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
   }
 
   // update instruction
   update(params: UpdateInstructionParams) {
-    return this._ngxSolanaApiService.createAndSendTransaction(
-      params.authority,
-      (transaction) => transaction.add(updateInstruction(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateInstruction(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
     );
   }
 
   // update instruction body
   updateBody(params: UpdateInstructionBodyParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(updateInstructionBody(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateInstructionBody(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 
   // delete instruction
   delete(params: DeleteInstructionParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(deleteInstruction(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(deleteInstruction(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 }

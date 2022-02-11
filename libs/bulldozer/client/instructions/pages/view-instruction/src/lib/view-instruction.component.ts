@@ -61,7 +61,6 @@ import { ViewInstructionStore } from './view-instruction.store';
                 $event.toAccountId
               )
             "
-            (updateInstructionRelation)="onUpdateInstructionRelation($event)"
             (deleteInstructionRelation)="onDeleteInstructionRelation($event)"
           >
           </bd-instruction-documents-list>
@@ -234,14 +233,6 @@ export class ViewInstructionComponent {
       fromAccountId,
       toAccountId,
     });
-  }
-
-  onUpdateInstructionRelation(request: {
-    instructionRelationId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }) {
-    this._viewInstructionRelationsStore.updateInstructionRelation(request);
   }
 
   onDeleteInstructionRelation(request: {

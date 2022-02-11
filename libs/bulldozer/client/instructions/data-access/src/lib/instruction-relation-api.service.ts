@@ -6,23 +6,27 @@ import {
   createInstructionRelationRelation,
   deleteInstructionRelation,
   DeleteInstructionRelationParams,
-  findInstructionRelationAddress,
   getBulldozerError,
   InstructionRelation,
   InstructionRelationFilters,
   instructionRelationQueryBuilder,
   Relation,
-  updateInstructionRelation,
-  UpdateInstructionRelationParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
 import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionRelationApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
 
-  // get instructions
+  private handleError(error: unknown) {
+    return throwError(() =>
+      typeof error === 'number' ? getBulldozerError(error) : error
+    );
+  }
+
+  // get instruction relations
   find(filters: InstructionRelationFilters) {
     const query = instructionRelationQueryBuilder().where(filters).build();
 
@@ -37,7 +41,7 @@ export class InstructionRelationApiService {
       );
   }
 
-  // get instruction
+  // get instruction relation
   findById(
     instructionRelationId: string
   ): Observable<Relation<InstructionRelation> | null> {
@@ -55,73 +59,27 @@ export class InstructionRelationApiService {
       );
   }
 
-  // create instruction
-  create(
-    params: Omit<
-      CreateInstructionRelationParams,
-      'instructionRelationId' | 'instructionRelationBump'
-    >
-  ) {
-    return findInstructionRelationAddress(
-      params.fromAccountId,
-      params.toAccountId
-    ).pipe(
-      concatMap(([instructionRelationId, instructionRelationBump]) => {
-        return this._ngxSolanaApiService.createAndSendTransaction(
-          params.authority,
-          (transaction) =>
-            transaction.add(
-              createInstructionRelation({
-                ...params,
-                instructionRelationId,
-                instructionRelationBump,
-              })
-            )
-        );
-      }),
-      catchError((error) => {
-        if (
-          'InstructionError' in error &&
-          error.InstructionError.length === 2 &&
-          typeof error.InstructionError[1].Custom === 'number'
-        ) {
-          return throwError(() =>
-            getBulldozerError(error.InstructionError[1].Custom)
-          );
-        }
-
-        return throwError(() => error);
-      })
+  // create instruction relation
+  create(params: CreateInstructionRelationParams) {
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(createInstructionRelation(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
     );
   }
 
-  // update instruction
-  update(params: UpdateInstructionRelationParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(updateInstructionRelation(params))
-      )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
-  }
-
-  // delete instruction
+  // delete instruction relation
   delete(params: DeleteInstructionRelationParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(deleteInstructionRelation(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(deleteInstructionRelation(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 }

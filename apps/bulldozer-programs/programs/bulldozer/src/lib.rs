@@ -8,7 +8,7 @@ mod utils;
 
 use instructions::*;
 
-declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
+declare_id!("7WgU9mAEgB1doxyKisYd2HAxdsNUrpfP6tAPvyNYnFfD");
 
 #[program]
 pub mod bulldozer {
