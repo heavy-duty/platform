@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CodeEditorOptions } from '@bulldozer-client/code-editor';
-import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
+import { DarkThemeStore } from '@bulldozer-client/core-data-access';
 import { generateInstructionCode } from '@heavy-duty/generator';
 import { ComponentStore } from '@ngrx/component-store';
 import { combineLatest, tap } from 'rxjs';
@@ -49,13 +49,13 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
     private readonly _viewInstructionAccountsStore: ViewInstructionAccountsStore,
     private readonly _viewInstructionRelationsStore: ViewInstructionRelationsStore,
     private readonly _viewCollectionsStore: ViewCollectionsStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _darkThemeStore: DarkThemeStore
   ) {
     super(initialState);
   }
 
   protected readonly loadEditorOptions = this.effect(() =>
-    this._themeService.isDarkThemeEnabled$.pipe(
+    this._darkThemeStore.isDarkThemeEnabled$.pipe(
       tap((isDarkThemeEnabled) =>
         this.patchState({
           contextEditorOptions: {

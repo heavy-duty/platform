@@ -1,14 +1,18 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ConfigStore } from '@bulldozer-client/config-store';
-import { NotificationStore } from '@bulldozer-client/notification-store';
-import { TabStore } from '@bulldozer-client/tab-store';
+import {
+  ConfigStore,
+  DarkThemeStore,
+  InternetConnectivityStore,
+  NotificationStore,
+  TabStore,
+} from '@bulldozer-client/core-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ShellStore } from './shell.store';
 
 @Component({
   selector: 'bd-shell',
   template: `
-    <mat-sidenav-container fullscreen>
+    <mat-sidenav-container fullscreen bdInternetConnectivity>
       <mat-sidenav
         #drawer
         class="w-64"
@@ -35,6 +39,10 @@ import { ShellStore } from './shell.store';
               color="accent"
             ></hd-wallet-multi-button>
 
+            <div>
+              {{ (online$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
+            </div>
+
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
         </mat-toolbar>
@@ -49,7 +57,14 @@ import { ShellStore } from './shell.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [ShellStore, TabStore, NotificationStore, ConfigStore],
+  providers: [
+    ShellStore,
+    TabStore,
+    NotificationStore,
+    ConfigStore,
+    InternetConnectivityStore,
+    DarkThemeStore,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent implements OnInit {
@@ -58,12 +73,14 @@ export class ShellComponent implements OnInit {
   readonly workspaceId$ = this._configStore.workspaceId$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
+  readonly online$ = this._internetConnectivityStore.online$;
 
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
-    private readonly _shellStore: ShellStore
+    private readonly _shellStore: ShellStore,
+    private readonly _internetConnectivityStore: InternetConnectivityStore
   ) {}
 
   ngOnInit() {

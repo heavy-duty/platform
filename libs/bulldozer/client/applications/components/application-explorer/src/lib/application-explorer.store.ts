@@ -3,7 +3,7 @@ import {
   ApplicationApiService,
   ApplicationSocketService,
 } from '@bulldozer-client/applications-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
+import { NotificationStore } from '@bulldozer-client/core-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';

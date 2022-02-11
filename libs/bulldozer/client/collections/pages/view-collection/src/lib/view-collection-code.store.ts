@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { CodeEditorOptions } from '@bulldozer-client/code-editor';
-import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
+import { DarkThemeStore } from '@bulldozer-client/core-data-access';
 import { generateCollectionCode } from '@heavy-duty/generator';
 import { ComponentStore } from '@ngrx/component-store';
 import { combineLatest, tap } from 'rxjs';
@@ -25,13 +25,13 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _viewCollectionStore: ViewCollectionStore,
     private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore,
-    private readonly _themeService: DarkThemeService
+    private readonly _darkThemeStore: DarkThemeStore
   ) {
     super(initialState);
   }
 
   protected readonly loadEditorOptions = this.effect(() =>
-    this._themeService.isDarkThemeEnabled$.pipe(
+    this._darkThemeStore.isDarkThemeEnabled$.pipe(
       tap((isDarkThemeEnabled) =>
         this.patchState({
           editorOptions: {

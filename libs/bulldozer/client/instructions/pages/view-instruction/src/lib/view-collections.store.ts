@@ -3,7 +3,7 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
+import { NotificationStore } from '@bulldozer-client/core-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {

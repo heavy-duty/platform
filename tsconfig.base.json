@@ -46,6 +46,9 @@
       "@bulldozer-client/config-store": [
         "libs/bulldozer/client/shared/stores/config-store/src/index.ts"
       ],
+      "@bulldozer-client/core-data-access": [
+        "libs/bulldozer/client/core/data-access/src/index.ts"
+      ],
       "@bulldozer-client/dark-theme": [
         "libs/bulldozer/client/shared/directives/dark-theme/src/index.ts"
       ],
@@ -99,6 +102,9 @@
       ],
       "@bulldozer-client/instructions-data-access": [
         "libs/bulldozer/client/instructions/data-access/src/index.ts"
+      ],
+      "@bulldozer-client/internet-connectivity": [
+        "libs/bulldozer/client/shared/directives/internet-connectivity/src/index.ts"
       ],
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"

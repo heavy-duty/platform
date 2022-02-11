@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/notification-store';
-import { TabStore } from '@bulldozer-client/tab-store';
+import {
+  NotificationStore,
+  TabStore,
+} from '@bulldozer-client/core-data-access';
 import {
   WorkspaceApiService,
   WorkspaceSocketService,

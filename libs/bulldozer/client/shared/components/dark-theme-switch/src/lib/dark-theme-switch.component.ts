@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
+import { DarkThemeStore } from '@bulldozer-client/core-data-access';
 import { map } from 'rxjs/operators';
 
 @Component({
@@ -19,7 +19,7 @@ import { map } from 'rxjs/operators';
   styles: [],
 })
 export class DarkThemeSwitchComponent {
-  readonly isDarkThemeEnabled$ = this._themeService.isDarkThemeEnabled$;
+  readonly isDarkThemeEnabled$ = this._darkThemeStore.isDarkThemeEnabled$;
   readonly currentIconSelected$ = this.isDarkThemeEnabled$.pipe(
     map((isDarkThemeEnabled) =>
       isDarkThemeEnabled ? 'light_mode' : 'dark_mode'
@@ -31,9 +31,9 @@ export class DarkThemeSwitchComponent {
     )
   );
 
-  constructor(private readonly _themeService: DarkThemeService) {}
+  constructor(private readonly _darkThemeStore: DarkThemeStore) {}
 
   toggleDarkMode() {
-    this._themeService.toggleDarkTheme();
+    this._darkThemeStore.toggleDarkTheme();
   }
 }

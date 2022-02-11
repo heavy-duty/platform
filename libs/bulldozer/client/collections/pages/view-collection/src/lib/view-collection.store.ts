@@ -3,8 +3,10 @@ import {
   CollectionApiService,
   CollectionSocketService,
 } from '@bulldozer-client/collections-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
-import { TabStore } from '@bulldozer-client/tab-store';
+import {
+  NotificationStore,
+  TabStore,
+} from '@bulldozer-client/core-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';

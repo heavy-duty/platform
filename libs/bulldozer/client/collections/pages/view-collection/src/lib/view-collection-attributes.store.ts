@@ -3,7 +3,7 @@ import {
   CollectionAttributeApiService,
   CollectionAttributeSocketService,
 } from '@bulldozer-client/collections-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
+import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   Collection,
   CollectionAttribute,

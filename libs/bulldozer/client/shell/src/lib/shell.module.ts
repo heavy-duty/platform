@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
+import { InternetConnectivityModule } from '@bulldozer-client/internet-connectivity';
 import { TabListModule } from '@bulldozer-client/tab-list';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
@@ -77,6 +78,7 @@ import { ShellComponent } from './shell.component';
     HdWalletAdapterMaterialModule,
     DarkThemeDirectiveModule,
     DarkThemeSwitchModule,
+    InternetConnectivityModule,
     WorkspaceExplorerModule,
     WorkspaceSelectorModule,
     TabListModule,

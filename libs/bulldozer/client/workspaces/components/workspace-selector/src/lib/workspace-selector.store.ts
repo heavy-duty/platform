@@ -4,14 +4,16 @@ import {
   CollectionApiService,
   CollectionAttributeApiService,
 } from '@bulldozer-client/collections-data-access';
-import { ConfigStore } from '@bulldozer-client/config-store';
+import {
+  ConfigStore,
+  NotificationStore,
+} from '@bulldozer-client/core-data-access';
 import {
   InstructionAccountApiService,
   InstructionApiService,
   InstructionArgumentApiService,
   InstructionRelationApiService,
 } from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   WorkspaceApiService,
   WorkspaceSocketService,

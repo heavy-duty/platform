@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
+import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   InstructionRelationApiService,
   InstructionRelationSocketService,
 } from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
 import {
   Document,
   Instruction,

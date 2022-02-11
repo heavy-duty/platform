@@ -5,7 +5,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
-import { ConfigStore } from '@bulldozer-client/config-store';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
