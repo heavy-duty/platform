@@ -1,26 +1,22 @@
-import {
-  PublicKey,
-  SystemProgram,
-  SYSVAR_CLOCK_PUBKEY,
-  TransactionInstruction,
-} from '@solana/web3.js';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { defer, from, Observable } from 'rxjs';
 import { bulldozerProgram } from '../../programs';
 import { CreateInstructionParams } from './types';
 
 export const createInstruction = (
   params: CreateInstructionParams
-): TransactionInstruction => {
-  return bulldozerProgram.instruction.createInstruction(
-    { name: params.instructionName },
-    {
-      accounts: {
-        workspace: new PublicKey(params.workspaceId),
-        instruction: new PublicKey(params.instructionId),
-        application: new PublicKey(params.applicationId),
-        authority: new PublicKey(params.authority),
-        systemProgram: SystemProgram.programId,
-        clock: SYSVAR_CLOCK_PUBKEY,
-      },
-    }
+): Observable<TransactionInstruction> => {
+  return defer(() =>
+    from(
+      bulldozerProgram.methods
+        .createInstruction({ name: params.instructionName })
+        .accounts({
+          workspace: new PublicKey(params.workspaceId),
+          application: new PublicKey(params.applicationId),
+          instruction: new PublicKey(params.instructionId),
+          authority: new PublicKey(params.authority),
+        })
+        .instruction() as Promise<TransactionInstruction>
+    )
   );
 };

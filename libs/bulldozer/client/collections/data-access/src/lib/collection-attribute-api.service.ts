@@ -15,28 +15,35 @@ import {
   UpdateCollectionAttributeParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  addInstructionToTransaction,
+  partiallySignTransaction,
+} from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, map, Observable, tap, throwError } from 'rxjs';
+import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionAttributeApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
 
+  private handleError(error: unknown) {
+    return throwError(() =>
+      typeof error === 'number' ? getBulldozerError(error) : error
+    );
+  }
+
   // get collection attributes
   find(filters: CollectionAttributeFilters) {
-    console.log(filters);
     const query = collectionAttributeQueryBuilder().where(filters).build();
 
     return this._ngxSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
-        tap((a) => console.log(a)),
         map((programAccounts) =>
           programAccounts.map(({ pubkey, account }) =>
             createCollectionAttributeDocument(pubkey, account)
           )
-        ),
-        tap((a) => console.log(a))
+        )
       );
   }
 
@@ -64,56 +71,44 @@ export class CollectionAttributeApiService {
   ) {
     const collectionAttributeKeypair = Keypair.generate();
 
-    console.log(params);
-
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) => {
-        transaction.add(
-          createCollectionAttribute({
-            ...params,
-            collectionAttributeId:
-              collectionAttributeKeypair.publicKey.toBase58(),
-          })
-        );
-        transaction.partialSign(collectionAttributeKeypair);
-        return transaction;
-      })
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        createCollectionAttribute({
+          ...params,
+          collectionAttributeId:
+            collectionAttributeKeypair.publicKey.toBase58(),
+        })
+      ),
+      partiallySignTransaction(collectionAttributeKeypair),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
   }
 
   // update collection attribute
   update(params: UpdateCollectionAttributeParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(updateCollectionAttribute(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateCollectionAttribute(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 
   // delete collection attribute
   delete(params: DeleteCollectionAttributeParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(deleteCollectionAttribute(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(deleteCollectionAttribute(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 }

@@ -1,36 +1,29 @@
-import {
-  Idl,
-  Program,
-  ProgramError,
-  Provider,
-  setProvider,
-} from '@project-serum/anchor';
-import { Keypair, SystemProgram, SYSVAR_CLOCK_PUBKEY } from '@solana/web3.js';
+import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { Keypair } from '@solana/web3.js';
 import { assert } from 'chai';
-import * as bulldozerIdl from '../target/idl/bulldozer.json';
+import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('workspace', () => {
-  const program = new Program(bulldozerIdl as Idl, BULLDOZER_PROGRAM_ID);
-  setProvider(Provider.env());
+  const program = new Program<Bulldozer>(
+    IDL,
+    BULLDOZER_PROGRAM_ID,
+    Provider.env()
+  );
   const workspace = Keypair.generate();
 
   it('should create account', async () => {
     // arrange
     const workspaceName = 'my-app';
     // act
-    await program.rpc.createWorkspace(
-      { name: workspaceName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          systemProgram: SystemProgram.programId,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-        signers: [workspace],
-      }
-    );
+    await program.methods
+      .createWorkspace({ name: workspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([workspace])
+      .rpc();
     // assert
     const account = await program.account.workspace.fetch(workspace.publicKey);
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
@@ -42,16 +35,13 @@ describe('workspace', () => {
     // arrange
     const workspaceName = 'my-app2';
     // act
-    await program.rpc.updateWorkspace(
-      { name: workspaceName },
-      {
-        accounts: {
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          clock: SYSVAR_CLOCK_PUBKEY,
-        },
-      }
-    );
+    await program.methods
+      .updateWorkspace({ name: workspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .rpc();
     // assert
     const account = await program.account.workspace.fetch(workspace.publicKey);
     assert.ok(account.createdAt.lte(account.updatedAt));
@@ -60,12 +50,13 @@ describe('workspace', () => {
 
   it('should delete account', async () => {
     // act
-    await program.rpc.deleteWorkspace({
-      accounts: {
+    await program.methods
+      .deleteWorkspace()
+      .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
-      },
-    });
+      })
+      .rpc();
     // assert
     const account = await program.account.workspace.fetchNullable(
       workspace.publicKey
@@ -79,44 +70,37 @@ describe('workspace', () => {
     const newWorkspace = Keypair.generate();
     const applicationName = 'sample';
     const application = Keypair.generate();
-    let error: ProgramError;
+    let error: ProgramError | null = null;
     // act
     try {
-      await program.rpc.createWorkspace(
-        { name: newWorkspaceName },
-        {
-          accounts: {
-            workspace: newWorkspace.publicKey,
-            authority: program.provider.wallet.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [newWorkspace],
-        }
-      );
-      await program.rpc.createApplication(
-        { name: applicationName },
-        {
-          accounts: {
-            authority: program.provider.wallet.publicKey,
-            workspace: newWorkspace.publicKey,
-            application: application.publicKey,
-            systemProgram: SystemProgram.programId,
-            clock: SYSVAR_CLOCK_PUBKEY,
-          },
-          signers: [application],
-        }
-      );
-      await program.rpc.deleteWorkspace({
-        accounts: {
+      await program.methods
+        .createWorkspace({ name: newWorkspaceName })
+        .accounts({
+          workspace: newWorkspace.publicKey,
+          authority: program.provider.wallet.publicKey,
+        })
+        .signers([newWorkspace])
+        .rpc();
+      await program.methods
+        .createApplication({ name: applicationName })
+        .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
-        },
-      });
+          application: application.publicKey,
+        })
+        .signers([application])
+        .rpc();
+      await program.methods
+        .deleteWorkspace()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+        })
+        .rpc();
     } catch (err) {
-      error = err;
+      error = err as ProgramError;
     }
     // assert
-    assert.equal(error.code, 6026);
+    assert.equal(error?.code, 6024);
   });
 });

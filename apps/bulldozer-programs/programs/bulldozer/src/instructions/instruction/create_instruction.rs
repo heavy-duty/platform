@@ -24,7 +24,6 @@ pub struct CreateInstruction<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
@@ -37,7 +36,7 @@ pub fn handle(ctx: Context<CreateInstruction>, arguments: CreateInstructionArgum
   ctx.accounts.instruction.quantity_of_arguments = 0;
   ctx.accounts.instruction.quantity_of_accounts = 0;
   ctx.accounts.application.quantity_of_instructions += 1;
-  ctx.accounts.instruction.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.instruction.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.instruction.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.instruction.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

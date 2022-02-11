@@ -236,52 +236,9 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
       )
   );
 
-  readonly updateInstructionRelation = this.effect(
-    (
-      $: Observable<{
-        instructionRelationId: string;
-        fromAccountId: string;
-        toAccountId: string;
-      }>
-    ) =>
-      $.pipe(
-        concatMap((request) =>
-          of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-        ),
-        concatMap(
-          ([
-            { instructionRelationId, fromAccountId, toAccountId },
-            authority,
-          ]) => {
-            if (authority === null) {
-              return EMPTY;
-            }
-
-            return this._instructionRelationApiService
-              .update({
-                instructionRelationId,
-                fromAccountId,
-                toAccountId,
-                authority: authority.toBase58(),
-              })
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._notificationStore.setEvent(
-                      'Update relation request sent'
-                    ),
-                  (error) => this._notificationStore.setError(error)
-                )
-              );
-          }
-        )
-      )
-  );
-
   readonly deleteInstructionRelation = this.effect(
     (
       $: Observable<{
-        instructionRelationId: string;
         fromAccountId: string;
         toAccountId: string;
       }>
@@ -290,33 +247,27 @@ export class ViewInstructionRelationsStore extends ComponentStore<ViewModel> {
         concatMap((request) =>
           of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
         ),
-        concatMap(
-          ([
-            { instructionRelationId, fromAccountId, toAccountId },
-            authority,
-          ]) => {
-            if (authority === null) {
-              return EMPTY;
-            }
-
-            return this._instructionRelationApiService
-              .delete({
-                authority: authority.toBase58(),
-                instructionRelationId,
-                fromAccountId,
-                toAccountId,
-              })
-              .pipe(
-                tapResponse(
-                  () =>
-                    this._notificationStore.setEvent(
-                      'Delete relation request sent'
-                    ),
-                  (error) => this._notificationStore.setError(error)
-                )
-              );
+        concatMap(([{ fromAccountId, toAccountId }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
           }
-        )
+
+          return this._instructionRelationApiService
+            .delete({
+              authority: authority.toBase58(),
+              fromAccountId,
+              toAccountId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete relation request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        })
       )
   );
 }

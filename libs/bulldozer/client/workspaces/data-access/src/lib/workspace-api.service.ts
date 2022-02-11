@@ -15,12 +15,22 @@ import {
   workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  addInstructionToTransaction,
+  partiallySignTransaction,
+} from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+
+  private handleError(error: unknown) {
+    return throwError(() =>
+      typeof error === 'number' ? getBulldozerError(error) : error
+    );
+  }
 
   // get workspaces
   find(filters: WorkspaceFilters) {
@@ -53,53 +63,43 @@ export class WorkspaceApiService {
   create(params: Omit<CreateWorkspaceParams, 'workspaceId'>) {
     const workspaceKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) => {
-        transaction.add(
-          createWorkspace({
-            ...params,
-            workspaceId: workspaceKeypair.publicKey.toBase58(),
-          })
-        );
-        transaction.partialSign(workspaceKeypair);
-        return transaction;
-      })
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        createWorkspace({
+          ...params,
+          workspaceId: workspaceKeypair.publicKey.toBase58(),
+        })
+      ),
+      partiallySignTransaction(workspaceKeypair),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
   }
 
   // update workspace
   update(params: UpdateWorkspaceParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(updateWorkspace(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateWorkspace(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 
   // delete workspace
   delete(params: DeleteWorkspaceParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(deleteWorkspace(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(deleteWorkspace(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 }

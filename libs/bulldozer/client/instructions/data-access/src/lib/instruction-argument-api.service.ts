@@ -15,12 +15,22 @@ import {
   UpdateInstructionArgumentParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  addInstructionToTransaction,
+  partiallySignTransaction,
+} from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, map, Observable, throwError } from 'rxjs';
+import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionArgumentApiService {
   constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+
+  private handleError(error: unknown) {
+    return throwError(() =>
+      typeof error === 'number' ? getBulldozerError(error) : error
+    );
+  }
 
   // get instruction arguments
   find(filters: InstructionArgumentFilters) {
@@ -61,54 +71,44 @@ export class InstructionArgumentApiService {
   ) {
     const instructionArgumentKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) => {
-        transaction.add(
-          createInstructionArgument({
-            ...params,
-            instructionArgumentId:
-              instructionArgumentKeypair.publicKey.toBase58(),
-          })
-        );
-        transaction.partialSign(instructionArgumentKeypair);
-        return transaction;
-      })
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        createInstructionArgument({
+          ...params,
+          instructionArgumentId:
+            instructionArgumentKeypair.publicKey.toBase58(),
+        })
+      ),
+      partiallySignTransaction(instructionArgumentKeypair),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
   }
 
   // update instruction argument
   update(params: UpdateInstructionArgumentParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(updateInstructionArgument(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateInstructionArgument(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 
   // delete instruction argument
   delete(params: DeleteInstructionArgumentParams) {
-    return this._ngxSolanaApiService
-      .createAndSendTransaction(params.authority, (transaction) =>
-        transaction.add(deleteInstructionArgument(params))
+    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(deleteInstructionArgument(params)),
+      concatMap((transaction) =>
+        this._ngxSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
       )
-      .pipe(
-        catchError((error) =>
-          throwError(() =>
-            typeof error === 'number' ? getBulldozerError(error) : error
-          )
-        )
-      );
+    );
   }
 }

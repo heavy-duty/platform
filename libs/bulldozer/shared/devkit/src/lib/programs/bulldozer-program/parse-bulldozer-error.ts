@@ -1,4 +1,4 @@
-import { parseIdlErrors, ProgramError } from '@project-serum/anchor';
+import { parseIdlErrors, ProgramError } from '@heavy-duty/anchor';
 import { IDL } from './bulldozer';
 
 const bulldozerIdlErrors = parseIdlErrors(IDL);

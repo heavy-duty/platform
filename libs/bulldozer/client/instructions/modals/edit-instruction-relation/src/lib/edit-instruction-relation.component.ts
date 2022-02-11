@@ -13,12 +13,7 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import {
-  Document,
-  InstructionAccount,
-  InstructionRelation,
-  Relation,
-} from '@heavy-duty/bulldozer-devkit';
+import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 import { Subject } from 'rxjs';
 
 export const equalValidator =
@@ -34,9 +29,7 @@ export const equalValidator =
 @Component({
   selector: 'bd-edit-relation',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
-      {{ data?.relation ? 'Edit' : 'Create' }} relation
-    </h2>
+    <h2 mat-dialog-title class="mat-primary">Create relation</h2>
 
     <form
       [formGroup]="relationGroup"
@@ -73,7 +66,7 @@ export const equalValidator =
         class="w-full"
         [disabled]="submitted && relationGroup.invalid"
       >
-        {{ data?.relation ? 'Save' : 'Create' }}
+        Create
       </button>
     </form>
 
@@ -113,30 +106,19 @@ export class EditInstructionRelationComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditInstructionRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      relation?: Relation<InstructionRelation>;
       accounts: Document<InstructionAccount>[];
       from: string;
     }
   ) {}
 
   ngOnInit() {
-    if (this.data?.relation) {
-      this.relationGroup.setValue(
-        {
-          from: this.data.relation.from,
-          to: this.data.relation.to,
-        },
-        { emitEvent: false }
-      );
-    } else {
-      this.relationGroup.setValue(
-        {
-          from: this.data.from,
-          to: null,
-        },
-        { emitEvent: false }
-      );
-    }
+    this.relationGroup.setValue(
+      {
+        from: this.data.from,
+        to: null,
+      },
+      { emitEvent: false }
+    );
   }
 
   ngOnDestroy() {

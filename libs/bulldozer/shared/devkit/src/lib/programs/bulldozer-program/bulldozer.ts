@@ -19,11 +19,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -47,11 +42,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -101,11 +91,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -129,11 +114,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -193,11 +173,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -221,11 +196,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -290,11 +260,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -318,11 +283,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -382,11 +342,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -410,11 +365,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -438,11 +388,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -507,11 +452,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -535,11 +475,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -604,11 +539,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -632,11 +562,6 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [
@@ -676,6 +601,27 @@ export type Bulldozer = {
           name: 'relation';
           isMut: true;
           isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'instruction_relation';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'InstructionAccount';
+                path: 'from';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'InstructionAccount';
+                path: 'to';
+              }
+            ];
+          };
         },
         {
           name: 'workspace';
@@ -711,49 +657,6 @@ export type Bulldozer = {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
-        }
-      ];
-      args: [
-        {
-          name: 'arguments';
-          type: {
-            defined: 'CreateInstructionRelationArguments';
-          };
-        }
-      ];
-    },
-    {
-      name: 'updateInstructionRelation';
-      accounts: [
-        {
-          name: 'relation';
-          isMut: true;
-          isSigner: false;
-        },
-        {
-          name: 'from';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'to';
-          isMut: false;
-          isSigner: false;
-        },
-        {
-          name: 'authority';
-          isMut: false;
-          isSigner: true;
-        },
-        {
-          name: 'clock';
-          isMut: false;
-          isSigner: false;
         }
       ];
       args: [];
@@ -765,6 +668,27 @@ export type Bulldozer = {
           name: 'relation';
           isMut: true;
           isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'instruction_relation';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'InstructionAccount';
+                path: 'from';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'InstructionAccount';
+                path: 'to';
+              }
+            ];
+          };
         },
         {
           name: 'from';
@@ -1299,18 +1223,6 @@ export type Bulldozer = {
       };
     },
     {
-      name: 'CreateInstructionRelationArguments';
-      type: {
-        kind: 'struct';
-        fields: [
-          {
-            name: 'bump';
-            type: 'u8';
-          }
-        ];
-      };
-    },
-    {
       name: 'CreateWorkspaceArguments';
       type: {
         kind: 'struct';
@@ -1742,61 +1654,51 @@ export type Bulldozer = {
     },
     {
       code: 6016;
-      name: 'FromDoesntMatchRelation';
-      msg: 'From provided doesnt match relation';
-    },
-    {
-      code: 6017;
-      name: 'ToDoesntMatchRelation';
-      msg: 'To provided doesnt match relation';
-    },
-    {
-      code: 6018;
       name: 'CantDeleteInstructionWithArguments';
       msg: 'Cant delete instruction with arguments';
     },
     {
-      code: 6019;
+      code: 6017;
       name: 'InstructionDoesntMatchArgument';
       msg: 'Instruction provided doesnt match argument';
     },
     {
-      code: 6020;
+      code: 6018;
       name: 'CantDeleteInstructionWithAccounts';
       msg: 'Cant delete instruction with accounts';
     },
     {
-      code: 6021;
+      code: 6019;
       name: 'InstructionDoesntMatchAccount';
       msg: 'Instruction provided doesnt match account';
     },
     {
-      code: 6022;
+      code: 6020;
       name: 'CantDeleteApplicationWithCollections';
       msg: 'Cant delete application with collections';
     },
     {
-      code: 6023;
+      code: 6021;
       name: 'ApplicationDoesntMatchCollection';
       msg: 'Application provided doesnt match collection';
     },
     {
-      code: 6024;
+      code: 6022;
       name: 'CantDeleteApplicationWithInstructions';
       msg: 'Cant delete application with instructions';
     },
     {
-      code: 6025;
+      code: 6023;
       name: 'ApplicationDoesntMatchInstruction';
       msg: 'Application provided doesnt match instruction';
     },
     {
-      code: 6026;
+      code: 6024;
       name: 'CantDeleteWorkspaceWithApplications';
       msg: 'Cant delete workspace with applications';
     },
     {
-      code: 6027;
+      code: 6025;
       name: 'WorkspaceDoesntMatchApplication';
       msg: 'Workspace provided doesnt match application';
     }
@@ -1825,11 +1727,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -1852,11 +1749,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -1907,11 +1799,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -1934,11 +1821,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -1999,11 +1881,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2026,11 +1903,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -2096,11 +1968,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2123,11 +1990,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -2188,11 +2050,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2216,11 +2073,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2243,11 +2095,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -2313,11 +2160,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2340,11 +2182,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -2410,11 +2247,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [
         {
@@ -2437,11 +2269,6 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: false,
           isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
         },
       ],
       args: [
@@ -2481,6 +2308,27 @@ export const IDL: Bulldozer = {
           name: 'relation',
           isMut: true,
           isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'instruction_relation',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'InstructionAccount',
+                path: 'from',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'InstructionAccount',
+                path: 'to',
+              },
+            ],
+          },
         },
         {
           name: 'workspace',
@@ -2517,49 +2365,6 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: false,
         },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
-      ],
-      args: [
-        {
-          name: 'arguments',
-          type: {
-            defined: 'CreateInstructionRelationArguments',
-          },
-        },
-      ],
-    },
-    {
-      name: 'updateInstructionRelation',
-      accounts: [
-        {
-          name: 'relation',
-          isMut: true,
-          isSigner: false,
-        },
-        {
-          name: 'from',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'to',
-          isMut: false,
-          isSigner: false,
-        },
-        {
-          name: 'authority',
-          isMut: false,
-          isSigner: true,
-        },
-        {
-          name: 'clock',
-          isMut: false,
-          isSigner: false,
-        },
       ],
       args: [],
     },
@@ -2570,6 +2375,27 @@ export const IDL: Bulldozer = {
           name: 'relation',
           isMut: true,
           isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'instruction_relation',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'InstructionAccount',
+                path: 'from',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'InstructionAccount',
+                path: 'to',
+              },
+            ],
+          },
         },
         {
           name: 'from',
@@ -3104,18 +2930,6 @@ export const IDL: Bulldozer = {
       },
     },
     {
-      name: 'CreateInstructionRelationArguments',
-      type: {
-        kind: 'struct',
-        fields: [
-          {
-            name: 'bump',
-            type: 'u8',
-          },
-        ],
-      },
-    },
-    {
       name: 'CreateWorkspaceArguments',
       type: {
         kind: 'struct',
@@ -3547,61 +3361,51 @@ export const IDL: Bulldozer = {
     },
     {
       code: 6016,
-      name: 'FromDoesntMatchRelation',
-      msg: 'From provided doesnt match relation',
-    },
-    {
-      code: 6017,
-      name: 'ToDoesntMatchRelation',
-      msg: 'To provided doesnt match relation',
-    },
-    {
-      code: 6018,
       name: 'CantDeleteInstructionWithArguments',
       msg: 'Cant delete instruction with arguments',
     },
     {
-      code: 6019,
+      code: 6017,
       name: 'InstructionDoesntMatchArgument',
       msg: 'Instruction provided doesnt match argument',
     },
     {
-      code: 6020,
+      code: 6018,
       name: 'CantDeleteInstructionWithAccounts',
       msg: 'Cant delete instruction with accounts',
     },
     {
-      code: 6021,
+      code: 6019,
       name: 'InstructionDoesntMatchAccount',
       msg: 'Instruction provided doesnt match account',
     },
     {
-      code: 6022,
+      code: 6020,
       name: 'CantDeleteApplicationWithCollections',
       msg: 'Cant delete application with collections',
     },
     {
-      code: 6023,
+      code: 6021,
       name: 'ApplicationDoesntMatchCollection',
       msg: 'Application provided doesnt match collection',
     },
     {
-      code: 6024,
+      code: 6022,
       name: 'CantDeleteApplicationWithInstructions',
       msg: 'Cant delete application with instructions',
     },
     {
-      code: 6025,
+      code: 6023,
       name: 'ApplicationDoesntMatchInstruction',
       msg: 'Application provided doesnt match instruction',
     },
     {
-      code: 6026,
+      code: 6024,
       name: 'CantDeleteWorkspaceWithApplications',
       msg: 'Cant delete workspace with applications',
     },
     {
-      code: 6027,
+      code: 6025,
       name: 'WorkspaceDoesntMatchApplication',
       msg: 'Workspace provided doesnt match application',
     },

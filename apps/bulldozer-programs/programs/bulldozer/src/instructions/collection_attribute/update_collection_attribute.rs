@@ -25,7 +25,6 @@ pub struct UpdateCollectionAttribute<'info> {
   )]
   pub attribute: Account<'info, CollectionAttribute>,
   pub authority: Signer<'info>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(_ctx: &Context<UpdateCollectionAttribute>, arguments: &UpdateCollectionAttributeArguments) -> std::result::Result<bool, ProgramError> {
@@ -45,6 +44,6 @@ pub fn handle(ctx: Context<UpdateCollectionAttribute>, arguments: UpdateCollecti
   ctx.accounts.attribute.name = arguments.name;
   ctx.accounts.attribute.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.attribute.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.attribute.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.attribute.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

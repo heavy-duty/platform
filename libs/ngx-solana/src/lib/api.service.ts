@@ -8,7 +8,15 @@ import {
   Transaction,
   TransactionResponse,
 } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  isObservable,
+  map,
+  Observable,
+  of,
+  throwError,
+} from 'rxjs';
 import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from './config';
 
 @Injectable()
@@ -23,7 +31,7 @@ export class NgxSolanaApiService {
     feePayer: string,
     beforeSendFunction: (transaction: Transaction) => Transaction
   ) {
-    return this.getRecentBlockhash().pipe(
+    return this.getLatestBlockhash().pipe(
       concatMap(({ blockhash }) =>
         this.sendTransaction(
           beforeSendFunction(
@@ -33,6 +41,18 @@ export class NgxSolanaApiService {
             })
           )
         )
+      )
+    );
+  }
+
+  createTransaction(feePayer: string) {
+    return this.getLatestBlockhash().pipe(
+      map(
+        ({ blockhash }) =>
+          new Transaction({
+            feePayer: new PublicKey(feePayer),
+            recentBlockhash: blockhash,
+          })
       )
     );
   }
@@ -111,14 +131,14 @@ export class NgxSolanaApiService {
       );
   }
 
-  getRecentBlockhash(): Observable<{ blockhash: string }> {
+  getLatestBlockhash(): Observable<{ blockhash: string }> {
     return this._httpClient
       .post<{ value: { blockhash: string } }>(
         this._ngxSolanaConfig.apiEndpoint,
         null,
         {
           headers: {
-            'solana-rpc-method': 'getRecentBlockhash',
+            'solana-rpc-method': 'getLatestBlockhash',
           },
         }
       )
@@ -151,25 +171,31 @@ export class NgxSolanaApiService {
     );
   }
 
-  sendTransaction(transaction: Transaction): Observable<string> {
-    return this._httpClient
-      .post<string>(this._ngxSolanaConfig.apiEndpoint, transaction, {
-        headers: {
-          'solana-rpc-method': 'sendTransaction',
-        },
-      })
-      .pipe(
-        catchError((error) => {
-          if (
-            'InstructionError' in error &&
-            error.InstructionError.length === 2 &&
-            typeof error.InstructionError[1].Custom === 'number'
-          ) {
-            return throwError(() => error.InstructionError[1].Custom);
-          }
+  sendTransaction(
+    transaction: Transaction | Observable<Transaction>
+  ): Observable<string> {
+    return (isObservable(transaction) ? transaction : of(transaction)).pipe(
+      concatMap((transaction) =>
+        this._httpClient
+          .post<string>(this._ngxSolanaConfig.apiEndpoint, transaction, {
+            headers: {
+              'solana-rpc-method': 'sendTransaction',
+            },
+          })
+          .pipe(
+            catchError((error) => {
+              if (
+                'InstructionError' in error &&
+                error.InstructionError.length === 2 &&
+                typeof error.InstructionError[1].Custom === 'number'
+              ) {
+                return throwError(() => error.InstructionError[1].Custom);
+              }
 
-          return throwError(() => error);
-        })
-      );
+              return throwError(() => error);
+            })
+          )
+      )
+    );
   }
 }

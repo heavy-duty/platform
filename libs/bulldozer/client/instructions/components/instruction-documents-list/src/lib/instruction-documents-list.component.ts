@@ -126,52 +126,24 @@ import {
                       {{ relation.extras.to.name }} ({{
                         relation.id | obscureAddress
                       }})
+
                       <button
                         class="w-6 h-6 leading-6"
                         mat-icon-button
                         [attr.aria-label]="
-                          'More options of ' +
-                          relation.extras.to.name +
-                          ' has one relation'
+                          'Delete relation to ' + relation.extras.to.name
                         "
-                        [matMenuTriggerFor]="documentRelationMenu"
+                        (click)="
+                          onDeleteInstructionRelation(
+                            relation.id,
+                            relation.from,
+                            relation.to
+                          )
+                        "
+                        [disabled]="!connected"
                       >
-                        <mat-icon>more_horiz</mat-icon>
+                        <mat-icon>delete</mat-icon>
                       </button>
-                      <mat-menu #documentRelationMenu="matMenu">
-                        <button
-                          mat-menu-item
-                          bdEditInstructionRelationTrigger
-                          [instructionRelation]="relation"
-                          [instructionAccounts]="instructionAccounts"
-                          [from]="instructionDocument.id"
-                          (editInstructionRelation)="
-                            onUpdateInstructionRelation(
-                              relation.id,
-                              $event.from,
-                              $event.to
-                            )
-                          "
-                          [disabled]="!connected"
-                        >
-                          <mat-icon>edit</mat-icon>
-                          <span>Update relation</span>
-                        </button>
-                        <button
-                          mat-menu-item
-                          (click)="
-                            onDeleteInstructionRelation(
-                              relation.id,
-                              relation.from,
-                              relation.to
-                            )
-                          "
-                          [disabled]="!connected"
-                        >
-                          <mat-icon>delete</mat-icon>
-                          <span>Delete relation</span>
-                        </button>
-                      </mat-menu>
                     </li>
                   </ul>
                 </ng-container>
@@ -252,11 +224,6 @@ export class InstructionDocumentsListComponent {
     fromAccountId: string;
     toAccountId: string;
   }>();
-  @Output() updateInstructionRelation = new EventEmitter<{
-    instructionRelationId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }>();
   @Output() deleteInstructionRelation = new EventEmitter<{
     instructionRelationId: string;
     fromAccountId: string;
@@ -283,18 +250,6 @@ export class InstructionDocumentsListComponent {
 
   onCreateInstructionRelation(fromAccountId: string, toAccountId: string) {
     this.createInstructionRelation.emit({ fromAccountId, toAccountId });
-  }
-
-  onUpdateInstructionRelation(
-    instructionRelationId: string,
-    fromAccountId: string,
-    toAccountId: string
-  ) {
-    this.updateInstructionRelation.emit({
-      instructionRelationId,
-      fromAccountId,
-      toAccountId,
-    });
   }
 
   onDeleteInstructionRelation(

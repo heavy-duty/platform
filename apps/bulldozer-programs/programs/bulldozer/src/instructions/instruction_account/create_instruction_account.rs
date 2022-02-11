@@ -35,7 +35,6 @@ pub struct CreateInstructionAccount<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(ctx: &Context<CreateInstructionAccount>, arguments: &CreateInstructionAccountArguments) -> std::result::Result<bool, ProgramError> {
@@ -78,7 +77,7 @@ pub fn handle(ctx: Context<CreateInstructionAccount>, arguments: CreateInstructi
   )?;
   ctx.accounts.account.quantity_of_relations = 0;
   ctx.accounts.instruction.quantity_of_accounts += 1;
-  ctx.accounts.account.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.account.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.account.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.account.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

@@ -9,15 +9,12 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   Document,
   InstructionAccount,
-  InstructionRelation,
   InstructionRelationDto,
-  Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionRelationComponent } from './edit-instruction-relation.component';
 
 @Directive({ selector: '[bdEditInstructionRelationTrigger]' })
 export class EditInstructionRelationTriggerDirective {
-  @Input() instructionRelation: Relation<InstructionRelation> | null = null;
   @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =
@@ -31,14 +28,12 @@ export class EditInstructionRelationTriggerDirective {
       .open<
         EditInstructionRelationComponent,
         {
-          relation: Relation<InstructionRelation> | null;
           accounts: Document<InstructionAccount>[];
           from: string;
         },
         InstructionRelationDto
       >(EditInstructionRelationComponent, {
         data: {
-          relation: this.instructionRelation,
           accounts: this.instructionAccounts,
           from: this.from,
         },

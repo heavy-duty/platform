@@ -12,12 +12,11 @@ pub struct UpdateWorkspace<'info> {
   #[account(mut, has_one = authority)]
   pub workspace: Box<Account<'info, Workspace>>,
   pub authority: Signer<'info>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn handle(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {
   msg!("Update workspace");
   ctx.accounts.workspace.name = arguments.name;
-  ctx.accounts.workspace.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.workspace.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

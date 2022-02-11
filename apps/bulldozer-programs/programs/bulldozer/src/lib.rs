@@ -8,7 +8,7 @@ mod utils;
 
 use instructions::*;
 
-declare_id!("GVm1TjFD3V6paG5ef4cvpd7fc27bwyjityN2sbyPJpef");
+declare_id!("7WgU9mAEgB1doxyKisYd2HAxdsNUrpfP6tAPvyNYnFfD");
 
 #[program]
 pub mod bulldozer {
@@ -130,14 +130,9 @@ pub mod bulldozer {
   }
 
   pub fn create_instruction_relation(
-    ctx: Context<CreateInstructionRelation>,
-    arguments: CreateInstructionRelationArguments,
+    ctx: Context<CreateInstructionRelation>
   ) -> ProgramResult {
-    instructions::create_instruction_relation::handle(ctx, arguments)
-  }
-
-  pub fn update_instruction_relation(ctx: Context<UpdateInstructionRelation>) -> ProgramResult {
-    instructions::update_instruction_relation::handle(ctx)
+    instructions::create_instruction_relation::handle(ctx)
   }
 
   pub fn delete_instruction_relation(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {

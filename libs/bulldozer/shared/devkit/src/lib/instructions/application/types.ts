@@ -1,7 +1,7 @@
 export interface CreateApplicationParams {
   workspaceId: string;
-  authority: string;
   applicationId: string;
+  authority: string;
   applicationName: string;
 }
 

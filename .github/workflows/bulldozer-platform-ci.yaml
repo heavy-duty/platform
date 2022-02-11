@@ -1,14 +1,15 @@
 name: Bulldozer Platform ci
 on: pull_request
 
-env:
-  SOLANA_VERSION: 1.9.1
-  ANCHOR_VERSION: 0.19.0
-  NODE_VERSION: 14.18.2
-
 jobs:
   ci:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: [14]
+        solana: [1.8.14, 1.9.5]
+        anchor: [0.21.0]
+        os: [ubuntu-20.04]
     steps:
       - id: config-repo
         name: Pre config - 🧰 Checkout repo
@@ -20,7 +21,7 @@ jobs:
         name: Pre config - 🧰 Setting up Node ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v2
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: ${{ matrix.node }}
 
       - id: install-npm-packages
         name: 📦 Git fetch for affected commands and installing npm packages
@@ -45,13 +46,13 @@ jobs:
           source $HOME/.cargo/env
           rustup component add rustfmt
           echo "Installing Solana >> "
-          sh -c "$(curl -sSfL https://release.solana.com/v${{ env.SOLANA_VERSION }}/install)"
+          sh -c "$(curl -sSfL https://release.solana.com/v${{ matrix.solana }}/install)"
           echo "-- adding new solana key file"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
           solana-keygen new -o $HOME/.config/solana/id.json
           echo "Installing Serum >> "
-          npm i -g @project-serum/anchor@${{ env.ANCHOR_VERSION }}
-          npm i -g @project-serum/anchor-cli@${{ env.ANCHOR_VERSION }}
+          npm i -g @project-serum/anchor@${{ matrix.anchor }}
+          npm i -g @project-serum/anchor-cli@${{ matrix.anchor }}
           echo "Installing others dependencies >>"
           npm i -g typescript
           npm install -g mocha

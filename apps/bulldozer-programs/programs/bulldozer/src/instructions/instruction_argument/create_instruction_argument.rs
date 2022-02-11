@@ -37,7 +37,6 @@ pub struct CreateInstructionArgument<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
-  pub clock: Sysvar<'info, Clock>,
 }
 
 pub fn validate(_ctx: &Context<CreateInstructionArgument>, arguments: &CreateInstructionArgumentArguments) -> std::result::Result<bool, ProgramError> {
@@ -62,7 +61,7 @@ pub fn handle(ctx: Context<CreateInstructionArgument>, arguments: CreateInstruct
   ctx.accounts.argument.kind = get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
   ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
   ctx.accounts.instruction.quantity_of_arguments += 1;
-  ctx.accounts.argument.created_at = ctx.accounts.clock.unix_timestamp;
-  ctx.accounts.argument.updated_at = ctx.accounts.clock.unix_timestamp;
+  ctx.accounts.argument.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.argument.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }
