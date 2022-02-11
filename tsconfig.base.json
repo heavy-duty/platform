@@ -26,7 +26,7 @@
         "libs/bulldozer/client/applications/data-access/src/index.ts"
       ],
       "@bulldozer-client/auth-guard": [
-        "libs/bulldozer/client/shared/guards/auth-guard/src/index.ts"
+        "libs/bulldozer/client/auth/utils/auth-guard/src/index.ts"
       ],
       "@bulldozer-client/code-editor": [
         "libs/bulldozer/client/shared/components/code-editor/src/index.ts"

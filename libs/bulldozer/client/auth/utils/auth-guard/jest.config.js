@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'bulldozer-client-shared-guards-auth-guard',
+  displayName: 'bulldozer-client-auth-utils-auth-guard',
   preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../../coverage/libs/bulldozer/client/shared/guards/auth-guard',
+    '../../../../../../coverage/libs/bulldozer/client/auth/utils/auth-guard',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },
