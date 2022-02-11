@@ -14,7 +14,7 @@ const initialState: ViewModel = {
   isHandset: false,
 };
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class ConfigStore extends ComponentStore<ViewModel> {
   private readonly _workspaceId = new LocalStorageSubject<string>(
     'workspaceId'

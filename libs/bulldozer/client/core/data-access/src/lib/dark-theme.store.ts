@@ -9,7 +9,7 @@ interface ViewModel {
   error?: unknown;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class DarkThemeStore extends ComponentStore<ViewModel> {
   private readonly _darkTheme = new LocalStorageSubject<boolean>('darkTheme');
   readonly isDarkThemeEnabled$ = this._darkTheme.asObservable();

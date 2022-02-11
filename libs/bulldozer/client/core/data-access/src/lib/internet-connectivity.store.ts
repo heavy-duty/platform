@@ -6,7 +6,7 @@ interface ViewModel {
   error?: unknown;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class InternetConnectivityStore extends ComponentStore<ViewModel> {
   readonly online$ = this.select(({ online }) => online);
 
