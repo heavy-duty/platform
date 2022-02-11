@@ -9,7 +9,7 @@ jobs:
         node: [14]
         solana: [1.8.14, 1.9.5]
         anchor: [0.21.0]
-        os: [macos-latest, windows-latest, ubuntu-20.04]
+        os: [ubuntu-20.04]
     steps:
       - id: config-repo
         name: Pre config - 🧰 Checkout repo
