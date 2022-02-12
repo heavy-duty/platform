@@ -16,7 +16,7 @@ import {
 } from '@bulldozer-client/instructions-data-access';
 import {
   WorkspaceApiService,
-  WorkspaceSocketService,
+  WorkspaceEventService,
 } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -74,7 +74,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionRelationApiService: InstructionRelationApiService,
-    private readonly _workspaceSocketService: WorkspaceSocketService,
+    private readonly _workspaceEventService: WorkspaceEventService,
     private readonly _walletStore: WalletStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _configStore: ConfigStore
@@ -122,7 +122,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     (workspaceId$: Observable<string>) =>
       workspaceId$.pipe(
         mergeMap((workspaceId) =>
-          this._workspaceSocketService.workspaceChanges(workspaceId).pipe(
+          this._workspaceEventService.workspaceChanges(workspaceId).pipe(
             tapResponse(
               (changes) => {
                 if (changes === null) {
@@ -152,7 +152,7 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._workspaceSocketService
+        return this._workspaceEventService
           .workspaceCreated({
             authority: authority.toBase58(),
           })

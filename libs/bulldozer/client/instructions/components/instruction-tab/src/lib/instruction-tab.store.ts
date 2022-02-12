@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   InstructionApiService,
-  InstructionSocketService,
+  InstructionEventService,
 } from '@bulldozer-client/instructions-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -27,7 +27,7 @@ export class InstructionTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService,
+    private readonly _instructionEventService: InstructionEventService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
@@ -46,7 +46,7 @@ export class InstructionTabStore extends ComponentStore<ViewModel> {
 
         return this._instructionApiService.findById(instructionId).pipe(
           concatMap((instruction) =>
-            this._instructionSocketService
+            this._instructionEventService
               .instructionChanges(instructionId)
               .pipe(startWith(instruction))
           ),

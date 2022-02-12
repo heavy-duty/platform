@@ -28,6 +28,9 @@
       "@bulldozer-client/auth-guard": [
         "libs/bulldozer/client/auth/utils/auth-guard/src/index.ts"
       ],
+      "@bulldozer-client/auth-interceptor": [
+        "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
+      ],
       "@bulldozer-client/code-editor": [
         "libs/bulldozer/client/shared/components/code-editor/src/index.ts"
       ],
@@ -163,6 +166,7 @@
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ngx-solana": ["libs/ngx-solana/src/index.ts"],
+      "@heavy-duty/ngx-websocket": ["libs/ngx-websocket/src/index.ts"],
       "@heavy-duty/rx-solana": ["libs/rx-solana/src/index.ts"],
       "@heavy-duty/rxjs": ["libs/rxjs/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [

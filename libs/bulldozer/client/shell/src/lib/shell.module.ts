@@ -55,14 +55,6 @@ import { ShellComponent } from './shell.component';
               ),
           },
         ],
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'unauthorized-access',
-        loadChildren: () =>
-          import('@bulldozer-client/unauthorized-access').then(
-            (m) => m.UnauthorizedAccessModule
-          ),
       },
       {
         path: '**',

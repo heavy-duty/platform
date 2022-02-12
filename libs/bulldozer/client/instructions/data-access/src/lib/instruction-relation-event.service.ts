@@ -7,19 +7,17 @@ import {
   instructionRelationQueryBuilder,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
+import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class InstructionRelationSocketService {
-  constructor(
-    private readonly _ngxSolanaSocketService: NgxSolanaSocketService
-  ) {}
+export class InstructionRelationEventService {
+  constructor(private readonly _connectionStore: NgxSolanaConnectionStore) {}
 
   instructionRelationChanges(
     instructionRelationId: string
   ): Observable<Relation<InstructionRelation> | null> {
-    return this._ngxSolanaSocketService
+    return this._connectionStore
       .onAccountChange(instructionRelationId)
       .pipe(
         map((accountInfo) =>
@@ -41,7 +39,7 @@ export class InstructionRelationSocketService {
       .setCommitment('finalized')
       .build();
 
-    return this._ngxSolanaSocketService
+    return this._connectionStore
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CollectionApiService,
-  CollectionSocketService,
+  CollectionEventService,
 } from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
@@ -41,7 +41,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService,
+    private readonly _collectionEventService: CollectionEventService,
     private readonly _viewInstructionStore: ViewInstructionStore,
     private readonly _notificationStore: NotificationStore
   ) {
@@ -88,7 +88,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
     (collectionId$: Observable<string>) =>
       collectionId$.pipe(
         mergeMap((collectionId) =>
-          this._collectionSocketService.collectionChanges(collectionId).pipe(
+          this._collectionEventService.collectionChanges(collectionId).pipe(
             tapResponse(
               (changes) => {
                 if (changes === null) {
@@ -118,7 +118,7 @@ export class ViewCollectionsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._collectionSocketService
+        return this._collectionEventService
           .collectionCreated({
             application: instruction.data.application,
           })

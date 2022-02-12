@@ -7,27 +7,25 @@ import {
   WorkspaceFilters,
   workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaSocketService } from '@heavy-duty/ngx-solana';
-import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
+import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
+import { concatMap, EMPTY, map, Observable, of, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
-export class WorkspaceSocketService {
-  constructor(
-    private readonly _ngxSolanaSocketService: NgxSolanaSocketService
-  ) {}
+export class WorkspaceEventService {
+  constructor(private readonly _connectionStore: NgxSolanaConnectionStore) {}
 
   workspaceChanges(
     workspaceId: string
   ): Observable<Document<Workspace> | null> {
-    return this._ngxSolanaSocketService
-      .onAccountChange(workspaceId)
-      .pipe(
-        map((accountInfo) =>
-          accountInfo.lamports > 0
-            ? createWorkspaceDocument(workspaceId, accountInfo)
-            : null
-        )
-      );
+    console.log(workspaceId);
+    return this._connectionStore.onAccountChange(workspaceId).pipe(
+      tap((a) => console.log(a)),
+      map((accountInfo) =>
+        accountInfo.lamports > 0
+          ? createWorkspaceDocument(workspaceId, accountInfo)
+          : null
+      )
+    );
   }
 
   workspaceCreated(filters: WorkspaceFilters) {
@@ -36,7 +34,7 @@ export class WorkspaceSocketService {
       .setCommitment('finalized')
       .build();
 
-    return this._ngxSolanaSocketService
+    return this._connectionStore
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {

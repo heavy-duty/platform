@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   ApplicationApiService,
-  ApplicationSocketService,
+  ApplicationEventService,
 } from '@bulldozer-client/applications-data-access';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
@@ -49,7 +49,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationSocketService: ApplicationSocketService,
+    private readonly _applicationEventService: ApplicationEventService,
     private readonly _walletStore: WalletStore,
     private readonly _notificationStore: NotificationStore
   ) {
@@ -100,7 +100,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     (applicationId$: Observable<string>) =>
       applicationId$.pipe(
         mergeMap((applicationId) =>
-          this._applicationSocketService.applicationChanges(applicationId).pipe(
+          this._applicationEventService.applicationChanges(applicationId).pipe(
             tapResponse(
               (changes) => {
                 if (changes === null) {
@@ -130,7 +130,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._applicationSocketService
+        return this._applicationEventService
           .applicationCreated({
             workspace: workspaceId,
           })

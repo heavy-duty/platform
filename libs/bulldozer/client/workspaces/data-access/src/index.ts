@@ -1,2 +1,2 @@
 export * from './lib/workspace-api.service';
-export * from './lib/workspace-socket.service';
+export * from './lib/workspace-event.service';

@@ -9,7 +9,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { concatMap, Observable, throwError } from 'rxjs';
 
 @Injectable()
-export class NgxSolanaApiAuthInterceptor implements HttpInterceptor {
+export class AuthInterceptor implements HttpInterceptor {
   constructor(private _walletStore: WalletStore) {}
 
   private isSolanaTransaction(

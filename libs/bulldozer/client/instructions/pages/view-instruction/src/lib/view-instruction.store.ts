@@ -5,7 +5,7 @@ import {
 } from '@bulldozer-client/core-data-access';
 import {
   InstructionApiService,
-  InstructionSocketService,
+  InstructionEventService,
 } from '@bulldozer-client/instructions-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
@@ -39,7 +39,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     private readonly _tabStore: TabStore,
     private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService,
+    private readonly _instructionEventService: InstructionEventService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
     private readonly _notificationStore: NotificationStore
   ) {
@@ -55,7 +55,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
 
         return this._instructionApiService.findById(instructionId).pipe(
           concatMap((instruction) =>
-            this._instructionSocketService
+            this._instructionEventService
               .instructionChanges(instructionId)
               .pipe(startWith(instruction))
           ),

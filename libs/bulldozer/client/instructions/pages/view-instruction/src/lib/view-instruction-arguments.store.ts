@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   InstructionArgumentApiService,
-  InstructionArgumentSocketService,
+  InstructionArgumentEventService,
 } from '@bulldozer-client/instructions-data-access';
 import {
   Document,
@@ -55,7 +55,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
-    private readonly _instructionArgumentSocketService: InstructionArgumentSocketService,
+    private readonly _instructionArgumentEventService: InstructionArgumentEventService,
     private readonly _viewInstructionRouteStore: ViewInstructionRouteStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
@@ -109,7 +109,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     (instructionArgumentId$: Observable<string>) =>
       instructionArgumentId$.pipe(
         mergeMap((instructionArgumentId) =>
-          this._instructionArgumentSocketService
+          this._instructionArgumentEventService
             .instructionArgumentChanges(instructionArgumentId)
             .pipe(
               tapResponse(
@@ -141,7 +141,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
-        return this._instructionArgumentSocketService
+        return this._instructionArgumentEventService
           .instructionArgumentCreated({
             instruction: instructionId,
           })

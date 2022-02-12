@@ -5,7 +5,7 @@ import {
 } from '@bulldozer-client/core-data-access';
 import {
   WorkspaceApiService,
-  WorkspaceSocketService,
+  WorkspaceEventService,
 } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
@@ -30,7 +30,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _tabStore: TabStore,
     private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _workspaceSocketService: WorkspaceSocketService,
+    private readonly _workspaceEventService: WorkspaceEventService,
     private readonly _viewWorkspaceRouteStore: ViewWorkspaceRouteStore,
     private readonly _notificationStore: NotificationStore
   ) {
@@ -46,7 +46,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
         return this._workspaceApiService.findById(workspaceId).pipe(
           concatMap((workspace) =>
-            this._workspaceSocketService
+            this._workspaceEventService
               .workspaceChanges(workspaceId)
               .pipe(startWith(workspace))
           ),

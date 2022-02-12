@@ -6,6 +6,7 @@ import {
   NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
+import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ShellStore } from './shell.store';
 
@@ -40,7 +41,14 @@ import { ShellStore } from './shell.store';
             ></hd-wallet-multi-button>
 
             <div>
-              {{ (online$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
+              <span>
+                Internet:
+                {{ (online$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
+              </span>
+              <span>
+                RPC:
+                {{ (rpcConnected$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
+              </span>
             </div>
 
             <bd-dark-theme-switch></bd-dark-theme-switch>
@@ -74,13 +82,15 @@ export class ShellComponent implements OnInit {
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
   readonly online$ = this._internetConnectivityStore.online$;
+  readonly rpcConnected$ = this._ngxSolanaConnectionStore.connected$;
 
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
     private readonly _shellStore: ShellStore,
-    private readonly _internetConnectivityStore: InternetConnectivityStore
+    private readonly _internetConnectivityStore: InternetConnectivityStore,
+    private readonly _ngxSolanaConnectionStore: NgxSolanaConnectionStore
   ) {}
 
   ngOnInit() {

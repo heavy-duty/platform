@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CollectionApiService,
-  CollectionSocketService,
+  CollectionEventService,
 } from '@bulldozer-client/collections-data-access';
 import {
   NotificationStore,
@@ -28,7 +28,7 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _tabStore: TabStore,
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService,
+    private readonly _collectionEventService: CollectionEventService,
     private readonly _viewCollectionRouteStore: ViewCollectionRouteStore,
     private readonly _notificationStore: NotificationStore
   ) {
@@ -46,7 +46,7 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
           .findById(collectionId)
           .pipe(
             concatMap((collection) =>
-              this._collectionSocketService
+              this._collectionEventService
                 .collectionChanges(collectionId)
                 .pipe(startWith(collection))
             )

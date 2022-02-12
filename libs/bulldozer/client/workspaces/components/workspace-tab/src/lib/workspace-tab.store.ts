@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   WorkspaceApiService,
-  WorkspaceSocketService,
+  WorkspaceEventService,
 } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -28,7 +28,7 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _workspaceSocketService: WorkspaceSocketService
+    private readonly _workspaceEventService: WorkspaceEventService
   ) {
     super(initialState);
   }
@@ -46,7 +46,7 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
 
         return this._workspaceApiService.findById(workspaceId).pipe(
           concatMap((workspace) =>
-            this._workspaceSocketService
+            this._workspaceEventService
               .workspaceChanges(workspaceId)
               .pipe(startWith(workspace))
           ),

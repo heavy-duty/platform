@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   ApplicationApiService,
-  ApplicationSocketService,
+  ApplicationEventService,
 } from '@bulldozer-client/applications-data-access';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
@@ -29,7 +29,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationSocketService: ApplicationSocketService,
+    private readonly _applicationEventService: ApplicationEventService,
     private readonly _notificationService: NotificationStore
   ) {
     super(initialState);
@@ -48,7 +48,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
 
         return this._applicationApiService.findById(applicationId).pipe(
           concatMap((application) =>
-            this._applicationSocketService
+            this._applicationEventService
               .applicationChanges(applicationId)
               .pipe(startWith(application))
           ),
