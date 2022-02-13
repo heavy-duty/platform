@@ -5,6 +5,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ConnectionMenuComponent } from './connection-menu.component';
+import { RelativeTimePipe } from './relative-time.pipe';
 
 @NgModule({
   imports: [
@@ -14,7 +15,7 @@ import { ConnectionMenuComponent } from './connection-menu.component';
     MatMenuModule,
     MatProgressSpinnerModule,
   ],
-  declarations: [ConnectionMenuComponent],
+  declarations: [ConnectionMenuComponent, RelativeTimePipe],
   exports: [ConnectionMenuComponent],
 })
 export class NgxSolanaMaterialModule {}

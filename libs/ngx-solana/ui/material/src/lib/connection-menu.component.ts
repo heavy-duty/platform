@@ -72,7 +72,18 @@ import {
         <ng-container
           *ngIf="(online$ | async) && (connected$ | async) === false"
         >
-          Reconnecting in {{ nextAttemptAt$ | async }}
+          <ng-container
+            *ngIf="
+              nextAttemptAt$ | hdRelativeTime | async as nextAttemptAt;
+              else reconnecting
+            "
+          >
+            Reconnecting in
+
+            <span class="text-primary">{{ nextAttemptAt }}</span
+            >.
+          </ng-container>
+          <ng-template #reconnecting> Reconnecting... </ng-template>
         </ng-container>
       </p>
     </mat-menu>
