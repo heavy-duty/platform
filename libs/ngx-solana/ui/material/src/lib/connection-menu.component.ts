@@ -8,7 +8,7 @@ import {
 @Component({
   selector: 'hd-connection-menu',
   template: `
-    <button mat-raised-button>
+    <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
       <div class="flex justify-between items-center">
         <div
           class="bg-green-500 rounded-full w-4 h-4"
@@ -32,13 +32,26 @@ import {
         <mat-icon>arrow_drop_down</mat-icon>
       </div>
     </button>
+
+    <mat-menu #menu="matMenu" class="px-4 py-2">
+      <h2 class="uppercase">{{ network }}</h2>
+      <p class="text-xs text-opacity-50">
+        <span class="font-bold">API: </span>
+        <span class="font-thin">{{ apiEndpoint }}</span>
+      </p>
+      <p class="text-xs text-opacity-50">
+        <span class="font-bold">WebSocket: </span>
+        <span class="font-thin">{{ webSocketEndpoint }}</span>
+      </p>
+    </mat-menu>
   `,
 })
 export class ConnectionMenuComponent {
   readonly online$ = this._connectionStore.online$;
   readonly connected$ = this._connectionStore.connected$;
   readonly network = this._solanaRpcConfig.network;
-  readonly endpoint = this._solanaRpcConfig.apiEndpoint;
+  readonly apiEndpoint = this._solanaRpcConfig.apiEndpoint;
+  readonly webSocketEndpoint = this._solanaRpcConfig.webSocket.endpoint;
 
   constructor(
     @Inject(NGX_SOLANA_CONFIG)

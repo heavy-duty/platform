@@ -36,7 +36,7 @@ import { ShellStore } from './shell.store';
 
             <hd-wallet-multi-button
               class="bd-custom-color mr-6 h-auto leading-none"
-              color="accent"
+              color="basic"
             ></hd-wallet-multi-button>
 
             <hd-connection-menu class="mr-6"></hd-connection-menu>
