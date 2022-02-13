@@ -21,8 +21,9 @@ export class NgxSolanaModule {
           webSocket: {
             endpoint: websocketEndpoint,
             reconnection: true,
-            reconnectionDelay: 1000,
-            heartBeatDelay: 30_000,
+            reconnectionDelay: 1_000, // 1 second
+            reconnectionDelayMax: 300_000, // 5 minutes
+            heartBeatDelay: 30_000, // 30 seconds
             heartBeatMessage: JSON.stringify({
               jsonrpc: '2.0',
               method: 'ping',
