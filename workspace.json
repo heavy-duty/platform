@@ -49,7 +49,7 @@
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
-    "ngx-solana": "libs/ngx-solana",
+    "ngx-solana-data-access": "libs/ngx-solana/data-access",
     "ngx-websocket": "libs/ngx-websocket",
     "rx-solana": "libs/rx-solana",
     "rxjs": "libs/rxjs",
