@@ -1,8 +1,8 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
+import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { tap } from 'rxjs';
-import { LocalStorageSubject } from './internal';
 
 interface ViewModel {
   workspaceId: string | null;

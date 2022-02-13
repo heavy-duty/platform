@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { tap } from 'rxjs';
-import { LocalStorageSubject } from './internal';
 
 interface ViewModel {
   isDarkThemeEnabled: boolean;

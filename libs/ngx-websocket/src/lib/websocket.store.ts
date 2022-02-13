@@ -52,7 +52,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     super(initialState);
 
     if (this._config.autoConnect) {
-      console.log('init autoconnect');
       this.connect();
     }
   }
@@ -81,7 +80,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
       { debounce: true }
     ).pipe(
       tap(({ online, connected, webSocket }) => {
-        console.log({ online, connected, webSocket });
         if (webSocket !== null && connected && !online) {
           this.disconnect();
         }
@@ -158,12 +156,10 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
 
         return fromEvent(webSocket, 'error').pipe(
           tapResponse(
-            (error) => {
-              console.log('am I called?', error);
+            (error) =>
               this.patchState({
                 error,
-              });
-            },
+              }),
             (error) => this.patchState({ error })
           )
         );

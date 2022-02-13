@@ -13,7 +13,7 @@ import { ShellStore } from './shell.store';
 @Component({
   selector: 'bd-shell',
   template: `
-    <mat-sidenav-container fullscreen bdInternetConnectivity>
+    <mat-sidenav-container fullscreen>
       <mat-sidenav
         #drawer
         class="w-64"
