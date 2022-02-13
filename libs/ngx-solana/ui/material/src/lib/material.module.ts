@@ -6,6 +6,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ConnectionMenuComponent } from './connection-menu.component';
 import { RelativeTimePipe } from './relative-time.pipe';
+import { StopPropagationDirective } from './stop-propagation.directive';
 
 @NgModule({
   imports: [
@@ -15,7 +16,11 @@ import { RelativeTimePipe } from './relative-time.pipe';
     MatMenuModule,
     MatProgressSpinnerModule,
   ],
-  declarations: [ConnectionMenuComponent, RelativeTimePipe],
+  declarations: [
+    ConnectionMenuComponent,
+    RelativeTimePipe,
+    StopPropagationDirective,
+  ],
   exports: [ConnectionMenuComponent],
 })
 export class NgxSolanaMaterialModule {}

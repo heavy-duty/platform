@@ -31,61 +31,63 @@ import {
       </div>
     </button>
 
-    <mat-menu #menu="matMenu" class="px-4 py-2">
-      <h2 class="uppercase">{{ network }}</h2>
+    <mat-menu #menu="matMenu">
+      <div class="px-4 py-2" hdStopPropagation>
+        <h2 class="uppercase">{{ network }}</h2>
 
-      <div class="bg-white bg-opacity-5 mat-elevation-z2 px-2 py-1 mb-4">
-        <p class="m-0 text-sm text-opacity-50">
-          <span class="font-bold">API: </span>
-          <span class="font-thin">{{ apiEndpoint }}</span>
+        <div class="bg-white bg-opacity-5 mat-elevation-z2 px-2 py-1 mb-4">
+          <p class="m-0 text-sm text-opacity-50">
+            <span class="font-bold">API: </span>
+            <span class="font-thin">{{ apiEndpoint }}</span>
+          </p>
+          <p class="m-0 text-sm text-opacity-50">
+            <span class="font-bold">WebSocket: </span>
+            <span class="font-thin">{{ webSocketEndpoint }}</span>
+          </p>
+        </div>
+
+        <p class="m-0 text-xs">
+          <ng-container *ngIf="online$ | async">
+            <span class="text-green-500">Online</span> since
+            <span class="text-primary">
+              {{ onlineSince$ | async | date: 'short' }}
+            </span>
+          </ng-container>
+          <ng-container *ngIf="(online$ | async) === false">
+            <span class="text-red-500">Offline</span>
+
+            since
+            <span class="text-primary">
+              {{ offlineSince$ | async | date: 'short' }}
+            </span>
+          </ng-container>
         </p>
-        <p class="m-0 text-sm text-opacity-50">
-          <span class="font-bold">WebSocket: </span>
-          <span class="font-thin">{{ webSocketEndpoint }}</span>
+
+        <p class="m-0 text-xs">
+          <ng-container *ngIf="(online$ | async) && (connected$ | async)">
+            <span class="text-green-500">Connected</span> since
+            <span class="text-primary">
+              {{ connectedAt$ | async | date: 'short' }}
+            </span>
+          </ng-container>
+          <ng-container
+            *ngIf="(online$ | async) && (connected$ | async) === false"
+          >
+            <ng-container
+              *ngIf="
+                nextAttemptAt$ | hdRelativeTime | async as nextAttemptAt;
+                else reconnecting
+              "
+            >
+              Reconnecting in
+
+              <span class="text-primary">{{ nextAttemptAt }}</span
+              >.
+            </ng-container>
+            <ng-template #reconnecting> Reconnecting... </ng-template>
+          </ng-container>
         </p>
       </div>
-
-      <p class="m-0 text-xs">
-        <ng-container *ngIf="online$ | async">
-          <span class="text-green-500">Online</span> since
-          <span class="text-primary">
-            {{ onlineSince$ | async | date: 'short' }}
-          </span>
-        </ng-container>
-        <ng-container *ngIf="(online$ | async) === false">
-          <span class="text-red-500">Offline</span>
-
-          since
-          <span class="text-primary">
-            {{ offlineSince$ | async | date: 'short' }}
-          </span>
-        </ng-container>
-      </p>
-
-      <p class="m-0 text-xs">
-        <ng-container *ngIf="(online$ | async) && (connected$ | async)">
-          <span class="text-green-500">Connected</span> since
-          <span class="text-primary">
-            {{ connectedAt$ | async | date: 'short' }}
-          </span>
-        </ng-container>
-        <ng-container
-          *ngIf="(online$ | async) && (connected$ | async) === false"
-        >
-          <ng-container
-            *ngIf="
-              nextAttemptAt$ | hdRelativeTime | async as nextAttemptAt;
-              else reconnecting
-            "
-          >
-            Reconnecting in
-
-            <span class="text-primary">{{ nextAttemptAt }}</span
-            >.
-          </ng-container>
-          <ng-template #reconnecting> Reconnecting... </ng-template>
-        </ng-container>
-      </p>
     </mat-menu>
   `,
 })
