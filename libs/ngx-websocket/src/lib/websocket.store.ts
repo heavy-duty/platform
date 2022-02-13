@@ -59,6 +59,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly setWebSocket = this.updater((state, webSocket: WebSocket) => ({
     ...state,
     webSocket,
+    connecting: true,
   }));
 
   readonly loadOnline = this.effect(() =>
@@ -68,22 +69,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
         (online) => this.patchState({ online }),
         (error) => this.patchState({ error })
       )
-    )
-  );
-
-  readonly disconnectOnOffline = this.effect(() =>
-    this.select(
-      this.online$,
-      this.connected$,
-      this.webSocket$,
-      (online, connected, webSocket) => ({ online, connected, webSocket }),
-      { debounce: true }
-    ).pipe(
-      tap(({ online, connected, webSocket }) => {
-        if (webSocket !== null && connected && !online) {
-          this.disconnect();
-        }
-      })
     )
   );
 
@@ -115,7 +100,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               this.patchState({
                 connected: true,
                 connecting: false,
-                error: null,
               }),
             (error) => this.patchState({ error })
           )
@@ -137,8 +121,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               this.patchState({
                 connected: false,
                 disconnecting: false,
-                webSocket: null,
-                error: null,
               }),
             (error) => this.patchState({ error })
           )
@@ -168,17 +150,12 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   );
 
   readonly handleReconnect = this.effect(() =>
-    this.select(
-      this.connected$,
-      this.connecting$,
-      (connected, connecting) => ({
-        connected,
-        connecting,
-      }),
-      { debounce: true }
-    ).pipe(
-      switchMap(({ connected, connecting }) => {
-        if (connected || connecting || !this._config.reconnection) {
+    this.select(this.connected$, this.online$, (connected, online) => ({
+      connected,
+      online,
+    })).pipe(
+      switchMap(({ connected, online }) => {
+        if (!online || connected || !this._config.reconnection) {
           return EMPTY;
         }
 
@@ -200,15 +177,17 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly heartBeat = this.effect(() =>
     this.select(
       this.webSocket$,
+      this.online$,
       this.connected$,
-      (webSocket, connected) => ({
+      (webSocket, online, connected) => ({
         webSocket,
+        online,
         connected,
       }),
       { debounce: true }
     ).pipe(
-      switchMap(({ webSocket, connected }) => {
-        if (webSocket === null || !connected) {
+      switchMap(({ webSocket, online, connected }) => {
+        if (!online || !connected || webSocket === null) {
           return EMPTY;
         }
 
@@ -227,8 +206,20 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     )
   );
 
+  readonly handleConnectionLost = this.effect(() =>
+    this.online$.pipe(
+      filter((online) => !online),
+      tap(() => this.disconnect())
+    )
+  );
+
   connect() {
-    this.setWebSocket(new WebSocket(this._config.endpoint));
+    try {
+      const webSocket = new WebSocket(this._config.endpoint);
+      this.setWebSocket(webSocket);
+    } catch (error) {
+      this.patchState({ error });
+    }
   }
 
   disconnect() {
