@@ -23,15 +23,14 @@ export class DarkThemeStore extends ComponentStore<ViewModel> {
     }
   }
 
-  readonly toggleDarkTheme = this.updater((state) => ({
-    ...state,
-    isDarkThemeEnabled: !state.isDarkThemeEnabled,
-  }));
-
   protected readonly loadDarkThemeStatus = this.effect(() =>
     this._darkTheme.asObservable().pipe(
       isNotNullOrUndefined,
       tap((isDarkThemeEnabled) => this.patchState({ isDarkThemeEnabled }))
     )
   );
+
+  toggleDarkTheme() {
+    this._darkTheme.next(!this.get().isDarkThemeEnabled);
+  }
 }
