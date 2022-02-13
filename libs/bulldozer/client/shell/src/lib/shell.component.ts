@@ -5,7 +5,6 @@ import {
   NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
-import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ShellStore } from './shell.store';
 
@@ -70,14 +69,12 @@ export class ShellComponent implements OnInit {
   readonly workspaceId$ = this._configStore.workspaceId$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
-  readonly rpcConnected$ = this._ngxSolanaConnectionStore.connected$;
 
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
-    private readonly _shellStore: ShellStore,
-    private readonly _ngxSolanaConnectionStore: NgxSolanaConnectionStore
+    private readonly _shellStore: ShellStore
   ) {}
 
   ngOnInit() {

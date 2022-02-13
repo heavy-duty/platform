@@ -1,12 +1,4 @@
-import {
-  concatMap,
-  defer,
-  EMPTY,
-  iif,
-  Observable,
-  repeatWhen,
-  timer,
-} from 'rxjs';
+import { concatMap, defer, EMPTY, Observable, repeatWhen, timer } from 'rxjs';
 
 export function exponentialBackoffDelay(iteration: number, delay: number) {
   return Math.pow(2, iteration) * delay;
@@ -16,6 +8,12 @@ export interface RepeatWithBackoffConfig {
   delay: number;
   attempts?: number;
   delayMax?: number;
+  attemptCallback?: (attempt: Attempt) => unknown;
+}
+
+interface Attempt {
+  createdAt: number;
+  nextAttemptAt: number;
 }
 
 export function repeatWithBackoff(
@@ -31,13 +29,24 @@ export function repeatWithBackoff(
           notifier.pipe(
             concatMap(() => {
               const attempt = counter++;
-              return iif(
-                () => attempt < attempts,
-                timer(
-                  Math.min(exponentialBackoffDelay(attempt, delay), delayMax)
-                ),
-                EMPTY
+
+              if (attempts <= attempt) {
+                return EMPTY;
+              }
+
+              const exponentialDelay = Math.min(
+                exponentialBackoffDelay(attempt, delay),
+                delayMax
               );
+
+              if (config.attemptCallback) {
+                config.attemptCallback({
+                  createdAt: Date.now(),
+                  nextAttemptAt: Date.now() + exponentialDelay,
+                });
+              }
+
+              return timer(exponentialDelay);
             })
           )
         )

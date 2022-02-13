@@ -20,6 +20,12 @@ interface ViewModel {
   disconnecting: boolean;
   webSocket: WebSocket | null;
   error: unknown;
+  connectedAt: number | null;
+  disconnectedAt: number | null;
+  onlineSince: number | null;
+  offlineSince: number | null;
+  nextAttemptAt: number | null;
+  lastAttemptAt: number | null;
 }
 
 const initialState: ViewModel = {
@@ -29,6 +35,12 @@ const initialState: ViewModel = {
   disconnecting: false,
   webSocket: null,
   error: null,
+  onlineSince: null,
+  offlineSince: null,
+  connectedAt: null,
+  disconnectedAt: null,
+  nextAttemptAt: null,
+  lastAttemptAt: null,
 };
 
 export interface WebSocketConfig {
@@ -47,6 +59,13 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly connected$ = this.select(({ connected }) => connected);
   readonly connecting$ = this.select(({ connecting }) => connecting);
   readonly online$ = this.select(({ online }) => online);
+  readonly nextAttemptAt$ = this.select(({ nextAttemptAt }) => nextAttemptAt);
+  readonly disconnectedAt$ = this.select(
+    ({ disconnectedAt }) => disconnectedAt
+  );
+  readonly connectedAt$ = this.select(({ connectedAt }) => connectedAt);
+  readonly onlineSince$ = this.select(({ onlineSince }) => onlineSince);
+  readonly offlineSince$ = this.select(({ offlineSince }) => offlineSince);
 
   constructor(private readonly _config: WebSocketConfig) {
     super(initialState);
@@ -60,13 +79,14 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     ...state,
     webSocket,
     connecting: true,
+    lastAttemptAt: Date.now(),
   }));
 
   readonly loadOnline = this.effect(() =>
     online().pipe(
       distinctUntilChanged(),
       tapResponse(
-        (online) => this.patchState({ online }),
+        (online) => this.patchState({ online, onlineSince: Date.now() }),
         (error) => this.patchState({ error })
       )
     )
@@ -100,6 +120,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               this.patchState({
                 connected: true,
                 connecting: false,
+                connectedAt: Date.now(),
               }),
             (error) => this.patchState({ error })
           )
@@ -121,6 +142,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               this.patchState({
                 connected: false,
                 disconnecting: false,
+                disconnectedAt: Date.now(),
               }),
             (error) => this.patchState({ error })
           )
@@ -164,6 +186,10 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
             delay: this._config.reconnectionDelay,
             attempts: this._config.reconnectionAttempts,
             delayMax: this._config.reconnectionDelayMax,
+            attemptCallback: ({ nextAttemptAt }) =>
+              this.patchState({
+                nextAttemptAt,
+              }),
           }),
           tapResponse(
             () => this.connect(),
@@ -209,7 +235,10 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly handleConnectionLost = this.effect(() =>
     this.online$.pipe(
       filter((online) => !online),
-      tap(() => this.disconnect())
+      tap(() => {
+        this.patchState({ offlineSince: Date.now() });
+        this.disconnect();
+      })
     )
   );
 
