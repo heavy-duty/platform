@@ -1,12 +1,12 @@
-import { repeatWithBackoff } from '@heavy-duty/rxjs';
+import { online, repeatWithBackoff } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  distinctUntilChanged,
   EMPTY,
   filter,
   fromEvent,
   interval,
   map,
-  Observable,
   of,
   pairwise,
   switchMap,
@@ -14,6 +14,7 @@ import {
 } from 'rxjs';
 
 interface ViewModel {
+  online: boolean;
   connected: boolean;
   connecting: boolean;
   disconnecting: boolean;
@@ -22,6 +23,7 @@ interface ViewModel {
 }
 
 const initialState: ViewModel = {
+  online: false,
   connected: false,
   connecting: false,
   disconnecting: false,
@@ -44,11 +46,13 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly webSocket$ = this.select(({ webSocket }) => webSocket);
   readonly connected$ = this.select(({ connected }) => connected);
   readonly connecting$ = this.select(({ connecting }) => connecting);
+  readonly online$ = this.select(({ online }) => online);
 
   constructor(private readonly _config: WebSocketConfig) {
     super(initialState);
 
     if (this._config.autoConnect) {
+      console.log('init autoconnect');
       this.connect();
     }
   }
@@ -56,10 +60,34 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   readonly setWebSocket = this.updater((state, webSocket: WebSocket) => ({
     ...state,
     webSocket,
-    connected: false,
-    connecting: true,
-    disconnecting: false,
   }));
+
+  readonly loadOnline = this.effect(() =>
+    online().pipe(
+      distinctUntilChanged(),
+      tapResponse(
+        (online) => this.patchState({ online }),
+        (error) => this.patchState({ error })
+      )
+    )
+  );
+
+  readonly disconnectOnOffline = this.effect(() =>
+    this.select(
+      this.online$,
+      this.connected$,
+      this.webSocket$,
+      (online, connected, webSocket) => ({ online, connected, webSocket }),
+      { debounce: true }
+    ).pipe(
+      tap(({ online, connected, webSocket }) => {
+        console.log({ online, connected, webSocket });
+        if (webSocket !== null && connected && !online) {
+          this.disconnect();
+        }
+      })
+    )
+  );
 
   readonly disconnectPreviousWebSocket = this.effect(() =>
     this.webSocket$.pipe(
@@ -130,13 +158,12 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
 
         return fromEvent(webSocket, 'error').pipe(
           tapResponse(
-            (error) =>
+            (error) => {
+              console.log('am I called?', error);
               this.patchState({
                 error,
-                connected: false,
-                connecting: false,
-                disconnecting: false,
-              }),
+              });
+            },
             (error) => this.patchState({ error })
           )
         );
@@ -146,23 +173,16 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
 
   readonly handleReconnect = this.effect(() =>
     this.select(
-      this.webSocket$,
       this.connected$,
       this.connecting$,
-      (webSocket, connected, connecting) => ({
-        webSocket,
+      (connected, connecting) => ({
         connected,
         connecting,
       }),
       { debounce: true }
     ).pipe(
-      switchMap(({ webSocket, connected, connecting }) => {
-        if (
-          webSocket === null ||
-          connected ||
-          connecting ||
-          !this._config.reconnection
-        ) {
+      switchMap(({ connected, connecting }) => {
+        if (connected || connecting || !this._config.reconnection) {
           return EMPTY;
         }
 
@@ -172,7 +192,10 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
             attempts: this._config.reconnectionAttempts,
             delayMax: this._config.reconnectionDelayMax,
           }),
-          tap(() => this.connect())
+          tapResponse(
+            () => this.connect(),
+            (error) => this.patchState({ error })
+          )
         );
       })
     )
@@ -200,10 +223,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
             } catch (error) {
               this.patchState({
                 error,
-                connected: false,
-                connecting: false,
-                disconnecting: false,
-                webSocket: null,
               });
             }
           })
@@ -233,7 +252,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     subMsg: () => unknown,
     unsubMsg: () => unknown,
     messageFilter: (value: T) => boolean
-  ): Observable<T> {
+  ) {
     return this.select(
       this.webSocket$,
       this.connected$,
@@ -258,10 +277,12 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               }
             },
             unsubscribe: () => {
-              try {
-                webSocket.send(JSON.stringify(unsubMsg()));
-              } catch (error) {
-                this.patchState({ error });
+              if (webSocket.readyState === webSocket.OPEN) {
+                try {
+                  webSocket.send(JSON.stringify(unsubMsg()));
+                } catch (error) {
+                  this.patchState({ error });
+                }
               }
             },
           }),
