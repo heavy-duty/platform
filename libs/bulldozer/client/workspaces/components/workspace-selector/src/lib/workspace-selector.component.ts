@@ -17,93 +17,97 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
         }}
       </button>
-      <mat-menu #menu="matMenu" class="px-4 py-2">
-        <mat-list role="list" class="p-0" bdStopPropagation>
-          <mat-list-item
-            *ngFor="let workspace of workspaces$ | ngrxPush"
-            role="listitem"
-            class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
-            [ngClass]="{
-              'border-b-primary': activeWorkspace?.id === workspace.id
-            }"
-          >
-            <div class="w-full">
-              <p class="text-xl font-bold mb-0 flex justify-between">
-                <span
-                  class="flex-grow leading-8 overflow-hidden"
-                  [matTooltip]="workspace.name"
-                  matTooltipShowDelay="500"
-                >
-                  {{ workspace.name }}
-                </span>
-                <button
-                  mat-icon-button
-                  color="primary"
-                  class="w-8 h-8 leading-8 flex-shrink-0"
-                  [attr.aria-label]="
-                    'Download ' + workspace.name + ' workspace'
-                  "
-                  (click)="onDownloadWorkspace(workspace.id)"
-                >
-                  <mat-icon>download</mat-icon>
-                </button>
-              </p>
+      <mat-menu #menu="matMenu">
+        <div class="px-4 py-2" bdStopPropagation>
+          <mat-list role="list">
+            <mat-list-item
+              *ngFor="let workspace of workspaces$ | ngrxPush"
+              role="listitem"
+              class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
+              [ngClass]="{
+                'border-b-primary': activeWorkspace?.id === workspace.id
+              }"
+            >
+              <div class="w-full">
+                <p class="text-xl font-bold mb-0 flex justify-between">
+                  <span
+                    class="flex-grow leading-8 overflow-hidden"
+                    [matTooltip]="workspace.name"
+                    matTooltipShowDelay="500"
+                  >
+                    {{ workspace.name }}
+                  </span>
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    class="w-8 h-8 leading-8 flex-shrink-0"
+                    [attr.aria-label]="
+                      'Download ' + workspace.name + ' workspace'
+                    "
+                    (click)="onDownloadWorkspace(workspace.id)"
+                  >
+                    <mat-icon>download</mat-icon>
+                  </button>
+                </p>
 
-              <p class="mb-2">
-                <a
-                  class="text-xs"
-                  [routerLink]="['/workspaces', workspace.id]"
-                  [ngClass]="{
-                    'underline text-primary':
-                      activeWorkspace?.id !== workspace.id,
-                    'opacity-50 italic': activeWorkspace?.id === workspace.id
-                  }"
-                  (click)="onActivateWorkspace(workspace.id)"
-                >
-                  {{
-                    activeWorkspace?.id === workspace.id ? 'Active' : 'Activate'
-                  }}
-                </a>
-              </p>
+                <p class="mb-2">
+                  <a
+                    class="text-xs"
+                    [routerLink]="['/workspaces', workspace.id]"
+                    [ngClass]="{
+                      'underline text-primary':
+                        activeWorkspace?.id !== workspace.id,
+                      'opacity-50 italic': activeWorkspace?.id === workspace.id
+                    }"
+                    (click)="onActivateWorkspace(workspace.id)"
+                  >
+                    {{
+                      activeWorkspace?.id === workspace.id
+                        ? 'Active'
+                        : 'Activate'
+                    }}
+                  </a>
+                </p>
 
-              <div>
-                <button
-                  class="mr-2"
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  bdEditWorkspaceTrigger
-                  [workspace]="workspace"
-                  (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
-                  [disabled]="!connected"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  (click)="onDeleteWorkspace(workspace.id)"
-                  [disabled]="!connected"
-                >
-                  Delete
-                </button>
+                <div>
+                  <button
+                    class="mr-2"
+                    type="button"
+                    mat-raised-button
+                    color="primary"
+                    bdEditWorkspaceTrigger
+                    [workspace]="workspace"
+                    (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
+                    [disabled]="!connected"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    mat-raised-button
+                    color="primary"
+                    (click)="onDeleteWorkspace(workspace.id)"
+                    [disabled]="!connected"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          </mat-list-item>
-        </mat-list>
+            </mat-list-item>
+          </mat-list>
 
-        <button
-          class="w-full h-12"
-          type="button"
-          mat-raised-button
-          color="primary"
-          bdEditWorkspaceTrigger
-          (editWorkspace)="onCreateWorkspace($event)"
-          [disabled]="!connected"
-        >
-          New workspace
-        </button>
+          <button
+            class="w-full h-12"
+            type="button"
+            mat-raised-button
+            color="primary"
+            bdEditWorkspaceTrigger
+            (editWorkspace)="onCreateWorkspace($event)"
+            [disabled]="!connected"
+          >
+            New workspace
+          </button>
+        </div>
       </mat-menu>
     </ng-container>
   `,
