@@ -1,27 +1,31 @@
-import { Injectable } from '@angular/core';
-import { ComponentStore } from '@ngrx/component-store';
+import { online } from '@heavy-duty/rxjs';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { distinctUntilChanged } from 'rxjs';
 
 interface ViewModel {
   online: boolean;
-  error?: unknown;
+  error: unknown;
 }
 
-@Injectable()
+const initialState: ViewModel = {
+  online: false,
+  error: null,
+};
+
 export class InternetConnectivityStore extends ComponentStore<ViewModel> {
   readonly online$ = this.select(({ online }) => online);
 
   constructor() {
-    super();
-
-    try {
-      this.setState({ online: window.navigator.onLine });
-    } catch (error) {
-      this.setState({ online: false, error });
-    }
+    super(initialState);
   }
 
-  readonly setOnline = this.updater((state, online: boolean) => ({
-    ...state,
-    online,
-  }));
+  readonly loadOnline = this.effect(() =>
+    online().pipe(
+      distinctUntilChanged(),
+      tapResponse(
+        (online) => this.patchState({ online }),
+        (error) => this.patchState({ error })
+      )
+    )
+  );
 }
