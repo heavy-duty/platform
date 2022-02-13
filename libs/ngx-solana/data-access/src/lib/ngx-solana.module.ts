@@ -10,7 +10,8 @@ import { NgxSolanaConnectionStore } from './connection.store';
 export class NgxSolanaModule {
   static forRoot(
     apiEndpoint: string,
-    websocketEndpoint: string
+    websocketEndpoint: string,
+    network: string
   ): ModuleWithProviders<NgxSolanaModule> {
     return {
       ngModule: NgxSolanaModule,
@@ -29,6 +30,7 @@ export class NgxSolanaModule {
             }),
             autoConnect: true,
           },
+          network,
         }),
         NgxSolanaApiService,
         NgxSolanaConnectionStore,

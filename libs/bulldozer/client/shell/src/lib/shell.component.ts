@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import {
   ConfigStore,
   DarkThemeStore,
-  InternetConnectivityStore,
   NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
@@ -40,16 +39,7 @@ import { ShellStore } from './shell.store';
               color="accent"
             ></hd-wallet-multi-button>
 
-            <div>
-              <span>
-                Internet:
-                {{ (online$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
-              </span>
-              <span>
-                RPC:
-                {{ (rpcConnected$ | ngrxPush) ? 'Connected' : 'Not Connected' }}
-              </span>
-            </div>
+            <hd-connection-menu class="mr-6"></hd-connection-menu>
 
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
@@ -70,7 +60,6 @@ import { ShellStore } from './shell.store';
     TabStore,
     NotificationStore,
     ConfigStore,
-    InternetConnectivityStore,
     DarkThemeStore,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,7 +70,6 @@ export class ShellComponent implements OnInit {
   readonly workspaceId$ = this._configStore.workspaceId$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
-  readonly online$ = this._internetConnectivityStore.online$;
   readonly rpcConnected$ = this._ngxSolanaConnectionStore.connected$;
 
   constructor(
@@ -89,7 +77,6 @@ export class ShellComponent implements OnInit {
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
     private readonly _shellStore: ShellStore,
-    private readonly _internetConnectivityStore: InternetConnectivityStore,
     private readonly _ngxSolanaConnectionStore: NgxSolanaConnectionStore
   ) {}
 

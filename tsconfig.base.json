@@ -166,6 +166,9 @@
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ngx-solana": ["libs/ngx-solana/data-access/src/index.ts"],
+      "@heavy-duty/ngx-solana-material": [
+        "libs/ngx-solana/ui/material/src/index.ts"
+      ],
       "@heavy-duty/ngx-websocket": ["libs/ngx-websocket/src/index.ts"],
       "@heavy-duty/rx-solana": ["libs/rx-solana/src/index.ts"],
       "@heavy-duty/rxjs": ["libs/rxjs/src/index.ts"],

@@ -39,7 +39,11 @@ import { AppComponent } from './app.component';
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
-    NgxSolanaModule.forRoot(environment.rpcEndpoint, environment.rpcWebsocket),
+    NgxSolanaModule.forRoot(
+      environment.rpcEndpoint,
+      environment.rpcWebsocket,
+      'localhost'
+    ),
   ],
   bootstrap: [AppComponent],
   providers: [
