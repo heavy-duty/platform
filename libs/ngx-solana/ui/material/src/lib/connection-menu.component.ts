@@ -1,8 +1,10 @@
-import { Component, Inject } from '@angular/core';
+import { Component } from '@angular/core';
 import {
-  NgxSolanaConfig,
+  HttpEndpoint,
+  Network,
+  NgxSolanaConfigStore,
   NgxSolanaConnectionStore,
-  NGX_SOLANA_CONFIG,
+  WebSocketEndpoint,
 } from '@heavy-duty/ngx-solana';
 
 @Component({
@@ -27,23 +29,84 @@ import {
         >
         </mat-progress-spinner>
 
-        <p class="flex-grow my-0 ml-2 text-left uppercase">{{ network }}</p>
+        <p class="flex-grow my-0 ml-2 text-left uppercase">
+          {{ selectedNetwork$ | async }}
+        </p>
       </div>
     </button>
 
     <mat-menu #menu="matMenu">
-      <div class="px-4 py-2" hdStopPropagation>
-        <h2 class="uppercase">{{ network }}</h2>
+      <div class="px-4 py-2 w-96" hdStopPropagation>
+        <h2 class="m-0 uppercase">network</h2>
 
-        <div class="bg-white bg-opacity-5 mat-elevation-z2 px-2 py-1 mb-4">
-          <p class="m-0 text-sm text-opacity-50">
-            <span class="font-bold">API: </span>
-            <span class="font-thin">{{ apiEndpoint }}</span>
-          </p>
-          <p class="m-0 text-sm text-opacity-50">
-            <span class="font-bold">WebSocket: </span>
-            <span class="font-thin">{{ webSocketEndpoint }}</span>
-          </p>
+        <mat-form-field appearance="fill" class="w-full">
+          <mat-label>Choose a network</mat-label>
+          <mat-select
+            [ngModel]="selectedNetwork$ | async"
+            (ngModelChange)="onSelectNetwork($event)"
+          >
+            <mat-option
+              [value]="networkConfig.network"
+              *ngFor="let networkConfig of networkConfigs$ | async"
+            >
+              {{ networkConfig.network }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <header class="flex items-baseline gap-2">
+          <h2 class="m-0 uppercase">endpoints</h2>
+
+          <button
+            *ngIf="selectedNetworkConfig$ | async as selectedNetworkConfig"
+            class="underline text-primary"
+            hdEditEndpointsModalTrigger
+            [apiEndpoint]="selectedNetworkConfig.apiEndpoint"
+            [webSocketEndpoint]="selectedNetworkConfig.webSocketEndpoint"
+            (editEndpoints)="
+              onEditEndpoints(selectedNetworkConfig.network, $event)
+            "
+          >
+            (change)
+          </button>
+        </header>
+
+        <div
+          class="bg-white bg-opacity-5 mat-elevation-z2 px-2 py-1 mb-4"
+          *ngIf="selectedNetworkConfig$ | async as selectedNetworkConfig"
+        >
+          <div class="flex items-center m-0 text-sm text-opacity-50">
+            <span class="font-bold mr-2">API:</span>
+            <span
+              class="font-thin flex-shrink overflow-ellipsis whitespace-nowrap overflow-hidden"
+              [matTooltip]="selectedNetworkConfig.apiEndpoint"
+            >
+              {{ selectedNetworkConfig.apiEndpoint }}
+            </span>
+            <button
+              mat-icon-button
+              [cdkCopyToClipboard]="selectedNetworkConfig.apiEndpoint"
+              aria-label="Copy API endpoint"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
+          <div class="flex items-center m-0 text-sm text-opacity-50">
+            <span class="font-bold mr-2">WebSocket: </span>
+            <span
+              class="font-thin flex-shrink overflow-ellipsis whitespace-nowrap overflow-hidden"
+              [matTooltip]="selectedNetworkConfig.webSocketEndpoint"
+            >
+              {{ selectedNetworkConfig.webSocketEndpoint }}
+            </span>
+            <button
+              mat-icon-button
+              [cdkCopyToClipboard]="selectedNetworkConfig.apiEndpoint"
+              aria-label="Copy API endpoint"
+            >
+              <mat-icon>content_copy</mat-icon>
+            </button>
+          </div>
         </div>
 
         <p class="m-0 text-xs">
@@ -87,7 +150,9 @@ import {
 
               <span class="text-primary">{{ nextAttemptAt }}</span
               >.
-              <button (click)="onReconnect()">(Reconnect now)</button>
+              <button (click)="onReconnect()" class="underline text-primary">
+                (Reconnect now)
+              </button>
             </ng-container>
             <ng-template #reconnecting> Reconnecting... </ng-template>
           </ng-container>
@@ -96,7 +161,7 @@ import {
     </mat-menu>
   `,
 })
-export class ConnectionMenuComponent {
+export class HdConnectionMenuComponent {
   readonly online$ = this._connectionStore.online$;
   readonly onlineSince$ = this._connectionStore.onlineSince$;
   readonly offlineSince$ = this._connectionStore.offlineSince$;
@@ -104,17 +169,33 @@ export class ConnectionMenuComponent {
   readonly connecting$ = this._connectionStore.connecting$;
   readonly connectedAt$ = this._connectionStore.connectedAt$;
   readonly nextAttemptAt$ = this._connectionStore.nextAttemptAt$;
-  readonly network = this._solanaRpcConfig.network;
-  readonly apiEndpoint = this._solanaRpcConfig.apiEndpoint;
-  readonly webSocketEndpoint = this._solanaRpcConfig.webSocket.endpoint;
+  readonly networkConfigs$ = this._configStore.networkConfigs$;
+  readonly selectedNetwork$ = this._configStore.selectedNetwork$;
+  readonly selectedNetworkConfig$ = this._configStore.selectedNetworkConfig$;
 
   constructor(
-    @Inject(NGX_SOLANA_CONFIG)
-    private readonly _solanaRpcConfig: NgxSolanaConfig,
-    private readonly _connectionStore: NgxSolanaConnectionStore
+    private readonly _connectionStore: NgxSolanaConnectionStore,
+    private readonly _configStore: NgxSolanaConfigStore
   ) {}
 
   onReconnect() {
     this._connectionStore.reconnect();
+  }
+
+  onSelectNetwork(network: Network) {
+    this._configStore.selectNetwork(network);
+  }
+
+  onEditEndpoints(
+    network: Network,
+    endpoints: {
+      apiEndpoint: HttpEndpoint;
+      webSocketEndpoint: WebSocketEndpoint;
+    }
+  ) {
+    this._configStore.setNetworkConfig({
+      network,
+      ...endpoints,
+    });
   }
 }

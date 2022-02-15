@@ -25,7 +25,8 @@
         ],
         "styles": [
           "apps/bulldozer-client/src/styles.scss",
-          "libs/wallet-adapter/ui/material/src/style.css"
+          "libs/wallet-adapter/ui/material/src/style.css",
+          "libs/ngx-solana/ui/material/src/style.css"
         ],
         "scripts": [],
         "customWebpackConfig": {

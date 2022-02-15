@@ -8,7 +8,7 @@ import {
   workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
 import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
-import { concatMap, EMPTY, map, Observable, of, tap } from 'rxjs';
+import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceEventService {
@@ -17,15 +17,15 @@ export class WorkspaceEventService {
   workspaceChanges(
     workspaceId: string
   ): Observable<Document<Workspace> | null> {
-    console.log(workspaceId);
-    return this._connectionStore.onAccountChange(workspaceId).pipe(
-      tap((a) => console.log(a)),
-      map((accountInfo) =>
-        accountInfo.lamports > 0
-          ? createWorkspaceDocument(workspaceId, accountInfo)
-          : null
-      )
-    );
+    return this._connectionStore
+      .onAccountChange(workspaceId)
+      .pipe(
+        map((accountInfo) =>
+          accountInfo.lamports > 0
+            ? createWorkspaceDocument(workspaceId, accountInfo)
+            : null
+        )
+      );
   }
 
   workspaceCreated(filters: WorkspaceFilters) {

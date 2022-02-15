@@ -2,6 +2,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { ModuleWithProviders, NgModule } from '@angular/core';
 import { NgxSolanaApiService } from './api.service';
 import { ngxSolanaConfigProviderFactory } from './config';
+import { NgxSolanaConfigStore } from './config.store';
 import { NgxSolanaConnectionStore } from './connection.store';
 
 @NgModule({
@@ -35,6 +36,7 @@ export class NgxSolanaModule {
         }),
         NgxSolanaApiService,
         NgxSolanaConnectionStore,
+        NgxSolanaConfigStore,
       ],
     };
   }

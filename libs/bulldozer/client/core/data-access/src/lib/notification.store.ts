@@ -65,8 +65,6 @@ export class NotificationStore extends ComponentStore<ViewModel> {
   );
 
   private getErrorMessage(error: unknown) {
-    console.log(error);
-
     if (typeof error === 'string') {
       return error;
     } else if (error instanceof WalletError) {

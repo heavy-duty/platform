@@ -117,6 +117,10 @@ mat-icon {
   }
 }
 
+.mat-menu-panel {
+  max-width: unset !important;
+}
+
 .mat-fab.cdk-keyboard-focused,
 .mat-mini-fab.cdk-keyboard-focused {
   transform: scale(1.5);

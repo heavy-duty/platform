@@ -4,7 +4,7 @@ import { interval, map, Observable, of, switchMap, takeWhile } from 'rxjs';
 @Pipe({
   name: 'hdRelativeTime',
 })
-export class RelativeTimePipe implements PipeTransform {
+export class HdRelativeTimePipe implements PipeTransform {
   transform($: Observable<number | null>): Observable<string | null> {
     return $.pipe(
       switchMap((value) => {
