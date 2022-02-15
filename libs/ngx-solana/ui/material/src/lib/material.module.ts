@@ -11,11 +11,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { HdConnectionMenuComponent } from './connection-menu.component';
-import { HdEditEndpointsModalTriggerDirective } from './edit-endpoints-modal-trigger.directive';
-import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
-import { HdRelativeTimePipe } from './relative-time.pipe';
-import { HdStopPropagationDirective } from './stop-propagation.directive';
+import { NgxSolanaCdkModule } from '@heavy-duty/ngx-solana-cdk';
+import { NgxConnectionMenuButtonComponent } from './connection-menu-button.component';
+import { NgxConnectionMenuComponent } from './connection-menu.component';
+import { NgxConnectionMiniStatusComponent } from './connection-mini-status.component';
+import { NgxConnectionStatusComponent } from './connection-status.component';
+import { NgxEditEndpointsModalTriggerDirective } from './edit-endpoints-modal-trigger.directive';
+import { NgxEditEndpointsComponent } from './edit-endpoints-modal.component';
+import { NgxEndpointsListItemComponent } from './endpoints-list-item.component';
+import { NgxEndpointsListComponent } from './endpoints-list.component';
+import { NgxNetworkSelectorComponent } from './network-selector.component';
 
 @NgModule({
   imports: [
@@ -32,14 +37,19 @@ import { HdStopPropagationDirective } from './stop-propagation.directive';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTooltipModule,
+    NgxSolanaCdkModule,
   ],
   declarations: [
-    HdConnectionMenuComponent,
-    HdRelativeTimePipe,
-    HdStopPropagationDirective,
-    HdEditEndpointsComponent,
-    HdEditEndpointsModalTriggerDirective,
+    NgxConnectionMenuButtonComponent,
+    NgxConnectionMenuComponent,
+    NgxConnectionMiniStatusComponent,
+    NgxEditEndpointsComponent,
+    NgxEditEndpointsModalTriggerDirective,
+    NgxEndpointsListComponent,
+    NgxEndpointsListItemComponent,
+    NgxNetworkSelectorComponent,
+    NgxConnectionStatusComponent,
   ],
-  exports: [HdConnectionMenuComponent],
+  exports: [NgxConnectionMenuComponent],
 })
 export class NgxSolanaMaterialModule {}

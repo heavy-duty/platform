@@ -50,6 +50,7 @@
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
     "ngx-solana-data-access": "libs/ngx-solana/data-access",
+    "ngx-solana-ui-cdk": "libs/ngx-solana/ui/cdk",
     "ngx-solana-ui-material": "libs/ngx-solana/ui/material",
     "ngx-websocket": "libs/ngx-websocket",
     "rx-solana": "libs/rx-solana",

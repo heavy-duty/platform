@@ -8,10 +8,10 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import { HttpEndpoint } from '@heavy-duty/ngx-solana';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
-import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
+import { NgxEditEndpointsComponent } from './edit-endpoints-modal.component';
 
-@Directive({ selector: 'button[hdEditEndpointsModalTrigger]' })
-export class HdEditEndpointsModalTriggerDirective {
+@Directive({ selector: 'button[ngxEditEndpointsModalTrigger]' })
+export class NgxEditEndpointsModalTriggerDirective {
   @Input() apiEndpoint: HttpEndpoint | null = null;
   @Input() webSocketEndpoint: WebSocketEndpoint | null = null;
   @Output() editEndpoints = new EventEmitter<{
@@ -25,10 +25,10 @@ export class HdEditEndpointsModalTriggerDirective {
 
     this._matDialog
       .open<
-        HdEditEndpointsComponent,
+        NgxEditEndpointsComponent,
         { apiEndpoint: HttpEndpoint; webSocketEndpoint: WebSocketEndpoint },
         { apiEndpoint: HttpEndpoint; webSocketEndpoint: WebSocketEndpoint }
-      >(HdEditEndpointsComponent, {
+      >(NgxEditEndpointsComponent, {
         panelClass: 'edit-modal',
         maxWidth: '380px',
         maxHeight: '90vh',

@@ -38,7 +38,7 @@ import { ShellStore } from './shell.store';
               color="basic"
             ></hd-wallet-multi-button>
 
-            <hd-connection-menu class="mr-6"></hd-connection-menu>
+            <ngx-connection-menu class="mr-6"></ngx-connection-menu>
 
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>

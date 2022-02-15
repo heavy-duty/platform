@@ -2,12 +2,13 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { interval, map, Observable, of, switchMap, takeWhile } from 'rxjs';
 
 @Pipe({
-  name: 'hdRelativeTime',
+  name: 'ngxRelativeTime',
 })
-export class HdRelativeTimePipe implements PipeTransform {
-  transform($: Observable<number | null>): Observable<string | null> {
-    return $.pipe(
+export class NgxRelativeTimePipe implements PipeTransform {
+  transform(date: number | null): Observable<string | null> {
+    return of(date).pipe(
       switchMap((value) => {
+        console.log(value);
         if (value === null) {
           return of(null);
         }

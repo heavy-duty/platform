@@ -1,23 +1,28 @@
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  Inject,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpEndpoint } from '@heavy-duty/ngx-solana';
+import { httpEndpoint, webSocketEndpoint } from '@heavy-duty/ngx-solana-cdk';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
-import { httpEndpoint } from './http-endpoint.validator';
-import { webSocketEndpoint } from './web-socket-endpoint.validator';
 
 @Component({
-  selector: 'hd-edit-endpoints-modal',
+  selector: 'ngx-edit-endpoints-modal',
   template: `
-    <header>
+    <header class="mb-10">
       <button
         mat-icon-button
         mat-dialog-close
         aria-label="Close edit endpoints modal"
+        class="block ml-auto mr-4 mt-4"
       >
         <mat-icon>close</mat-icon>
       </button>
-      <h2>Edit Endpoints</h2>
+      <h2 class="text-2xl text-center px-12 py-0 font-bold">Edit Endpoints</h2>
     </header>
 
     <form
@@ -64,45 +69,18 @@ import { webSocketEndpoint } from './web-socket-endpoint.validator';
       </button>
     </form>
   `,
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      .mat-dialog-title {
-        margin: 0;
-      }
-
-      header {
-        margin-bottom: 2.5rem;
-      }
-
-      header h2 {
-        font-size: 1.5rem;
-        text-align: center;
-        padding: 0 3rem;
-        font-weight: bold;
-      }
-
-      header button {
-        display: block;
-        margin-left: auto;
-        margin-right: 1rem;
-        margin-top: 1rem;
-      }
-    `,
-  ],
+  styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class HdEditEndpointsComponent {
+export class NgxEditEndpointsComponent {
+  @HostBinding('class') class = 'block';
   submitted = false;
   form: FormGroup;
 
   constructor(
     private readonly _formBuilder: FormBuilder,
     private readonly _matDialogRef: MatDialogRef<
-      HdEditEndpointsComponent,
+      NgxEditEndpointsComponent,
       {
         apiEndpoint: HttpEndpoint;
         webSocketEndpoint: WebSocketEndpoint;

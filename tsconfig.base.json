@@ -166,6 +166,7 @@
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ngx-solana": ["libs/ngx-solana/data-access/src/index.ts"],
+      "@heavy-duty/ngx-solana-cdk": ["libs/ngx-solana/ui/cdk/src/index.ts"],
       "@heavy-duty/ngx-solana-material": [
         "libs/ngx-solana/ui/material/src/index.ts"
       ],
