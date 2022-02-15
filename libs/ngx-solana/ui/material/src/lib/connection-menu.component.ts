@@ -71,7 +71,11 @@ import {
             </span>
           </ng-container>
           <ng-container
-            *ngIf="(online$ | async) && (connected$ | async) === false"
+            *ngIf="
+              (online$ | async) &&
+              (connected$ | async) === false &&
+              (connecting$ | async) === false
+            "
           >
             <ng-container
               *ngIf="
@@ -83,6 +87,7 @@ import {
 
               <span class="text-primary">{{ nextAttemptAt }}</span
               >.
+              <button (click)="onReconnect()">(Reconnect now)</button>
             </ng-container>
             <ng-template #reconnecting> Reconnecting... </ng-template>
           </ng-container>
@@ -96,6 +101,7 @@ export class ConnectionMenuComponent {
   readonly onlineSince$ = this._connectionStore.onlineSince$;
   readonly offlineSince$ = this._connectionStore.offlineSince$;
   readonly connected$ = this._connectionStore.connected$;
+  readonly connecting$ = this._connectionStore.connecting$;
   readonly connectedAt$ = this._connectionStore.connectedAt$;
   readonly nextAttemptAt$ = this._connectionStore.nextAttemptAt$;
   readonly network = this._solanaRpcConfig.network;
@@ -107,4 +113,8 @@ export class ConnectionMenuComponent {
     private readonly _solanaRpcConfig: NgxSolanaConfig,
     private readonly _connectionStore: NgxSolanaConnectionStore
   ) {}
+
+  onReconnect() {
+    this._connectionStore.reconnect();
+  }
 }

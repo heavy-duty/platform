@@ -1,4 +1,15 @@
-import { concatMap, defer, EMPTY, Observable, repeatWhen, timer } from 'rxjs';
+import {
+  concatMap,
+  defer,
+  EMPTY,
+  NEVER,
+  Observable,
+  race,
+  repeatWhen,
+  take,
+  tap,
+  timer,
+} from 'rxjs';
 
 export function exponentialBackoffDelay(iteration: number, delay: number) {
   return Math.pow(2, iteration) * delay;
@@ -9,6 +20,7 @@ export interface RepeatWithBackoffConfig {
   attempts?: number;
   delayMax?: number;
   attemptCallback?: (attempt: Attempt) => unknown;
+  restart$?: Observable<unknown>;
 }
 
 interface Attempt {
@@ -46,7 +58,15 @@ export function repeatWithBackoff(
                 });
               }
 
-              return timer(exponentialDelay);
+              return race(
+                timer(exponentialDelay),
+                config.restart$?.pipe(
+                  take(1),
+                  tap({
+                    complete: () => (counter = 0),
+                  })
+                ) ?? NEVER
+              );
             })
           )
         )

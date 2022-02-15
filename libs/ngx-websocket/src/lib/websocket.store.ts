@@ -9,6 +9,7 @@ import {
   map,
   of,
   pairwise,
+  Subject,
   switchMap,
   tap,
 } from 'rxjs';
@@ -55,6 +56,7 @@ export interface WebSocketConfig {
 }
 
 export class WebSocketStore<T> extends ComponentStore<ViewModel> {
+  private readonly _reconnect = new Subject();
   readonly webSocket$ = this.select(({ webSocket }) => webSocket);
   readonly connected$ = this.select(({ connected }) => connected);
   readonly connecting$ = this.select(({ connecting }) => connecting);
@@ -163,6 +165,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
             (error) =>
               this.patchState({
                 error,
+                connecting: false,
               }),
             (error) => this.patchState({ error })
           )
@@ -190,6 +193,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
               this.patchState({
                 nextAttemptAt,
               }),
+            restart$: this._reconnect.asObservable(),
           }),
           tapResponse(
             () => this.connect(),
@@ -262,6 +266,10 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
         this.patchState({ error });
       }
     }
+  }
+
+  reconnect() {
+    this._reconnect.next(null);
   }
 
   multiplex(

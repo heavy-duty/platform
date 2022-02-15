@@ -1,6 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { concatMap, interval, map, Observable, takeWhile } from 'rxjs';
+import { interval, map, Observable, of, switchMap, takeWhile } from 'rxjs';
 
 @Pipe({
   name: 'hdRelativeTime',
@@ -8,9 +7,12 @@ import { concatMap, interval, map, Observable, takeWhile } from 'rxjs';
 export class RelativeTimePipe implements PipeTransform {
   transform($: Observable<number | null>): Observable<string | null> {
     return $.pipe(
-      isNotNullOrUndefined,
-      concatMap((value) =>
-        interval(1_000).pipe(
+      switchMap((value) => {
+        if (value === null) {
+          return of(null);
+        }
+
+        return interval(1_000).pipe(
           takeWhile(() => value > Date.now()),
           map(() => {
             const seconds = Math.floor((value - Date.now()) / 1000);
@@ -33,8 +35,8 @@ export class RelativeTimePipe implements PipeTransform {
               })}`;
             }
           })
-        )
-      )
+        );
+      })
     );
   }
 }
