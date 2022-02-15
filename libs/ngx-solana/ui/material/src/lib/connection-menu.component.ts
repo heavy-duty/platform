@@ -10,7 +10,14 @@ import {
 @Component({
   selector: 'hd-connection-menu',
   template: `
-    <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
+    <button
+      type="button"
+      class="w-36"
+      mat-raised-button
+      *ngIf="selectedNetwork$ | async as selectedNetwork"
+      [matMenuTriggerFor]="menu"
+      [matTooltip]="selectedNetwork"
+    >
       <div class="flex justify-between items-center">
         <div
           class="bg-green-500 rounded-full w-4 h-4"
@@ -29,9 +36,11 @@ import {
         >
         </mat-progress-spinner>
 
-        <p class="flex-grow my-0 ml-2 text-left uppercase">
-          {{ selectedNetwork$ | async }}
-        </p>
+        <span
+          class="flex-grow ml-2 uppercase overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
+          {{ selectedNetwork }}
+        </span>
       </div>
     </button>
 
