@@ -16,6 +16,7 @@ import {
 import { filter, map, Observable } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from './config';
+import { NgxSolanaConfigStore } from './config.store';
 import { hashGetProgramAccountsRequest } from './internal';
 
 @Injectable()
@@ -40,9 +41,12 @@ export class NgxSolanaConnectionStore extends WebSocketStore<RpcMessage> {
 
   constructor(
     @Inject(NGX_SOLANA_CONFIG)
-    _solanaRpcConfig: NgxSolanaConfig
+    _solanaRpcConfig: NgxSolanaConfig,
+    private readonly _configStore: NgxSolanaConfigStore
   ) {
-    super(_solanaRpcConfig.webSocket);
+    super(_solanaRpcConfig.webSocketConfig);
+
+    this.setEndpoint(this._configStore.webSocketEndpoint$);
   }
 
   onAccountChange(

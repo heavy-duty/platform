@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import {
   AccountInfo,
   GetProgramAccountsConfig,
@@ -11,19 +11,19 @@ import {
 import {
   catchError,
   concatMap,
+  first,
   isObservable,
   map,
   Observable,
   of,
   throwError,
 } from 'rxjs';
-import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from './config';
+import { NgxSolanaConfigStore } from './config.store';
 
 @Injectable()
 export class NgxSolanaApiService {
   constructor(
-    @Inject(NGX_SOLANA_CONFIG)
-    private readonly _ngxSolanaConfig: NgxSolanaConfig,
+    private readonly _configStore: NgxSolanaConfigStore,
     private readonly _httpClient: HttpClient
   ) {}
 
@@ -61,141 +61,192 @@ export class NgxSolanaApiService {
     pubkey: string,
     commitment = 'confirmed'
   ): Observable<AccountInfo<Buffer> | null> {
-    return this._httpClient
-      .post<{
-        value: AccountInfo<[string, string]>;
-        context: { slot: number };
-      }>(
-        this._ngxSolanaConfig.apiEndpoint,
-        [pubkey, { encoding: 'base64', commitment }],
-        {
-          headers: {
-            'solana-rpc-method': 'getAccountInfo',
-          },
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
         }
-      )
-      .pipe(
-        map(({ value }) => ({
-          ...value,
-          data: Buffer.from(value.data[0], 'base64'),
-        }))
-      );
+
+        return this._httpClient
+          .post<{
+            value: AccountInfo<[string, string]>;
+            context: { slot: number };
+          }>(apiEndpoint, [pubkey, { encoding: 'base64', commitment }], {
+            headers: {
+              'solana-rpc-method': 'getAccountInfo',
+            },
+          })
+          .pipe(
+            map(({ value }) => ({
+              ...value,
+              data: Buffer.from(value.data[0], 'base64'),
+            }))
+          );
+      })
+    );
   }
 
   getBalance(pubkey: string) {
-    return this._httpClient.post<{ value: number }>(
-      this._ngxSolanaConfig.apiEndpoint,
-      pubkey,
-      {
-        headers: {
-          'solana-rpc-method': 'getBalance',
-        },
-      }
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient.post<{ value: number }>(apiEndpoint, pubkey, {
+          headers: {
+            'solana-rpc-method': 'getBalance',
+          },
+        });
+      })
     );
   }
 
   getProgramAccounts(programId: string, config?: GetProgramAccountsConfig) {
-    return this._httpClient
-      .post<
-        {
-          account: AccountInfo<[string, string]>;
-          pubkey: string;
-        }[]
-      >(
-        this._ngxSolanaConfig.apiEndpoint,
-        [
-          programId,
-          {
-            encoding: config?.encoding ?? 'base64',
-            commitment: config?.commitment ?? 'confirmed',
-            filters: config?.filters ?? [],
-            dataSlice: config?.dataSlice,
-          },
-        ],
-        {
-          headers: {
-            'solana-rpc-method': 'getProgramAccounts',
-          },
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
         }
-      )
-      .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) => ({
-            pubkey,
-            account: {
-              ...account,
-              data: Buffer.from(account.data[0], 'base64'),
-            },
-          }))
-        )
-      );
+
+        return this._httpClient
+          .post<
+            {
+              account: AccountInfo<[string, string]>;
+              pubkey: string;
+            }[]
+          >(
+            apiEndpoint,
+            [
+              programId,
+              {
+                encoding: config?.encoding ?? 'base64',
+                commitment: config?.commitment ?? 'confirmed',
+                filters: config?.filters ?? [],
+                dataSlice: config?.dataSlice,
+              },
+            ],
+            {
+              headers: {
+                'solana-rpc-method': 'getProgramAccounts',
+              },
+            }
+          )
+          .pipe(
+            map((programAccounts) =>
+              programAccounts.map(({ pubkey, account }) => ({
+                pubkey,
+                account: {
+                  ...account,
+                  data: Buffer.from(account.data[0], 'base64'),
+                },
+              }))
+            )
+          );
+      })
+    );
   }
 
   getLatestBlockhash(): Observable<{ blockhash: string }> {
-    return this._httpClient
-      .post<{ value: { blockhash: string } }>(
-        this._ngxSolanaConfig.apiEndpoint,
-        null,
-        {
-          headers: {
-            'solana-rpc-method': 'getLatestBlockhash',
-          },
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
         }
-      )
-      .pipe(map(({ value }) => value));
+
+        return this._httpClient
+          .post<{ value: { blockhash: string } }>(apiEndpoint, null, {
+            headers: {
+              'solana-rpc-method': 'getLatestBlockhash',
+            },
+          })
+          .pipe(map(({ value }) => value));
+      })
+    );
   }
 
   getSignatureStatus(signature: string): Observable<SignatureStatus> {
-    return this._httpClient
-      .post<{ value: SignatureStatus[] }>(
-        this._ngxSolanaConfig.apiEndpoint,
-        [[signature], { searchTransactionHistory: true }],
-        {
-          headers: {
-            'solana-rpc-method': 'getSignatureStatuses',
-          },
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
         }
-      )
-      .pipe(map(({ value: [status] }) => status));
+
+        return this._httpClient
+          .post<{ value: SignatureStatus[] }>(
+            apiEndpoint,
+            [[signature], { searchTransactionHistory: true }],
+            {
+              headers: {
+                'solana-rpc-method': 'getSignatureStatuses',
+              },
+            }
+          )
+          .pipe(map(({ value: [status] }) => status));
+      })
+    );
   }
 
   getTransaction(signature: string): Observable<TransactionResponse> {
-    return this._httpClient.post<TransactionResponse>(
-      this._ngxSolanaConfig.apiEndpoint,
-      signature,
-      {
-        headers: {
-          'solana-rpc-method': 'getTransaction',
-        },
-      }
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient.post<TransactionResponse>(
+          apiEndpoint,
+          signature,
+          {
+            headers: {
+              'solana-rpc-method': 'getTransaction',
+            },
+          }
+        );
+      })
     );
   }
 
   sendTransaction(
     transaction: Transaction | Observable<Transaction>
   ): Observable<string> {
-    return (isObservable(transaction) ? transaction : of(transaction)).pipe(
-      concatMap((transaction) =>
-        this._httpClient
-          .post<string>(this._ngxSolanaConfig.apiEndpoint, transaction, {
-            headers: {
-              'solana-rpc-method': 'sendTransaction',
-            },
-          })
-          .pipe(
-            catchError((error) => {
-              if (
-                'InstructionError' in error &&
-                error.InstructionError.length === 2 &&
-                typeof error.InstructionError[1].Custom === 'number'
-              ) {
-                return throwError(() => error.InstructionError[1].Custom);
-              }
+    return this._configStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
 
-              return throwError(() => error);
-            })
+        return (isObservable(transaction) ? transaction : of(transaction)).pipe(
+          concatMap((transaction) =>
+            this._httpClient
+              .post<string>(apiEndpoint, transaction, {
+                headers: {
+                  'solana-rpc-method': 'sendTransaction',
+                },
+              })
+              .pipe(
+                catchError((error) => {
+                  if (
+                    'InstructionError' in error &&
+                    error.InstructionError.length === 2 &&
+                    typeof error.InstructionError[1].Custom === 'number'
+                  ) {
+                    return throwError(() => error.InstructionError[1].Custom);
+                  }
+
+                  return throwError(() => error);
+                })
+              )
           )
-      )
+        );
+      })
     );
   }
 }

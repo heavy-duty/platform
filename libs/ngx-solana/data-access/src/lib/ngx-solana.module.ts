@@ -9,18 +9,12 @@ import { NgxSolanaConnectionStore } from './connection.store';
   imports: [HttpClientModule],
 })
 export class NgxSolanaModule {
-  static forRoot(
-    apiEndpoint: string,
-    websocketEndpoint: string,
-    network: string
-  ): ModuleWithProviders<NgxSolanaModule> {
+  static forRoot(): ModuleWithProviders<NgxSolanaModule> {
     return {
       ngModule: NgxSolanaModule,
       providers: [
         ngxSolanaConfigProviderFactory({
-          apiEndpoint,
-          webSocket: {
-            endpoint: websocketEndpoint,
+          webSocketConfig: {
             reconnection: true,
             reconnectionDelay: 1_000, // 1 second
             reconnectionDelayMax: 300_000, // 5 minutes
@@ -30,9 +24,7 @@ export class NgxSolanaModule {
               method: 'ping',
               params: null,
             }),
-            autoConnect: true,
           },
-          network,
         }),
         NgxSolanaApiService,
         NgxSolanaConnectionStore,

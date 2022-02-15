@@ -10,9 +10,7 @@ type RecursivePartial<T> = {
 };
 
 export interface NgxSolanaConfig {
-  apiEndpoint: string;
-  webSocket: WebSocketConfig;
-  network: string;
+  webSocketConfig: WebSocketConfig;
 }
 
 export const NGX_SOLANA_CONFIG = new InjectionToken<NgxSolanaConfig>(

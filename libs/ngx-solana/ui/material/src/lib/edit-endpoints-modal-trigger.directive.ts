@@ -6,7 +6,8 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { HttpEndpoint, WebSocketEndpoint } from '@heavy-duty/ngx-solana';
+import { HttpEndpoint } from '@heavy-duty/ngx-solana';
+import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
 
 @Directive({ selector: 'button[hdEditEndpointsModalTrigger]' })

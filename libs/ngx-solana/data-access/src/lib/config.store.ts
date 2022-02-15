@@ -1,15 +1,14 @@
 import { Injectable } from '@angular/core';
+import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { tap } from 'rxjs';
 
 export type Network = 'localhost' | 'devnet' | 'testnet' | 'mainnet-beta';
 
-type WebSocketProtocol = 'ws' | 'wss';
 type HttpProtocol = 'http' | 'https';
 
 type Url = string;
-export type WebSocketEndpoint = `${WebSocketProtocol}://${Url}`;
 export type HttpEndpoint = `${HttpProtocol}://${Url}`;
 
 export interface NetworkConfig {
@@ -67,6 +66,14 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
       networkConfigs.find(
         (networkConfig) => networkConfig.network === selectedNetwork
       ) ?? null
+  );
+  readonly apiEndpoint$ = this.select(
+    this.selectedNetworkConfig$,
+    (selectedNetwork) => selectedNetwork?.apiEndpoint ?? null
+  );
+  readonly webSocketEndpoint$ = this.select(
+    this.selectedNetworkConfig$,
+    (selectedNetwork) => selectedNetwork?.webSocketEndpoint ?? null
   );
 
   constructor() {

@@ -1,6 +1,7 @@
 import { online, repeatWithBackoff } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  concatMap,
   distinctUntilChanged,
   EMPTY,
   filter,
@@ -12,7 +13,15 @@ import {
   Subject,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs';
+
+export type Network = 'localhost' | 'devnet' | 'testnet' | 'mainnet-beta';
+
+type WebSocketProtocol = 'ws' | 'wss';
+
+type Url = string;
+export type WebSocketEndpoint = `${WebSocketProtocol}://${Url}`;
 
 interface ViewModel {
   online: boolean;
@@ -27,6 +36,7 @@ interface ViewModel {
   offlineSince: number | null;
   nextAttemptAt: number | null;
   lastAttemptAt: number | null;
+  endpoint: WebSocketEndpoint | null;
 }
 
 const initialState: ViewModel = {
@@ -42,11 +52,10 @@ const initialState: ViewModel = {
   disconnectedAt: null,
   nextAttemptAt: null,
   lastAttemptAt: null,
+  endpoint: null,
 };
 
 export interface WebSocketConfig {
-  endpoint: string;
-  autoConnect: boolean;
   reconnection: boolean;
   reconnectionDelay: number;
   reconnectionAttempts: number;
@@ -57,6 +66,7 @@ export interface WebSocketConfig {
 
 export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   private readonly _reconnect = new Subject();
+  private readonly _endpoint$ = this.select(({ endpoint }) => endpoint);
   readonly webSocket$ = this.select(({ webSocket }) => webSocket);
   readonly connected$ = this.select(({ connected }) => connected);
   readonly connecting$ = this.select(({ connecting }) => connecting);
@@ -71,10 +81,6 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
 
   constructor(private readonly _config: WebSocketConfig) {
     super(initialState);
-
-    if (this._config.autoConnect) {
-      this.connect();
-    }
   }
 
   readonly setWebSocket = this.updater((state, webSocket: WebSocket) => ({
@@ -84,11 +90,32 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     lastAttemptAt: Date.now(),
   }));
 
+  readonly setEndpoint = this.updater(
+    (state, endpoint: WebSocketEndpoint | null) => ({
+      ...state,
+      endpoint,
+    })
+  );
+
   readonly loadOnline = this.effect(() =>
     online().pipe(
       distinctUntilChanged(),
       tapResponse(
-        (online) => this.patchState({ online, onlineSince: Date.now() }),
+        (online) => {
+          if (online) {
+            this.patchState({
+              online,
+              onlineSince: Date.now(),
+              offlineSince: null,
+            });
+          } else {
+            this.patchState({
+              online,
+              onlineSince: null,
+              offlineSince: Date.now(),
+            });
+          }
+        },
         (error) => this.patchState({ error })
       )
     )
@@ -107,6 +134,30 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
         }
       })
     )
+  );
+
+  readonly handleEndpointChange = this.effect(() =>
+    this._endpoint$
+      .pipe(
+        concatMap((endpoint) =>
+          of(endpoint).pipe(
+            withLatestFrom(this.webSocket$, this.connected$, this.connecting$)
+          )
+        )
+      )
+      .pipe(
+        tap(([endpoint, webSocket, connected, connecting]) => {
+          if (
+            endpoint !== null &&
+            webSocket !== null &&
+            endpoint !== webSocket.url &&
+            connected &&
+            !connecting
+          ) {
+            this.disconnect();
+          }
+        })
+      )
   );
 
   readonly handleOpen = this.effect(() =>
@@ -175,12 +226,23 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
   );
 
   readonly handleReconnect = this.effect(() =>
-    this.select(this.connected$, this.online$, (connected, online) => ({
-      connected,
-      online,
-    })).pipe(
-      switchMap(({ connected, online }) => {
-        if (!online || connected || !this._config.reconnection) {
+    this.select(
+      this.connected$,
+      this.online$,
+      this._endpoint$,
+      (connected, online, endpoint) => ({
+        connected,
+        online,
+        endpoint,
+      })
+    ).pipe(
+      switchMap(({ connected, online, endpoint }) => {
+        if (
+          !online ||
+          connected ||
+          endpoint === null ||
+          !this._config.reconnection
+        ) {
           return EMPTY;
         }
 
@@ -196,7 +258,7 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
             restart$: this._reconnect.asObservable(),
           }),
           tapResponse(
-            () => this.connect(),
+            () => this.connect(endpoint),
             (error) => this.patchState({ error })
           )
         );
@@ -246,14 +308,16 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
     )
   );
 
-  connect() {
-    try {
-      const webSocket = new WebSocket(this._config.endpoint);
+  connect = this.effect<WebSocketEndpoint>(
+    tap((endpoint) => {
+      if (!endpoint) {
+        throw Error('Endpoint missing');
+      }
+
+      const webSocket = new WebSocket(endpoint);
       this.setWebSocket(webSocket);
-    } catch (error) {
-      this.patchState({ error });
-    }
-  }
+    })
+  );
 
   disconnect() {
     const { webSocket } = this.get();

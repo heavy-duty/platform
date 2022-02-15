@@ -10,7 +10,6 @@ import {
   NgxSolanaModule,
 } from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
-import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -39,11 +38,7 @@ import { AppComponent } from './app.component';
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
-    NgxSolanaModule.forRoot(
-      environment.rpcEndpoint,
-      environment.rpcWebsocket,
-      'localhost'
-    ),
+    NgxSolanaModule.forRoot(),
   ],
   bootstrap: [AppComponent],
   providers: [

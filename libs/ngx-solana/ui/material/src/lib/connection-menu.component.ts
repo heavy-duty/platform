@@ -4,8 +4,8 @@ import {
   Network,
   NgxSolanaConfigStore,
   NgxSolanaConnectionStore,
-  WebSocketEndpoint,
 } from '@heavy-duty/ngx-solana';
+import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 
 @Component({
   selector: 'hd-connection-menu',

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { HttpEndpoint, WebSocketEndpoint } from '@heavy-duty/ngx-solana';
+import { HttpEndpoint } from '@heavy-duty/ngx-solana';
+import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { httpEndpoint } from './http-endpoint.validator';
 import { webSocketEndpoint } from './web-socket-endpoint.validator';
 
