@@ -12,6 +12,7 @@ import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
 import { TabListModule } from '@bulldozer-client/tab-list';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { HdSolanaMaterialModule } from '@heavy-duty/ngx-solana-material';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ShellComponent } from './shell.component';
@@ -54,14 +55,6 @@ import { ShellComponent } from './shell.component';
               ),
           },
         ],
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'unauthorized-access',
-        loadChildren: () =>
-          import('@bulldozer-client/unauthorized-access').then(
-            (m) => m.UnauthorizedAccessModule
-          ),
       },
       {
         path: '**',
@@ -75,6 +68,7 @@ import { ShellComponent } from './shell.component';
     MatToolbarModule,
     ReactiveComponentModule,
     HdWalletAdapterMaterialModule,
+    HdSolanaMaterialModule,
     DarkThemeDirectiveModule,
     DarkThemeSwitchModule,
     WorkspaceExplorerModule,

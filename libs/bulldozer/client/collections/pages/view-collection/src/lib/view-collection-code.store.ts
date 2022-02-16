@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { CodeEditorOptions } from '@bulldozer-client/code-editor';
-import { DarkThemeService } from '@bulldozer-client/dark-theme-service';
+import {
+  CollectionAttributesStore,
+  CollectionStore,
+} from '@bulldozer-client/collections-data-access';
+import { DarkThemeStore } from '@bulldozer-client/core-data-access';
+import {
+  Collection,
+  CollectionAttribute,
+  Document,
+} from '@heavy-duty/bulldozer-devkit';
 import { generateCollectionCode } from '@heavy-duty/generator';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, tap } from 'rxjs';
-import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
-import { ViewCollectionStore } from './view-collection.store';
 
 interface ViewModel {
   code: string | null;
@@ -23,42 +29,45 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
   readonly editorOptions$ = this.select(({ editorOptions }) => editorOptions);
 
   constructor(
-    private readonly _viewCollectionStore: ViewCollectionStore,
-    private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore,
-    private readonly _themeService: DarkThemeService
+    collectionStore: CollectionStore,
+    collectionAttributesStore: CollectionAttributesStore,
+    darkThemeStore: DarkThemeStore
   ) {
     super(initialState);
+
+    this._loadEditorOptions(darkThemeStore.isDarkThemeEnabled$);
+    this._loadCode(
+      this.select(
+        collectionStore.collection$,
+        collectionAttributesStore.collectionAttributes$,
+        (collection, collectionAttributes) => ({
+          collection,
+          collectionAttributes,
+        }),
+        { debounce: true }
+      )
+    );
   }
 
-  protected readonly loadEditorOptions = this.effect(() =>
-    this._themeService.isDarkThemeEnabled$.pipe(
-      tap((isDarkThemeEnabled) =>
-        this.patchState({
-          editorOptions: {
-            theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
-            language: 'rust',
-            automaticLayout: true,
-            readOnly: true,
-            fontSize: 16,
-          },
-        })
-      )
-    )
+  private readonly _loadEditorOptions = this.updater<boolean>(
+    (state, isDarkThemeEnabled) => ({
+      ...state,
+      editorOptions: {
+        theme: isDarkThemeEnabled ? 'vs-dark' : 'vs-light',
+        language: 'rust',
+        automaticLayout: true,
+        readOnly: true,
+        fontSize: 16,
+      },
+    })
   );
 
-  protected readonly loadCode = this.effect(() =>
-    combineLatest({
-      collection: this._viewCollectionStore.collection$,
-      collectionAttributes:
-        this._viewCollectionAttributesStore.collectionAttributes$,
-    }).pipe(
-      tap(({ collection, collectionAttributes }) =>
-        this.patchState({
-          code:
-            collection &&
-            generateCollectionCode(collection, collectionAttributes),
-        })
-      )
-    )
-  );
+  private readonly _loadCode = this.updater<{
+    collection: Document<Collection> | null;
+    collectionAttributes: Document<CollectionAttribute>[];
+  }>((state, { collection, collectionAttributes }) => ({
+    ...state,
+    code:
+      collection && generateCollectionCode(collection, collectionAttributes),
+  }));
 }

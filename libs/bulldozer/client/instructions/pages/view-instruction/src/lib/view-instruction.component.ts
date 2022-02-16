@@ -1,18 +1,22 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { CollectionsStore } from '@bulldozer-client/collections-data-access';
+import {
+  InstructionAccountsStore,
+  InstructionArgumentsStore,
+  InstructionRelationsStore,
+  InstructionStore,
+} from '@bulldozer-client/instructions-data-access';
 import {
   Document,
   Instruction,
   InstructionAccountDto,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ViewCollectionsStore } from './view-collections.store';
-import { ViewInstructionAccountsStore } from './view-instruction-accounts.store';
-import { ViewInstructionArgumentsStore } from './view-instruction-arguments.store';
+import { map } from 'rxjs';
 import { ViewInstructionCodeStore } from './view-instruction-code.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
-import { ViewInstructionRelationsStore } from './view-instruction-relations.store';
-import { ViewInstructionRouteStore } from './view-instruction-route.store';
 import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 import { ViewInstructionStore } from './view-instruction.store';
 
@@ -118,27 +122,27 @@ import { ViewInstructionStore } from './view-instruction.store';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    InstructionStore,
+    InstructionArgumentsStore,
+    InstructionAccountsStore,
+    InstructionRelationsStore,
+    CollectionsStore,
     ViewInstructionStore,
-    ViewInstructionArgumentsStore,
-    ViewInstructionAccountsStore,
-    ViewCollectionsStore,
-    ViewInstructionRelationsStore,
     ViewInstructionDocumentsStore,
     ViewInstructionSignersStore,
     ViewInstructionCodeStore,
-    ViewInstructionRouteStore,
   ],
 })
 export class ViewInstructionComponent {
   @HostBinding('class') class = 'block';
   instructionBody = '';
   readonly connected$ = this._walletStore.connected$;
-  readonly collections$ = this._viewCollectionsStore.collections$;
-  readonly instruction$ = this._viewInstructionStore.instruction$;
+  readonly collections$ = this._collectionsStore.collections$;
+  readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionArguments$ =
-    this._viewInstructionArgumentsStore.instructionArguments$;
+    this._instructionArgumentsStore.instructionArguments$;
   readonly instructionAccounts$ =
-    this._viewInstructionAccountsStore.instructionAccounts$;
+    this._instructionAccountsStore.instructionAccounts$;
   readonly instructionDocuments$ =
     this._viewInstructionDocumentsStore.instructionDocuments$;
   readonly instructionSigners$ =
@@ -151,19 +155,42 @@ export class ViewInstructionComponent {
   readonly handleCode$ = this._viewInstructionCodeStore.handleCode$;
 
   constructor(
+    private readonly _instructionStore: InstructionStore,
+    private readonly _instructionArgumentsStore: InstructionArgumentsStore,
+    private readonly _instructionAccountsStore: InstructionAccountsStore,
+    private readonly _instructionRelationsStore: InstructionRelationsStore,
+    private readonly _collectionsStore: CollectionsStore,
     private readonly _walletStore: WalletStore,
     private readonly _viewInstructionStore: ViewInstructionStore,
     private readonly _viewInstructionCodeStore: ViewInstructionCodeStore,
-    private readonly _viewInstructionArgumentsStore: ViewInstructionArgumentsStore,
-    private readonly _viewInstructionAccountsStore: ViewInstructionAccountsStore,
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
-    private readonly _viewInstructionSignersStore: ViewInstructionSignersStore,
-    private readonly _viewInstructionRelationsStore: ViewInstructionRelationsStore,
-    private readonly _viewCollectionsStore: ViewCollectionsStore
-  ) {}
+    private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
+  ) {
+    this._instructionStore.setInstructionId(
+      this._viewInstructionStore.instructionId$
+    );
+    this._instructionArgumentsStore.setFilters(
+      this._viewInstructionStore.instructionId$.pipe(
+        isNotNullOrUndefined,
+        map((instructionId) => ({ instruction: instructionId }))
+      )
+    );
+    this._instructionAccountsStore.setFilters(
+      this._viewInstructionStore.instructionId$.pipe(
+        isNotNullOrUndefined,
+        map((instructionId) => ({ instruction: instructionId }))
+      )
+    );
+    this._collectionsStore.setFilters(
+      this._viewInstructionStore.applicationId$.pipe(
+        isNotNullOrUndefined,
+        map((applicationId) => ({ application: applicationId }))
+      )
+    );
+  }
 
   onUpdateInstructionBody(instructionId: string) {
-    this._viewInstructionStore.updateInstructionBody({
+    this._instructionStore.updateInstructionBody({
       instructionId,
       instructionBody: this.instructionBody,
     });
@@ -173,7 +200,7 @@ export class ViewInstructionComponent {
     instruction: Document<Instruction>,
     instructionArgumentDto: InstructionArgumentDto
   ) {
-    this._viewInstructionArgumentsStore.createInstructionArgument({
+    this._instructionArgumentsStore.createInstructionArgument({
       instruction,
       instructionArgumentDto,
     });
@@ -183,14 +210,14 @@ export class ViewInstructionComponent {
     instructionArgumentId: string;
     instructionArgumentDto: InstructionArgumentDto;
   }) {
-    this._viewInstructionArgumentsStore.updateInstructionArgument(request);
+    this._instructionArgumentsStore.updateInstructionArgument(request);
   }
 
   onDeleteInstructionArgument(
     instructionId: string,
     instructionArgumentId: string
   ) {
-    this._viewInstructionArgumentsStore.deleteInstructionArgument({
+    this._instructionArgumentsStore.deleteInstructionArgument({
       instructionId,
       instructionArgumentId,
     });
@@ -200,7 +227,7 @@ export class ViewInstructionComponent {
     instruction: Document<Instruction>,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._viewInstructionAccountsStore.createInstructionAccount({
+    this._instructionAccountsStore.createInstructionAccount({
       instruction,
       instructionAccountDto,
     });
@@ -210,14 +237,14 @@ export class ViewInstructionComponent {
     instructionAccountId: string;
     instructionAccountDto: InstructionAccountDto;
   }) {
-    this._viewInstructionAccountsStore.updateInstructionAccount(request);
+    this._instructionAccountsStore.updateInstructionAccount(request);
   }
 
   onDeleteInstructionAccount(
     instructionId: string,
     instructionAccountId: string
   ) {
-    this._viewInstructionAccountsStore.deleteInstructionAccount({
+    this._instructionAccountsStore.deleteInstructionAccount({
       instructionId,
       instructionAccountId,
     });
@@ -228,7 +255,7 @@ export class ViewInstructionComponent {
     fromAccountId: string,
     toAccountId: string
   ) {
-    this._viewInstructionRelationsStore.createInstructionRelation({
+    this._instructionRelationsStore.createInstructionRelation({
       instruction,
       fromAccountId,
       toAccountId,
@@ -240,6 +267,6 @@ export class ViewInstructionComponent {
     fromAccountId: string;
     toAccountId: string;
   }) {
-    this._viewInstructionRelationsStore.deleteInstructionRelation(request);
+    this._instructionRelationsStore.deleteInstructionRelation(request);
   }
 }

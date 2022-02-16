@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import {
-  Collection,
-  CollectionAttributeDto,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
+  CollectionAttributesStore,
+  CollectionStore,
+} from '@bulldozer-client/collections-data-access';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
+import { map } from 'rxjs';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
-import { ViewCollectionRouteStore } from './view-collection-route.store';
 import { ViewCollectionStore } from './view-collection.store';
 
 @Component({
@@ -28,10 +28,25 @@ import { ViewCollectionStore } from './view-collection.store';
             [connected]="(connected$ | ngrxPush) ?? false"
             [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
             (createCollectionAttribute)="
-              onCreateCollectionAttribute(collection, $event)
+              onCreateCollectionAttribute(
+                collection.data.workspace,
+                collection.data.application,
+                collection.id,
+                $event
+              )
             "
-            (updateCollectionAttribute)="onUpdateCollectionAttribute($event)"
-            (deleteCollectionAttribute)="onDeleteCollectionAttribute($event)"
+            (updateCollectionAttribute)="
+              onUpdateCollectionAttribute(
+                $event.collectionAttributeId,
+                $event.collectionAttributeDto
+              )
+            "
+            (deleteCollectionAttribute)="
+              onDeleteCollectionAttribute(
+                $event.collectionId,
+                $event.collectionAttributeId
+              )
+            "
           >
           </bd-collection-attributes-list>
         </main>
@@ -39,7 +54,7 @@ import { ViewCollectionStore } from './view-collection.store';
       <div class="w-1/2 bd-custom-height-layout overflow-hidden">
         <bd-code-editor
           [customClass]="'bd-custom-monaco-editor'"
-          [template]="(collectionCode$ | ngrxPush) ?? null"
+          [template]="(code$ | ngrxPush) ?? null"
           [options]="(editorOptions$ | ngrxPush) ?? null"
         ></bd-code-editor>
       </div>
@@ -48,49 +63,70 @@ import { ViewCollectionStore } from './view-collection.store';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    CollectionStore,
+    CollectionAttributesStore,
     ViewCollectionStore,
-    ViewCollectionAttributesStore,
     ViewCollectionCodeStore,
-    ViewCollectionRouteStore,
   ],
 })
 export class ViewCollectionComponent {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
-  readonly collection$ = this._viewCollectionStore.collection$;
+  readonly collection$ = this._collectionStore.collection$;
   readonly collectionAttributes$ =
-    this._viewCollectionAttributesStore.collectionAttributes$;
-  readonly collectionCode$ = this._viewCollectionCodeStore.code$;
+    this._collectionAttributesStore.collectionAttributes$;
+  readonly code$ = this._viewCollectionCodeStore.code$;
   readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
 
   constructor(
     private readonly _viewCollectionStore: ViewCollectionStore,
-    private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore,
     private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
+    private readonly _collectionStore: CollectionStore,
+    private readonly _collectionAttributesStore: CollectionAttributesStore,
     private readonly _walletStore: WalletStore
-  ) {}
+  ) {
+    this._collectionAttributesStore.setFilters(
+      this._viewCollectionStore.collectionId$.pipe(
+        isNotNullOrUndefined,
+        map((collectionId) => ({ collection: collectionId }))
+      )
+    );
+    this._collectionStore.setCollectionId(
+      this._viewCollectionStore.collectionId$
+    );
+  }
 
   onCreateCollectionAttribute(
-    collection: Document<Collection>,
+    workspaceId: string,
+    applicationId: string,
+    collectionId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._viewCollectionAttributesStore.createCollectionAttribute({
-      collection,
+    this._collectionAttributesStore.createCollectionAttribute({
+      workspaceId,
+      applicationId,
+      collectionId,
       collectionAttributeDto,
     });
   }
 
-  onUpdateCollectionAttribute(request: {
-    collectionAttributeId: string;
-    collectionAttributeDto: CollectionAttributeDto;
-  }) {
-    this._viewCollectionAttributesStore.updateCollectionAttribute(request);
+  onUpdateCollectionAttribute(
+    collectionAttributeId: string,
+    collectionAttributeDto: CollectionAttributeDto
+  ) {
+    this._collectionAttributesStore.updateCollectionAttribute({
+      collectionAttributeId,
+      collectionAttributeDto,
+    });
   }
 
-  onDeleteCollectionAttribute(request: {
-    collectionId: string;
-    collectionAttributeId: string;
-  }) {
-    this._viewCollectionAttributesStore.deleteCollectionAttribute(request);
+  onDeleteCollectionAttribute(
+    collectionId: string,
+    collectionAttributeId: string
+  ) {
+    this._collectionAttributesStore.deleteCollectionAttribute({
+      collectionId,
+      collectionAttributeId,
+    });
   }
 }

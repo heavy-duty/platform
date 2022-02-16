@@ -14,7 +14,7 @@ import {
   updateApplication,
   UpdateApplicationParams,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
@@ -24,7 +24,7 @@ import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationApiService {
-  constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
 
   private handleError(error: unknown) {
     return throwError(() =>
@@ -36,7 +36,7 @@ export class ApplicationApiService {
   find(filters: ApplicationFilters) {
     const query = applicationQueryBuilder().where(filters).build();
 
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
@@ -49,7 +49,7 @@ export class ApplicationApiService {
 
   // get application
   findById(applicationId: string): Observable<Document<Application> | null> {
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getAccountInfo(applicationId)
       .pipe(
         map(
@@ -63,7 +63,7 @@ export class ApplicationApiService {
   create(params: Omit<CreateApplicationParams, 'applicationId'>) {
     const applicationKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         createApplication({
           ...params,
@@ -72,7 +72,7 @@ export class ApplicationApiService {
       ),
       partiallySignTransaction(applicationKeypair),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
@@ -81,10 +81,10 @@ export class ApplicationApiService {
 
   // update application
   update(params: UpdateApplicationParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(updateApplication(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
@@ -93,10 +93,10 @@ export class ApplicationApiService {
 
   // delete application
   delete(params: DeleteApplicationParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(deleteApplication(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )

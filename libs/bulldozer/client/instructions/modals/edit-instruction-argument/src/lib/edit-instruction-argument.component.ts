@@ -1,4 +1,10 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import {
+  Component,
+  HostBinding,
+  Inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -13,7 +19,7 @@ import { Subject, takeUntil } from 'rxjs';
     </h2>
 
     <form
-      [formGroup]="argumentGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditArgument()"
     >
@@ -132,7 +138,7 @@ import { Subject, takeUntil } from 'rxjs';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && argumentGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.instructionArgument ? 'Save' : 'Create' }}
       </button>
@@ -148,12 +154,11 @@ import { Subject, takeUntil } from 'rxjs';
     </button>
   `,
 })
-export class EditInstructionArgumentComponent implements OnInit {
+export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
-  submitted = false;
-  readonly argumentGroup = new FormGroup({
+  readonly form = new FormGroup({
     name: new FormControl('', { validators: [Validators.required] }),
     kind: new FormControl(0, { validators: [Validators.required] }),
     modifier: new FormControl(null),
@@ -161,24 +166,25 @@ export class EditInstructionArgumentComponent implements OnInit {
     max: new FormControl(null),
     maxLength: new FormControl(null),
   });
+  submitted = false;
 
   get nameControl() {
-    return this.argumentGroup.get('name') as FormControl;
+    return this.form.get('name') as FormControl;
   }
   get kindControl() {
-    return this.argumentGroup.get('kind') as FormControl;
+    return this.form.get('kind') as FormControl;
   }
   get modifierControl() {
-    return this.argumentGroup.get('modifier') as FormControl;
+    return this.form.get('modifier') as FormControl;
   }
   get sizeControl() {
-    return this.argumentGroup.get('size') as FormControl;
+    return this.form.get('size') as FormControl;
   }
   get maxControl() {
-    return this.argumentGroup.get('max') as FormControl;
+    return this.form.get('max') as FormControl;
   }
   get maxLengthControl() {
-    return this.argumentGroup.get('maxLength') as FormControl;
+    return this.form.get('maxLength') as FormControl;
   }
 
   constructor(
@@ -188,7 +194,30 @@ export class EditInstructionArgumentComponent implements OnInit {
     public data?: {
       instructionArgument?: Document<InstructionArgument>;
     }
-  ) {}
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.instructionArgument?.name ?? '', {
+        validators: [Validators.required],
+      }),
+      kind: new FormControl(this.data?.instructionArgument?.data.kind.id ?? 0, {
+        validators: [Validators.required],
+      }),
+      modifier: new FormControl(
+        this.data?.instructionArgument?.data.modifier !== null
+          ? this.data?.instructionArgument?.data.modifier.id
+          : null
+      ),
+      size: new FormControl(
+        this.data?.instructionArgument?.data.modifier !== null
+          ? this.data?.instructionArgument?.data.modifier.size
+          : null
+      ),
+      max: new FormControl(this.data?.instructionArgument?.data.max ?? null),
+      maxLength: new FormControl(
+        this.data?.instructionArgument?.data.maxLength ?? null
+      ),
+    });
+  }
 
   ngOnInit() {
     this.kindControl.valueChanges
@@ -234,34 +263,19 @@ export class EditInstructionArgumentComponent implements OnInit {
 
         this.sizeControl.updateValueAndValidity();
       });
-
-    if (this.data?.instructionArgument) {
-      this.argumentGroup.setValue(
-        {
-          name: this.data.instructionArgument.name,
-          kind: this.data.instructionArgument.data.kind.id,
-          modifier:
-            this.data.instructionArgument.data?.modifier !== null
-              ? this.data.instructionArgument.data.modifier.id
-              : null,
-          size:
-            this.data.instructionArgument.data?.modifier !== null
-              ? this.data.instructionArgument.data.modifier.size
-              : null,
-          max: this.data.instructionArgument.data.max,
-          maxLength: this.data.instructionArgument.data.maxLength,
-        },
-        { emitEvent: false }
-      );
-    }
   }
 
-  async onEditArgument() {
-    this.submitted = true;
-    this.argumentGroup.markAllAsTouched();
+  ngOnDestroy() {
+    this._destroy.next(null);
+    this._destroy.complete();
+  }
 
-    if (this.argumentGroup.valid) {
-      this._matDialogRef.close(this.argumentGroup.value);
+  onEditArgument() {
+    this.submitted = true;
+    this.form.markAllAsTouched();
+
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

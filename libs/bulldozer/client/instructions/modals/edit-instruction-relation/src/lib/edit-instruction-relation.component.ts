@@ -1,10 +1,4 @@
-import {
-  Component,
-  HostBinding,
-  Inject,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -14,7 +8,6 @@ import {
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
-import { Subject } from 'rxjs';
 
 export const equalValidator =
   (a: string, b: string): ValidatorFn =>
@@ -32,7 +25,7 @@ export const equalValidator =
     <h2 mat-dialog-title class="mat-primary">Create relation</h2>
 
     <form
-      [formGroup]="relationGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditAccount()"
     >
@@ -55,7 +48,7 @@ export const equalValidator =
       </mat-form-field>
 
       <mat-error
-        *ngIf="submitted && relationGroup.hasError('equal')"
+        *ngIf="submitted && form.hasError('equal')"
         class="text-center m-0"
         >Accounts have to be different.</mat-error
       >
@@ -64,7 +57,7 @@ export const equalValidator =
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && relationGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         Create
       </button>
@@ -80,26 +73,10 @@ export const equalValidator =
     </button>
   `,
 })
-export class EditInstructionRelationComponent implements OnInit, OnDestroy {
+export class EditInstructionRelationComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  private readonly _destroy = new Subject();
-  readonly destroy$ = this._destroy.asObservable();
+  readonly form: FormGroup;
   submitted = false;
-  readonly relationGroup = new FormGroup(
-    {
-      from: new FormControl(null, { validators: [Validators.required] }),
-      to: new FormControl(null, { validators: [Validators.required] }),
-    },
-    {
-      validators: [equalValidator('from', 'to')],
-    }
-  );
-  get fromControl() {
-    return this.relationGroup.get('from') as FormControl;
-  }
-  get toControl() {
-    return this.relationGroup.get('to') as FormControl;
-  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -109,32 +86,26 @@ export class EditInstructionRelationComponent implements OnInit, OnDestroy {
       accounts: Document<InstructionAccount>[];
       from: string;
     }
-  ) {}
-
-  ngOnInit() {
-    this.relationGroup.setValue(
+  ) {
+    this.form = new FormGroup(
       {
-        from: this.data.from,
-        to: null,
+        from: new FormControl(this.data.from, {
+          validators: [Validators.required],
+        }),
+        to: new FormControl(null, { validators: [Validators.required] }),
       },
-      { emitEvent: false }
+      {
+        validators: [equalValidator('from', 'to')],
+      }
     );
   }
 
-  ngOnDestroy() {
-    this._destroy.next(null);
-    this._destroy.complete();
-  }
-
-  async onEditAccount() {
+  onEditAccount() {
     this.submitted = true;
-    this.relationGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.relationGroup.valid) {
-      this._matDialogRef.close({
-        from: this.fromControl.value,
-        to: this.toControl.value,
-      });
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

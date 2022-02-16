@@ -5,7 +5,8 @@
     "bulldozer-client",
     "editor",
     "wallet-adapter",
-    "ngx-solana"
+    "ngx-solana",
+    "ngx-websocket"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,

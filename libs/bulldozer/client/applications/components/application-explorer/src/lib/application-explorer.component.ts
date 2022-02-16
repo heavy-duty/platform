@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -42,14 +42,14 @@ import { ApplicationExplorerStore } from './application-explorer.store';
         <bd-collection-explorer
           [connected]="connected"
           [applicationId]="application.id"
-          [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
+          [workspaceId]="workspaceId"
         >
         </bd-collection-explorer>
 
         <bd-instruction-explorer
           [connected]="connected"
           [applicationId]="application.id"
-          [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
+          [workspaceId]="workspaceId"
         >
         </bd-instruction-explorer>
 
@@ -90,35 +90,43 @@ import { ApplicationExplorerStore } from './application-explorer.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ApplicationExplorerStore],
+  providers: [ApplicationsStore],
 })
 export class ApplicationExplorerComponent {
   @Input() connected = false;
-  @Input() set workspaceId(value: string | null) {
-    this._applicationExplorerStore.setWorkspaceId(value);
+
+  private _workspaceId!: string;
+  get workspaceId() {
+    return this._workspaceId;
   }
-  readonly workspaceId$ = this._applicationExplorerStore.workspaceId$;
-  readonly applications$ = this._applicationExplorerStore.applications$;
+  @Input() set workspaceId(value: string) {
+    this._workspaceId = value;
+    this._applicationsStore.setFilters({
+      workspace: value,
+    });
+  }
 
-  constructor(
-    private readonly _applicationExplorerStore: ApplicationExplorerStore
-  ) {}
+  readonly applications$ = this._applicationsStore.applications$;
 
-  onCreateApplication(name: string) {
-    this._applicationExplorerStore.createApplication({
-      applicationName: name,
+  constructor(private readonly _applicationsStore: ApplicationsStore) {}
+
+  onCreateApplication(applicationName: string) {
+    this._applicationsStore.createApplication({
+      workspaceId: this.workspaceId,
+      applicationName,
     });
   }
 
   onUpdateApplication(applicationId: string, applicationName: string) {
-    this._applicationExplorerStore.updateApplication({
+    this._applicationsStore.updateApplication({
       applicationId,
       applicationName,
     });
   }
 
   onDeleteApplication(applicationId: string) {
-    this._applicationExplorerStore.deleteApplication({
+    this._applicationsStore.deleteApplication({
+      workspaceId: this.workspaceId,
       applicationId,
     });
   }

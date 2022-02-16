@@ -1,0 +1,11 @@
+.edit-modal .mat-dialog-container {
+  padding: 0 !important;
+}
+
+.edit-modal .mat-dialog-title {
+  margin: 0 !important;
+}
+
+.connection-menu .mat-menu-content {
+  padding: 0 !important;
+}

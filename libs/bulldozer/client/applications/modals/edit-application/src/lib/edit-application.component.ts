@@ -1,4 +1,4 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,7 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
     </h2>
 
     <form
-      [formGroup]="applicationGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditApplication()"
     >
@@ -29,12 +29,14 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
           autocomplete="off"
           maxlength="32"
         />
-        <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
+        <mat-hint align="end"
+          >{{ form.get('name')?.value?.length || 0 }}/32</mat-hint
+        >
 
-        <mat-error *ngIf="submitted && nameControl.hasError('required')"
+        <mat-error *ngIf="submitted && form.get('name')?.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
+        <mat-error *ngIf="submitted && form.get('name')?.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -43,7 +45,7 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && applicationGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.application ? 'Save' : 'Create' }}
       </button>
@@ -59,18 +61,10 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
     </button>
   `,
 })
-export class EditApplicationComponent implements OnInit {
+export class EditApplicationComponent {
   @HostBinding('class') class = 'block w-72 relative';
+  readonly form: FormGroup;
   submitted = false;
-  readonly applicationGroup = new FormGroup({
-    name: new FormControl('', {
-      validators: [Validators.required, Validators.maxLength(32)],
-    }),
-  });
-
-  get nameControl() {
-    return this.applicationGroup.get('name') as FormControl;
-  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -79,25 +73,20 @@ export class EditApplicationComponent implements OnInit {
     public data?: {
       application?: Document<Application>;
     }
-  ) {}
-
-  ngOnInit() {
-    if (this.data?.application) {
-      this.applicationGroup.setValue(
-        {
-          name: this.data.application.name,
-        },
-        { emitEvent: false }
-      );
-    }
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.application?.name ?? '', {
+        validators: [Validators.required, Validators.maxLength(32)],
+      }),
+    });
   }
 
-  async onEditApplication() {
+  onEditApplication() {
     this.submitted = true;
-    this.applicationGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.applicationGroup.valid) {
-      this._matDialogRef.close({ name: this.nameControl.value });
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

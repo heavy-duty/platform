@@ -1,61 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  InstructionApiService,
-  InstructionSocketService,
-} from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
+import { TabStore } from '@bulldozer-client/core-data-access';
+import { InstructionStore } from '@bulldozer-client/instructions-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
-
-interface ViewModel {
-  instructionId: string | null;
-  instruction: Document<Instruction> | null;
-}
-
-const initialState: ViewModel = {
-  instructionId: null,
-  instruction: null,
-};
+import { ComponentStore } from '@ngrx/component-store';
+import { filter, pairwise, pipe, tap } from 'rxjs';
 
 @Injectable()
-export class InstructionTabStore extends ComponentStore<ViewModel> {
-  private readonly _instructionId$ = this.select(
-    ({ instructionId }) => instructionId
-  );
-  readonly instruction$ = this.select(({ instruction }) => instruction);
-
+export class InstructionTabStore extends ComponentStore<object> {
   constructor(
-    private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionSocketService: InstructionSocketService,
-    private readonly _notificationStore: NotificationStore
+    private readonly _tabStore: TabStore,
+    instructionStore: InstructionStore
   ) {
-    super(initialState);
+    super({});
+
+    this._handleInstructionDeleted(instructionStore.instruction$);
   }
 
-  readonly setInstructionId = this.updater(
-    (state, instructionId: string | null) => ({ ...state, instructionId })
-  );
+  private readonly _handleInstructionDeleted =
+    this.effect<Document<Instruction> | null>(
+      pipe(
+        pairwise(),
+        filter(
+          ([previousInstruction, currentInstruction]) =>
+            previousInstruction !== null && currentInstruction === null
+        ),
+        tap(([instruction]) => {
+          if (instruction !== null) {
+            this._tabStore.closeTab(instruction.id);
+          }
+        })
+      )
+    );
 
-  protected readonly loadInstruction = this.effect(() =>
-    this._instructionId$.pipe(
-      switchMap((instructionId) => {
-        if (instructionId === null) {
-          return EMPTY;
-        }
-
-        return this._instructionApiService.findById(instructionId).pipe(
-          concatMap((instruction) =>
-            this._instructionSocketService
-              .instructionChanges(instructionId)
-              .pipe(startWith(instruction))
-          ),
-          tapResponse(
-            (instruction) => this.patchState({ instruction }),
-            (error) => this._notificationStore.setError({ error })
-          )
-        );
-      })
-    )
-  );
+  closeTab(tabId: string) {
+    this._tabStore.closeTab(tabId);
+  }
 }

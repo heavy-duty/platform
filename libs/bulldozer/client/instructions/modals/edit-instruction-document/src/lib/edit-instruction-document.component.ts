@@ -24,7 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
     </h2>
 
     <form
-      [formGroup]="documentGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditDocument()"
     >
@@ -148,7 +148,7 @@ import { Subject, takeUntil } from 'rxjs';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && documentGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.document ? 'Save' : 'Create' }}
       </button>
@@ -169,32 +169,26 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
+  readonly form: FormGroup;
   submitted = false;
-  readonly documentGroup = new FormGroup({
-    name: new FormControl('', { validators: [Validators.required] }),
-    modifier: new FormControl(null),
-    collection: new FormControl(null, { validators: [Validators.required] }),
-    space: new FormControl(null),
-    payer: new FormControl(null),
-    close: new FormControl(null),
-  });
+
   get nameControl() {
-    return this.documentGroup.get('name') as FormControl;
+    return this.form.get('name') as FormControl;
   }
   get modifierControl() {
-    return this.documentGroup.get('modifier') as FormControl;
+    return this.form.get('modifier') as FormControl;
   }
   get collectionControl() {
-    return this.documentGroup.get('collection') as FormControl;
+    return this.form.get('collection') as FormControl;
   }
   get spaceControl() {
-    return this.documentGroup.get('space') as FormControl;
+    return this.form.get('space') as FormControl;
   }
   get payerControl() {
-    return this.documentGroup.get('payer') as FormControl;
+    return this.form.get('payer') as FormControl;
   }
   get closeControl() {
-    return this.documentGroup.get('close') as FormControl;
+    return this.form.get('close') as FormControl;
   }
 
   constructor(
@@ -206,7 +200,25 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
       collections: Document<Collection>[];
       accounts: Document<InstructionAccount>[];
     }
-  ) {}
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.document?.name ?? '', {
+        validators: [Validators.required],
+      }),
+      modifier: new FormControl(
+        this.data?.document?.data.modifier !== null
+          ? this.data?.document?.data.modifier.id
+          : null
+      ),
+      collection: new FormControl(
+        this.data?.document?.data.kind.collection || null,
+        { validators: [Validators.required] }
+      ),
+      space: new FormControl(this.data?.document?.data.modifier?.space),
+      payer: new FormControl(this.data?.document?.data.modifier?.payer),
+      close: new FormControl(this.data?.document?.data.modifier?.close),
+    });
+  }
 
   ngOnInit() {
     this.modifierControl.valueChanges
@@ -227,23 +239,6 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
         this.spaceControl.updateValueAndValidity();
         this.payerControl.updateValueAndValidity();
       });
-
-    if (this.data?.document) {
-      this.documentGroup.setValue(
-        {
-          name: this.data.document.name,
-          modifier:
-            this.data.document.data.modifier !== null
-              ? this.data.document.data.modifier.id
-              : null,
-          collection: this.data.document.data.kind.collection || null,
-          space: this.data.document.data.modifier?.space || null,
-          payer: this.data.document.data.modifier?.payer || null,
-          close: this.data.document.data.modifier?.close || null,
-        },
-        { emitEvent: false }
-      );
-    }
   }
 
   ngOnDestroy() {
@@ -251,11 +246,11 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     this._destroy.complete();
   }
 
-  async onEditDocument() {
+  onEditDocument() {
     this.submitted = true;
-    this.documentGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.documentGroup.valid) {
+    if (this.form.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
         kind: 0,

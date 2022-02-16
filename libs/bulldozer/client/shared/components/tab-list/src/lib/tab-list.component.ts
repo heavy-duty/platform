@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Tab } from '@bulldozer-client/tab-store';
+import { Tab } from '@bulldozer-client/core-data-access';
 
 @Component({
   selector: 'bd-tab-list',

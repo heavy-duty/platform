@@ -1,12 +1,5 @@
-import {
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { filter, first, pairwise } from 'rxjs';
+import { Component, HostBinding, Input } from '@angular/core';
+import { CollectionStore } from '@bulldozer-client/collections-data-access';
 import { CollectionTabStore } from './collection-tab.store';
 
 @Component({
@@ -38,29 +31,28 @@ import { CollectionTabStore } from './collection-tab.store';
       </button>
     </div>
   `,
-  providers: [CollectionTabStore],
+  providers: [CollectionStore, CollectionTabStore],
 })
-export class CollectionTabComponent implements OnInit {
+export class CollectionTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() set collectionId(value: string | null) {
-    this._collectionTabStore.setCollectionId(value);
-  }
-  @Output() closeTab = new EventEmitter();
-  readonly collection$ = this._collectionTabStore.collection$;
 
-  constructor(private readonly _collectionTabStore: CollectionTabStore) {}
-
-  ngOnInit() {
-    this.collection$
-      .pipe(
-        pairwise(),
-        filter(([, collection]) => collection === null),
-        first()
-      )
-      .subscribe(() => this.onCloseTab());
+  private _collectionId!: string;
+  @Input() set collectionId(value: string) {
+    this._collectionId = value;
+    this._collectionStore.setCollectionId(this.collectionId);
   }
+  get collectionId() {
+    return this._collectionId;
+  }
+
+  readonly collection$ = this._collectionStore.collection$;
+
+  constructor(
+    private readonly _collectionStore: CollectionStore,
+    private readonly _collectionTabStore: CollectionTabStore
+  ) {}
 
   onCloseTab() {
-    this.closeTab.emit();
+    this._collectionTabStore.closeTab(this.collectionId);
   }
 }

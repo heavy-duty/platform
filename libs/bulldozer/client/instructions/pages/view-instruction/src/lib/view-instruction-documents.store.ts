@@ -1,17 +1,19 @@
 import { Injectable } from '@angular/core';
+import { CollectionsStore } from '@bulldozer-client/collections-data-access';
+import {
+  InstructionAccountsStore,
+  InstructionRelationsStore,
+  InstructionStore,
+} from '@bulldozer-client/instructions-data-access';
 import {
   Collection,
   Document,
+  Instruction,
   InstructionAccount,
   InstructionRelation,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, tap } from 'rxjs';
-import { ViewCollectionsStore } from './view-collections.store';
-import { ViewInstructionAccountsStore } from './view-instruction-accounts.store';
-import { ViewInstructionRelationsStore } from './view-instruction-relations.store';
-import { ViewInstructionStore } from './view-instruction.store';
 
 export interface InstructionDocumentRelation
   extends Relation<InstructionRelation> {
@@ -42,93 +44,103 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _viewInstructionStore: ViewInstructionStore,
-    private readonly _viewInstructionAccountsStore: ViewInstructionAccountsStore,
-    private readonly _viewCollectionsStore: ViewCollectionsStore,
-    private readonly _viewInstructionRelationsStore: ViewInstructionRelationsStore
+    instructionStore: InstructionStore,
+    instructionAccountsStore: InstructionAccountsStore,
+    collectionsStore: CollectionsStore,
+    instructionRelationsStore: InstructionRelationsStore
   ) {
     super(initialState);
-  }
 
-  protected readonly _loadDocuments = this.effect(() =>
-    combineLatest({
-      instruction: this._viewInstructionStore.instruction$,
-      instructionAccounts:
-        this._viewInstructionAccountsStore.instructionAccounts$,
-      instructionRelations:
-        this._viewInstructionRelationsStore.instructionRelations$,
-      collections: this._viewCollectionsStore.collections$,
-    }).pipe(
-      tap(
-        ({
+    this._loadDocuments(
+      this.select(
+        instructionStore.instruction$,
+        instructionAccountsStore.instructionAccounts$,
+        instructionRelationsStore.instructionRelations$,
+        collectionsStore.collections$,
+        (
+          instruction,
+          instructionAccounts,
+          instructionRelations,
+          collections
+        ) => ({
           instruction,
           instructionAccounts,
           instructionRelations,
           collections,
-        }) =>
-          this.patchState({
-            instructionDocuments: instruction
-              ? instructionAccounts
-                  .filter(
-                    ({ data }) =>
-                      data.instruction === instruction.id && data.kind.id === 0
-                  )
-                  .map((instructionAccount) => ({
-                    ...instructionAccount,
-                    relations: instructionRelations
-                      .filter(({ from }) => from === instructionAccount.id)
-                      .reduce(
-                        (
-                          relations: (Relation<InstructionRelation> & {
-                            extras: { to: Document<InstructionAccount> };
-                          })[],
-                          instructionRelation
-                        ) => {
-                          const toAccount = instructionAccounts.find(
-                            ({ id }) => id === instructionRelation.to
-                          );
-
-                          return toAccount
-                            ? [
-                                ...relations,
-                                {
-                                  ...instructionRelation,
-                                  extras: { to: toAccount },
-                                },
-                              ]
-                            : relations;
-                        },
-                        []
-                      ),
-                    collection: collections.reduce(
-                      (found: Document<Collection> | null, collection) =>
-                        !found &&
-                        instructionAccount.data.kind.collection ===
-                          collection.id
-                          ? collection
-                          : null,
-                      null
-                    ),
-                    payer: instructionAccounts.reduce(
-                      (found: Document<InstructionAccount> | null, payer) =>
-                        !found &&
-                        instructionAccount.data.modifier?.payer === payer.id
-                          ? payer
-                          : null,
-                      null
-                    ),
-                    close: instructionAccounts.reduce(
-                      (found: Document<InstructionAccount> | null, close) =>
-                        !found &&
-                        instructionAccount.data.modifier?.close === close.id
-                          ? close
-                          : null,
-                      null
-                    ),
-                  }))
-              : [],
-          })
+        }),
+        { debounce: true }
       )
-    )
+    );
+  }
+
+  private readonly _loadDocuments = this.updater<{
+    instruction: Document<Instruction> | null;
+    instructionAccounts: Document<InstructionAccount>[];
+    instructionRelations: Relation<InstructionRelation>[];
+    collections: Document<Collection>[];
+  }>(
+    (
+      state,
+      { instruction, instructionAccounts, instructionRelations, collections }
+    ) => ({
+      ...state,
+      instructionDocuments: instruction
+        ? instructionAccounts
+            .filter(
+              ({ data }) =>
+                data.instruction === instruction.id && data.kind.id === 0
+            )
+            .map((instructionAccount) => ({
+              ...instructionAccount,
+              relations: instructionRelations
+                .filter(({ from }) => from === instructionAccount.id)
+                .reduce(
+                  (
+                    relations: (Relation<InstructionRelation> & {
+                      extras: { to: Document<InstructionAccount> };
+                    })[],
+                    instructionRelation
+                  ) => {
+                    const toAccount = instructionAccounts.find(
+                      ({ id }) => id === instructionRelation.to
+                    );
+
+                    return toAccount
+                      ? [
+                          ...relations,
+                          {
+                            ...instructionRelation,
+                            extras: { to: toAccount },
+                          },
+                        ]
+                      : relations;
+                  },
+                  []
+                ),
+              collection: collections.reduce(
+                (found: Document<Collection> | null, collection) =>
+                  !found &&
+                  instructionAccount.data.kind.collection === collection.id
+                    ? collection
+                    : null,
+                null
+              ),
+              payer: instructionAccounts.reduce(
+                (found: Document<InstructionAccount> | null, payer) =>
+                  !found && instructionAccount.data.modifier?.payer === payer.id
+                    ? payer
+                    : null,
+                null
+              ),
+              close: instructionAccounts.reduce(
+                (found: Document<InstructionAccount> | null, close) =>
+                  !found && instructionAccount.data.modifier?.close === close.id
+                    ? close
+                    : null,
+                null
+              ),
+            }))
+        : [],
+    })
   );
 }

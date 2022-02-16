@@ -10,6 +10,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
         </figure>
         <h2 class="mt-4 text-center">BULLDOZER</h2>
         <bd-application-explorer
+          *ngIf="workspaceId !== null"
           [connected]="connected"
           [workspaceId]="workspaceId"
         ></bd-application-explorer>

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { ViewApplicationRouteStore } from './view-application-route.store';
+import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { ViewApplicationStore } from './view-application.store';
 
 @Component({
@@ -18,11 +18,18 @@ import { ViewApplicationStore } from './view-application.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ViewApplicationStore, ViewApplicationRouteStore],
+  providers: [ViewApplicationStore, ApplicationStore],
 })
 export class ViewApplicationComponent {
   @HostBinding('class') class = 'block p-4';
-  readonly application$ = this._viewApplicationStore.application$;
+  readonly application$ = this._applicationStore.application$;
 
-  constructor(private readonly _viewApplicationStore: ViewApplicationStore) {}
+  constructor(
+    private readonly _applicationStore: ApplicationStore,
+    private readonly _viewApplicationStore: ViewApplicationStore
+  ) {
+    this._applicationStore.setApplicationId(
+      this._viewApplicationStore.applicationId$
+    );
+  }
 }

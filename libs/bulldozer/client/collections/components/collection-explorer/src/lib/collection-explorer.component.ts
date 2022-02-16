@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CollectionExplorerStore } from './collection-explorer.store';
+import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 
 @Component({
   selector: 'bd-collection-explorer',
@@ -74,38 +74,49 @@ import { CollectionExplorerStore } from './collection-explorer.store';
       </mat-nav-list>
     </mat-expansion-panel>
   `,
-  providers: [CollectionExplorerStore],
+  providers: [CollectionsStore],
 })
 export class CollectionExplorerComponent {
   @Input() connected = false;
-  @Input() set applicationId(value: string | null) {
-    this._collectionExplorerStore.setApplicationId(value);
-  }
-  @Input() set workspaceId(value: string | null) {
-    this._collectionExplorerStore.setWorkspaceId(value);
-  }
-  readonly applicationId$ = this._collectionExplorerStore.applicationId$;
-  readonly collections$ = this._collectionExplorerStore.collections$;
 
-  constructor(
-    private readonly _collectionExplorerStore: CollectionExplorerStore
-  ) {}
+  private _workspaceId!: string;
+  @Input() set workspaceId(value: string) {
+    this._workspaceId = value;
+  }
+  get workspaceId() {
+    return this._workspaceId;
+  }
 
-  onCreateCollection(name: string) {
-    this._collectionExplorerStore.createCollection({
-      collectionName: name,
+  private _applicationId!: string;
+  @Input() set applicationId(value: string) {
+    this._applicationId = value;
+    this._collectionsStore.setFilters({
+      application: this.applicationId,
     });
   }
+  get applicationId() {
+    return this._applicationId;
+  }
 
-  onUpdateCollection(collectionId: string, collectionName: string) {
-    this._collectionExplorerStore.updateCollection({
-      collectionId,
+  readonly collections$ = this._collectionsStore.collections$;
+
+  constructor(private readonly _collectionsStore: CollectionsStore) {}
+
+  onCreateCollection(collectionName: string) {
+    this._collectionsStore.createCollection({
+      workspaceId: this.workspaceId,
+      applicationId: this.applicationId,
       collectionName,
     });
   }
 
+  onUpdateCollection(collectionId: string, collectionName: string) {
+    this._collectionsStore.updateCollection({ collectionId, collectionName });
+  }
+
   onDeleteCollection(collectionId: string) {
-    this._collectionExplorerStore.deleteCollection({
+    this._collectionsStore.deleteCollection({
+      applicationId: this.applicationId,
       collectionId,
     });
   }

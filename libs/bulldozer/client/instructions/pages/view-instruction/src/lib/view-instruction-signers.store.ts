@@ -1,9 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
+import {
+  InstructionAccountsStore,
+  InstructionStore,
+} from '@bulldozer-client/instructions-data-access';
+import {
+  Document,
+  Instruction,
+  InstructionAccount,
+} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, tap } from 'rxjs';
-import { ViewInstructionAccountsStore } from './view-instruction-accounts.store';
-import { ViewInstructionStore } from './view-instruction.store';
 
 interface ViewModel {
   instructionSigners: Document<InstructionAccount>[];
@@ -20,28 +25,34 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _viewInstructionStore: ViewInstructionStore,
-    private readonly _viewInstructionAccountsStore: ViewInstructionAccountsStore
+    instructionStore: InstructionStore,
+    instructionAccountsStore: InstructionAccountsStore
   ) {
     super(initialState);
+
+    this._loadSigners(
+      this.select(
+        instructionStore.instruction$,
+        instructionAccountsStore.instructionAccounts$,
+        (instruction, instructionAccounts) => ({
+          instruction,
+          instructionAccounts,
+        }),
+        { debounce: true }
+      )
+    );
   }
 
-  protected readonly _loadSigners = this.effect(() =>
-    combineLatest({
-      instruction: this._viewInstructionStore.instruction$,
-      instructionAccounts:
-        this._viewInstructionAccountsStore.instructionAccounts$,
-    }).pipe(
-      tap(({ instruction, instructionAccounts }) =>
-        this.patchState({
-          instructionSigners: instruction
-            ? instructionAccounts.filter(
-                ({ data }) =>
-                  data.instruction === instruction.id && data.kind.id === 1
-              )
-            : [],
-        })
-      )
-    )
-  );
+  private readonly _loadSigners = this.updater<{
+    instruction: Document<Instruction> | null;
+    instructionAccounts: Document<InstructionAccount>[];
+  }>((state, { instruction, instructionAccounts }) => ({
+    ...state,
+    instructionSigners: instruction
+      ? instructionAccounts.filter(
+          ({ data }) =>
+            data.instruction === instruction.id && data.kind.id === 1
+        )
+      : [],
+  }));
 }

@@ -5,7 +5,9 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
-import { ConfigStore } from '@bulldozer-client/config-store';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
+import { PublicKey } from '@solana/web3.js';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -17,107 +19,120 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
         }}
       </button>
-      <mat-menu #menu="matMenu" class="px-4 py-2">
-        <mat-list role="list" class="p-0" bdStopPropagation>
-          <mat-list-item
-            *ngFor="let workspace of workspaces$ | ngrxPush"
-            role="listitem"
-            class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
-            [ngClass]="{
-              'border-b-primary': activeWorkspace?.id === workspace.id
-            }"
-          >
-            <div class="w-full">
-              <p class="text-xl font-bold mb-0 flex justify-between">
-                <span
-                  class="flex-grow leading-8 overflow-hidden"
-                  [matTooltip]="workspace.name"
-                  matTooltipShowDelay="500"
-                >
-                  {{ workspace.name }}
-                </span>
-                <button
-                  mat-icon-button
-                  color="primary"
-                  class="w-8 h-8 leading-8 flex-shrink-0"
-                  [attr.aria-label]="
-                    'Download ' + workspace.name + ' workspace'
-                  "
-                  (click)="onDownloadWorkspace(workspace.id)"
-                >
-                  <mat-icon>download</mat-icon>
-                </button>
-              </p>
+      <mat-menu #menu="matMenu">
+        <div class="px-4 py-2" bdStopPropagation>
+          <mat-list role="list">
+            <mat-list-item
+              *ngFor="let workspace of workspaces$ | ngrxPush"
+              role="listitem"
+              class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
+              [ngClass]="{
+                'border-b-primary': activeWorkspace?.id === workspace.id
+              }"
+            >
+              <div class="w-full">
+                <p class="text-xl font-bold mb-0 flex justify-between">
+                  <span
+                    class="flex-grow leading-8 overflow-hidden"
+                    [matTooltip]="workspace.name"
+                    matTooltipShowDelay="500"
+                  >
+                    {{ workspace.name }}
+                  </span>
+                  <button
+                    mat-icon-button
+                    color="primary"
+                    class="w-8 h-8 leading-8 flex-shrink-0"
+                    [attr.aria-label]="
+                      'Download ' + workspace.name + ' workspace'
+                    "
+                    (click)="onDownloadWorkspace(workspace.id)"
+                  >
+                    <mat-icon>download</mat-icon>
+                  </button>
+                </p>
 
-              <p class="mb-2">
-                <a
-                  class="text-xs"
-                  [routerLink]="['/workspaces', workspace.id]"
-                  [ngClass]="{
-                    'underline text-primary':
-                      activeWorkspace?.id !== workspace.id,
-                    'opacity-50 italic': activeWorkspace?.id === workspace.id
-                  }"
-                  (click)="onActivateWorkspace(workspace.id)"
-                >
-                  {{
-                    activeWorkspace?.id === workspace.id ? 'Active' : 'Activate'
-                  }}
-                </a>
-              </p>
+                <p class="mb-2">
+                  <a
+                    class="text-xs"
+                    [routerLink]="['/workspaces', workspace.id]"
+                    [ngClass]="{
+                      'underline text-primary':
+                        activeWorkspace?.id !== workspace.id,
+                      'opacity-50 italic': activeWorkspace?.id === workspace.id
+                    }"
+                    (click)="onActivateWorkspace(workspace.id)"
+                  >
+                    {{
+                      activeWorkspace?.id === workspace.id
+                        ? 'Active'
+                        : 'Activate'
+                    }}
+                  </a>
+                </p>
 
-              <div>
-                <button
-                  class="mr-2"
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  bdEditWorkspaceTrigger
-                  [workspace]="workspace"
-                  (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
-                  [disabled]="!connected"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  (click)="onDeleteWorkspace(workspace.id)"
-                  [disabled]="!connected"
-                >
-                  Delete
-                </button>
+                <div>
+                  <button
+                    class="mr-2"
+                    type="button"
+                    mat-raised-button
+                    color="primary"
+                    bdEditWorkspaceTrigger
+                    [workspace]="workspace"
+                    (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
+                    [disabled]="!connected"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    mat-raised-button
+                    color="primary"
+                    (click)="onDeleteWorkspace(workspace.id)"
+                    [disabled]="!connected"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          </mat-list-item>
-        </mat-list>
+            </mat-list-item>
+          </mat-list>
 
-        <button
-          class="w-full h-12"
-          type="button"
-          mat-raised-button
-          color="primary"
-          bdEditWorkspaceTrigger
-          (editWorkspace)="onCreateWorkspace($event)"
-          [disabled]="!connected"
-        >
-          New workspace
-        </button>
+          <button
+            class="w-full h-12"
+            type="button"
+            mat-raised-button
+            color="primary"
+            bdEditWorkspaceTrigger
+            (editWorkspace)="onCreateWorkspace($event)"
+            [disabled]="!connected"
+          >
+            New workspace
+          </button>
+        </div>
       </mat-menu>
     </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WorkspaceSelectorStore],
+  providers: [WorkspacesStore, WorkspaceSelectorStore],
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
+
   @Input() connected = false;
+
+  @Input() set walletPublicKey(value: PublicKey | null) {
+    if (value !== null) {
+      this._workspacesStore.setFilters({ authority: value.toBase58() });
+    }
+  }
+
   readonly workspace$ = this._workspaceSelectorStore.workspace$;
-  readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
+  readonly workspaces$ = this._workspacesStore.workspaces$;
 
   constructor(
+    private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
     private readonly _configStore: ConfigStore
   ) {}
@@ -130,25 +145,22 @@ export class WorkspaceSelectorComponent {
 
   onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.createWorkspace({ workspaceName });
+    this._workspacesStore.createWorkspace(workspaceName);
   }
 
   onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.updateWorkspace({
-      workspaceId,
-      workspaceName,
-    });
+    this._workspacesStore.updateWorkspace({ workspaceId, workspaceName });
   }
 
   onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.deleteWorkspace({ workspaceId });
+    this._workspacesStore.deleteWorkspace(workspaceId);
   }
 
   onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.downloadWorkspace({ workspaceId });
+    this._workspaceSelectorStore.downloadWorkspace(workspaceId);
   }
 
   onActivateWorkspace(workspaceId: string) {

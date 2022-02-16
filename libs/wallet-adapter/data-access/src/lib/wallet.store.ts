@@ -1,4 +1,5 @@
 import { Inject, Injectable, InjectionToken } from '@angular/core';
+import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import {
   Adapter,
@@ -39,7 +40,6 @@ import {
 import {
   fromAdapterEvent,
   handleEvent,
-  LocalStorageSubject,
   signAllTransactions,
   signMessage,
   signTransaction,

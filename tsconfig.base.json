@@ -26,7 +26,10 @@
         "libs/bulldozer/client/applications/data-access/src/index.ts"
       ],
       "@bulldozer-client/auth-guard": [
-        "libs/bulldozer/client/shared/guards/auth-guard/src/index.ts"
+        "libs/bulldozer/client/auth/utils/auth-guard/src/index.ts"
+      ],
+      "@bulldozer-client/auth-interceptor": [
+        "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
       ],
       "@bulldozer-client/code-editor": [
         "libs/bulldozer/client/shared/components/code-editor/src/index.ts"
@@ -45,6 +48,9 @@
       ],
       "@bulldozer-client/config-store": [
         "libs/bulldozer/client/shared/stores/config-store/src/index.ts"
+      ],
+      "@bulldozer-client/core-data-access": [
+        "libs/bulldozer/client/core/data-access/src/index.ts"
       ],
       "@bulldozer-client/dark-theme": [
         "libs/bulldozer/client/shared/directives/dark-theme/src/index.ts"
@@ -99,6 +105,9 @@
       ],
       "@bulldozer-client/instructions-data-access": [
         "libs/bulldozer/client/instructions/data-access/src/index.ts"
+      ],
+      "@bulldozer-client/internet-connectivity": [
+        "libs/bulldozer/client/shared/directives/internet-connectivity/src/index.ts"
       ],
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"
@@ -156,7 +165,12 @@
         "libs/bulldozer/shared/store/src/index.ts"
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
-      "@heavy-duty/ngx-solana": ["libs/ngx-solana/src/index.ts"],
+      "@heavy-duty/ngx-solana": ["libs/ngx-solana/data-access/src/index.ts"],
+      "@heavy-duty/ngx-solana-cdk": ["libs/ngx-solana/ui/cdk/src/index.ts"],
+      "@heavy-duty/ngx-solana-material": [
+        "libs/ngx-solana/ui/material/src/index.ts"
+      ],
+      "@heavy-duty/ngx-websocket": ["libs/ngx-websocket/src/index.ts"],
       "@heavy-duty/rx-solana": ["libs/rx-solana/src/index.ts"],
       "@heavy-duty/rxjs": ["libs/rxjs/src/index.ts"],
       "@heavy-duty/shared/utils/operators": [

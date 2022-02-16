@@ -1,72 +1,44 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/notification-store';
-import { TabStore } from '@bulldozer-client/tab-store';
-import {
-  WorkspaceApiService,
-  WorkspaceSocketService,
-} from '@bulldozer-client/workspaces-data-access';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
-import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { TabStore } from '@bulldozer-client/core-data-access';
+import { ComponentStore } from '@ngrx/component-store';
+import { tap } from 'rxjs';
 
 interface ViewModel {
-  workspace: Document<Workspace> | null;
-  error: unknown | null;
+  workspaceId: string | null;
 }
 
 const initialState: ViewModel = {
-  workspace: null,
-  error: null,
+  workspaceId: null,
 };
 
 @Injectable()
 export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
-  readonly workspace$ = this.select(({ workspace }) => workspace);
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
-  constructor(
-    private readonly _tabStore: TabStore,
-    private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _workspaceSocketService: WorkspaceSocketService,
-    private readonly _viewWorkspaceRouteStore: ViewWorkspaceRouteStore,
-    private readonly _notificationStore: NotificationStore
-  ) {
+  constructor(private readonly _tabStore: TabStore, route: ActivatedRoute) {
     super(initialState);
+
+    this._openTab(this.workspaceId$);
+    this._setRouteParameters(route.paramMap);
   }
 
-  protected readonly loadWorkspace = this.effect(() =>
-    this._viewWorkspaceRouteStore.workspaceId$.pipe(
-      switchMap((workspaceId) => {
-        if (workspaceId === null) {
-          return EMPTY;
-        }
-
-        return this._workspaceApiService.findById(workspaceId).pipe(
-          concatMap((workspace) =>
-            this._workspaceSocketService
-              .workspaceChanges(workspaceId)
-              .pipe(startWith(workspace))
-          ),
-          tapResponse(
-            (workspace) => this.patchState({ workspace }),
-            (error) => this._notificationStore.setError({ error })
-          )
-        );
-      })
-    )
+  private readonly _setRouteParameters = this.updater<ParamMap>(
+    (state, paramMap) => ({
+      ...state,
+      workspaceId: paramMap.get('workspaceId'),
+    })
   );
 
-  protected readonly openTab = this.effect(() =>
-    this.workspace$.pipe(
-      isNotNullOrUndefined,
-      tap((workspace) =>
+  private readonly _openTab = this.effect<string | null>(
+    tap((workspaceId) => {
+      if (workspaceId !== null) {
         this._tabStore.openTab({
-          id: workspace.id,
+          id: workspaceId,
           kind: 'workspace',
-          url: `/workspaces/${workspace.id}`,
-        })
-      )
-    )
+          url: `/workspaces/${workspaceId}`,
+        });
+      }
+    })
   );
 }

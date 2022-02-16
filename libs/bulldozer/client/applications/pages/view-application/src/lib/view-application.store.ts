@@ -1,72 +1,61 @@
 import { Injectable } from '@angular/core';
-import {
-  ApplicationApiService,
-  ApplicationSocketService,
-} from '@bulldozer-client/applications-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
-import { TabStore } from '@bulldozer-client/tab-store';
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap, tap } from 'rxjs';
-import { ViewApplicationRouteStore } from './view-application-route.store';
+import { ActivatedRoute, ParamMap } from '@angular/router';
+import { TabStore } from '@bulldozer-client/core-data-access';
+import { ComponentStore } from '@ngrx/component-store';
+import { tap } from 'rxjs';
 
 interface ViewModel {
-  application: Document<Application> | null;
-  error: unknown | null;
+  workspaceId: string | null;
+  applicationId: string | null;
 }
 
 const initialState: ViewModel = {
-  application: null,
-  error: null,
+  workspaceId: null,
+  applicationId: null,
 };
 
 @Injectable()
 export class ViewApplicationStore extends ComponentStore<ViewModel> {
-  readonly application$ = this.select(({ application }) => application);
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  readonly applicationId$ = this.select(({ applicationId }) => applicationId);
 
-  constructor(
-    private readonly _tabStore: TabStore,
-    private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationSocketService: ApplicationSocketService,
-    private readonly _viewApplicationRouteStore: ViewApplicationRouteStore,
-    private readonly _notificationStore: NotificationStore
-  ) {
+  constructor(private readonly _tabStore: TabStore, route: ActivatedRoute) {
     super(initialState);
+
+    this._openTab(
+      this.select(
+        this.applicationId$,
+        this.workspaceId$,
+        (applicationId, workspaceId) => ({
+          applicationId,
+          workspaceId,
+        }),
+        { debounce: true }
+      )
+    );
+    this._setRouteParameters(route.paramMap);
   }
 
-  protected readonly loadApplication = this.effect(() =>
-    this._viewApplicationRouteStore.applicationId$.pipe(
-      switchMap((applicationId) => {
-        if (applicationId === null) {
-          return EMPTY;
-        }
-
-        return this._applicationApiService.findById(applicationId).pipe(
-          concatMap((application) =>
-            this._applicationSocketService
-              .applicationChanges(applicationId)
-              .pipe(startWith(application))
-          ),
-          tapResponse(
-            (application) => this.patchState({ application }),
-            (error) => this._notificationStore.setError({ error })
-          )
-        );
-      })
-    )
+  private readonly _setRouteParameters = this.updater<ParamMap>(
+    (state, paramMap) => ({
+      ...state,
+      workspaceId: paramMap.get('workspaceId'),
+      applicationId: paramMap.get('applicationId'),
+    })
   );
 
-  protected readonly openTab = this.effect(() =>
-    this.application$.pipe(
-      isNotNullOrUndefined,
-      tap((application) =>
+  private readonly _openTab = this.effect<{
+    applicationId: string | null;
+    workspaceId: string | null;
+  }>(
+    tap(({ applicationId, workspaceId }) => {
+      if (applicationId !== null && workspaceId !== null) {
         this._tabStore.openTab({
-          id: application.id,
+          id: applicationId,
           kind: 'application',
-          url: `/workspaces/${application.data.workspace}/applications/${application.id}`,
-        })
-      )
-    )
+          url: `/workspaces/${workspaceId}/applications/${applicationId}`,
+        });
+      }
+    })
   );
 }

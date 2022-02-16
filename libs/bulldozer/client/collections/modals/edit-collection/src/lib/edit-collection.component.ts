@@ -1,4 +1,4 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,7 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
     </h2>
 
     <form
-      [formGroup]="collectionGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditCollection()"
     >
@@ -29,12 +29,16 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
           autocomplete="off"
           maxlength="32"
         />
-        <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
+        <mat-hint align="end"
+          >{{ this.form.get('name')?.value?.length || 0 }}/32</mat-hint
+        >
 
-        <mat-error *ngIf="submitted && nameControl.hasError('required')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -43,7 +47,7 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && collectionGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.collection ? 'Save' : 'Create' }}
       </button>
@@ -59,18 +63,10 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
     </button>
   `,
 })
-export class EditCollectionComponent implements OnInit {
+export class EditCollectionComponent {
   @HostBinding('class') class = 'block w-72 relative';
+  readonly form: FormGroup;
   submitted = false;
-  readonly collectionGroup = new FormGroup({
-    name: new FormControl('', {
-      validators: [Validators.required, Validators.maxLength(32)],
-    }),
-  });
-
-  get nameControl() {
-    return this.collectionGroup.get('name') as FormControl;
-  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -79,27 +75,20 @@ export class EditCollectionComponent implements OnInit {
     public data?: {
       collection?: Document<Collection>;
     }
-  ) {}
-
-  ngOnInit() {
-    if (this.data?.collection) {
-      this.collectionGroup.setValue(
-        {
-          name: this.data.collection.name,
-        },
-        { emitEvent: false }
-      );
-    }
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.collection?.name ?? '', {
+        validators: [Validators.required, Validators.maxLength(32)],
+      }),
+    });
   }
 
-  async onEditCollection() {
+  onEditCollection() {
     this.submitted = true;
-    this.collectionGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.collectionGroup.valid) {
-      this._matDialogRef.close({
-        name: this.nameControl.value,
-      });
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

@@ -1,61 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  CollectionApiService,
-  CollectionSocketService,
-} from '@bulldozer-client/collections-data-access';
-import { NotificationStore } from '@bulldozer-client/notification-store';
+import { CollectionStore } from '@bulldozer-client/collections-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
-
-interface ViewModel {
-  collectionId: string | null;
-  collection: Document<Collection> | null;
-}
-
-const initialState: ViewModel = {
-  collectionId: null,
-  collection: null,
-};
+import { ComponentStore } from '@ngrx/component-store';
+import { filter, pairwise, pipe, tap } from 'rxjs';
 
 @Injectable()
-export class CollectionTabStore extends ComponentStore<ViewModel> {
-  private readonly _collectionId$ = this.select(
-    ({ collectionId }) => collectionId
-  );
-  readonly collection$ = this.select(({ collection }) => collection);
-
+export class CollectionTabStore extends ComponentStore<object> {
   constructor(
-    private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionSocketService: CollectionSocketService,
-    private readonly _notificationStore: NotificationStore
+    private readonly _tabStore: TabStore,
+    collectionStore: CollectionStore
   ) {
-    super(initialState);
+    super({});
+
+    this._handleCollectionDeleted(collectionStore.collection$);
   }
 
-  readonly setCollectionId = this.updater(
-    (state, collectionId: string | null) => ({ ...state, collectionId })
-  );
+  private readonly _handleCollectionDeleted =
+    this.effect<Document<Collection> | null>(
+      pipe(
+        pairwise(),
+        filter(
+          ([previousCollection, currentCollection]) =>
+            previousCollection !== null && currentCollection === null
+        ),
+        tap(([collection]) => {
+          if (collection !== null) {
+            this._tabStore.closeTab(collection.id);
+          }
+        })
+      )
+    );
 
-  protected readonly loadCollection = this.effect(() =>
-    this._collectionId$.pipe(
-      switchMap((collectionId) => {
-        if (collectionId === null) {
-          return EMPTY;
-        }
-
-        return this._collectionApiService.findById(collectionId).pipe(
-          concatMap((collection) =>
-            this._collectionSocketService
-              .collectionChanges(collectionId)
-              .pipe(startWith(collection))
-          ),
-          tapResponse(
-            (collection) => this.patchState({ collection }),
-            (error) => this._notificationStore.setError({ error })
-          )
-        );
-      })
-    )
-  );
+  closeTab(tabId: string) {
+    this._tabStore.closeTab(tabId);
+  }
 }
