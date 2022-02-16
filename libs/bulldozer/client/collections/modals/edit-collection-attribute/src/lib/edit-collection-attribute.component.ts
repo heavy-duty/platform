@@ -19,7 +19,7 @@ import { Subject, takeUntil } from 'rxjs';
     </h2>
 
     <form
-      [formGroup]="attributeGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditAttribute()"
     >
@@ -138,7 +138,7 @@ import { Subject, takeUntil } from 'rxjs';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && attributeGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.collectionAttribute ? 'Save' : 'Create' }}
       </button>
@@ -159,32 +159,25 @@ export class EditCollectionAttributeComponent implements OnInit, OnDestroy {
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
   submitted = false;
-  readonly attributeGroup = new FormGroup({
-    name: new FormControl('', { validators: [Validators.required] }),
-    kind: new FormControl(0, { validators: [Validators.required] }),
-    modifier: new FormControl(null),
-    size: new FormControl(null),
-    max: new FormControl(null),
-    maxLength: new FormControl(null),
-  });
+  readonly form: FormGroup;
 
   get nameControl() {
-    return this.attributeGroup.get('name') as FormControl;
+    return this.form.get('name') as FormControl;
   }
   get kindControl() {
-    return this.attributeGroup.get('kind') as FormControl;
+    return this.form.get('kind') as FormControl;
   }
   get modifierControl() {
-    return this.attributeGroup.get('modifier') as FormControl;
+    return this.form.get('modifier') as FormControl;
   }
   get sizeControl() {
-    return this.attributeGroup.get('size') as FormControl;
+    return this.form.get('size') as FormControl;
   }
   get maxControl() {
-    return this.attributeGroup.get('max') as FormControl;
+    return this.form.get('max') as FormControl;
   }
   get maxLengthControl() {
-    return this.attributeGroup.get('maxLength') as FormControl;
+    return this.form.get('maxLength') as FormControl;
   }
 
   constructor(
@@ -192,7 +185,30 @@ export class EditCollectionAttributeComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditCollectionAttributeComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: { collectionAttribute?: Document<CollectionAttribute> }
-  ) {}
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.collectionAttribute?.name ?? '', {
+        validators: [Validators.required],
+      }),
+      kind: new FormControl(this.data?.collectionAttribute?.data.kind.id ?? 0, {
+        validators: [Validators.required],
+      }),
+      modifier: new FormControl(
+        this.data?.collectionAttribute?.data.modifier !== null
+          ? this.data?.collectionAttribute?.data.modifier.id
+          : null
+      ),
+      size: new FormControl(
+        this.data?.collectionAttribute?.data.modifier !== null
+          ? this.data?.collectionAttribute?.data.modifier.size
+          : null
+      ),
+      max: new FormControl(this.data?.collectionAttribute?.data.max ?? null),
+      maxLength: new FormControl(
+        this.data?.collectionAttribute?.data.maxLength ?? null
+      ),
+    });
+  }
 
   ngOnInit() {
     this.kindControl.valueChanges
@@ -238,26 +254,6 @@ export class EditCollectionAttributeComponent implements OnInit, OnDestroy {
 
         this.sizeControl.updateValueAndValidity();
       });
-
-    if (this.data?.collectionAttribute) {
-      this.attributeGroup.setValue(
-        {
-          name: this.data.collectionAttribute.name,
-          kind: this.data.collectionAttribute.data.kind.id,
-          modifier:
-            this.data.collectionAttribute.data.modifier !== null
-              ? this.data.collectionAttribute.data.modifier.id
-              : null,
-          size:
-            this.data.collectionAttribute.data.modifier !== null
-              ? this.data.collectionAttribute.data.modifier.size
-              : null,
-          max: this.data.collectionAttribute.data.max,
-          maxLength: this.data.collectionAttribute.data.maxLength,
-        },
-        { emitEvent: false }
-      );
-    }
   }
 
   ngOnDestroy() {
@@ -265,12 +261,12 @@ export class EditCollectionAttributeComponent implements OnInit, OnDestroy {
     this._destroy.complete();
   }
 
-  async onEditAttribute() {
+  onEditAttribute() {
     this.submitted = true;
-    this.attributeGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.attributeGroup.valid) {
-      this._matDialogRef.close(this.attributeGroup.value);
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

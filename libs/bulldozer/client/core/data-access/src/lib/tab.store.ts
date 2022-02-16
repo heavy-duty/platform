@@ -67,7 +67,7 @@ export class TabStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly openTab = this.updater<Tab>((state, newTab) => {
+  private readonly _openTab = this.updater<Tab>((state, newTab) => {
     const oldTab = state.tabs.find((tab) => tab.id === newTab.id);
 
     return {
@@ -77,7 +77,7 @@ export class TabStore extends ComponentStore<ViewModel> {
     };
   });
 
-  readonly closeTab = this.effect<string>(
+  private readonly _closeTab = this.effect<string>(
     pipe(
       tap((tabId) => this._removeTab(tabId)),
       concatMap(() =>
@@ -96,4 +96,12 @@ export class TabStore extends ComponentStore<ViewModel> {
       })
     )
   );
+
+  openTab(tab: Tab) {
+    this._openTab(tab);
+  }
+
+  closeTab(tabId: string) {
+    this._closeTab(tabId);
+  }
 }

@@ -1,12 +1,5 @@
-import {
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { filter, first, pairwise } from 'rxjs';
+import { Component, HostBinding, Input } from '@angular/core';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceTabStore } from './workspace-tab.store';
 
 @Component({
@@ -33,29 +26,28 @@ import { WorkspaceTabStore } from './workspace-tab.store';
       </button>
     </div>
   `,
-  providers: [WorkspaceTabStore],
+  providers: [WorkspaceStore, WorkspaceTabStore],
 })
-export class WorkspaceTabComponent implements OnInit {
+export class WorkspaceTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() set workspaceId(value: string | null) {
-    this._workspaceTabStore.setWorkspaceId(value);
-  }
-  @Output() closeTab = new EventEmitter();
-  readonly workspace$ = this._workspaceTabStore.workspace$;
 
-  constructor(private readonly _workspaceTabStore: WorkspaceTabStore) {}
-
-  ngOnInit() {
-    this.workspace$
-      .pipe(
-        pairwise(),
-        filter(([, workspace]) => workspace === null),
-        first()
-      )
-      .subscribe(() => this.onCloseTab());
+  private _workspaceId!: string;
+  @Input() set workspaceId(value: string) {
+    this._workspaceId = value;
+    this._workspaceStore.setWorkspaceId(this.workspaceId);
   }
+  get workspaceId() {
+    return this._workspaceId;
+  }
+
+  readonly workspace$ = this._workspaceStore.workspace$;
+
+  constructor(
+    private readonly _workspaceStore: WorkspaceStore,
+    private readonly _workspaceTabStore: WorkspaceTabStore
+  ) {}
 
   onCloseTab() {
-    this.closeTab.emit();
+    this._workspaceTabStore.closeTab(this.workspaceId);
   }
 }

@@ -22,6 +22,6 @@ import { Component, Input } from '@angular/core';
   `,
 })
 export class HdEndpointsListItemComponent {
-  @Input() label: string | null = null;
-  @Input() endpoint: string | null = null;
+  @Input() label!: string;
+  @Input() endpoint!: string;
 }

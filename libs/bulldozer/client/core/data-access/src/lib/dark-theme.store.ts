@@ -23,6 +23,11 @@ export class DarkThemeStore extends ComponentStore<ViewModel> {
     this._persistDarkThemeStatus(this.isDarkThemeEnabled$);
   }
 
+  private readonly _toggleDarkTheme = this.updater((state) => ({
+    ...state,
+    isDarkThemeEnabled: !state.isDarkThemeEnabled,
+  }));
+
   private readonly _loadDarkThemeStatus = this.effect<boolean | null>(
     pipe(
       tap((isDarkThemeEnabled) => {
@@ -49,8 +54,7 @@ export class DarkThemeStore extends ComponentStore<ViewModel> {
     tap(this._darkTheme)
   );
 
-  readonly toggleDarkTheme = this.updater((state) => ({
-    ...state,
-    isDarkThemeEnabled: !state.isDarkThemeEnabled,
-  }));
+  toggleDarkTheme() {
+    this._toggleDarkTheme();
+  }
 }

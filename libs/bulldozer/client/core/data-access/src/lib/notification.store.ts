@@ -28,12 +28,12 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     this._notifyEvents(this._event$);
   }
 
-  readonly setEvent = this.updater<string | null>((state, event) => ({
+  private readonly _setEvent = this.updater<string | null>((state, event) => ({
     ...state,
     event,
   }));
 
-  readonly setError = this.updater<unknown>((state, error) => ({
+  private readonly _setError = this.updater<unknown>((state, error) => ({
     ...state,
     error,
   }));
@@ -68,7 +68,6 @@ export class NotificationStore extends ComponentStore<ViewModel> {
   );
 
   private getErrorMessage(error: unknown) {
-    console.log(error);
     if (typeof error === 'string') {
       return error;
     } else if (error instanceof WalletError) {
@@ -78,5 +77,13 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     } else {
       return 'Unknown error';
     }
+  }
+
+  setEvent(event: string | null) {
+    this._setEvent(event);
+  }
+
+  setError(error: unknown) {
+    this._setError(error);
   }
 }

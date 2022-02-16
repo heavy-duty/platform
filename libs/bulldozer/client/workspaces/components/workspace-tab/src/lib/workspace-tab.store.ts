@@ -1,61 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  WorkspaceApiService,
-  WorkspaceEventService,
-} from '@bulldozer-client/workspaces-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
-
-interface ViewModel {
-  workspaceId: string | null;
-  workspace: Document<Workspace> | null;
-  error: unknown | null;
-}
-
-const initialState: ViewModel = {
-  workspaceId: null,
-  workspace: null,
-  error: null,
-};
+import { ComponentStore } from '@ngrx/component-store';
+import { filter, pairwise, pipe, tap } from 'rxjs';
 
 @Injectable()
-export class WorkspaceTabStore extends ComponentStore<ViewModel> {
-  private readonly _workspaceId$ = this.select(
-    ({ workspaceId }) => workspaceId
-  );
-  readonly workspace$ = this.select(({ workspace }) => workspace);
-
+export class WorkspaceTabStore extends ComponentStore<object> {
   constructor(
-    private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _workspaceEventService: WorkspaceEventService
+    private readonly _tabStore: TabStore,
+    workspaceStore: WorkspaceStore
   ) {
-    super(initialState);
+    super({});
+
+    this._handleWorkspaceDeleted(workspaceStore.workspace$);
   }
 
-  readonly setWorkspaceId = this.updater(
-    (state, workspaceId: string | null) => ({ ...state, workspaceId })
-  );
+  private readonly _handleWorkspaceDeleted =
+    this.effect<Document<Workspace> | null>(
+      pipe(
+        pairwise(),
+        filter(
+          ([previousWorkspace, currentWorkspace]) =>
+            previousWorkspace !== null && currentWorkspace === null
+        ),
+        tap(([workspace]) => {
+          if (workspace !== null) {
+            this._tabStore.closeTab(workspace.id);
+          }
+        })
+      )
+    );
 
-  protected readonly loadWorkspace = this.effect(() =>
-    this._workspaceId$.pipe(
-      switchMap((workspaceId) => {
-        if (workspaceId === null) {
-          return EMPTY;
-        }
-
-        return this._workspaceApiService.findById(workspaceId).pipe(
-          concatMap((workspace) =>
-            this._workspaceEventService
-              .workspaceChanges(workspaceId)
-              .pipe(startWith(workspace))
-          ),
-          tapResponse(
-            (workspace) => this.patchState({ workspace }),
-            (error) => this.patchState({ error })
-          )
-        );
-      })
-    )
-  );
+  closeTab(tabId: string) {
+    this._tabStore.closeTab(tabId);
+  }
 }

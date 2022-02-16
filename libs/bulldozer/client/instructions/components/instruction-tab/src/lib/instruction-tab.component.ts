@@ -1,12 +1,5 @@
-import {
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { filter, first, pairwise } from 'rxjs';
+import { Component, HostBinding, Input } from '@angular/core';
+import { InstructionStore } from '@bulldozer-client/instructions-data-access';
 import { InstructionTabStore } from './instruction-tab.store';
 
 @Component({
@@ -38,29 +31,28 @@ import { InstructionTabStore } from './instruction-tab.store';
       </button>
     </div>
   `,
-  providers: [InstructionTabStore],
+  providers: [InstructionStore, InstructionTabStore],
 })
-export class InstructionTabComponent implements OnInit {
+export class InstructionTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() set instructionId(value: string | null) {
-    this._instructionTabStore.setInstructionId(value);
-  }
-  @Output() closeTab = new EventEmitter();
-  readonly instruction$ = this._instructionTabStore.instruction$;
 
-  constructor(private readonly _instructionTabStore: InstructionTabStore) {}
-
-  ngOnInit() {
-    this.instruction$
-      .pipe(
-        pairwise(),
-        filter(([, instruction]) => instruction === null),
-        first()
-      )
-      .subscribe(() => this.onCloseTab());
+  private _instructionId!: string;
+  @Input() set instructionId(value: string) {
+    this._instructionId = value;
+    this._instructionStore.setInstructionId(value);
   }
+  get instructionId() {
+    return this._instructionId;
+  }
+
+  readonly instruction$ = this._instructionStore.instruction$;
+
+  constructor(
+    private readonly _instructionStore: InstructionStore,
+    private readonly _instructionTabStore: InstructionTabStore
+  ) {}
 
   onCloseTab() {
-    this.closeTab.emit();
+    this._instructionTabStore.closeTab(this.instructionId);
   }
 }

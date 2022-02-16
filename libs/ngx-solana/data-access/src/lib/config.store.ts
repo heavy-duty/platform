@@ -88,23 +88,6 @@ export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
     this._loadConfigs(this._networkConfigs.asObservable());
   }
 
-  private readonly _setNetworkConfig = this.updater<NetworkConfig | null>(
-    (state, networkConfig) => ({
-      ...state,
-      configs:
-        state.configs?.map((config) =>
-          config.network === networkConfig?.network ? networkConfig : config
-        ) ?? null,
-    })
-  );
-
-  private readonly _selectNetwork = this.updater<Network | null>(
-    (state, selectedNetwork) => ({
-      ...state,
-      selectedNetwork,
-    })
-  );
-
   private readonly _loadConfigs = this.effect<NetworkConfig[] | null>(
     pipe(
       tap((configs) => {
@@ -137,17 +120,20 @@ export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
     tap(this._selectedNetwork)
   );
 
-  setNetworkConfig(
-    network: Network,
-    endpoints: {
-      apiEndpoint: HttpEndpoint;
-      webSocketEndpoint: WebSocketEndpoint;
-    }
-  ) {
-    this._setNetworkConfig({ network, ...endpoints });
-  }
+  readonly setNetworkConfig = this.updater<NetworkConfig | null>(
+    (state, networkConfig) => ({
+      ...state,
+      configs:
+        state.configs?.map((config) =>
+          config.network === networkConfig?.network ? networkConfig : config
+        ) ?? null,
+    })
+  );
 
-  selectNetwork(network: Network | null) {
-    this._selectNetwork(network);
-  }
+  readonly selectNetwork = this.updater<Network | null>(
+    (state, selectedNetwork) => ({
+      ...state,
+      selectedNetwork,
+    })
+  );
 }

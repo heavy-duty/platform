@@ -38,13 +38,14 @@ export class HdSolanaConnectionDirective extends ComponentStore<object> {
   private _context: HdSolanaConnectionContext = new HdSolanaConnectionContext();
 
   constructor(
-    private readonly _viewContainerRef: ViewContainerRef,
-    private readonly _templateRef: TemplateRef<HdSolanaConnectionContext>,
     private readonly _changeDetectionRef: ChangeDetectorRef,
+    templateRef: TemplateRef<HdSolanaConnectionContext>,
+    viewContainerRef: ViewContainerRef,
     connectionStore: HdSolanaConnectionStore
   ) {
     super({});
-    this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
+
+    viewContainerRef.createEmbeddedView(templateRef, this._context);
     this._handleChanges(
       this.select(
         connectionStore.online$,

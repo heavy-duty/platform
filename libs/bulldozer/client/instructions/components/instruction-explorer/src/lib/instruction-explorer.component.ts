@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { InstructionExplorerStore } from './instruction-explorer.store';
+import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
 
 @Component({
   selector: 'bd-instruction-explorer',
@@ -74,38 +74,52 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
       </mat-nav-list>
     </mat-expansion-panel>
   `,
-  providers: [InstructionExplorerStore],
+  providers: [InstructionsStore],
 })
 export class InstructionExplorerComponent {
   @Input() connected = false;
-  @Input() set applicationId(value: string | null) {
-    this._instructionExplorerStore.setApplicationId(value);
-  }
-  @Input() set workspaceId(value: string | null) {
-    this._instructionExplorerStore.setWorkspaceId(value);
-  }
-  readonly applicationId$ = this._instructionExplorerStore.applicationId$;
-  readonly instructions$ = this._instructionExplorerStore.instructions$;
 
-  constructor(
-    private readonly _instructionExplorerStore: InstructionExplorerStore
-  ) {}
+  private _workspaceId!: string;
+  @Input() set workspaceId(value: string) {
+    this._workspaceId = value;
+  }
+  get workspaceId() {
+    return this._workspaceId;
+  }
 
-  onCreateInstruction(name: string) {
-    this._instructionExplorerStore.createInstruction({
-      instructionName: name,
+  private _applicationId!: string;
+  @Input() set applicationId(value: string) {
+    this._applicationId = value;
+    this._instructionsStore.setFilters({
+      application: this.applicationId,
+    });
+  }
+  get applicationId() {
+    return this._applicationId;
+  }
+
+  readonly instructions$ = this._instructionsStore.instructions$;
+
+  constructor(private readonly _instructionsStore: InstructionsStore) {}
+
+  onCreateInstruction(instructionName: string) {
+    this._instructionsStore.createInstruction({
+      workspaceId: this.workspaceId,
+      applicationId: this.applicationId,
+      instructionName,
     });
   }
 
   onUpdateInstruction(instructionId: string, instructionName: string) {
-    this._instructionExplorerStore.updateInstruction({
+    this._instructionsStore.updateInstruction({
       instructionId,
       instructionName,
     });
   }
 
   onDeleteInstruction(instructionId: string) {
-    this._instructionExplorerStore.deleteInstruction({
+    this._instructionsStore.deleteInstruction({
+      applicationId: this.applicationId,
       instructionId,
     });
   }

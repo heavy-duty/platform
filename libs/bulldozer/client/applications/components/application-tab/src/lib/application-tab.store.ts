@@ -1,63 +1,38 @@
 import { Injectable } from '@angular/core';
-import {
-  ApplicationApiService,
-  ApplicationEventService,
-} from '@bulldozer-client/applications-data-access';
-import { NotificationStore } from '@bulldozer-client/core-data-access';
+import { ApplicationStore } from '@bulldozer-client/applications-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';
-
-interface ViewModel {
-  applicationId: string | null;
-  application: Document<Application> | null;
-  error: unknown | null;
-}
-
-const initialState: ViewModel = {
-  applicationId: null,
-  application: null,
-  error: null,
-};
+import { ComponentStore } from '@ngrx/component-store';
+import { filter, pairwise, pipe, tap } from 'rxjs';
 
 @Injectable()
-export class ApplicationTabStore extends ComponentStore<ViewModel> {
-  private readonly _applicationId$ = this.select(
-    ({ applicationId }) => applicationId
-  );
-  readonly application$ = this.select(({ application }) => application);
-
+export class ApplicationTabStore extends ComponentStore<object> {
   constructor(
-    private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationEventService: ApplicationEventService,
-    private readonly _notificationService: NotificationStore
+    private readonly _tabStore: TabStore,
+    applicationStore: ApplicationStore
   ) {
-    super(initialState);
+    super({});
+
+    this._handleApplicationDeleted(applicationStore.application$);
   }
 
-  readonly setApplicationId = this.updater(
-    (state, applicationId: string | null) => ({ ...state, applicationId })
-  );
+  private readonly _handleApplicationDeleted =
+    this.effect<Document<Application> | null>(
+      pipe(
+        pairwise(),
+        filter(
+          ([previousApplication, currentApplication]) =>
+            previousApplication !== null && currentApplication === null
+        ),
+        tap(([application]) => {
+          if (application !== null) {
+            this._tabStore.closeTab(application.id);
+          }
+        })
+      )
+    );
 
-  protected readonly loadApplication = this.effect(() =>
-    this._applicationId$.pipe(
-      switchMap((applicationId) => {
-        if (applicationId === null) {
-          return EMPTY;
-        }
-
-        return this._applicationApiService.findById(applicationId).pipe(
-          concatMap((application) =>
-            this._applicationEventService
-              .applicationChanges(applicationId)
-              .pipe(startWith(application))
-          ),
-          tapResponse(
-            (application) => this.patchState({ application }),
-            (error) => this._notificationService.setError({ error })
-          )
-        );
-      })
-    )
-  );
+  closeTab(tabId: string) {
+    this._tabStore.closeTab(tabId);
+  }
 }

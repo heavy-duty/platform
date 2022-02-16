@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Network, NetworkConfig } from '@heavy-duty/ngx-solana';
 
 @Component({
   selector: 'hd-network-selector',
@@ -8,13 +9,8 @@ import { Component } from '@angular/core';
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Choose a network</mat-label>
       <mat-select
-        *hdSolanaConfig="
-          let selectedNetwork = selectedNetwork;
-          let networkConfigs = networkConfigs;
-          let selectNetwork = selectNetwork
-        "
         [value]="selectedNetwork"
-        (selectionChange)="selectNetwork($event.value)"
+        (selectionChange)="selectNetwork.emit($event.value)"
       >
         <mat-option
           [value]="networkConfig.network"
@@ -26,4 +22,8 @@ import { Component } from '@angular/core';
     </mat-form-field>
   `,
 })
-export class HdNetworkSelectorComponent {}
+export class HdNetworkSelectorComponent {
+  @Input() selectedNetwork: Network | null = null;
+  @Input() networkConfigs!: NetworkConfig[];
+  @Output() selectNetwork = new EventEmitter<Network>();
+}

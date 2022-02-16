@@ -3,7 +3,6 @@ import {
   Component,
   HostBinding,
   Inject,
-  OnInit,
 } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -18,7 +17,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
     </h2>
 
     <form
-      [formGroup]="workspaceGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditWorkspace()"
     >
@@ -35,12 +34,16 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
           autocomplete="off"
           maxlength="32"
         />
-        <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
+        <mat-hint align="end"
+          >{{ this.form.get('name')?.value?.length || 0 }}/32</mat-hint
+        >
 
-        <mat-error *ngIf="submitted && nameControl.hasError('required')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -49,7 +52,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && workspaceGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.workspace ? 'Save' : 'Create' }}
       </button>
@@ -67,18 +70,10 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EditWorkspaceComponent implements OnInit {
+export class EditWorkspaceComponent {
   @HostBinding('class') class = 'block w-72 relative';
+  readonly form: FormGroup;
   submitted = false;
-  readonly workspaceGroup = new FormGroup({
-    name: new FormControl('', {
-      validators: [Validators.required, Validators.maxLength(32)],
-    }),
-  });
-
-  get nameControl() {
-    return this.workspaceGroup.get('name') as FormControl;
-  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -87,25 +82,20 @@ export class EditWorkspaceComponent implements OnInit {
     public data?: {
       workspace?: Document<Workspace>;
     }
-  ) {}
-
-  ngOnInit() {
-    if (this.data?.workspace) {
-      this.workspaceGroup.setValue(
-        {
-          name: this.data.workspace.name,
-        },
-        { emitEvent: false }
-      );
-    }
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.workspace?.name ?? '', {
+        validators: [Validators.required, Validators.maxLength(32)],
+      }),
+    });
   }
 
-  async onEditWorkspace() {
+  onEditWorkspace() {
     this.submitted = true;
-    this.workspaceGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.workspaceGroup.valid) {
-      this._matDialogRef.close({ name: this.nameControl.value });
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

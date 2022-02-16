@@ -1,4 +1,4 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
     </h2>
 
     <form
-      [formGroup]="signerGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditSigner()"
     >
@@ -45,7 +45,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && signerGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.signer ? 'Save' : 'Create' }}
       </button>
@@ -61,18 +61,16 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
     </button>
   `,
 })
-export class EditInstructionSignerComponent implements OnInit {
+export class EditInstructionSignerComponent {
   @HostBinding('class') class = 'block w-72 relative';
+  readonly form: FormGroup;
   submitted = false;
-  readonly signerGroup = new FormGroup({
-    name: new FormControl('', { validators: [Validators.required] }),
-    saveChanges: new FormControl(false),
-  });
+
   get nameControl() {
-    return this.signerGroup.get('name') as FormControl;
+    return this.form.get('name') as FormControl;
   }
   get saveChangesControl() {
-    return this.signerGroup.get('saveChanges') as FormControl;
+    return this.form.get('saveChanges') as FormControl;
   }
 
   constructor(
@@ -82,25 +80,20 @@ export class EditInstructionSignerComponent implements OnInit {
     public data?: {
       signer?: Document<InstructionAccount>;
     }
-  ) {}
-
-  ngOnInit() {
-    if (this.data?.signer) {
-      this.signerGroup.setValue(
-        {
-          name: this.data.signer.name,
-          saveChanges: this.data.signer.data.modifier?.id === 1,
-        },
-        { emitEvent: false }
-      );
-    }
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.signer?.name ?? '', {
+        validators: [Validators.required],
+      }),
+      saveChanges: new FormControl(this.data?.signer?.data.modifier?.id === 1),
+    });
   }
 
-  async onEditSigner() {
+  onEditSigner() {
     this.submitted = true;
-    this.signerGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.signerGroup.valid) {
+    if (this.form.valid) {
       this._matDialogRef.close({
         name: this.nameControl.value,
         modifier: this.saveChangesControl.value ? 1 : null,

@@ -6,6 +6,8 @@ import {
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
+import { PublicKey } from '@solana/web3.js';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -113,15 +115,24 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WorkspaceSelectorStore],
+  providers: [WorkspacesStore, WorkspaceSelectorStore],
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
+
   @Input() connected = false;
+
+  @Input() set walletPublicKey(value: PublicKey | null) {
+    if (value !== null) {
+      this._workspacesStore.setFilters({ authority: value.toBase58() });
+    }
+  }
+
   readonly workspace$ = this._workspaceSelectorStore.workspace$;
-  readonly workspaces$ = this._workspaceSelectorStore.workspaces$;
+  readonly workspaces$ = this._workspacesStore.workspaces$;
 
   constructor(
+    private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
     private readonly _configStore: ConfigStore
   ) {}
@@ -134,25 +145,22 @@ export class WorkspaceSelectorComponent {
 
   onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.createWorkspace({ workspaceName });
+    this._workspacesStore.createWorkspace(workspaceName);
   }
 
   onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.updateWorkspace({
-      workspaceId,
-      workspaceName,
-    });
+    this._workspacesStore.updateWorkspace({ workspaceId, workspaceName });
   }
 
   onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.deleteWorkspace({ workspaceId });
+    this._workspacesStore.deleteWorkspace(workspaceId);
   }
 
   onDownloadWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspaceSelectorStore.downloadWorkspace({ workspaceId });
+    this._workspaceSelectorStore.downloadWorkspace(workspaceId);
   }
 
   onActivateWorkspace(workspaceId: string) {

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { ViewWorkspaceRouteStore } from './view-workspace-route.store';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
@@ -18,11 +18,16 @@ import { ViewWorkspaceStore } from './view-workspace.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ViewWorkspaceStore, ViewWorkspaceRouteStore],
+  providers: [WorkspaceStore, ViewWorkspaceStore],
 })
 export class ViewWorkspaceComponent {
   @HostBinding('class') class = 'block p-4';
-  readonly workspace$ = this._viewWorkspaceStore.workspace$;
+  readonly workspace$ = this._workspaceStore.workspace$;
 
-  constructor(private readonly _viewWorkspaceStore: ViewWorkspaceStore) {}
+  constructor(
+    private readonly _workspaceStore: WorkspaceStore,
+    private readonly _viewWorkspaceStore: ViewWorkspaceStore
+  ) {
+    this._workspaceStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
+  }
 }

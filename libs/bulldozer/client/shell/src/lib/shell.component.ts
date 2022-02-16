@@ -34,6 +34,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             <bd-workspace-selector
               class="mr-6"
               [connected]="(connected$ | ngrxPush) ?? false"
+              [walletPublicKey]="(walletPublicKey$ | ngrxPush) ?? null"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -63,6 +64,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 export class ShellComponent extends ComponentStore<object> {
   readonly isHandset$ = this._configStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
+  readonly walletPublicKey$ = this._walletStore.publicKey$;
   readonly workspaceId$ = this._configStore.workspaceId$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;

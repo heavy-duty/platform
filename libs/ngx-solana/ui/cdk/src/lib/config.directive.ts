@@ -20,13 +20,7 @@ interface ConfigChanges {
   selectedNetwork: Network | null;
   selectedNetworkConfig: NetworkConfig | null;
   selectNetwork: (network: Network) => void;
-  editEndpoints: (
-    network: Network,
-    endpoints: {
-      apiEndpoint: HttpEndpoint;
-      webSocketEndpoint: WebSocketEndpoint;
-    }
-  ) => void;
+  editNetworkConfig: (networkConfig: NetworkConfig) => void;
 }
 
 export class HdSolanaConfigContext implements ConfigChanges {
@@ -37,13 +31,7 @@ export class HdSolanaConfigContext implements ConfigChanges {
   public selectedNetwork!: Network | null;
   public selectedNetworkConfig!: NetworkConfig | null;
   public selectNetwork!: (network: Network) => void;
-  public editEndpoints!: (
-    network: Network,
-    endpoints: {
-      apiEndpoint: HttpEndpoint;
-      webSocketEndpoint: WebSocketEndpoint;
-    }
-  ) => void;
+  public editNetworkConfig!: (networkConfig: NetworkConfig) => void;
 }
 
 @Directive({
@@ -53,14 +41,14 @@ export class HdSolanaConfigDirective extends ComponentStore<object> {
   private _context: HdSolanaConfigContext = new HdSolanaConfigContext();
 
   constructor(
-    private readonly _viewContainerRef: ViewContainerRef,
-    private readonly _templateRef: TemplateRef<HdSolanaConfigContext>,
     private readonly _changeDetectionRef: ChangeDetectorRef,
+    viewContainerRef: ViewContainerRef,
+    templateRef: TemplateRef<HdSolanaConfigContext>,
     hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super({});
 
-    this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
+    viewContainerRef.createEmbeddedView(templateRef, this._context);
     this._handleChanges(
       this.select(
         hdSolanaConfigStore.apiEndpoint$,
@@ -80,15 +68,12 @@ export class HdSolanaConfigDirective extends ComponentStore<object> {
           networkConfigs,
           selectedNetwork,
           selectedNetworkConfig,
-          selectNetwork: (network: Network) =>
-            hdSolanaConfigStore.selectNetwork(network),
-          editEndpoints: (
-            network: Network,
-            endpoints: {
-              apiEndpoint: HttpEndpoint;
-              webSocketEndpoint: WebSocketEndpoint;
-            }
-          ) => hdSolanaConfigStore.setNetworkConfig(network, endpoints),
+          selectNetwork: (network: Network) => {
+            hdSolanaConfigStore.selectNetwork(network);
+          },
+          editNetworkConfig: (networkConfig: NetworkConfig) => {
+            hdSolanaConfigStore.setNetworkConfig(networkConfig);
+          },
         }),
         { debounce: true }
       )
@@ -103,7 +88,7 @@ export class HdSolanaConfigDirective extends ComponentStore<object> {
         networkConfigs,
         selectedNetwork,
         selectedNetworkConfig,
-        editEndpoints,
+        editNetworkConfig,
         selectNetwork,
       }) => {
         this._context.apiEndpoint = apiEndpoint;
@@ -112,7 +97,7 @@ export class HdSolanaConfigDirective extends ComponentStore<object> {
         this._context.selectedNetwork = selectedNetwork;
         this._context.selectedNetworkConfig = selectedNetworkConfig;
         this._context.selectNetwork = selectNetwork;
-        this._context.editEndpoints = editEndpoints;
+        this._context.editNetworkConfig = editNetworkConfig;
         this._changeDetectionRef.markForCheck();
       }
     )

@@ -1,4 +1,4 @@
-import { Component, HostBinding, Inject, OnInit } from '@angular/core';
+import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -12,7 +12,7 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
     </h2>
 
     <form
-      [formGroup]="instructionGroup"
+      [formGroup]="form"
       class="flex flex-col gap-4"
       (ngSubmit)="onEditInstruction()"
     >
@@ -29,12 +29,16 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
           autocomplete="off"
           maxlength="32"
         />
-        <mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
+        <mat-hint align="end"
+          >{{ this.form.get('name')?.value?.length || 0 }}/32</mat-hint
+        >
 
-        <mat-error *ngIf="submitted && nameControl.hasError('required')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('required')"
           >The name is mandatory.</mat-error
         >
-        <mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
+        <mat-error
+          *ngIf="submitted && this.form.get('name')?.hasError('maxlength')"
           >Maximum length is 32.</mat-error
         >
       </mat-form-field>
@@ -43,7 +47,7 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
         mat-stroked-button
         color="primary"
         class="w-full"
-        [disabled]="submitted && instructionGroup.invalid"
+        [disabled]="submitted && form.invalid"
       >
         {{ data?.instruction ? 'Save' : 'Create' }}
       </button>
@@ -59,16 +63,10 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
     </button>
   `,
 })
-export class EditInstructionComponent implements OnInit {
+export class EditInstructionComponent {
   @HostBinding('class') class = 'block w-72 relative';
+  readonly form: FormGroup;
   submitted = false;
-  readonly instructionGroup = new FormGroup({
-    name: new FormControl('', { validators: [Validators.required] }),
-  });
-
-  get nameControl() {
-    return this.instructionGroup.get('name') as FormControl;
-  }
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
@@ -77,25 +75,20 @@ export class EditInstructionComponent implements OnInit {
     public data?: {
       instruction?: Document<Instruction>;
     }
-  ) {}
-
-  ngOnInit() {
-    if (this.data?.instruction) {
-      this.instructionGroup.setValue(
-        {
-          name: this.data.instruction.name,
-        },
-        { emitEvent: false }
-      );
-    }
+  ) {
+    this.form = new FormGroup({
+      name: new FormControl(this.data?.instruction?.name ?? '', {
+        validators: [Validators.required],
+      }),
+    });
   }
 
-  async onEditInstruction() {
+  onEditInstruction() {
     this.submitted = true;
-    this.instructionGroup.markAllAsTouched();
+    this.form.markAllAsTouched();
 
-    if (this.instructionGroup.valid) {
-      this._matDialogRef.close({ name: this.nameControl.value });
+    if (this.form.valid) {
+      this._matDialogRef.close(this.form.value);
     } else {
       this._matSnackBar.open('Invalid information', 'close', {
         panelClass: 'warning-snackbar',

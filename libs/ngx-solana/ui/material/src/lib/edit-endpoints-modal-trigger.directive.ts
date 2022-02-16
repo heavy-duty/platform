@@ -12,17 +12,13 @@ import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
 
 @Directive({ selector: 'button[hdEditEndpointsModalTrigger]' })
 export class HdEditEndpointsModalTriggerDirective {
-  @Input() apiEndpoint: HttpEndpoint | null = null;
-  @Input() webSocketEndpoint: WebSocketEndpoint | null = null;
+  @Input() apiEndpoint!: HttpEndpoint;
+  @Input() webSocketEndpoint!: WebSocketEndpoint;
   @Output() editEndpoints = new EventEmitter<{
     apiEndpoint: HttpEndpoint;
     webSocketEndpoint: WebSocketEndpoint;
   }>();
-  @HostListener('click') onClick(): void {
-    if (this.apiEndpoint === null || this.webSocketEndpoint === null) {
-      throw new Error('Endpoints missing');
-    }
-
+  @HostListener('click') onClick() {
     this._matDialog
       .open<
         HdEditEndpointsComponent,

@@ -1,12 +1,5 @@
-import {
-  Component,
-  EventEmitter,
-  HostBinding,
-  Input,
-  OnInit,
-  Output,
-} from '@angular/core';
-import { filter, first, pairwise } from 'rxjs';
+import { Component, HostBinding, Input } from '@angular/core';
+import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { ApplicationTabStore } from './application-tab.store';
 
 @Component({
@@ -36,29 +29,28 @@ import { ApplicationTabStore } from './application-tab.store';
       </button>
     </div>
   `,
-  providers: [ApplicationTabStore],
+  providers: [ApplicationStore, ApplicationTabStore],
 })
-export class ApplicationTabComponent implements OnInit {
+export class ApplicationTabComponent {
   @HostBinding('class') class = 'block w-full';
-  @Input() set applicationId(value: string | null) {
-    this._applicationTabStore.setApplicationId(value);
-  }
-  @Output() closeTab = new EventEmitter();
-  readonly application$ = this._applicationTabStore.application$;
 
-  constructor(private readonly _applicationTabStore: ApplicationTabStore) {}
-
-  ngOnInit() {
-    this.application$
-      .pipe(
-        pairwise(),
-        filter(([, application]) => application === null),
-        first()
-      )
-      .subscribe(() => this.onCloseTab());
+  private _applicationId!: string;
+  @Input() set applicationId(value: string) {
+    this._applicationId = value;
+    this._applicationStore.setApplicationId(this.applicationId);
   }
+  get applicationId() {
+    return this._applicationId;
+  }
+
+  readonly application$ = this._applicationStore.application$;
+
+  constructor(
+    private readonly _applicationTabStore: ApplicationTabStore,
+    private readonly _applicationStore: ApplicationStore
+  ) {}
 
   onCloseTab() {
-    this.closeTab.emit();
+    this._applicationTabStore.closeTab(this.applicationId);
   }
 }
