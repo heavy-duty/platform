@@ -1,8 +1,4 @@
 import { Injectable } from '@angular/core';
-import {
-  ApplicationApiService,
-  ApplicationEventService,
-} from '@bulldozer-client/applications-data-access';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   Application,
@@ -24,6 +20,8 @@ import {
   takeWhile,
   withLatestFrom,
 } from 'rxjs';
+import { ApplicationApiService } from './application-api.service';
+import { ApplicationEventService } from './application-event.service';
 
 interface ViewModel {
   loading: boolean;

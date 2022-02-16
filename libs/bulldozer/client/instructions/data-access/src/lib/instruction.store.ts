@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
-import {
-  InstructionApiService,
-  InstructionEventService,
-} from '@bulldozer-client/instructions-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -16,6 +12,8 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs';
+import { InstructionApiService } from './instruction-api.service';
+import { InstructionEventService } from './instruction-event.service';
 
 interface ViewModel {
   instruction: Document<Instruction> | null;

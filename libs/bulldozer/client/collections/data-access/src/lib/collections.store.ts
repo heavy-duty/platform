@@ -1,8 +1,4 @@
 import { Injectable } from '@angular/core';
-import {
-  CollectionApiService,
-  CollectionEventService,
-} from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
   Collection,
@@ -24,6 +20,8 @@ import {
   takeWhile,
   withLatestFrom,
 } from 'rxjs';
+import { CollectionApiService } from './collection-api.service';
+import { CollectionEventService } from './collection-event.service';
 
 interface ViewModel {
   loading: boolean;

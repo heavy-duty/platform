@@ -1,10 +1,6 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/core-data-access';
 import {
-  InstructionRelationApiService,
-  InstructionRelationEventService,
-} from '@bulldozer-client/instructions-data-access';
-import {
   Document,
   Instruction,
   InstructionRelation,
@@ -26,6 +22,8 @@ import {
   takeWhile,
   withLatestFrom,
 } from 'rxjs';
+import { InstructionRelationApiService } from './instruction-relation-api.service';
+import { InstructionRelationEventService } from './instruction-relation-event.service';
 
 interface ViewModel {
   loading: boolean;
