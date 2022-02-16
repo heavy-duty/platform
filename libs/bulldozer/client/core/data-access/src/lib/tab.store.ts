@@ -1,8 +1,16 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { ComponentStore } from '@ngrx/component-store';
-import { concatMap, Observable, of, tap, withLatestFrom } from 'rxjs';
+import {
+  concatMap,
+  distinctUntilChanged,
+  of,
+  pairwise,
+  pipe,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 export interface Tab {
   id: string;
@@ -32,23 +40,34 @@ export class TabStore extends ComponentStore<ViewModel> {
     (tabs, selected) => tabs.find(({ id }) => id === selected) || null
   );
 
-  constructor(private readonly _router: Router) {
+  constructor(
+    private readonly _router: Router,
+    private readonly _configStore: NgxSolanaConfigStore
+  ) {
     super(initialState);
+
+    this._handleNetworkChanges(this._configStore.selectedNetwork$);
   }
 
-  private readonly _removeTab = this.updater((state, tabId: string) => ({
+  private readonly _removeTab = this.updater<string>((state, tabId) => ({
     ...state,
     tabs: state.tabs.filter((tab) => tab.id !== tabId),
   }));
 
-  readonly setWorkspace = this.updater(
-    (state, workspace: Document<Workspace>) => ({
-      ...state,
-      workspace,
-    })
+  private readonly _handleNetworkChanges = this.effect(
+    pipe(
+      distinctUntilChanged(),
+      pairwise(),
+      tap(() =>
+        this.patchState({
+          tabs: [],
+          selected: null,
+        })
+      )
+    )
   );
 
-  readonly openTab = this.updater((state, newTab: Tab) => {
+  readonly openTab = this.updater<Tab>((state, newTab) => {
     const oldTab = state.tabs.find((tab) => tab.id === newTab.id);
 
     return {
@@ -58,14 +77,8 @@ export class TabStore extends ComponentStore<ViewModel> {
     };
   });
 
-  readonly clearTabs = this.updater((state) => ({
-    ...state,
-    tabs: [],
-    selected: null,
-  }));
-
-  readonly closeTab = this.effect((tabId$: Observable<string>) =>
-    tabId$.pipe(
+  readonly closeTab = this.effect<string>(
+    pipe(
       tap((tabId) => this._removeTab(tabId)),
       concatMap(() =>
         of(null).pipe(

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { pipe, tap } from 'rxjs';
 
 export type Network = 'localhost' | 'devnet' | 'testnet' | 'mainnet-beta';
 
@@ -43,7 +43,7 @@ const defaultNetworkConfigs: NetworkConfig[] = [
 const defaultSelectedNetwork = 'localhost';
 
 interface ViewModel {
-  configs: NetworkConfig[];
+  configs: NetworkConfig[] | null;
   selectedNetwork: Network | null;
 }
 
@@ -63,7 +63,7 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
     this.networkConfigs$,
     this.selectedNetwork$,
     (networkConfigs, selectedNetwork) =>
-      networkConfigs.find(
+      networkConfigs?.find(
         (networkConfig) => networkConfig.network === selectedNetwork
       ) ?? null
   );
@@ -78,56 +78,63 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
 
   constructor() {
     super({
-      configs: [],
+      configs: null,
       selectedNetwork: null,
     });
+
+    this._persistConfigChanges(this.networkConfigs$);
+    this._persistSelectedNetwork(this.selectedNetwork$);
+    this._loadSelectedNetwork(this._selectedNetwork.asObservable());
+    this._loadConfigs(this._networkConfigs.asObservable());
   }
 
-  readonly setNetworkConfig = this.updater(
-    (state, networkConfig: NetworkConfig) => ({
+  readonly setNetworkConfig = this.updater<NetworkConfig | null>(
+    (state, networkConfig) => ({
       ...state,
-      configs: state.configs.map((config) =>
-        config.network === networkConfig.network ? networkConfig : config
-      ),
+      configs:
+        state.configs?.map((config) =>
+          config.network === networkConfig?.network ? networkConfig : config
+        ) ?? null,
     })
   );
 
-  readonly selectNetwork = this.updater(
-    (state, selectedNetwork: Network | null) => ({
+  readonly selectNetwork = this.updater<Network | null>(
+    (state, selectedNetwork) => ({
       ...state,
       selectedNetwork,
     })
   );
 
-  readonly loadConfigs = this.effect(() =>
-    this._networkConfigs.asObservable().pipe(
+  private readonly _loadConfigs = this.effect<NetworkConfig[] | null>(
+    pipe(
       tap((configs) => {
-        if (configs !== null) {
-          this.patchState({ configs });
-        } else {
+        console.log(configs);
+        if (configs === null) {
           this._networkConfigs.next(defaultNetworkConfigs);
-        }
-      })
-    )
-  );
-
-  readonly loadSelectedNetwork = this.effect(() =>
-    this._selectedNetwork.asObservable().pipe(
-      tap((selectedNetwork) => {
-        if (selectedNetwork !== null) {
-          this.patchState({ selectedNetwork });
         } else {
-          this._selectedNetwork.next(defaultSelectedNetwork);
+          this.patchState({ configs });
         }
       })
     )
   );
 
-  readonly persistConfigChanges = this.effect(() =>
-    this.networkConfigs$.pipe(tap(this._networkConfigs))
+  private readonly _loadSelectedNetwork = this.effect<Network | null>(
+    pipe(
+      tap((selectedNetwork) => {
+        if (selectedNetwork === null) {
+          this._selectedNetwork.next(defaultSelectedNetwork);
+        } else {
+          this.patchState({ selectedNetwork });
+        }
+      })
+    )
   );
 
-  readonly persistSelectedNetwork = this.effect(() =>
-    this.selectedNetwork$.pipe(tap(this._selectedNetwork))
+  private readonly _persistConfigChanges = this.effect<NetworkConfig[] | null>(
+    tap(this._networkConfigs)
+  );
+
+  private readonly _persistSelectedNetwork = this.effect<Network | null>(
+    tap(this._selectedNetwork)
   );
 }

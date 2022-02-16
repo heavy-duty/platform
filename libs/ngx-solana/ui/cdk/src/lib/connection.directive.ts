@@ -45,10 +45,10 @@ export class NgxSolanaConnectionDirective extends ComponentStore<object> {
   ) {
     super({});
     this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
-    this.handleChanges(this.changes$);
+    this._handleChanges(this._changes$);
   }
 
-  readonly changes$: Observable<ConnectionChanges> = this.select(
+  private readonly _changes$: Observable<ConnectionChanges> = this.select(
     this._connectionStore.online$,
     this._connectionStore.onlineSince$,
     this._connectionStore.offlineSince$,
@@ -76,7 +76,7 @@ export class NgxSolanaConnectionDirective extends ComponentStore<object> {
     { debounce: true }
   );
 
-  readonly handleChanges = this.effect<ConnectionChanges>(
+  private readonly _handleChanges = this.effect<ConnectionChanges>(
     tap(
       ({
         online,

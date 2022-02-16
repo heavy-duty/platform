@@ -16,7 +16,7 @@ import { Observable, tap } from 'rxjs';
 interface ConfigChanges {
   apiEndpoint: HttpEndpoint | null;
   webSocketEndpoint: WebSocketEndpoint | null;
-  networkConfigs: NetworkConfig[];
+  networkConfigs: NetworkConfig[] | null;
   selectedNetwork: Network | null;
   selectedNetworkConfig: NetworkConfig | null;
 }
@@ -25,7 +25,7 @@ export class NgxSolanaConfigContext {
   public $implicit!: unknown;
   public apiEndpoint!: HttpEndpoint | null;
   public webSocketEndpoint!: WebSocketEndpoint | null;
-  public networkConfigs!: NetworkConfig[];
+  public networkConfigs!: NetworkConfig[] | null;
   public selectedNetwork!: Network | null;
   public selectedNetworkConfig!: NetworkConfig | null;
   public selectNetwork!: (network: Network) => void;
@@ -52,10 +52,10 @@ export class NgxSolanaConfigDirective extends ComponentStore<object> {
   ) {
     super({});
     this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
-    this.handleChanges(this.changes$);
+    this._handleChanges(this._changes$);
   }
 
-  readonly changes$: Observable<ConfigChanges> = this.select(
+  private readonly _changes$: Observable<ConfigChanges> = this.select(
     this._configStore.apiEndpoint$,
     this._configStore.webSocketEndpoint$,
     this._configStore.networkConfigs$,
@@ -77,7 +77,7 @@ export class NgxSolanaConfigDirective extends ComponentStore<object> {
     { debounce: true }
   );
 
-  readonly handleChanges = this.effect<ConfigChanges>(
+  private readonly _handleChanges = this.effect<ConfigChanges>(
     tap(
       ({
         apiEndpoint,

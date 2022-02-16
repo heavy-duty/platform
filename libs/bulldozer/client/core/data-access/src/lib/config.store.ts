@@ -1,8 +1,13 @@
-import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import {
+  BreakpointObserver,
+  Breakpoints,
+  BreakpointState,
+} from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
+import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { distinctUntilChanged, pairwise, pipe, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -22,20 +27,34 @@ export class ConfigStore extends ComponentStore<ViewModel> {
   readonly isHandset$ = this.select(({ isHandset }) => isHandset);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
-  constructor(private readonly _breakpointObserver: BreakpointObserver) {
+  constructor(
+    private readonly _breakpointObserver: BreakpointObserver,
+    private readonly _solanaConfigStore: NgxSolanaConfigStore
+  ) {
     super(initialState);
+
+    this._loadHandset(this._breakpointObserver.observe(Breakpoints.Handset));
+    this._loadWorkspaceId(this._workspaceId.asObservable());
+    this._handleNetworkChanges(this._solanaConfigStore.selectedNetwork$);
   }
 
-  readonly loadHandset = this.effect(() =>
-    this._breakpointObserver
-      .observe(Breakpoints.Handset)
-      .pipe(tap((result) => this.patchState({ isHandset: result.matches })))
+  private readonly _loadHandset = this.updater<BreakpointState>(
+    (state, result) => ({
+      ...state,
+      isHandset: result.matches,
+    })
   );
 
-  readonly loadWorkspaceId = this.effect(() =>
-    this._workspaceId
-      .asObservable()
-      .pipe(tap((workspaceId) => this.patchState({ workspaceId })))
+  private readonly _loadWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  private readonly _handleNetworkChanges = this.effect(
+    pipe(
+      distinctUntilChanged(),
+      pairwise(),
+      tap(() => this.setWorkspaceId(null))
+    )
   );
 
   setWorkspaceId(workspaceId: string | null) {

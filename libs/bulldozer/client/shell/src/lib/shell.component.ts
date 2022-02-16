@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   ConfigStore,
   DarkThemeStore,
   NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
+import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ShellStore } from './shell.store';
+import { ComponentStore } from '@ngrx/component-store';
+import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 @Component({
   selector: 'bd-shell',
@@ -54,16 +57,10 @@ import { ShellStore } from './shell.store';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [
-    ShellStore,
-    TabStore,
-    NotificationStore,
-    ConfigStore,
-    DarkThemeStore,
-  ],
+  providers: [TabStore, NotificationStore, ConfigStore, DarkThemeStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ShellComponent implements OnInit {
+export class ShellComponent extends ComponentStore<object> {
   readonly isHandset$ = this._configStore.isHandset$;
   readonly connected$ = this._walletStore.connected$;
   readonly workspaceId$ = this._configStore.workspaceId$;
@@ -74,12 +71,35 @@ export class ShellComponent implements OnInit {
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
-    private readonly _shellStore: ShellStore
-  ) {}
+    private readonly _router: Router,
+    private readonly _ngxSolanaConfigStore: NgxSolanaConfigStore
+  ) {
+    super();
 
-  ngOnInit() {
-    this._shellStore.redirectUnauthorized();
+    this._handleNetworkChanges(this._ngxSolanaConfigStore.selectedNetwork$);
+    this._redirectUnauthorized(this._walletStore.connected$);
   }
+
+  private readonly _redirectUnauthorized = this.effect<boolean>(
+    pipe(
+      filter((connected) => !connected),
+      tap(() =>
+        this._router.navigate(['/unauthorized-access'], {
+          queryParams: {
+            redirect: this._router.routerState.snapshot.url,
+          },
+        })
+      )
+    )
+  );
+
+  private readonly _handleNetworkChanges = this.effect(
+    pipe(
+      distinctUntilChanged(),
+      pairwise(),
+      tap(() => this._router.navigate(['/']))
+    )
+  );
 
   onCloseTab(tabId: string) {
     this._tabStore.closeTab(tabId);

@@ -1,8 +1,8 @@
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { Injectable } from '@angular/core';
-import { isNotNullOrUndefined, LocalStorageSubject } from '@heavy-duty/rxjs';
+import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { pipe, tap } from 'rxjs';
 
 interface ViewModel {
   isDarkThemeEnabled: boolean;
@@ -12,38 +12,45 @@ interface ViewModel {
 @Injectable()
 export class DarkThemeStore extends ComponentStore<ViewModel> {
   private readonly _darkTheme = new LocalStorageSubject<boolean>('darkTheme');
-  readonly isDarkThemeEnabled$ = this._darkTheme.asObservable();
+  readonly isDarkThemeEnabled$ = this.select(
+    ({ isDarkThemeEnabled }) => isDarkThemeEnabled
+  );
 
   constructor(private readonly _overlayContainer: OverlayContainer) {
     super({ isDarkThemeEnabled: false });
 
-    try {
-      this._darkTheme.next(localStorage.getItem('darkTheme') === 'true');
-    } catch (error) {
-      this.patchState({ error });
-    }
+    this._loadDarkThemeStatus(this._darkTheme.asObservable());
+    this._persistDarkThemeStatus(this.isDarkThemeEnabled$);
   }
 
-  protected readonly loadDarkThemeStatus = this.effect(() =>
-    this._darkTheme.asObservable().pipe(
-      isNotNullOrUndefined,
+  private readonly _loadDarkThemeStatus = this.effect<boolean | null>(
+    pipe(
       tap((isDarkThemeEnabled) => {
-        this.patchState({ isDarkThemeEnabled });
-
-        if (isDarkThemeEnabled) {
-          this._overlayContainer
-            .getContainerElement()
-            .classList.add('darkMode');
+        if (isDarkThemeEnabled === null) {
+          this._darkTheme.next(true);
         } else {
-          this._overlayContainer
-            .getContainerElement()
-            .classList.remove('darkMode');
+          this.patchState({ isDarkThemeEnabled });
+
+          if (isDarkThemeEnabled) {
+            this._overlayContainer
+              .getContainerElement()
+              .classList.add('darkMode');
+          } else {
+            this._overlayContainer
+              .getContainerElement()
+              .classList.remove('darkMode');
+          }
         }
       })
     )
   );
 
-  toggleDarkTheme() {
-    this._darkTheme.next(!this.get().isDarkThemeEnabled);
-  }
+  private readonly _persistDarkThemeStatus = this.effect<boolean>(
+    tap(this._darkTheme)
+  );
+
+  readonly toggleDarkTheme = this.updater((state) => ({
+    ...state,
+    isDarkThemeEnabled: !state.isDarkThemeEnabled,
+  }));
 }

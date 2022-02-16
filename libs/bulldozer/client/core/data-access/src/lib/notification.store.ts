@@ -4,7 +4,7 @@ import { ProgramError } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { WalletError } from '@solana/wallet-adapter-base';
-import { switchMap, tap } from 'rxjs';
+import { pipe, switchMap, tap } from 'rxjs';
 
 interface ViewModel {
   error: unknown | null;
@@ -23,20 +23,23 @@ export class NotificationStore extends ComponentStore<ViewModel> {
 
   constructor(private readonly _matSnackBar: MatSnackBar) {
     super(initialState);
+
+    this._notifyErrors(this._error$);
+    this._notifyEvents(this._event$);
   }
 
-  readonly setEvent = this.updater((state, event: string | null) => ({
+  readonly setEvent = this.updater<string | null>((state, event) => ({
     ...state,
     event,
   }));
 
-  readonly setError = this.updater((state, error: unknown) => ({
+  readonly setError = this.updater<unknown>((state, error) => ({
     ...state,
     error,
   }));
 
-  readonly notifyErrors = this.effect(() =>
-    this._error$.pipe(
+  private readonly _notifyErrors = this.effect<unknown>(
+    pipe(
       isNotNullOrUndefined,
       switchMap((error) =>
         this._matSnackBar
@@ -49,8 +52,8 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly notifyEvents = this.effect(() =>
-    this._event$.pipe(
+  private readonly _notifyEvents = this.effect<string | null>(
+    pipe(
       isNotNullOrUndefined,
       switchMap((event) =>
         this._matSnackBar
@@ -65,6 +68,7 @@ export class NotificationStore extends ComponentStore<ViewModel> {
   );
 
   private getErrorMessage(error: unknown) {
+    console.log(error);
     if (typeof error === 'string') {
       return error;
     } else if (error instanceof WalletError) {
