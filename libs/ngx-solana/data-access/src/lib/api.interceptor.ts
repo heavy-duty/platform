@@ -11,7 +11,7 @@ import { concatMap, Observable, of, throwError } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
-export class NgxSolanaApiInterceptor implements HttpInterceptor {
+export class HdSolanaApiInterceptor implements HttpInterceptor {
   private getParams(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     httpRequest: HttpRequest<any>

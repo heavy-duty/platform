@@ -1,19 +1,19 @@
 import { HttpClientModule } from '@angular/common/http';
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { NgxSolanaApiService } from './api.service';
-import { ngxSolanaConfigProviderFactory } from './config';
-import { NgxSolanaConfigStore } from './config.store';
-import { NgxSolanaConnectionStore } from './connection.store';
+import { HdSolanaApiService } from './api.service';
+import { hdSolanaConfigProviderFactory } from './config';
+import { HdSolanaConfigStore } from './config.store';
+import { HdSolanaConnectionStore } from './connection.store';
 
 @NgModule({
   imports: [HttpClientModule],
 })
-export class NgxSolanaModule {
-  static forRoot(): ModuleWithProviders<NgxSolanaModule> {
+export class HdSolanaModule {
+  static forRoot(): ModuleWithProviders<HdSolanaModule> {
     return {
-      ngModule: NgxSolanaModule,
+      ngModule: HdSolanaModule,
       providers: [
-        ngxSolanaConfigProviderFactory({
+        hdSolanaConfigProviderFactory({
           webSocketConfig: {
             reconnection: true,
             reconnectionDelay: 1_000, // 1 second
@@ -26,9 +26,9 @@ export class NgxSolanaModule {
             }),
           },
         }),
-        NgxSolanaApiService,
-        NgxSolanaConnectionStore,
-        NgxSolanaConfigStore,
+        HdSolanaApiService,
+        HdSolanaConnectionStore,
+        HdSolanaConfigStore,
       ],
     };
   }

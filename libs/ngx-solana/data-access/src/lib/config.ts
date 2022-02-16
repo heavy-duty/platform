@@ -9,17 +9,15 @@ type RecursivePartial<T> = {
     : T[P];
 };
 
-export interface NgxSolanaConfig {
+export interface HdSolanaConfig {
   webSocketConfig: WebSocketConfig;
 }
 
-export const NGX_SOLANA_CONFIG = new InjectionToken<NgxSolanaConfig>(
-  'rpcConfig'
-);
+export const HD_SOLANA_CONFIG = new InjectionToken<HdSolanaConfig>('rpcConfig');
 
-export const ngxSolanaConfigProviderFactory = (
-  config: RecursivePartial<NgxSolanaConfig>
+export const hdSolanaConfigProviderFactory = (
+  config: RecursivePartial<HdSolanaConfig>
 ) => ({
-  provide: NGX_SOLANA_CONFIG,
+  provide: HD_SOLANA_CONFIG,
   useValue: config,
 });

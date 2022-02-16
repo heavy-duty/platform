@@ -15,12 +15,12 @@ import {
 } from '@solana/web3.js';
 import { filter, map, Observable } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { NgxSolanaConfig, NGX_SOLANA_CONFIG } from './config';
-import { NgxSolanaConfigStore } from './config.store';
+import { HdSolanaConfig, HD_SOLANA_CONFIG } from './config';
+import { HdSolanaConfigStore } from './config.store';
 import { hashGetProgramAccountsRequest } from './internal';
 
 @Injectable()
-export class NgxSolanaConnectionStore extends WebSocketStore<RpcMessage> {
+export class HdSolanaConnectionStore extends WebSocketStore<RpcMessage> {
   private readonly _accountChanges = new Map<
     string,
     Observable<AccountInfo<Buffer>>
@@ -40,13 +40,13 @@ export class NgxSolanaConnectionStore extends WebSocketStore<RpcMessage> {
   >();
 
   constructor(
-    @Inject(NGX_SOLANA_CONFIG)
-    _solanaRpcConfig: NgxSolanaConfig,
-    private readonly _configStore: NgxSolanaConfigStore
+    @Inject(HD_SOLANA_CONFIG)
+    hdSolanaConfig: HdSolanaConfig,
+    hdSolanaConfigStore: HdSolanaConfigStore
   ) {
-    super(_solanaRpcConfig.webSocketConfig);
+    super(hdSolanaConfig.webSocketConfig);
 
-    this.setEndpoint(this._configStore.webSocketEndpoint$);
+    this.setEndpoint(hdSolanaConfigStore.webSocketEndpoint$);
   }
 
   onAccountChange(

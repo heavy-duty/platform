@@ -1,21 +1,21 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-connection-menu',
+  selector: 'hd-connection-menu',
   template: `
-    <ngx-connection-menu-button
+    <hd-connection-menu-button
       [matMenuTriggerFor]="menu"
-    ></ngx-connection-menu-button>
+    ></hd-connection-menu-button>
 
     <mat-menu #menu="matMenu" class="connection-menu">
-      <div class="w-96 p-4 flex flex-col gap-2" ngxStopPropagation>
-        <ngx-network-selector></ngx-network-selector>
+      <div class="w-96 p-4 flex flex-col gap-2" hdStopPropagation>
+        <hd-network-selector></hd-network-selector>
 
-        <ngx-edpoints-list></ngx-edpoints-list>
+        <hd-edpoints-list></hd-edpoints-list>
 
-        <ngx-connection-status></ngx-connection-status>
+        <hd-connection-status></hd-connection-status>
       </div>
     </mat-menu>
   `,
 })
-export class NgxConnectionMenuComponent {}
+export class HdConnectionMenuComponent {}

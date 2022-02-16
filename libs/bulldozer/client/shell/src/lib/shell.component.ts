@@ -6,7 +6,7 @@ import {
   NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
-import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
@@ -41,7 +41,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
               color="basic"
             ></hd-wallet-multi-button>
 
-            <ngx-connection-menu class="mr-6"></ngx-connection-menu>
+            <hd-connection-menu class="mr-6"></hd-connection-menu>
 
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
@@ -72,11 +72,11 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
     private readonly _router: Router,
-    private readonly _ngxSolanaConfigStore: NgxSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super();
 
-    this._handleNetworkChanges(this._ngxSolanaConfigStore.selectedNetwork$);
+    this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
   }
 

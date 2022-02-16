@@ -1,7 +1,7 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'ngx-edpoints-list-item',
+  selector: 'hd-edpoints-list-item',
   template: `
     <div class="flex items-center m-0 text-sm text-opacity-50" *ngIf="endpoint">
       <span class="font-bold mr-2">{{ label }}:</span>
@@ -21,7 +21,7 @@ import { Component, Input } from '@angular/core';
     </div>
   `,
 })
-export class NgxEndpointsListItemComponent {
+export class HdEndpointsListItemComponent {
   @Input() label: string | null = null;
   @Input() endpoint: string | null = null;
 }

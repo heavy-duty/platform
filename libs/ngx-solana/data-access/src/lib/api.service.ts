@@ -18,12 +18,12 @@ import {
   of,
   throwError,
 } from 'rxjs';
-import { NgxSolanaConfigStore } from './config.store';
+import { HdSolanaConfigStore } from './config.store';
 
 @Injectable()
-export class NgxSolanaApiService {
+export class HdSolanaApiService {
   constructor(
-    private readonly _configStore: NgxSolanaConfigStore,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
     private readonly _httpClient: HttpClient
   ) {}
 
@@ -61,7 +61,7 @@ export class NgxSolanaApiService {
     pubkey: string,
     commitment = 'confirmed'
   ): Observable<AccountInfo<Buffer> | null> {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -88,7 +88,7 @@ export class NgxSolanaApiService {
   }
 
   getBalance(pubkey: string) {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -105,7 +105,7 @@ export class NgxSolanaApiService {
   }
 
   getProgramAccounts(programId: string, config?: GetProgramAccountsConfig) {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -151,7 +151,7 @@ export class NgxSolanaApiService {
   }
 
   getLatestBlockhash(): Observable<{ blockhash: string }> {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -170,7 +170,7 @@ export class NgxSolanaApiService {
   }
 
   getSignatureStatus(signature: string): Observable<SignatureStatus> {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -193,7 +193,7 @@ export class NgxSolanaApiService {
   }
 
   getTransaction(signature: string): Observable<TransactionResponse> {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {
@@ -216,7 +216,7 @@ export class NgxSolanaApiService {
   sendTransaction(
     transaction: Transaction | Observable<Transaction>
   ): Observable<string> {
-    return this._configStore.apiEndpoint$.pipe(
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
         if (apiEndpoint === null) {

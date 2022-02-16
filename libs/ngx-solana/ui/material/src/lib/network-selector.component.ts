@@ -1,14 +1,14 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-network-selector',
+  selector: 'hd-network-selector',
   template: `
     <h2 class="m-0 uppercase">network</h2>
 
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Choose a network</mat-label>
       <mat-select
-        *ngxSolanaConfig="
+        *hdSolanaConfig="
           let selectedNetwork = selectedNetwork;
           let networkConfigs = networkConfigs;
           let selectNetwork = selectNetwork
@@ -26,4 +26,4 @@ import { Component } from '@angular/core';
     </mat-form-field>
   `,
 })
-export class NgxNetworkSelectorComponent {}
+export class HdNetworkSelectorComponent {}

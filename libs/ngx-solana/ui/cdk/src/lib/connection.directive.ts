@@ -4,9 +4,9 @@ import {
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
-import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 interface ConnectionChanges {
   online: boolean;
@@ -16,9 +16,10 @@ interface ConnectionChanges {
   connecting: boolean;
   connectedAt: number | null;
   nextAttemptAt: number | null;
+  reconnect: () => void;
 }
 
-export class NgxSolanaConnectionContext {
+export class HdSolanaConnectionContext implements ConnectionChanges {
   public $implicit!: unknown;
   public online!: boolean;
   public onlineSince!: number | null;
@@ -31,50 +32,50 @@ export class NgxSolanaConnectionContext {
 }
 
 @Directive({
-  selector: '[ngxSolanaConnection]',
+  selector: '[hdSolanaConnection]',
 })
-export class NgxSolanaConnectionDirective extends ComponentStore<object> {
-  private _context: NgxSolanaConnectionContext =
-    new NgxSolanaConnectionContext();
+export class HdSolanaConnectionDirective extends ComponentStore<object> {
+  private _context: HdSolanaConnectionContext = new HdSolanaConnectionContext();
 
   constructor(
     private readonly _viewContainerRef: ViewContainerRef,
-    private readonly _templateRef: TemplateRef<NgxSolanaConnectionContext>,
-    private readonly _connectionStore: NgxSolanaConnectionStore,
-    private readonly _changeDetectionRef: ChangeDetectorRef
+    private readonly _templateRef: TemplateRef<HdSolanaConnectionContext>,
+    private readonly _changeDetectionRef: ChangeDetectorRef,
+    connectionStore: HdSolanaConnectionStore
   ) {
     super({});
     this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
-    this._handleChanges(this._changes$);
+    this._handleChanges(
+      this.select(
+        connectionStore.online$,
+        connectionStore.onlineSince$,
+        connectionStore.offlineSince$,
+        connectionStore.connected$,
+        connectionStore.connecting$,
+        connectionStore.connectedAt$,
+        connectionStore.nextAttemptAt$,
+        (
+          online,
+          onlineSince,
+          offlineSince,
+          connected,
+          connecting,
+          connectedAt,
+          nextAttemptAt
+        ) => ({
+          online,
+          onlineSince,
+          offlineSince,
+          connected,
+          connecting,
+          connectedAt,
+          nextAttemptAt,
+          reconnect: () => connectionStore.reconnect(),
+        }),
+        { debounce: true }
+      )
+    );
   }
-
-  private readonly _changes$: Observable<ConnectionChanges> = this.select(
-    this._connectionStore.online$,
-    this._connectionStore.onlineSince$,
-    this._connectionStore.offlineSince$,
-    this._connectionStore.connected$,
-    this._connectionStore.connecting$,
-    this._connectionStore.connectedAt$,
-    this._connectionStore.nextAttemptAt$,
-    (
-      online,
-      onlineSince,
-      offlineSince,
-      connected,
-      connecting,
-      connectedAt,
-      nextAttemptAt
-    ) => ({
-      online,
-      onlineSince,
-      offlineSince,
-      connected,
-      connecting,
-      connectedAt,
-      nextAttemptAt,
-    }),
-    { debounce: true }
-  );
 
   private readonly _handleChanges = this.effect<ConnectionChanges>(
     tap(
@@ -86,6 +87,7 @@ export class NgxSolanaConnectionDirective extends ComponentStore<object> {
         connectedAt,
         connecting,
         nextAttemptAt,
+        reconnect,
       }) => {
         this._context.online = online;
         this._context.onlineSince = onlineSince;
@@ -94,16 +96,16 @@ export class NgxSolanaConnectionDirective extends ComponentStore<object> {
         this._context.connectedAt = connectedAt;
         this._context.connecting = connecting;
         this._context.nextAttemptAt = nextAttemptAt;
-        this._context.reconnect = () => this._connectionStore.reconnect();
+        this._context.reconnect = reconnect;
         this._changeDetectionRef.markForCheck();
       }
     )
   );
 
   static ngTemplateContextGuard(
-    _: NgxSolanaConnectionDirective,
+    _: HdSolanaConnectionDirective,
     ctx: unknown
-  ): ctx is NgxSolanaConnectionContext {
+  ): ctx is HdSolanaConnectionContext {
     return true;
   }
 }

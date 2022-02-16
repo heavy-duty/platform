@@ -7,17 +7,19 @@ import {
   InstructionAccountFilters,
   instructionAccountQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionAccountEventService {
-  constructor(private readonly _connectionStore: NgxSolanaConnectionStore) {}
+  constructor(
+    private readonly _hdSolanaConnectionStore: HdSolanaConnectionStore
+  ) {}
 
   instructionAccountChanges(
     instructionAccountId: string
   ): Observable<Document<InstructionAccount> | null> {
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onAccountChange(instructionAccountId)
       .pipe(
         map((accountInfo) =>
@@ -39,7 +41,7 @@ export class InstructionAccountEventService {
       .setCommitment('finalized')
       .build();
 
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {

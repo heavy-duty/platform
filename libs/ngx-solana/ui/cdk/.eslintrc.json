@@ -13,7 +13,7 @@
           "error",
           {
             "type": "attribute",
-            "prefix": "ngx",
+            "prefix": "hd",
             "style": "camelCase"
           }
         ],
@@ -21,7 +21,7 @@
           "error",
           {
             "type": "element",
-            "prefix": "ngx",
+            "prefix": "hd",
             "style": "kebab-case"
           }
         ]

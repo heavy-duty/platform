@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-edpoints-list',
+  selector: 'hd-edpoints-list',
   template: `
     <header
       class="flex items-baseline gap-2"
-      *ngxSolanaConfig="
+      *hdSolanaConfig="
         let selectedNetworkConfig = selectedNetworkConfig;
         let editEndpoints = editEndpoints
       "
@@ -15,7 +15,7 @@ import { Component } from '@angular/core';
       <button
         *ngIf="selectedNetworkConfig"
         class="underline text-primary"
-        ngxEditEndpointsModalTrigger
+        hdEditEndpointsModalTrigger
         [apiEndpoint]="selectedNetworkConfig.apiEndpoint"
         [webSocketEndpoint]="selectedNetworkConfig.webSocketEndpoint"
         (editEndpoints)="editEndpoints(selectedNetworkConfig.network, $event)"
@@ -26,20 +26,20 @@ import { Component } from '@angular/core';
 
     <div
       class="bg-white bg-opacity-5 mat-elevation-z2 px-2 py-1 mb-4"
-      *ngxSolanaConfig="
+      *hdSolanaConfig="
         let apiEndpoint = apiEndpoint;
         let webSocketEndpoint = webSocketEndpoint
       "
     >
-      <ngx-edpoints-list-item
+      <hd-edpoints-list-item
         label="API"
         [endpoint]="apiEndpoint"
-      ></ngx-edpoints-list-item>
-      <ngx-edpoints-list-item
+      ></hd-edpoints-list-item>
+      <hd-edpoints-list-item
         label="WebSocket"
         [endpoint]="webSocketEndpoint"
-      ></ngx-edpoints-list-item>
+      ></hd-edpoints-list-item>
     </div>
   `,
 })
-export class NgxEndpointsListComponent {}
+export class HdEndpointsListComponent {}

@@ -12,13 +12,13 @@ import {
   instructionRelationQueryBuilder,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
 import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionRelationApiService {
-  constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
 
   private handleError(error: unknown) {
     return throwError(() =>
@@ -30,7 +30,7 @@ export class InstructionRelationApiService {
   find(filters: InstructionRelationFilters) {
     const query = instructionRelationQueryBuilder().where(filters).build();
 
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
@@ -45,7 +45,7 @@ export class InstructionRelationApiService {
   findById(
     instructionRelationId: string
   ): Observable<Relation<InstructionRelation> | null> {
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getAccountInfo(instructionRelationId)
       .pipe(
         map(
@@ -61,10 +61,10 @@ export class InstructionRelationApiService {
 
   // create instruction relation
   create(params: CreateInstructionRelationParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(createInstructionRelation(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
@@ -73,10 +73,10 @@ export class InstructionRelationApiService {
 
   // delete instruction relation
   delete(params: DeleteInstructionRelationParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(deleteInstructionRelation(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )

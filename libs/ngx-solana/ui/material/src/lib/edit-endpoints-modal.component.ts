@@ -11,7 +11,7 @@ import { httpEndpoint, webSocketEndpoint } from '@heavy-duty/ngx-solana-cdk';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 
 @Component({
-  selector: 'ngx-edit-endpoints-modal',
+  selector: 'hd-edit-endpoints-modal',
   template: `
     <header class="mb-10">
       <button
@@ -72,7 +72,7 @@ import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class NgxEditEndpointsComponent {
+export class HdEditEndpointsComponent {
   @HostBinding('class') class = 'block';
   submitted = false;
   form: FormGroup;
@@ -80,7 +80,7 @@ export class NgxEditEndpointsComponent {
   constructor(
     private readonly _formBuilder: FormBuilder,
     private readonly _matDialogRef: MatDialogRef<
-      NgxEditEndpointsComponent,
+      HdEditEndpointsComponent,
       {
         apiEndpoint: HttpEndpoint;
         webSocketEndpoint: WebSocketEndpoint;

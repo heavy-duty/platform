@@ -7,17 +7,19 @@ import {
   WorkspaceFilters,
   workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceEventService {
-  constructor(private readonly _connectionStore: NgxSolanaConnectionStore) {}
+  constructor(
+    private readonly _hdSolanaConnectionStore: HdSolanaConnectionStore
+  ) {}
 
   workspaceChanges(
     workspaceId: string
   ): Observable<Document<Workspace> | null> {
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onAccountChange(workspaceId)
       .pipe(
         map((accountInfo) =>
@@ -34,7 +36,7 @@ export class WorkspaceEventService {
       .setCommitment('finalized')
       .build();
 
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {

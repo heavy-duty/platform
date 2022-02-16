@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import {
   concatMap,
@@ -42,11 +42,11 @@ export class TabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _router: Router,
-    private readonly _configStore: NgxSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super(initialState);
 
-    this._handleNetworkChanges(this._configStore.selectedNetwork$);
+    this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
   }
 
   private readonly _removeTab = this.updater<string>((state, tabId) => ({

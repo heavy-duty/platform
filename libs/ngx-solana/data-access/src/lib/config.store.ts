@@ -48,7 +48,7 @@ interface ViewModel {
 }
 
 @Injectable()
-export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
+export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
   private readonly _networkConfigs = new LocalStorageSubject<NetworkConfig[]>(
     'networkConfigs'
   );
@@ -88,7 +88,7 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
     this._loadConfigs(this._networkConfigs.asObservable());
   }
 
-  readonly setNetworkConfig = this.updater<NetworkConfig | null>(
+  private readonly _setNetworkConfig = this.updater<NetworkConfig | null>(
     (state, networkConfig) => ({
       ...state,
       configs:
@@ -98,7 +98,7 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly selectNetwork = this.updater<Network | null>(
+  private readonly _selectNetwork = this.updater<Network | null>(
     (state, selectedNetwork) => ({
       ...state,
       selectedNetwork,
@@ -108,7 +108,6 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
   private readonly _loadConfigs = this.effect<NetworkConfig[] | null>(
     pipe(
       tap((configs) => {
-        console.log(configs);
         if (configs === null) {
           this._networkConfigs.next(defaultNetworkConfigs);
         } else {
@@ -137,4 +136,18 @@ export class NgxSolanaConfigStore extends ComponentStore<ViewModel> {
   private readonly _persistSelectedNetwork = this.effect<Network | null>(
     tap(this._selectedNetwork)
   );
+
+  setNetworkConfig(
+    network: Network,
+    endpoints: {
+      apiEndpoint: HttpEndpoint;
+      webSocketEndpoint: WebSocketEndpoint;
+    }
+  ) {
+    this._setNetworkConfig({ network, ...endpoints });
+  }
+
+  selectNetwork(network: Network | null) {
+    this._selectNetwork(network);
+  }
 }

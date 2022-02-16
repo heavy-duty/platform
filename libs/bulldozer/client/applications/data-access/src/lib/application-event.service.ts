@@ -7,17 +7,19 @@ import {
   createApplicationDocument,
   Document,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaConnectionStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
 import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApplicationEventService {
-  constructor(private readonly _connectionStore: NgxSolanaConnectionStore) {}
+  constructor(
+    private readonly _hdSolanaConnectionStore: HdSolanaConnectionStore
+  ) {}
 
   applicationChanges(
     applicationId: string
   ): Observable<Document<Application> | null> {
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onAccountChange(applicationId)
       .pipe(
         map((accountInfo) =>
@@ -34,7 +36,7 @@ export class ApplicationEventService {
       .setCommitment('finalized')
       .build();
 
-    return this._connectionStore
+    return this._hdSolanaConnectionStore
       .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         concatMap(({ account, pubkey }) => {

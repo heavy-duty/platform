@@ -5,13 +5,13 @@ import {
   ViewContainerRef,
 } from '@angular/core';
 import {
+  HdSolanaConfigStore,
   HttpEndpoint,
   NetworkConfig,
-  NgxSolanaConfigStore,
 } from '@heavy-duty/ngx-solana';
 import { Network, WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { ComponentStore } from '@ngrx/component-store';
-import { Observable, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 interface ConfigChanges {
   apiEndpoint: HttpEndpoint | null;
@@ -19,9 +19,17 @@ interface ConfigChanges {
   networkConfigs: NetworkConfig[] | null;
   selectedNetwork: Network | null;
   selectedNetworkConfig: NetworkConfig | null;
+  selectNetwork: (network: Network) => void;
+  editEndpoints: (
+    network: Network,
+    endpoints: {
+      apiEndpoint: HttpEndpoint;
+      webSocketEndpoint: WebSocketEndpoint;
+    }
+  ) => void;
 }
 
-export class NgxSolanaConfigContext {
+export class HdSolanaConfigContext implements ConfigChanges {
   public $implicit!: unknown;
   public apiEndpoint!: HttpEndpoint | null;
   public webSocketEndpoint!: WebSocketEndpoint | null;
@@ -39,43 +47,53 @@ export class NgxSolanaConfigContext {
 }
 
 @Directive({
-  selector: '[ngxSolanaConfig]',
+  selector: '[hdSolanaConfig]',
 })
-export class NgxSolanaConfigDirective extends ComponentStore<object> {
-  private _context: NgxSolanaConfigContext = new NgxSolanaConfigContext();
+export class HdSolanaConfigDirective extends ComponentStore<object> {
+  private _context: HdSolanaConfigContext = new HdSolanaConfigContext();
 
   constructor(
     private readonly _viewContainerRef: ViewContainerRef,
-    private readonly _templateRef: TemplateRef<NgxSolanaConfigContext>,
-    private readonly _configStore: NgxSolanaConfigStore,
-    private readonly _changeDetectionRef: ChangeDetectorRef
+    private readonly _templateRef: TemplateRef<HdSolanaConfigContext>,
+    private readonly _changeDetectionRef: ChangeDetectorRef,
+    hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super({});
-    this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
-    this._handleChanges(this._changes$);
-  }
 
-  private readonly _changes$: Observable<ConfigChanges> = this.select(
-    this._configStore.apiEndpoint$,
-    this._configStore.webSocketEndpoint$,
-    this._configStore.networkConfigs$,
-    this._configStore.selectedNetwork$,
-    this._configStore.selectedNetworkConfig$,
-    (
-      apiEndpoint,
-      webSocketEndpoint,
-      networkConfigs,
-      selectedNetwork,
-      selectedNetworkConfig
-    ) => ({
-      apiEndpoint,
-      webSocketEndpoint,
-      networkConfigs,
-      selectedNetwork,
-      selectedNetworkConfig,
-    }),
-    { debounce: true }
-  );
+    this._viewContainerRef.createEmbeddedView(this._templateRef, this._context);
+    this._handleChanges(
+      this.select(
+        hdSolanaConfigStore.apiEndpoint$,
+        hdSolanaConfigStore.webSocketEndpoint$,
+        hdSolanaConfigStore.networkConfigs$,
+        hdSolanaConfigStore.selectedNetwork$,
+        hdSolanaConfigStore.selectedNetworkConfig$,
+        (
+          apiEndpoint,
+          webSocketEndpoint,
+          networkConfigs,
+          selectedNetwork,
+          selectedNetworkConfig
+        ) => ({
+          apiEndpoint,
+          webSocketEndpoint,
+          networkConfigs,
+          selectedNetwork,
+          selectedNetworkConfig,
+          selectNetwork: (network: Network) =>
+            hdSolanaConfigStore.selectNetwork(network),
+          editEndpoints: (
+            network: Network,
+            endpoints: {
+              apiEndpoint: HttpEndpoint;
+              webSocketEndpoint: WebSocketEndpoint;
+            }
+          ) => hdSolanaConfigStore.setNetworkConfig(network, endpoints),
+        }),
+        { debounce: true }
+      )
+    );
+  }
 
   private readonly _handleChanges = this.effect<ConfigChanges>(
     tap(
@@ -85,34 +103,25 @@ export class NgxSolanaConfigDirective extends ComponentStore<object> {
         networkConfigs,
         selectedNetwork,
         selectedNetworkConfig,
+        editEndpoints,
+        selectNetwork,
       }) => {
         this._context.apiEndpoint = apiEndpoint;
         this._context.webSocketEndpoint = webSocketEndpoint;
         this._context.networkConfigs = networkConfigs;
         this._context.selectedNetwork = selectedNetwork;
         this._context.selectedNetworkConfig = selectedNetworkConfig;
-        this._context.selectNetwork = (network: Network) =>
-          this._configStore.selectNetwork(network);
-        this._context.editEndpoints = (
-          network: Network,
-          endpoints: {
-            apiEndpoint: HttpEndpoint;
-            webSocketEndpoint: WebSocketEndpoint;
-          }
-        ) =>
-          this._configStore.setNetworkConfig({
-            network,
-            ...endpoints,
-          });
+        this._context.selectNetwork = selectNetwork;
+        this._context.editEndpoints = editEndpoints;
         this._changeDetectionRef.markForCheck();
       }
     )
   );
 
   static ngTemplateContextGuard(
-    _: NgxSolanaConfigDirective,
+    _: HdSolanaConfigDirective,
     ctx: unknown
-  ): ctx is NgxSolanaConfigContext {
+  ): ctx is HdSolanaConfigContext {
     return true;
   }
 }

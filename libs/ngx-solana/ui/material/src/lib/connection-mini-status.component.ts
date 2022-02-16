@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-connection-mini-status-button',
+  selector: 'hd-connection-mini-status-button',
   template: `
     <ng-container
-      *ngxSolanaConnection="let connected = connected; let online = online"
+      *hdSolanaConnection="let connected = connected; let online = online"
     >
       <div
         *ngIf="online && connected"
@@ -22,4 +22,4 @@ import { Component } from '@angular/core';
     </ng-container>
   `,
 })
-export class NgxConnectionMiniStatusComponent {}
+export class HdConnectionMiniStatusComponent {}

@@ -1,23 +1,23 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { NgxSolanaConfigDirective } from './config.directive';
-import { NgxSolanaConnectionDirective } from './connection.directive';
-import { NgxRelativeTimePipe } from './relative-time.pipe';
-import { NgxStopPropagationDirective } from './stop-propagation.directive';
+import { HdSolanaConfigDirective } from './config.directive';
+import { HdSolanaConnectionDirective } from './connection.directive';
+import { HdRelativeTimePipe } from './relative-time.pipe';
+import { HdStopPropagationDirective } from './stop-propagation.directive';
 
 @NgModule({
   imports: [CommonModule],
   declarations: [
-    NgxSolanaConnectionDirective,
-    NgxSolanaConfigDirective,
-    NgxRelativeTimePipe,
-    NgxStopPropagationDirective,
+    HdSolanaConnectionDirective,
+    HdSolanaConfigDirective,
+    HdRelativeTimePipe,
+    HdStopPropagationDirective,
   ],
   exports: [
-    NgxSolanaConnectionDirective,
-    NgxSolanaConfigDirective,
-    NgxRelativeTimePipe,
-    NgxStopPropagationDirective,
+    HdSolanaConnectionDirective,
+    HdSolanaConfigDirective,
+    HdRelativeTimePipe,
+    HdStopPropagationDirective,
   ],
 })
-export class NgxSolanaCdkModule {}
+export class HdSolanaCdkModule {}

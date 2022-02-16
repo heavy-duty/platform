@@ -5,10 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
-import {
-  NgxSolanaApiInterceptor,
-  NgxSolanaModule,
-} from '@heavy-duty/ngx-solana';
+import { HdSolanaApiInterceptor, HdSolanaModule } from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
 import { AppComponent } from './app.component';
 
@@ -38,7 +35,7 @@ import { AppComponent } from './app.component';
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
-    NgxSolanaModule.forRoot(),
+    HdSolanaModule.forRoot(),
   ],
   bootstrap: [AppComponent],
   providers: [
@@ -49,7 +46,7 @@ import { AppComponent } from './app.component';
     },
     {
       provide: HTTP_INTERCEPTORS,
-      useClass: NgxSolanaApiInterceptor,
+      useClass: HdSolanaApiInterceptor,
       multi: true,
     },
   ],

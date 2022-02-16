@@ -4,7 +4,7 @@ import {
   BreakpointState,
 } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { NgxSolanaConfigStore } from '@heavy-duty/ngx-solana';
+import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { distinctUntilChanged, pairwise, pipe, tap } from 'rxjs';
@@ -29,13 +29,13 @@ export class ConfigStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _breakpointObserver: BreakpointObserver,
-    private readonly _solanaConfigStore: NgxSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super(initialState);
 
     this._loadHandset(this._breakpointObserver.observe(Breakpoints.Handset));
     this._loadWorkspaceId(this._workspaceId.asObservable());
-    this._handleNetworkChanges(this._solanaConfigStore.selectedNetwork$);
+    this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
   }
 
   private readonly _loadHandset = this.updater<BreakpointState>(

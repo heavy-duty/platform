@@ -11,16 +11,16 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { NgxSolanaCdkModule } from '@heavy-duty/ngx-solana-cdk';
-import { NgxConnectionMenuButtonComponent } from './connection-menu-button.component';
-import { NgxConnectionMenuComponent } from './connection-menu.component';
-import { NgxConnectionMiniStatusComponent } from './connection-mini-status.component';
-import { NgxConnectionStatusComponent } from './connection-status.component';
-import { NgxEditEndpointsModalTriggerDirective } from './edit-endpoints-modal-trigger.directive';
-import { NgxEditEndpointsComponent } from './edit-endpoints-modal.component';
-import { NgxEndpointsListItemComponent } from './endpoints-list-item.component';
-import { NgxEndpointsListComponent } from './endpoints-list.component';
-import { NgxNetworkSelectorComponent } from './network-selector.component';
+import { HdSolanaCdkModule } from '@heavy-duty/ngx-solana-cdk';
+import { HdConnectionMenuButtonComponent } from './connection-menu-button.component';
+import { HdConnectionMenuComponent } from './connection-menu.component';
+import { HdConnectionMiniStatusComponent } from './connection-mini-status.component';
+import { HdConnectionStatusComponent } from './connection-status.component';
+import { HdEditEndpointsModalTriggerDirective } from './edit-endpoints-modal-trigger.directive';
+import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
+import { HdEndpointsListItemComponent } from './endpoints-list-item.component';
+import { HdEndpointsListComponent } from './endpoints-list.component';
+import { HdNetworkSelectorComponent } from './network-selector.component';
 
 @NgModule({
   imports: [
@@ -37,19 +37,19 @@ import { NgxNetworkSelectorComponent } from './network-selector.component';
     MatProgressSpinnerModule,
     MatSelectModule,
     MatTooltipModule,
-    NgxSolanaCdkModule,
+    HdSolanaCdkModule,
   ],
   declarations: [
-    NgxConnectionMenuButtonComponent,
-    NgxConnectionMenuComponent,
-    NgxConnectionMiniStatusComponent,
-    NgxEditEndpointsComponent,
-    NgxEditEndpointsModalTriggerDirective,
-    NgxEndpointsListComponent,
-    NgxEndpointsListItemComponent,
-    NgxNetworkSelectorComponent,
-    NgxConnectionStatusComponent,
+    HdConnectionMenuButtonComponent,
+    HdConnectionMenuComponent,
+    HdConnectionMiniStatusComponent,
+    HdEditEndpointsComponent,
+    HdEditEndpointsModalTriggerDirective,
+    HdEndpointsListComponent,
+    HdEndpointsListItemComponent,
+    HdNetworkSelectorComponent,
+    HdConnectionStatusComponent,
   ],
-  exports: [NgxConnectionMenuComponent],
+  exports: [HdConnectionMenuComponent],
 })
-export class NgxSolanaMaterialModule {}
+export class HdSolanaMaterialModule {}

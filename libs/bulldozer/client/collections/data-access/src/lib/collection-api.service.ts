@@ -14,7 +14,7 @@ import {
   updateCollection,
   UpdateCollectionParams,
 } from '@heavy-duty/bulldozer-devkit';
-import { NgxSolanaApiService } from '@heavy-duty/ngx-solana';
+import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
@@ -24,7 +24,7 @@ import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionApiService {
-  constructor(private readonly _ngxSolanaApiService: NgxSolanaApiService) {}
+  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
 
   private handleError(error: unknown) {
     return throwError(() =>
@@ -36,7 +36,7 @@ export class CollectionApiService {
   find(filters: CollectionFilters) {
     const query = collectionQueryBuilder().where(filters).build();
 
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
       .pipe(
         map((programAccounts) =>
@@ -49,7 +49,7 @@ export class CollectionApiService {
 
   // get collection
   findById(collectionId: string): Observable<Document<Collection> | null> {
-    return this._ngxSolanaApiService
+    return this._hdSolanaApiService
       .getAccountInfo(collectionId)
       .pipe(
         map(
@@ -63,7 +63,7 @@ export class CollectionApiService {
   create(params: Omit<CreateCollectionParams, 'collectionId'>) {
     const collectionKeypair = Keypair.generate();
 
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         createCollection({
           ...params,
@@ -72,7 +72,7 @@ export class CollectionApiService {
       ),
       partiallySignTransaction(collectionKeypair),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
@@ -81,10 +81,10 @@ export class CollectionApiService {
 
   // update collection
   update(params: UpdateCollectionParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(updateCollection(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
@@ -93,10 +93,10 @@ export class CollectionApiService {
 
   // delete collection
   delete(params: DeleteCollectionParams) {
-    return this._ngxSolanaApiService.createTransaction(params.authority).pipe(
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(deleteCollection(params)),
       concatMap((transaction) =>
-        this._ngxSolanaApiService
+        this._hdSolanaApiService
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )

@@ -1,10 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'ngx-connection-status',
+  selector: 'hd-connection-status',
   template: `
     <ng-container
-      *ngxSolanaConnection="
+      *hdSolanaConnection="
         let online = online;
         let connected = connected;
         let connecting = connecting;
@@ -33,14 +33,14 @@ import { Component } from '@angular/core';
 
         <p class="m-0 text-xs" *ngIf="!connected && !connecting">
           <ng-container
-            *ngxSolanaConnection="
+            *hdSolanaConnection="
               let nextAttemptAt = nextAttemptAt;
               let reconnect = reconnect
             "
           >
             <ng-container
               *ngIf="
-                nextAttemptAt | ngxRelativeTime | async as timeToNextAttempt;
+                nextAttemptAt | hdRelativeTime | async as timeToNextAttempt;
                 else reconnecting
               "
             >
@@ -58,4 +58,4 @@ import { Component } from '@angular/core';
     </ng-container>
   `,
 })
-export class NgxConnectionStatusComponent {}
+export class HdConnectionStatusComponent {}
