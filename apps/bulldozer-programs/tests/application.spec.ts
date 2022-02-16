@@ -215,6 +215,6 @@ describe('application', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6025);
+    assert.equal(error?.code, 6026);
   });
 });

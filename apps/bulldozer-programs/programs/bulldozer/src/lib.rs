@@ -26,6 +26,14 @@ pub mod bulldozer {
     instructions::delete_workspace::handle(ctx)
   }
 
+  pub fn add_collaborator(ctx: Context<AddCollaborator>) -> ProgramResult {
+    instructions::add_collaborator::handle(ctx)
+  }
+
+  pub fn delete_collaborator(ctx: Context<DeleteCollaborator>) -> ProgramResult {
+    instructions::delete_collaborator::handle(ctx)
+  }
+
   pub fn create_application(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
     instructions::create_application::handle(ctx, arguments)
   }

@@ -9,6 +9,7 @@ pub struct DeleteWorkspace<'info> {
     has_one = authority,
     close = authority,
     constraint = workspace.quantity_of_applications == 0 @ ErrorCode::CantDeleteWorkspaceWithApplications,
+    constraint = workspace.quantity_of_collaborators == 0 @ ErrorCode::CantDeleteWorkspaceWithCollaborators,
   )]
   pub workspace: Account<'info, Workspace>,
   pub authority: Signer<'info>,
