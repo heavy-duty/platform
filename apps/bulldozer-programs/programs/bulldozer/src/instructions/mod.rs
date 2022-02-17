@@ -1,4 +1,5 @@
 pub mod application;
+pub mod collaborator;
 pub mod collection;
 pub mod collection_attribute;
 pub mod workspace;
@@ -8,6 +9,7 @@ pub mod instruction_argument;
 pub mod instruction_relation;
 
 pub use application::*;
+pub use collaborator::*;
 pub use collection::*;
 pub use collection_attribute::*;
 pub use workspace::*;

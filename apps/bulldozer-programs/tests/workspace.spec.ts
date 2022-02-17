@@ -60,53 +60,6 @@ describe('workspace', () => {
     assert.equal(account.name, workspaceName);
   });
 
-  it('should add collaborator', async () => {
-    // act
-    await program.methods
-      .addCollaborator()
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        receiver: program.provider.wallet.publicKey,
-      })
-      .rpc();
-    // assert
-    const collaboratorAccount = await program.account.collaborator.fetch(
-      collaboratorPublicKey
-    );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
-    );
-    assert.ok(
-      collaboratorAccount.authority.equals(program.provider.wallet.publicKey)
-    );
-    assert.ok(
-      collaboratorAccount.owner.equals(program.provider.wallet.publicKey)
-    );
-    assert.ok(collaboratorAccount.workspace.equals(workspace.publicKey));
-    assert.equal(workspaceAccount.quantityOfCollaborators, 1);
-  });
-
-  it('should delete collaborator', async () => {
-    // act
-    await program.methods
-      .deleteCollaborator()
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        receiver: program.provider.wallet.publicKey,
-      })
-      .rpc();
-    // assert
-    const collaboratorAccount =
-      await program.account.collaborator.fetchNullable(collaboratorPublicKey);
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
-    );
-    assert.equal(collaboratorAccount, null);
-    assert.equal(workspaceAccount.quantityOfCollaborators, 0);
-  });
-
   it('should delete account', async () => {
     // act
     await program.methods
