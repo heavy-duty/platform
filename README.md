@@ -18,6 +18,7 @@ In order to run Bulldozer in your local environment, you'll need to make sure yo
 - typescript
 - npm
 - node
+- 1
 
 Clone the repo in the desired location and `cd` to it and run `npm i`. It's time to build the program and deploy it! Every Solana program needs a Keypair, Bulldozer is not different. We used one during development but you'll need to set up your own and replace it in some files.
 
