@@ -20,6 +20,12 @@ pub fn get_account_key<'info, T: AccountSerialize + AccountDeserialize + Owner +
 ) -> std::result::Result<Option<Pubkey>, ProgramError> {
   match maybe_account {
     Some(account) => Ok(Some(account.key())),
-    _ => Ok(None)
+    _ => Ok(None),
   }
+}
+
+pub fn get_budget_rent_exemption() -> std::result::Result<u64, ProgramError> {
+  let rent = Rent::get()?;
+  let budget_space = 73;
+  Ok(rent.minimum_balance(budget_space))
 }

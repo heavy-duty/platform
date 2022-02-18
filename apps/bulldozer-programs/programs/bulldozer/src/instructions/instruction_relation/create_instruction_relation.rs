@@ -1,6 +1,9 @@
 use crate::collections::{
-  Application, Instruction, InstructionAccount, InstructionRelation, Workspace,
+  Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionRelation, User,
+  Workspace,
 };
+use crate::errors::ErrorCode;
+use crate::utils::get_budget_rent_exemption;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -29,11 +32,65 @@ pub struct CreateInstructionRelation<'info> {
   pub to: Box<Account<'info, InstructionAccount>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = collaborator.bump
+  )]
+  pub collaborator: Box<Account<'info, Collaborator>>,
+  #[account(
+    mut,
+    seeds = [
+      b"budget".as_ref(),
+      workspace.key().as_ref(),
+    ],
+    bump = budget.bump,
+  )]
+  pub budget: Box<Account<'info, Budget>>,
   pub system_program: Program<'info, System>,
+}
+
+pub fn validate(
+  ctx: &Context<CreateInstructionRelation>,
+) -> std::result::Result<bool, ProgramError> {
+  let relation_rent = **ctx.accounts.relation.to_account_info().lamports.borrow();
+  let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let budget_rent_exemption = get_budget_rent_exemption()?;
+
+  if relation_rent + budget_rent_exemption > budget {
+    return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+  }
+
+  Ok(true)
 }
 
 pub fn handle(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
   msg!("Create instruction relation");
+
+  // charge back to the authority
+  let rent = **ctx.accounts.relation.to_account_info().lamports.borrow();
+  **ctx
+    .accounts
+    .budget
+    .to_account_info()
+    .try_borrow_mut_lamports()? -= rent;
+  **ctx
+    .accounts
+    .authority
+    .to_account_info()
+    .try_borrow_mut_lamports()? += rent;
+
   ctx.accounts.relation.authority = ctx.accounts.authority.key();
   ctx.accounts.relation.workspace = ctx.accounts.workspace.key();
   ctx.accounts.relation.application = ctx.accounts.application.key();

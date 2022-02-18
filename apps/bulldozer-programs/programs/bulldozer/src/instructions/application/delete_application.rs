@@ -1,13 +1,12 @@
-use crate::collections::{Application, Workspace};
-use anchor_lang::prelude::*;
+use crate::collections::{Application, Budget, Collaborator, User, Workspace};
 use crate::errors::ErrorCode;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteApplication<'info> {
   #[account(
     mut,
-    has_one = authority,
-    close = authority,
+    close = budget,
     constraint = application.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
     constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions
   )]
@@ -18,6 +17,32 @@ pub struct DeleteApplication<'info> {
   )]
   pub workspace: Account<'info, Workspace>,
   pub authority: Signer<'info>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = collaborator.bump
+  )]
+  pub collaborator: Box<Account<'info, Collaborator>>,
+  #[account(
+    mut,
+    seeds = [
+      b"budget".as_ref(),
+      workspace.key().as_ref(),
+    ],
+    bump = budget.bump,
+  )]
+  pub budget: Box<Account<'info, Budget>>,
 }
 
 pub fn handle(ctx: Context<DeleteApplication>) -> ProgramResult {

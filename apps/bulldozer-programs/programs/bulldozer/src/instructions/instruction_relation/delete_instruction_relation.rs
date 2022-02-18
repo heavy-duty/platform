@@ -1,4 +1,6 @@
-use crate::collections::{InstructionAccount, InstructionRelation};
+use crate::collections::{
+  Budget, Collaborator, InstructionAccount, InstructionRelation, User, Workspace,
+};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -20,6 +22,33 @@ pub struct DeleteInstructionRelation<'info> {
   #[account(mut)]
   pub to: Box<Account<'info, InstructionAccount>>,
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = collaborator.bump
+  )]
+  pub collaborator: Box<Account<'info, Collaborator>>,
+  #[account(
+    mut,
+    seeds = [
+      b"budget".as_ref(),
+      workspace.key().as_ref(),
+    ],
+    bump = budget.bump,
+  )]
+  pub budget: Box<Account<'info, Budget>>,
 }
 
 pub fn handle(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {

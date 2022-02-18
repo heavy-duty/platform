@@ -1,5 +1,10 @@
 import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
-import { Keypair } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID, decodeAttributeEnum } from './utils';
@@ -12,13 +17,37 @@ describe('collection attribute', () => {
   );
   const attribute = Keypair.generate();
   const collection = Keypair.generate();
-  const collectionName = 'things';
   const application = Keypair.generate();
-  const applicationName = 'my-app';
   const workspace = Keypair.generate();
+  const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
+  const collectionName = 'my-collection';
+  let userPublicKey: PublicKey;
+  let budgetPublicKey: PublicKey;
 
   before(async () => {
+    [userPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('user', 'utf8'),
+        program.provider.wallet.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [budgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    const userAccount = await program.account.user.fetchNullable(userPublicKey);
+
+    if (userAccount === null) {
+      await program.methods
+        .createUser()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+        })
+        .rpc();
+    }
+
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
@@ -26,7 +55,15 @@ describe('collection attribute', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: budgetPublicKey,
+          lamports: LAMPORTS_PER_SOL,
+        })
+      )
       .rpc();
+
     await program.methods
       .createApplication({ name: applicationName })
       .accounts({
@@ -36,6 +73,7 @@ describe('collection attribute', () => {
       })
       .signers([application])
       .rpc();
+
     await program.methods
       .createCollection({ name: collectionName })
       .accounts({
@@ -117,6 +155,7 @@ describe('collection attribute', () => {
       .updateCollectionAttribute(argumentsData)
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         attribute: attribute.publicKey,
       })
       .rpc();
@@ -142,6 +181,7 @@ describe('collection attribute', () => {
       .deleteCollectionAttribute()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         collection: collection.publicKey,
         attribute: attribute.publicKey,
       })
@@ -261,6 +301,7 @@ describe('collection attribute', () => {
         .deleteCollectionAttribute()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           collection: collection.publicKey,
           attribute: newAttribute.publicKey,
         })
@@ -270,5 +311,87 @@ describe('collection attribute', () => {
     }
     // assert
     assert.equal(error?.code, 6014);
+  });
+
+  it('should fail when workspace has insufficient funds', async () => {
+    // arrange
+    const newWorkspace = Keypair.generate();
+    const newWorkspaceName = 'sample';
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newCollection = Keypair.generate();
+    const newCollectionName = 'sample';
+    const newAttribute = Keypair.generate();
+    const argumentsData = {
+      name: 'attr1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+      program.programId
+    );
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createWorkspace({ name: newWorkspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+      })
+      .signers([newWorkspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newBudgetPublicKey,
+          lamports:
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              157 // collection account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              126 // application account size
+            )),
+        })
+      )
+      .rpc();
+    await program.methods
+      .createApplication({ name: newApplicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+      })
+      .signers([newApplication])
+      .rpc();
+    await program.methods
+      .createCollection({ name: newCollectionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+        collection: newCollection.publicKey,
+      })
+      .signers([newCollection])
+      .rpc();
+    try {
+      await program.methods
+        .createCollectionAttribute(argumentsData)
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+          collection: newCollection.publicKey,
+          attribute: newAttribute.publicKey,
+        })
+        .signers([newAttribute])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6027);
   });
 });

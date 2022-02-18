@@ -1,5 +1,10 @@
 import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
-import { Keypair } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
@@ -12,11 +17,35 @@ describe('instruction', () => {
   );
   const instruction = Keypair.generate();
   const application = Keypair.generate();
-  const applicationName = 'my-app';
   const workspace = Keypair.generate();
+  const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
+  let userPublicKey: PublicKey;
+  let budgetPublicKey: PublicKey;
 
   before(async () => {
+    [userPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('user', 'utf8'),
+        program.provider.wallet.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [budgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    const userAccount = await program.account.user.fetchNullable(userPublicKey);
+
+    if (userAccount === null) {
+      await program.methods
+        .createUser()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+        })
+        .rpc();
+    }
+
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
@@ -24,6 +53,13 @@ describe('instruction', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: budgetPublicKey,
+          lamports: LAMPORTS_PER_SOL,
+        })
+      )
       .rpc();
     await program.methods
       .createApplication({ name: applicationName })
@@ -74,6 +110,7 @@ describe('instruction', () => {
       .updateInstruction({ name: instructionName })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -101,6 +138,7 @@ describe('instruction', () => {
       .updateInstructionBody({ body: instructionBody })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -117,6 +155,7 @@ describe('instruction', () => {
       .deleteInstruction()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
         application: application.publicKey,
       })
@@ -174,6 +213,7 @@ describe('instruction', () => {
         .accounts({
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
         })
         .rpc();
@@ -223,6 +263,7 @@ describe('instruction', () => {
         .deleteInstruction()
         .accounts({
           instruction: instruction.publicKey,
+          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
         })
@@ -266,6 +307,7 @@ describe('instruction', () => {
         .deleteInstruction()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: newInstruction.publicKey,
         })
@@ -275,5 +317,64 @@ describe('instruction', () => {
     }
     // assert
     assert.equal(error?.code, 6023);
+  });
+
+  it('should fail when workspace has insufficient funds', async () => {
+    // arrange
+    const newWorkspace = Keypair.generate();
+    const newWorkspaceName = 'sample';
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+      program.programId
+    );
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createWorkspace({ name: newWorkspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+      })
+      .signers([newWorkspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newBudgetPublicKey,
+          lamports:
+            await program.provider.connection.getMinimumBalanceForRentExemption(
+              126 // application account size
+            ),
+        })
+      )
+      .rpc();
+    await program.methods
+      .createApplication({ name: newApplicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+      })
+      .signers([newApplication])
+      .rpc();
+    try {
+      await program.methods
+        .createInstruction({ name: newInstructionName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
+        })
+        .signers([newInstruction])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6027);
   });
 });

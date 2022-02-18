@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use crate::errors::ErrorCode;
+use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
 pub enum AttributeKinds {
@@ -16,15 +16,12 @@ pub fn get_attribute_kind(
 ) -> std::result::Result<AttributeKinds, ProgramError> {
   match (kind, max, max_length) {
     (0, _, _) => Ok(AttributeKinds::Boolean { id: 0, size: 1 }),
-    (1, Some(max), _) => Ok(AttributeKinds::Number {
-      id: 1,
-      size: max,
-    }),
+    (1, Some(max), _) => Ok(AttributeKinds::Number { id: 1, size: max }),
     (2, _, Some(max_length)) => Ok(AttributeKinds::String {
       id: 2,
       size: max_length,
     }),
     (3, _, _) => Ok(AttributeKinds::Pubkey { id: kind, size: 32 }),
-    _ => Err(ErrorCode::InvalidAttributeKind.into())
+    _ => Err(ErrorCode::InvalidAttributeKind.into()),
   }
 }

@@ -57,4 +57,6 @@ pub enum ErrorCode {
   CantDeleteWorkspaceWithCollaborators,
   #[msg("Workspace provided doesnt match application")]
   WorkspaceDoesntMatchApplication,
+  #[msg("Budget has insufficient funds")]
+  BudgetHasUnsufficientFunds,
 }

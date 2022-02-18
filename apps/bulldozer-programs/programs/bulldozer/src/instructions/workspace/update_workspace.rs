@@ -1,16 +1,33 @@
-use crate::collections::Workspace;
+use crate::collections::{Collaborator, User, Workspace};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateWorkspaceArguments {
-  pub name: String
+  pub name: String,
 }
 
 #[derive(Accounts)]
 #[instruction(arguments: UpdateWorkspaceArguments)]
 pub struct UpdateWorkspace<'info> {
-  #[account(mut, has_one = authority)]
+  #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = collaborator.bump
+  )]
+  pub collaborator: Box<Account<'info, Collaborator>>,
   pub authority: Signer<'info>,
 }
 

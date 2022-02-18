@@ -3,18 +3,8 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteCollaborator<'info> {
-  #[account(
-    mut,
-    close = authority,
-    seeds = [
-      b"collaborator".as_ref(),
-      workspace.key().as_ref(),
-      receiver.key().as_ref(),
-    ],
-    bump = collaborator.bump
-  )]
+  #[account(mut, has_one = workspace, close = authority)]
   pub collaborator: Box<Account<'info, Collaborator>>,
-  pub receiver: UncheckedAccount<'info>,
   #[account(mut, has_one = authority)]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]

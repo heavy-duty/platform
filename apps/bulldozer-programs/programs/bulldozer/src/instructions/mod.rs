@@ -7,6 +7,7 @@ pub mod instruction;
 pub mod instruction_account;
 pub mod instruction_argument;
 pub mod instruction_relation;
+pub mod user;
 
 pub use application::*;
 pub use collaborator::*;
@@ -17,3 +18,4 @@ pub use instruction::*;
 pub use instruction_account::*;
 pub use instruction_argument::*;
 pub use instruction_relation::*;
+pub use user::*;

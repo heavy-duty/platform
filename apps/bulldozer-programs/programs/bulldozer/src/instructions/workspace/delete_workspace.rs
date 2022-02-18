@@ -1,6 +1,6 @@
 use crate::collections::Workspace;
-use anchor_lang::prelude::*;
 use crate::errors::ErrorCode;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteWorkspace<'info> {

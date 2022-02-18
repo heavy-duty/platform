@@ -1,5 +1,10 @@
 import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
@@ -11,17 +16,40 @@ describe('workspace', () => {
     Provider.env()
   );
   const workspace = Keypair.generate();
+  let userPublicKey: PublicKey;
   let collaboratorPublicKey: PublicKey;
+  let budgetPublicKey: PublicKey;
 
   before(async () => {
-    [collaboratorPublicKey] = await PublicKey.findProgramAddress(
+    [userPublicKey] = await PublicKey.findProgramAddress(
       [
-        Buffer.from('collaborator', 'utf8'),
-        workspace.publicKey.toBuffer(),
+        Buffer.from('user', 'utf8'),
         program.provider.wallet.publicKey.toBuffer(),
       ],
       program.programId
     );
+    [collaboratorPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('collaborator', 'utf8'),
+        workspace.publicKey.toBuffer(),
+        userPublicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [budgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    const userAccount = await program.account.user.fetchNullable(userPublicKey);
+
+    if (userAccount === null) {
+      await program.methods
+        .createUser()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+        })
+        .rpc();
+    }
   });
 
   it('should create account', async () => {
@@ -29,11 +57,20 @@ describe('workspace', () => {
     const workspaceName = 'my-app';
     // act
     await program.methods
-      .createWorkspace({ name: workspaceName })
+      .createWorkspace({
+        name: workspaceName,
+      })
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
       })
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: budgetPublicKey,
+          lamports: LAMPORTS_PER_SOL,
+        })
+      )
       .signers([workspace])
       .rpc();
     // assert
@@ -63,6 +100,14 @@ describe('workspace', () => {
   it('should delete account', async () => {
     // act
     await program.methods
+      .deleteCollaborator()
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        collaborator: collaboratorPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .rpc();
+    await program.methods
       .deleteWorkspace()
       .accounts({
         authority: program.provider.wallet.publicKey,
@@ -82,16 +127,31 @@ describe('workspace', () => {
     const newWorkspace = Keypair.generate();
     const applicationName = 'sample';
     const application = Keypair.generate();
+    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+      program.programId
+    );
     let error: ProgramError | null = null;
     // act
     try {
       await program.methods
-        .createWorkspace({ name: newWorkspaceName })
+        .createWorkspace({
+          name: newWorkspaceName,
+        })
         .accounts({
+          // This is temporal since anchor doesn't populate pda from a defined type argument
           workspace: newWorkspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          user: userPublicKey,
         })
         .signers([newWorkspace])
+        .postInstructions(
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newBudgetPublicKey,
+            lamports: LAMPORTS_PER_SOL,
+          })
+        )
         .rpc();
       await program.methods
         .createApplication({ name: applicationName })
@@ -124,20 +184,16 @@ describe('workspace', () => {
     // act
     try {
       await program.methods
-        .createWorkspace({ name: newWorkspaceName })
+        .createWorkspace({
+          name: newWorkspaceName,
+        })
         .accounts({
+          // This is temporal since anchor doesn't populate pda from a defined type argument
           workspace: newWorkspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          user: userPublicKey,
         })
         .signers([newWorkspace])
-        .rpc();
-      await program.methods
-        .addCollaborator()
-        .accounts({
-          authority: program.provider.wallet.publicKey,
-          workspace: newWorkspace.publicKey,
-          receiver: program.provider.wallet.publicKey,
-        })
         .rpc();
       await program.methods
         .deleteWorkspace()

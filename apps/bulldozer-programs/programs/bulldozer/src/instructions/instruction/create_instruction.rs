@@ -1,4 +1,6 @@
-use crate::collections::{Application, Instruction, Workspace};
+use crate::collections::{Application, Budget, Collaborator, Instruction, User, Workspace};
+use crate::errors::ErrorCode;
+use crate::utils::get_budget_rent_exemption;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -10,24 +12,79 @@ pub struct CreateInstructionArguments {
 #[instruction(arguments: CreateInstructionArguments)]
 pub struct CreateInstruction<'info> {
   #[account(
-        init,
-        payer = authority,
-        // discriminator + authority + workspace + application
-        // name (size 32 + 4 ?) + body + quantity of arguments
-        // quantity of accounts + created at + updated at
-        space = 8 + 32 + 32 + 32 + 33 + 2000 + 1 + 1 + 8 + 8
-    )]
+    init,
+    payer = authority,
+    // discriminator + authority + workspace + application
+    // name (size 32 + 4 ?) + body + quantity of arguments
+    // quantity of accounts + created at + updated at
+    space = 8 + 32 + 32 + 32 + 33 + 2000 + 1 + 1 + 8 + 8
+  )]
   pub instruction: Box<Account<'info, Instruction>>,
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub application: Box<Account<'info, Application>>,
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = collaborator.bump
+  )]
+  pub collaborator: Box<Account<'info, Collaborator>>,
+  #[account(
+    mut,
+    seeds = [
+      b"budget".as_ref(),
+      workspace.key().as_ref(),
+    ],
+    bump = budget.bump,
+  )]
+  pub budget: Box<Account<'info, Budget>>,
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
+pub fn validate(ctx: &Context<CreateInstruction>) -> std::result::Result<bool, ProgramError> {
+  let instruction_rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
+  let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let budget_rent_exemption = get_budget_rent_exemption()?;
+
+  if instruction_rent + budget_rent_exemption > budget {
+    return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+  }
+
+  Ok(true)
+}
+
+pub fn handle(
+  ctx: Context<CreateInstruction>,
+  arguments: CreateInstructionArguments,
+) -> ProgramResult {
   msg!("Create instruction");
+
+  // charge back to the authority
+  let rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
+  **ctx
+    .accounts
+    .budget
+    .to_account_info()
+    .try_borrow_mut_lamports()? -= rent;
+  **ctx
+    .accounts
+    .authority
+    .to_account_info()
+    .try_borrow_mut_lamports()? += rent;
+
   ctx.accounts.instruction.authority = ctx.accounts.authority.key();
   ctx.accounts.instruction.workspace = ctx.accounts.workspace.key();
   ctx.accounts.instruction.application = ctx.accounts.application.key();

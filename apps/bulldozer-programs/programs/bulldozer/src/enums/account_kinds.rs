@@ -1,5 +1,5 @@
-use anchor_lang::prelude::*;
 use crate::errors::ErrorCode;
+use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
 pub enum AccountKinds {
@@ -12,10 +12,11 @@ pub fn get_account_kind(
   collection: Option<Pubkey>,
 ) -> std::result::Result<AccountKinds, ProgramError> {
   match (kind, collection) {
-    (0, Some(collection)) => Ok(AccountKinds::Document { id: 0, collection: collection }),
-    (1, _) => Ok(AccountKinds::Signer {
-      id: 1,
+    (0, Some(collection)) => Ok(AccountKinds::Document {
+      id: 0,
+      collection: collection,
     }),
-    _ => Err(ErrorCode::InvalidAccountKind.into())
+    (1, _) => Ok(AccountKinds::Signer { id: 1 }),
+    _ => Err(ErrorCode::InvalidAccountKind.into()),
   }
 }
