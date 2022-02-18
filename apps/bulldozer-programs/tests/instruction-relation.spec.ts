@@ -410,7 +410,6 @@ describe('instruction relation', () => {
         ])
         .rpc();
     } catch (err) {
-      console.log({ err });
       error = err as ProgramError;
     }
     // assert
