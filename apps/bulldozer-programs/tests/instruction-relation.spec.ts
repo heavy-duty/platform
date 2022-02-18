@@ -359,4 +359,61 @@ describe('instruction relation', () => {
     // assert
     assert.equal(error?.code, 6027);
   });
+
+  it('should fail when user is not a collaborator', async () => {
+    // arrange
+    const newUser = Keypair.generate();
+    const newFrom = Keypair.generate();
+    const newTo = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newFrom.publicKey,
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newTo.publicKey,
+      })
+      .signers([newTo])
+      .rpc();
+    try {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+        })
+        .signers([newUser])
+        .preInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newUser.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ])
+        .rpc();
+    } catch (err) {
+      console.log({ err });
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 3012);
+  });
 });

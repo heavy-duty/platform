@@ -300,4 +300,35 @@ describe('application', () => {
     // assert
     assert.equal(error?.code, 6027);
   });
+
+  it('should fail when user is not a collaborator', async () => {
+    // arrange
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newUser = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    try {
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+        })
+        .signers([newUser, newApplication])
+        .preInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newUser.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 3012);
+  });
 });

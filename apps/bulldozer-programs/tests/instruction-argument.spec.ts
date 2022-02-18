@@ -396,4 +396,44 @@ describe('instruction argument', () => {
     // assert
     assert.equal(error?.code, 6027);
   });
+
+  it('should fail when user is not a collaborator', async () => {
+    // arrange
+    const newUser = Keypair.generate();
+    const newArgument = Keypair.generate();
+    const argumentsData = {
+      name: 'attr1_name',
+      kind: 0,
+      modifier: null,
+      size: null,
+      max: null,
+      maxLength: null,
+    };
+    let error: ProgramError | null = null;
+    // act
+    try {
+      await program.methods
+        .createInstructionArgument(argumentsData)
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          argument: newArgument.publicKey,
+        })
+        .signers([newUser, newArgument])
+        .preInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newUser.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 3012);
+  });
 });
