@@ -7,7 +7,12 @@ body:
     attributes:
       label: Which @heavy-duty/* package(s) are the source of the bug?
       options:
+        - bulldozer
         - ngx-solana
+        - ngx-websocket
+        - rx-solana
+        - rxjs
+        - wallet-adapter
         - Don't known / other
       multiple: true
     validations:
