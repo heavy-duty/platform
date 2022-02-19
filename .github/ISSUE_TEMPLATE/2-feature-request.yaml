@@ -7,22 +7,12 @@ body:
     attributes:
       label: Which @heavy-duty/* package(s) are relevant/releated to the feature request?
       options:
-        - animations
-        - bazel
-        - common
-        - compiler-cli
-        - compiler
-        - core
-        - elements
-        - forms
-        - language-service
-        - localize
-        - platform-browser-dynamic
-        - platform-browser
-        - platform-server
-        - router
-        - service-worker
-        - upgrade
+        - bulldozer
+        - ngx-solana
+        - ngx-websocket
+        - rx-solana
+        - rxjs
+        - wallet-adapter
       multiple: true
 
   - type: textarea
