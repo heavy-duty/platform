@@ -1,5 +1,5 @@
 use crate::collections::{Collaborator, CollectionAttribute, User, Workspace};
-use crate::enums::{get_attribute_kind, get_attribute_modifier};
+use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -57,8 +57,8 @@ pub fn handle(
   msg!("Update collection attribute");
   ctx.accounts.attribute.rename(arguments.name);
   ctx.accounts.attribute.change_settings(
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
-    get_attribute_modifier(arguments.modifier, arguments.size)?,
+    AttributeKinds::create(arguments.kind, arguments.max, arguments.max_length)?,
+    AttributeModifiers::create(arguments.modifier, arguments.size)?,
   );
   ctx.accounts.attribute.bump_timestamp()?;
   Ok(())

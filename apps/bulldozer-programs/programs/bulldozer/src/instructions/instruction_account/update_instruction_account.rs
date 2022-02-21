@@ -1,5 +1,5 @@
 use crate::collections::{Collaborator, Collection, InstructionAccount, User, Workspace};
-use crate::enums::{get_account_kind, get_account_modifier};
+use crate::enums::{AccountKinds, AccountModifiers};
 use crate::errors::ErrorCode;
 use crate::utils::{get_account_key, get_remaining_account};
 use anchor_lang::prelude::*;
@@ -63,14 +63,14 @@ pub fn handle(
   msg!("Update instruction account");
   ctx.accounts.account.rename(arguments.name);
   ctx.accounts.account.change_settings(
-    get_account_kind(
+    AccountKinds::create(
       arguments.kind,
       get_account_key(get_remaining_account::<Collection>(
         ctx.remaining_accounts,
         0,
       )?)?,
     )?,
-    get_account_modifier(
+    AccountModifiers::create(
       arguments.modifier,
       arguments.space,
       get_account_key(get_remaining_account::<InstructionAccount>(

@@ -1,7 +1,7 @@
 use crate::collections::{
   Application, Budget, Collaborator, Collection, CollectionAttribute, User, Workspace,
 };
-use crate::enums::{get_attribute_kind, get_attribute_modifier};
+use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
 use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
@@ -96,8 +96,8 @@ pub fn handle(
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
     ctx.accounts.collection.key(),
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
-    get_attribute_modifier(arguments.modifier, arguments.size)?,
+    AttributeKinds::create(arguments.kind, arguments.max, arguments.max_length)?,
+    AttributeModifiers::create(arguments.modifier, arguments.size)?,
   );
   ctx.accounts.collection.increase_attribute_quantity();
   ctx.accounts.attribute.initialize_timestamp()?;

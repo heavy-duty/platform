@@ -1,7 +1,7 @@
 use crate::collections::{
   Application, Budget, Collaborator, Collection, Instruction, InstructionAccount, User, Workspace,
 };
-use crate::enums::{get_account_kind, get_account_modifier};
+use crate::enums::{AccountKinds, AccountModifiers};
 use crate::errors::ErrorCode;
 use crate::utils::{
   fund_rent_for_account, get_account_key, get_remaining_account, has_enough_funds,
@@ -103,14 +103,14 @@ pub fn handle(
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
     ctx.accounts.instruction.key(),
-    get_account_kind(
+    AccountKinds::create(
       arguments.kind,
       get_account_key(get_remaining_account::<Collection>(
         ctx.remaining_accounts,
         0,
       )?)?,
     )?,
-    get_account_modifier(
+    AccountModifiers::create(
       arguments.modifier,
       arguments.space,
       get_account_key(get_remaining_account::<InstructionAccount>(
