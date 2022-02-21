@@ -59,16 +59,14 @@ describe('instruction relation', () => {
       ],
       program.programId
     );
-    const userAccount = await program.account.user.fetchNullable(userPublicKey);
-
-    if (userAccount === null) {
+    try {
       await program.methods
         .createUser()
         .accounts({
           authority: program.provider.wallet.publicKey,
         })
         .rpc();
-    }
+    } catch (error) {}
 
     await program.methods
       .createWorkspace({ name: workspaceName })

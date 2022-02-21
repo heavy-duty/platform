@@ -3,7 +3,7 @@ import {
   Keypair,
   LAMPORTS_PER_SOL,
   PublicKey,
-  SystemProgram
+  SystemProgram,
 } from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
@@ -37,16 +37,14 @@ describe('collection attribute', () => {
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
-    const userAccount = await program.account.user.fetchNullable(userPublicKey);
-
-    if (userAccount === null) {
+    try {
       await program.methods
         .createUser()
         .accounts({
           authority: program.provider.wallet.publicKey,
         })
         .rpc();
-    }
+    } catch (error) {}
 
     await program.methods
       .createWorkspace({ name: workspaceName })
