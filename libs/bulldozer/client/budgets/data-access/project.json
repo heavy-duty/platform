@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/budgets/data-access",
+  "sourceRoot": "libs/bulldozer/client/budgets/data-access/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/client/budgets/data-access"],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/budgets/data-access/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/budgets/data-access/src/**/*.ts",
+          "libs/bulldozer/client/budgets/data-access/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

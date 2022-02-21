@@ -14,7 +14,7 @@ import {
 
 export interface Tab {
   id: string;
-  kind: 'workspace' | 'application' | 'collection' | 'instruction';
+  kind: 'workspace' | 'application' | 'collection' | 'instruction' | 'profile';
   url: string;
 }
 

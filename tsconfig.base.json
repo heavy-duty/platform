@@ -25,14 +25,23 @@
       "@bulldozer-client/applications-data-access": [
         "libs/bulldozer/client/applications/data-access/src/index.ts"
       ],
+      "@bulldozer-client/auth-data-access": [
+        "libs/bulldozer/client/auth/data-access/src/index.ts"
+      ],
       "@bulldozer-client/auth-guard": [
         "libs/bulldozer/client/auth/utils/auth-guard/src/index.ts"
       ],
       "@bulldozer-client/auth-interceptor": [
         "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
       ],
+      "@bulldozer-client/budgets-data-access": [
+        "libs/bulldozer/client/budgets/data-access/src/index.ts"
+      ],
       "@bulldozer-client/code-editor": [
         "libs/bulldozer/client/shared/components/code-editor/src/index.ts"
+      ],
+      "@bulldozer-client/collaborators-data-access": [
+        "libs/bulldozer/client/collaborators/data-access/src/index.ts"
       ],
       "@bulldozer-client/collection-attributes-list": [
         "libs/bulldozer/client/collections/components/collection-attributes-list/src/index.ts"
@@ -60,6 +69,9 @@
       ],
       "@bulldozer-client/dark-theme-switch": [
         "libs/bulldozer/client/shared/components/dark-theme-switch/src/index.ts"
+      ],
+      "@bulldozer-client/deposit-to-budget": [
+        "libs/bulldozer/client/budgets/modals/deposit-to-budget/src/index.ts"
       ],
       "@bulldozer-client/edit-application": [
         "libs/bulldozer/client/applications/modals/edit-application/src/index.ts"
@@ -118,6 +130,12 @@
       "@bulldozer-client/page-header": [
         "libs/bulldozer/client/shared/directives/page-header/src/index.ts"
       ],
+      "@bulldozer-client/profile": [
+        "libs/bulldozer/client/auth/pages/profile/src/index.ts"
+      ],
+      "@bulldozer-client/profile-tab": [
+        "libs/bulldozer/client/users/components/profile-tab/src/index.ts"
+      ],
       "@bulldozer-client/section-header": [
         "libs/bulldozer/client/shared/directives/section-header/src/index.ts"
       ],
@@ -134,6 +152,9 @@
       "@bulldozer-client/unauthorized-access": [
         "libs/bulldozer/client/auth/pages/unauthorized-access/src/index.ts"
       ],
+      "@bulldozer-client/users-data-access": [
+        "libs/bulldozer/client/users/data-access/src/index.ts"
+      ],
       "@bulldozer-client/view-application": [
         "libs/bulldozer/client/applications/pages/view-application/src/index.ts"
       ],
@@ -142,6 +163,9 @@
       ],
       "@bulldozer-client/view-instruction": [
         "libs/bulldozer/client/instructions/pages/view-instruction/src/index.ts"
+      ],
+      "@bulldozer-client/view-profile": [
+        "libs/bulldozer/client/users/pages/view-profile/src/index.ts"
       ],
       "@bulldozer-client/view-workspace": [
         "libs/bulldozer/client/workspaces/pages/view-workspace/src/index.ts"

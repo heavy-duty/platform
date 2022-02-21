@@ -50,7 +50,10 @@ export class InstructionAccountEventService {
           } else {
             const document = createInstructionAccountDocument(pubkey, account);
 
-            if (document.createdAt.eq(document.updatedAt)) {
+            if (
+              document.updatedAt !== undefined &&
+              document.createdAt.eq(document.updatedAt)
+            ) {
               return of(document);
             } else {
               return EMPTY;

@@ -3,17 +3,147 @@ export type Bulldozer = {
   name: 'bulldozer';
   instructions: [
     {
+      name: 'createUser';
+      accounts: [
+        {
+          name: 'user';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'deleteUser';
+      accounts: [
+        {
+          name: 'user';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        }
+      ];
+      args: [];
+    },
+    {
       name: 'createWorkspace';
       accounts: [
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
         {
           name: 'workspace';
           isMut: true;
           isSigner: true;
         },
         {
-          name: 'authority';
+          name: 'collaborator';
           isMut: true;
-          isSigner: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         },
         {
           name: 'systemProgram';
@@ -37,6 +167,51 @@ export type Bulldozer = {
           name: 'workspace';
           isMut: true;
           isSigner: false;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         },
         {
           name: 'authority';
@@ -70,6 +245,79 @@ export type Bulldozer = {
       args: [];
     },
     {
+      name: 'createCollaborator';
+      accounts: [
+        {
+          name: 'workspace';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'collaborator';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [];
+    },
+    {
+      name: 'deleteCollaborator';
+      accounts: [
+        {
+          name: 'collaborator';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'workspace';
+          isMut: true;
+          isSigner: false;
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        }
+      ];
+      args: [];
+    },
+    {
       name: 'createApplication';
       accounts: [
         {
@@ -86,6 +334,71 @@ export type Bulldozer = {
           name: 'authority';
           isMut: true;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         },
         {
           name: 'systemProgram';
@@ -111,9 +424,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -142,6 +505,71 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -170,6 +598,71 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
+        },
+        {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
@@ -193,9 +686,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -221,9 +764,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -257,6 +870,71 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
+        },
+        {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
@@ -280,9 +958,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -308,9 +1036,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -324,19 +1122,84 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
-          name: 'workspace';
-          isMut: false;
+          name: 'application';
+          isMut: true;
           isSigner: false;
         },
         {
-          name: 'application';
-          isMut: true;
+          name: 'workspace';
+          isMut: false;
           isSigner: false;
         },
         {
           name: 'authority';
           isMut: true;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         },
         {
           name: 'systemProgram';
@@ -362,9 +1225,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -385,9 +1298,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -413,9 +1376,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -429,11 +1462,6 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
-          name: 'workspace';
-          isMut: false;
-          isSigner: false;
-        },
-        {
           name: 'application';
           isMut: false;
           isSigner: false;
@@ -444,9 +1472,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: true;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         },
         {
           name: 'systemProgram';
@@ -472,9 +1570,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -500,9 +1648,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -516,11 +1734,6 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
-          name: 'workspace';
-          isMut: false;
-          isSigner: false;
-        },
-        {
           name: 'application';
           isMut: false;
           isSigner: false;
@@ -531,9 +1744,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: true;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         },
         {
           name: 'systemProgram';
@@ -559,9 +1842,59 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
         }
       ];
       args: [
@@ -587,9 +1920,79 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -654,6 +2057,71 @@ export type Bulldozer = {
           isSigner: true;
         },
         {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
+        },
+        {
           name: 'systemProgram';
           isMut: false;
           isSigner: false;
@@ -704,6 +2172,76 @@ export type Bulldozer = {
           name: 'authority';
           isMut: false;
           isSigner: true;
+        },
+        {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
         }
       ];
       args: [];
@@ -741,6 +2279,58 @@ export type Bulldozer = {
           },
           {
             name: 'updatedAt';
+            type: 'i64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'budget';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'authority';
+            type: 'publicKey';
+          },
+          {
+            name: 'workspace';
+            type: 'publicKey';
+          },
+          {
+            name: 'bump';
+            type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          }
+        ];
+      };
+    },
+    {
+      name: 'collaborator';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'authority';
+            type: 'publicKey';
+          },
+          {
+            name: 'workspace';
+            type: 'publicKey';
+          },
+          {
+            name: 'user';
+            type: 'publicKey';
+          },
+          {
+            name: 'bump';
+            type: 'u8';
+          },
+          {
+            name: 'createdAt';
             type: 'i64';
           }
         ];
@@ -1049,6 +2639,26 @@ export type Bulldozer = {
       };
     },
     {
+      name: 'user';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'authority';
+            type: 'publicKey';
+          },
+          {
+            name: 'bump';
+            type: 'u8';
+          },
+          {
+            name: 'createdAt';
+            type: 'i64';
+          }
+        ];
+      };
+    },
+    {
       name: 'workspace';
       type: {
         kind: 'struct';
@@ -1060,6 +2670,10 @@ export type Bulldozer = {
           {
             name: 'name';
             type: 'string';
+          },
+          {
+            name: 'quantityOfCollaborators';
+            type: 'u8';
           },
           {
             name: 'quantityOfApplications';
@@ -1699,8 +3313,18 @@ export type Bulldozer = {
     },
     {
       code: 6025;
+      name: 'CantDeleteWorkspaceWithCollaborators';
+      msg: 'Cant delete workspace with collaborators';
+    },
+    {
+      code: 6026;
       name: 'WorkspaceDoesntMatchApplication';
       msg: 'Workspace provided doesnt match application';
+    },
+    {
+      code: 6027;
+      name: 'BudgetHasUnsufficientFunds';
+      msg: 'Budget has insufficient funds';
     }
   ];
 };
@@ -1710,17 +3334,147 @@ export const IDL: Bulldozer = {
   name: 'bulldozer',
   instructions: [
     {
+      name: 'createUser',
+      accounts: [
+        {
+          name: 'user',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: 'deleteUser',
+      accounts: [
+        {
+          name: 'user',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+      ],
+      args: [],
+    },
+    {
       name: 'createWorkspace',
       accounts: [
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
         {
           name: 'workspace',
           isMut: true,
           isSigner: true,
         },
         {
-          name: 'authority',
+          name: 'collaborator',
           isMut: true,
-          isSigner: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
         {
           name: 'systemProgram',
@@ -1744,6 +3498,51 @@ export const IDL: Bulldozer = {
           name: 'workspace',
           isMut: true,
           isSigner: false,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
         {
           name: 'authority',
@@ -1777,6 +3576,79 @@ export const IDL: Bulldozer = {
       args: [],
     },
     {
+      name: 'createCollaborator',
+      accounts: [
+        {
+          name: 'workspace',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'collaborator',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [],
+    },
+    {
+      name: 'deleteCollaborator',
+      accounts: [
+        {
+          name: 'collaborator',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'workspace',
+          isMut: true,
+          isSigner: false,
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+      ],
+      args: [],
+    },
+    {
       name: 'createApplication',
       accounts: [
         {
@@ -1793,6 +3665,71 @@ export const IDL: Bulldozer = {
           name: 'authority',
           isMut: true,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
         {
           name: 'systemProgram',
@@ -1818,9 +3755,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -1850,6 +3837,71 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
       ],
       args: [],
     },
@@ -1877,6 +3929,71 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
+        {
           name: 'systemProgram',
           isMut: false,
           isSigner: false,
@@ -1900,9 +4017,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -1928,9 +4095,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
       ],
       args: [],
@@ -1964,6 +4201,71 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
+        {
           name: 'systemProgram',
           isMut: false,
           isSigner: false,
@@ -1987,9 +4289,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -2015,9 +4367,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
       ],
       args: [],
@@ -2031,19 +4453,84 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
-          name: 'workspace',
-          isMut: false,
+          name: 'application',
+          isMut: true,
           isSigner: false,
         },
         {
-          name: 'application',
-          isMut: true,
+          name: 'workspace',
+          isMut: false,
           isSigner: false,
         },
         {
           name: 'authority',
           isMut: true,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
         {
           name: 'systemProgram',
@@ -2069,9 +4556,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -2092,9 +4629,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -2120,9 +4707,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
       ],
       args: [],
@@ -2136,11 +4793,6 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
-          name: 'workspace',
-          isMut: false,
-          isSigner: false,
-        },
-        {
           name: 'application',
           isMut: false,
           isSigner: false,
@@ -2151,9 +4803,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: true,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
         {
           name: 'systemProgram',
@@ -2179,9 +4901,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -2207,9 +4979,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
       ],
       args: [],
@@ -2223,11 +5065,6 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
-          name: 'workspace',
-          isMut: false,
-          isSigner: false,
-        },
-        {
           name: 'application',
           isMut: false,
           isSigner: false,
@@ -2238,9 +5075,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: true,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
         {
           name: 'systemProgram',
@@ -2266,9 +5173,59 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
         },
       ],
       args: [
@@ -2294,9 +5251,79 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'authority',
           isMut: false,
           isSigner: true,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
         },
       ],
       args: [],
@@ -2361,6 +5388,71 @@ export const IDL: Bulldozer = {
           isSigner: true,
         },
         {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
+        {
           name: 'systemProgram',
           isMut: false,
           isSigner: false,
@@ -2412,6 +5504,76 @@ export const IDL: Bulldozer = {
           isMut: false,
           isSigner: true,
         },
+        {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
       ],
       args: [],
     },
@@ -2448,6 +5610,58 @@ export const IDL: Bulldozer = {
           },
           {
             name: 'updatedAt',
+            type: 'i64',
+          },
+        ],
+      },
+    },
+    {
+      name: 'budget',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'authority',
+            type: 'publicKey',
+          },
+          {
+            name: 'workspace',
+            type: 'publicKey',
+          },
+          {
+            name: 'bump',
+            type: 'u8',
+          },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+        ],
+      },
+    },
+    {
+      name: 'collaborator',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'authority',
+            type: 'publicKey',
+          },
+          {
+            name: 'workspace',
+            type: 'publicKey',
+          },
+          {
+            name: 'user',
+            type: 'publicKey',
+          },
+          {
+            name: 'bump',
+            type: 'u8',
+          },
+          {
+            name: 'createdAt',
             type: 'i64',
           },
         ],
@@ -2756,6 +5970,26 @@ export const IDL: Bulldozer = {
       },
     },
     {
+      name: 'user',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'authority',
+            type: 'publicKey',
+          },
+          {
+            name: 'bump',
+            type: 'u8',
+          },
+          {
+            name: 'createdAt',
+            type: 'i64',
+          },
+        ],
+      },
+    },
+    {
       name: 'workspace',
       type: {
         kind: 'struct',
@@ -2767,6 +6001,10 @@ export const IDL: Bulldozer = {
           {
             name: 'name',
             type: 'string',
+          },
+          {
+            name: 'quantityOfCollaborators',
+            type: 'u8',
           },
           {
             name: 'quantityOfApplications',
@@ -3406,8 +6644,18 @@ export const IDL: Bulldozer = {
     },
     {
       code: 6025,
+      name: 'CantDeleteWorkspaceWithCollaborators',
+      msg: 'Cant delete workspace with collaborators',
+    },
+    {
+      code: 6026,
       name: 'WorkspaceDoesntMatchApplication',
       msg: 'Workspace provided doesnt match application',
+    },
+    {
+      code: 6027,
+      name: 'BudgetHasUnsufficientFunds',
+      msg: 'Budget has insufficient funds',
     },
   ],
 };
