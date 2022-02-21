@@ -6,8 +6,7 @@ pub struct CreateUser<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + bump + created at
-    space = 8 + 32 + 1 + 8,
+    space = User::space(),
     seeds = [
       b"user".as_ref(),
       authority.key().as_ref()
@@ -22,8 +21,10 @@ pub struct CreateUser<'info> {
 
 pub fn handle(ctx: Context<CreateUser>) -> ProgramResult {
   msg!("Create user");
-  ctx.accounts.user.authority = ctx.accounts.authority.key();
-  ctx.accounts.user.bump = *ctx.bumps.get("user").unwrap();
-  ctx.accounts.user.created_at = Clock::get()?.unix_timestamp;
+  ctx
+    .accounts
+    .user
+    .initialize(*ctx.accounts.authority.key, *ctx.bumps.get("user").unwrap());
+  ctx.accounts.user.initialize_timestamp()?;
   Ok(())
 }

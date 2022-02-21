@@ -37,7 +37,7 @@ pub fn handle(
   arguments: UpdateApplicationArguments,
 ) -> ProgramResult {
   msg!("Update application");
-  ctx.accounts.application.name = arguments.name;
-  ctx.accounts.application.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.application.rename(arguments.name);
+  ctx.accounts.application.bump_timestamp()?;
   Ok(())
 }

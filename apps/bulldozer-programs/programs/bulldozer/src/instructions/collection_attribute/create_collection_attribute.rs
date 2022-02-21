@@ -3,7 +3,7 @@ use crate::collections::{
 };
 use crate::enums::{get_attribute_kind, get_attribute_modifier};
 use crate::errors::ErrorCode;
-use crate::utils::get_budget_rent_exemption;
+use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -22,10 +22,7 @@ pub struct CreateCollectionAttribute<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + application
-    // collection + name (size 32 + 4 ?) + kind + modifier
-    // created at + updated at
-    space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6 + 8 + 8,
+    space = CollectionAttribute::space(),
   )]
   pub attribute: Box<Account<'info, CollectionAttribute>>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -71,14 +68,13 @@ pub fn validate(
     (1, None, _) => Err(ErrorCode::MissingMax.into()),
     (2, _, None) => Err(ErrorCode::MissingMaxLength.into()),
     _ => {
-      let attribute_rent = **ctx.accounts.attribute.to_account_info().lamports.borrow();
-      let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
-      let budget_rent_exemption = get_budget_rent_exemption()?;
-
-      if attribute_rent + budget_rent_exemption > budget {
+      if !has_enough_funds(
+        ctx.accounts.budget.to_account_info(),
+        ctx.accounts.attribute.to_account_info(),
+        Budget::get_rent_exemption()?,
+      ) {
         return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
       }
-
       Ok(true)
     }
   }
@@ -89,30 +85,21 @@ pub fn handle(
   arguments: CreateCollectionAttributeArguments,
 ) -> ProgramResult {
   msg!("Create collection attribute");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.attribute.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.attribute.authority = ctx.accounts.authority.key();
-  ctx.accounts.attribute.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.attribute.application = ctx.accounts.application.key();
-  ctx.accounts.attribute.collection = ctx.accounts.collection.key();
-  ctx.accounts.attribute.name = arguments.name;
-  ctx.accounts.attribute.kind =
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
-  ctx.accounts.attribute.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.collection.quantity_of_attributes += 1;
-  ctx.accounts.attribute.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.attribute.updated_at = Clock::get()?.unix_timestamp;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.attribute.to_account_info().lamports.borrow(),
+  )?;
+  ctx.accounts.attribute.initialize(
+    arguments.name,
+    ctx.accounts.authority.key(),
+    ctx.accounts.workspace.key(),
+    ctx.accounts.application.key(),
+    ctx.accounts.collection.key(),
+    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
+    get_attribute_modifier(arguments.modifier, arguments.size)?,
+  );
+  ctx.accounts.collection.increase_attribute_quantity();
+  ctx.accounts.attribute.initialize_timestamp()?;
   Ok(())
 }

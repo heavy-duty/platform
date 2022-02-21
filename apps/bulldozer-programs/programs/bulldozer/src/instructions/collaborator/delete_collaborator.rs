@@ -13,6 +13,6 @@ pub struct DeleteCollaborator<'info> {
 
 pub fn handle(ctx: Context<DeleteCollaborator>) -> ProgramResult {
   msg!("Delete collaborator");
-  ctx.accounts.workspace.quantity_of_collaborators -= 1;
+  ctx.accounts.workspace.decrease_collaborator_quantity();
   Ok(())
 }

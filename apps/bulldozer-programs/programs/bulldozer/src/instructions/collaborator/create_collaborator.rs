@@ -9,9 +9,7 @@ pub struct CreateCollaborator<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + user
-    // bump + created at
-    space = 8 + 32 + 32 + 32 + 1 + 8,
+    space = Collaborator::space(),
     seeds = [
       b"collaborator".as_ref(),
       workspace.key().as_ref(),
@@ -27,11 +25,13 @@ pub struct CreateCollaborator<'info> {
 
 pub fn handle(ctx: Context<CreateCollaborator>) -> ProgramResult {
   msg!("Create collaborator");
-  ctx.accounts.collaborator.authority = ctx.accounts.authority.key();
-  ctx.accounts.collaborator.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.collaborator.user = ctx.accounts.user.key();
-  ctx.accounts.collaborator.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.collaborator.bump = *ctx.bumps.get("collaborator").unwrap();
-  ctx.accounts.workspace.quantity_of_collaborators += 1;
+  ctx.accounts.collaborator.initialize(
+    *ctx.accounts.authority.key,
+    ctx.accounts.workspace.key(),
+    ctx.accounts.user.key(),
+    *ctx.bumps.get("collaborator").unwrap(),
+  );
+  ctx.accounts.collaborator.initialize_timestamp()?;
+  ctx.accounts.workspace.increase_collaborator_quantity();
   Ok(())
 }

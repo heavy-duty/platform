@@ -1,7 +1,6 @@
 use crate::collections::{Collaborator, Instruction, User, Workspace};
 use anchor_lang::prelude::*;
 
-
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateInstructionArguments {
   pub name: String,
@@ -33,9 +32,12 @@ pub struct UpdateInstruction<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
+pub fn handle(
+  ctx: Context<UpdateInstruction>,
+  arguments: UpdateInstructionArguments,
+) -> ProgramResult {
   msg!("Update instruction");
-  ctx.accounts.instruction.name = arguments.name;
-  ctx.accounts.instruction.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.instruction.rename(arguments.name);
+  ctx.accounts.instruction.bump_timestamp()?;
   Ok(())
 }

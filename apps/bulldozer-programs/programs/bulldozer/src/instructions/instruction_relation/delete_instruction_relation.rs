@@ -53,7 +53,7 @@ pub struct DeleteInstructionRelation<'info> {
 
 pub fn handle(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
   msg!("Delete instruction relation");
-  ctx.accounts.from.quantity_of_relations -= 1;
-  ctx.accounts.to.quantity_of_relations -= 1;
+  ctx.accounts.from.decrease_relation_quantity();
+  ctx.accounts.to.decrease_relation_quantity();
   Ok(())
 }

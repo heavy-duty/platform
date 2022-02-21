@@ -32,9 +32,12 @@ pub struct UpdateInstructionBody<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<UpdateInstructionBody>, arguments: UpdateInstructionBodyArguments) -> ProgramResult {
+pub fn handle(
+  ctx: Context<UpdateInstructionBody>,
+  arguments: UpdateInstructionBodyArguments,
+) -> ProgramResult {
   msg!("Update instruction body");
-  ctx.accounts.instruction.body = arguments.body;
-  ctx.accounts.instruction.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.instruction.change_body(arguments.body);
+  ctx.accounts.instruction.bump_timestamp()?;
   Ok(())
 }

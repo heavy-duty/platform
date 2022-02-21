@@ -3,7 +3,7 @@ use crate::collections::{
   Workspace,
 };
 use crate::errors::ErrorCode;
-use crate::utils::get_budget_rent_exemption;
+use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -11,9 +11,7 @@ pub struct CreateInstructionRelation<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + application
-    // instruction + from + to + bump + created at + updated at
-    space = 8 + 32 + 32 + 32 + 32 + 32 + 32 + 1 + 8 + 8 + 100,
+    space = InstructionRelation::space(),
     seeds = [
       b"instruction_relation".as_ref(),
       from.key().as_ref(),
@@ -64,11 +62,11 @@ pub struct CreateInstructionRelation<'info> {
 pub fn validate(
   ctx: &Context<CreateInstructionRelation>,
 ) -> std::result::Result<bool, ProgramError> {
-  let relation_rent = **ctx.accounts.relation.to_account_info().lamports.borrow();
-  let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
-  let budget_rent_exemption = get_budget_rent_exemption()?;
-
-  if relation_rent + budget_rent_exemption > budget {
+  if !has_enough_funds(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.relation.to_account_info(),
+    Budget::get_rent_exemption()?,
+  ) {
     return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
   }
 
@@ -77,30 +75,22 @@ pub fn validate(
 
 pub fn handle(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
   msg!("Create instruction relation");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.relation.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.relation.authority = ctx.accounts.authority.key();
-  ctx.accounts.relation.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.relation.application = ctx.accounts.application.key();
-  ctx.accounts.relation.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.relation.from = ctx.accounts.from.key();
-  ctx.accounts.relation.to = ctx.accounts.to.key();
-  ctx.accounts.relation.bump = *ctx.bumps.get("relation").unwrap();
-  ctx.accounts.from.quantity_of_relations += 1;
-  ctx.accounts.to.quantity_of_relations += 1;
-  ctx.accounts.relation.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.relation.updated_at = Clock::get()?.unix_timestamp;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.relation.to_account_info().lamports.borrow(),
+  )?;
+  ctx.accounts.relation.initialize(
+    *ctx.accounts.authority.key,
+    ctx.accounts.workspace.key(),
+    ctx.accounts.application.key(),
+    ctx.accounts.instruction.key(),
+    ctx.accounts.from.key(),
+    ctx.accounts.to.key(),
+    *ctx.bumps.get("relation").unwrap(),
+  );
+  ctx.accounts.relation.initialize_timestamp()?;
+  ctx.accounts.from.increase_relation_quantity();
+  ctx.accounts.to.increase_relation_quantity();
   Ok(())
 }

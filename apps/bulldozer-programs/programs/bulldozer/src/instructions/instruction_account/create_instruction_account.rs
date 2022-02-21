@@ -3,7 +3,9 @@ use crate::collections::{
 };
 use crate::enums::{get_account_kind, get_account_modifier};
 use crate::errors::ErrorCode;
-use crate::utils::{get_account_key, get_budget_rent_exemption, get_remaining_account};
+use crate::utils::{
+  fund_rent_for_account, get_account_key, get_remaining_account, has_enough_funds,
+};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -20,11 +22,7 @@ pub struct CreateInstructionAccount<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + application
-    // instruction + name (size 32 + 4 ?) + kind + modifier
-    // collection + payer + close + space + quantity of relations
-    // created at + updated at
-    space = 8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 33 + 3 + 1 + 8 + 8
+    space = InstructionAccount::space()
   )]
   pub account: Box<Account<'info, InstructionAccount>>,
   pub application: Box<Account<'info, Application>>,
@@ -77,14 +75,13 @@ pub fn validate(
     (_, _, Some(0), None, _) => Err(ErrorCode::MissingSpace.into()),
     (_, _, Some(0), _, None) => Err(ErrorCode::MissingPayerAccount.into()),
     _ => {
-      let account_rent = **ctx.accounts.account.to_account_info().lamports.borrow();
-      let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
-      let budget_rent_exemption = get_budget_rent_exemption()?;
-
-      if account_rent + budget_rent_exemption > budget {
+      if !has_enough_funds(
+        ctx.accounts.budget.to_account_info(),
+        ctx.accounts.account.to_account_info(),
+        Budget::get_rent_exemption()?,
+      ) {
         return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
       }
-
       Ok(true)
     }
   }
@@ -95,47 +92,38 @@ pub fn handle(
   arguments: CreateInstructionAccountArguments,
 ) -> ProgramResult {
   msg!("Create instruction account");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.account.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.account.authority = ctx.accounts.authority.key();
-  ctx.accounts.account.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.account.application = ctx.accounts.application.key();
-  ctx.accounts.account.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.account.name = arguments.name;
-  ctx.accounts.account.kind = get_account_kind(
-    arguments.kind,
-    get_account_key(get_remaining_account::<Collection>(
-      ctx.remaining_accounts,
-      0,
-    )?)?,
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.account.to_account_info().lamports.borrow(),
   )?;
-  ctx.accounts.account.modifier = get_account_modifier(
-    arguments.modifier,
-    arguments.space,
-    get_account_key(get_remaining_account::<InstructionAccount>(
-      ctx.remaining_accounts,
-      1,
-    )?)?,
-    get_account_key(get_remaining_account::<InstructionAccount>(
-      ctx.remaining_accounts,
-      1,
-    )?)?,
-  )?;
-  ctx.accounts.account.quantity_of_relations = 0;
-  ctx.accounts.instruction.quantity_of_accounts += 1;
-  ctx.accounts.account.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.account.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.account.initialize(
+    arguments.name,
+    ctx.accounts.authority.key(),
+    ctx.accounts.workspace.key(),
+    ctx.accounts.application.key(),
+    ctx.accounts.instruction.key(),
+    get_account_kind(
+      arguments.kind,
+      get_account_key(get_remaining_account::<Collection>(
+        ctx.remaining_accounts,
+        0,
+      )?)?,
+    )?,
+    get_account_modifier(
+      arguments.modifier,
+      arguments.space,
+      get_account_key(get_remaining_account::<InstructionAccount>(
+        ctx.remaining_accounts,
+        1,
+      )?)?,
+      get_account_key(get_remaining_account::<InstructionAccount>(
+        ctx.remaining_accounts,
+        1,
+      )?)?,
+    )?,
+  );
+  ctx.accounts.account.initialize_timestamp()?;
+  ctx.accounts.instruction.increase_account_quantity();
   Ok(())
 }

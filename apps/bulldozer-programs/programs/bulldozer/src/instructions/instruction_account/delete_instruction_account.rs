@@ -47,6 +47,6 @@ pub struct DeleteInstructionAccount<'info> {
 
 pub fn handle(ctx: Context<DeleteInstructionAccount>) -> ProgramResult {
   msg!("Delete instruction account");
-  ctx.accounts.instruction.quantity_of_accounts -= 1;
+  ctx.accounts.instruction.decrease_account_quantity();
   Ok(())
 }

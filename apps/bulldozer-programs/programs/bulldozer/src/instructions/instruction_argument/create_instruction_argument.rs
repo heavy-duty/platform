@@ -3,7 +3,7 @@ use crate::collections::{
 };
 use crate::enums::{get_attribute_kind, get_attribute_modifier};
 use crate::errors::ErrorCode;
-use crate::utils::get_budget_rent_exemption;
+use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -22,10 +22,7 @@ pub struct CreateInstructionArgument<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + application
-    // instruction + name (size 32 + 4 ?) + kind + modifier
-    // created at + updated at
-    space = 8 + 32 + 32 + 32 + 32 + 36 + 6 + 6 + 8 + 8,
+    space = InstructionArgument::space(),
   )]
   pub argument: Box<Account<'info, InstructionArgument>>,
   pub application: Box<Account<'info, Application>>,
@@ -71,14 +68,13 @@ pub fn validate(
     (1, None, _) => Err(ErrorCode::MissingMax.into()),
     (2, _, None) => Err(ErrorCode::MissingMaxLength.into()),
     _ => {
-      let argument_rent = **ctx.accounts.argument.to_account_info().lamports.borrow();
-      let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
-      let budget_rent_exemption = get_budget_rent_exemption()?;
-
-      if argument_rent + budget_rent_exemption > budget {
+      if !has_enough_funds(
+        ctx.accounts.budget.to_account_info(),
+        ctx.accounts.argument.to_account_info(),
+        Budget::get_rent_exemption()?,
+      ) {
         return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
       }
-
       Ok(true)
     }
   }
@@ -89,30 +85,21 @@ pub fn handle(
   arguments: CreateInstructionArgumentArguments,
 ) -> ProgramResult {
   msg!("Create instruction argument");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.argument.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.argument.authority = ctx.accounts.authority.key();
-  ctx.accounts.argument.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.argument.application = ctx.accounts.application.key();
-  ctx.accounts.argument.instruction = ctx.accounts.instruction.key();
-  ctx.accounts.argument.name = arguments.name;
-  ctx.accounts.argument.kind =
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
-  ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.instruction.quantity_of_arguments += 1;
-  ctx.accounts.argument.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.argument.updated_at = Clock::get()?.unix_timestamp;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.argument.to_account_info().lamports.borrow(),
+  )?;
+  ctx.accounts.argument.initialize(
+    arguments.name,
+    ctx.accounts.authority.key(),
+    ctx.accounts.workspace.key(),
+    ctx.accounts.application.key(),
+    ctx.accounts.instruction.key(),
+    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
+    get_attribute_modifier(arguments.modifier, arguments.size)?,
+  );
+  ctx.accounts.argument.initialize_timestamp()?;
+  ctx.accounts.instruction.increase_argument_quantity();
   Ok(())
 }

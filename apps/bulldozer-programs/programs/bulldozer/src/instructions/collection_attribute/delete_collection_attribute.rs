@@ -46,6 +46,6 @@ pub struct DeleteCollectionAttribute<'info> {
 
 pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
   msg!("Delete collection attribute");
-  ctx.accounts.collection.quantity_of_attributes -= 1;
+  ctx.accounts.collection.decrease_attribute_quantity();
   Ok(())
 }

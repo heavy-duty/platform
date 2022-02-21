@@ -55,10 +55,11 @@ pub fn handle(
   arguments: UpdateCollectionAttributeArguments,
 ) -> ProgramResult {
   msg!("Update collection attribute");
-  ctx.accounts.attribute.name = arguments.name;
-  ctx.accounts.attribute.kind =
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
-  ctx.accounts.attribute.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.attribute.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.attribute.rename(arguments.name);
+  ctx.accounts.attribute.change_settings(
+    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
+    get_attribute_modifier(arguments.modifier, arguments.size)?,
+  );
+  ctx.accounts.attribute.bump_timestamp()?;
   Ok(())
 }

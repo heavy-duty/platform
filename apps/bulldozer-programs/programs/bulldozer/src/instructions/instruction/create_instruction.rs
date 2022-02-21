@@ -1,6 +1,6 @@
 use crate::collections::{Application, Budget, Collaborator, Instruction, User, Workspace};
 use crate::errors::ErrorCode;
-use crate::utils::get_budget_rent_exemption;
+use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -14,10 +14,7 @@ pub struct CreateInstruction<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + application
-    // name (size 32 + 4 ?) + body + quantity of arguments
-    // quantity of accounts + created at + updated at
-    space = 8 + 32 + 32 + 32 + 33 + 2000 + 1 + 1 + 8 + 8
+    space = Instruction::space()
   )]
   pub instruction: Box<Account<'info, Instruction>>,
   #[account(mut)]
@@ -55,11 +52,11 @@ pub struct CreateInstruction<'info> {
 }
 
 pub fn validate(ctx: &Context<CreateInstruction>) -> std::result::Result<bool, ProgramError> {
-  let instruction_rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
-  let budget = **ctx.accounts.budget.to_account_info().lamports.borrow();
-  let budget_rent_exemption = get_budget_rent_exemption()?;
-
-  if instruction_rent + budget_rent_exemption > budget {
+  if !has_enough_funds(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.instruction.to_account_info(),
+    Budget::get_rent_exemption()?,
+  ) {
     return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
   }
 
@@ -71,29 +68,18 @@ pub fn handle(
   arguments: CreateInstructionArguments,
 ) -> ProgramResult {
   msg!("Create instruction");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.instruction.authority = ctx.accounts.authority.key();
-  ctx.accounts.instruction.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.instruction.application = ctx.accounts.application.key();
-  ctx.accounts.instruction.name = arguments.name;
-  ctx.accounts.instruction.body = "".to_string();
-  ctx.accounts.instruction.quantity_of_arguments = 0;
-  ctx.accounts.instruction.quantity_of_accounts = 0;
-  ctx.accounts.application.quantity_of_instructions += 1;
-  ctx.accounts.instruction.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.instruction.updated_at = Clock::get()?.unix_timestamp;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.instruction.to_account_info().lamports.borrow(),
+  )?;
+  ctx.accounts.instruction.initialize(
+    arguments.name,
+    *ctx.accounts.authority.key,
+    ctx.accounts.workspace.key(),
+    ctx.accounts.application.key(),
+  );
+  ctx.accounts.instruction.initialize_timestamp()?;
+  ctx.accounts.application.increase_instruction_quantity();
   Ok(())
 }

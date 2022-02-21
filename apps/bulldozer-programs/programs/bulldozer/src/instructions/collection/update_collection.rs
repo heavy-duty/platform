@@ -37,7 +37,7 @@ pub fn handle(
   arguments: UpdateCollectionArguments,
 ) -> ProgramResult {
   msg!("Update collection");
-  ctx.accounts.collection.name = arguments.name;
-  ctx.accounts.collection.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.collection.rename(arguments.name);
+  ctx.accounts.collection.bump_timestamp()?;
   Ok(())
 }

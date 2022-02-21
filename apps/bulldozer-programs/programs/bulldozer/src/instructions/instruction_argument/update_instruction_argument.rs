@@ -54,11 +54,12 @@ pub fn handle(
   ctx: Context<UpdateInstructionArgument>,
   arguments: UpdateInstructionArgumentArguments,
 ) -> ProgramResult {
-  msg!("Update instruction argument");
-  ctx.accounts.argument.name = arguments.name;
-  ctx.accounts.argument.kind =
-    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?;
-  ctx.accounts.argument.modifier = get_attribute_modifier(arguments.modifier, arguments.size)?;
-  ctx.accounts.argument.updated_at = Clock::get()?.unix_timestamp;
+  msg!("Update collection argument");
+  ctx.accounts.argument.rename(arguments.name);
+  ctx.accounts.argument.change_settings(
+    get_attribute_kind(arguments.kind, arguments.max, arguments.max_length)?,
+    get_attribute_modifier(arguments.modifier, arguments.size)?,
+  );
+  ctx.accounts.argument.bump_timestamp()?;
   Ok(())
 }

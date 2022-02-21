@@ -33,7 +33,7 @@ pub struct UpdateWorkspace<'info> {
 
 pub fn handle(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {
   msg!("Update workspace");
-  ctx.accounts.workspace.name = arguments.name;
-  ctx.accounts.workspace.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.workspace.rename(arguments.name);
+  ctx.accounts.workspace.bump_timestamp()?;
   Ok(())
 }

@@ -47,6 +47,6 @@ pub struct DeleteCollection<'info> {
 
 pub fn handle(ctx: Context<DeleteCollection>) -> ProgramResult {
   msg!("Delete collection");
-  ctx.accounts.application.quantity_of_collections -= 1;
+  ctx.accounts.application.decrease_collection_quantity();
   Ok(())
 }

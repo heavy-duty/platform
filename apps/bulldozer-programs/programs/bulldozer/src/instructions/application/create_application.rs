@@ -1,6 +1,6 @@
 use crate::collections::{Application, Budget, Collaborator, User, Workspace};
 use crate::errors::ErrorCode;
-use crate::utils::get_budget_rent_exemption;
+use crate::utils::{fund_rent_for_account, has_enough_funds};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -14,10 +14,7 @@ pub struct CreateApplication<'info> {
   #[account(
     init,
     payer = authority,
-    // discriminator + authority + workspace + name (size 32 + 4 ?) +
-    // quantity of collections + quantity of instructions +
-    // created at + updated at
-    space = 8 + 32 + 32 + 36 + 1 + 1 + 8 + 8,
+    space = Application::space()
   )]
   pub application: Box<Account<'info, Application>>,
   #[account(mut)]
@@ -54,11 +51,11 @@ pub struct CreateApplication<'info> {
 }
 
 pub fn validate(ctx: &Context<CreateApplication>) -> std::result::Result<bool, ProgramError> {
-  let application_rent = **ctx.accounts.application.to_account_info().lamports.borrow();
-  let budget_in_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
-  let budget_rent_exemption = get_budget_rent_exemption()?;
-
-  if application_rent + budget_rent_exemption > budget_in_lamports {
+  if !has_enough_funds(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.application.to_account_info(),
+    Budget::get_rent_exemption()?,
+  ) {
     return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
   }
 
@@ -70,27 +67,17 @@ pub fn handle(
   arguments: CreateApplicationArguments,
 ) -> ProgramResult {
   msg!("Create application");
-
-  // charge back to the authority
-  let rent = **ctx.accounts.application.to_account_info().lamports.borrow();
-  **ctx
-    .accounts
-    .budget
-    .to_account_info()
-    .try_borrow_mut_lamports()? -= rent;
-  **ctx
-    .accounts
-    .authority
-    .to_account_info()
-    .try_borrow_mut_lamports()? += rent;
-
-  ctx.accounts.application.name = arguments.name;
-  ctx.accounts.application.authority = ctx.accounts.authority.key();
-  ctx.accounts.application.workspace = ctx.accounts.workspace.key();
-  ctx.accounts.application.quantity_of_collections = 0;
-  ctx.accounts.application.quantity_of_instructions = 0;
-  ctx.accounts.workspace.quantity_of_applications += 1;
-  ctx.accounts.application.created_at = Clock::get()?.unix_timestamp;
-  ctx.accounts.application.updated_at = Clock::get()?.unix_timestamp;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx.accounts.application.to_account_info().lamports.borrow(),
+  )?;
+  ctx.accounts.application.initialize(
+    arguments.name,
+    *ctx.accounts.authority.key,
+    ctx.accounts.workspace.key(),
+  );
+  ctx.accounts.application.initialize_timestamp()?;
+  ctx.accounts.workspace.increase_application_quantity();
   Ok(())
 }

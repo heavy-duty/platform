@@ -61,26 +61,28 @@ pub fn handle(
   arguments: UpdateInstructionAccountArguments,
 ) -> ProgramResult {
   msg!("Update instruction account");
-  ctx.accounts.account.name = arguments.name;
-  ctx.accounts.account.kind = get_account_kind(
-    arguments.kind,
-    get_account_key(get_remaining_account::<Collection>(
-      ctx.remaining_accounts,
-      0,
-    )?)?,
-  )?;
-  ctx.accounts.account.modifier = get_account_modifier(
-    arguments.modifier,
-    arguments.space,
-    get_account_key(get_remaining_account::<InstructionAccount>(
-      ctx.remaining_accounts,
-      1,
-    )?)?,
-    get_account_key(get_remaining_account::<InstructionAccount>(
-      ctx.remaining_accounts,
-      1,
-    )?)?,
-  )?;
-  ctx.accounts.account.updated_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.account.rename(arguments.name);
+  ctx.accounts.account.change_settings(
+    get_account_kind(
+      arguments.kind,
+      get_account_key(get_remaining_account::<Collection>(
+        ctx.remaining_accounts,
+        0,
+      )?)?,
+    )?,
+    get_account_modifier(
+      arguments.modifier,
+      arguments.space,
+      get_account_key(get_remaining_account::<InstructionAccount>(
+        ctx.remaining_accounts,
+        1,
+      )?)?,
+      get_account_key(get_remaining_account::<InstructionAccount>(
+        ctx.remaining_accounts,
+        1,
+      )?)?,
+    )?,
+  );
+  ctx.accounts.account.bump_timestamp()?;
   Ok(())
 }
