@@ -413,4 +413,81 @@ describe('instruction relation', () => {
     // assert
     assert.equal(error?.code, 3012);
   });
+
+  it('should fail when user is not an approved collaborator', async () => {
+    // arrange
+    const newFrom = Keypair.generate();
+    const newTo = Keypair.generate();
+    const newUser = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    const [newUserPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
+      program.programId
+    );
+    await program.methods
+      .createUser()
+      .accounts({
+        authority: newUser.publicKey,
+      })
+      .signers([newUser])
+      .preInstructions([
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newUser.publicKey,
+          lamports: LAMPORTS_PER_SOL,
+        }),
+      ])
+      .rpc();
+    await program.methods
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        user: newUserPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newFrom.publicKey,
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newTo.publicKey,
+      })
+      .signers([newTo])
+      .rpc();
+
+    try {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+        })
+        .signers([newUser])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6029);
+  });
 });

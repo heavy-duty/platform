@@ -19,6 +19,7 @@ describe('collaborator', () => {
   const newUser = Keypair.generate();
   const workspaceName = 'my-app';
   let collaboratorPublicKey: PublicKey;
+  let newCollaboratorPublicKey: PublicKey;
   let userPublicKey: PublicKey;
   let newUserPublicKey: PublicKey;
 
@@ -35,6 +36,14 @@ describe('collaborator', () => {
       program.programId
     );
     [collaboratorPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('collaborator', 'utf8'),
+        workspace.publicKey.toBuffer(),
+        userPublicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [newCollaboratorPublicKey] = await PublicKey.findProgramAddress(
       [
         Buffer.from('collaborator', 'utf8'),
         workspace.publicKey.toBuffer(),
@@ -78,10 +87,48 @@ describe('collaborator', () => {
       .rpc();
   });
 
-  it('should create collaborator', async () => {
+  it('should create admin collaborator', async () => {
+    // assert
+    const collaboratorAccount = await program.account.collaborator.fetch(
+      collaboratorPublicKey
+    );
+    assert.ok(
+      collaboratorAccount.authority.equals(program.provider.wallet.publicKey)
+    );
+    assert.equal(collaboratorAccount.isAdmin, true);
+    assert.ok('approved' in collaboratorAccount.status);
+  });
+
+  it('should request collaborator status', async () => {
     // act
     await program.methods
-      .createCollaborator()
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        user: newUserPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+    // assert
+    const collaboratorAccount = await program.account.collaborator.fetch(
+      newCollaboratorPublicKey
+    );
+    const workspaceAccount = await program.account.workspace.fetch(
+      workspace.publicKey
+    );
+    assert.ok(collaboratorAccount.authority.equals(newUser.publicKey));
+    assert.equal(collaboratorAccount.isAdmin, false);
+    assert.ok('pending' in collaboratorAccount.status);
+    assert.ok(collaboratorAccount.user.equals(newUserPublicKey));
+    assert.ok(collaboratorAccount.workspace.equals(workspace.publicKey));
+    assert.equal(workspaceAccount.quantityOfCollaborators, 2);
+  });
+
+  it('should approve collaborator', async () => {
+    // act
+    await program.methods
+      .updateCollaborator({ status: 1 })
       .accounts({
         authority: program.provider.wallet.publicKey,
         user: newUserPublicKey,
@@ -90,17 +137,9 @@ describe('collaborator', () => {
       .rpc();
     // assert
     const collaboratorAccount = await program.account.collaborator.fetch(
-      collaboratorPublicKey
+      newCollaboratorPublicKey
     );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
-    );
-    assert.ok(
-      collaboratorAccount.authority.equals(program.provider.wallet.publicKey)
-    );
-    assert.ok(collaboratorAccount.user.equals(newUserPublicKey));
-    assert.ok(collaboratorAccount.workspace.equals(workspace.publicKey));
-    assert.equal(workspaceAccount.quantityOfCollaborators, 2);
+    assert.ok('approved' in collaboratorAccount.status);
   });
 
   it('should delete collaborator', async () => {

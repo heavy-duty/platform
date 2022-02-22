@@ -44,8 +44,19 @@ pub mod bulldozer {
     instructions::create_collaborator::handle(ctx)
   }
 
+  pub fn update_collaborator(
+    ctx: Context<UpdateCollaborator>,
+    arguments: UpdateCollaboratorArguments,
+  ) -> ProgramResult {
+    instructions::update_collaborator::handle(ctx, arguments)
+  }
+
   pub fn delete_collaborator(ctx: Context<DeleteCollaborator>) -> ProgramResult {
     instructions::delete_collaborator::handle(ctx)
+  }
+
+  pub fn request_collaborator_status(ctx: Context<RequestCollaboratorStatus>) -> ProgramResult {
+    instructions::request_collaborator_status::handle(ctx)
   }
 
   #[access_control(instructions::create_application::validate(&ctx))]

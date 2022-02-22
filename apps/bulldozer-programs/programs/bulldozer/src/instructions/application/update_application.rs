@@ -1,4 +1,6 @@
 use crate::collections::{Application, Collaborator, User, Workspace};
+use crate::enums::CollaboratorStatus;
+use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -27,7 +29,8 @@ pub struct UpdateApplication<'info> {
       workspace.key().as_ref(),
       user.key().as_ref(),
     ],
-    bump = collaborator.bump
+    bump = collaborator.bump,
+    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
 }

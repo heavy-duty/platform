@@ -1,4 +1,5 @@
 use crate::collections::{Application, Budget, Collaborator, Instruction, User, Workspace};
+use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -32,7 +33,8 @@ pub struct DeleteInstruction<'info> {
       workspace.key().as_ref(),
       user.key().as_ref(),
     ],
-    bump = collaborator.bump
+    bump = collaborator.bump,
+    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
   #[account(

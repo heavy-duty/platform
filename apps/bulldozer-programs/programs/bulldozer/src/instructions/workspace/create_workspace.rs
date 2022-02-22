@@ -1,4 +1,5 @@
 use crate::collections::{Budget, Collaborator, User, Workspace};
+use crate::enums::CollaboratorStatus;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -62,6 +63,8 @@ pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.user.key(),
+    CollaboratorStatus::Approved {},
+    true,
     *ctx.bumps.get("collaborator").unwrap(),
   );
   ctx.accounts.collaborator.initialize_timestamp()?;

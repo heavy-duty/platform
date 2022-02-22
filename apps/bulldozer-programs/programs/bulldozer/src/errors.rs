@@ -59,4 +59,8 @@ pub enum ErrorCode {
   WorkspaceDoesntMatchApplication,
   #[msg("Budget has insufficient funds")]
   BudgetHasUnsufficientFunds,
+  #[msg("Invalid collaborator status")]
+  InvalidCollaboratorStatus,
+  #[msg("Collaborator status has not been approved")]
+  CollaboratorStatusNotApproved,
 }

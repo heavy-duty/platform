@@ -1,5 +1,5 @@
 use crate::collections::{Collaborator, CollectionAttribute, User, Workspace};
-use crate::enums::{AttributeKinds, AttributeModifiers};
+use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -34,7 +34,8 @@ pub struct UpdateCollectionAttribute<'info> {
       workspace.key().as_ref(),
       user.key().as_ref(),
     ],
-    bump = collaborator.bump
+    bump = collaborator.bump,
+    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
 }

@@ -330,4 +330,56 @@ describe('application', () => {
     // assert
     assert.equal(error?.code, 3012);
   });
+
+  it('should fail when user is not an approved collaborator', async () => {
+    // arrange
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newUser = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    const [newUserPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
+      program.programId
+    );
+    await program.methods
+      .createUser()
+      .accounts({
+        authority: newUser.publicKey,
+      })
+      .signers([newUser])
+      .preInstructions([
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newUser.publicKey,
+          lamports: LAMPORTS_PER_SOL,
+        }),
+      ])
+      .rpc();
+    await program.methods
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        user: newUserPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+
+    try {
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: newApplication.publicKey,
+        })
+        .signers([newUser, newApplication])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6029);
+  });
 });

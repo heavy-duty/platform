@@ -3,8 +3,8 @@ use crate::enums::CollaboratorStatus;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
-pub struct CreateCollaborator<'info> {
-  #[account(mut, has_one = authority)]
+pub struct RequestCollaboratorStatus<'info> {
+  #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
   pub user: Box<Account<'info, User>>,
   #[account(
@@ -24,13 +24,13 @@ pub struct CreateCollaborator<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<CreateCollaborator>) -> ProgramResult {
-  msg!("Create collaborator");
+pub fn handle(ctx: Context<RequestCollaboratorStatus>) -> ProgramResult {
+  msg!("Request collaborator status");
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.user.key(),
-    CollaboratorStatus::Approved {},
+    CollaboratorStatus::Pending {},
     false,
     *ctx.bumps.get("collaborator").unwrap(),
   );

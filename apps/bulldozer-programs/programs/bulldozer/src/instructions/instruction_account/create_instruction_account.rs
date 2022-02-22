@@ -1,7 +1,7 @@
 use crate::collections::{
   Application, Budget, Collaborator, Collection, Instruction, InstructionAccount, User, Workspace,
 };
-use crate::enums::{AccountKinds, AccountModifiers};
+use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use crate::utils::{
   fund_rent_for_account, get_account_key, get_remaining_account, has_enough_funds,
@@ -45,7 +45,8 @@ pub struct CreateInstructionAccount<'info> {
       workspace.key().as_ref(),
       user.key().as_ref(),
     ],
-    bump = collaborator.bump
+    bump = collaborator.bump,
+    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
   #[account(

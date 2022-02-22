@@ -1,5 +1,5 @@
 use crate::collections::{Collaborator, Collection, InstructionAccount, User, Workspace};
-use crate::enums::{AccountKinds, AccountModifiers};
+use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use crate::utils::{get_account_key, get_remaining_account};
 use anchor_lang::prelude::*;
@@ -33,7 +33,8 @@ pub struct UpdateInstructionAccount<'info> {
       workspace.key().as_ref(),
       user.key().as_ref(),
     ],
-    bump = collaborator.bump
+    bump = collaborator.bump,
+    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
