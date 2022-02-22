@@ -22,10 +22,6 @@ pub mod bulldozer {
     instructions::delete_user::handle(ctx)
   }
 
-  pub fn link_github(ctx: Context<LinkGithub>, arguments: LinkGithubArguments) -> ProgramResult {
-    instructions::link_github::handle(ctx, arguments)
-  }
-
   pub fn create_workspace(
     ctx: Context<CreateWorkspace>,
     arguments: CreateWorkspaceArguments,
