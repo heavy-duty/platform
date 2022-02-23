@@ -20,7 +20,7 @@ import {
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, tap, throwError } from 'rxjs';
+import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceApiService {
@@ -63,19 +63,20 @@ export class WorkspaceApiService {
   findByIds(
     workspaceIds: string[]
   ): Observable<(Document<Workspace> | null)[]> {
-    return this._hdSolanaApiService.getMultipleAccounts(workspaceIds).pipe(
-      map((keyedAccounts) =>
-        keyedAccounts.map(
-          (keyedAccount) =>
-            keyedAccount &&
-            createWorkspaceDocument(
-              keyedAccount.accountId,
-              keyedAccount.accountInfo
-            )
+    return this._hdSolanaApiService
+      .getMultipleAccounts(workspaceIds)
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createWorkspaceDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
         )
-      ),
-      tap((a) => console.log(a))
-    );
+      );
   }
 
   // create workspace

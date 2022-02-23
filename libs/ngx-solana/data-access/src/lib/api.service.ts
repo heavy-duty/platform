@@ -17,7 +17,6 @@ import {
   map,
   Observable,
   of,
-  tap,
   throwError,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
@@ -188,7 +187,6 @@ export class HdSolanaApiService {
             }
           )
           .pipe(
-            tap((a) => console.log(a)),
             map(({ value }) =>
               value.map((account, index) => ({
                 accountId: pubkeys[index],
@@ -197,8 +195,7 @@ export class HdSolanaApiService {
                   data: Buffer.from(account.data[0], 'base64'),
                 },
               }))
-            ),
-            tap((a) => console.log(a))
+            )
           );
       })
     );

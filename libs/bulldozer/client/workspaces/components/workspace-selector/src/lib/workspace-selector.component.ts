@@ -134,9 +134,7 @@ export class WorkspaceSelectorComponent {
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
     private readonly _configStore: ConfigStore
-  ) {
-    this._workspacesStore.workspaces$.subscribe((a) => console.log(a));
-  }
+  ) {}
 
   private _closeMenu() {
     if (this._workspaceMenu) {
