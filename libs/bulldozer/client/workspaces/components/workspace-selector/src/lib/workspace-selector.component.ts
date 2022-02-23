@@ -24,7 +24,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             <mat-list-item
               *ngFor="let workspace of workspaces$ | ngrxPush"
               role="listitem"
-              class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
+              class="w-full h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
               [ngClass]="{
                 'border-b-primary': activeWorkspace?.id === workspace.id
               }"
@@ -98,7 +98,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           </mat-list>
 
           <button
-            class="w-full h-12"
+            class="w-full h-12 mb-2"
             type="button"
             mat-raised-button
             color="primary"
@@ -107,6 +107,17 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             [disabled]="!connected"
           >
             New workspace
+          </button>
+
+          <button
+            class="w-full h-12"
+            type="button"
+            mat-raised-button
+            color="accent"
+            bdImportWorkspaceTrigger
+            (importWorkspace)="onImportWorkspace($event)"
+          >
+            Import workspace
           </button>
         </div>
       </mat-menu>
@@ -166,6 +177,11 @@ export class WorkspaceSelectorComponent {
   }
 
   onActivateWorkspace(workspaceId: string) {
+    this._configStore.setWorkspaceId(workspaceId);
+  }
+
+  onImportWorkspace(workspaceId: string) {
+    this._configStore.addWorkspace(workspaceId);
     this._configStore.setWorkspaceId(workspaceId);
   }
 }

@@ -56,6 +56,13 @@ export class ConfigStore extends ComponentStore<ViewModel> {
     this._loadWorkspaces(this._loadedWorkspaces.asObservable());
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._handleWorkspaceCreated(this._walletStore.publicKey$);
+    this._handleWorkspaceRemoved(
+      this.select(
+        this.workspaceId$,
+        this.workspaceIds$,
+        (workspaceId, workspaceIds) => ({ workspaceId, workspaceIds })
+      )
+    );
   }
 
   private readonly _loadHandset = this.updater<BreakpointState>(
@@ -71,6 +78,21 @@ export class ConfigStore extends ComponentStore<ViewModel> {
 
   private readonly _loadWorkspaces = this.updater<string[] | null>(
     (state, workspaceIds) => ({ ...state, workspaceIds })
+  );
+
+  private readonly _handleWorkspaceRemoved = this.effect<{
+    workspaceId: string | null;
+    workspaceIds: string[] | null;
+  }>(
+    tap(({ workspaceId, workspaceIds }) => {
+      if (
+        workspaceId !== null &&
+        workspaceIds !== null &&
+        !workspaceIds.some((id) => id === workspaceId)
+      ) {
+        this.setWorkspaceId(null);
+      }
+    })
   );
 
   private readonly _handleNetworkChanges = this.effect(
@@ -110,7 +132,7 @@ export class ConfigStore extends ComponentStore<ViewModel> {
     if (workspaceIds === null) {
       this._loadedWorkspaces.next([workspaceId]);
     } else {
-      this._loadedWorkspaces.next([...workspaceIds, workspaceId]);
+      this._loadedWorkspaces.next([...new Set([...workspaceIds, workspaceId])]);
     }
   }
 

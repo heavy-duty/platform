@@ -146,6 +146,7 @@ export class ViewProfileComponent extends ComponentStore<object> {
 
   onLoadWorkspace(workspaceId: string) {
     this._configStore.addWorkspace(workspaceId);
+    this._configStore.setWorkspaceId(workspaceId);
   }
 
   onRemoveWorkspace(workspaceId: string) {

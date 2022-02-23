@@ -100,6 +100,9 @@
       "@bulldozer-client/edit-workspace": [
         "libs/bulldozer/client/workspaces/modals/edit-workspace/src/index.ts"
       ],
+      "@bulldozer-client/import-workspace": [
+        "libs/bulldozer/client/workspaces/modals/import-workspace/src/index.ts"
+      ],
       "@bulldozer-client/instruction-arguments-list": [
         "libs/bulldozer/client/instructions/components/instruction-arguments-list/src/index.ts"
       ],
