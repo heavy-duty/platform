@@ -124,6 +124,12 @@
       "@bulldozer-client/internet-connectivity": [
         "libs/bulldozer/client/shared/directives/internet-connectivity/src/index.ts"
       ],
+      "@bulldozer-client/loaded-workspaces-list": [
+        "libs/bulldozer/client/workspaces/components/loaded-workspaces-list/src/index.ts"
+      ],
+      "@bulldozer-client/my-workspaces-list": [
+        "libs/bulldozer/client/workspaces/components/my-workspaces-list/src/index.ts"
+      ],
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"
       ],
@@ -157,6 +163,9 @@
       ],
       "@bulldozer-client/unauthorized-access": [
         "libs/bulldozer/client/auth/pages/unauthorized-access/src/index.ts"
+      ],
+      "@bulldozer-client/user-details": [
+        "libs/bulldozer/client/users/components/user-details/src/index.ts"
       ],
       "@bulldozer-client/users-data-access": [
         "libs/bulldozer/client/users/data-access/src/index.ts"

@@ -6,8 +6,7 @@ import {
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 
 @Component({
   selector: 'bd-view-profile',
@@ -17,90 +16,31 @@ import { map, tap } from 'rxjs';
       <p>Visualize all the details about your profile.</p>
     </header>
 
-    <main>
-      <ng-container *ngIf="connected$ | ngrxPush; else notConnected">
-        <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
-          <section>
-            <h2>User ID: {{ user.id | obscureAddress }}</h2>
+    <main class="flex flex-col gap-4">
+      <bd-user-details
+        [connected]="(connected$ | ngrxPush) ?? false"
+        [user]="(user$ | ngrxPush) ?? null"
+        (createUser)="onCreateUser()"
+        (deleteUser)="onDeleteUser()"
+      ></bd-user-details>
 
-            <p>
-              Created at:
-              {{ user.createdAt.toNumber() * 1000 | date: 'medium' }}
-            </p>
+      <bd-loaded-workspaces-list
+        *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
+        [workspaces]="(loadedWorkspaces$ | ngrxPush) ?? null"
+        (removeWorkspace)="onRemoveWorkspace($event)"
+      ></bd-loaded-workspaces-list>
 
-            <button mat-raised-button color="warn" (click)="onDeleteUser()">
-              Delete User
-            </button>
-          </section>
-
-          <section>
-            <h2>Loaded Workspaces</h2>
-
-            <ul>
-              <li *ngFor="let workspace of loadedWorkspaces$ | ngrxPush">
-                <h3>{{ workspace.name }}</h3>
-
-                <p>{{ workspace.id }}</p>
-
-                <a [routerLink]="['/workspaces', workspace.id]">View</a>
-
-                <button
-                  mat-raised-button
-                  color="warn"
-                  (click)="onRemoveWorkspace(workspace.id)"
-                >
-                  Remove
-                </button>
-              </li>
-            </ul>
-          </section>
-
-          <section>
-            <h2>My Workspaces</h2>
-
-            <ul>
-              <li *ngFor="let workspace of myWorkspaces$ | ngrxPush">
-                <h3>{{ workspace.name }}</h3>
-
-                <p>{{ workspace.id }}</p>
-
-                <a [routerLink]="['/workspaces', workspace.id]">View</a>
-
-                <button
-                  mat-raised-button
-                  color="primary"
-                  (click)="onLoadWorkspace(workspace.id)"
-                >
-                  Load
-                </button>
-              </li>
-            </ul>
-          </section>
-        </ng-container>
-        <ng-template #userNotDefined>
-          <section>
-            <h2>You have no user defined.</h2>
-
-            <button mat-raised-button color="primary" (click)="onCreateUser()">
-              Create User
-            </button>
-          </section>
-        </ng-template>
-      </ng-container>
-
-      <ng-template #notConnected>
-        <section>
-          <h2>Connect your wallet in order to view your profile.</h2>
-
-          <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
-        </section>
-      </ng-template>
+      <bd-my-workspaces-list
+        *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
+        [workspaces]="(myWorkspaces$ | ngrxPush) ?? null"
+        (loadWorkspace)="onLoadWorkspace($event)"
+      ></bd-my-workspaces-list>
     </main>
   `,
   providers: [UserStore, WorkspacesStore, WorkspaceQueryStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewProfileComponent extends ComponentStore<object> {
+export class ViewProfileComponent {
   @HostBinding('class') class = 'block p-4';
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
@@ -115,8 +55,6 @@ export class ViewProfileComponent extends ComponentStore<object> {
     private readonly _workspaceQueryStore: WorkspaceQueryStore,
     private readonly _configStore: ConfigStore
   ) {
-    super({});
-
     this._openTab();
     this._workspacesStore.setWorkspaceIds(this._configStore.workspaceIds$);
     this._workspaceQueryStore.setFilters(
@@ -126,15 +64,13 @@ export class ViewProfileComponent extends ComponentStore<object> {
     );
   }
 
-  private readonly _openTab = this.effect<void>(
-    tap(() => {
-      this._tabStore.openTab({
-        id: 'profile',
-        kind: 'profile',
-        url: '/profile',
-      });
-    })
-  );
+  private _openTab() {
+    this._tabStore.openTab({
+      id: 'profile',
+      kind: 'profile',
+      url: '/profile',
+    });
+  }
 
   onCreateUser() {
     this._userStore.createUser();
