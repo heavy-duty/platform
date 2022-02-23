@@ -96,11 +96,7 @@ export class ConfigStore extends ComponentStore<ViewModel> {
         .workspaceCreated({
           authority: walletPublicKey.toBase58(),
         })
-        .pipe(
-          tap((workspace) => {
-            console.log('workspace created by you', workspace);
-          })
-        );
+        .pipe(tap((workspace) => this.addWorkspace(workspace.id)));
     })
   );
 
