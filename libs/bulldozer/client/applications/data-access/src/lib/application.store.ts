@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, startWith, switchMap } from 'rxjs';

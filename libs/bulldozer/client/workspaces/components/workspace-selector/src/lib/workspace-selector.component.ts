@@ -7,7 +7,6 @@ import {
 import { MatMenu } from '@angular/material/menu';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
-import { PublicKey } from '@solana/web3.js';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -122,9 +121,9 @@ export class WorkspaceSelectorComponent {
 
   @Input() connected = false;
 
-  @Input() set walletPublicKey(value: PublicKey | null) {
+  @Input() set workspaceIds(value: string[] | null) {
     if (value !== null) {
-      this._workspacesStore.setFilters({ authority: value.toBase58() });
+      this._workspacesStore.setWorkspaceIds(value);
     }
   }
 
@@ -135,7 +134,9 @@ export class WorkspaceSelectorComponent {
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
     private readonly _configStore: ConfigStore
-  ) {}
+  ) {
+    this._workspacesStore.workspaces$.subscribe((a) => console.log(a));
+  }
 
   private _closeMenu() {
     if (this._workspaceMenu) {
@@ -145,17 +146,20 @@ export class WorkspaceSelectorComponent {
 
   onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspacesStore.createWorkspace(workspaceName);
+    this._workspaceSelectorStore.createWorkspace(workspaceName);
   }
 
   onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspacesStore.updateWorkspace({ workspaceId, workspaceName });
+    this._workspaceSelectorStore.updateWorkspace({
+      workspaceId,
+      workspaceName,
+    });
   }
 
   onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspacesStore.deleteWorkspace(workspaceId);
+    this._workspaceSelectorStore.deleteWorkspace(workspaceId);
   }
 
   onDownloadWorkspace(workspaceId: string) {

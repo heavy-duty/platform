@@ -124,6 +124,9 @@
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"
       ],
+      "@bulldozer-client/notifications-data-access": [
+        "libs/bulldozer/client/notifications/data-access/src/index.ts"
+      ],
       "@bulldozer-client/obscure-address": [
         "libs/bulldozer/client/shared/pipes/obscure-address/src/index.ts"
       ],

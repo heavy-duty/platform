@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   Document,
   Instruction,

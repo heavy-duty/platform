@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   AccountInfo,
+  GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
   SignatureStatus,
@@ -16,9 +17,15 @@ import {
   map,
   Observable,
   of,
+  tap,
   throwError,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
+
+export interface KeyedAccountInfo {
+  accountId: string;
+  accountInfo: AccountInfo<Buffer>;
+}
 
 @Injectable()
 export class HdSolanaApiService {
@@ -145,6 +152,53 @@ export class HdSolanaApiService {
                 },
               }))
             )
+          );
+      })
+    );
+  }
+
+  getMultipleAccounts(
+    pubkeys: string[],
+    config?: GetMultipleAccountsConfig
+  ): Observable<(KeyedAccountInfo | null)[]> {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient
+          .post<{
+            value: AccountInfo<[string, string]>[];
+            context: { slot: number };
+          }>(
+            apiEndpoint,
+            [
+              pubkeys,
+              {
+                encoding: config?.encoding ?? 'base64',
+                commitment: config?.commitment ?? 'confirmed',
+              },
+            ],
+            {
+              headers: {
+                'solana-rpc-method': 'getMultipleAccounts',
+              },
+            }
+          )
+          .pipe(
+            tap((a) => console.log(a)),
+            map(({ value }) =>
+              value.map((account, index) => ({
+                accountId: pubkeys[index],
+                accountInfo: {
+                  ...account,
+                  data: Buffer.from(account.data[0], 'base64'),
+                },
+              }))
+            ),
+            tap((a) => console.log(a))
           );
       })
     );

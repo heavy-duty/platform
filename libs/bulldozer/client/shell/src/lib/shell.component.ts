@@ -3,9 +3,9 @@ import { Router } from '@angular/router';
 import {
   ConfigStore,
   DarkThemeStore,
-  NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
@@ -34,7 +34,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             <bd-workspace-selector
               class="mr-6"
               [connected]="(connected$ | ngrxPush) ?? false"
-              [walletPublicKey]="(walletPublicKey$ | ngrxPush) ?? null"
+              [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -70,6 +70,7 @@ export class ShellComponent extends ComponentStore<object> {
   readonly connected$ = this._walletStore.connected$;
   readonly walletPublicKey$ = this._walletStore.publicKey$;
   readonly workspaceId$ = this._configStore.workspaceId$;
+  readonly workspaceIds$ = this._configStore.workspaceIds$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
 

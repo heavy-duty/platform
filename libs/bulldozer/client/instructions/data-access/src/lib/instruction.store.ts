@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
