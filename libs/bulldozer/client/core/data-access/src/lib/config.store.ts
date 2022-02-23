@@ -113,4 +113,16 @@ export class ConfigStore extends ComponentStore<ViewModel> {
       this._loadedWorkspaces.next([...workspaceIds, workspaceId]);
     }
   }
+
+  removeWorkspace(workspaceId: string) {
+    const { workspaceIds } = this.get();
+
+    if (workspaceIds !== null) {
+      this._loadedWorkspaces.next(
+        workspaceIds.filter(
+          (loadedWorkspaceId) => loadedWorkspaceId !== workspaceId
+        )
+      );
+    }
+  }
 }
