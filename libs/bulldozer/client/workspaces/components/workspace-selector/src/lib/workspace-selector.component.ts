@@ -6,7 +6,11 @@ import {
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
-import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import {
+  WorkspaceApiService,
+  WorkspacesStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -144,7 +148,9 @@ export class WorkspaceSelectorComponent {
   constructor(
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
-    private readonly _configStore: ConfigStore
+    private readonly _configStore: ConfigStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
+    private readonly _notificationStore: NotificationStore
   ) {}
 
   private _closeMenu() {
@@ -181,7 +187,13 @@ export class WorkspaceSelectorComponent {
   }
 
   onImportWorkspace(workspaceId: string) {
-    this._configStore.addWorkspace(workspaceId);
-    this._configStore.setWorkspaceId(workspaceId);
+    this._workspaceApiService.findById(workspaceId).subscribe((workspace) => {
+      if (workspace === null) {
+        this._notificationStore.setError('Workspace does not exist.');
+      } else {
+        this._configStore.addWorkspace(workspaceId);
+        this._configStore.setWorkspaceId(workspaceId);
+      }
+    });
   }
 }

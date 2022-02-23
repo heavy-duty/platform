@@ -84,10 +84,13 @@ export class HdSolanaApiService {
             },
           })
           .pipe(
-            map(({ value }) => ({
-              ...value,
-              data: Buffer.from(value.data[0], 'base64'),
-            }))
+            map(
+              ({ value }) =>
+                value && {
+                  ...value,
+                  data: Buffer.from(value.data[0], 'base64'),
+                }
+            )
           );
       })
     );
