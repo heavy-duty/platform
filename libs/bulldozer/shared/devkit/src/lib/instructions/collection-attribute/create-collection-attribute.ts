@@ -11,10 +11,10 @@ export const createCollectionAttribute = (
       bulldozerProgram.methods
         .createCollectionAttribute(params.collectionAttributeDto)
         .accounts({
+          authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
           collection: new PublicKey(params.collectionId),
-          authority: new PublicKey(params.authority),
           attribute: new PublicKey(params.collectionAttributeId),
         })
         .instruction() as Promise<TransactionInstruction>

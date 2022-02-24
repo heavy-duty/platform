@@ -6,6 +6,7 @@ import {
   TabStore,
 } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserStore } from '@bulldozer-client/users-data-access';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
@@ -62,7 +63,13 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [TabStore, NotificationStore, ConfigStore, DarkThemeStore],
+  providers: [
+    TabStore,
+    NotificationStore,
+    ConfigStore,
+    DarkThemeStore,
+    UserStore,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent extends ComponentStore<object> {

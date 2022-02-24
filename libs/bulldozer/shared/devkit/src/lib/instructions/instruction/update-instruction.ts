@@ -11,8 +11,8 @@ export const updateInstruction = (
       bulldozerProgram.methods
         .updateInstruction({ name: params.instructionName })
         .accounts({
-          instruction: new PublicKey(params.instructionId),
           authority: new PublicKey(params.authority),
+          instruction: new PublicKey(params.instructionId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

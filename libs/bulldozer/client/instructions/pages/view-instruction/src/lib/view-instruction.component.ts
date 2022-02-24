@@ -24,7 +24,9 @@ import { ViewInstructionStore } from './view-instruction.store';
   selector: 'bd-view-instruction',
   template: `
     <div class="flex w-full" *ngIf="instruction$ | ngrxPush as instruction">
-      <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
+      <div
+        class="p-5 w-1/2 bd-custom-height-layout overflow-auto flex flex-col gap-5"
+      >
         <header bdPageHeader>
           <h1>
             {{ instruction.name }}
@@ -32,9 +34,8 @@ import { ViewInstructionStore } from './view-instruction.store';
           <p>Visualize all the details about this instruction.</p>
         </header>
 
-        <main class="mb-16">
+        <main class="flex flex-col gap-4">
           <bd-instruction-arguments-list
-            class="block mb-4"
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionArguments]="(instructionArguments$ | ngrxPush) ?? null"
             (createInstructionArgument)="
@@ -46,7 +47,6 @@ import { ViewInstructionStore } from './view-instruction.store';
             "
           ></bd-instruction-arguments-list>
           <bd-instruction-documents-list
-            class="block mb-4"
             [connected]="(connected$ | ngrxPush) ?? false"
             [collections]="(collections$ | ngrxPush) ?? null"
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
@@ -69,7 +69,6 @@ import { ViewInstructionStore } from './view-instruction.store';
           >
           </bd-instruction-documents-list>
           <bd-instruction-signers-list
-            class="block"
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
             (createInstructionSigner)="
@@ -176,6 +175,12 @@ export class ViewInstructionComponent {
       )
     );
     this._instructionAccountsStore.setFilters(
+      this._viewInstructionStore.instructionId$.pipe(
+        isNotNullOrUndefined,
+        map((instructionId) => ({ instruction: instructionId }))
+      )
+    );
+    this._instructionRelationsStore.setFilters(
       this._viewInstructionStore.instructionId$.pipe(
         isNotNullOrUndefined,
         map((instructionId) => ({ instruction: instructionId }))

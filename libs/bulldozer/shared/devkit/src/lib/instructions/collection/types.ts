@@ -1,6 +1,6 @@
 export interface CreateCollectionParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   collectionId: string;
   collectionName: string;

@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   AccountInfo,
+  Commitment,
   GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
@@ -155,6 +156,32 @@ export class HdSolanaApiService {
               }))
             )
           );
+      })
+    );
+  }
+
+  getMinimumBalanceForRentExemption(dataSize: number, commitment?: Commitment) {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient.post<number>(
+          apiEndpoint,
+          [
+            dataSize,
+            {
+              commitment: commitment ?? 'confirmed',
+            },
+          ],
+          {
+            headers: {
+              'solana-rpc-method': 'getMinimumBalanceForRentExemption',
+            },
+          }
+        );
       })
     );
   }

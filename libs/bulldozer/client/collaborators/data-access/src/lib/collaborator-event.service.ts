@@ -8,7 +8,7 @@ import {
   Document,
 } from '@heavy-duty/bulldozer-devkit';
 import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
-import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
+import { concatMap, EMPTY, filter, map, Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollaboratorEventService {
@@ -28,6 +28,12 @@ export class CollaboratorEventService {
             : null
         )
       );
+  }
+
+  collaboratorDeleted(collaboratorId: string): Observable<unknown> {
+    return this._hdSolanaConnectionStore
+      .onAccountChange(collaboratorId, 'finalized')
+      .pipe(filter((accountInfo) => accountInfo.lamports === 0));
   }
 
   collaboratorCreated(filters: CollaboratorFilters) {

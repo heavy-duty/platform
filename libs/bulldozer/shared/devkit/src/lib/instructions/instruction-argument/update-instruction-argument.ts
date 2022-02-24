@@ -11,8 +11,8 @@ export const updateInstructionArgument = (
       bulldozerProgram.methods
         .updateInstructionArgument(params.instructionArgumentDto)
         .accounts({
-          argument: new PublicKey(params.instructionArgumentId),
           authority: new PublicKey(params.authority),
+          argument: new PublicKey(params.instructionArgumentId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

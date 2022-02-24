@@ -11,9 +11,9 @@ export const deleteCollectionAttribute = (
       bulldozerProgram.methods
         .deleteCollectionAttribute()
         .accounts({
-          attribute: new PublicKey(params.collectionAttributeId),
-          collection: new PublicKey(params.collectionId),
           authority: new PublicKey(params.authority),
+          collection: new PublicKey(params.collectionId),
+          attribute: new PublicKey(params.collectionAttributeId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

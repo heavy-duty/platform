@@ -3,6 +3,7 @@ import {
   Budget,
   BudgetFilters,
   budgetQueryBuilder,
+  BUDGET_ACCOUNT_SIZE,
   BULLDOZER_PROGRAM_ID,
   createBudgetDocument,
   depositToBudget,
@@ -60,6 +61,12 @@ export class BudgetApiService {
           .sendTransaction(transaction)
           .pipe(catchError((error) => this.handleError(error)))
       )
+    );
+  }
+
+  getMinimumBalanceForRentExemption() {
+    return this._hdSolanaApiService.getMinimumBalanceForRentExemption(
+      BUDGET_ACCOUNT_SIZE
     );
   }
 }

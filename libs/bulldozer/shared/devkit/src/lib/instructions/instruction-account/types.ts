@@ -1,8 +1,8 @@
 import { InstructionAccountDto } from '../../utils';
 
 export interface CreateInstructionAccountParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   instructionId: string;
   instructionAccountId: string;

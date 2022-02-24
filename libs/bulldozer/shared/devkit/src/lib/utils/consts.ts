@@ -9,3 +9,4 @@ export const INSTRUCTION_RELATION_ACCOUNT_NAME = 'instructionRelation';
 export const USER_ACCOUNT_NAME = 'user';
 export const COLLABORATOR_ACCOUNT_NAME = 'collaborator';
 export const BUDGET_ACCOUNT_NAME = 'budget';
+export const BUDGET_ACCOUNT_SIZE = 81;

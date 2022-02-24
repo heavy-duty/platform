@@ -11,8 +11,8 @@ export const updateCollection = (
       bulldozerProgram.methods
         .updateCollection({ name: params.collectionName })
         .accounts({
-          collection: new PublicKey(params.collectionId),
           authority: new PublicKey(params.authority),
+          collection: new PublicKey(params.collectionId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

@@ -34,6 +34,9 @@
       "@bulldozer-client/auth-interceptor": [
         "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
       ],
+      "@bulldozer-client/budget-details": [
+        "libs/bulldozer/client/budgets/components/budget-details/src/index.ts"
+      ],
       "@bulldozer-client/budgets-data-access": [
         "libs/bulldozer/client/budgets/data-access/src/index.ts"
       ],
@@ -42,6 +45,9 @@
       ],
       "@bulldozer-client/collaborators-data-access": [
         "libs/bulldozer/client/collaborators/data-access/src/index.ts"
+      ],
+      "@bulldozer-client/collaborators-list": [
+        "libs/bulldozer/client/collaborators/components/collaborators-list/src/index.ts"
       ],
       "@bulldozer-client/collection-attributes-list": [
         "libs/bulldozer/client/collections/components/collection-attributes-list/src/index.ts"

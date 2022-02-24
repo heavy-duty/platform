@@ -11,8 +11,8 @@ export const updateCollectionAttribute = (
       bulldozerProgram.methods
         .updateCollectionAttribute(params.collectionAttributeDto)
         .accounts({
-          attribute: new PublicKey(params.collectionAttributeId),
           authority: new PublicKey(params.authority),
+          attribute: new PublicKey(params.collectionAttributeId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

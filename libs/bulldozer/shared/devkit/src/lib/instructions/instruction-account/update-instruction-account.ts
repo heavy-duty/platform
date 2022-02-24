@@ -16,8 +16,8 @@ export const updateInstructionAccount = (
           space: params.instructionAccountDto.space,
         })
         .accounts({
-          account: new PublicKey(params.instructionAccountId),
           authority: new PublicKey(params.authority),
+          account: new PublicKey(params.instructionAccountId),
         })
         .remainingAccounts(
           [

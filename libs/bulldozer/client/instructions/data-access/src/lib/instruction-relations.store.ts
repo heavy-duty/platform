@@ -187,6 +187,13 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
       })
     );
 
+  readonly setFilters = this.updater<InstructionRelationFilters>(
+    (state, filters) => ({
+      ...state,
+      filters,
+    })
+  );
+
   readonly createInstructionRelation = this.effect<{
     fromAccountId: string;
     toAccountId: string;

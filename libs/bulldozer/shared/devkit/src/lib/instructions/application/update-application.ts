@@ -11,8 +11,8 @@ export const updateApplication = (
       bulldozerProgram.methods
         .updateApplication({ name: params.applicationName })
         .accounts({
-          application: new PublicKey(params.applicationId),
           authority: new PublicKey(params.authority),
+          application: new PublicKey(params.applicationId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

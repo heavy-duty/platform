@@ -10,8 +10,8 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-loaded-workspaces-list',
   template: `
-    <section>
-      <mat-card>
+    <mat-card class="p-3">
+      <section class="flex flex-col gap-3">
         <header bdSectionHeader>
           <h2>Loaded Workspaces</h2>
           <p>Visualize all your loaded workspaces.</p>
@@ -20,13 +20,14 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
         <mat-list
           role="list"
           *ngIf="workspaces && workspaces.length > 0; else emptyList"
+          class="flex flex-col gap-2"
         >
           <mat-list-item
             role="listitem"
             *ngFor="let workspace of workspaces; let i = index"
-            class="h-20 bg-white bg-opacity-5 mat-elevation-z2 mb-2 last:mb-0"
+            class="h-auto bg-white bg-opacity-5 mat-elevation-z2"
           >
-            <div class="flex items-center gap-4 w-full">
+            <div class="flex items-center gap-4 py-2 w-full">
               <div
                 class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
               >
@@ -64,8 +65,8 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
             You don't have loaded workspaces.
           </p>
         </ng-template>
-      </mat-card>
-    </section>
+      </section>
+    </mat-card>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,

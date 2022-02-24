@@ -11,13 +11,13 @@ import {
   DeleteCollaboratorParams,
   Document,
   getBulldozerError,
+  requestCollaboratorStatus,
+  RequestCollaboratorStatusParams,
+  updateCollaborator,
+  UpdateCollaboratorParams,
 } from '@heavy-duty/bulldozer-devkit';
 import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
-import {
-  addInstructionToTransaction,
-  partiallySignTransaction,
-} from '@heavy-duty/rx-solana';
-import { Keypair } from '@solana/web3.js';
+import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
 import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
@@ -59,16 +59,21 @@ export class CollaboratorApiService {
   }
 
   // create collaborator
-  create(params: Omit<CreateCollaboratorParams, 'collaboratorId'>) {
-    const collaboratorKeypair = Keypair.generate();
-
+  create(params: CreateCollaboratorParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(
-        createCollaborator({
-          ...params,
-        })
-      ),
-      partiallySignTransaction(collaboratorKeypair),
+      addInstructionToTransaction(createCollaborator(params)),
+      concatMap((transaction) =>
+        this._hdSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
+  }
+
+  // update workspace
+  update(params: UpdateCollaboratorParams) {
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(updateCollaborator(params)),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -81,6 +86,18 @@ export class CollaboratorApiService {
   delete(params: DeleteCollaboratorParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(deleteCollaborator(params)),
+      concatMap((transaction) =>
+        this._hdSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
+  }
+
+  // request collaborator status
+  requestCollaboratorStatus(params: RequestCollaboratorStatusParams) {
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(requestCollaboratorStatus(params)),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import {
@@ -11,37 +11,38 @@ import { map } from 'rxjs';
 @Component({
   selector: 'bd-view-profile',
   template: `
-    <header bdPageHeader>
-      <h1>Profile</h1>
-      <p>Visualize all the details about your profile.</p>
-    </header>
+    <div class="flex flex-col gap-5 p-5">
+      <header bdPageHeader>
+        <h1>Profile</h1>
+        <p>Visualize all the details about your profile.</p>
+      </header>
 
-    <main class="flex flex-col gap-4">
-      <bd-user-details
-        [connected]="(connected$ | ngrxPush) ?? false"
-        [user]="(user$ | ngrxPush) ?? null"
-        (createUser)="onCreateUser()"
-        (deleteUser)="onDeleteUser()"
-      ></bd-user-details>
+      <main class="flex flex-col gap-4">
+        <bd-user-details
+          [connected]="(connected$ | ngrxPush) ?? false"
+          [user]="(user$ | ngrxPush) ?? null"
+          (createUser)="onCreateUser()"
+          (deleteUser)="onDeleteUser()"
+        ></bd-user-details>
 
-      <bd-loaded-workspaces-list
-        *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-        [workspaces]="(loadedWorkspaces$ | ngrxPush) ?? null"
-        (removeWorkspace)="onRemoveWorkspace($event)"
-      ></bd-loaded-workspaces-list>
+        <bd-loaded-workspaces-list
+          *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
+          [workspaces]="(loadedWorkspaces$ | ngrxPush) ?? null"
+          (removeWorkspace)="onRemoveWorkspace($event)"
+        ></bd-loaded-workspaces-list>
 
-      <bd-my-workspaces-list
-        *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-        [workspaces]="(myWorkspaces$ | ngrxPush) ?? null"
-        (loadWorkspace)="onLoadWorkspace($event)"
-      ></bd-my-workspaces-list>
-    </main>
+        <bd-my-workspaces-list
+          *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
+          [workspaces]="(myWorkspaces$ | ngrxPush) ?? null"
+          (loadWorkspace)="onLoadWorkspace($event)"
+        ></bd-my-workspaces-list>
+      </main>
+    </div>
   `,
-  providers: [UserStore, WorkspacesStore, WorkspaceQueryStore],
+  providers: [WorkspacesStore, WorkspaceQueryStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewProfileComponent {
-  @HostBinding('class') class = 'block p-4';
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
   readonly loadedWorkspaces$ = this._workspacesStore.workspaces$;

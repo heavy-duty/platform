@@ -11,12 +11,12 @@ export const createInstructionRelation = (
       bulldozerProgram.methods
         .createInstructionRelation()
         .accounts({
+          authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
           instruction: new PublicKey(params.instructionId),
           from: new PublicKey(params.fromAccountId),
           to: new PublicKey(params.toAccountId),
-          authority: new PublicKey(params.authority),
         })
         .instruction() as Promise<TransactionInstruction>
     )

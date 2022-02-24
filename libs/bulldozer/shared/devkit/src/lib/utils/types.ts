@@ -58,6 +58,11 @@ export interface Collaborator {
   workspace: string;
   user: string;
   bump: number;
+  isAdmin: boolean;
+  status: {
+    id: number;
+    name: string;
+  };
 }
 
 export interface User {

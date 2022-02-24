@@ -11,10 +11,10 @@ export const createInstructionArgument = (
       bulldozerProgram.methods
         .createInstructionArgument(params.instructionArgumentDto)
         .accounts({
+          authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
           argument: new PublicKey(params.instructionArgumentId),
-          authority: new PublicKey(params.authority),
           instruction: new PublicKey(params.instructionId),
         })
         .instruction() as Promise<TransactionInstruction>

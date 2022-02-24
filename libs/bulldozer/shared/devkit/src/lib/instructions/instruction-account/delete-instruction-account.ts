@@ -11,9 +11,9 @@ export const deleteInstructionAccount = (
       bulldozerProgram.methods
         .deleteInstructionAccount()
         .accounts({
+          authority: new PublicKey(params.authority),
           instruction: new PublicKey(params.instructionId),
           account: new PublicKey(params.instructionAccountId),
-          authority: new PublicKey(params.authority),
         })
         .instruction() as Promise<TransactionInstruction>
     )

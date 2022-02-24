@@ -11,9 +11,9 @@ export const deleteInstructionRelation = (
       bulldozerProgram.methods
         .deleteInstructionRelation()
         .accounts({
+          authority: new PublicKey(params.authority),
           from: new PublicKey(params.fromAccountId),
           to: new PublicKey(params.toAccountId),
-          authority: new PublicKey(params.authority),
         })
         .instruction() as Promise<TransactionInstruction>
     )

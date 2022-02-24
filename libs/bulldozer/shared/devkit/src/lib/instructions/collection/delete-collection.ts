@@ -11,9 +11,9 @@ export const deleteCollection = (
       bulldozerProgram.methods
         .deleteCollection()
         .accounts({
+          authority: new PublicKey(params.authority),
           collection: new PublicKey(params.collectionId),
           application: new PublicKey(params.applicationId),
-          authority: new PublicKey(params.authority),
         })
         .instruction() as Promise<TransactionInstruction>
     )

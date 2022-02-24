@@ -75,6 +75,7 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     } else if (error instanceof ProgramError) {
       return error.message;
     } else {
+      console.log(error);
       return 'Unknown error';
     }
   }

@@ -16,11 +16,11 @@ export const createInstructionAccount = (
           space: params.instructionAccountDto.space,
         })
         .accounts({
-          workspace: new PublicKey(params.workspaceId),
-          account: new PublicKey(params.instructionAccountId),
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
           instruction: new PublicKey(params.instructionId),
+          account: new PublicKey(params.instructionAccountId),
         })
         .remainingAccounts(
           [
