@@ -161,7 +161,7 @@ export interface Account<T> {
   data: T;
   metadata: AccountInfo<Buffer>;
   createdAt: BN;
-  updatedAt?: BN;
+  updatedAt: BN;
 }
 
 export interface Document<T> extends Account<T> {

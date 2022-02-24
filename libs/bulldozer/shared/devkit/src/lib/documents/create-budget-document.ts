@@ -18,5 +18,6 @@ export const createBudgetDocument = (
       bump: decodedAccount.bump,
     },
     createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

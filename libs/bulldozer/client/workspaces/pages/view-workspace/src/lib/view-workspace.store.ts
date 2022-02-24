@@ -82,15 +82,14 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     );
 
   readonly updateCollaborator = this.effect<{
-    workspaceId: string;
-    userId: string;
+    collaboratorId: string;
     status: number;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ workspaceId, userId, status }, authority]) => {
+      concatMap(([{ collaboratorId, status }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -98,9 +97,8 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         return this._collaboratorApiService
           .update({
             authority: authority.toBase58(),
-            workspaceId,
             status,
-            userId,
+            collaboratorId,
           })
           .pipe(
             tapResponse(
@@ -117,13 +115,12 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly requestCollaboratorStatus = this.effect<{
     workspaceId: string;
-    userId: string;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ workspaceId, userId }, authority]) => {
+      concatMap(([{ workspaceId }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -132,13 +129,42 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
           .requestCollaboratorStatus({
             authority: authority.toBase58(),
             workspaceId,
-            userId,
           })
           .pipe(
             tapResponse(
               () =>
                 this._notificationStore.setEvent(
                   'Request collaborator status request sent'
+                ),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  readonly retryCollaboratorStatusRequest = this.effect<{
+    collaboratorId: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([{ collaboratorId }, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._collaboratorApiService
+          .retryCollaboratorStatusRequest({
+            authority: authority.toBase58(),
+            collaboratorId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Retry collaborator status request sent'
                 ),
               (error) => this._notificationStore.setError(error)
             )

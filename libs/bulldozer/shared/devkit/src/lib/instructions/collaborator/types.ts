@@ -12,13 +12,16 @@ export interface DeleteCollaboratorParams {
 
 export interface UpdateCollaboratorParams {
   authority: string;
-  workspaceId: string;
-  userId: string;
+  collaboratorId: string;
   status: number;
 }
 
 export interface RequestCollaboratorStatusParams {
   authority: string;
   workspaceId: string;
-  userId: string;
+}
+
+export interface RetryCollaboratorStatusRequestParams {
+  authority: string;
+  collaboratorId: string;
 }

@@ -6,7 +6,6 @@ import {
 } from '@bulldozer-client/collaborators-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { Collaborator, Document } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { map } from 'rxjs';
 import { ViewWorkspaceStore } from './view-workspace.store';
@@ -35,26 +34,25 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           (depositToBudget)="onDepositToBudget(budget.id, $event)"
         ></bd-budget-details>
 
-        <ng-container *ngrxLet="user$; let user">
-          <bd-collaborators-list
-            [canRequestCollaboratorStatus]="
-              user !== null && !(isCurrentUserACollaborator$ | ngrxPush)
-            "
-            [canUpdateCollaborator]="
-              (isCurrentUserAnAdmin$ | ngrxPush) ?? false
-            "
-            [collaborators]="(collaborators$ | ngrxPush) ?? null"
-            (approveCollaboratorStatusRequest)="
-              onApproveCollaboratorStatusRequest($event)
-            "
-            (rejectCollaboratorStatusRequest)="
-              onRejectCollaboratorStatusRequest($event)
-            "
-            (requestCollaboratorStatus)="
-              onRequestCollaboratorStatus(workspace.id, user?.id ?? null)
-            "
-          ></bd-collaborators-list>
-        </ng-container>
+        <bd-collaborators-list
+          [currentUser]="(user$ | ngrxPush) ?? null"
+          [currentCollaborator]="(collaborator$ | ngrxPush) ?? null"
+          [collaborators]="(collaborators$ | ngrxPush) ?? null"
+          (approveCollaboratorStatusRequest)="
+            onApproveCollaboratorStatusRequest($event)
+          "
+          (grantCollaboratorStatus)="onGrantCollaboratorStatus($event)"
+          (rejectCollaboratorStatusRequest)="
+            onRejectCollaboratorStatusRequest($event)
+          "
+          (requestCollaboratorStatus)="
+            onRequestCollaboratorStatus(workspace.id)
+          "
+          (revokeCollaboratorStatus)="onRevokeCollaboratorStatus($event)"
+          (retryCollaboratorStatusRequest)="
+            onRetryCollaboratorStatusRequest($event)
+          "
+        ></bd-collaborators-list>
       </main>
     </div>
   `,
@@ -70,16 +68,16 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 })
 export class ViewWorkspaceComponent {
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly collaborators$ = this._collaboratorsStore.collaborators$;
+  readonly collaborators$ = this._collaboratorsStore.collaborators$.pipe(
+    map((collaborators) =>
+      collaborators.sort(
+        (a, b) => a.createdAt.toNumber() - b.createdAt.toNumber()
+      )
+    )
+  );
   readonly budget$ = this._budgetStore.budget$;
   readonly user$ = this._userStore.user$;
-  readonly isCurrentUserACollaborator$ =
-    this._collaboratorStore.collaborator$.pipe(
-      map((collaborator) => collaborator !== null)
-    );
-  readonly isCurrentUserAnAdmin$ = this._collaboratorStore.collaborator$.pipe(
-    map((collaborator) => collaborator?.data.isAdmin ?? false)
-  );
+  readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly budgetMinimumBalanceForRentExemption$ =
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
 
@@ -103,8 +101,6 @@ export class ViewWorkspaceComponent {
     );
     this._workspaceStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
     this._budgetStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
-
-    this._collaboratorStore.collaborator$.subscribe((a) => console.log(a));
   }
 
   onDepositToBudget(budgetId: string, lamports: number) {
@@ -114,29 +110,42 @@ export class ViewWorkspaceComponent {
     });
   }
 
-  onRequestCollaboratorStatus(workspaceId: string, userId: string | null) {
-    if (userId === null) {
-      throw new Error('User cannot be null');
-    }
-
+  onRequestCollaboratorStatus(workspaceId: string) {
     this._viewWorkspaceStore.requestCollaboratorStatus({
       workspaceId,
-      userId,
     });
   }
 
-  onApproveCollaboratorStatusRequest(collaborator: Document<Collaborator>) {
+  onRetryCollaboratorStatusRequest(collaboratorId: string) {
+    this._viewWorkspaceStore.retryCollaboratorStatusRequest({
+      collaboratorId,
+    });
+  }
+
+  onApproveCollaboratorStatusRequest(collaboratorId: string) {
     this._viewWorkspaceStore.updateCollaborator({
-      workspaceId: collaborator.data.workspace,
-      userId: collaborator.data.user,
+      collaboratorId,
       status: 1,
     });
   }
 
-  onRejectCollaboratorStatusRequest(collaborator: Document<Collaborator>) {
+  onGrantCollaboratorStatus(collaboratorId: string) {
     this._viewWorkspaceStore.updateCollaborator({
-      workspaceId: collaborator.data.workspace,
-      userId: collaborator.data.user,
+      collaboratorId,
+      status: 1,
+    });
+  }
+
+  onRejectCollaboratorStatusRequest(collaboratorId: string) {
+    this._viewWorkspaceStore.updateCollaborator({
+      collaboratorId,
+      status: 2,
+    });
+  }
+
+  onRevokeCollaboratorStatus(collaboratorId: string) {
+    this._viewWorkspaceStore.updateCollaborator({
+      collaboratorId,
       status: 2,
     });
   }

@@ -13,6 +13,8 @@ import {
   getBulldozerError,
   requestCollaboratorStatus,
   RequestCollaboratorStatusParams,
+  retryCollaboratorStatusRequest,
+  RetryCollaboratorStatusRequestParams,
   updateCollaborator,
   UpdateCollaboratorParams,
 } from '@heavy-duty/bulldozer-devkit';
@@ -152,6 +154,29 @@ export class CollaboratorApiService {
             }
 
             return requestCollaboratorStatus(apiEndpoint, params);
+          })
+        )
+      ),
+      concatMap((transaction) =>
+        this._hdSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
+  }
+
+  // retry collaborator status request
+  retryCollaboratorStatusRequest(params: RetryCollaboratorStatusRequestParams) {
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return retryCollaboratorStatusRequest(apiEndpoint, params);
           })
         )
       ),

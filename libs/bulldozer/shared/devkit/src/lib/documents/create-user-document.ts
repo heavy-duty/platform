@@ -17,5 +17,6 @@ export const createUserDocument = (
       bump: decodedAccount.bump,
     },
     createdAt: decodedAccount.createdAt,
+    updatedAt: decodedAccount.updatedAt,
   };
 };

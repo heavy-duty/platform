@@ -13,7 +13,6 @@ export const requestCollaboratorStatus = (
         .methods.requestCollaboratorStatus()
         .accounts({
           authority: new PublicKey(params.authority),
-          user: new PublicKey(params.userId),
           workspace: new PublicKey(params.workspaceId),
         })
         .instruction() as Promise<TransactionInstruction>
