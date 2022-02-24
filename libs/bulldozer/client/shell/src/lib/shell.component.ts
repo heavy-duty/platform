@@ -45,11 +45,16 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
             <hd-connection-menu class="mr-6"></hd-connection-menu>
 
-            <bd-dark-theme-switch></bd-dark-theme-switch>
-
-            <button mat-raised-button color="basic" [routerLink]="['/profile']">
+            <button
+              mat-raised-button
+              color="basic"
+              [routerLink]="['/profile']"
+              class="mr-6"
+            >
               Profile
             </button>
+
+            <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
         </mat-toolbar>
 
