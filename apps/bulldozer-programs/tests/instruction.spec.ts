@@ -108,7 +108,6 @@ describe('instruction', () => {
       .updateInstruction({ name: instructionName })
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -136,7 +135,6 @@ describe('instruction', () => {
       .updateInstructionBody({ body: instructionBody })
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -153,7 +151,6 @@ describe('instruction', () => {
       .deleteInstruction()
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
         application: application.publicKey,
       })
@@ -211,7 +208,6 @@ describe('instruction', () => {
         .accounts({
           instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           application: application.publicKey,
         })
         .rpc();
@@ -261,7 +257,6 @@ describe('instruction', () => {
         .deleteInstruction()
         .accounts({
           instruction: instruction.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
         })
@@ -305,7 +300,6 @@ describe('instruction', () => {
         .deleteInstruction()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: newInstruction.publicKey,
         })
@@ -314,7 +308,7 @@ describe('instruction', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6023);
+    assert.equal(error?.code, 6039);
   });
 
   it('should fail when workspace has insufficient funds', async () => {

@@ -1,4 +1,4 @@
-use crate::collections::{Application, Collaborator, User, Workspace};
+use crate::collections::{Application, Collaborator, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -11,10 +11,9 @@ pub struct UpdateApplicationArguments {
 #[derive(Accounts)]
 #[instruction(arguments: UpdateApplicationArguments)]
 pub struct UpdateApplication<'info> {
+  pub authority: Signer<'info>,
   #[account(mut)]
   pub application: Box<Account<'info, Application>>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -26,7 +25,7 @@ pub struct UpdateApplication<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      application.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,

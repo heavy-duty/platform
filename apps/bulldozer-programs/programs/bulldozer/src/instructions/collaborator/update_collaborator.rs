@@ -15,7 +15,6 @@ pub struct UpdateCollaborator<'info> {
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut, has_one = workspace)]
   pub collaborator: Box<Account<'info, Collaborator>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn handle(

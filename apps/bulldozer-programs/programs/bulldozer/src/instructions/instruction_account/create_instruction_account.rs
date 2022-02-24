@@ -19,18 +19,17 @@ pub struct CreateInstructionAccountArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionAccountArguments)]
 pub struct CreateInstructionAccount<'info> {
-  #[account(
-    init,
-    payer = authority,
-    space = InstructionAccount::space()
-  )]
-  pub account: Box<Account<'info, InstructionAccount>>,
-  pub application: Box<Account<'info, Application>>,
-  #[account(mut)]
-  pub instruction: Box<Account<'info, Instruction>>,
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    mut,
+    constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,6 +57,12 @@ pub struct CreateInstructionAccount<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccount::space()
+  )]
+  pub account: Box<Account<'info, InstructionAccount>>,
   pub system_program: Program<'info, System>,
 }
 

@@ -12,17 +12,14 @@ pub struct CreateCollectionArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateCollectionArguments)]
 pub struct CreateCollection<'info> {
-  #[account(
-    init,
-    payer = authority,
-    space = Collection::space()
-  )]
-  pub collection: Box<Account<'info, Collection>>,
-  #[account(mut)]
-  pub application: Box<Account<'info, Application>>,
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    mut,
+    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+  )]
+  pub application: Box<Account<'info, Application>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -50,6 +47,12 @@ pub struct CreateCollection<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Collection::space()
+  )]
+  pub collection: Box<Account<'info, Collection>>,
   pub system_program: Program<'info, System>,
 }
 

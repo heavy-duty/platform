@@ -1,22 +1,22 @@
-use crate::collections::{Budget, Collaborator, Collection, CollectionAttribute, User, Workspace};
+use crate::collections::{Budget, Collaborator, Collection, CollectionAttribute, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteCollectionAttribute<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
-    close = budget
+    close = budget,
+    constraint = attribute.collection == collection.key() @ ErrorCode::CollectionAttributeDoesNotBelongToCollection,
   )]
   pub attribute: Account<'info, CollectionAttribute>,
   #[account(
     mut,
-    constraint = attribute.collection == collection.key() @ ErrorCode::CollectionDoesntMatchAttribute
+    constraint = collection.workspace == attribute.workspace @ ErrorCode::CollectionDoesNotBelongToWorkspace
   )]
   pub collection: Account<'info, Collection>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -28,7 +28,7 @@ pub struct DeleteCollectionAttribute<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      attribute.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -39,7 +39,7 @@ pub struct DeleteCollectionAttribute<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      attribute.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

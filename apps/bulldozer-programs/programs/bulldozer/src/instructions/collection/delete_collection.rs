@@ -1,23 +1,23 @@
-use crate::collections::{Application, Budget, Collaborator, Collection, User, Workspace};
+use crate::collections::{Application, Budget, Collaborator, Collection, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteCollection<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
     close = budget,
-    constraint = collection.quantity_of_attributes == 0 @ ErrorCode::CantDeleteCollectionWithAttributes
+    constraint = collection.quantity_of_attributes == 0 @ ErrorCode::CantDeleteCollectionWithAttributes,
+    constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
   )]
   pub collection: Account<'info, Collection>,
   #[account(
     mut,
-    constraint = collection.application == application.key() @ ErrorCode::ApplicationDoesntMatchCollection
+    constraint = application.workspace == collection.workspace @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub application: Account<'info, Application>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -29,7 +29,7 @@ pub struct DeleteCollection<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      collection.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -40,7 +40,7 @@ pub struct DeleteCollection<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      collection.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

@@ -1,12 +1,11 @@
-use crate::collections::{
-  Budget, Collaborator, InstructionAccount, InstructionRelation, User, Workspace,
-};
+use crate::collections::{Budget, Collaborator, InstructionAccount, InstructionRelation, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteInstructionRelation<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
     has_one = authority,
@@ -19,12 +18,20 @@ pub struct DeleteInstructionRelation<'info> {
     bump = relation.bump
   )]
   pub relation: Account<'info, InstructionRelation>,
-  #[account(mut)]
+  #[account(
+    mut,
+    constraint = from.workspace == relation.workspace @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = from.application == relation.application @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
+    constraint = from.instruction == relation.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+  )]
   pub from: Box<Account<'info, InstructionAccount>>,
-  #[account(mut)]
+  #[account(
+    mut,
+    constraint = to.workspace == relation.workspace @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = to.application == relation.application @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
+    constraint = to.instruction == relation.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+  )]
   pub to: Box<Account<'info, InstructionAccount>>,
-  pub authority: Signer<'info>,
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -36,7 +43,7 @@ pub struct DeleteInstructionRelation<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      relation.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -47,7 +54,7 @@ pub struct DeleteInstructionRelation<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      relation.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

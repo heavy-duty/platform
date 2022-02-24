@@ -12,16 +12,10 @@ pub struct CreateApplicationArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateApplicationArguments)]
 pub struct CreateApplication<'info> {
-  #[account(
-    init,
-    payer = authority,
-    space = Application::space()
-  )]
-  pub application: Box<Account<'info, Application>>,
-  #[account(mut)]
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(mut)]
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -49,6 +43,12 @@ pub struct CreateApplication<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Application::space()
+  )]
+  pub application: Box<Account<'info, Application>>,
   pub system_program: Program<'info, System>,
 }
 

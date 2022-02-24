@@ -108,7 +108,6 @@ describe('collection', () => {
       .accounts({
         collection: collection.publicKey,
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
       })
       .rpc();
     // assert
@@ -127,7 +126,6 @@ describe('collection', () => {
         collection: collection.publicKey,
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
-        workspace: workspace.publicKey,
       })
       .rpc();
     // assert
@@ -184,7 +182,6 @@ describe('collection', () => {
           collection: collection.publicKey,
           authority: program.provider.wallet.publicKey,
           application: application.publicKey,
-          workspace: workspace.publicKey,
         })
         .rpc();
     } catch (err) {
@@ -226,7 +223,6 @@ describe('collection', () => {
         .deleteCollection()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           application: application.publicKey,
           collection: newCollection.publicKey,
         })
@@ -235,7 +231,7 @@ describe('collection', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6021);
+    assert.equal(error?.code, 6035);
   });
 
   it('should fail when workspace has insufficient funds', async () => {

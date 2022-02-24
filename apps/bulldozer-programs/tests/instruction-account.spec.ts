@@ -199,7 +199,6 @@ describe('instruction account', () => {
         .updateInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           account: instructionAccount.publicKey,
         })
         .rpc();
@@ -245,7 +244,6 @@ describe('instruction account', () => {
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           account: instructionAccount.publicKey,
           instruction: instruction.publicKey,
         })
@@ -341,7 +339,6 @@ describe('instruction account', () => {
           .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
             account: instructionAccount.publicKey,
           })
           .remainingAccounts([
@@ -545,7 +542,6 @@ describe('instruction account', () => {
           .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
             account: instructionAccount.publicKey,
           })
           .rpc();
@@ -670,7 +666,6 @@ describe('instruction account', () => {
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           account: instructionAccount1.publicKey,
           instruction: instruction.publicKey,
         })
@@ -831,7 +826,7 @@ describe('instruction account', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6019);
+    assert.equal(error?.code, 6044);
   });
 
   it('should fail when workspace has insufficient funds', async () => {
@@ -901,8 +896,8 @@ describe('instruction account', () => {
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
           account: newAccount.publicKey,
         })
         .signers([newAccount])

@@ -155,7 +155,6 @@ describe('instruction argument', () => {
       .updateInstructionArgument(argumentsData)
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         argument: instructionArgument.publicKey,
       })
       .rpc();
@@ -181,7 +180,6 @@ describe('instruction argument', () => {
       .deleteInstructionArgument()
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         argument: instructionArgument.publicKey,
         instruction: instruction.publicKey,
       })
@@ -301,7 +299,6 @@ describe('instruction argument', () => {
         .deleteInstructionArgument()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           instruction: instruction.publicKey,
           argument: newArgument.publicKey,
         })
@@ -310,7 +307,7 @@ describe('instruction argument', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6017);
+    assert.equal(error?.code, 6041);
   });
 
   it('should fail when workspace has insufficient funds', async () => {

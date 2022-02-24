@@ -9,28 +9,30 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct CreateInstructionRelation<'info> {
-  #[account(
-    init,
-    payer = authority,
-    space = InstructionRelation::space(),
-    seeds = [
-      b"instruction_relation".as_ref(),
-      from.key().as_ref(),
-      to.key().as_ref()
-    ],
-    bump,
-    constraint = from.key().as_ref() != to.key().as_ref()
-  )]
-  pub relation: Box<Account<'info, InstructionRelation>>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub application: Box<Account<'info, Application>>,
-  pub instruction: Box<Account<'info, Instruction>>,
-  #[account(mut)]
-  pub from: Box<Account<'info, InstructionAccount>>,
-  #[account(mut)]
-  pub to: Box<Account<'info, InstructionAccount>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    mut,
+    constraint = from.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+    constraint = from.application == application.key() @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
+    constraint = from.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace
+  )]
+  pub from: Box<Account<'info, InstructionAccount>>,
+  #[account(
+    mut,
+    constraint = to.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+    constraint = to.application == application.key() @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
+    constraint = to.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace
+  )]
+  pub to: Box<Account<'info, InstructionAccount>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,6 +60,19 @@ pub struct CreateInstructionRelation<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionRelation::space(),
+    seeds = [
+      b"instruction_relation".as_ref(),
+      from.key().as_ref(),
+      to.key().as_ref()
+    ],
+    bump,
+    constraint = from.key().as_ref() != to.key().as_ref()
+  )]
+  pub relation: Box<Account<'info, InstructionRelation>>,
   pub system_program: Program<'info, System>,
 }
 

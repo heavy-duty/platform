@@ -5,19 +5,19 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteApplication<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
     close = budget,
     constraint = application.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
-    constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions
+    constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions,
   )]
   pub application: Account<'info, Application>,
   #[account(
     mut,
-    constraint = application.workspace == workspace.key() @ ErrorCode::WorkspaceDoesntMatchApplication
+    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub workspace: Account<'info, Workspace>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -29,7 +29,7 @@ pub struct DeleteApplication<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      application.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -40,7 +40,7 @@ pub struct DeleteApplication<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      application.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

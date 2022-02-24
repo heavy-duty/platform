@@ -220,7 +220,6 @@ describe('instruction relation', () => {
       .deleteInstructionRelation()
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         from: newFrom.publicKey,
         to: newTo.publicKey,
       })

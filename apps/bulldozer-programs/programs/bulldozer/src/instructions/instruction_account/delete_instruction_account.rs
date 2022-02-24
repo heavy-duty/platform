@@ -1,23 +1,23 @@
-use crate::collections::{Budget, Collaborator, Instruction, InstructionAccount, User, Workspace};
+use crate::collections::{Budget, Collaborator, Instruction, InstructionAccount, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteInstructionAccount<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
     close = budget,
-    constraint = account.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations
+    constraint = account.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
+    constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub account: Account<'info, InstructionAccount>,
   #[account(
     mut,
-    constraint = instruction.key() == account.instruction @ ErrorCode::InstructionDoesntMatchAccount
+    constraint = instruction.workspace == account.workspace @ ErrorCode::InstructionDoesNotBelongToWorkspace
   )]
   pub instruction: Account<'info, Instruction>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -29,7 +29,7 @@ pub struct DeleteInstructionAccount<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      account.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -40,7 +40,7 @@ pub struct DeleteInstructionAccount<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      account.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

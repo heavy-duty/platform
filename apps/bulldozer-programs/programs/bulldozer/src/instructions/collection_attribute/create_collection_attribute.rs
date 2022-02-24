@@ -19,18 +19,17 @@ pub struct CreateCollectionAttributeArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateCollectionAttributeArguments)]
 pub struct CreateCollectionAttribute<'info> {
-  #[account(
-    init,
-    payer = authority,
-    space = CollectionAttribute::space(),
-  )]
-  pub attribute: Box<Account<'info, CollectionAttribute>>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub application: Box<Account<'info, Application>>,
-  #[account(mut)]
-  pub collection: Box<Account<'info, Collection>>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    mut,
+    constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
+    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace
+  )]
+  pub collection: Box<Account<'info, Collection>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,6 +57,12 @@ pub struct CreateCollectionAttribute<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = CollectionAttribute::space(),
+  )]
+  pub attribute: Box<Account<'info, CollectionAttribute>>,
   pub system_program: Program<'info, System>,
 }
 

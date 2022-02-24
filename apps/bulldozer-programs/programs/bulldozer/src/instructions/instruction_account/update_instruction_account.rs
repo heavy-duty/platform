@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, Collection, InstructionAccount, User, Workspace};
+use crate::collections::{Collaborator, Collection, InstructionAccount, User};
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use crate::utils::{get_account_key, get_remaining_account};
@@ -15,10 +15,9 @@ pub struct UpdateInstructionAccountArguments {
 #[derive(Accounts)]
 #[instruction(arguments: UpdateInstructionAccountArguments)]
 pub struct UpdateInstructionAccount<'info> {
-  #[account(mut, has_one = authority)]
-  pub account: Box<Account<'info, InstructionAccount>>,
-  pub workspace: Box<Account<'info, Workspace>>,
   pub authority: Signer<'info>,
+  #[account(mut)]
+  pub account: Box<Account<'info, InstructionAccount>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -30,7 +29,7 @@ pub struct UpdateInstructionAccount<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      account.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,

@@ -95,7 +95,6 @@ describe('application', () => {
     await program.methods
       .updateApplication({ name: applicationName })
       .accounts({
-        workspace: workspace.publicKey,
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
       })
@@ -264,7 +263,7 @@ describe('application', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6026);
+    assert.equal(error?.code, 6033);
   });
 
   it('should fail when workspace has insufficient funds', async () => {

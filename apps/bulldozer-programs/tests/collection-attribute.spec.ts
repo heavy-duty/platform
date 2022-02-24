@@ -308,7 +308,7 @@ describe('collection attribute', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6014);
+    assert.equal(error?.code, 6037);
   });
 
   it('should fail when workspace has insufficient funds', async () => {

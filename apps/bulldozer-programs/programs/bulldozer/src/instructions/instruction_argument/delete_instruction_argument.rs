@@ -1,22 +1,22 @@
-use crate::collections::{Budget, Collaborator, Instruction, InstructionArgument, User, Workspace};
+use crate::collections::{Budget, Collaborator, Instruction, InstructionArgument, User};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeleteInstructionArgument<'info> {
+  pub authority: Signer<'info>,
   #[account(
     mut,
-    close = budget
+    close = budget,
+    constraint = argument.instruction == instruction.key() @ ErrorCode::InstructionArgumentDoesNotBelongToInstruction,
   )]
   pub argument: Account<'info, InstructionArgument>,
   #[account(
     mut,
-    constraint = instruction.key() == argument.instruction @ ErrorCode::InstructionDoesntMatchArgument
+    constraint = instruction.workspace == argument.workspace @ ErrorCode::InstructionDoesNotBelongToWorkspace
   )]
   pub instruction: Account<'info, Instruction>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -28,7 +28,7 @@ pub struct DeleteInstructionArgument<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      argument.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -39,7 +39,7 @@ pub struct DeleteInstructionArgument<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      workspace.key().as_ref(),
+      argument.workspace.as_ref(),
     ],
     bump = budget.bump,
   )]

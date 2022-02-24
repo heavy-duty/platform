@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, InstructionArgument, User, Workspace};
+use crate::collections::{Collaborator, InstructionArgument, User};
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -16,10 +16,9 @@ pub struct UpdateInstructionArgumentArguments {
 #[derive(Accounts)]
 #[instruction(arguments: UpdateInstructionArgumentArguments)]
 pub struct UpdateInstructionArgument<'info> {
+  pub authority: Signer<'info>,
   #[account(mut)]
   pub argument: Box<Account<'info, InstructionArgument>>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -31,7 +30,7 @@ pub struct UpdateInstructionArgument<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      workspace.key().as_ref(),
+      argument.workspace.as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
