@@ -35,9 +35,12 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         ></bd-budget-details>
 
         <bd-collaborators-list
+          [showRejected]="(showRejectedCollaborators$ | ngrxPush) ?? false"
+          [mode]="(collaboratorListMode$ | ngrxPush) ?? 'ready'"
           [currentUser]="(user$ | ngrxPush) ?? null"
           [currentCollaborator]="(collaborator$ | ngrxPush) ?? null"
-          [collaborators]="(collaborators$ | ngrxPush) ?? null"
+          [readyCollaborators]="(readyCollaborators$ | ngrxPush) ?? null"
+          [pendingCollaborators]="(pendingCollaborators$ | ngrxPush) ?? null"
           (approveCollaboratorStatusRequest)="
             onApproveCollaboratorStatusRequest($event)
           "
@@ -52,6 +55,8 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           (retryCollaboratorStatusRequest)="
             onRetryCollaboratorStatusRequest($event)
           "
+          (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
+          (toggleShowRejected)="onToggleShowRejectedCollaborators()"
         ></bd-collaborators-list>
       </main>
     </div>
@@ -68,13 +73,13 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 })
 export class ViewWorkspaceComponent {
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly collaborators$ = this._collaboratorsStore.collaborators$.pipe(
-    map((collaborators) =>
-      collaborators.sort(
-        (a, b) => a.createdAt.toNumber() - b.createdAt.toNumber()
-      )
-    )
-  );
+  readonly readyCollaborators$ = this._viewWorkspaceStore.readyCollaborators$;
+  readonly pendingCollaborators$ =
+    this._viewWorkspaceStore.pendingCollaborators$;
+  readonly collaboratorListMode$ =
+    this._viewWorkspaceStore.collaboratorListMode$;
+  readonly showRejectedCollaborators$ =
+    this._viewWorkspaceStore.showRejectedCollaborators$;
   readonly budget$ = this._budgetStore.budget$;
   readonly user$ = this._userStore.user$;
   readonly collaborator$ = this._collaboratorStore.collaborator$;
@@ -148,5 +153,13 @@ export class ViewWorkspaceComponent {
       collaboratorId,
       status: 2,
     });
+  }
+
+  onSetCollaboratorListMode(mode: 'ready' | 'pending') {
+    this._viewWorkspaceStore.setCollaboratorListMode(mode);
+  }
+
+  onToggleShowRejectedCollaborators() {
+    this._viewWorkspaceStore.toggleShowRejectedCollaborators();
   }
 }

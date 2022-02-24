@@ -7,7 +7,6 @@ export const updateCollaborator = (
   endpoint: string,
   params: UpdateCollaboratorParams
 ): Observable<TransactionInstruction> => {
-  console.log(params);
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
