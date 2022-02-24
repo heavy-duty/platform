@@ -14,17 +14,30 @@ import {
   updateCollection,
   UpdateCollectionParams,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+} from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  Observable,
+  throwError,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionApiService {
-  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
+  constructor(
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+  ) {}
 
   private handleError(error: unknown) {
     return throwError(() =>
@@ -65,10 +78,19 @@ export class CollectionApiService {
 
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
-        createCollection({
-          ...params,
-          collectionId: collectionKeypair.publicKey.toBase58(),
-        })
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return createCollection(apiEndpoint, {
+              ...params,
+              collectionId: collectionKeypair.publicKey.toBase58(),
+            });
+          })
+        )
       ),
       partiallySignTransaction(collectionKeypair),
       concatMap((transaction) =>
@@ -82,7 +104,18 @@ export class CollectionApiService {
   // update collection
   update(params: UpdateCollectionParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(updateCollection(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateCollection(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -94,7 +127,18 @@ export class CollectionApiService {
   // delete collection
   delete(params: DeleteCollectionParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(deleteCollection(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return deleteCollection(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)

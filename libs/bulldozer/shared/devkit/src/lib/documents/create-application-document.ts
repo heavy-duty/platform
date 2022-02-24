@@ -1,12 +1,12 @@
 import { AccountInfo } from '@solana/web3.js';
-import { bulldozerProgram } from '../programs';
 import { Application, APPLICATION_ACCOUNT_NAME, Document } from '../utils';
+import { borshCoder } from './internal';
 
 export const createApplicationDocument = (
   publicKey: string,
   account: AccountInfo<Buffer>
 ): Document<Application> => {
-  const decodedAccount = bulldozerProgram.coder.accounts.decode(
+  const decodedAccount = borshCoder.decode(
     APPLICATION_ACCOUNT_NAME,
     account.data
   );

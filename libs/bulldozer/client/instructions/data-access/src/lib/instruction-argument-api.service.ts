@@ -14,17 +14,30 @@ import {
   updateInstructionArgument,
   UpdateInstructionArgumentParams,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+} from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  Observable,
+  throwError,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionArgumentApiService {
-  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
+  constructor(
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+  ) {}
 
   private handleError(error: unknown) {
     return throwError(() =>
@@ -73,11 +86,20 @@ export class InstructionArgumentApiService {
 
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
-        createInstructionArgument({
-          ...params,
-          instructionArgumentId:
-            instructionArgumentKeypair.publicKey.toBase58(),
-        })
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return createInstructionArgument(apiEndpoint, {
+              ...params,
+              instructionArgumentId:
+                instructionArgumentKeypair.publicKey.toBase58(),
+            });
+          })
+        )
       ),
       partiallySignTransaction(instructionArgumentKeypair),
       concatMap((transaction) =>
@@ -91,7 +113,18 @@ export class InstructionArgumentApiService {
   // update instruction argument
   update(params: UpdateInstructionArgumentParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(updateInstructionArgument(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateInstructionArgument(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -103,7 +136,18 @@ export class InstructionArgumentApiService {
   // delete instruction argument
   delete(params: DeleteInstructionArgumentParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(deleteInstructionArgument(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return deleteInstructionArgument(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)

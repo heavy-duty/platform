@@ -1,15 +1,12 @@
 import { AccountInfo } from '@solana/web3.js';
-import { bulldozerProgram } from '../programs';
 import { Document, User, USER_ACCOUNT_NAME } from '../utils';
+import { borshCoder } from './internal';
 
 export const createUserDocument = (
   publicKey: string,
   account: AccountInfo<Buffer>
 ): Document<User> => {
-  const decodedAccount = bulldozerProgram.coder.accounts.decode(
-    USER_ACCOUNT_NAME,
-    account.data
-  );
+  const decodedAccount = borshCoder.decode(USER_ACCOUNT_NAME, account.data);
 
   return {
     id: publicKey,

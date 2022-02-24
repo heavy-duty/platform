@@ -1,15 +1,16 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
-import { bulldozerProgram } from '../../programs';
+import { getBulldozerProgram } from '../../programs';
 import { CreateUserParams } from './types';
 
 export const createUser = (
+  endpoint: string,
   params: CreateUserParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
-      bulldozerProgram.methods
-        .createUser()
+      getBulldozerProgram(endpoint)
+        .methods.createUser()
         .accounts({
           authority: new PublicKey(params.authority),
         })

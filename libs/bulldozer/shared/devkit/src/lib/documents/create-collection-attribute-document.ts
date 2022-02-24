@@ -1,17 +1,16 @@
 import { AccountInfo } from '@solana/web3.js';
-import { bulldozerProgram } from '../programs';
 import {
   CollectionAttribute,
   COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
   Document,
 } from '../utils';
-import { decodeAttributeEnum } from './internal';
+import { borshCoder, decodeAttributeEnum } from './internal';
 
 export const createCollectionAttributeDocument = (
   publicKey: string,
   account: AccountInfo<Buffer>
 ): Document<CollectionAttribute> => {
-  const decodedAccount = bulldozerProgram.coder.accounts.decode(
+  const decodedAccount = borshCoder.decode(
     COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
     account.data
   );

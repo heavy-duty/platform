@@ -1,15 +1,16 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
-import { bulldozerProgram } from '../../programs';
+import { getBulldozerProgram } from '../../programs';
 import { UpdateCollaboratorParams } from './types';
 
 export const updateCollaborator = (
+  endpoint: string,
   params: UpdateCollaboratorParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
-      bulldozerProgram.methods
-        .updateCollaborator({ status: params.status })
+      getBulldozerProgram(endpoint)
+        .methods.updateCollaborator({ status: params.status })
         .accounts({
           authority: new PublicKey(params.authority),
           user: new PublicKey(params.userId),
