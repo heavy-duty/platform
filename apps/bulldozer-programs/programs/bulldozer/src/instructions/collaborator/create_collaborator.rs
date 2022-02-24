@@ -4,6 +4,8 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct CreateCollaborator<'info> {
+  #[account(mut)]
+  pub authority: Signer<'info>,
   #[account(mut, has_one = authority)]
   pub workspace: Box<Account<'info, Workspace>>,
   pub user: Box<Account<'info, User>>,
@@ -19,8 +21,6 @@ pub struct CreateCollaborator<'info> {
     bump
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
-  #[account(mut)]
-  pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
 }
 
@@ -30,7 +30,7 @@ pub fn handle(ctx: Context<CreateCollaborator>) -> ProgramResult {
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.user.key(),
-    CollaboratorStatus::Approved {},
+    CollaboratorStatus::Approved { id: 1 },
     false,
     *ctx.bumps.get("collaborator").unwrap(),
   );

@@ -63,7 +63,7 @@ pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.user.key(),
-    CollaboratorStatus::Approved {},
+    CollaboratorStatus::Approved { id: 1 },
     true,
     *ctx.bumps.get("collaborator").unwrap(),
   );

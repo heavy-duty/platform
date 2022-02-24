@@ -30,7 +30,7 @@ pub struct UpdateCollection<'info> {
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
-    constraint = collaborator.status == CollaboratorStatus::Approved {} @ ErrorCode::CollaboratorStatusNotApproved,
+    constraint = collaborator.status == CollaboratorStatus::Approved { id: 1 } @ ErrorCode::CollaboratorStatusNotApproved,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
 }

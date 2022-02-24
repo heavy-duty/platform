@@ -63,4 +63,8 @@ pub enum ErrorCode {
   InvalidCollaboratorStatus,
   #[msg("Collaborator status has not been approved")]
   CollaboratorStatusNotApproved,
+  #[msg("Only collaborator status request author can retry")]
+  OnlyCollaboratorStatusRequestAuthorCanRetry,
+  #[msg("Only rejected collaborator status requests can be retried")]
+  OnlyRejectedCollaboratorStatusRequestsCanBeRetried,
 }

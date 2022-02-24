@@ -59,6 +59,12 @@ pub mod bulldozer {
     instructions::request_collaborator_status::handle(ctx)
   }
 
+  pub fn retry_collaborator_status_request(
+    ctx: Context<RetryCollaboratorStatusRequest>,
+  ) -> ProgramResult {
+    instructions::retry_collaborator_status_request::handle(ctx)
+  }
+
   #[access_control(instructions::create_application::validate(&ctx))]
   pub fn create_application(
     ctx: Context<CreateApplication>,

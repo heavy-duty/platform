@@ -105,7 +105,6 @@ describe('collaborator', () => {
       .requestCollaboratorStatus()
       .accounts({
         authority: newUser.publicKey,
-        user: newUserPublicKey,
         workspace: workspace.publicKey,
       })
       .signers([newUser])
@@ -131,8 +130,8 @@ describe('collaborator', () => {
       .updateCollaborator({ status: 1 })
       .accounts({
         authority: program.provider.wallet.publicKey,
-        user: newUserPublicKey,
         workspace: workspace.publicKey,
+        collaborator: newCollaboratorPublicKey,
       })
       .rpc();
     // assert
@@ -149,16 +148,60 @@ describe('collaborator', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
-        collaborator: collaboratorPublicKey,
+        collaborator: newCollaboratorPublicKey,
       })
       .rpc();
     // assert
     const collaboratorAccount =
-      await program.account.collaborator.fetchNullable(collaboratorPublicKey);
+      await program.account.collaborator.fetchNullable(
+        newCollaboratorPublicKey
+      );
     const workspaceAccount = await program.account.workspace.fetch(
       workspace.publicKey
     );
     assert.equal(collaboratorAccount, null);
     assert.equal(workspaceAccount.quantityOfCollaborators, 1);
+  });
+
+  it('should reject collaborator status request', async () => {
+    // act
+    await program.methods
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+    await program.methods
+      .updateCollaborator({ status: 2 })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        collaborator: newCollaboratorPublicKey,
+      })
+      .rpc();
+    // assert
+    const collaboratorAccount = await program.account.collaborator.fetch(
+      newCollaboratorPublicKey
+    );
+    assert.ok('rejected' in collaboratorAccount.status);
+  });
+
+  it('should retry collaborator status request', async () => {
+    // act
+    await program.methods
+      .retryCollaboratorStatusRequest()
+      .accounts({
+        authority: newUser.publicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+    // assert
+    const collaboratorAccount = await program.account.collaborator.fetch(
+      newCollaboratorPublicKey
+    );
+    assert.ok('pending' in collaboratorAccount.status);
   });
 });

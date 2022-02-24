@@ -3,17 +3,17 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone, Debug, PartialEq)]
 pub enum CollaboratorStatus {
-  Pending,
-  Approved,
-  Rejected,
+  Pending { id: u8 },
+  Approved { id: u8 },
+  Rejected { id: u8 },
 }
 
 impl CollaboratorStatus {
   pub fn create(status: u8) -> std::result::Result<CollaboratorStatus, ProgramError> {
     match status {
-      0 => Ok(CollaboratorStatus::Pending {}),
-      1 => Ok(CollaboratorStatus::Approved {}),
-      2 => Ok(CollaboratorStatus::Rejected {}),
+      0 => Ok(CollaboratorStatus::Pending { id: 0 }),
+      1 => Ok(CollaboratorStatus::Approved { id: 1 }),
+      2 => Ok(CollaboratorStatus::Rejected { id: 2 }),
       _ => Err(ErrorCode::InvalidCollaboratorStatus.into()),
     }
   }
