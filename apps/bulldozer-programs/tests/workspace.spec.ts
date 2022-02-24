@@ -16,7 +16,9 @@ describe('workspace', () => {
     Provider.env()
   );
   const workspace = Keypair.generate();
+  const newUser = Keypair.generate();
   let userPublicKey: PublicKey;
+  let newUserPublicKey: PublicKey;
   let collaboratorPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
 
@@ -26,6 +28,10 @@ describe('workspace', () => {
         Buffer.from('user', 'utf8'),
         program.provider.wallet.publicKey.toBuffer(),
       ],
+      program.programId
+    );
+    [newUserPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
       program.programId
     );
     [collaboratorPublicKey] = await PublicKey.findProgramAddress(
@@ -48,6 +54,21 @@ describe('workspace', () => {
         })
         .rpc();
     } catch (error) {}
+
+    await program.methods
+      .createUser()
+      .accounts({
+        authority: newUser.publicKey,
+      })
+      .signers([newUser])
+      .preInstructions([
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newUser.publicKey,
+          lamports: LAMPORTS_PER_SOL,
+        }),
+      ])
+      .rpc();
   });
 
   it('should create account', async () => {
@@ -97,14 +118,6 @@ describe('workspace', () => {
 
   it('should delete account', async () => {
     // act
-    await program.methods
-      .deleteCollaborator()
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        collaborator: collaboratorPublicKey,
-        workspace: workspace.publicKey,
-      })
-      .rpc();
     await program.methods
       .deleteWorkspace()
       .accounts({
@@ -180,19 +193,27 @@ describe('workspace', () => {
     const newWorkspace = Keypair.generate();
     let error: ProgramError | null = null;
     // act
+    await program.methods
+      .createWorkspace({
+        name: newWorkspaceName,
+      })
+      .accounts({
+        workspace: newWorkspace.publicKey,
+        authority: program.provider.wallet.publicKey,
+      })
+      .signers([newWorkspace])
+      .rpc();
+
     try {
       await program.methods
-        .createWorkspace({
-          name: newWorkspaceName,
-        })
+        .createCollaborator()
         .accounts({
-          // This is temporal since anchor doesn't populate pda from a defined type argument
           workspace: newWorkspace.publicKey,
+          user: newUserPublicKey,
           authority: program.provider.wallet.publicKey,
-          user: userPublicKey,
         })
-        .signers([newWorkspace])
         .rpc();
+
       await program.methods
         .deleteWorkspace()
         .accounts({
@@ -201,6 +222,7 @@ describe('workspace', () => {
         })
         .rpc();
     } catch (err) {
+      console.log({ err });
       error = err as ProgramError;
     }
     // assert
@@ -236,7 +258,7 @@ describe('workspace', () => {
     assert.equal(error?.code, 3012);
   });
 
-  it('should fail when user is not an approved collaborator', async () => {
+  it('should fail when user is not an admin collaborator', async () => {
     // arrange
     const newWorkspace = Keypair.generate();
     const newWorkspaceName = 'sample';
@@ -293,6 +315,6 @@ describe('workspace', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6029);
+    assert.equal(error?.code, 6045);
   });
 });

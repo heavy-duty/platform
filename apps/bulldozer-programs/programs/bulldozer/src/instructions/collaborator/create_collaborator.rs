@@ -1,14 +1,33 @@
 use crate::collections::{Collaborator, User, Workspace};
 use crate::enums::CollaboratorStatus;
+use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct CreateCollaborator<'info> {
   #[account(mut)]
-  pub authority: Signer<'info>,
-  #[account(mut, has_one = authority)]
   pub workspace: Box<Account<'info, Workspace>>,
   pub user: Box<Account<'info, User>>,
+  #[account(mut)]
+  pub authority: Signer<'info>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = authority_user.bump
+  )]
+  pub authority_user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      workspace.key().as_ref(),
+      authority_user.key().as_ref(),
+    ],
+    bump = authority_collaborator.bump,
+    constraint = authority_collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
+  )]
+  pub authority_collaborator: Box<Account<'info, Collaborator>>,
   #[account(
     init,
     payer = authority,

@@ -1,5 +1,4 @@
 use crate::collections::{Collaborator, User, Workspace};
-use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -13,6 +12,7 @@ pub struct UpdateWorkspaceArguments {
 pub struct UpdateWorkspace<'info> {
   #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
+  pub authority: Signer<'info>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -28,10 +28,9 @@ pub struct UpdateWorkspace<'info> {
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
-    constraint = collaborator.status == CollaboratorStatus::Approved { id: 1 } @ ErrorCode::CollaboratorStatusNotApproved,
+    constraint = collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
-  pub authority: Signer<'info>,
 }
 
 pub fn handle(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {

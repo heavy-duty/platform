@@ -130,7 +130,6 @@ describe('collaborator', () => {
       .updateCollaborator({ status: 1 })
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         collaborator: newCollaboratorPublicKey,
       })
       .rpc();
@@ -177,7 +176,6 @@ describe('collaborator', () => {
       .updateCollaborator({ status: 2 })
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         collaborator: newCollaboratorPublicKey,
       })
       .rpc();
@@ -194,7 +192,7 @@ describe('collaborator', () => {
       .retryCollaboratorStatusRequest()
       .accounts({
         authority: newUser.publicKey,
-        workspace: workspace.publicKey,
+        collaborator: newCollaboratorPublicKey,
       })
       .signers([newUser])
       .rpc();

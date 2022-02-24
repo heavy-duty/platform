@@ -1,5 +1,6 @@
-use crate::collections::{Collaborator, Workspace};
+use crate::collections::{Collaborator, User};
 use crate::enums::CollaboratorStatus;
+use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -10,11 +11,27 @@ pub struct UpdateCollaboratorArguments {
 #[derive(Accounts)]
 #[instruction(arguments: UpdateCollaboratorArguments)]
 pub struct UpdateCollaborator<'info> {
-  pub authority: Signer<'info>,
-  #[account(has_one = authority)]
-  pub workspace: Box<Account<'info, Workspace>>,
-  #[account(mut, has_one = workspace)]
+  #[account(mut)]
   pub collaborator: Box<Account<'info, Collaborator>>,
+  pub authority: Signer<'info>,
+  #[account(
+    seeds = [
+      b"user".as_ref(),
+      authority.key().as_ref(),
+    ],
+    bump = user.bump
+  )]
+  pub user: Box<Account<'info, User>>,
+  #[account(
+    seeds = [
+      b"collaborator".as_ref(),
+      collaborator.workspace.as_ref(),
+      user.key().as_ref(),
+    ],
+    bump = authority_collaborator.bump,
+    constraint = authority_collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
+  )]
+  pub authority_collaborator: Box<Account<'info, Collaborator>>,
 }
 
 pub fn handle(
