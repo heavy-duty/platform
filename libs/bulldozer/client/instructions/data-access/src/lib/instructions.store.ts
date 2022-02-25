@@ -11,11 +11,11 @@ import {
   concatMap,
   EMPTY,
   filter,
-  first,
   mergeMap,
   of,
   pipe,
   switchMap,
+  take,
   takeUntil,
   takeWhile,
   withLatestFrom,
@@ -112,7 +112,7 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
         takeUntil(
           this.loading$.pipe(
             filter((loading) => loading),
-            first()
+            take(1)
           )
         ),
         takeWhile((instruction) => instruction !== null)

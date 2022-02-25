@@ -11,11 +11,11 @@ import {
   concatMap,
   EMPTY,
   filter,
-  first,
   mergeMap,
   of,
   pipe,
   switchMap,
+  take,
   takeUntil,
   takeWhile,
   withLatestFrom,
@@ -110,7 +110,7 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
         takeUntil(
           this.loading$.pipe(
             filter((loading) => loading),
-            first()
+            take(1)
           )
         ),
         takeWhile((collection) => collection !== null)

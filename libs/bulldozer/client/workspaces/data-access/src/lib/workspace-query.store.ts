@@ -9,9 +9,9 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   EMPTY,
   filter,
-  first,
   mergeMap,
   switchMap,
+  take,
   takeUntil,
   takeWhile,
 } from 'rxjs';
@@ -102,7 +102,7 @@ export class WorkspaceQueryStore extends ComponentStore<ViewModel> {
         takeUntil(
           this.loading$.pipe(
             filter((loading) => loading),
-            first()
+            take(1)
           )
         ),
         takeWhile((workspace) => workspace !== null)
