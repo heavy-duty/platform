@@ -7,29 +7,40 @@ import {
   deleteWorkspace,
   DeleteWorkspaceParams,
   Document,
-  getBulldozerError,
+  parseBulldozerError,
   updateWorkspace,
   UpdateWorkspaceParams,
   Workspace,
   WorkspaceFilters,
   workspaceQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+} from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  Observable,
+  throwError,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class WorkspaceApiService {
-  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
+  constructor(
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+  ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get workspaces
@@ -59,16 +70,45 @@ export class WorkspaceApiService {
       );
   }
 
+  // get workspaces
+  findByIds(
+    workspaceIds: string[]
+  ): Observable<(Document<Workspace> | null)[]> {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(workspaceIds)
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createWorkspaceDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
+        )
+      );
+  }
+
   // create workspace
   create(params: Omit<CreateWorkspaceParams, 'workspaceId'>) {
     const workspaceKeypair = Keypair.generate();
 
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
-        createWorkspace({
-          ...params,
-          workspaceId: workspaceKeypair.publicKey.toBase58(),
-        })
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return createWorkspace(apiEndpoint, {
+              ...params,
+              workspaceId: workspaceKeypair.publicKey.toBase58(),
+            });
+          })
+        )
       ),
       partiallySignTransaction(workspaceKeypair),
       concatMap((transaction) =>
@@ -82,7 +122,18 @@ export class WorkspaceApiService {
   // update workspace
   update(params: UpdateWorkspaceParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(updateWorkspace(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateWorkspace(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -94,7 +145,18 @@ export class WorkspaceApiService {
   // delete workspace
   delete(params: DeleteWorkspaceParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(deleteWorkspace(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return deleteWorkspace(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)

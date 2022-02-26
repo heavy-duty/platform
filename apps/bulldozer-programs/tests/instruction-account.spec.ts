@@ -1,5 +1,10 @@
 import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
-import { Keypair } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
 import {
@@ -18,14 +23,36 @@ describe('instruction account', () => {
   const instructionName = 'create_document';
   const collection = Keypair.generate();
   const collectionName = 'things';
-  const application = Keypair.generate();
-  const applicationName = 'my-app';
-  const workspace = Keypair.generate();
-  const workspaceName = 'my-workspace';
   const anotherCollection = Keypair.generate();
   const anotherCollectionName = 'another-things';
+  const application = Keypair.generate();
+  const workspace = Keypair.generate();
+  const applicationName = 'my-app';
+  const workspaceName = 'my-workspace';
+  let userPublicKey: PublicKey;
+  let budgetPublicKey: PublicKey;
 
   before(async () => {
+    [userPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('user', 'utf8'),
+        program.provider.wallet.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [budgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    try {
+      await program.methods
+        .createUser()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+        })
+        .rpc();
+    } catch (error) {}
+
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
@@ -33,6 +60,13 @@ describe('instruction account', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: budgetPublicKey,
+          lamports: LAMPORTS_PER_SOL,
+        })
+      )
       .rpc();
     await program.methods
       .createApplication({ name: applicationName })
@@ -42,6 +76,16 @@ describe('instruction account', () => {
         application: application.publicKey,
       })
       .signers([application])
+      .rpc();
+    await program.methods
+      .createInstruction({ name: instructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+      })
+      .signers([instruction])
       .rpc();
     await program.methods
       .createCollection({ name: collectionName })
@@ -63,16 +107,6 @@ describe('instruction account', () => {
       })
       .signers([anotherCollection])
       .rpc();
-    await program.methods
-      .createInstruction({ name: instructionName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-      })
-      .signers([instruction])
-      .rpc();
   });
 
   describe('document', () => {
@@ -81,7 +115,7 @@ describe('instruction account', () => {
     it('should fail when creating without collection', async () => {
       // arrange
       const instructionAccount = Keypair.generate();
-      const argumentsData = {
+      const accountsData = {
         name: '12345678901234567890123456789012',
         kind: 0,
         modifier: null,
@@ -91,7 +125,7 @@ describe('instruction account', () => {
       // act
       try {
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -110,7 +144,7 @@ describe('instruction account', () => {
 
     it('should create', async () => {
       // arrange
-      const argumentsData = {
+      const accountsData = {
         name: 'data',
         kind: 0,
         modifier: null,
@@ -118,7 +152,7 @@ describe('instruction account', () => {
       };
       // act
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -144,9 +178,9 @@ describe('instruction account', () => {
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
-      assert.equal(account.name, argumentsData.name);
+      assert.equal(account.name, accountsData.name);
       assert.ok('document' in account.kind);
-      assert.equal(decodedKind.id, argumentsData.kind);
+      assert.equal(decodedKind.id, accountsData.kind);
       assert.equal(decodedKind.collection, collection.publicKey.toBase58());
       assert.equal(account.modifier, null);
       assert.ok(account.createdAt.eq(account.updatedAt));
@@ -154,7 +188,7 @@ describe('instruction account', () => {
 
     it('should remove collection when changing the kind', async () => {
       // arrange
-      const argumentsData = {
+      const accountsData = {
         name: 'data',
         kind: 1,
         modifier: null,
@@ -162,7 +196,7 @@ describe('instruction account', () => {
       };
       // act
       await program.methods
-        .updateInstructionAccount(argumentsData)
+        .updateInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           account: instructionAccount.publicKey,
@@ -174,14 +208,14 @@ describe('instruction account', () => {
       );
       const decodedKind = decodeAccountKind(account.kind as any);
       assert.ok('signer' in account.kind);
-      assert.equal(decodedKind.id, argumentsData.kind);
+      assert.equal(decodedKind.id, accountsData.kind);
       assert.ok(account.createdAt.lte(account.updatedAt));
     });
 
     it('should delete', async () => {
       // arrange
       const instructionAccount = Keypair.generate();
-      const argumentsData = {
+      const accountsData = {
         name: 'data',
         kind: 0,
         modifier: null,
@@ -189,7 +223,7 @@ describe('instruction account', () => {
       };
       // act
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -226,7 +260,7 @@ describe('instruction account', () => {
       const instructionPayerAccount = Keypair.generate();
 
       before(async () => {
-        const argumentsData = {
+        const accountsData = {
           name: 'payer',
           kind: 1,
           modifier: 1,
@@ -234,7 +268,7 @@ describe('instruction account', () => {
         };
 
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -248,7 +282,7 @@ describe('instruction account', () => {
 
       it('should create', async () => {
         // arrange
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 0,
           modifier: 0,
@@ -256,7 +290,7 @@ describe('instruction account', () => {
         };
         // act
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -283,7 +317,7 @@ describe('instruction account', () => {
           instructionAccount.publicKey
         );
         const decodedModifier = decodeAccountModifier(account.modifier as any);
-        assert.equal(decodedModifier.id, argumentsData.modifier);
+        assert.equal(decodedModifier.id, accountsData.modifier);
         assert.equal(decodedModifier.name, 'init');
         assert.equal(
           decodedModifier.payer,
@@ -294,7 +328,7 @@ describe('instruction account', () => {
 
       it('should remove payer and space when changing the modifier', async () => {
         // arrange
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 0,
           modifier: null,
@@ -302,7 +336,7 @@ describe('instruction account', () => {
         };
         // act
         await program.methods
-          .updateInstructionAccount(argumentsData)
+          .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             account: instructionAccount.publicKey,
@@ -327,7 +361,7 @@ describe('instruction account', () => {
       it('should fail when space is not provided', async () => {
         // arrange
         const instructionAccount = Keypair.generate();
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 0,
           modifier: 0,
@@ -337,7 +371,7 @@ describe('instruction account', () => {
         // act
         try {
           await program.methods
-            .createInstructionAccount(argumentsData)
+            .createInstructionAccount(accountsData)
             .accounts({
               authority: program.provider.wallet.publicKey,
               workspace: workspace.publicKey,
@@ -372,7 +406,7 @@ describe('instruction account', () => {
 
       it('should create', async () => {
         // arrange
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 0,
           modifier: 1,
@@ -380,7 +414,7 @@ describe('instruction account', () => {
         };
         // act
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -407,10 +441,10 @@ describe('instruction account', () => {
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
-        assert.equal(account.name, argumentsData.name);
-        assert.equal(decodedKind.id, argumentsData.kind);
+        assert.equal(account.name, accountsData.name);
+        assert.equal(decodedKind.id, accountsData.kind);
         assert.equal(decodedKind.collection, collection.publicKey.toBase58());
-        assert.equal(decodedModifier.id, argumentsData.modifier);
+        assert.equal(decodedModifier.id, accountsData.modifier);
         assert.equal(decodedModifier.name, 'mut');
         assert.equal(decodedModifier.close, null);
       });
@@ -421,7 +455,7 @@ describe('instruction account', () => {
       const instructionCloseAccount = Keypair.generate();
 
       before(async () => {
-        const argumentsData = {
+        const accountsData = {
           name: 'payer',
           kind: 1,
           modifier: 1,
@@ -429,7 +463,7 @@ describe('instruction account', () => {
         };
 
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -443,7 +477,7 @@ describe('instruction account', () => {
 
       it('should create', async () => {
         // arrange
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 0,
           modifier: 1,
@@ -451,7 +485,7 @@ describe('instruction account', () => {
         };
         // act
         await program.methods
-          .createInstructionAccount(argumentsData)
+          .createInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             workspace: workspace.publicKey,
@@ -483,11 +517,11 @@ describe('instruction account', () => {
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
-        assert.equal(account.name, argumentsData.name);
-        assert.equal(decodedKind.id, argumentsData.kind);
+        assert.equal(account.name, accountsData.name);
+        assert.equal(decodedKind.id, accountsData.kind);
         assert.equal(decodedKind.name, 'document');
         assert.equal(decodedKind.collection, collection.publicKey.toBase58());
-        assert.equal(decodedModifier.id, argumentsData.modifier);
+        assert.equal(decodedModifier.id, accountsData.modifier);
         assert.equal(decodedModifier.name, 'mut');
         assert.equal(
           decodedModifier.close,
@@ -497,7 +531,7 @@ describe('instruction account', () => {
 
       it('should remove close when changing the modifier', async () => {
         // arrange
-        const argumentsData = {
+        const accountsData = {
           name: 'data',
           kind: 1,
           modifier: null,
@@ -505,7 +539,7 @@ describe('instruction account', () => {
         };
         // act
         await program.methods
-          .updateInstructionAccount(argumentsData)
+          .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
             account: instructionAccount.publicKey,
@@ -516,7 +550,7 @@ describe('instruction account', () => {
           instructionAccount.publicKey
         );
         const decodedKind = decodeAccountKind(account.kind as any);
-        assert.equal(decodedKind.id, argumentsData.kind);
+        assert.equal(decodedKind.id, accountsData.kind);
         assert.equal(decodedKind.name, 'signer');
         assert.equal(account.modifier, null);
         assert.equal(account.close, null);
@@ -530,7 +564,7 @@ describe('instruction account', () => {
 
     it('should create', async () => {
       // arrange
-      const argumentsData = {
+      const accountsData = {
         name: 'data',
         kind: 1,
         modifier: null,
@@ -538,7 +572,7 @@ describe('instruction account', () => {
       };
       // act
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -557,8 +591,8 @@ describe('instruction account', () => {
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
-      assert.equal(account.name, argumentsData.name);
-      assert.equal(decodedKind.id, argumentsData.kind);
+      assert.equal(account.name, accountsData.name);
+      assert.equal(decodedKind.id, accountsData.kind);
       assert.equal(decodedKind.name, 'signer');
       assert.equal(account.modifier, null);
       assert.equal(account.collection, null);
@@ -572,7 +606,7 @@ describe('instruction account', () => {
     // arrange
     const instructionAccount1 = Keypair.generate();
     const instructionAccount2 = Keypair.generate();
-    const argumentsData = {
+    const accountsData = {
       name: '12345678901234567890123456789012',
       kind: 0,
       modifier: null,
@@ -582,7 +616,7 @@ describe('instruction account', () => {
     // act
     try {
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -600,7 +634,7 @@ describe('instruction account', () => {
         ])
         .rpc();
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -647,7 +681,7 @@ describe('instruction account', () => {
     // arrange
     const instructionAccount = Keypair.generate();
     const instruction = Keypair.generate();
-    const argumentsData = {
+    const accountsData = {
       name: 'data',
       kind: 0,
       modifier: null,
@@ -665,7 +699,7 @@ describe('instruction account', () => {
       .signers([instruction])
       .rpc();
     await program.methods
-      .createInstructionAccount(argumentsData)
+      .createInstructionAccount(accountsData)
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
@@ -693,7 +727,7 @@ describe('instruction account', () => {
     // arrange
     const instructionAccount = Keypair.generate();
     const instruction = Keypair.generate();
-    const argumentsData = {
+    const accountsData = {
       name: 'data',
       kind: 0,
       modifier: null,
@@ -711,7 +745,7 @@ describe('instruction account', () => {
       .signers([instruction])
       .rpc();
     await program.methods
-      .createInstructionAccount(argumentsData)
+      .createInstructionAccount(accountsData)
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
@@ -732,6 +766,7 @@ describe('instruction account', () => {
       .deleteInstructionAccount()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         account: instructionAccount.publicKey,
         instruction: instruction.publicKey,
       })
@@ -748,7 +783,7 @@ describe('instruction account', () => {
     const newInstruction = Keypair.generate();
     const newInstructionName = 'sample';
     const newAccount = Keypair.generate();
-    const argumentsData = {
+    const accountsData = {
       name: 'data',
       kind: 1,
       modifier: null,
@@ -768,7 +803,7 @@ describe('instruction account', () => {
         .signers([newInstruction])
         .rpc();
       await program.methods
-        .createInstructionAccount(argumentsData)
+        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
@@ -782,6 +817,7 @@ describe('instruction account', () => {
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           instruction: instruction.publicKey,
           account: newAccount.publicKey,
         })
@@ -790,6 +826,190 @@ describe('instruction account', () => {
       error = err as ProgramError;
     }
     // assert
-    assert.equal(error?.code, 6019);
+    assert.equal(error?.code, 6044);
+  });
+
+  it('should fail when workspace has insufficient funds', async () => {
+    // arrange
+    const newWorkspace = Keypair.generate();
+    const newWorkspaceName = 'sample';
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const newAccount = Keypair.generate();
+    const accountsData = {
+      name: 'data',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+      program.programId
+    );
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createWorkspace({ name: newWorkspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+      })
+      .signers([newWorkspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newBudgetPublicKey,
+          lamports:
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              2155 // instruction account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              126 // application account size
+            )),
+        })
+      )
+      .rpc();
+    await program.methods
+      .createApplication({ name: newApplicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+      })
+      .signers([newApplication])
+      .rpc();
+    await program.methods
+      .createInstruction({ name: newInstructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+        instruction: newInstruction.publicKey,
+      })
+      .signers([newInstruction])
+      .rpc();
+    try {
+      await program.methods
+        .createInstructionAccount(accountsData)
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
+          account: newAccount.publicKey,
+        })
+        .signers([newAccount])
+        .remainingAccounts([
+          {
+            pubkey: collection.publicKey,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6027);
+  });
+
+  it('should fail when user is not a collaborator', async () => {
+    // arrange
+    const newUser = Keypair.generate();
+    const newAccount = Keypair.generate();
+    const accountsData = {
+      name: 'data',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    let error: ProgramError | null = null;
+    // act
+    try {
+      await program.methods
+        .createInstructionAccount(accountsData)
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: newAccount.publicKey,
+        })
+        .signers([newUser, newAccount])
+        .preInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newUser.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 3012);
+  });
+
+  it('should fail when user is not an approved collaborator', async () => {
+    // arrange
+    const newAccount = Keypair.generate();
+    const accountsData = {
+      name: 'data',
+      kind: 0,
+      modifier: null,
+      space: null,
+    };
+    const newUser = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    const [newUserPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
+      program.programId
+    );
+    await program.methods
+      .createUser()
+      .accounts({
+        authority: newUser.publicKey,
+      })
+      .signers([newUser])
+      .preInstructions([
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newUser.publicKey,
+          lamports: LAMPORTS_PER_SOL,
+        }),
+      ])
+      .rpc();
+    await program.methods
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        user: newUserPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+
+    try {
+      await program.methods
+        .createInstructionAccount(accountsData)
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: newAccount.publicKey,
+        })
+        .signers([newUser, newAccount])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6029);
   });
 });

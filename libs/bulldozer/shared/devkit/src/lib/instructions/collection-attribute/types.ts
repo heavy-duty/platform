@@ -1,8 +1,8 @@
 import { CollectionAttributeDto } from '../../utils';
 
 export interface CreateCollectionAttributeParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   collectionId: string;
   collectionAttributeId: string;

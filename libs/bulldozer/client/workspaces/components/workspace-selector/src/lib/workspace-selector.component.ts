@@ -6,8 +6,11 @@ import {
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
-import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
-import { PublicKey } from '@solana/web3.js';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import {
+  WorkspaceApiService,
+  WorkspacesStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceSelectorStore } from './workspace-selector.store';
 
 @Component({
@@ -25,7 +28,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             <mat-list-item
               *ngFor="let workspace of workspaces$ | ngrxPush"
               role="listitem"
-              class="w-60 h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
+              class="w-full h-auto mb-2 pt-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2"
               [ngClass]="{
                 'border-b-primary': activeWorkspace?.id === workspace.id
               }"
@@ -99,7 +102,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           </mat-list>
 
           <button
-            class="w-full h-12"
+            class="w-full h-12 mb-2"
             type="button"
             mat-raised-button
             color="primary"
@@ -108,6 +111,17 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             [disabled]="!connected"
           >
             New workspace
+          </button>
+
+          <button
+            class="w-full h-12"
+            type="button"
+            mat-raised-button
+            color="accent"
+            bdImportWorkspaceTrigger
+            (importWorkspace)="onImportWorkspace($event)"
+          >
+            Import workspace
           </button>
         </div>
       </mat-menu>
@@ -122,9 +136,9 @@ export class WorkspaceSelectorComponent {
 
   @Input() connected = false;
 
-  @Input() set walletPublicKey(value: PublicKey | null) {
+  @Input() set workspaceIds(value: string[] | null) {
     if (value !== null) {
-      this._workspacesStore.setFilters({ authority: value.toBase58() });
+      this._workspacesStore.setWorkspaceIds(value);
     }
   }
 
@@ -134,7 +148,9 @@ export class WorkspaceSelectorComponent {
   constructor(
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,
-    private readonly _configStore: ConfigStore
+    private readonly _configStore: ConfigStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
+    private readonly _notificationStore: NotificationStore
   ) {}
 
   private _closeMenu() {
@@ -145,17 +161,20 @@ export class WorkspaceSelectorComponent {
 
   onCreateWorkspace(workspaceName: string) {
     this._closeMenu();
-    this._workspacesStore.createWorkspace(workspaceName);
+    this._workspaceSelectorStore.createWorkspace(workspaceName);
   }
 
   onUpdateWorkspace(workspaceId: string, workspaceName: string) {
     this._closeMenu();
-    this._workspacesStore.updateWorkspace({ workspaceId, workspaceName });
+    this._workspaceSelectorStore.updateWorkspace({
+      workspaceId,
+      workspaceName,
+    });
   }
 
   onDeleteWorkspace(workspaceId: string) {
     this._closeMenu();
-    this._workspacesStore.deleteWorkspace(workspaceId);
+    this._workspaceSelectorStore.deleteWorkspace(workspaceId);
   }
 
   onDownloadWorkspace(workspaceId: string) {
@@ -165,5 +184,16 @@ export class WorkspaceSelectorComponent {
 
   onActivateWorkspace(workspaceId: string) {
     this._configStore.setWorkspaceId(workspaceId);
+  }
+
+  onImportWorkspace(workspaceId: string) {
+    this._workspaceApiService.findById(workspaceId).subscribe((workspace) => {
+      if (workspace === null) {
+        this._notificationStore.setError('Workspace does not exist.');
+      } else {
+        this._configStore.addWorkspace(workspaceId);
+        this._configStore.setWorkspaceId(workspaceId);
+      }
+    });
   }
 }

@@ -1,27 +1,24 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { ViewApplicationStore } from './view-application.store';
 
 @Component({
   selector: 'bd-view-application',
   template: `
-    <ng-container *ngIf="application$ | ngrxPush as application">
+    <div *ngIf="application$ | ngrxPush as application" class="p-5">
       <header bdPageHeader>
         <h1>
           {{ application.name }}
         </h1>
         <p>Visualize all the details about this application.</p>
       </header>
-
-      <main></main>
-    </ng-container>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ViewApplicationStore, ApplicationStore],
 })
 export class ViewApplicationComponent {
-  @HostBinding('class') class = 'block p-4';
   readonly application$ = this._applicationStore.application$;
 
   constructor(

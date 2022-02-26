@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/users/pages/view-profile",
+  "sourceRoot": "libs/bulldozer/client/users/pages/view-profile/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/client/users/pages/view-profile"],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/users/pages/view-profile/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/users/pages/view-profile/src/**/*.ts",
+          "libs/bulldozer/client/users/pages/view-profile/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

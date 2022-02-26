@@ -14,11 +14,25 @@ declare_id!("7WgU9mAEgB1doxyKisYd2HAxdsNUrpfP6tAPvyNYnFfD");
 pub mod bulldozer {
   use super::*;
 
-  pub fn create_workspace(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
+  pub fn create_user(ctx: Context<CreateUser>) -> ProgramResult {
+    instructions::create_user::handle(ctx)
+  }
+
+  pub fn delete_user(ctx: Context<DeleteUser>) -> ProgramResult {
+    instructions::delete_user::handle(ctx)
+  }
+
+  pub fn create_workspace(
+    ctx: Context<CreateWorkspace>,
+    arguments: CreateWorkspaceArguments,
+  ) -> ProgramResult {
     instructions::create_workspace::handle(ctx, arguments)
   }
 
-  pub fn update_workspace(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {
+  pub fn update_workspace(
+    ctx: Context<UpdateWorkspace>,
+    arguments: UpdateWorkspaceArguments,
+  ) -> ProgramResult {
     instructions::update_workspace::handle(ctx, arguments)
   }
 
@@ -26,11 +40,43 @@ pub mod bulldozer {
     instructions::delete_workspace::handle(ctx)
   }
 
-  pub fn create_application(ctx: Context<CreateApplication>, arguments: CreateApplicationArguments) -> ProgramResult {
+  pub fn create_collaborator(ctx: Context<CreateCollaborator>) -> ProgramResult {
+    instructions::create_collaborator::handle(ctx)
+  }
+
+  pub fn update_collaborator(
+    ctx: Context<UpdateCollaborator>,
+    arguments: UpdateCollaboratorArguments,
+  ) -> ProgramResult {
+    instructions::update_collaborator::handle(ctx, arguments)
+  }
+
+  pub fn delete_collaborator(ctx: Context<DeleteCollaborator>) -> ProgramResult {
+    instructions::delete_collaborator::handle(ctx)
+  }
+
+  pub fn request_collaborator_status(ctx: Context<RequestCollaboratorStatus>) -> ProgramResult {
+    instructions::request_collaborator_status::handle(ctx)
+  }
+
+  pub fn retry_collaborator_status_request(
+    ctx: Context<RetryCollaboratorStatusRequest>,
+  ) -> ProgramResult {
+    instructions::retry_collaborator_status_request::handle(ctx)
+  }
+
+  #[access_control(instructions::create_application::validate(&ctx))]
+  pub fn create_application(
+    ctx: Context<CreateApplication>,
+    arguments: CreateApplicationArguments,
+  ) -> ProgramResult {
     instructions::create_application::handle(ctx, arguments)
   }
 
-  pub fn update_application(ctx: Context<UpdateApplication>, arguments: UpdateApplicationArguments) -> ProgramResult {
+  pub fn update_application(
+    ctx: Context<UpdateApplication>,
+    arguments: UpdateApplicationArguments,
+  ) -> ProgramResult {
     instructions::update_application::handle(ctx, arguments)
   }
 
@@ -38,11 +84,18 @@ pub mod bulldozer {
     instructions::delete_application::handle(ctx)
   }
 
-  pub fn create_collection(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> ProgramResult {
+  #[access_control(instructions::create_collection::validate(&ctx))]
+  pub fn create_collection(
+    ctx: Context<CreateCollection>,
+    arguments: CreateCollectionArguments,
+  ) -> ProgramResult {
     instructions::create_collection::handle(ctx, arguments)
   }
 
-  pub fn update_collection(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> ProgramResult {
+  pub fn update_collection(
+    ctx: Context<UpdateCollection>,
+    arguments: UpdateCollectionArguments,
+  ) -> ProgramResult {
     instructions::update_collection::handle(ctx, arguments)
   }
 
@@ -70,11 +123,18 @@ pub mod bulldozer {
     instructions::delete_collection_attribute::handle(ctx)
   }
 
-  pub fn create_instruction(ctx: Context<CreateInstruction>, arguments: CreateInstructionArguments) -> ProgramResult {
+  #[access_control(instructions::create_instruction::validate(&ctx))]
+  pub fn create_instruction(
+    ctx: Context<CreateInstruction>,
+    arguments: CreateInstructionArguments,
+  ) -> ProgramResult {
     instructions::create_instruction::handle(ctx, arguments)
   }
 
-  pub fn update_instruction(ctx: Context<UpdateInstruction>, arguments: UpdateInstructionArguments) -> ProgramResult {
+  pub fn update_instruction(
+    ctx: Context<UpdateInstruction>,
+    arguments: UpdateInstructionArguments,
+  ) -> ProgramResult {
     instructions::update_instruction::handle(ctx, arguments)
   }
 
@@ -129,9 +189,8 @@ pub mod bulldozer {
     instructions::delete_instruction_account::handle(ctx)
   }
 
-  pub fn create_instruction_relation(
-    ctx: Context<CreateInstructionRelation>
-  ) -> ProgramResult {
+  #[access_control(instructions::create_instruction_relation::validate(&ctx))]
+  pub fn create_instruction_relation(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
     instructions::create_instruction_relation::handle(ctx)
   }
 

@@ -45,7 +45,10 @@ export class InstructionEventService {
           } else {
             const document = createInstructionDocument(pubkey, account);
 
-            if (document.createdAt.eq(document.updatedAt)) {
+            if (
+              document.updatedAt !== undefined &&
+              document.createdAt.eq(document.updatedAt)
+            ) {
               return of(document);
             } else {
               return EMPTY;

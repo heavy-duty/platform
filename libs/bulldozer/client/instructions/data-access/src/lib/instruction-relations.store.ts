@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   Document,
   Instruction,
@@ -13,11 +13,11 @@ import {
   concatMap,
   EMPTY,
   filter,
-  first,
   mergeMap,
   of,
   pipe,
   switchMap,
+  take,
   takeUntil,
   takeWhile,
   withLatestFrom,
@@ -125,7 +125,7 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
           takeUntil(
             this.loading$.pipe(
               filter((loading) => loading),
-              first()
+              take(1)
             )
           ),
           takeWhile((instruction) => instruction !== null)
@@ -186,6 +186,13 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
         );
       })
     );
+
+  readonly setFilters = this.updater<InstructionRelationFilters>(
+    (state, filters) => ({
+      ...state,
+      filters,
+    })
+  );
 
   readonly createInstructionRelation = this.effect<{
     fromAccountId: string;

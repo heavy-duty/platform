@@ -53,6 +53,46 @@ pub enum ErrorCode {
   ApplicationDoesntMatchInstruction,
   #[msg("Cant delete workspace with applications")]
   CantDeleteWorkspaceWithApplications,
+  #[msg("Cant delete workspace with collaborators")]
+  CantDeleteWorkspaceWithCollaborators,
   #[msg("Workspace provided doesnt match application")]
   WorkspaceDoesntMatchApplication,
+  #[msg("Budget has insufficient funds")]
+  BudgetHasUnsufficientFunds,
+  #[msg("Invalid collaborator status")]
+  InvalidCollaboratorStatus,
+  #[msg("Collaborator status has not been approved")]
+  CollaboratorStatusNotApproved,
+  #[msg("Only collaborator status request author can retry")]
+  OnlyCollaboratorStatusRequestAuthorCanRetry,
+  #[msg("Only rejected collaborator status requests can be retried")]
+  OnlyRejectedCollaboratorStatusRequestsCanBeRetried,
+  #[msg("Workspace provided doesnt match collection")]
+  WorkspaceDoesntMatchCollection,
+  #[msg("Application does not belong to workspace")]
+  ApplicationDoesNotBelongToWorkspace,
+  #[msg("Collection does not belong to workspace")]
+  CollectionDoesNotBelongToWorkspace,
+  #[msg("Collection does not belong to application")]
+  CollectionDoesNotBelongToApplication,
+  #[msg("Collection attribute does not belong to workspace")]
+  CollectionAttributeDoesNotBelongToWorkspace,
+  #[msg("Collection attribute does not belong to collection")]
+  CollectionAttributeDoesNotBelongToCollection,
+  #[msg("Instruction does not belong to workspace")]
+  InstructionDoesNotBelongToWorkspace,
+  #[msg("Instruction does not belong to application")]
+  InstructionDoesNotBelongToApplication,
+  #[msg("Instruction argument does not belong to workspace")]
+  InstructionArgumentDoesNotBelongToWorkspace,
+  #[msg("Instruction argument does not belong to instruction")]
+  InstructionArgumentDoesNotBelongToInstruction,
+  #[msg("Instruction account does not belong to workspace")]
+  InstructionAccountDoesNotBelongToWorkspace,
+  #[msg("Instruction account does not belong to application")]
+  InstructionAccountDoesNotBelongToApplication,
+  #[msg("Instruction account does not belong to instruction")]
+  InstructionAccountDoesNotBelongToInstruction,
+  #[msg("Only admin collaborator can update")]
+  OnlyAdminCollaboratorCanUpdate,
 }

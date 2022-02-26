@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
   AccountInfo,
+  Commitment,
+  GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
   SignatureStatus,
@@ -9,7 +11,6 @@ import {
   TransactionResponse,
 } from '@solana/web3.js';
 import {
-  catchError,
   concatMap,
   first,
   isObservable,
@@ -19,6 +20,11 @@ import {
   throwError,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
+
+export interface KeyedAccountInfo {
+  accountId: string;
+  accountInfo: AccountInfo<Buffer>;
+}
 
 @Injectable()
 export class HdSolanaApiService {
@@ -78,10 +84,13 @@ export class HdSolanaApiService {
             },
           })
           .pipe(
-            map(({ value }) => ({
-              ...value,
-              data: Buffer.from(value.data[0], 'base64'),
-            }))
+            map(
+              ({ value }) =>
+                value && {
+                  ...value,
+                  data: Buffer.from(value.data[0], 'base64'),
+                }
+            )
           );
       })
     );
@@ -140,6 +149,77 @@ export class HdSolanaApiService {
               programAccounts.map(({ pubkey, account }) => ({
                 pubkey,
                 account: {
+                  ...account,
+                  data: Buffer.from(account.data[0], 'base64'),
+                },
+              }))
+            )
+          );
+      })
+    );
+  }
+
+  getMinimumBalanceForRentExemption(dataSize: number, commitment?: Commitment) {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient.post<number>(
+          apiEndpoint,
+          [
+            dataSize,
+            {
+              commitment: commitment ?? 'confirmed',
+            },
+          ],
+          {
+            headers: {
+              'solana-rpc-method': 'getMinimumBalanceForRentExemption',
+            },
+          }
+        );
+      })
+    );
+  }
+
+  getMultipleAccounts(
+    pubkeys: string[],
+    config?: GetMultipleAccountsConfig
+  ): Observable<(KeyedAccountInfo | null)[]> {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient
+          .post<{
+            value: AccountInfo<[string, string]>[];
+            context: { slot: number };
+          }>(
+            apiEndpoint,
+            [
+              pubkeys,
+              {
+                encoding: config?.encoding ?? 'base64',
+                commitment: config?.commitment ?? 'confirmed',
+              },
+            ],
+            {
+              headers: {
+                'solana-rpc-method': 'getMultipleAccounts',
+              },
+            }
+          )
+          .pipe(
+            map(({ value }) =>
+              value.map((account, index) => ({
+                accountId: pubkeys[index],
+                accountInfo: {
                   ...account,
                   data: Buffer.from(account.data[0], 'base64'),
                 },
@@ -225,25 +305,11 @@ export class HdSolanaApiService {
 
         return (isObservable(transaction) ? transaction : of(transaction)).pipe(
           concatMap((transaction) =>
-            this._httpClient
-              .post<string>(apiEndpoint, transaction, {
-                headers: {
-                  'solana-rpc-method': 'sendTransaction',
-                },
-              })
-              .pipe(
-                catchError((error) => {
-                  if (
-                    'InstructionError' in error &&
-                    error.InstructionError.length === 2 &&
-                    typeof error.InstructionError[1].Custom === 'number'
-                  ) {
-                    return throwError(() => error.InstructionError[1].Custom);
-                  }
-
-                  return throwError(() => error);
-                })
-              )
+            this._httpClient.post<string>(apiEndpoint, transaction, {
+              headers: {
+                'solana-rpc-method': 'sendTransaction',
+              },
+            })
           )
         );
       })

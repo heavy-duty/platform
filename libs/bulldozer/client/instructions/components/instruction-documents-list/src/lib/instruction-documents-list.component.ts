@@ -16,8 +16,8 @@ import {
 @Component({
   selector: 'bd-instruction-documents-list',
   template: `
-    <section>
-      <mat-card class="mb-4">
+    <mat-card class="p-3">
+      <section class="flex flex-col gap-3">
         <header bdSectionHeader>
           <h2>
             Documents
@@ -42,6 +42,7 @@ import {
             instructionDocuments && instructionDocuments.length > 0;
             else emptyList
           "
+          class="flex flex-col gap-2"
         >
           <mat-list-item
             role="listitem"
@@ -49,7 +50,7 @@ import {
               let instructionDocument of instructionDocuments;
               let i = index
             "
-            class="h-auto bg-white bg-opacity-5 mat-elevation-z2 mb-2 last:mb-0 py-2"
+            class="h-28 bg-white bg-opacity-5 mat-elevation-z2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
@@ -201,8 +202,8 @@ import {
         <ng-template #emptyList>
           <p class="text-center text-xl py-8">There's no documents yet.</p>
         </ng-template>
-      </mat-card>
-    </section>
+      </section>
+    </mat-card>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,

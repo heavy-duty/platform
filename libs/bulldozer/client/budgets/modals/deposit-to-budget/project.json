@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/budgets/modals/deposit-to-budget",
+  "sourceRoot": "libs/bulldozer/client/budgets/modals/deposit-to-budget/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/budgets/modals/deposit-to-budget"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/budgets/modals/deposit-to-budget/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/budgets/modals/deposit-to-budget/src/**/*.ts",
+          "libs/bulldozer/client/budgets/modals/deposit-to-budget/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

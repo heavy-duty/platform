@@ -1,19 +1,20 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
-import { bulldozerProgram } from '../../programs';
+import { getBulldozerProgram } from '../../programs';
 import { DeleteInstructionRelationParams } from './types';
 
 export const deleteInstructionRelation = (
+  endpoint: string,
   params: DeleteInstructionRelationParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
-      bulldozerProgram.methods
-        .deleteInstructionRelation()
+      getBulldozerProgram(endpoint)
+        .methods.deleteInstructionRelation()
         .accounts({
+          authority: new PublicKey(params.authority),
           from: new PublicKey(params.fromAccountId),
           to: new PublicKey(params.toAccountId),
-          authority: new PublicKey(params.authority),
         })
         .instruction() as Promise<TransactionInstruction>
     )

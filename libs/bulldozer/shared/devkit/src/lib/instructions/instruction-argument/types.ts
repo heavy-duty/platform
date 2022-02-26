@@ -1,8 +1,8 @@
 import { InstructionArgumentDto } from '../../utils';
 
 export interface CreateInstructionArgumentParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   instructionId: string;
   instructionArgumentId: string;

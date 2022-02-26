@@ -2,12 +2,15 @@ import { BN } from '@heavy-duty/anchor';
 import { AccountInfo } from '@solana/web3.js';
 import {
   APPLICATION_ACCOUNT_NAME,
+  BUDGET_ACCOUNT_NAME,
+  COLLABORATOR_ACCOUNT_NAME,
   COLLECTION_ACCOUNT_NAME,
   COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
   INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
   INSTRUCTION_ACCOUNT_NAME,
   INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
   INSTRUCTION_RELATION_ACCOUNT_NAME,
+  USER_ACCOUNT_NAME,
   WORKSPACE_ACCOUNT_NAME,
 } from './consts';
 
@@ -42,6 +45,29 @@ export interface InstructionArgumentDto {
 export interface InstructionRelationDto {
   from: string;
   to: string;
+}
+
+export interface Budget {
+  authority: string;
+  workspace: string;
+  bump: number;
+}
+
+export interface Collaborator {
+  authority: string;
+  workspace: string;
+  user: string;
+  bump: number;
+  isAdmin: boolean;
+  status: {
+    id: number;
+    name: string;
+  };
+}
+
+export interface User {
+  authority: string;
+  bump: number;
 }
 
 export interface Workspace {
@@ -148,6 +174,9 @@ export interface Relation<T> extends Account<T> {
 }
 
 export type AccountName =
+  | typeof USER_ACCOUNT_NAME
+  | typeof COLLABORATOR_ACCOUNT_NAME
+  | typeof BUDGET_ACCOUNT_NAME
   | typeof WORKSPACE_ACCOUNT_NAME
   | typeof APPLICATION_ACCOUNT_NAME
   | typeof COLLECTION_ACCOUNT_NAME

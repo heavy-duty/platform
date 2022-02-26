@@ -10,26 +10,37 @@ import {
   deleteCollectionAttribute,
   DeleteCollectionAttributeParams,
   Document,
-  getBulldozerError,
+  parseBulldozerError,
   updateCollectionAttribute,
   UpdateCollectionAttributeParams,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+} from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
 import { Keypair } from '@solana/web3.js';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  Observable,
+  throwError,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CollectionAttributeApiService {
-  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
+  constructor(
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+  ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get collection attributes
@@ -73,11 +84,20 @@ export class CollectionAttributeApiService {
 
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
-        createCollectionAttribute({
-          ...params,
-          collectionAttributeId:
-            collectionAttributeKeypair.publicKey.toBase58(),
-        })
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return createCollectionAttribute(apiEndpoint, {
+              ...params,
+              collectionAttributeId:
+                collectionAttributeKeypair.publicKey.toBase58(),
+            });
+          })
+        )
       ),
       partiallySignTransaction(collectionAttributeKeypair),
       concatMap((transaction) =>
@@ -91,7 +111,18 @@ export class CollectionAttributeApiService {
   // update collection attribute
   update(params: UpdateCollectionAttributeParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(updateCollectionAttribute(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateCollectionAttribute(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -103,7 +134,18 @@ export class CollectionAttributeApiService {
   // delete collection attribute
   delete(params: DeleteCollectionAttributeParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(deleteCollectionAttribute(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return deleteCollectionAttribute(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)

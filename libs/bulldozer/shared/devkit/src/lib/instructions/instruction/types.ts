@@ -1,6 +1,6 @@
 export interface CreateInstructionParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   instructionId: string;
   instructionName: string;

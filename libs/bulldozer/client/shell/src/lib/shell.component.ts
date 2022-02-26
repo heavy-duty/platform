@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import {
   ConfigStore,
   DarkThemeStore,
-  NotificationStore,
   TabStore,
 } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserStore } from '@bulldozer-client/users-data-access';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
@@ -34,7 +35,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             <bd-workspace-selector
               class="mr-6"
               [connected]="(connected$ | ngrxPush) ?? false"
-              [walletPublicKey]="(walletPublicKey$ | ngrxPush) ?? null"
+              [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
             ></bd-workspace-selector>
 
             <hd-wallet-multi-button
@@ -43,6 +44,15 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             ></hd-wallet-multi-button>
 
             <hd-connection-menu class="mr-6"></hd-connection-menu>
+
+            <button
+              mat-raised-button
+              color="basic"
+              [routerLink]="['/profile']"
+              class="mr-6"
+            >
+              Profile
+            </button>
 
             <bd-dark-theme-switch></bd-dark-theme-switch>
           </div>
@@ -58,7 +68,13 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       </mat-sidenav-content>
     </mat-sidenav-container>
   `,
-  providers: [TabStore, NotificationStore, ConfigStore, DarkThemeStore],
+  providers: [
+    TabStore,
+    NotificationStore,
+    ConfigStore,
+    DarkThemeStore,
+    UserStore,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ShellComponent extends ComponentStore<object> {
@@ -66,6 +82,7 @@ export class ShellComponent extends ComponentStore<object> {
   readonly connected$ = this._walletStore.connected$;
   readonly walletPublicKey$ = this._walletStore.publicKey$;
   readonly workspaceId$ = this._configStore.workspaceId$;
+  readonly workspaceIds$ = this._configStore.workspaceIds$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
 
@@ -73,6 +90,7 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
@@ -80,6 +98,7 @@ export class ShellComponent extends ComponentStore<object> {
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
+    this._notificationStore.setError(this._walletStore.error$);
   }
 
   private readonly _redirectUnauthorized = this.effect<boolean>(

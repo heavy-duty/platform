@@ -54,6 +54,13 @@ import { ShellComponent } from './shell.component';
                 (m) => m.ViewInstructionModule
               ),
           },
+          {
+            path: 'profile',
+            loadChildren: () =>
+              import('@bulldozer-client/view-profile').then(
+                (m) => m.ViewProfileModule
+              ),
+          },
         ],
       },
       {

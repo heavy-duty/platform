@@ -1,5 +1,10 @@
 import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import {
+  Keypair,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  SystemProgram,
+} from '@solana/web3.js';
 import { assert } from 'chai';
 import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
@@ -31,8 +36,38 @@ describe('instruction relation', () => {
     space: null,
   };
   let relationPublicKey: PublicKey;
+  let userPublicKey: PublicKey;
+  let budgetPublicKey: PublicKey;
 
   before(async () => {
+    [userPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('user', 'utf8'),
+        program.provider.wallet.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [budgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    [relationPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_relation', 'utf8'),
+        from.publicKey.toBuffer(),
+        to.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    try {
+      await program.methods
+        .createUser()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+        })
+        .rpc();
+    } catch (error) {}
+
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
@@ -40,6 +75,13 @@ describe('instruction relation', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: budgetPublicKey,
+          lamports: LAMPORTS_PER_SOL,
+        })
+      )
       .rpc();
     await program.methods
       .createApplication({ name: applicationName })
@@ -82,14 +124,6 @@ describe('instruction relation', () => {
       })
       .signers([to])
       .rpc();
-    [relationPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('instruction_relation', 'utf8'),
-        from.publicKey.toBuffer(),
-        to.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
   });
 
   it('should create', async () => {
@@ -218,5 +252,241 @@ describe('instruction relation', () => {
     }
     // assert
     assert.equal(error?.code, 2003);
+  });
+
+  it('should fail when workspace has insufficient funds', async () => {
+    // arrange
+    const newWorkspace = Keypair.generate();
+    const newWorkspaceName = 'sample';
+    const newApplication = Keypair.generate();
+    const newApplicationName = 'sample';
+    const newInstruction = Keypair.generate();
+    const newInstructionName = 'sample';
+    const newFrom = Keypair.generate();
+    const newTo = Keypair.generate();
+    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+      program.programId
+    );
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createWorkspace({ name: newWorkspaceName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+      })
+      .signers([newWorkspace])
+      .postInstructions(
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newBudgetPublicKey,
+          lamports:
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              2155 // instruction account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              126 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              295 // from account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              295 // to account size
+            )),
+        })
+      )
+      .rpc();
+    await program.methods
+      .createApplication({ name: newApplicationName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+      })
+      .signers([newApplication])
+      .rpc();
+    await program.methods
+      .createInstruction({ name: newInstructionName })
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+        instruction: newInstruction.publicKey,
+      })
+      .signers([newInstruction])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+        instruction: newInstruction.publicKey,
+        account: newFrom.publicKey,
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: newWorkspace.publicKey,
+        application: newApplication.publicKey,
+        instruction: newInstruction.publicKey,
+        account: newTo.publicKey,
+      })
+      .signers([newTo])
+      .rpc();
+    try {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+          instruction: newInstruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+        })
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6027);
+  });
+
+  it('should fail when user is not a collaborator', async () => {
+    // arrange
+    const newUser = Keypair.generate();
+    const newFrom = Keypair.generate();
+    const newTo = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newFrom.publicKey,
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newTo.publicKey,
+      })
+      .signers([newTo])
+      .rpc();
+    try {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+        })
+        .signers([newUser])
+        .preInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newUser.publicKey,
+            lamports: LAMPORTS_PER_SOL,
+          }),
+        ])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 3012);
+  });
+
+  it('should fail when user is not an approved collaborator', async () => {
+    // arrange
+    const newFrom = Keypair.generate();
+    const newTo = Keypair.generate();
+    const newUser = Keypair.generate();
+    let error: ProgramError | null = null;
+    // act
+    const [newUserPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
+      program.programId
+    );
+    await program.methods
+      .createUser()
+      .accounts({
+        authority: newUser.publicKey,
+      })
+      .signers([newUser])
+      .preInstructions([
+        SystemProgram.transfer({
+          fromPubkey: program.provider.wallet.publicKey,
+          toPubkey: newUser.publicKey,
+          lamports: LAMPORTS_PER_SOL,
+        }),
+      ])
+      .rpc();
+    await program.methods
+      .requestCollaboratorStatus()
+      .accounts({
+        authority: newUser.publicKey,
+        user: newUserPublicKey,
+        workspace: workspace.publicKey,
+      })
+      .signers([newUser])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(fromDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newFrom.publicKey,
+      })
+      .signers([newFrom])
+      .rpc();
+    await program.methods
+      .createInstructionAccount(toDto)
+      .accounts({
+        authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        instruction: instruction.publicKey,
+        account: newTo.publicKey,
+      })
+      .signers([newTo])
+      .rpc();
+
+    try {
+      await program.methods
+        .createInstructionRelation()
+        .accounts({
+          authority: newUser.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          from: newFrom.publicKey,
+          to: newTo.publicKey,
+        })
+        .signers([newUser])
+        .rpc();
+    } catch (err) {
+      error = err as ProgramError;
+    }
+    // assert
+    assert.equal(error?.code, 6029);
   });
 });

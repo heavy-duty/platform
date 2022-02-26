@@ -74,7 +74,7 @@ export class HdSolanaApiInterceptor implements HttpInterceptor {
             const firstValue = event.body[0];
 
             if ('error' in firstValue) {
-              return throwError(() => firstValue.error.data.err);
+              return throwError(() => firstValue.error.message);
             }
 
             return of(event.clone({ body: firstValue.result }));

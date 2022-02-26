@@ -1,6 +1,6 @@
 export interface CreateInstructionRelationParams {
-  workspaceId: string;
   authority: string;
+  workspaceId: string;
   applicationId: string;
   instructionId: string;
   fromAccountId: string;

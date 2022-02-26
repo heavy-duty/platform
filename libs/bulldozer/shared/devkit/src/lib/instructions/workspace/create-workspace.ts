@@ -1,15 +1,16 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
-import { bulldozerProgram } from '../../programs';
+import { getBulldozerProgram } from '../../programs';
 import { CreateWorkspaceParams } from './types';
 
 export const createWorkspace = (
+  endpoint: string,
   params: CreateWorkspaceParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
-      bulldozerProgram.methods
-        .createWorkspace({ name: params.workspaceName })
+      getBulldozerProgram(endpoint)
+        .methods.createWorkspace({ name: params.workspaceName })
         .accounts({
           workspace: new PublicKey(params.workspaceId),
           authority: new PublicKey(params.authority),

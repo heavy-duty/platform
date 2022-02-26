@@ -1,16 +1,16 @@
 import { AccountInfo } from '@solana/web3.js';
-import { bulldozerProgram } from '../programs';
 import {
   InstructionRelation,
   INSTRUCTION_RELATION_ACCOUNT_NAME,
   Relation,
 } from '../utils';
+import { borshCoder } from './internal';
 
 export const createInstructionRelationRelation = (
   publicKey: string,
   account: AccountInfo<Buffer>
 ): Relation<InstructionRelation> => {
-  const decodedAccount = bulldozerProgram.coder.accounts.decode(
+  const decodedAccount = borshCoder.decode(
     INSTRUCTION_RELATION_ACCOUNT_NAME,
     account.data
   );

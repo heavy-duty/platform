@@ -10,7 +10,7 @@ export class SectionHeaderDirective implements OnInit {
     this.renderer.setAttribute(
       this.el.nativeElement,
       'class',
-      `${this.el.nativeElement.classList.toString()} pl-4 mb-4 border-l-4 border-solid border-primary`
+      `${this.el.nativeElement.classList.toString()} pl-4 border-l-4 border-solid border-primary`
     );
 
     if (!this.titleElement) {

@@ -14,7 +14,9 @@ import { ViewCollectionStore } from './view-collection.store';
   selector: 'bd-view-collection',
   template: `
     <div class="flex" *ngIf="collection$ | ngrxPush as collection">
-      <div class="p-4 w-1/2 bd-custom-height-layout overflow-auto">
+      <div
+        class="p-5 w-1/2 bd-custom-height-layout overflow-auto flex flex-col gap-5"
+      >
         <header bdPageHeader>
           <h1>
             {{ collection.name }}
@@ -24,7 +26,6 @@ import { ViewCollectionStore } from './view-collection.store';
 
         <main>
           <bd-collection-attributes-list
-            class="block mb-16"
             [connected]="(connected$ | ngrxPush) ?? false"
             [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
             (createCollectionAttribute)="

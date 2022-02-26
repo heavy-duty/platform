@@ -1,17 +1,16 @@
 import { AccountInfo } from '@solana/web3.js';
-import { bulldozerProgram } from '../programs';
 import {
   Document,
   InstructionArgument,
   INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
 } from '../utils';
-import { decodeAttributeEnum } from './internal';
+import { borshCoder, decodeAttributeEnum } from './internal';
 
 export const createInstructionArgumentDocument = (
   publicKey: string,
   account: AccountInfo<Buffer>
 ): Document<InstructionArgument> => {
-  const decodedAccount = bulldozerProgram.coder.accounts.decode(
+  const decodedAccount = borshCoder.decode(
     INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
     account.data
   );

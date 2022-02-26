@@ -6,24 +6,35 @@ import {
   createInstructionRelationRelation,
   deleteInstructionRelation,
   DeleteInstructionRelationParams,
-  getBulldozerError,
   InstructionRelation,
   InstructionRelationFilters,
   instructionRelationQueryBuilder,
+  parseBulldozerError,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+} from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
-import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  first,
+  map,
+  Observable,
+  throwError,
+} from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionRelationApiService {
-  constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
+  constructor(
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+  ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get instruction relations
@@ -62,7 +73,18 @@ export class InstructionRelationApiService {
   // create instruction relation
   create(params: CreateInstructionRelationParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(createInstructionRelation(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return createInstructionRelation(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
@@ -74,7 +96,18 @@ export class InstructionRelationApiService {
   // delete instruction relation
   delete(params: DeleteInstructionRelationParams) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(deleteInstructionRelation(params)),
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return deleteInstructionRelation(apiEndpoint, params);
+          })
+        )
+      ),
       concatMap((transaction) =>
         this._hdSolanaApiService
           .sendTransaction(transaction)
