@@ -9,7 +9,7 @@ import {
   depositToBudget,
   DepositToBudgetParams,
   Document,
-  getBulldozerError,
+  parseBulldozerError,
 } from '@heavy-duty/bulldozer-devkit';
 import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
@@ -19,10 +19,8 @@ import { catchError, concatMap, map, Observable, throwError } from 'rxjs';
 export class BudgetApiService {
   constructor(private readonly _hdSolanaApiService: HdSolanaApiService) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get budgets

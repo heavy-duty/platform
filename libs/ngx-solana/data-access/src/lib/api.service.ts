@@ -11,7 +11,6 @@ import {
   TransactionResponse,
 } from '@solana/web3.js';
 import {
-  catchError,
   concatMap,
   first,
   isObservable,
@@ -306,25 +305,11 @@ export class HdSolanaApiService {
 
         return (isObservable(transaction) ? transaction : of(transaction)).pipe(
           concatMap((transaction) =>
-            this._httpClient
-              .post<string>(apiEndpoint, transaction, {
-                headers: {
-                  'solana-rpc-method': 'sendTransaction',
-                },
-              })
-              .pipe(
-                catchError((error) => {
-                  if (
-                    'InstructionError' in error &&
-                    error.InstructionError.length === 2 &&
-                    typeof error.InstructionError[1].Custom === 'number'
-                  ) {
-                    return throwError(() => error.InstructionError[1].Custom);
-                  }
-
-                  return throwError(() => error);
-                })
-              )
+            this._httpClient.post<string>(apiEndpoint, transaction, {
+              headers: {
+                'solana-rpc-method': 'sendTransaction',
+              },
+            })
           )
         );
       })

@@ -6,10 +6,10 @@ import {
   createInstructionRelationRelation,
   deleteInstructionRelation,
   DeleteInstructionRelationParams,
-  getBulldozerError,
   InstructionRelation,
   InstructionRelationFilters,
   instructionRelationQueryBuilder,
+  parseBulldozerError,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -33,10 +33,8 @@ export class InstructionRelationApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get instruction relations

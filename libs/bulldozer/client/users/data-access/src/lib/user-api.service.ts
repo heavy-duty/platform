@@ -6,7 +6,7 @@ import {
   deleteUser,
   DeleteUserParams,
   Document,
-  getBulldozerError,
+  parseBulldozerError,
   User,
 } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -30,10 +30,8 @@ export class UserApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get user

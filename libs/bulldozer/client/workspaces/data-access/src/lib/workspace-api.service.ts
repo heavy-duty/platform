@@ -7,7 +7,7 @@ import {
   deleteWorkspace,
   DeleteWorkspaceParams,
   Document,
-  getBulldozerError,
+  parseBulldozerError,
   updateWorkspace,
   UpdateWorkspaceParams,
   Workspace,
@@ -39,10 +39,8 @@ export class WorkspaceApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get workspaces

@@ -7,10 +7,10 @@ import {
   deleteInstruction,
   DeleteInstructionParams,
   Document,
-  getBulldozerError,
   Instruction,
   InstructionFilters,
   instructionQueryBuilder,
+  parseBulldozerError,
   updateInstruction,
   updateInstructionBody,
   UpdateInstructionBodyParams,
@@ -41,10 +41,8 @@ export class InstructionApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get instructions

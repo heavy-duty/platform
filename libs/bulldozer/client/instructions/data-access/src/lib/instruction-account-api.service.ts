@@ -7,10 +7,10 @@ import {
   deleteInstructionAccount,
   DeleteInstructionAccountParams,
   Document,
-  getBulldozerError,
   InstructionAccount,
   InstructionAccountFilters,
   instructionAccountQueryBuilder,
+  parseBulldozerError,
   updateInstructionAccount,
   UpdateInstructionAccountParams,
 } from '@heavy-duty/bulldozer-devkit';
@@ -39,10 +39,8 @@ export class InstructionAccountApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get instruction accounts

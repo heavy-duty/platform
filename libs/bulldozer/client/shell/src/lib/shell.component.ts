@@ -90,6 +90,7 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
@@ -97,6 +98,7 @@ export class ShellComponent extends ComponentStore<object> {
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
+    this._notificationStore.setError(this._walletStore.error$);
   }
 
   private readonly _redirectUnauthorized = this.effect<boolean>(

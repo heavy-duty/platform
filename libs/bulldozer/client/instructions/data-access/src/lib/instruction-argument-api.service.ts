@@ -7,10 +7,10 @@ import {
   deleteInstructionArgument,
   DeleteInstructionArgumentParams,
   Document,
-  getBulldozerError,
   InstructionArgument,
   InstructionArgumentFilters,
   instructionArgumentQueryBuilder,
+  parseBulldozerError,
   updateInstructionArgument,
   UpdateInstructionArgumentParams,
 } from '@heavy-duty/bulldozer-devkit';
@@ -39,10 +39,8 @@ export class InstructionArgumentApiService {
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
-  private handleError(error: unknown) {
-    return throwError(() =>
-      typeof error === 'number' ? getBulldozerError(error) : error
-    );
+  private handleError(error: string) {
+    return throwError(() => parseBulldozerError(error) ?? null);
   }
 
   // get instruction arguments
