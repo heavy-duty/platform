@@ -66,7 +66,7 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
       }
 
       return merge(
-        workspaceIds.map((workspaceId) =>
+        ...workspaceIds.map((workspaceId) =>
           this._workspaceEventService.workspaceChanges(workspaceId).pipe(
             tapResponse(
               (changes) => {
