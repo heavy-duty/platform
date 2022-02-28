@@ -17,6 +17,7 @@ import {
 import {
   HdSolanaApiService,
   HdSolanaConfigStore,
+  HdSolanaTransactionsStore,
 } from '@heavy-duty/ngx-solana';
 import {
   addInstructionToTransaction,
@@ -29,6 +30,7 @@ import {
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -36,7 +38,8 @@ import {
 export class WorkspaceApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdSolanaTransactionsStore: HdSolanaTransactionsStore
   ) {}
 
   private handleError(error: string) {
@@ -135,9 +138,15 @@ export class WorkspaceApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((signature) => {
+            this._hdSolanaTransactionsStore.reportProgress(
+              transaction,
+              signature
+            );
+          }),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

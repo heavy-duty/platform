@@ -4,6 +4,7 @@ import { HdSolanaApiService } from './api.service';
 import { hdSolanaConfigProviderFactory } from './config';
 import { HdSolanaConfigStore } from './config.store';
 import { HdSolanaConnectionStore } from './connection.store';
+import { HdSolanaTransactionsStore } from './transactions.store';
 
 @NgModule({
   imports: [HttpClientModule],
@@ -29,6 +30,7 @@ export class HdSolanaModule {
         HdSolanaApiService,
         HdSolanaConnectionStore,
         HdSolanaConfigStore,
+        HdSolanaTransactionsStore,
       ],
     };
   }

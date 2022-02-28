@@ -17,10 +17,35 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   selector: 'bd-workspace-selector',
   template: `
     <ng-container *ngrxLet="workspace$; let activeWorkspace">
-      <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
-        {{
-          activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
-        }}
+      <button
+        type="button"
+        mat-raised-button
+        [matMenuTriggerFor]="menu"
+        class="w-36"
+      >
+        <div class="flex justify-between items-center gap-2">
+          <ng-container *ngIf="activeWorkspace !== null">
+            <span
+              class="flex-grow overflow-hidden whitespace-nowrap overflow-ellipsis text-left"
+              [matTooltip]="activeWorkspace.name"
+            >
+              {{ activeWorkspace.name }}
+            </span>
+
+            <hd-account-updating
+              *ngIf="activeWorkspace"
+              [accountId]="activeWorkspace.id"
+            ></hd-account-updating>
+          </ng-container>
+
+          <ng-container *ngIf="activeWorkspace === null">
+            <span
+              class="flex-grow overflow-hidden whitespace-nowrap overflow-ellipsis text-left"
+            >
+              Select workspace
+            </span>
+          </ng-container>
+        </div>
       </button>
       <mat-menu #menu="matMenu">
         <div class="px-4 py-2" bdStopPropagation>

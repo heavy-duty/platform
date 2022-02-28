@@ -20,7 +20,7 @@ export class WorkspaceEventService {
     workspaceId: string
   ): Observable<Document<Workspace> | null> {
     return this._hdSolanaConnectionStore
-      .onAccountChange(workspaceId)
+      .onAccountChange(workspaceId, 'finalized')
       .pipe(
         map((accountInfo) =>
           accountInfo.lamports > 0

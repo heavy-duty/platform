@@ -58,6 +58,14 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
           </div>
         </mat-toolbar>
 
+        <div class="block fixed bottom-0 right-0 w-screen z-20">
+          <div class="flex justify-center">
+            <hd-transactions-list-button
+              class="mat-elevation-z8"
+            ></hd-transactions-list-button>
+          </div>
+        </div>
+
         <bd-tab-list
           [tabs]="(tabs$ | ngrxPush) ?? null"
           [selectedTab]="(selectedTab$ | ngrxPush) ?? null"

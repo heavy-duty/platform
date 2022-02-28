@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { EditWorkspaceComponentModule } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponentModule } from '@bulldozer-client/import-workspace';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
+import { HdSolanaMaterialModule } from '@heavy-duty/ngx-solana-material';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceSelectorComponent } from './workspace-selector.component';
 
@@ -27,6 +28,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     StopPropagationModule,
     EditWorkspaceComponentModule,
     ImportWorkspaceComponentModule,
+    HdSolanaMaterialModule,
   ],
 })
 export class WorkspaceSelectorModule {}
