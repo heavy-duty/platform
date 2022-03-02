@@ -3,7 +3,7 @@ import {
   Component,
   HostBinding,
   OnDestroy,
-  OnInit,
+  OnInit
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -13,7 +13,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   selector: 'bd-unauthorized-access',
   template: `
     <header class="mt-16 flex justify-center flex-wrap">
-      <figure class="mb-4 w-40">
+      <figure class="mb-4 w-80">
         <img src="assets/images/logo.png" class="w-full" />
       </figure>
       <h1 class="w-full text-center">BULLDOZER</h1>
