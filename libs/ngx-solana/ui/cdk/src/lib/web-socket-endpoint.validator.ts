@@ -8,9 +8,16 @@ export function webSocketEndpoint(): ValidatorFn {
 
     const [protocol, url] = control.value.split('://');
 
-    return (protocol === 'ws' || protocol === 'wss') &&
-      url.split('.').length > 1
-      ? null
-      : { webSocketEndpoint: control.value };
+    if (protocol !== 'ws' && protocol !== 'wss') {
+      return { httpEndpoint: control.value };
+    }
+
+    if (url.includes('localhost')) {
+      return url.split(':').length === 2
+        ? null
+        : { httpEndpoint: control.value };
+    }
+
+    return url.split('.').length > 1 ? null : { httpEndpoint: control.value };
   };
 }

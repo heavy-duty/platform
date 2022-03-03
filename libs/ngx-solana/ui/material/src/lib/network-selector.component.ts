@@ -24,6 +24,6 @@ import { Network, NetworkConfig } from '@heavy-duty/ngx-solana';
 })
 export class HdNetworkSelectorComponent {
   @Input() selectedNetwork: Network | null = null;
-  @Input() networkConfigs!: NetworkConfig[];
+  @Input() networkConfigs: NetworkConfig[] | null = null;
   @Output() selectNetwork = new EventEmitter<Network>();
 }

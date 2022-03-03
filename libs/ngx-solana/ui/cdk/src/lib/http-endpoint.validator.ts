@@ -8,9 +8,16 @@ export function httpEndpoint(): ValidatorFn {
 
     const [protocol, url] = control.value.split('://');
 
-    return (protocol === 'http' || protocol === 'https') &&
-      url.split('.').length > 1
-      ? null
-      : { httpEndpoint: control.value };
+    if (protocol !== 'http' && protocol !== 'https') {
+      return { httpEndpoint: control.value };
+    }
+
+    if (url.includes('localhost')) {
+      return url.split(':').length === 2
+        ? null
+        : { httpEndpoint: control.value };
+    }
+
+    return url.split('.').length > 1 ? null : { httpEndpoint: control.value };
   };
 }

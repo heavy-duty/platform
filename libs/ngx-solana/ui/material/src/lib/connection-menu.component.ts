@@ -30,7 +30,7 @@ import { MatMenu } from '@angular/material/menu';
           <hd-network-selector
             *ngIf="networkConfigs !== null"
             [selectedNetwork]="selectedNetwork"
-            [networkConfigs]="networkConfigs"
+            [networkConfigs]="networkConfigs ?? null"
             (selectNetwork)="selectNetwork($event)"
           ></hd-network-selector>
         </ng-container>

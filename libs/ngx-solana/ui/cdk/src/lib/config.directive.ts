@@ -16,7 +16,7 @@ import { tap } from 'rxjs';
 interface ConfigChanges {
   apiEndpoint: HttpEndpoint | null;
   webSocketEndpoint: WebSocketEndpoint | null;
-  networkConfigs: NetworkConfig[] | null;
+  networkConfigs: NetworkConfig[] | null | undefined;
   selectedNetwork: Network | null;
   selectedNetworkConfig: NetworkConfig | null;
   selectNetwork: (network: Network) => void;
@@ -27,7 +27,7 @@ export class HdSolanaConfigContext implements ConfigChanges {
   public $implicit!: unknown;
   public apiEndpoint!: HttpEndpoint | null;
   public webSocketEndpoint!: WebSocketEndpoint | null;
-  public networkConfigs!: NetworkConfig[] | null;
+  public networkConfigs!: NetworkConfig[] | null | undefined;
   public selectedNetwork!: Network | null;
   public selectedNetworkConfig!: NetworkConfig | null;
   public selectNetwork!: (network: Network) => void;

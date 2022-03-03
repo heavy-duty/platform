@@ -20,8 +20,8 @@ export interface NetworkConfig {
 const defaultNetworkConfigs: NetworkConfig[] = [
   {
     network: 'localhost',
-    apiEndpoint: 'http://192.168.1.35:8899',
-    webSocketEndpoint: 'ws://192.168.1.35:8900',
+    apiEndpoint: 'http://localhost:8899',
+    webSocketEndpoint: 'ws://localhost:8900',
   },
   {
     network: 'devnet',
@@ -43,7 +43,7 @@ const defaultNetworkConfigs: NetworkConfig[] = [
 const defaultSelectedNetwork = 'localhost';
 
 interface ViewModel {
-  configs: NetworkConfig[] | null;
+  configs: NetworkConfig[] | null | undefined;
   selectedNetwork: Network | null;
 }
 
@@ -78,7 +78,7 @@ export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
 
   constructor() {
     super({
-      configs: null,
+      configs: undefined,
       selectedNetwork: null,
     });
 
@@ -91,7 +91,7 @@ export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
   private readonly _loadConfigs = this.effect<NetworkConfig[] | null>(
     pipe(
       tap((configs) => {
-        if (configs === null) {
+        if (configs === undefined) {
           this._networkConfigs.next(defaultNetworkConfigs);
         } else {
           this.patchState({ configs });
@@ -112,8 +112,14 @@ export class HdSolanaConfigStore extends ComponentStore<ViewModel> {
     )
   );
 
-  private readonly _persistConfigChanges = this.effect<NetworkConfig[] | null>(
-    tap(this._networkConfigs)
+  private readonly _persistConfigChanges = this.effect<
+    NetworkConfig[] | null | undefined
+  >(
+    tap((configs) => {
+      if (configs !== undefined) {
+        this._networkConfigs.next(configs);
+      }
+    })
   );
 
   private readonly _persistSelectedNetwork = this.effect<Network | null>(
