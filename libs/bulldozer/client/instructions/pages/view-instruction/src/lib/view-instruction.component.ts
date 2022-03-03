@@ -25,7 +25,7 @@ import { ViewInstructionStore } from './view-instruction.store';
   template: `
     <div class="flex w-full" *ngIf="instruction$ | ngrxPush as instruction">
       <div
-        class="p-5 w-1/2 bd-custom-height-layout overflow-auto flex flex-col gap-5"
+        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
       >
         <header bdPageHeader>
           <h1>
@@ -83,7 +83,7 @@ import { ViewInstructionStore } from './view-instruction.store';
         </main>
       </div>
       <div class="w-1/2">
-        <div class="bd-custom-height-layout overflow-hidden">
+        <div class="bd-custom-height-content overflow-hidden">
           <bd-code-editor
             [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
             [template]="(contextCode$ | ngrxPush) ?? null"

@@ -6,6 +6,8 @@ $error-bgcolor: #dc2626;
 $white-text-color: white;
 $black-text-color: black;
 
+$toolbar-height: 64px;
+
 @mixin snackbar-span {
   display: block;
   font-size: 1.125rem;
@@ -65,6 +67,14 @@ input[readonly] {
   pointer-events: none;
 }
 
+.bd-h-inherit {
+  height: inherit !important;
+}
+
+.bd-custom-top-toolbar {
+  top: $toolbar-height !important;
+}
+
 .bd-custom-monaco-editor {
   height: calc(100vh - 96px) !important;
 }
@@ -79,6 +89,12 @@ input[readonly] {
 
 .bd-custom-height-layout {
   height: calc(
-    100vh - 113px
+    100vh - $toolbar-height
+  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
+}
+
+.bd-custom-height-content {
+  height: calc(
+    100vh - $toolbar-height - 48px - 1px
   ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
 }
