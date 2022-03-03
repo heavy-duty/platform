@@ -7,7 +7,7 @@ import { ApplicationTabStore } from './application-tab.store';
   template: `
     <div
       *ngIf="application$ | ngrxPush as application"
-      class="flex items-stretch p-0"
+      class="flex items-stretch p-0 "
     >
       <a
         [routerLink]="[

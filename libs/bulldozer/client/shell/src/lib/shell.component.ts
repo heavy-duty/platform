@@ -16,7 +16,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
   selector: 'bd-shell',
   template: `
     <div>
-      <mat-toolbar color="primary" class="shadow-xl sticky top-0 z-10">
+      <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
         <div class="flex items-center">
           <figure class="flex justify-center">
             <img src="assets/images/logo.png" class="w-10" />
@@ -24,18 +24,13 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
           <h2 class="text-center font-bold">BULLDOZER</h2>
         </div>
         <div class="ml-auto flex items-center">
-          <bd-workspace-selector
+          <!-- <bd-workspace-selector
             class="mr-6"
             [connected]="(connected$ | ngrxPush) ?? false"
             [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
-          ></bd-workspace-selector>
+          ></bd-workspace-selector> -->
 
-          <hd-wallet-multi-button
-            class="bd-custom-color mr-6 h-auto leading-none"
-            color="basic"
-          ></hd-wallet-multi-button>
-
-          <hd-connection-menu class="mr-6"></hd-connection-menu>
+          <!-- <hd-connection-menu class="mr-6"></hd-connection-menu>
 
           <button
             mat-raised-button
@@ -44,7 +39,12 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             class="mr-6"
           >
             Profile
-          </button>
+          </button> -->
+
+          <hd-wallet-multi-button
+            class="bd-custom-color h-auto leading-none"
+            color="basic"
+          ></hd-wallet-multi-button>
 
           <bd-dark-theme-switch></bd-dark-theme-switch>
         </div>
@@ -52,7 +52,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       <mat-sidenav-container class="bd-custom-height-layout w-full">
         <mat-sidenav
           #drawer
-          class="bd-h-inherit bd-custom-top-toolbar w-52 pt-5"
+          class="bd-h-inherit bd-custom-top-toolbar w-52"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
