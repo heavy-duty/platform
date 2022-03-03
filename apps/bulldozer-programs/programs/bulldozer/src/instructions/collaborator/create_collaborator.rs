@@ -43,7 +43,7 @@ pub struct CreateCollaborator<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<CreateCollaborator>) -> ProgramResult {
+pub fn handle(ctx: Context<CreateCollaborator>) -> Result<()> {
   msg!("Create collaborator");
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,

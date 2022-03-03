@@ -7,7 +7,7 @@ module.exports = (config) => {
     process: false,
     util: false,
     assert: false,
-    stream: false
+    stream: false,
   };
 
   return config;

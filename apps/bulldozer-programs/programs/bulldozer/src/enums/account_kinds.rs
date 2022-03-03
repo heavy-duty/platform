@@ -8,17 +8,14 @@ pub enum AccountKinds {
 }
 
 impl AccountKinds {
-  pub fn create(
-    kind: u8,
-    collection: Option<Pubkey>,
-  ) -> std::result::Result<AccountKinds, ProgramError> {
+  pub fn create(kind: u8, collection: Option<Pubkey>) -> Result<AccountKinds> {
     match (kind, collection) {
       (0, Some(collection)) => Ok(AccountKinds::Document {
         id: 0,
         collection: collection,
       }),
       (1, _) => Ok(AccountKinds::Signer { id: 1 }),
-      _ => Err(ErrorCode::InvalidAccountKind.into()),
+      _ => Err(error!(ErrorCode::InvalidAccountKind)),
     }
   }
 }

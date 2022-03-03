@@ -51,13 +51,13 @@ describe('application', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
-      .postInstructions(
+      .postInstructions([
         SystemProgram.transfer({
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
-        })
-      )
+        }),
+      ])
       .rpc();
   });
 
@@ -234,13 +234,13 @@ describe('application', () => {
           workspace: newWorkspace.publicKey,
         })
         .signers([newWorkspace])
-        .postInstructions(
+        .postInstructions([
           SystemProgram.transfer({
             fromPubkey: program.provider.wallet.publicKey,
             toPubkey: newBudgetPublicKey,
             lamports: LAMPORTS_PER_SOL,
-          })
-        )
+          }),
+        ])
         .rpc();
       await program.methods
         .createApplication({ name: newApplicationName })

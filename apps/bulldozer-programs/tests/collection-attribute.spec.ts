@@ -53,13 +53,13 @@ describe('collection attribute', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
-      .postInstructions(
+      .postInstructions([
         SystemProgram.transfer({
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
-        })
-      )
+        }),
+      ])
       .rpc();
 
     await program.methods
@@ -153,7 +153,6 @@ describe('collection attribute', () => {
       .updateCollectionAttribute(attributesData)
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         attribute: attribute.publicKey,
       })
       .rpc();
@@ -179,7 +178,6 @@ describe('collection attribute', () => {
       .deleteCollectionAttribute()
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         collection: collection.publicKey,
         attribute: attribute.publicKey,
       })
@@ -299,7 +297,6 @@ describe('collection attribute', () => {
         .deleteCollectionAttribute()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           collection: collection.publicKey,
           attribute: newAttribute.publicKey,
         })
@@ -341,7 +338,7 @@ describe('collection attribute', () => {
         workspace: newWorkspace.publicKey,
       })
       .signers([newWorkspace])
-      .postInstructions(
+      .postInstructions([
         SystemProgram.transfer({
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
@@ -352,8 +349,8 @@ describe('collection attribute', () => {
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               126 // application account size
             )),
-        })
-      )
+        }),
+      ])
       .rpc();
     await program.methods
       .createApplication({ name: newApplicationName })

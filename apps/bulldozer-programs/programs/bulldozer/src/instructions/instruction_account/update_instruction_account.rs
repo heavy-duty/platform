@@ -41,7 +41,7 @@ pub struct UpdateInstructionAccount<'info> {
 pub fn validate(
   ctx: &Context<UpdateInstructionAccount>,
   arguments: &UpdateInstructionAccountArguments,
-) -> std::result::Result<bool, ProgramError> {
+) -> Result<bool> {
   match (
     arguments.kind,
     get_remaining_account::<Collection>(ctx.remaining_accounts, 0)?,
@@ -49,9 +49,9 @@ pub fn validate(
     arguments.space,
     get_remaining_account::<InstructionAccount>(ctx.remaining_accounts, 1)?,
   ) {
-    (0, None, _, _, _) => Err(ErrorCode::MissingCollectionAccount.into()),
-    (_, _, Some(0), None, _) => Err(ErrorCode::MissingSpace.into()),
-    (_, _, Some(0), _, None) => Err(ErrorCode::MissingPayerAccount.into()),
+    (0, None, _, _, _) => Err(error!(ErrorCode::MissingCollectionAccount)),
+    (_, _, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (_, _, Some(0), _, None) => Err(error!(ErrorCode::MissingPayerAccount)),
     _ => Ok(true),
   }
 }
@@ -59,7 +59,7 @@ pub fn validate(
 pub fn handle(
   ctx: Context<UpdateInstructionAccount>,
   arguments: UpdateInstructionAccountArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update instruction account");
   ctx.accounts.account.rename(arguments.name);
   ctx.accounts.account.change_settings(

@@ -13,7 +13,7 @@ impl User {
     self.bump = bump;
   }
 
-  pub fn initialize_timestamp(&mut self) -> ProgramResult {
+  pub fn initialize_timestamp(&mut self) -> Result<()> {
     self.created_at = Clock::get()?.unix_timestamp;
     Ok(())
   }

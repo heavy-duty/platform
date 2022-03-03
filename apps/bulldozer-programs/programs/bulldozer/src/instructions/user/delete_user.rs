@@ -18,7 +18,7 @@ pub struct DeleteUser<'info> {
   pub authority: Signer<'info>,
 }
 
-pub fn handle(_ctx: Context<DeleteUser>) -> ProgramResult {
+pub fn handle(_ctx: Context<DeleteUser>) -> Result<()> {
   msg!("Delete user");
   Ok(())
 }

@@ -3,7 +3,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { Bulldozer, IDL } from './bulldozer';
 
 export const BULLDOZER_PROGRAM_ID = new PublicKey(
-  '7WgU9mAEgB1doxyKisYd2HAxdsNUrpfP6tAPvyNYnFfD'
+  '3YZPhioKYt3GpHw93iPKnwf8NEZ4GwMaCDcxFP2VJzgg'
 );
 
 let currentEndpoint: string;

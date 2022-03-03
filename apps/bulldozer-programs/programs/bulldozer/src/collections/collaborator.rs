@@ -35,13 +35,13 @@ impl Collaborator {
     self.status = status;
   }
 
-  pub fn initialize_timestamp(&mut self) -> ProgramResult {
+  pub fn initialize_timestamp(&mut self) -> Result<()> {
     self.created_at = Clock::get()?.unix_timestamp;
     self.updated_at = Clock::get()?.unix_timestamp;
     Ok(())
   }
 
-  pub fn bump_timestamp(&mut self) -> ProgramResult {
+  pub fn bump_timestamp(&mut self) -> Result<()> {
     self.updated_at = Clock::get()?.unix_timestamp;
     Ok(())
   }

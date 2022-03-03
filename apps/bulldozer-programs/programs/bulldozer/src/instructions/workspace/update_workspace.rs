@@ -33,7 +33,7 @@ pub struct UpdateWorkspace<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateWorkspace>, arguments: UpdateWorkspaceArguments) -> Result<()> {
   msg!("Update workspace");
   ctx.accounts.workspace.rename(arguments.name);
   ctx.accounts.workspace.bump_timestamp()?;

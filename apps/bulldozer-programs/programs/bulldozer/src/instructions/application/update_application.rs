@@ -37,7 +37,7 @@ pub struct UpdateApplication<'info> {
 pub fn handle(
   ctx: Context<UpdateApplication>,
   arguments: UpdateApplicationArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update application");
   ctx.accounts.application.rename(arguments.name);
   ctx.accounts.application.bump_timestamp()?;

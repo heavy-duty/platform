@@ -20,7 +20,7 @@ impl AccountModifiers {
     space: Option<u16>,
     payer: Option<Pubkey>,
     close: Option<Pubkey>,
-  ) -> std::result::Result<Option<AccountModifiers>, ProgramError> {
+  ) -> Result<Option<AccountModifiers>> {
     match (modifier, space, payer, close) {
       (Some(0), space, payer, _) => Ok(Some(AccountModifiers::Init {
         id: 0,
@@ -32,7 +32,7 @@ impl AccountModifiers {
         close: close,
       })),
       (None, _, _, _) => Ok(None),
-      _ => Err(ErrorCode::InvalidAccountModifier.into()),
+      _ => Err(error!(ErrorCode::InvalidAccountModifier)),
     }
   }
 }

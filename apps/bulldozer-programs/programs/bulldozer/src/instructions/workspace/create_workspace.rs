@@ -52,7 +52,7 @@ pub struct CreateWorkspace<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> ProgramResult {
+pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {
   msg!("Create workspace");
   ctx
     .accounts

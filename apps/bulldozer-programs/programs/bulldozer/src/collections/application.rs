@@ -40,13 +40,13 @@ impl Application {
     self.quantity_of_instructions -= 1;
   }
 
-  pub fn initialize_timestamp(&mut self) -> ProgramResult {
+  pub fn initialize_timestamp(&mut self) -> Result<()> {
     self.created_at = Clock::get()?.unix_timestamp;
     self.updated_at = Clock::get()?.unix_timestamp;
     Ok(())
   }
 
-  pub fn bump_timestamp(&mut self) -> ProgramResult {
+  pub fn bump_timestamp(&mut self) -> Result<()> {
     self.updated_at = Clock::get()?.unix_timestamp;
     Ok(())
   }

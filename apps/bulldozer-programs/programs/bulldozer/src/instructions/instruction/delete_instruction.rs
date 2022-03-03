@@ -48,7 +48,7 @@ pub struct DeleteInstruction<'info> {
   pub budget: Box<Account<'info, Budget>>,
 }
 
-pub fn handle(ctx: Context<DeleteInstruction>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteInstruction>) -> Result<()> {
   msg!("Delete instruction");
   ctx.accounts.application.decrease_instruction_quantity();
   Ok(())

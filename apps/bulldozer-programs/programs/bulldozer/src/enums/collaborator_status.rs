@@ -9,12 +9,12 @@ pub enum CollaboratorStatus {
 }
 
 impl CollaboratorStatus {
-  pub fn create(status: u8) -> std::result::Result<CollaboratorStatus, ProgramError> {
+  pub fn create(status: u8) -> Result<CollaboratorStatus> {
     match status {
       0 => Ok(CollaboratorStatus::Pending { id: 0 }),
       1 => Ok(CollaboratorStatus::Approved { id: 1 }),
       2 => Ok(CollaboratorStatus::Rejected { id: 2 }),
-      _ => Err(ErrorCode::InvalidCollaboratorStatus.into()),
+      _ => Err(error!(ErrorCode::InvalidCollaboratorStatus)),
     }
   }
 }

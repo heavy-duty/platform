@@ -37,7 +37,7 @@ pub struct UpdateInstructionBody<'info> {
 pub fn handle(
   ctx: Context<UpdateInstructionBody>,
   arguments: UpdateInstructionBodyArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update instruction body");
   ctx.accounts.instruction.change_body(arguments.body);
   ctx.accounts.instruction.bump_timestamp()?;
