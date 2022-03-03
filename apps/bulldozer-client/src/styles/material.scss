@@ -1,6 +1,8 @@
 @use '@angular/material' as mat;
 @use '@angular/cdk';
 
+@use './components/custom-containers.scss' as containers;
+
 @import './themes/default-themes.scss';
 @import '@angular/material/theming';
 
@@ -12,11 +14,19 @@
 $theme: set-light-theme($theme-primary, $theme-accent, $theme-warn);
 $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 
+// $bd-background-color: mat.get-color-from-palette($theme);
+
 // Theme Init
 @include angular-material-theme($theme);
+// set custom themes
+@include containers.theme($theme);
+// end
 
 .darkMode {
   @include angular-material-theme($darkTheme);
+  // set custom themes
+  @include containers.theme($darkTheme);
+  // end
 }
 
 // Specific component overrides, pieces that are not in line with the general theming
@@ -116,6 +126,9 @@ mat-icon {
     }
   }
 }
+.mat-list-base {
+  padding: 0 !important;
+}
 
 .mat-menu-panel {
   max-width: unset !important;
@@ -140,8 +153,4 @@ mat-icon {
     color: #444444 !important;
     background-color: rgba(250, 250, 250, 0.42) !important;
   }
-}
-
-.mat-list-base {
-  padding: 0 !important;
 }

@@ -1,13 +1,7 @@
-// utilities
-$success-bgcolor: #059669;
-$warning-bgcolor: #fbbf24;
-$error-bgcolor: #dc2626;
+@import './constants/colors.scss';
+@import './constants/sizes.scss';
 
-$white-text-color: white;
-$black-text-color: black;
-
-$toolbar-height: 64px;
-
+// utilities (TO DO: move to antoher folder)
 @mixin snackbar-span {
   display: block;
   font-size: 1.125rem;
@@ -95,6 +89,6 @@ input[readonly] {
 
 .bd-custom-height-content {
   height: calc(
-    100vh - $toolbar-height - 48px - 1px
+    100vh - $toolbar-height - $tabs-height - 1px
   ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
 }
