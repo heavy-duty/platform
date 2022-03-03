@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ProgramError } from '@heavy-duty/anchor';
+import { Error } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { WalletError } from '@solana/wallet-adapter-base';
@@ -72,7 +72,7 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       return error;
     } else if (error instanceof WalletError) {
       return error.name;
-    } else if (error instanceof ProgramError) {
+    } else if (error instanceof Error) {
       return error.message;
     } else {
       return 'Unknown error';

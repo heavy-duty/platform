@@ -34,10 +34,7 @@ pub struct UpdateCollection<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(
-  ctx: Context<UpdateCollection>,
-  arguments: UpdateCollectionArguments,
-) -> ProgramResult {
+pub fn handle(ctx: Context<UpdateCollection>, arguments: UpdateCollectionArguments) -> Result<()> {
   msg!("Update collection");
   ctx.accounts.collection.rename(arguments.name);
   ctx.accounts.collection.bump_timestamp()?;

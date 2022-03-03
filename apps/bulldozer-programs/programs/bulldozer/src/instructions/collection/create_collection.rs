@@ -56,22 +56,19 @@ pub struct CreateCollection<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn validate(ctx: &Context<CreateCollection>) -> std::result::Result<bool, ProgramError> {
+pub fn validate(ctx: &Context<CreateCollection>) -> Result<bool> {
   if !has_enough_funds(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.collection.to_account_info(),
     Budget::get_rent_exemption()?,
   ) {
-    return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+    return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
   Ok(true)
 }
 
-pub fn handle(
-  ctx: Context<CreateCollection>,
-  arguments: CreateCollectionArguments,
-) -> ProgramResult {
+pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArguments) -> Result<()> {
   msg!("Create collection");
   fund_rent_for_account(
     ctx.accounts.budget.to_account_info(),

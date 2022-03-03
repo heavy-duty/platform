@@ -14,7 +14,7 @@ pub struct RetryCollaboratorStatusRequest<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<RetryCollaboratorStatusRequest>) -> ProgramResult {
+pub fn handle(ctx: Context<RetryCollaboratorStatusRequest>) -> Result<()> {
   msg!("Retry collaborator status request");
   ctx
     .accounts

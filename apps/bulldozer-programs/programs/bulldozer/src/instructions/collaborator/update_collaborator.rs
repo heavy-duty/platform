@@ -37,7 +37,7 @@ pub struct UpdateCollaborator<'info> {
 pub fn handle(
   ctx: Context<UpdateCollaborator>,
   arguments: UpdateCollaboratorArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update collaborator");
   ctx
     .accounts

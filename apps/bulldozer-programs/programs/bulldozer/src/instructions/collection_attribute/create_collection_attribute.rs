@@ -69,17 +69,17 @@ pub struct CreateCollectionAttribute<'info> {
 pub fn validate(
   ctx: &Context<CreateCollectionAttribute>,
   arguments: &CreateCollectionAttributeArguments,
-) -> std::result::Result<bool, ProgramError> {
+) -> Result<bool> {
   match (arguments.kind, arguments.max, arguments.max_length) {
-    (1, None, _) => Err(ErrorCode::MissingMax.into()),
-    (2, _, None) => Err(ErrorCode::MissingMaxLength.into()),
+    (1, None, _) => Err(error!(ErrorCode::MissingMax)),
+    (2, _, None) => Err(error!(ErrorCode::MissingMaxLength)),
     _ => {
       if !has_enough_funds(
         ctx.accounts.budget.to_account_info(),
         ctx.accounts.attribute.to_account_info(),
         Budget::get_rent_exemption()?,
       ) {
-        return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+        return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
       }
       Ok(true)
     }
@@ -89,7 +89,7 @@ pub fn validate(
 pub fn handle(
   ctx: Context<CreateCollectionAttribute>,
   arguments: CreateCollectionAttributeArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Create collection attribute");
   fund_rent_for_account(
     ctx.accounts.budget.to_account_info(),

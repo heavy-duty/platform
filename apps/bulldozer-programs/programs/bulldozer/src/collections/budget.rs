@@ -15,7 +15,7 @@ impl Budget {
     self.bump = bump;
   }
 
-  pub fn initialize_timestamp(&mut self) -> ProgramResult {
+  pub fn initialize_timestamp(&mut self) -> Result<()> {
     self.created_at = Clock::get()?.unix_timestamp;
     Ok(())
   }
@@ -25,7 +25,7 @@ impl Budget {
     8 + 32 + 32 + 1 + 8
   }
 
-  pub fn get_rent_exemption() -> std::result::Result<u64, ProgramError> {
+  pub fn get_rent_exemption() -> Result<u64> {
     let rent = Rent::get()?;
     Ok(rent.minimum_balance(Budget::space()))
   }

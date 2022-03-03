@@ -76,21 +76,19 @@ pub struct CreateInstructionRelation<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn validate(
-  ctx: &Context<CreateInstructionRelation>,
-) -> std::result::Result<bool, ProgramError> {
+pub fn validate(ctx: &Context<CreateInstructionRelation>) -> Result<bool> {
   if !has_enough_funds(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.relation.to_account_info(),
     Budget::get_rent_exemption()?,
   ) {
-    return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+    return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
   Ok(true)
 }
 
-pub fn handle(ctx: Context<CreateInstructionRelation>) -> ProgramResult {
+pub fn handle(ctx: Context<CreateInstructionRelation>) -> Result<()> {
   msg!("Create instruction relation");
   fund_rent_for_account(
     ctx.accounts.budget.to_account_info(),

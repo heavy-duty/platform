@@ -69,7 +69,7 @@ pub struct CreateInstructionAccount<'info> {
 pub fn validate(
   ctx: &Context<CreateInstructionAccount>,
   arguments: &CreateInstructionAccountArguments,
-) -> std::result::Result<bool, ProgramError> {
+) -> Result<bool> {
   match (
     arguments.kind,
     get_remaining_account::<Collection>(ctx.remaining_accounts, 0)?,
@@ -77,16 +77,16 @@ pub fn validate(
     arguments.space,
     get_remaining_account::<InstructionAccount>(ctx.remaining_accounts, 1)?,
   ) {
-    (0, None, _, _, _) => Err(ErrorCode::MissingCollectionAccount.into()),
-    (_, _, Some(0), None, _) => Err(ErrorCode::MissingSpace.into()),
-    (_, _, Some(0), _, None) => Err(ErrorCode::MissingPayerAccount.into()),
+    (0, None, _, _, _) => Err(error!(ErrorCode::MissingCollectionAccount)),
+    (_, _, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (_, _, Some(0), _, None) => Err(error!(ErrorCode::MissingPayerAccount)),
     _ => {
       if !has_enough_funds(
         ctx.accounts.budget.to_account_info(),
         ctx.accounts.account.to_account_info(),
         Budget::get_rent_exemption()?,
       ) {
-        return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+        return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
       }
       Ok(true)
     }
@@ -96,7 +96,7 @@ pub fn validate(
 pub fn handle(
   ctx: Context<CreateInstructionAccount>,
   arguments: CreateInstructionAccountArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Create instruction account");
   fund_rent_for_account(
     ctx.accounts.budget.to_account_info(),

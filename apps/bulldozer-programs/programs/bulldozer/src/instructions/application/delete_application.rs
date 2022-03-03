@@ -47,7 +47,7 @@ pub struct DeleteApplication<'info> {
   pub budget: Box<Account<'info, Budget>>,
 }
 
-pub fn handle(ctx: Context<DeleteApplication>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteApplication>) -> Result<()> {
   msg!("Delete application");
   ctx.accounts.workspace.decrease_application_quantity();
   Ok(())

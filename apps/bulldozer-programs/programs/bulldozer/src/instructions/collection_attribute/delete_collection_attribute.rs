@@ -46,7 +46,7 @@ pub struct DeleteCollectionAttribute<'info> {
   pub budget: Box<Account<'info, Budget>>,
 }
 
-pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
   msg!("Delete collection attribute");
   ctx.accounts.collection.decrease_attribute_quantity();
   Ok(())

@@ -34,7 +34,7 @@ pub struct DeleteWorkspace<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(_ctx: Context<DeleteWorkspace>) -> ProgramResult {
+pub fn handle(_ctx: Context<DeleteWorkspace>) -> Result<()> {
   msg!("Delete workspace");
   Ok(())
 }

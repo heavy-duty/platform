@@ -42,10 +42,10 @@ pub struct UpdateInstructionArgument<'info> {
 pub fn validate(
   _ctx: &Context<UpdateInstructionArgument>,
   arguments: &UpdateInstructionArgumentArguments,
-) -> std::result::Result<bool, ProgramError> {
+) -> Result<bool> {
   match (arguments.kind, arguments.max, arguments.max_length) {
-    (1, None, _) => Err(ErrorCode::MissingMax.into()),
-    (2, _, None) => Err(ErrorCode::MissingMaxLength.into()),
+    (1, None, _) => Err(error!(ErrorCode::MissingMax)),
+    (2, _, None) => Err(error!(ErrorCode::MissingMaxLength)),
     _ => Ok(true),
   }
 }
@@ -53,7 +53,7 @@ pub fn validate(
 pub fn handle(
   ctx: Context<UpdateInstructionArgument>,
   arguments: UpdateInstructionArgumentArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update collection argument");
   ctx.accounts.argument.rename(arguments.name);
   ctx.accounts.argument.change_settings(

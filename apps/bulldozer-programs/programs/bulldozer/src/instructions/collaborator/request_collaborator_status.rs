@@ -31,7 +31,7 @@ pub struct RequestCollaboratorStatus<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<RequestCollaboratorStatus>) -> ProgramResult {
+pub fn handle(ctx: Context<RequestCollaboratorStatus>) -> Result<()> {
   msg!("Request collaborator status");
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,

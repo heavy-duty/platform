@@ -1,7 +1,6 @@
-use anchor_lang::error;
 use anchor_lang::prelude::*;
 
-#[error]
+#[error_code]
 pub enum ErrorCode {
   #[msg("Invalid attribute kind")]
   InvalidAttributeKind,

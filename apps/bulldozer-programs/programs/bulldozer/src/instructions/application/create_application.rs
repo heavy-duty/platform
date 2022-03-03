@@ -52,13 +52,13 @@ pub struct CreateApplication<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn validate(ctx: &Context<CreateApplication>) -> std::result::Result<bool, ProgramError> {
+pub fn validate(ctx: &Context<CreateApplication>) -> Result<bool> {
   if !has_enough_funds(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.application.to_account_info(),
     Budget::get_rent_exemption()?,
   ) {
-    return Err(ErrorCode::BudgetHasUnsufficientFunds.into());
+    return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
   Ok(true)
@@ -67,7 +67,7 @@ pub fn validate(ctx: &Context<CreateApplication>) -> std::result::Result<bool, P
 pub fn handle(
   ctx: Context<CreateApplication>,
   arguments: CreateApplicationArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Create application");
   fund_rent_for_account(
     ctx.accounts.budget.to_account_info(),

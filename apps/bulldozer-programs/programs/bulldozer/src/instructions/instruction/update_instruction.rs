@@ -37,7 +37,7 @@ pub struct UpdateInstruction<'info> {
 pub fn handle(
   ctx: Context<UpdateInstruction>,
   arguments: UpdateInstructionArguments,
-) -> ProgramResult {
+) -> Result<()> {
   msg!("Update instruction");
   ctx.accounts.instruction.rename(arguments.name);
   ctx.accounts.instruction.bump_timestamp()?;

@@ -30,7 +30,7 @@ pub struct DeleteCollaborator<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<DeleteCollaborator>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteCollaborator>) -> Result<()> {
   msg!("Delete collaborator");
   ctx.accounts.workspace.decrease_collaborator_quantity();
   Ok(())

@@ -61,7 +61,7 @@ pub struct DeleteInstructionRelation<'info> {
   pub budget: Box<Account<'info, Budget>>,
 }
 
-pub fn handle(ctx: Context<DeleteInstructionRelation>) -> ProgramResult {
+pub fn handle(ctx: Context<DeleteInstructionRelation>) -> Result<()> {
   msg!("Delete instruction relation");
   ctx.accounts.from.decrease_relation_quantity();
   ctx.accounts.to.decrease_relation_quantity();

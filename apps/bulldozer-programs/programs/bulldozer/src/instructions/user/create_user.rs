@@ -19,7 +19,7 @@ pub struct CreateUser<'info> {
   pub system_program: Program<'info, System>,
 }
 
-pub fn handle(ctx: Context<CreateUser>) -> ProgramResult {
+pub fn handle(ctx: Context<CreateUser>) -> Result<()> {
   msg!("Create user");
   ctx
     .accounts
