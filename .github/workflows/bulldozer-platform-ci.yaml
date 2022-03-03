@@ -7,8 +7,8 @@ jobs:
     strategy:
       matrix:
         node: [14]
-        solana: [1.8.14, 1.9.5]
-        anchor: [0.21.0]
+        solana: [1.8.14, 1.9.9]
+        anchor: [0.22.1]
         os: [ubuntu-20.04]
     steps:
       - id: config-repo
