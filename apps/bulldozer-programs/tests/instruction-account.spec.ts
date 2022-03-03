@@ -60,13 +60,13 @@ describe('instruction account', () => {
         workspace: workspace.publicKey,
       })
       .signers([workspace])
-      .postInstructions(
+      .postInstructions([
         SystemProgram.transfer({
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
-        })
-      )
+        }),
+      ])
       .rpc();
     await program.methods
       .createApplication({ name: applicationName })
@@ -766,7 +766,6 @@ describe('instruction account', () => {
       .deleteInstructionAccount()
       .accounts({
         authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
         account: instructionAccount.publicKey,
         instruction: instruction.publicKey,
       })
@@ -817,7 +816,6 @@ describe('instruction account', () => {
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
           instruction: instruction.publicKey,
           account: newAccount.publicKey,
         })
@@ -857,7 +855,7 @@ describe('instruction account', () => {
         workspace: newWorkspace.publicKey,
       })
       .signers([newWorkspace])
-      .postInstructions(
+      .postInstructions([
         SystemProgram.transfer({
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
@@ -868,8 +866,8 @@ describe('instruction account', () => {
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               126 // application account size
             )),
-        })
-      )
+        }),
+      ])
       .rpc();
     await program.methods
       .createApplication({ name: newApplicationName })
