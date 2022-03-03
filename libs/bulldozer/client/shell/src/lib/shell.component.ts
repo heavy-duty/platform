@@ -7,10 +7,27 @@ import {
 } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+  HdSolanaTransactionsStore,
+} from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
+import {
+  combineLatest,
+  concatMap,
+  distinctUntilChanged,
+  EMPTY,
+  filter,
+  interval,
+  map,
+  pairwise,
+  pipe,
+  tap,
+} from 'rxjs';
+
+const POLL_DELAY_IN_MS = 5_000;
 
 @Component({
   selector: 'bd-shell',
@@ -100,13 +117,21 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _configStore: ConfigStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaTransactionsStore: HdSolanaTransactionsStore
   ) {
     super();
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
+    this._pollSignatures(
+      combineLatest({
+        workspaceId: this._configStore.workspaceId$,
+        interval: interval(POLL_DELAY_IN_MS),
+      }).pipe(map(({ workspaceId }) => workspaceId))
+    );
   }
 
   private readonly _redirectUnauthorized = this.effect<boolean>(
@@ -128,6 +153,32 @@ export class ShellComponent extends ComponentStore<object> {
       pairwise(),
       tap(() => this._router.navigate(['/']))
     )
+  );
+
+  private readonly _pollSignatures = this.effect<string | null>(
+    concatMap((workspaceId) => {
+      if (workspaceId === null) {
+        return EMPTY;
+      }
+
+      return this._hdSolanaApiService
+        .getSignaturesForAddress(workspaceId, undefined, 'confirmed')
+        .pipe(
+          tap((confirmedSignatureInfos) => {
+            confirmedSignatureInfos
+              .filter(
+                (confirmedSignatureInfo) =>
+                  (confirmedSignatureInfo as any).confirmationStatus ===
+                  'confirmed'
+              )
+              .forEach((confirmedSignatureInfo) =>
+                this._hdSolanaTransactionsStore.reportProgress(
+                  confirmedSignatureInfo.signature
+                )
+              );
+          })
+        );
+    })
   );
 
   onCloseTab(tabId: string) {

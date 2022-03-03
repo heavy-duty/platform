@@ -139,12 +139,9 @@ export class WorkspaceApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((signature) => {
-            this._hdSolanaTransactionsStore.reportProgress(
-              transaction,
-              signature
-            );
-          }),
+          tap((signature) =>
+            this._hdSolanaTransactionsStore.reportProgress(signature)
+          ),
           catchError((error) => this.handleError(error))
         )
       )

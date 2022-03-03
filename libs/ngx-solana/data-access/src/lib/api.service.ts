@@ -3,9 +3,12 @@ import { Injectable } from '@angular/core';
 import {
   AccountInfo,
   Commitment,
+  ConfirmedSignatureInfo,
+  Finality,
   GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
+  SignaturesForAddressOptions,
   SignatureStatus,
   Transaction,
   TransactionResponse,
@@ -250,6 +253,39 @@ export class HdSolanaApiService {
     );
   }
 
+  getSignaturesForAddress(
+    address: string,
+    options?: SignaturesForAddressOptions,
+    commitment: Finality = 'finalized'
+  ): Observable<ConfirmedSignatureInfo[]> {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient.post<ConfirmedSignatureInfo[]>(
+          apiEndpoint,
+          [
+            address,
+            {
+              before: options?.before,
+              limit: options?.limit,
+              until: options?.until,
+              commitment,
+            },
+          ],
+          {
+            headers: {
+              'solana-rpc-method': 'getSignaturesForAddress',
+            },
+          }
+        );
+      })
+    );
+  }
+
   getSignatureStatus(signature: string): Observable<SignatureStatus> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
@@ -273,7 +309,10 @@ export class HdSolanaApiService {
     );
   }
 
-  getTransaction(signature: string): Observable<TransactionResponse> {
+  getTransaction(
+    signature: string,
+    commitment: Finality = 'finalized'
+  ): Observable<TransactionResponse> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -283,7 +322,7 @@ export class HdSolanaApiService {
 
         return this._httpClient.post<TransactionResponse>(
           apiEndpoint,
-          signature,
+          [signature, { encoding: 'base64', commitment }],
           {
             headers: {
               'solana-rpc-method': 'getTransaction',

@@ -59,7 +59,7 @@ export class HdIsAccountUpdatingDirective extends ComponentStore<ViewModel> {
           }
 
           return pendingTransactions.some((transactionStatus) =>
-            transactionStatus.transaction.instructions.some((instruction) =>
+            transactionStatus.transaction?.instructions.some((instruction) =>
               instruction.keys.some(
                 ({ pubkey, isWritable }) =>
                   pubkey.toBase58() === accountId && isWritable

@@ -1,23 +1,19 @@
 import { Injectable } from '@angular/core';
-import {
-  HdSolanaApiService,
-  HdSolanaConnectionStore,
-} from '@heavy-duty/ngx-solana';
 import { ComponentStore } from '@ngrx/component-store';
 import {
-  SignatureStatus,
   Transaction,
   TransactionConfirmationStatus,
   TransactionResponse,
   TransactionSignature,
 } from '@solana/web3.js';
 import { concatMap, mergeMap, take, tap } from 'rxjs';
+import { HdSolanaApiService } from './api.service';
+import { HdSolanaConnectionStore } from './connection.store';
 
 export interface TransactionStatus {
-  transaction: Transaction;
   signature: TransactionSignature;
-  signatureStatus?: SignatureStatus;
   confirmationStatus?: TransactionConfirmationStatus;
+  transaction?: Transaction;
   transactionResponse?: TransactionResponse;
 }
 
@@ -51,15 +47,9 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
   }
 
   private readonly _addTransactionStatus = this.updater(
-    (
-      state,
-      transactionStatus: {
-        signature: TransactionSignature;
-        transaction: Transaction;
-      }
-    ) => ({
+    (state, signature: TransactionSignature) => ({
       ...state,
-      transactionStatuses: [...state.transactionStatuses, transactionStatus],
+      transactionStatuses: [...state.transactionStatuses, { signature }],
     })
   );
 
@@ -97,7 +87,16 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
       ...state,
       transactionStatuses: state.transactionStatuses.map((transactionStatus) =>
         transactionStatus.signature === signature
-          ? { ...transactionStatus, transactionResponse }
+          ? {
+              ...transactionStatus,
+              transactionResponse,
+              transaction: Transaction.from(
+                Buffer.from(
+                  (transactionResponse.transaction as any)[0] as string,
+                  'base64'
+                )
+              ),
+            }
           : transactionStatus
       ),
     })
@@ -110,12 +109,23 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
           .onSignatureChange(signature, 'confirmed')
           .pipe(
             take(1),
-            tap(() =>
+            concatMap(() => {
               this._setConfirmationStatus({
                 signature,
                 confirmationStatus: 'confirmed',
-              })
-            )
+              });
+
+              return this._hdSolanaApiService
+                .getTransaction(signature, 'confirmed')
+                .pipe(
+                  tap((transactionResponse) => {
+                    this._setTransactionResponse({
+                      signature,
+                      transactionResponse,
+                    });
+                  })
+                );
+            })
           )
       )
     );
@@ -146,9 +156,17 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
       )
     );
 
-  reportProgress(transaction: Transaction, signature: string) {
-    this._addTransactionStatus({ transaction, signature });
-    this._handleTransactionConfirmed(signature);
-    this._handleTransactionFinalized(signature);
+  reportProgress(signature: string) {
+    const { transactionStatuses } = this.get();
+
+    if (
+      !transactionStatuses.some(
+        (transactionStatus) => transactionStatus.signature === signature
+      )
+    ) {
+      this._addTransactionStatus(signature);
+      this._handleTransactionConfirmed(signature);
+      this._handleTransactionFinalized(signature);
+    }
   }
 }

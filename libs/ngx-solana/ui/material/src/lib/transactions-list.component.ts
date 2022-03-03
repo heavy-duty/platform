@@ -1,5 +1,4 @@
-import { Component, Input } from '@angular/core';
-import { TransactionStatus } from '@heavy-duty/ngx-solana';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'hd-transactions-list',
@@ -26,6 +25,4 @@ import { TransactionStatus } from '@heavy-duty/ngx-solana';
     </div>
   `,
 })
-export class HdTransactionsListComponent {
-  @Input() transactionStatuses: TransactionStatus[] | null = null;
-}
+export class HdTransactionsListComponent {}

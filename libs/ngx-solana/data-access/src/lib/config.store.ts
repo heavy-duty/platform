@@ -20,8 +20,8 @@ export interface NetworkConfig {
 const defaultNetworkConfigs: NetworkConfig[] = [
   {
     network: 'localhost',
-    apiEndpoint: 'http://localhost:8899',
-    webSocketEndpoint: 'ws://localhost:8900',
+    apiEndpoint: 'http://192.168.1.35:8899',
+    webSocketEndpoint: 'ws://192.168.1.35:8900',
   },
   {
     network: 'devnet',

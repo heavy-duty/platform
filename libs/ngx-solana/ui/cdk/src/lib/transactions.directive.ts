@@ -18,8 +18,8 @@ interface TransactionsChanges {
 
 export class HdSolanaTransactionsContext implements TransactionsChanges {
   public $implicit!: unknown;
-  public transactionStatuses!: TransactionStatus[] | null;
-  public transactionsInProcess!: number;
+  public transactionStatuses: TransactionStatus[] | null = null;
+  public transactionsInProcess = 0;
 }
 
 @Directive({
