@@ -20,25 +20,30 @@ import {
 import { generateInstructionCode } from '@heavy-duty/generator';
 import { ComponentStore } from '@ngrx/component-store';
 
-const COMMON_EDITOR_OPTIONS = {
+const COMMON_EDITOR_OPTIONS: CodeEditorOptions = {
   language: 'rust',
   automaticLayout: true,
   fontSize: 16,
-  wordWrap: true,
+  wordWrap: 'on',
+  theme: 'vs-light',
+  readOnly: false,
 };
 
 interface ViewModel {
   contextCode: string | null;
-  contextEditorOptions: CodeEditorOptions | null;
+  contextEditorOptions: CodeEditorOptions;
   handleCode: string | null;
-  handleEditorOptions: CodeEditorOptions | null;
+  handleEditorOptions: CodeEditorOptions;
 }
 
 const initialState: ViewModel = {
   contextCode: null,
-  contextEditorOptions: null,
+  contextEditorOptions: {
+    ...COMMON_EDITOR_OPTIONS,
+    readOnly: true,
+  },
   handleCode: null,
-  handleEditorOptions: null,
+  handleEditorOptions: COMMON_EDITOR_OPTIONS,
 };
 
 @Injectable()

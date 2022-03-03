@@ -5,6 +5,7 @@ import { CodeEditorOptions } from './types';
   selector: 'bd-code-editor',
   template: `
     <ngx-monaco-editor
+      *ngIf="options !== null"
       class="{{ customClass }}"
       [options]="options"
       [ngModel]="template"
@@ -16,13 +17,7 @@ import { CodeEditorOptions } from './types';
 export class CodeEditorComponent {
   @Input() template: string | null = null;
   @Input() customClass = '';
-  @Input() options: CodeEditorOptions | null = {
-    theme: 'vs-light',
-    language: 'rust',
-    automaticLayout: true,
-    readOnly: false,
-    fontSize: 16,
-  };
+  @Input() options: CodeEditorOptions | null = null;
   @Output() codeChange = new EventEmitter<string>();
 
   onChange(event: string) {
