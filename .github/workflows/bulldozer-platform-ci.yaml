@@ -6,7 +6,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        node: [14]
+        node: [17.6.0]
         solana: [1.8.14, 1.9.9]
         anchor: [0.22.1]
         os: [ubuntu-20.04]
