@@ -18,6 +18,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   template: `
     <ng-container *ngrxLet="workspace$; let activeWorkspace">
       <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
+        Workspace:
         {{
           activeWorkspace === null ? 'Select workspace' : activeWorkspace?.name
         }}

@@ -24,13 +24,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
           <h2 class="text-center font-bold">BULLDOZER</h2>
         </div>
         <div class="ml-auto flex items-center">
-          <!-- <bd-workspace-selector
-            class="mr-6"
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
-          ></bd-workspace-selector> -->
-
-          <!-- <hd-connection-menu class="mr-6"></hd-connection-menu>
+          <hd-connection-menu class="mr-6"></hd-connection-menu>
 
           <button
             mat-raised-button
@@ -39,10 +33,10 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             class="mr-6"
           >
             Profile
-          </button> -->
+          </button>
 
           <hd-wallet-multi-button
-            class="bd-custom-color h-auto leading-none"
+            class="bd-custom-color h-auto leading-none mr-6"
             color="basic"
           ></hd-wallet-multi-button>
 

@@ -80,9 +80,12 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
           </mat-expansion-panel>
         </div>
 
-        <div id="bd-application-buttons">
+        <div
+          id="bd-application-buttons"
+          class="flex flex-col items-center pt-2"
+        >
           <bd-workspace-selector
-            class="mr-6"
+            class="mb-2"
             [connected]="(connected$ | ngrxPush) ?? false"
             [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
           ></bd-workspace-selector>
