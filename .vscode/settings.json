@@ -6,7 +6,8 @@
     "editor",
     "wallet-adapter",
     "ngx-solana",
-    "ngx-websocket"
+    "ngx-websocket",
+    "broadcaster"
   ],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
