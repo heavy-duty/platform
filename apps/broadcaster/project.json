@@ -1,0 +1,52 @@
+{
+  "root": "apps/broadcaster",
+  "sourceRoot": "apps/broadcaster/src",
+  "projectType": "application",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/node:webpack",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/broadcaster",
+        "main": "apps/broadcaster/src/main.ts",
+        "tsConfig": "apps/broadcaster/tsconfig.app.json",
+        "assets": ["apps/broadcaster/src/assets"]
+      },
+      "configurations": {
+        "production": {
+          "optimization": true,
+          "extractLicenses": true,
+          "inspect": false,
+          "fileReplacements": [
+            {
+              "replace": "apps/broadcaster/src/environments/environment.ts",
+              "with": "apps/broadcaster/src/environments/environment.prod.ts"
+            }
+          ]
+        }
+      }
+    },
+    "serve": {
+      "executor": "@nrwl/node:node",
+      "options": {
+        "buildTarget": "broadcaster:build"
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": ["{options.outputFile}"],
+      "options": {
+        "lintFilePatterns": ["apps/broadcaster/**/*.ts"]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/apps/broadcaster"],
+      "options": {
+        "jestConfig": "apps/broadcaster/jest.config.js",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
+}

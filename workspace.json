@@ -1,6 +1,7 @@
 {
   "version": 2,
   "projects": {
+    "broadcaster": "apps/broadcaster",
     "bulldozer-client": "apps/bulldozer-client",
     "bulldozer-client-applications-components-application-explorer": "libs/bulldozer/client/applications/components/application-explorer",
     "bulldozer-client-applications-components-application-tab": "libs/bulldozer/client/applications/components/application-tab",
