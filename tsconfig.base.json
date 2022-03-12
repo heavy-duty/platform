@@ -203,6 +203,7 @@
       "@bulldozer-client/workspaces-data-access": [
         "libs/bulldozer/client/workspaces/data-access/src/index.ts"
       ],
+      "@heavy-duty/broadcaster": ["libs/broadcaster/data-access/src/index.ts"],
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],

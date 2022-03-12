@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/broadcaster/data-access",
+  "sourceRoot": "libs/broadcaster/data-access/src",
+  "prefix": "hd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/broadcaster/data-access"],
+      "options": {
+        "jestConfig": "libs/broadcaster/data-access/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/broadcaster/data-access/src/**/*.ts",
+          "libs/broadcaster/data-access/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

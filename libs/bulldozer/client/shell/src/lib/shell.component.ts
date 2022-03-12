@@ -7,10 +7,18 @@ import {
 } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
-import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
+import {
+  distinctUntilChanged,
+  filter,
+  pairwise,
+  pipe,
+  startWith,
+  tap,
+} from 'rxjs';
 
 @Component({
   selector: 'bd-shell',
@@ -93,14 +101,32 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _configStore: ConfigStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {
     super();
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
+    this._subscribeToWorkspace(this._configStore.workspaceId$);
   }
+
+  private readonly _subscribeToWorkspace = this.effect<string | null>(
+    pipe(
+      startWith(null),
+      pairwise(),
+      tap(([previous, current]) => {
+        if (previous !== null) {
+          this._hdBroadcasterStore.unsubscribe([previous]);
+        }
+
+        if (current !== null) {
+          this._hdBroadcasterStore.subscribe([current]);
+        }
+      })
+    )
+  );
 
   private readonly _redirectUnauthorized = this.effect<boolean>(
     pipe(

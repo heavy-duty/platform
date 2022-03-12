@@ -3,12 +3,13 @@ import { Injectable } from '@angular/core';
 import {
   AccountInfo,
   Commitment,
+  ConfirmedTransactionMeta,
+  Finality,
   GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
   SignatureStatus,
   Transaction,
-  TransactionResponse,
 } from '@solana/web3.js';
 import {
   concatMap,
@@ -24,6 +25,13 @@ import { HdSolanaConfigStore } from './config.store';
 export interface KeyedAccountInfo {
   accountId: string;
   accountInfo: AccountInfo<Buffer>;
+}
+
+export interface TransactionResponse<T> {
+  slot: number;
+  transaction: T;
+  meta: ConfirmedTransactionMeta | null;
+  blockTime?: number | null;
 }
 
 @Injectable()
@@ -272,7 +280,10 @@ export class HdSolanaApiService {
     );
   }
 
-  getTransaction(signature: string): Observable<TransactionResponse> {
+  getTransaction(
+    signature: string,
+    commitment: Finality = 'finalized'
+  ): Observable<TransactionResponse<Transaction>> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -280,15 +291,24 @@ export class HdSolanaApiService {
           return throwError(() => 'API endpoint missing');
         }
 
-        return this._httpClient.post<TransactionResponse>(
-          apiEndpoint,
-          signature,
-          {
-            headers: {
-              'solana-rpc-method': 'getTransaction',
-            },
-          }
-        );
+        return this._httpClient
+          .post<TransactionResponse<[string, string]>>(
+            apiEndpoint,
+            [signature, { encoding: 'base64', commitment }],
+            {
+              headers: {
+                'solana-rpc-method': 'getTransaction',
+              },
+            }
+          )
+          .pipe(
+            map((transactionResponse) => ({
+              ...transactionResponse,
+              transaction: Transaction.from(
+                Buffer.from(transactionResponse.transaction[0], 'base64')
+              ),
+            }))
+          );
       })
     );
   }

@@ -58,7 +58,7 @@ const initialState: ViewModel = {
 export interface WebSocketConfig {
   reconnection: boolean;
   reconnectionDelay: number;
-  reconnectionAttempts: number;
+  reconnectionAttempts?: number;
   reconnectionDelayMax: number;
   heartBeatDelay: number;
   heartBeatMessage: string;
@@ -330,6 +330,37 @@ export class WebSocketStore<T> extends ComponentStore<ViewModel> {
         this.patchState({ error });
       }
     }
+  }
+
+  send(message: string) {
+    const { webSocket } = this.get();
+
+    if (webSocket) {
+      webSocket.send(message);
+    }
+  }
+
+  fromEvent(event: string) {
+    return this.select(
+      this.webSocket$,
+      this.connected$,
+      (webSocket, connected) => ({
+        webSocket,
+        connected,
+      }),
+      { debounce: true }
+    ).pipe(
+      switchMap(({ connected, webSocket }) => {
+        if (!connected || webSocket === null) {
+          return EMPTY;
+        }
+
+        return fromEvent<MessageEvent<string>>(webSocket, 'message').pipe(
+          map((message) => JSON.parse(message.data)),
+          filter((message) => message.event === event)
+        );
+      })
+    );
   }
 
   reconnect() {

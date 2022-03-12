@@ -8,6 +8,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Connection, TransactionSignature } from '@solana/web3.js';
 import WebSocket, { Server } from 'ws';
 
 @WebSocketGateway({
@@ -18,15 +19,49 @@ import WebSocket, { Server } from 'ws';
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly _logger = new Logger(EventsGateway.name);
   @WebSocketServer()
-  server: Server;
+  private readonly _server: Server;
   private readonly _topics = new Map<string, Set<WebSocket>>();
+  private readonly _connection = new Connection('http://localhost:8899');
+
+  private broadcastTransaction(
+    emitter: WebSocket,
+    event: string,
+    transactionSignature: TransactionSignature,
+    topics: string[]
+  ) {
+    const clients = topics.reduce(
+      (clients, topic) =>
+        new Set([...clients, ...(this._topics.get(topic) ?? [])]),
+      new Set<WebSocket>()
+    );
+
+    emitter.send(
+      JSON.stringify({
+        event,
+        data: transactionSignature,
+      })
+    );
+
+    if (topics) {
+      clients.forEach((client) => {
+        if (client !== emitter) {
+          client.send(
+            JSON.stringify({
+              event,
+              data: transactionSignature,
+            })
+          );
+        }
+      });
+    }
+  }
 
   handleConnection(
     @ConnectedSocket()
     client: WebSocket
   ) {
     this._logger.log(
-      `Client connected. [${this.server.clients.size} clients connected]`
+      `Client connected. [${this._server.clients.size} clients connected]`
     );
 
     this._topics.set('*', new Set([...(this._topics.get('*') ?? []), client]));
@@ -37,7 +72,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client: WebSocket
   ) {
     this._logger.log(
-      `Client disconnected. [${this.server.clients.size} clients connected]`
+      `Client disconnected. [${this._server.clients.size} clients connected]`
     );
 
     this._topics.forEach((_, topic) => {
@@ -88,5 +123,46 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         this._topics.set(topic, new Set(clients));
       }
     });
+  }
+
+  @SubscribeMessage('transaction')
+  async onTransaction(
+    @ConnectedSocket()
+    client: WebSocket,
+    @MessageBody()
+    {
+      transactionSignature,
+      topics,
+    }: { transactionSignature: TransactionSignature; topics?: string[] }
+  ) {
+    this._logger.log(`Transaction received [${transactionSignature}].`);
+
+    await this._connection.confirmTransaction(
+      transactionSignature,
+      'confirmed'
+    );
+
+    this._logger.log(`Transaction confirmed [${transactionSignature}].`);
+
+    this.broadcastTransaction(
+      client,
+      'transactionConfirmed',
+      transactionSignature,
+      topics ?? []
+    );
+
+    await this._connection.confirmTransaction(
+      transactionSignature,
+      'finalized'
+    );
+
+    this._logger.log(`Transaction finalized [${transactionSignature}].`);
+
+    this.broadcastTransaction(
+      client,
+      'transactionFinalized',
+      transactionSignature,
+      topics ?? []
+    );
   }
 }
