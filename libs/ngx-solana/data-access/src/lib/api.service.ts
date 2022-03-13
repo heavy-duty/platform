@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import {
   AccountInfo,
   Commitment,
+  ConfirmedSignatureInfo,
   ConfirmedTransactionMeta,
   Finality,
   GetMultipleAccountsConfig,
@@ -19,7 +20,6 @@ import {
   map,
   Observable,
   of,
-  tap,
   throwError,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
@@ -286,7 +286,7 @@ export class HdSolanaApiService {
     address: string,
     config?: SignaturesForAddressOptions,
     commitment?: Finality
-  ): Observable<any> {
+  ): Observable<ConfirmedSignatureInfo> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -294,25 +294,23 @@ export class HdSolanaApiService {
           return throwError(() => 'API endpoint missing');
         }
 
-        return this._httpClient
-          .post(
-            apiEndpoint,
-            [
-              address,
-              {
-                limit: config?.limit,
-                before: config?.before,
-                until: config?.until,
-                commitment: commitment ?? 'finalized',
-              },
-            ],
+        return this._httpClient.post<ConfirmedSignatureInfo>(
+          apiEndpoint,
+          [
+            address,
             {
-              headers: {
-                'solana-rpc-method': 'getSignaturesForAddress',
-              },
-            }
-          )
-          .pipe(tap((a) => console.log(a)));
+              limit: config?.limit,
+              before: config?.before,
+              until: config?.until,
+              commitment: commitment ?? 'finalized',
+            },
+          ],
+          {
+            headers: {
+              'solana-rpc-method': 'getSignaturesForAddress',
+            },
+          }
+        );
       })
     );
   }

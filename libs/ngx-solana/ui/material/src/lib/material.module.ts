@@ -2,6 +2,7 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,6 +22,9 @@ import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
 import { HdEndpointsListItemComponent } from './endpoints-list-item.component';
 import { HdEndpointsListComponent } from './endpoints-list.component';
 import { HdNetworkSelectorComponent } from './network-selector.component';
+import { HdTransactionsListButtonComponent } from './transactions-list-button.component';
+import { HdTransactionsListComponent } from './transactions-list.component';
+import { HdTransactionsListTriggerDirective } from './transactions-list.trigger.directive';
 
 @NgModule({
   imports: [
@@ -28,6 +32,7 @@ import { HdNetworkSelectorComponent } from './network-selector.component';
     FormsModule,
     ReactiveFormsModule,
     ClipboardModule,
+    MatBottomSheetModule,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -49,7 +54,10 @@ import { HdNetworkSelectorComponent } from './network-selector.component';
     HdEndpointsListItemComponent,
     HdNetworkSelectorComponent,
     HdConnectionStatusComponent,
+    HdTransactionsListComponent,
+    HdTransactionsListTriggerDirective,
+    HdTransactionsListButtonComponent,
   ],
-  exports: [HdConnectionMenuComponent],
+  exports: [HdConnectionMenuComponent, HdTransactionsListButtonComponent],
 })
 export class HdSolanaMaterialModule {}

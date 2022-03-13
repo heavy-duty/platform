@@ -48,7 +48,6 @@ export class HdBroadcasterDirective extends ComponentStore<object> {
 
   private readonly _handleChanges = this.effect<BroadcasterChanges>(
     tap(({ transactionStatuses, transactionsInProcess }) => {
-      console.log(transactionStatuses, transactionsInProcess);
       this._context.transactionStatuses = transactionStatuses;
       this._context.transactionsInProcess = transactionsInProcess;
       this._changeDetectionRef.markForCheck();

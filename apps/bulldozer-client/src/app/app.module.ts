@@ -6,7 +6,11 @@ import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
 import { HdBroadcasterModule } from '@heavy-duty/broadcaster';
-import { HdSolanaApiInterceptor, HdSolanaModule } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiInterceptor,
+  HdSolanaModule,
+  HdSolanaTransactionsInterceptor,
+} from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
 import { AppComponent } from './app.component';
 
@@ -49,6 +53,11 @@ import { AppComponent } from './app.component';
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HdSolanaApiInterceptor,
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HdSolanaTransactionsInterceptor,
       multi: true,
     },
   ],
