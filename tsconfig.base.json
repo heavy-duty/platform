@@ -204,6 +204,10 @@
         "libs/bulldozer/client/workspaces/data-access/src/index.ts"
       ],
       "@heavy-duty/broadcaster": ["libs/broadcaster/data-access/src/index.ts"],
+      "@heavy-duty/broadcaster-cdk": ["libs/broadcaster/ui/cdk/src/index.ts"],
+      "@heavy-duty/broadcaster-material": [
+        "libs/broadcaster/ui/material/src/index.ts"
+      ],
       "@heavy-duty/bulldozer-devkit": [
         "libs/bulldozer/shared/devkit/src/index.ts"
       ],

@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createWorkspace,
@@ -29,6 +30,7 @@ import {
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -36,7 +38,8 @@ import {
 export class WorkspaceApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {}
 
   private handleError(error: string) {
@@ -135,9 +138,15 @@ export class WorkspaceApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

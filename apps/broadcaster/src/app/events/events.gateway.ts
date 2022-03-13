@@ -24,36 +24,21 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly _connection = new Connection('http://localhost:8899');
 
   private broadcastTransaction(
-    emitter: WebSocket,
     event: string,
-    transactionSignature: TransactionSignature,
-    topics: string[]
+    signature: TransactionSignature,
+    topic: string
   ) {
-    const clients = topics.reduce(
-      (clients, topic) =>
-        new Set([...clients, ...(this._topics.get(topic) ?? [])]),
-      new Set<WebSocket>()
+    this._topics.get(topic)?.forEach((client) =>
+      client.send(
+        JSON.stringify({
+          event,
+          data: {
+            signature,
+            topic,
+          },
+        })
+      )
     );
-
-    emitter.send(
-      JSON.stringify({
-        event,
-        data: transactionSignature,
-      })
-    );
-
-    if (topics) {
-      clients.forEach((client) => {
-        if (client !== emitter) {
-          client.send(
-            JSON.stringify({
-              event,
-              data: transactionSignature,
-            })
-          );
-        }
-      });
-    }
   }
 
   handleConnection(
@@ -92,15 +77,13 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onSubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topics: string[]
+    @MessageBody() topic: string
   ) {
-    this._logger.log(`Client subscribed to [${topics.join(', ')}].`);
+    this._logger.log(`Client subscribed to [${topic}].`);
 
-    topics.forEach((topic) =>
-      this._topics.set(
-        topic,
-        new Set([...(this._topics.get(topic) ?? []), client])
-      )
+    this._topics.set(
+      topic,
+      new Set([...(this._topics.get(topic) ?? []), client])
     );
   }
 
@@ -108,32 +91,31 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onUnsubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topics: string[]
+    @MessageBody() topic: string
   ) {
-    this._logger.log(`Client unsubscribed from [${topics.join(', ')}].`);
+    this._logger.log(`Client unsubscribed from [${topic}].`);
 
-    topics.forEach((topic) => {
-      const clients = [...(this._topics.get(topic) ?? [])].filter(
-        (ws) => ws !== client
-      );
+    const clients = [...(this._topics.get(topic) ?? [])].filter(
+      (ws) => ws !== client
+    );
 
-      if (clients.length === 0) {
-        this._topics.delete(topic);
-      } else {
-        this._topics.set(topic, new Set(clients));
-      }
-    });
+    if (clients.length === 0) {
+      this._topics.delete(topic);
+    } else {
+      this._topics.set(topic, new Set(clients));
+    }
   }
 
   @SubscribeMessage('transaction')
   async onTransaction(
-    @ConnectedSocket()
-    client: WebSocket,
     @MessageBody()
     {
       transactionSignature,
-      topics,
-    }: { transactionSignature: TransactionSignature; topics?: string[] }
+      topic,
+    }: {
+      transactionSignature: TransactionSignature;
+      topic: string;
+    }
   ) {
     this._logger.log(`Transaction received [${transactionSignature}].`);
 
@@ -145,10 +127,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this._logger.log(`Transaction confirmed [${transactionSignature}].`);
 
     this.broadcastTransaction(
-      client,
       'transactionConfirmed',
       transactionSignature,
-      topics ?? []
+      topic
     );
 
     await this._connection.confirmTransaction(
@@ -159,10 +140,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this._logger.log(`Transaction finalized [${transactionSignature}].`);
 
     this.broadcastTransaction(
-      client,
       'transactionFinalized',
       transactionSignature,
-      topics ?? []
+      topic
     );
   }
 }

@@ -4,6 +4,22 @@
   "sourceRoot": "libs/broadcaster/data-access/src",
   "prefix": "hd",
   "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/broadcaster/data-access"],
+      "options": {
+        "project": "libs/broadcaster/data-access/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/broadcaster/data-access/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/broadcaster/data-access/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": ["coverage/libs/broadcaster/data-access"],

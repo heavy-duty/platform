@@ -7,16 +7,21 @@ import {
 } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
+import {
+  HdBroadcasterSocketStore,
+  HdBroadcasterStore,
+} from '@heavy-duty/broadcaster';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import {
   distinctUntilChanged,
+  EMPTY,
   filter,
   pairwise,
   pipe,
   startWith,
+  switchMap,
   tap,
 } from 'rxjs';
 
@@ -75,6 +80,14 @@ import {
           <router-outlet></router-outlet>
         </mat-sidenav-content>
       </mat-sidenav-container>
+
+      <div class="block fixed bottom-0 right-0 w-screen z-20">
+        <div class="flex justify-center">
+          <hd-transactions-list-button
+            class="mat-elevation-z8"
+          ></hd-transactions-list-button>
+        </div>
+      </div>
     </div>
   `,
   providers: [
@@ -102,14 +115,25 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdBroadcasterStore: HdBroadcasterStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore
   ) {
     super();
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
-    this._subscribeToWorkspace(this._configStore.workspaceId$);
+    this._subscribeToWorkspace(
+      this._hdBroadcasterSocketStore.connected$.pipe(
+        switchMap((connected) => {
+          if (!connected) {
+            return EMPTY;
+          }
+
+          return this._configStore.workspaceId$;
+        })
+      )
+    );
   }
 
   private readonly _subscribeToWorkspace = this.effect<string | null>(
@@ -118,11 +142,11 @@ export class ShellComponent extends ComponentStore<object> {
       pairwise(),
       tap(([previous, current]) => {
         if (previous !== null) {
-          this._hdBroadcasterStore.unsubscribe([previous]);
+          this._hdBroadcasterStore.unsubscribe(previous);
         }
 
         if (current !== null) {
-          this._hdBroadcasterStore.subscribe([current]);
+          this._hdBroadcasterStore.subscribe(current);
         }
       })
     )
