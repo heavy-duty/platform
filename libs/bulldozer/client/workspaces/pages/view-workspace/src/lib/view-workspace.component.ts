@@ -58,6 +58,10 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
           (toggleShowRejected)="onToggleShowRejectedCollaborators()"
         ></bd-collaborators-list>
+
+        <bd-workspace-transactions
+          [transactionStatuses]="(transactionStatuses$ | ngrxPush) ?? null"
+        ></bd-workspace-transactions>
       </main>
     </div>
   `,
@@ -85,6 +89,7 @@ export class ViewWorkspaceComponent {
   readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly budgetMinimumBalanceForRentExemption$ =
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
+  readonly transactionStatuses$ = this._viewWorkspaceStore.transactionStatuses$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,

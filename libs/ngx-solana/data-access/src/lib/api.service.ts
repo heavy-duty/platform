@@ -8,6 +8,7 @@ import {
   GetMultipleAccountsConfig,
   GetProgramAccountsConfig,
   PublicKey,
+  SignaturesForAddressOptions,
   SignatureStatus,
   Transaction,
 } from '@solana/web3.js';
@@ -18,6 +19,7 @@ import {
   map,
   Observable,
   of,
+  tap,
   throwError,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
@@ -276,6 +278,41 @@ export class HdSolanaApiService {
             }
           )
           .pipe(map(({ value: [status] }) => status));
+      })
+    );
+  }
+
+  getSignaturesForAddress(
+    address: string,
+    config?: SignaturesForAddressOptions,
+    commitment?: Finality
+  ): Observable<any> {
+    return this._hdSolanaConfigStore.apiEndpoint$.pipe(
+      first(),
+      concatMap((apiEndpoint) => {
+        if (apiEndpoint === null) {
+          return throwError(() => 'API endpoint missing');
+        }
+
+        return this._httpClient
+          .post(
+            apiEndpoint,
+            [
+              address,
+              {
+                limit: config?.limit,
+                before: config?.before,
+                until: config?.until,
+                commitment: commitment ?? 'finalized',
+              },
+            ],
+            {
+              headers: {
+                'solana-rpc-method': 'getSignaturesForAddress',
+              },
+            }
+          )
+          .pipe(tap((a) => console.log(a)));
       })
     );
   }

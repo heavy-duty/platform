@@ -7,6 +7,7 @@ import {
 } from '@bulldozer-client/collaborators-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
@@ -65,6 +66,14 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         )
         .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
   );
+  readonly transactionStatuses$ = this.select(
+    this.workspaceId$,
+    this._hdBroadcasterStore.transactionStatuses$,
+    (workspaceId, transactionStatuses) =>
+      transactionStatuses.filter(
+        (transactionStatus) => transactionStatus.topic === workspaceId
+      )
+  );
 
   constructor(
     private readonly _tabStore: TabStore,
@@ -73,6 +82,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _budgetApiService: BudgetApiService,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore,
     route: ActivatedRoute
   ) {
     super(initialState);
