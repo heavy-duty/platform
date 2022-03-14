@@ -25,7 +25,7 @@
     "@materia-ui/ngx-monaco-editor": "^6.0.0",
     "@ngrx/component": "13.0.2",
     "@ngrx/component-store": "13.0.2",
-    "@nrwl/angular": "13.8.4",
+    "@nrwl/angular": "13.8.8",
     "@solana/wallet-adapter-base": "^0.9.2",
     "@solana/wallet-adapter-wallets": "^0.14.2",
     "@solana/web3.js": "^1.36.0",
@@ -51,14 +51,14 @@
     "@commitlint/config-conventional": "^13.2.0",
     "@danmt/nx-anchor": "0.0.6",
     "@ngneat/tailwind": "^7.0.3",
-    "@nrwl/cli": "13.8.4",
-    "@nrwl/cypress": "13.8.4",
-    "@nrwl/eslint-plugin-nx": "13.8.4",
-    "@nrwl/jest": "13.8.4",
-    "@nrwl/js": "13.8.4",
-    "@nrwl/linter": "13.8.4",
-    "@nrwl/tao": "13.8.4",
-    "@nrwl/workspace": "13.8.4",
+    "@nrwl/cli": "13.8.8",
+    "@nrwl/cypress": "13.8.8",
+    "@nrwl/eslint-plugin-nx": "13.8.8",
+    "@nrwl/jest": "13.8.8",
+    "@nrwl/js": "13.8.8",
+    "@nrwl/linter": "13.8.8",
+    "@nrwl/tao": "13.8.8",
+    "@nrwl/workspace": "13.8.8",
     "@types/chai": "^4.2.21",
     "@types/file-saver": "^2.0.3",
     "@types/jest": "27.0.2",
@@ -99,3 +99,4 @@
     ]
   }
 }
+
