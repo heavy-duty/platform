@@ -1,14 +1,19 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 
 @Component({
   selector: 'bd-workspace-explorer',
   template: `
     <div class="h-full flex flex-col">
-      <div class="flex-grow overflow-auto">
-        <figure class="pt-4 pb-4 w-full flex justify-center">
-          <img src="assets/images/logo.png" />
-        </figure>
-        <h2 class="mt-4 text-center">BULLDOZER</h2>
+      <div class="flex-grow overflow-auto bd-custom-height-sidebar">
+        <div class="flex flex-col items-center pt-3 bd-custom-background">
+          <bd-workspace-selector
+            class="mb-3"
+            [connected]="(connected$ | ngrxPush) ?? false"
+            [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
+          ></bd-workspace-selector>
+        </div>
         <bd-application-explorer
           *ngIf="workspaceId !== null"
           [connected]="connected"
@@ -23,4 +28,12 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 export class WorkspaceExplorerComponent {
   @Input() connected = false;
   @Input() workspaceId: string | null = null;
+
+  constructor(
+    private readonly _configStore: ConfigStore,
+    private readonly _walletStore: WalletStore
+  ) {}
+
+  readonly connected$ = this._walletStore.connected$;
+  readonly workspaceIds$ = this._configStore.workspaceIds$;
 }

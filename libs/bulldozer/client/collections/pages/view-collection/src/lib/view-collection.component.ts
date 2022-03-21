@@ -15,7 +15,7 @@ import { ViewCollectionStore } from './view-collection.store';
   template: `
     <div class="flex" *ngIf="collection$ | ngrxPush as collection">
       <div
-        class="p-5 w-1/2 bd-custom-height-layout overflow-auto flex flex-col gap-5"
+        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
       >
         <header bdPageHeader>
           <h1>
@@ -52,7 +52,7 @@ import { ViewCollectionStore } from './view-collection.store';
           </bd-collection-attributes-list>
         </main>
       </div>
-      <div class="w-1/2 bd-custom-height-layout overflow-hidden">
+      <div class="w-1/2 bd-custom-height-content overflow-hidden">
         <bd-code-editor
           [customClass]="'bd-custom-monaco-editor'"
           [template]="(code$ | ngrxPush) ?? null"

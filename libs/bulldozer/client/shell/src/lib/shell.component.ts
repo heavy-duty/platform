@@ -15,58 +15,59 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 @Component({
   selector: 'bd-shell',
   template: `
-    <mat-sidenav-container fullscreen>
-      <mat-sidenav
-        #drawer
-        class="w-64"
-        fixedInViewport
-        [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
-        [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
-        [opened]="(isHandset$ | ngrxPush) === false"
-      >
-        <bd-workspace-explorer
-          [connected]="(connected$ | ngrxPush) ?? false"
-          [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
-        ></bd-workspace-explorer>
-      </mat-sidenav>
-      <mat-sidenav-content>
-        <mat-toolbar color="primary" class="shadow-xl sticky top-0 z-10">
-          <div class="ml-auto flex items-center">
-            <bd-workspace-selector
-              class="mr-6"
-              [connected]="(connected$ | ngrxPush) ?? false"
-              [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
-            ></bd-workspace-selector>
+    <div>
+      <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
+        <div class="flex items-center">
+          <figure class="flex justify-center">
+            <img src="assets/images/logo.png" class="w-10" />
+          </figure>
+          <h2 class="text-center font-bold">BULLDOZER</h2>
+        </div>
+        <div class="ml-auto flex items-center">
+          <hd-connection-menu class="mr-6"></hd-connection-menu>
 
-            <hd-wallet-multi-button
-              class="bd-custom-color mr-6 h-auto leading-none"
-              color="basic"
-            ></hd-wallet-multi-button>
+          <button
+            mat-raised-button
+            color="basic"
+            [routerLink]="['/profile']"
+            class="mr-6"
+          >
+            Profile
+          </button>
 
-            <hd-connection-menu class="mr-6"></hd-connection-menu>
+          <hd-wallet-multi-button
+            class="bd-custom-color h-auto leading-none mr-6"
+            color="basic"
+          ></hd-wallet-multi-button>
 
-            <button
-              mat-raised-button
-              color="basic"
-              [routerLink]="['/profile']"
-              class="mr-6"
-            >
-              Profile
-            </button>
+          <bd-dark-theme-switch></bd-dark-theme-switch>
+        </div>
+      </mat-toolbar>
+      <mat-sidenav-container class="bd-custom-height-layout w-full">
+        <mat-sidenav
+          #drawer
+          class="bd-h-inherit bd-custom-top-toolbar w-52"
+          fixedInViewport
+          [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
+          [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
+          [opened]="(isHandset$ | ngrxPush) === false"
+        >
+          <bd-workspace-explorer
+            [connected]="(connected$ | ngrxPush) ?? false"
+            [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
+          ></bd-workspace-explorer>
+        </mat-sidenav>
+        <mat-sidenav-content>
+          <bd-tab-list
+            [tabs]="(tabs$ | ngrxPush) ?? null"
+            [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
+            (closeTab)="onCloseTab($event)"
+          ></bd-tab-list>
 
-            <bd-dark-theme-switch></bd-dark-theme-switch>
-          </div>
-        </mat-toolbar>
-
-        <bd-tab-list
-          [tabs]="(tabs$ | ngrxPush) ?? null"
-          [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
-          (closeTab)="onCloseTab($event)"
-        ></bd-tab-list>
-
-        <router-outlet></router-outlet>
-      </mat-sidenav-content>
-    </mat-sidenav-container>
+          <router-outlet></router-outlet>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    </div>
   `,
   providers: [
     TabStore,
