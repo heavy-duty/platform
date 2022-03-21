@@ -8,99 +8,87 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
   selector: 'bd-application-explorer',
   template: `
     <ng-container *ngrxLet="applications$; let applications">
-      <div class="bd-custom-height-sidebar">
-        <div id="bd-application-panel">
-          <mat-expansion-panel
-            *ngFor="let application of applications; trackBy: identify"
-            class="flex-shrink-0"
-            togglePosition="before"
-          >
-            <mat-expansion-panel-header class="pl-4 pr-0">
-              <div class="flex justify-between items-center flex-grow">
-                <mat-panel-title> {{ application.name }} </mat-panel-title>
-                <button
-                  mat-icon-button
-                  [attr.aria-label]="
-                    'More options of ' + application.name + ' application'
-                  "
-                  [matMenuTriggerFor]="applicationOptionsMenu"
-                  bdStopPropagation
-                >
-                  <mat-icon>more_horiz</mat-icon>
-                </button>
-              </div>
-            </mat-expansion-panel-header>
-
-            <bd-collection-explorer
-              [connected]="connected"
-              [applicationId]="application.id"
-              [workspaceId]="workspaceId"
-            >
-            </bd-collection-explorer>
-
-            <bd-instruction-explorer
-              [connected]="connected"
-              [applicationId]="application.id"
-              [workspaceId]="workspaceId"
-            >
-            </bd-instruction-explorer>
-
-            <mat-menu #applicationOptionsMenu="matMenu">
-              <a
-                mat-menu-item
-                [routerLink]="[
-                  '/workspaces',
-                  application.data.workspace,
-                  'applications',
-                  application.id
-                ]"
-              >
-                <mat-icon>launch</mat-icon>
-                <span>View application</span>
-              </a>
-              <button
-                mat-menu-item
-                bdEditApplicationTrigger
-                [application]="application"
-                (editApplication)="onUpdateApplication(application.id, $event)"
-                [disabled]="!connected"
-              >
-                <mat-icon>edit</mat-icon>
-                <span>Edit application</span>
-              </button>
-              <button
-                mat-menu-item
-                (click)="onDeleteApplication(application.id)"
-                [disabled]="!connected"
-              >
-                <mat-icon>delete</mat-icon>
-                <span>Delete application</span>
-              </button>
-            </mat-menu>
-          </mat-expansion-panel>
-        </div>
-
-        <div
-          id="bd-application-buttons"
-          class="flex flex-col items-center pt-2"
+      <div class="flex flex-col items-center pb-3 bd-custom-background">
+        <button
+          mat-raised-button
+          color="primary"
+          class="block"
+          [disabled]="!connected"
+          bdEditApplicationTrigger
+          (editApplication)="onCreateApplication($event)"
         >
-          <bd-workspace-selector
-            class="mb-2"
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [workspaceIds]="(workspaceIds$ | ngrxPush) ?? null"
-          ></bd-workspace-selector>
-          <button
-            mat-raised-button
-            color="primary"
-            class="block"
-            [disabled]="!connected"
-            aria-label="Create application"
-            bdEditApplicationTrigger
-            (editApplication)="onCreateApplication($event)"
+          Create application
+        </button>
+      </div>
+      <div class="overflow-y-auto">
+        <mat-expansion-panel
+          *ngFor="let application of applications; trackBy: identify"
+          class="flex-shrink-0"
+          togglePosition="before"
+        >
+          <mat-expansion-panel-header class="pl-4 pr-0">
+            <div class="flex justify-between items-center flex-grow">
+              <mat-panel-title> {{ application.name }} </mat-panel-title>
+              <button
+                mat-icon-button
+                [attr.aria-label]="
+                  'More options of ' + application.name + ' application'
+                "
+                [matMenuTriggerFor]="applicationOptionsMenu"
+                bdStopPropagation
+              >
+                <mat-icon>more_horiz</mat-icon>
+              </button>
+            </div>
+          </mat-expansion-panel-header>
+
+          <bd-collection-explorer
+            [connected]="connected"
+            [applicationId]="application.id"
+            [workspaceId]="workspaceId"
           >
-            Create application
-          </button>
-        </div>
+          </bd-collection-explorer>
+
+          <bd-instruction-explorer
+            [connected]="connected"
+            [applicationId]="application.id"
+            [workspaceId]="workspaceId"
+          >
+          </bd-instruction-explorer>
+
+          <mat-menu #applicationOptionsMenu="matMenu">
+            <a
+              mat-menu-item
+              [routerLink]="[
+                '/workspaces',
+                application.data.workspace,
+                'applications',
+                application.id
+              ]"
+            >
+              <mat-icon>launch</mat-icon>
+              <span>View application</span>
+            </a>
+            <button
+              mat-menu-item
+              bdEditApplicationTrigger
+              [application]="application"
+              (editApplication)="onUpdateApplication(application.id, $event)"
+              [disabled]="!connected"
+            >
+              <mat-icon>edit</mat-icon>
+              <span>Edit application</span>
+            </button>
+            <button
+              mat-menu-item
+              (click)="onDeleteApplication(application.id)"
+              [disabled]="!connected"
+            >
+              <mat-icon>delete</mat-icon>
+              <span>Delete application</span>
+            </button>
+          </mat-menu>
+        </mat-expansion-panel>
       </div>
     </ng-container>
   `,

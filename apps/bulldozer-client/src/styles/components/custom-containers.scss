@@ -11,7 +11,7 @@
   $primary-palette: map.get($color-config, 'background');
 
   .bd-custom-height-sidebar {
-    #bd-application-buttons {
+    .bd-custom-background {
       background-color: mat.get-color-from-palette(
         $primary-palette,
         'background'
@@ -24,15 +24,5 @@
   $color-config: mat.get-color-config($theme);
   @if $color-config != null {
     @include color($theme);
-  }
-}
-
-.bd-custom-height-sidebar {
-  #bd-application-panel {
-    overflow-y: auto;
-    height: calc(100vh - $toolbar-height - $actions-buttons-application);
-  }
-  #bd-application-buttons {
-    height: $actions-buttons-application;
   }
 }
