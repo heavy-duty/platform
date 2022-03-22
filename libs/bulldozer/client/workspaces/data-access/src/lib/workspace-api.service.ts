@@ -46,18 +46,20 @@ export class WorkspaceApiService {
     return throwError(() => parseBulldozerError(error) ?? null);
   }
 
-  // get workspaces
-  find(filters: WorkspaceFilters) {
+  // get workspace ids
+  findIds(filters: WorkspaceFilters) {
     const query = workspaceQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
+        ...query,
+        dataSlice: {
+          length: 0,
+          offset: 0,
+        },
+      })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createWorkspaceDocument(pubkey, account)
-          )
-        )
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }
 

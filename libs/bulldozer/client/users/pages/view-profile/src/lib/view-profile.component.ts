@@ -4,7 +4,10 @@ import {
   UserInstructionsStore,
   UserStore,
 } from '@bulldozer-client/users-data-access';
-import { WorkspaceQueryStore } from '@bulldozer-client/workspaces-data-access';
+import {
+  WorkspaceQueryStore,
+  WorkspacesStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
@@ -37,14 +40,14 @@ import { ViewProfileStore } from './view-profile.store';
       </main>
     </div>
   `,
-  providers: [WorkspaceQueryStore, ViewProfileStore],
+  providers: [WorkspacesStore, WorkspaceQueryStore, ViewProfileStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewProfileComponent {
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
   readonly activeWorkspaceId$ = this._configStore.workspaceId$;
-  readonly workspaces$ = this._workspaceQueryStore.workspaces$;
+  readonly workspaces$ = this._workspacesStore.workspaces$;
   readonly isCreatingUser$ = this._userStore.isCreating$;
   readonly isDeletingUser$ = this._userStore.isDeleting$;
 
@@ -53,6 +56,7 @@ export class ViewProfileComponent {
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _workspaceQueryStore: WorkspaceQueryStore,
+    private readonly _workspacesStore: WorkspacesStore,
     private readonly _configStore: ConfigStore,
     private readonly _userInstructionsStore: UserInstructionsStore,
     private readonly _viewProfileStore: ViewProfileStore
@@ -62,6 +66,9 @@ export class ViewProfileComponent {
       this._walletStore.publicKey$.pipe(
         map((publicKey) => publicKey && { authority: publicKey.toBase58() })
       )
+    );
+    this._workspacesStore.setWorkspaceIds(
+      this._workspaceQueryStore.workspaceIds$
     );
     this._userStore.toggleCreating(
       this._userInstructionsStore.instructionStatuses$.pipe(
