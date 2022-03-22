@@ -83,9 +83,9 @@ import {
 
       <div class="block fixed bottom-0 right-0 w-screen z-20">
         <div class="flex justify-center">
-          <hd-transactions-list-button
+          <bd-user-instructions-button
             class="mat-elevation-z8"
-          ></hd-transactions-list-button>
+          ></bd-user-instructions-button>
         </div>
       </div>
     </div>

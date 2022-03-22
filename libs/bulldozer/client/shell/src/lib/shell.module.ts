@@ -10,6 +10,7 @@ import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
 import { TabListModule } from '@bulldozer-client/tab-list';
+import { UserInstructionsModule } from '@bulldozer-client/user-instructions';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
 import { HdSolanaMaterialModule } from '@heavy-duty/ngx-solana-material';
@@ -81,6 +82,7 @@ import { ShellComponent } from './shell.component';
     WorkspaceExplorerModule,
     WorkspaceSelectorModule,
     TabListModule,
+    UserInstructionsModule,
   ],
   providers: [AuthGuard],
 })

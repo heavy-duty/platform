@@ -173,6 +173,9 @@
       "@bulldozer-client/user-details": [
         "libs/bulldozer/client/users/components/user-details/src/index.ts"
       ],
+      "@bulldozer-client/user-instructions": [
+        "libs/bulldozer/client/users/components/user-instructions/src/index.ts"
+      ],
       "@bulldozer-client/users-data-access": [
         "libs/bulldozer/client/users/data-access/src/index.ts"
       ],

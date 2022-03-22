@@ -5,6 +5,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
+import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import { HdBroadcasterModule } from '@heavy-duty/broadcaster';
 import {
   HdSolanaApiInterceptor,
@@ -60,6 +61,7 @@ import { AppComponent } from './app.component';
       useClass: HdSolanaTransactionsInterceptor,
       multi: true,
     },
+    UserInstructionsStore,
   ],
 })
 export class AppModule {}

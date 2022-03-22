@@ -11,7 +11,7 @@ import { HdSolanaConnectionStore } from './connection.store';
 
 export interface TransactionStatus {
   signature: TransactionSignature;
-  status?: TransactionConfirmationStatus;
+  status: TransactionConfirmationStatus | 'pending';
   transactionResponse?: TransactionResponse<Transaction>;
 }
 
@@ -46,7 +46,10 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
   private readonly _addTransactionStatus = this.updater<TransactionSignature>(
     (state, signature) => ({
       ...state,
-      transactionStatuses: [...state.transactionStatuses, { signature }],
+      transactionStatuses: [
+        ...state.transactionStatuses,
+        { signature, status: 'pending' },
+      ],
     })
   );
 
