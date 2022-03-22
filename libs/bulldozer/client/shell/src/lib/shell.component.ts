@@ -104,7 +104,6 @@ export class ShellComponent extends ComponentStore<object> {
   readonly connected$ = this._walletStore.connected$;
   readonly walletPublicKey$ = this._walletStore.publicKey$;
   readonly workspaceId$ = this._configStore.workspaceId$;
-  readonly workspaceIds$ = this._configStore.workspaceIds$;
   readonly tabs$ = this._tabStore.tabs$;
   readonly selectedTab$ = this._tabStore.selected$;
 

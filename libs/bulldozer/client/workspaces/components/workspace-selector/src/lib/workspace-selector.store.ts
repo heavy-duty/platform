@@ -14,9 +14,8 @@ import {
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   WorkspaceApiService,
-  WorkspacesStore,
+  WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
@@ -25,18 +24,8 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, forkJoin, of, pipe, withLatestFrom } from 'rxjs';
 
-interface ViewModel {
-  workspace: Document<Workspace> | null;
-}
-
-const initialState: ViewModel = {
-  workspace: null,
-};
-
 @Injectable()
-export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
-  readonly workspace$ = this.select(({ workspace }) => workspace);
-
+export class WorkspaceSelectorStore extends ComponentStore<object> {
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _applicationApiService: ApplicationApiService,
@@ -48,32 +37,13 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
-    workspacesStore: WorkspacesStore,
-    configStore: ConfigStore
+    configStore: ConfigStore,
+    workspaceStore: WorkspaceStore
   ) {
-    super(initialState);
+    super({});
 
-    this._loadWorkspace(
-      this.select(
-        configStore.workspaceId$,
-        workspacesStore.workspaces$,
-        (workspaceId, workspaces) => ({
-          workspaceId,
-          workspaces,
-        }),
-        { debounce: true }
-      )
-    );
+    workspaceStore.setWorkspaceId(configStore.workspaceId$);
   }
-
-  private readonly _loadWorkspace = this.updater<{
-    workspaceId: string | null;
-    workspaces: Document<Workspace>[];
-  }>((state, { workspaceId, workspaces }) => ({
-    ...state,
-    workspace:
-      workspaces.find((workspace) => workspace?.id === workspaceId) ?? null,
-  }));
 
   readonly downloadWorkspace = this.effect<string>(
     concatMap((workspaceId) =>

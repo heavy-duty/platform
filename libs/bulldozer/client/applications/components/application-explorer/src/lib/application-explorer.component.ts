@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
-import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 
@@ -112,11 +111,9 @@ export class ApplicationExplorerComponent {
 
   readonly applications$ = this._applicationsStore.applications$;
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaceIds$ = this._configStore.workspaceIds$;
 
   constructor(
     private readonly _applicationsStore: ApplicationsStore,
-    private readonly _configStore: ConfigStore,
     private readonly _walletStore: WalletStore
   ) {}
 

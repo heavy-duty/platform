@@ -52,9 +52,10 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
                 mat-mini-fab
                 aria-label="Load workspace"
                 color="primary"
-                (click)="onLoadWorkspace(workspace.id)"
+                (click)="onActivateWorkspace(workspace.id)"
+                [disabled]="activeWorkspaceId === workspace.id"
               >
-                <mat-icon>add</mat-icon>
+                <mat-icon>check</mat-icon>
               </button>
             </div>
           </mat-list-item>
@@ -71,9 +72,10 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 })
 export class MyWorkspacesListComponent {
   @Input() workspaces: Document<Workspace>[] | null = null;
-  @Output() loadWorkspace = new EventEmitter<string>();
+  @Input() activeWorkspaceId: string | null = null;
+  @Output() activateWorkspace = new EventEmitter<string>();
 
-  onLoadWorkspace(workspaceId: string) {
-    this.loadWorkspace.emit(workspaceId);
+  onActivateWorkspace(workspaceId: string) {
+    this.activateWorkspace.emit(workspaceId);
   }
 }
