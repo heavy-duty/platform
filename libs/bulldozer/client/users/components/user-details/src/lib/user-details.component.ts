@@ -19,13 +19,38 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
               <p>Visualize your user details.</p>
             </header>
 
-            <p class="m-0">
+            <p class="m-0 flex items-center gap-2" *ngIf="isCreating">
+              <mat-progress-spinner
+                diameter="16"
+                mode="indeterminate"
+                color="primary"
+              >
+              </mat-progress-spinner>
+              Creating user...
+            </p>
+
+            <p class="m-0 flex items-center gap-2" *ngIf="isDeleting">
+              <mat-progress-spinner
+                diameter="16"
+                mode="indeterminate"
+                color="primary"
+              >
+              </mat-progress-spinner>
+              Deleting user...
+            </p>
+
+            <p class="m-0" *ngIf="!isCreating && !isDeleting">
               Created at:
               {{ user.createdAt.toNumber() * 1000 | date: 'medium' }}
             </p>
 
             <footer>
-              <button mat-raised-button color="warn" (click)="onDeleteUser()">
+              <button
+                mat-raised-button
+                color="warn"
+                (click)="onDeleteUser()"
+                [disabled]="isCreating || isDeleting"
+              >
                 Delete User
               </button>
             </footer>
@@ -51,6 +76,7 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
                 mat-raised-button
                 color="primary"
                 (click)="onCreateUser()"
+                [disabled]="isCreating"
               >
                 Create User
               </button>
@@ -66,6 +92,8 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
 export class UserDetailsComponent {
   @Input() connected = false;
   @Input() user: Document<User> | null = null;
+  @Input() isCreating = false;
+  @Input() isDeleting = false;
   @Output() createUser = new EventEmitter();
   @Output() deleteUser = new EventEmitter();
 

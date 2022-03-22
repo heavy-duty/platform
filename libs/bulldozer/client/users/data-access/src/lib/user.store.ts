@@ -4,73 +4,74 @@ import { Document, findUserAddress, User } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { PublicKey } from '@solana/web3.js';
-import { concatMap, EMPTY, of, pipe, switchMap, withLatestFrom } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  concatMap,
+  EMPTY,
+  filter,
+  map,
+  pairwise,
+  pipe,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { UserApiService } from './user-api.service';
-import { UserEventService } from './user-event.service';
 
 interface ViewModel {
   loading: boolean;
   userId: string | null;
   user: Document<User> | null;
+  isCreating: boolean;
+  isDeleting: boolean;
+  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   userId: null,
   user: null,
   loading: false,
+  isCreating: false,
+  isDeleting: false,
+  error: null,
 };
 
 @Injectable()
 export class UserStore extends ComponentStore<ViewModel> {
+  private readonly _reload = new BehaviorSubject(null);
+  private readonly reload$ = this._reload.asObservable();
   readonly loading$ = this.select(({ loading }) => loading);
   readonly user$ = this.select(({ user }) => user);
   readonly userId$ = this.select(({ userId }) => userId);
+  readonly isCreating$ = this.select(({ isCreating }) => isCreating);
+  readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
 
   constructor(
     private readonly _userApiService: UserApiService,
-    private readonly _userEventService: UserEventService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore
   ) {
     super(initialState);
 
     this._loadUserId(this._walletStore.publicKey$);
-    this._loadUser(this.userId$);
-    this._handleUserCreated(this._walletStore.publicKey$);
-    this._handleUserDeleted(this.userId$);
+    this._loadUser(
+      combineLatest([this.userId$, this.reload$]).pipe(
+        map(([userId]) => userId)
+      )
+    );
+    this._handleUserCreated(this.isCreating$);
+    this._handleUserDeleted(this.isDeleting$);
   }
 
-  private readonly _handleUserDeleted = this.effect<string | null>(
-    switchMap((userId) => {
-      if (userId === null) {
-        return EMPTY;
-      }
+  readonly toggleCreating = this.updater<boolean>((state, isCreating) => ({
+    ...state,
+    isCreating,
+  }));
 
-      return this._userEventService.userDeleted(userId).pipe(
-        tapResponse(
-          () => this.patchState({ user: null }),
-          (error) => this._notificationStore.setError(error)
-        )
-      );
-    })
-  );
-
-  private readonly _handleUserCreated = this.effect<PublicKey | null>(
-    switchMap((walletPublicKey) => {
-      if (walletPublicKey === null) {
-        return EMPTY;
-      }
-
-      return this._userEventService
-        .userCreated({ authority: walletPublicKey.toBase58() })
-        .pipe(
-          tapResponse(
-            (user) => this.patchState({ user }),
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-    })
-  );
+  readonly toggleDeleting = this.updater<boolean>((state, isDeleting) => ({
+    ...state,
+    isDeleting,
+  }));
 
   private readonly _loadUserId = this.effect<PublicKey | null>(
     concatMap((walletPublicKey) => {
@@ -104,59 +105,31 @@ export class UserStore extends ComponentStore<ViewModel> {
               loading: false,
             });
           },
-          (error) => this._notificationStore.setError(error)
+          (error) => {
+            this.patchState({ error });
+            this._notificationStore.setError(error);
+          }
         )
       );
     })
   );
 
-  readonly createUser = this.effect<void>(
+  private readonly _handleUserCreated = this.effect<boolean>(
     pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._userApiService
-          .create({
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Create user request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+      filter((isCreating) => isCreating),
+      tap(() => this.reload())
     )
   );
 
-  readonly deleteUser = this.effect<void>(
+  private readonly _handleUserDeleted = this.effect<boolean>(
     pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._userApiService
-          .delete({
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Delete user request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+      pairwise(),
+      filter(([previous, current]) => previous && !current),
+      tap(() => this.patchState({ user: null }))
     )
   );
+
+  reload() {
+    this._reload.next(null);
+  }
 }
