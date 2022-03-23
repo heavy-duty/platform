@@ -9,8 +9,6 @@ import {
   WorkspaceInstructionsStore,
   WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { filter, map } from 'rxjs';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
@@ -106,37 +104,11 @@ export class ViewWorkspaceComponent {
   constructor(
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _viewWorkspaceStore: ViewWorkspaceStore,
-    private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
     private readonly _userStore: UserStore,
     private readonly _budgetStore: BudgetStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
-  ) {
-    this._collaboratorStore.setWorkspaceId(
-      this._viewWorkspaceStore.workspaceId$
-    );
-    this._collaboratorStore.setUserId(this._userStore.userId$);
-    this._collaboratorsStore.setFilters(
-      this._viewWorkspaceStore.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        map((workspaceId) => ({ workspace: workspaceId }))
-      )
-    );
-    this._workspaceStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
-    this._budgetStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
-    this._workspaceStore.handleWorkspaceInstruction(
-      this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined,
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'updateWorkspace' ||
-              instructionStatus.name === 'deleteWorkspace') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        )
-      )
-    );
-  }
+  ) {}
 
   onDepositToBudget(budgetId: string, lamports: number) {
     this._budgetStore.depositToBudget({

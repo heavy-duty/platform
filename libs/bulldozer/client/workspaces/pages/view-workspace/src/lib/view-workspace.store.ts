@@ -1,21 +1,36 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
-import { BudgetApiService } from '@bulldozer-client/budgets-data-access';
+import {
+  BudgetApiService,
+  BudgetStore,
+} from '@bulldozer-client/budgets-data-access';
 import {
   CollaboratorApiService,
   CollaboratorsStore,
+  CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserStore } from '@bulldozer-client/users-data-access';
+import {
+  WorkspaceInstructionsStore,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   concatMap,
   EMPTY,
+  filter,
+  from,
+  map,
+  merge,
   of,
   pipe,
   switchMap,
+  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -79,10 +94,15 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _tabStore: TabStore,
     private readonly _walletStore: WalletStore,
     private readonly _collaboratorApiService: CollaboratorApiService,
-    private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _budgetApiService: BudgetApiService,
     private readonly _hdBroadcasterStore: HdBroadcasterStore,
+    private readonly _workspaceStore: WorkspaceStore,
+    private readonly _collaboratorsStore: CollaboratorsStore,
+    private readonly _collaboratorStore: CollaboratorStore,
+    private readonly _userStore: UserStore,
+    private readonly _budgetStore: BudgetStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
     route: ActivatedRoute
   ) {
     super(initialState);
@@ -90,7 +110,54 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     this._openTab(this.workspaceId$);
     this._setRouteParameters(route.paramMap);
     this._loadBudgetMinimumBalanceForRentExemption();
+    this._watchWorkspace(this._workspaceStore.loading$);
+    this._collaboratorStore.setWorkspaceId(this.workspaceId$);
+    this._collaboratorStore.setUserId(this._userStore.userId$);
+    this._collaboratorsStore.setFilters(
+      this.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        map((workspaceId) => ({ workspace: workspaceId }))
+      )
+    );
+    this._workspaceStore.setWorkspaceId(this.workspaceId$);
+    this._budgetStore.setWorkspaceId(this.workspaceId$);
   }
+
+  private readonly _watchWorkspace = this.effect<boolean>(
+    pipe(
+      concatMap((loading) =>
+        of(loading).pipe(withLatestFrom(this._workspaceStore.workspace$))
+      ),
+      switchMap(([loading, workspace]) => {
+        if (loading !== false && workspace === null) {
+          return EMPTY;
+        }
+
+        return merge(
+          this._workspaceInstructionsStore.instructionStatuses$.pipe(
+            take(1),
+            concatMap((instructionStatuses) => from(instructionStatuses))
+          ),
+          this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
+            isNotNullOrUndefined
+          )
+        ).pipe(
+          filter(
+            (instructionStatus) =>
+              (instructionStatus.name === 'updateWorkspace' ||
+                instructionStatus.name === 'deleteWorkspace') &&
+              (instructionStatus.status === 'confirmed' ||
+                instructionStatus.status === 'finalized')
+          ),
+          tap((workspaceInstruction) =>
+            this._workspaceStore.handleWorkspaceInstruction(
+              workspaceInstruction
+            )
+          )
+        );
+      })
+    )
+  );
 
   private readonly _setRouteParameters = this.updater<ParamMap>(
     (state, paramMap) => ({

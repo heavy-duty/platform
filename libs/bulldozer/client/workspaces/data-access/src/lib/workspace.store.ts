@@ -18,6 +18,7 @@ interface ViewModel {
   workspace: Document<Workspace> | null;
   isUpdating: boolean;
   isDeleting: boolean;
+  loading: boolean;
 }
 
 const initialState: ViewModel = {
@@ -25,6 +26,7 @@ const initialState: ViewModel = {
   workspace: null,
   isUpdating: false,
   isDeleting: false,
+  loading: false,
 };
 
 @Injectable()
@@ -35,6 +37,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly isUpdating$ = this.select(({ isUpdating }) => isUpdating);
   readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
+  readonly loading$ = this.select(({ loading }) => loading);
 
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
@@ -55,10 +58,12 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
+      this.patchState({ loading: true });
+
       return this._workspaceApiService.findById(workspaceId).pipe(
         tapResponse(
-          (workspace) => this.patchState({ workspace }),
-          (error) => this._notificationStore.setError({ error })
+          (workspace) => this.patchState({ workspace, loading: false }),
+          (error) => this._notificationStore.setError({ error, loading: false })
         )
       );
     })

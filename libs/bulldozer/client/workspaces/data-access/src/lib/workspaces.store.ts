@@ -56,7 +56,7 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
     }
   );
 
-  readonly _patchWorkspaceStatuses = this.updater<{
+  private readonly _patchWorkspaceStatuses = this.updater<{
     workspaceId: string;
     statuses: {
       isCreating?: boolean;
