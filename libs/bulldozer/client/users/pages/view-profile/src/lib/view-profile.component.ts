@@ -1,16 +1,11 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
-import {
-  UserInstructionsStore,
-  UserStore,
-} from '@bulldozer-client/users-data-access';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { UserStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { filter, map, tap } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
 
 @Component({
@@ -55,57 +50,10 @@ export class ViewProfileComponent {
   constructor(
     private readonly _userStore: UserStore,
     private readonly _walletStore: WalletStore,
-    private readonly _tabStore: TabStore,
-    private readonly _workspaceQueryStore: WorkspaceQueryStore,
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _configStore: ConfigStore,
-    private readonly _userInstructionsStore: UserInstructionsStore,
     private readonly _viewProfileStore: ViewProfileStore
-  ) {
-    this._openTab();
-    this._workspaceQueryStore.setFilters(
-      this._walletStore.publicKey$.pipe(
-        map((publicKey) => publicKey && { authority: publicKey.toBase58() })
-      )
-    );
-    this._workspacesStore.setWorkspaceIds(
-      this._workspaceQueryStore.workspaceIds$
-    );
-    this._workspacesStore.handleWorkspaceInstruction(
-      this._userInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined,
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createWorkspace' ||
-              instructionStatus.name === 'updateWorkspace' ||
-              instructionStatus.name === 'deleteWorkspace') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((a) => console.log(a))
-      )
-    );
-    this._userStore.handleUserInstruction(
-      this._userInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined,
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createUser' ||
-              instructionStatus.name === 'deleteUser') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        )
-      )
-    );
-  }
-
-  private _openTab() {
-    this._tabStore.openTab({
-      id: 'profile',
-      kind: 'profile',
-      url: '/profile',
-    });
-  }
+  ) {}
 
   onCreateUser() {
     this._viewProfileStore.createUser();

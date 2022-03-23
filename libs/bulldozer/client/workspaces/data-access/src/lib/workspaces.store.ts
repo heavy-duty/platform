@@ -28,6 +28,7 @@ const initialState: ViewModel = {
 
 @Injectable()
 export class WorkspacesStore extends ComponentStore<ViewModel> {
+  readonly loading$ = this.select(({ loading }) => loading);
   readonly workspaceIds$ = this.select(({ workspaceIds }) => workspaceIds);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
   readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
@@ -53,24 +54,6 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
         workspacesMap,
       };
     }
-  );
-
-  private readonly _setWorkspaces = this.updater<Document<Workspace>[]>(
-    (state, workspaces) => ({
-      ...state,
-      workspacesMap: new Map(
-        workspaces.reduce(
-          (workspacesMap, workspace) =>
-            workspacesMap.set(workspace.id, {
-              document: workspace,
-              isCreating: false,
-              isUpdating: false,
-              isDeleting: false,
-            }),
-          state.workspacesMap
-        )
-      ),
-    })
   );
 
   readonly _patchWorkspaceStatuses = this.updater<{
@@ -119,19 +102,24 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
       return this._workspaceApiService.findByIds(workspaceIds).pipe(
         tapResponse(
           (workspaces) => {
-            console.log(
-              workspaces.filter(
-                (workspace): workspace is Document<Workspace> =>
-                  workspace !== null
-              )
-            );
-            this._setWorkspaces(
-              workspaces.filter(
-                (workspace): workspace is Document<Workspace> =>
-                  workspace !== null
-              )
-            );
-            this.patchState({ loading: false });
+            this.patchState({
+              loading: false,
+              workspacesMap: workspaces
+                .filter(
+                  (workspace): workspace is Document<Workspace> =>
+                    workspace !== null
+                )
+                .reduce(
+                  (workspacesMap, workspace) =>
+                    workspacesMap.set(workspace.id, {
+                      document: workspace,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    }),
+                  new Map<string, WorkspaceView>()
+                ),
+            });
           },
           (error) => this._notificationStore.setError({ error })
         )
@@ -214,8 +202,6 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteWorkspace': {
-          console.log('delete workspaceId: ', workspaceAccountMeta.pubkey);
-
           if (workspaceInstruction.status === 'confirmed') {
             this._patchWorkspaceStatuses({
               workspaceId: workspaceAccountMeta.pubkey,

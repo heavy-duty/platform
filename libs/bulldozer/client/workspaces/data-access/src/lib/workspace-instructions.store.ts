@@ -107,8 +107,6 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   constructor(private readonly _hdBroadcasterStore: HdBroadcasterStore) {
     super(initialState);
 
-    console.log('am I even called?');
-
     this._handleTransactionStatuses(
       this._hdBroadcasterStore.transactionStatuses$
     );

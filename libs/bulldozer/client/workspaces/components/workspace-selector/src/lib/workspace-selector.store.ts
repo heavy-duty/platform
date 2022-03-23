@@ -167,8 +167,6 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(([workspaceId, authority]) => {
-        console.log('am I called???');
-
         if (authority === null) {
           return EMPTY;
         }
