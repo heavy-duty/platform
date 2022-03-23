@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
 
 @Component({
   selector: 'bd-my-workspaces-list',
@@ -35,15 +35,19 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
               </div>
               <div class="flex-grow">
                 <h3 class="mb-0 text-lg font-bold">
-                  {{ workspace.name }}
+                  {{ workspace.document.name }}
+
+                  <span *ngIf="workspace.isCreating">(Creating...)</span>
+                  <span *ngIf="workspace.isDeleting">(Deleting...)</span>
+                  <span *ngIf="workspace.isUpdating">(Updating...)</span>
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Workspace ID:
-                  {{ workspace.id }}
+                  {{ workspace.document.id }}
                 </p>
                 <a
                   class="text-xs underline text-primary"
-                  [routerLink]="['/workspaces', workspace.id]"
+                  [routerLink]="['/workspaces', workspace.document.id]"
                 >
                   View details
                 </a>
@@ -52,8 +56,8 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
                 mat-mini-fab
                 aria-label="Load workspace"
                 color="primary"
-                (click)="onActivateWorkspace(workspace.id)"
-                [disabled]="activeWorkspaceId === workspace.id"
+                (click)="onActivateWorkspace(workspace.document.id)"
+                [disabled]="activeWorkspaceId === workspace.document.id"
               >
                 <mat-icon>check</mat-icon>
               </button>
@@ -71,7 +75,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyWorkspacesListComponent {
-  @Input() workspaces: Document<Workspace>[] | null = null;
+  @Input() workspaces: WorkspaceView[] | null = null;
   @Input() activeWorkspaceId: string | null = null;
   @Output() activateWorkspace = new EventEmitter<string>();
 

@@ -23,7 +23,7 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Keypair } from '@solana/web3.js';
+import { Finality, Keypair } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
@@ -47,7 +47,7 @@ export class WorkspaceApiService {
   }
 
   // get workspace ids
-  findIds(filters: WorkspaceFilters) {
+  findIds(filters: WorkspaceFilters, commitment: Finality = 'finalized') {
     const query = workspaceQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
@@ -57,6 +57,7 @@ export class WorkspaceApiService {
           length: 0,
           offset: 0,
         },
+        commitment,
       })
       .pipe(
         map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
@@ -64,9 +65,12 @@ export class WorkspaceApiService {
   }
 
   // get workspace
-  findById(workspaceId: string): Observable<Document<Workspace> | null> {
+  findById(
+    workspaceId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<Workspace> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(workspaceId)
+      .getAccountInfo(workspaceId, commitment)
       .pipe(
         map(
           (accountInfo) =>
@@ -77,10 +81,11 @@ export class WorkspaceApiService {
 
   // get workspaces
   findByIds(
-    workspaceIds: string[]
+    workspaceIds: string[],
+    commitment: Finality = 'finalized'
   ): Observable<(Document<Workspace> | null)[]> {
     return this._hdSolanaApiService
-      .getMultipleAccounts(workspaceIds)
+      .getMultipleAccounts(workspaceIds, { commitment })
       .pipe(
         map((keyedAccounts) =>
           keyedAccounts.map(

@@ -9,14 +9,12 @@ import {
   combineLatest,
   concatMap,
   EMPTY,
-  filter,
   map,
-  pairwise,
-  pipe,
   switchMap,
   tap,
 } from 'rxjs';
 import { UserApiService } from './user-api.service';
+import { InstructionStatus } from './user-instructions.store';
 
 interface ViewModel {
   loading: boolean;
@@ -59,19 +57,7 @@ export class UserStore extends ComponentStore<ViewModel> {
         map(([userId]) => userId)
       )
     );
-    this._handleUserCreated(this.isCreating$);
-    this._handleUserDeleted(this.isDeleting$);
   }
-
-  readonly toggleCreating = this.updater<boolean>((state, isCreating) => ({
-    ...state,
-    isCreating,
-  }));
-
-  readonly toggleDeleting = this.updater<boolean>((state, isDeleting) => ({
-    ...state,
-    isDeleting,
-  }));
 
   private readonly _loadUserId = this.effect<PublicKey | null>(
     concatMap((walletPublicKey) => {
@@ -114,19 +100,30 @@ export class UserStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleUserCreated = this.effect<boolean>(
-    pipe(
-      filter((isCreating) => isCreating),
-      tap(() => this.reload())
-    )
-  );
+  readonly handleUserInstruction = this.effect<InstructionStatus>(
+    tap((userInstruction) => {
+      switch (userInstruction.name) {
+        case 'createUser': {
+          if (userInstruction.status === 'confirmed') {
+            this.patchState({ isCreating: true });
+            this.reload();
+          } else {
+            this.patchState({ isCreating: false });
+          }
 
-  private readonly _handleUserDeleted = this.effect<boolean>(
-    pipe(
-      pairwise(),
-      filter(([previous, current]) => previous && !current),
-      tap(() => this.patchState({ user: null }))
-    )
+          break;
+        }
+        case 'deleteUser': {
+          if (userInstruction.status === 'confirmed') {
+            this.patchState({ isDeleting: true });
+          } else {
+            this.patchState({ user: null, isDeleting: false });
+          }
+
+          break;
+        }
+      }
+    })
   );
 
   reload() {

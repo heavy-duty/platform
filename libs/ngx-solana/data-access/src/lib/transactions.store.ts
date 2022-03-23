@@ -17,10 +17,12 @@ export interface TransactionStatus {
 
 interface ViewModel {
   transactionStatuses: TransactionStatus[];
+  lastTransactionStatus: TransactionStatus | null;
 }
 
 const initialState: ViewModel = {
   transactionStatuses: [],
+  lastTransactionStatus: null,
 };
 
 @Injectable()
@@ -34,6 +36,9 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
       transactionStatuses.filter(
         (transactionStatus) => transactionStatus.status === 'confirmed'
       ).length
+  );
+  readonly lastTransactionStatus$ = this.select(
+    ({ lastTransactionStatus }) => lastTransactionStatus
   );
 
   constructor(
@@ -97,6 +102,13 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
                 .getTransaction(signature, 'confirmed')
                 .pipe(
                   tap((transactionResponse) => {
+                    this.patchState({
+                      lastTransactionStatus: {
+                        signature,
+                        transactionResponse,
+                        status: 'confirmed',
+                      },
+                    });
                     this._setTransactionResponse({
                       signature,
                       transactionResponse,
@@ -122,12 +134,19 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
               });
 
               return this._hdSolanaApiService.getTransaction(signature).pipe(
-                tap((transactionResponse) =>
+                tap((transactionResponse) => {
+                  this.patchState({
+                    lastTransactionStatus: {
+                      signature,
+                      transactionResponse,
+                      status: 'finalized',
+                    },
+                  });
                   this._setTransactionResponse({
                     signature,
                     transactionResponse,
-                  })
-                )
+                  });
+                })
               );
             })
           )

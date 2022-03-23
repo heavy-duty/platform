@@ -11,13 +11,19 @@ import {
   HdBroadcasterSocketStore,
   HdBroadcasterStore,
 } from '@heavy-duty/broadcaster';
-import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
+import {
+  HdSolanaApiService,
+  HdSolanaConfigStore,
+  HdSolanaTransactionsStore,
+} from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore } from '@ngrx/component-store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { PublicKey } from '@solana/web3.js';
 import {
   distinctUntilChanged,
   EMPTY,
   filter,
+  of,
   pairwise,
   pipe,
   startWith,
@@ -113,6 +119,8 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _configStore: ConfigStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
+    private readonly _hdSolanaApiService: HdSolanaApiService,
+    private readonly _hdSolanaTransactionsStore: HdSolanaTransactionsStore,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
     private readonly _hdBroadcasterStore: HdBroadcasterStore,
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore
@@ -133,7 +141,38 @@ export class ShellComponent extends ComponentStore<object> {
         })
       )
     );
+    this._loadWalletTransactions(this._walletStore.publicKey$);
   }
+
+  private readonly _loadWalletTransactions = this.effect<PublicKey | null>(
+    pipe(
+      switchMap((publicKey) => {
+        if (publicKey === null) {
+          return of([]);
+        }
+
+        return this._hdSolanaApiService.getSignaturesForAddress(
+          publicKey.toBase58(),
+          undefined,
+          'confirmed'
+        );
+      }),
+      tapResponse(
+        (confirmedSignatureInfos) =>
+          confirmedSignatureInfos
+            .filter(
+              (confirmedSignatureInfo) =>
+                confirmedSignatureInfo.confirmationStatus === 'confirmed'
+            )
+            .forEach((confirmedSignatureInfo) =>
+              this._hdSolanaTransactionsStore.reportProgress(
+                confirmedSignatureInfo.signature
+              )
+            ),
+        (error) => this._notificationStore.setError(error)
+      )
+    )
+  );
 
   private readonly _subscribeToWorkspace = this.effect<string | null>(
     pipe(

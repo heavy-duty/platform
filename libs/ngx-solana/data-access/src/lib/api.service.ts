@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import {
   AccountInfo,
   Commitment,
-  ConfirmedSignatureInfo,
   ConfirmedTransactionMeta,
   Finality,
   GetMultipleAccountsConfig,
@@ -12,6 +11,7 @@ import {
   SignaturesForAddressOptions,
   SignatureStatus,
   Transaction,
+  TransactionError,
 } from '@solana/web3.js';
 import {
   concatMap,
@@ -35,6 +35,15 @@ export interface TransactionResponse<T> {
   meta: ConfirmedTransactionMeta | null;
   blockTime?: number | null;
 }
+
+export type ConfirmedSignatureInfo = {
+  signature: string;
+  slot: number;
+  err: TransactionError | null;
+  memo: string | null;
+  blockTime?: number | null;
+  confirmationStatus: Finality;
+};
 
 @Injectable()
 export class HdSolanaApiService {
@@ -286,7 +295,7 @@ export class HdSolanaApiService {
     address: string,
     config?: SignaturesForAddressOptions,
     commitment?: Finality
-  ): Observable<ConfirmedSignatureInfo> {
+  ): Observable<ConfirmedSignatureInfo[]> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -294,7 +303,7 @@ export class HdSolanaApiService {
           return throwError(() => 'API endpoint missing');
         }
 
-        return this._httpClient.post<ConfirmedSignatureInfo>(
+        return this._httpClient.post<ConfirmedSignatureInfo[]>(
           apiEndpoint,
           [
             address,

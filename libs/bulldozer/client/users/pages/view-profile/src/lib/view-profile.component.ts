@@ -8,8 +8,9 @@ import {
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
 
 @Component({
@@ -70,29 +71,28 @@ export class ViewProfileComponent {
     this._workspacesStore.setWorkspaceIds(
       this._workspaceQueryStore.workspaceIds$
     );
-    this._userStore.toggleCreating(
-      this._userInstructionsStore.instructionStatuses$.pipe(
-        map((instructionStatuses) =>
-          instructionStatuses
-            .filter(
-              (instructionStatus) => instructionStatus.name === 'createUser'
-            )
-            .some(
-              (instructionStatus) => instructionStatus.status === 'confirmed'
-            )
+    this._workspacesStore.handleWorkspaceInstruction(
+      this._userInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined,
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createWorkspace' ||
+              instructionStatus.name === 'updateWorkspace' ||
+              instructionStatus.name === 'deleteWorkspace') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
         )
       )
     );
-    this._userStore.toggleDeleting(
-      this._userInstructionsStore.instructionStatuses$.pipe(
-        map((instructionStatuses) =>
-          instructionStatuses
-            .filter(
-              (instructionStatus) => instructionStatus.name === 'deleteUser'
-            )
-            .some(
-              (instructionStatus) => instructionStatus.status === 'confirmed'
-            )
+    this._userStore.handleUserInstruction(
+      this._userInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined,
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createUser' ||
+              instructionStatus.name === 'deleteUser') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
         )
       )
     );
