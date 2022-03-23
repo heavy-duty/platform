@@ -6,6 +6,7 @@ import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
 import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { HdBroadcasterModule } from '@heavy-duty/broadcaster';
 import {
   HdSolanaApiInterceptor,
@@ -62,6 +63,7 @@ import { AppComponent } from './app.component';
       multi: true,
     },
     UserInstructionsStore,
+    WorkspaceInstructionsStore,
   ],
 })
 export class AppModule {}

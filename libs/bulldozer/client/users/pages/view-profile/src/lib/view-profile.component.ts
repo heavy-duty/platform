@@ -10,7 +10,7 @@ import {
 } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { filter, map } from 'rxjs';
+import { filter, map, tap } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
 
 @Component({
@@ -81,7 +81,8 @@ export class ViewProfileComponent {
               instructionStatus.name === 'deleteWorkspace') &&
             (instructionStatus.status === 'confirmed' ||
               instructionStatus.status === 'finalized')
-        )
+        ),
+        tap((a) => console.log(a))
       )
     );
     this._userStore.handleUserInstruction(

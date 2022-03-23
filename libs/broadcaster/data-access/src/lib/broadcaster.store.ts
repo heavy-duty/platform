@@ -18,10 +18,12 @@ export interface TransactionStatus {
 interface ViewModel {
   transactionStatusMap: Map<TransactionSignature, TransactionStatus>;
   error?: unknown;
+  lastTransactionStatus: TransactionStatus | null;
 }
 
 const initialState: ViewModel = {
   transactionStatusMap: new Map<TransactionSignature, TransactionStatus>(),
+  lastTransactionStatus: null,
 };
 
 @Injectable()
@@ -43,6 +45,9 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
       transactionStatuses.filter(
         (transactionStatus) => transactionStatus.status === 'confirmed'
       ).length ?? 0
+  );
+  readonly lastTransactionStatus$ = this.select(
+    ({ lastTransactionStatus }) => lastTransactionStatus
   );
 
   constructor(
@@ -108,6 +113,13 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
       return state;
     }
 
+    this.patchState({
+      lastTransactionStatus: {
+        ...transactionStatus,
+        status: 'finalized',
+      },
+    });
+
     return {
       ...state,
       transactionStatusMap: new Map(
@@ -130,11 +142,20 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
         .getTransaction(signature, 'confirmed')
         .pipe(
           tapResponse(
-            (transactionResponse) =>
+            (transactionResponse) => {
+              this.patchState({
+                lastTransactionStatus: {
+                  topic,
+                  signature,
+                  transactionResponse,
+                  status: 'confirmed',
+                },
+              });
               this._setTransactionResponse({
                 signature: signature,
                 transactionResponse,
-              }),
+              });
+            },
             (error) => this.patchState({ error })
           )
         );

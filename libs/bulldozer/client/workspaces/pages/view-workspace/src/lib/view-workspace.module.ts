@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { BudgetDetailsModule } from '@bulldozer-client/budget-details';
 import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
+import { WorkspaceInstructionsModule } from '@bulldozer-client/workspace-instructions';
 import { WorkspaceTransactionsModule } from '@bulldozer-client/workspace-transactions';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
@@ -22,6 +23,7 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     BudgetDetailsModule,
     CollaboratorsListModule,
     WorkspaceTransactionsModule,
+    WorkspaceInstructionsModule
   ],
 })
 export class ViewWorkspaceModule {}

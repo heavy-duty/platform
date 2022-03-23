@@ -174,9 +174,15 @@ export class WorkspaceApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

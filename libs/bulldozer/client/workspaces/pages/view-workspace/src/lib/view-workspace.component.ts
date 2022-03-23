@@ -5,9 +5,12 @@ import {
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
+import {
+  WorkspaceInstructionsStore,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
@@ -20,6 +23,12 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       <header bdPageHeader>
         <h1>
           {{ workspace.name }}
+          <span *ngIf="(isUpdatingWorkspace$ | ngrxPush) ?? false">
+            (Updating...)
+          </span>
+          <span *ngIf="(isDeletingWorkspace$ | ngrxPush) ?? false">
+            (Deleting...)
+          </span>
         </h1>
         <p>Visualize all the details about this workspace.</p>
       </header>
@@ -59,9 +68,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           (toggleShowRejected)="onToggleShowRejectedCollaborators()"
         ></bd-collaborators-list>
 
-        <bd-workspace-transactions
-          [transactionStatuses]="(transactionStatuses$ | ngrxPush) ?? null"
-        ></bd-workspace-transactions>
+        <bd-workspace-instructions
+          [instructionStatuses]="(instructionStatuses$ | ngrxPush) ?? null"
+        ></bd-workspace-instructions>
       </main>
     </div>
   `,
@@ -89,7 +98,10 @@ export class ViewWorkspaceComponent {
   readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly budgetMinimumBalanceForRentExemption$ =
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
-  readonly transactionStatuses$ = this._viewWorkspaceStore.transactionStatuses$;
+  readonly instructionStatuses$ =
+    this._workspaceInstructionsStore.instructionStatuses$;
+  readonly isUpdatingWorkspace$ = this._workspaceStore.isUpdating$;
+  readonly isDeletingWorkspace$ = this._workspaceStore.isDeleting$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,
@@ -97,7 +109,8 @@ export class ViewWorkspaceComponent {
     private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
     private readonly _userStore: UserStore,
-    private readonly _budgetStore: BudgetStore
+    private readonly _budgetStore: BudgetStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     this._collaboratorStore.setWorkspaceId(
       this._viewWorkspaceStore.workspaceId$
@@ -111,6 +124,18 @@ export class ViewWorkspaceComponent {
     );
     this._workspaceStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
     this._budgetStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
+    this._workspaceStore.handleWorkspaceInstruction(
+      this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined,
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'updateWorkspace' ||
+              instructionStatus.name === 'deleteWorkspace') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
+        )
+      )
+    );
   }
 
   onDepositToBudget(budgetId: string, lamports: number) {

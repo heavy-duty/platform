@@ -14,6 +14,7 @@ import {
   HdSolanaConfigStore,
 } from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
+import { Finality } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
@@ -35,9 +36,12 @@ export class UserApiService {
   }
 
   // get user
-  findById(userId: string): Observable<Document<User> | null> {
+  findById(
+    userId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<User> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(userId)
+      .getAccountInfo(userId, commitment)
       .pipe(
         map(
           (accountInfo) =>

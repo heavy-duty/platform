@@ -197,6 +197,9 @@
       "@bulldozer-client/workspace-explorer": [
         "libs/bulldozer/client/workspaces/components/workspace-explorer/src/index.ts"
       ],
+      "@bulldozer-client/workspace-instructions": [
+        "libs/bulldozer/client/workspaces/components/workspace-instructions/src/index.ts"
+      ],
       "@bulldozer-client/workspace-selector": [
         "libs/bulldozer/client/workspaces/components/workspace-selector/src/index.ts"
       ],
