@@ -188,9 +188,6 @@ describe('instruction account', () => {
       assert.equal(decodedKind.collection, collection.publicKey.toBase58());
       assert.equal(account.modifier, null);
       assert.ok(account.createdAt.eq(account.updatedAt));
-
-      console.log(instructionStatsAccount);
-
       assert.equal(instructionStatsAccount.quantityOfAccounts, 1);
     });
 

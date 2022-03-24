@@ -1,6 +1,6 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Collection, Instruction, InstructionAccount, InstructionStats,
-  User, Workspace,
+  Application, Budget, Collaborator, Collection, Instruction, InstructionAccount,
+  InstructionAccountStats, InstructionStats, User, Workspace,
 };
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
@@ -71,6 +71,17 @@ pub struct CreateInstructionAccount<'info> {
     bump = instruction.instruction_stats_bump
   )]
   pub instruction_stats: Box<Account<'info, InstructionStats>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccountStats::space(),
+    seeds = [
+      b"instruction_account_stats".as_ref(),
+      account.key().as_ref()
+    ],
+    bump
+  )]
+  pub account_stats: Box<Account<'info, InstructionAccountStats>>,
 }
 
 pub fn validate(
@@ -90,9 +101,16 @@ pub fn validate(
     _ => {
       let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
       let instruction_account_rent = **ctx.accounts.account.to_account_info().lamports.borrow();
-
+      let instruction_account_stats_rent = **ctx
+        .accounts
+        .account_stats
+        .to_account_info()
+        .lamports
+        .borrow();
       let funds_required = &Budget::get_rent_exemption()?
         .checked_add(instruction_account_rent)
+        .unwrap()
+        .checked_add(instruction_account_stats_rent)
         .unwrap();
 
       if budget_lamports.lt(funds_required) {
@@ -113,6 +131,16 @@ pub fn handle(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.account.to_account_info().lamports.borrow(),
+  )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .account_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
   )?;
   ctx.accounts.account.initialize(
     arguments.name,
@@ -139,8 +167,10 @@ pub fn handle(
         1,
       )?)?,
     )?,
+    *ctx.bumps.get("account_stats").unwrap(),
   );
   ctx.accounts.account.initialize_timestamp()?;
+  ctx.accounts.account_stats.initialize();
   ctx.accounts.instruction_stats.increase_account_quantity();
   Ok(())
 }

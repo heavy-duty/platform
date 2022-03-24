@@ -57,8 +57,6 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   private readonly _loadWorkspace = this.effect<string | null>(
     switchMap((workspaceId) => {
-      console.log('loading workspace');
-
       if (workspaceId === null) {
         this.patchState({ workspace: null });
         return EMPTY;
@@ -104,8 +102,6 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             .pipe(
               tapResponse(
                 (workspace) => {
-                  console.log(workspace);
-
                   this.patchState({
                     workspace,
                     isCreating: true,

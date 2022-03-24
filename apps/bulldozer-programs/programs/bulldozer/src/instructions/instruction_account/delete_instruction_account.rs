@@ -1,5 +1,6 @@
 use crate::collections::{
-  Budget, Collaborator, Instruction, InstructionAccount, InstructionStats, User, Workspace,
+  Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountStats, InstructionStats,
+  User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -16,7 +17,6 @@ pub struct DeleteInstructionAccount<'info> {
   #[account(
     mut,
     close = budget,
-    constraint = account.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
     constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace
   )]
@@ -57,6 +57,17 @@ pub struct DeleteInstructionAccount<'info> {
     bump = instruction.instruction_stats_bump
   )]
   pub instruction_stats: Box<Account<'info, InstructionStats>>,
+  #[account(
+    mut,
+    close = budget,
+    constraint = account_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
+    seeds = [
+      b"instruction_account_stats".as_ref(),
+      account.key().as_ref()
+    ],
+    bump = account.instruction_account_stats_bump
+  )]
+  pub account_stats: Box<Account<'info, InstructionAccountStats>>,
 }
 
 pub fn handle(ctx: Context<DeleteInstructionAccount>) -> Result<()> {
