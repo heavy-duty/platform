@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, User};
+use crate::collections::{Collaborator, User, Workspace};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -14,6 +14,7 @@ pub struct UpdateCollaborator<'info> {
   #[account(mut)]
   pub collaborator: Box<Account<'info, Collaborator>>,
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -25,7 +26,7 @@ pub struct UpdateCollaborator<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      collaborator.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = authority_collaborator.bump,

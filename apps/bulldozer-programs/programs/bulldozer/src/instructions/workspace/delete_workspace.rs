@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, User, Workspace};
+use crate::collections::{Collaborator, User, Workspace, WorkspaceStats};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -7,10 +7,18 @@ pub struct DeleteWorkspace<'info> {
   #[account(
     mut,
     close = authority,
-    constraint = workspace.quantity_of_applications == 0 @ ErrorCode::CantDeleteWorkspaceWithApplications,
-    constraint = workspace.quantity_of_collaborators == 1 @ ErrorCode::CantDeleteWorkspaceWithCollaborators,
+    constraint = workspace_stats.quantity_of_applications == 0 @ ErrorCode::CantDeleteWorkspaceWithApplications,
+    constraint = workspace_stats.quantity_of_collaborators == 1 @ ErrorCode::CantDeleteWorkspaceWithCollaborators,
   )]
   pub workspace: Account<'info, Workspace>,
+  #[account(
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump = workspace.workspace_stats_bump,
+  )]
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   pub authority: Signer<'info>,
   #[account(
     seeds = [

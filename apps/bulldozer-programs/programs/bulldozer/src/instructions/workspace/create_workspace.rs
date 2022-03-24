@@ -1,4 +1,4 @@
-use crate::collections::{Budget, Collaborator, User, Workspace};
+use crate::collections::{Budget, Collaborator, User, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
 use anchor_lang::prelude::*;
 
@@ -29,6 +29,17 @@ pub struct CreateWorkspace<'info> {
   #[account(
     init,
     payer = authority,
+    space = WorkspaceStats::space(),
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump,
+  )]
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
+  #[account(
+    init,
+    payer = authority,
     seeds = [
       b"collaborator".as_ref(),
       workspace.key().as_ref(),
@@ -54,11 +65,13 @@ pub struct CreateWorkspace<'info> {
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {
   msg!("Create workspace");
-  ctx
-    .accounts
-    .workspace
-    .initialize(arguments.name, *ctx.accounts.authority.key);
+  ctx.accounts.workspace.initialize(
+    arguments.name,
+    *ctx.accounts.authority.key,
+    *ctx.bumps.get("workspace_stats").unwrap(),
+  );
   ctx.accounts.workspace.initialize_timestamp()?;
+  ctx.accounts.workspace_stats.initialize();
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),

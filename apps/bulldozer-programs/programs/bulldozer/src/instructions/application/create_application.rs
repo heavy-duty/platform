@@ -1,4 +1,4 @@
-use crate::collections::{Application, Budget, Collaborator, User, Workspace};
+use crate::collections::{Application, Budget, Collaborator, User, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use crate::utils::{fund_rent_for_account, has_enough_funds};
@@ -14,8 +14,16 @@ pub struct CreateApplicationArguments {
 pub struct CreateApplication<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
-  #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    mut,
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump = workspace.workspace_stats_bump,
+  )]
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -80,6 +88,6 @@ pub fn handle(
     ctx.accounts.workspace.key(),
   );
   ctx.accounts.application.initialize_timestamp()?;
-  ctx.accounts.workspace.increase_application_quantity();
+  ctx.accounts.workspace_stats.increase_application_quantity();
   Ok(())
 }

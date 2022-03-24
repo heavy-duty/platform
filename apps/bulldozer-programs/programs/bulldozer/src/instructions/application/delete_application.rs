@@ -1,4 +1,4 @@
-use crate::collections::{Application, Budget, Collaborator, User, Workspace};
+use crate::collections::{Application, Budget, Collaborator, User, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,18 +6,24 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteApplication<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     mut,
     close = budget,
     constraint = application.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
     constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions,
+    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub application: Account<'info, Application>,
   #[account(
     mut,
-    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump = workspace.workspace_stats_bump,
   )]
-  pub workspace: Account<'info, Workspace>,
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -49,6 +55,6 @@ pub struct DeleteApplication<'info> {
 
 pub fn handle(ctx: Context<DeleteApplication>) -> Result<()> {
   msg!("Delete application");
-  ctx.accounts.workspace.decrease_application_quantity();
+  ctx.accounts.workspace_stats.decrease_application_quantity();
   Ok(())
 }

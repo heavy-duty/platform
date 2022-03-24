@@ -22,6 +22,7 @@ describe('collaborator', () => {
   let newCollaboratorPublicKey: PublicKey;
   let userPublicKey: PublicKey;
   let newUserPublicKey: PublicKey;
+  let workspaceStatsPublicKey: PublicKey;
 
   before(async () => {
     [userPublicKey] = await PublicKey.findProgramAddress(
@@ -49,6 +50,10 @@ describe('collaborator', () => {
         workspace.publicKey.toBuffer(),
         newUserPublicKey.toBuffer(),
       ],
+      program.programId
+    );
+    [workspaceStatsPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('workspace_stats', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
 
@@ -113,15 +118,15 @@ describe('collaborator', () => {
     const collaboratorAccount = await program.account.collaborator.fetch(
       newCollaboratorPublicKey
     );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
+    const workspaceStatsAccount = await program.account.workspaceStats.fetch(
+      workspaceStatsPublicKey
     );
     assert.ok(collaboratorAccount.authority.equals(newUser.publicKey));
     assert.equal(collaboratorAccount.isAdmin, false);
     assert.ok('pending' in collaboratorAccount.status);
     assert.ok(collaboratorAccount.user.equals(newUserPublicKey));
     assert.ok(collaboratorAccount.workspace.equals(workspace.publicKey));
-    assert.equal(workspaceAccount.quantityOfCollaborators, 2);
+    assert.equal(workspaceStatsAccount.quantityOfCollaborators, 2);
   });
 
   it('should approve collaborator', async () => {
@@ -130,6 +135,7 @@ describe('collaborator', () => {
       .updateCollaborator({ status: 1 })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         collaborator: newCollaboratorPublicKey,
       })
       .rpc();
@@ -155,11 +161,11 @@ describe('collaborator', () => {
       await program.account.collaborator.fetchNullable(
         newCollaboratorPublicKey
       );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
+    const workspaceStatsAccount = await program.account.workspaceStats.fetch(
+      workspaceStatsPublicKey
     );
     assert.equal(collaboratorAccount, null);
-    assert.equal(workspaceAccount.quantityOfCollaborators, 1);
+    assert.equal(workspaceStatsAccount.quantityOfCollaborators, 1);
   });
 
   it('should reject collaborator status request', async () => {
@@ -176,6 +182,7 @@ describe('collaborator', () => {
       .updateCollaborator({ status: 2 })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         collaborator: newCollaboratorPublicKey,
       })
       .rpc();
@@ -193,6 +200,7 @@ describe('collaborator', () => {
       .accounts({
         authority: newUser.publicKey,
         collaborator: newCollaboratorPublicKey,
+        workspace: workspace.publicKey,
       })
       .signers([newUser])
       .rpc();
