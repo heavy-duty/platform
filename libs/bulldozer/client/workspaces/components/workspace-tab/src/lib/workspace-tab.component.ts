@@ -1,6 +1,5 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { combineLatest, map } from 'rxjs';
 import { WorkspaceTabStore } from './workspace-tab.store';
 
 @Component({
@@ -51,41 +50,8 @@ export class WorkspaceTabComponent {
   }
 
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly showSpinner$ = combineLatest({
-    workspace: this.workspace$,
-    isCreating: this._workspaceStore.isCreating$,
-    isUpdating: this._workspaceStore.isUpdating$,
-    isDeleting: this._workspaceStore.isDeleting$,
-  }).pipe(
-    map(
-      ({ workspace, isCreating, isDeleting, isUpdating }) =>
-        workspace !== null && (isCreating || isUpdating || isDeleting)
-    )
-  );
-  readonly tooltipMessage$ = combineLatest({
-    workspace: this.workspace$,
-    isCreating: this._workspaceStore.isCreating$,
-    isUpdating: this._workspaceStore.isUpdating$,
-    isDeleting: this._workspaceStore.isDeleting$,
-  }).pipe(
-    map(({ workspace, isCreating, isDeleting, isUpdating }) => {
-      if (workspace === null) {
-        return '';
-      }
-
-      const message = `Workspace "${workspace.name}"`;
-
-      if (isCreating) {
-        return `"${message}" being created...`;
-      } else if (isUpdating) {
-        return `"${message}" being updated...`;
-      } else if (isDeleting) {
-        return `"${message}" being deleted...`;
-      }
-
-      return `${message}.`;
-    })
-  );
+  readonly showSpinner$ = this._workspaceTabStore.showSpinner$;
+  readonly tooltipMessage$ = this._workspaceTabStore.tooltipMessage$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,
