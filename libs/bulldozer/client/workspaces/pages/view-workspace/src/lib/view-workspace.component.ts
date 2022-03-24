@@ -21,6 +21,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       <header bdPageHeader>
         <h1>
           {{ workspace.name }}
+          <span *ngIf="(isCreatingWorkspace$ | ngrxPush) ?? false">
+            (Creating...)
+          </span>
           <span *ngIf="(isUpdatingWorkspace$ | ngrxPush) ?? false">
             (Updating...)
           </span>
@@ -98,6 +101,7 @@ export class ViewWorkspaceComponent {
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
+  readonly isCreatingWorkspace$ = this._workspaceStore.isCreating$;
   readonly isUpdatingWorkspace$ = this._workspaceStore.isUpdating$;
   readonly isDeletingWorkspace$ = this._workspaceStore.isDeleting$;
 

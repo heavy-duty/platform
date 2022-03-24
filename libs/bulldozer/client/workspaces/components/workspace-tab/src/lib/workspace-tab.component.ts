@@ -1,5 +1,6 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
+import { combineLatest, map } from 'rxjs';
 import { WorkspaceTabStore } from './workspace-tab.store';
 
 @Component({
@@ -11,11 +12,20 @@ import { WorkspaceTabStore } from './workspace-tab.store';
     >
       <a
         [routerLink]="['/workspaces', workspace.id]"
-        class="flex items-center pl-4 flex-grow"
+        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
       >
-        <span>
+        <span
+          class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
           {{ workspace.name }}
         </span>
+        <mat-progress-spinner
+          class="flex-shrink-0"
+          *ngIf="showSpinner$ | ngrxPush"
+          mode="indeterminate"
+          diameter="16"
+        ></mat-progress-spinner>
       </a>
       <button
         mat-icon-button
@@ -41,6 +51,41 @@ export class WorkspaceTabComponent {
   }
 
   readonly workspace$ = this._workspaceStore.workspace$;
+  readonly showSpinner$ = combineLatest({
+    workspace: this.workspace$,
+    isCreating: this._workspaceStore.isCreating$,
+    isUpdating: this._workspaceStore.isUpdating$,
+    isDeleting: this._workspaceStore.isDeleting$,
+  }).pipe(
+    map(
+      ({ workspace, isCreating, isDeleting, isUpdating }) =>
+        workspace !== null && (isCreating || isUpdating || isDeleting)
+    )
+  );
+  readonly tooltipMessage$ = combineLatest({
+    workspace: this.workspace$,
+    isCreating: this._workspaceStore.isCreating$,
+    isUpdating: this._workspaceStore.isUpdating$,
+    isDeleting: this._workspaceStore.isDeleting$,
+  }).pipe(
+    map(({ workspace, isCreating, isDeleting, isUpdating }) => {
+      if (workspace === null) {
+        return '';
+      }
+
+      const message = `Workspace "${workspace.name}"`;
+
+      if (isCreating) {
+        return `"${message}" being created...`;
+      } else if (isUpdating) {
+        return `"${message}" being updated...`;
+      } else if (isDeleting) {
+        return `"${message}" being deleted...`;
+      }
+
+      return `${message}.`;
+    })
+  );
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,

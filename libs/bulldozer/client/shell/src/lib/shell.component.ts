@@ -188,8 +188,6 @@ export class ShellComponent extends ComponentStore<object> {
         .pipe(
           tapResponse(
             (confirmedSignatureInfos) => {
-              console.log(confirmedSignatureInfos);
-
               this._hdBroadcasterStore.clearTransactions();
               confirmedSignatureInfos
                 .filter(

@@ -5,10 +5,10 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
   BehaviorSubject,
   combineLatest,
+  concatMap,
   EMPTY,
   map,
   switchMap,
-  tap,
 } from 'rxjs';
 import { WorkspaceApiService } from './workspace-api.service';
 import { InstructionStatus } from './workspace-instructions.store';
@@ -16,6 +16,7 @@ import { InstructionStatus } from './workspace-instructions.store';
 interface ViewModel {
   workspaceId: string | null;
   workspace: Document<Workspace> | null;
+  isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
   loading: boolean;
@@ -24,6 +25,7 @@ interface ViewModel {
 const initialState: ViewModel = {
   workspaceId: null,
   workspace: null,
+  isCreating: false,
   isUpdating: false,
   isDeleting: false,
   loading: false,
@@ -35,6 +37,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   private readonly reload$ = this._reload.asObservable();
   readonly workspace$ = this.select(({ workspace }) => workspace);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  readonly isCreating$ = this.select(({ isCreating }) => isCreating);
   readonly isUpdating$ = this.select(({ isUpdating }) => isUpdating);
   readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
   readonly loading$ = this.select(({ loading }) => loading);
@@ -54,6 +57,8 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
   private readonly _loadWorkspace = this.effect<string | null>(
     switchMap((workspaceId) => {
+      console.log('loading workspace');
+
       if (workspaceId === null) {
         this.patchState({ workspace: null });
         return EMPTY;
@@ -78,17 +83,56 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly handleWorkspaceInstruction = this.effect<InstructionStatus>(
-    tap((workspaceInstruction) => {
+    concatMap((workspaceInstruction) => {
+      const workspaceAccountMeta = workspaceInstruction.accounts.find(
+        (account) => account.name === 'Workspace'
+      );
+
+      if (workspaceAccountMeta === undefined) {
+        return EMPTY;
+      }
+
       switch (workspaceInstruction.name) {
-        case 'updateWorkspace': {
-          if (workspaceInstruction.status === 'confirmed') {
-            this.patchState({ isUpdating: true });
-            this.reload();
-          } else {
-            this.patchState({ isUpdating: false });
+        case 'createWorkspace': {
+          if (workspaceInstruction.status === 'finalized') {
+            this.patchState({ isCreating: false });
+            return EMPTY;
           }
 
-          break;
+          return this._workspaceApiService
+            .findById(workspaceAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (workspace) => {
+                  console.log(workspace);
+
+                  this.patchState({
+                    workspace,
+                    isCreating: true,
+                  });
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'updateWorkspace': {
+          if (workspaceInstruction.status === 'finalized') {
+            this.patchState({ isUpdating: false });
+            return EMPTY;
+          }
+
+          return this._workspaceApiService
+            .findById(workspaceAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (workspace) =>
+                  this.patchState({
+                    workspace,
+                    isUpdating: true,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
         }
         case 'deleteWorkspace': {
           if (workspaceInstruction.status === 'confirmed') {
@@ -97,8 +141,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             this.patchState({ workspace: null, isDeleting: false });
           }
 
-          break;
+          return EMPTY;
         }
+        default:
+          return EMPTY;
       }
     })
   );
