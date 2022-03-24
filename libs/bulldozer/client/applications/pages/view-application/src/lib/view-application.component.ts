@@ -9,6 +9,15 @@ import { ViewApplicationStore } from './view-application.store';
       <header bdPageHeader>
         <h1>
           {{ application.name }}
+          <span *ngIf="(isCreatingApplication$ | ngrxPush) ?? false">
+            (Creating...)
+          </span>
+          <span *ngIf="(isUpdatingApplication$ | ngrxPush) ?? false">
+            (Updating...)
+          </span>
+          <span *ngIf="(isDeletingApplication$ | ngrxPush) ?? false">
+            (Deleting...)
+          </span>
         </h1>
         <p>Visualize all the details about this application.</p>
       </header>
@@ -20,6 +29,9 @@ import { ViewApplicationStore } from './view-application.store';
 })
 export class ViewApplicationComponent {
   readonly application$ = this._applicationStore.application$;
+  readonly isCreatingApplication$ = this._applicationStore.isCreating$;
+  readonly isUpdatingApplication$ = this._applicationStore.isUpdating$;
+  readonly isDeletingApplication$ = this._applicationStore.isDeleting$;
 
   constructor(
     private readonly _applicationStore: ApplicationStore,

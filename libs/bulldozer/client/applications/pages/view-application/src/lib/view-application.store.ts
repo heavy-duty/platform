@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { concatMap, filter, from, merge, switchMap, take, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -19,9 +22,15 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
 
-  constructor(private readonly _tabStore: TabStore, route: ActivatedRoute) {
+  constructor(
+    private readonly _tabStore: TabStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
+    private readonly _applicationStore: ApplicationStore,
+    route: ActivatedRoute
+  ) {
     super(initialState);
 
+    this._watchApplication(this.applicationId$);
     this._openTab(
       this.select(
         this.applicationId$,
@@ -35,6 +44,39 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
     );
     this._setRouteParameters(route.paramMap);
   }
+
+  private readonly _watchApplication = this.effect<string | null>(
+    switchMap((applicationId) =>
+      merge(
+        this._workspaceInstructionsStore.instructionStatuses$.pipe(
+          take(1),
+          concatMap((instructionStatuses) => from(instructionStatuses))
+        ),
+        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        )
+      ).pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createApplication' ||
+              instructionStatus.name === 'updateApplication' ||
+              instructionStatus.name === 'deleteApplication') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized') &&
+            instructionStatus.accounts.some(
+              (account) =>
+                account.name === 'Application' &&
+                account.pubkey === applicationId
+            )
+        ),
+        tap((applicationInstruction) =>
+          this._applicationStore.handleApplicationInstruction(
+            applicationInstruction
+          )
+        )
+      )
+    )
+  );
 
   private readonly _setRouteParameters = this.updater<ParamMap>(
     (state, paramMap) => ({

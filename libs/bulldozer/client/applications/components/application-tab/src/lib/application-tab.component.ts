@@ -16,10 +16,22 @@ import { ApplicationTabStore } from './application-tab.store';
           'applications',
           application.id
         ]"
-        class="flex items-center pl-4 flex-grow"
+        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
       >
-        {{ application.name }}
+        <span
+          class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
+          {{ application.name }}
+        </span>
+        <mat-progress-spinner
+          class="flex-shrink-0"
+          *ngIf="showSpinner$ | ngrxPush"
+          mode="indeterminate"
+          diameter="16"
+        ></mat-progress-spinner>
       </a>
+
       <button
         mat-icon-button
         [attr.aria-label]="'Close ' + application.name + ' tab'"
@@ -44,6 +56,8 @@ export class ApplicationTabComponent {
   }
 
   readonly application$ = this._applicationStore.application$;
+  readonly showSpinner$ = this._applicationTabStore.showSpinner$;
+  readonly tooltipMessage$ = this._applicationTabStore.tooltipMessage$;
 
   constructor(
     private readonly _applicationTabStore: ApplicationTabStore,
