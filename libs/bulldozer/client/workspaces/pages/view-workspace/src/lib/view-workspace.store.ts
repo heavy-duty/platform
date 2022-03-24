@@ -147,7 +147,12 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
               (instructionStatus.name === 'updateWorkspace' ||
                 instructionStatus.name === 'deleteWorkspace') &&
               (instructionStatus.status === 'confirmed' ||
-                instructionStatus.status === 'finalized')
+                instructionStatus.status === 'finalized') &&
+              instructionStatus.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' &&
+                  account.pubkey === workspace?.id
+              )
           ),
           tap((workspaceInstruction) =>
             this._workspaceStore.handleWorkspaceInstruction(

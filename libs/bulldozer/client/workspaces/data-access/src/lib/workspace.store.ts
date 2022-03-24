@@ -55,6 +55,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   private readonly _loadWorkspace = this.effect<string | null>(
     switchMap((workspaceId) => {
       if (workspaceId === null) {
+        this.patchState({ workspace: null });
         return EMPTY;
       }
 
