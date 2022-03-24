@@ -9,7 +9,7 @@ import {
   CollaboratorsStore,
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
-import { TabStore } from '@bulldozer-client/core-data-access';
+import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import {
@@ -100,6 +100,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
+    private readonly _configStore: ConfigStore,
     private readonly _userStore: UserStore,
     private readonly _budgetStore: BudgetStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
@@ -121,7 +122,12 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     );
     this._workspaceStore.setWorkspaceId(this.workspaceId$);
     this._budgetStore.setWorkspaceId(this.workspaceId$);
+    this._activateWorkspace(this.workspaceId$);
   }
+
+  private readonly _activateWorkspace = this.effect<string | null>(
+    tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
+  );
 
   private readonly _watchWorkspace = this.effect<boolean>(
     pipe(

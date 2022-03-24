@@ -23,7 +23,6 @@ import {
   distinctUntilChanged,
   EMPTY,
   filter,
-  of,
   pairwise,
   pipe,
   startWith,
@@ -142,36 +141,72 @@ export class ShellComponent extends ComponentStore<object> {
       )
     );
     this._loadWalletTransactions(this._walletStore.publicKey$);
+    this._loadWorkspaceTransactions(this._configStore.workspaceId$);
   }
 
   private readonly _loadWalletTransactions = this.effect<PublicKey | null>(
-    pipe(
-      switchMap((publicKey) => {
-        if (publicKey === null) {
-          return of([]);
-        }
+    switchMap((publicKey) => {
+      this._hdSolanaTransactionsStore.clearTransactions();
 
-        return this._hdSolanaApiService.getSignaturesForAddress(
-          publicKey.toBase58(),
-          undefined,
-          'confirmed'
+      if (publicKey === null) {
+        return EMPTY;
+      }
+
+      return this._hdSolanaApiService
+        .getSignaturesForAddress(publicKey.toBase58(), undefined, 'confirmed')
+        .pipe(
+          tapResponse(
+            (confirmedSignatureInfos) => {
+              this._hdSolanaTransactionsStore.clearTransactions();
+              confirmedSignatureInfos
+                .filter(
+                  (confirmedSignatureInfo) =>
+                    confirmedSignatureInfo.confirmationStatus === 'confirmed'
+                )
+                .forEach((confirmedSignatureInfo) =>
+                  this._hdSolanaTransactionsStore.reportProgress(
+                    confirmedSignatureInfo.signature
+                  )
+                );
+            },
+            (error) => this._notificationStore.setError(error)
+          )
         );
-      }),
-      tapResponse(
-        (confirmedSignatureInfos) =>
-          confirmedSignatureInfos
-            .filter(
-              (confirmedSignatureInfo) =>
-                confirmedSignatureInfo.confirmationStatus === 'confirmed'
-            )
-            .forEach((confirmedSignatureInfo) =>
-              this._hdSolanaTransactionsStore.reportProgress(
-                confirmedSignatureInfo.signature
-              )
-            ),
-        (error) => this._notificationStore.setError(error)
-      )
-    )
+    })
+  );
+
+  private readonly _loadWorkspaceTransactions = this.effect<string | null>(
+    switchMap((workspaceId) => {
+      this._hdBroadcasterStore.clearTransactions();
+
+      if (workspaceId === null) {
+        return EMPTY;
+      }
+
+      return this._hdSolanaApiService
+        .getSignaturesForAddress(workspaceId, undefined, 'confirmed')
+        .pipe(
+          tapResponse(
+            (confirmedSignatureInfos) => {
+              console.log(confirmedSignatureInfos);
+
+              this._hdBroadcasterStore.clearTransactions();
+              confirmedSignatureInfos
+                .filter(
+                  (confirmedSignatureInfo) =>
+                    confirmedSignatureInfo.confirmationStatus === 'confirmed'
+                )
+                .forEach((confirmedSignatureInfo) =>
+                  this._hdBroadcasterStore.handleTransactionConfirmed({
+                    signature: confirmedSignatureInfo.signature,
+                    topic: workspaceId,
+                  })
+                );
+            },
+            (error) => this._notificationStore.setError(error)
+          )
+        );
+    })
   );
 
   private readonly _subscribeToWorkspace = this.effect<string | null>(

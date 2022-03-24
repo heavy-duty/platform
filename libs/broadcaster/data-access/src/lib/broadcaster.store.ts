@@ -56,7 +56,7 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
-    this._handleTransactionConfirmed(
+    this.handleTransactionConfirmed(
       this._hdBroadcasterSocketStore
         .fromEvent('transactionConfirmed')
         .pipe(map((message) => message.data))
@@ -131,7 +131,7 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
     };
   });
 
-  private readonly _handleTransactionConfirmed = this.effect<{
+  readonly handleTransactionConfirmed = this.effect<{
     signature: TransactionSignature;
     topic: string;
   }>(
@@ -190,5 +190,12 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
         data: topic,
       })
     );
+  }
+
+  clearTransactions() {
+    this.patchState({
+      transactionStatusMap: new Map<TransactionSignature, TransactionStatus>(),
+      lastTransactionStatus: null,
+    });
   }
 }

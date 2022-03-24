@@ -17,6 +17,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs';
+import { ConfigStore } from './config.store';
 
 export interface Tab {
   id: string;
@@ -48,12 +49,16 @@ export class TabStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _router: Router,
+    private readonly _configStore: ConfigStore,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
     private readonly _userInstructionsStore: UserInstructionsStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
+    this._handleActiveWorkspaceChanges(
+      this._configStore.workspaceId$.pipe(isNotNullOrUndefined)
+    );
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._removeWorkspaceTabOnDelete(
       merge(
@@ -86,6 +91,15 @@ export class TabStore extends ComponentStore<ViewModel> {
     tabs: state.tabs.filter((tab) => tab.id !== tabId),
   }));
 
+  private readonly _removeWorkspaceTabs = this.updater<string>(
+    (state, workspaceId) => ({
+      ...state,
+      tabs: state.tabs.filter(
+        (tab) => !tab.url.startsWith(`/workspaces/${workspaceId}`)
+      ),
+    })
+  );
+
   private readonly _handleNetworkChanges = this.effect(
     pipe(
       distinctUntilChanged(),
@@ -95,6 +109,16 @@ export class TabStore extends ComponentStore<ViewModel> {
           tabs: [],
           selected: null,
         })
+      )
+    )
+  );
+
+  private readonly _handleActiveWorkspaceChanges = this.effect<string>(
+    pipe(
+      distinctUntilChanged(),
+      pairwise(),
+      tap(([previousWorkspaceId]) =>
+        this._removeWorkspaceTabs(previousWorkspaceId)
       )
     )
   );

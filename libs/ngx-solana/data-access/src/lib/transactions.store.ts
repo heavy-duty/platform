@@ -166,4 +166,11 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
       this._handleTransactionFinalized(signature);
     }
   }
+
+  clearTransactions() {
+    this.patchState({
+      transactionStatuses: [],
+      lastTransactionStatus: null,
+    });
+  }
 }
