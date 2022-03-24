@@ -27,7 +27,6 @@ pub struct CreateCollectionAttribute<'info> {
   #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
   pub application: Box<Account<'info, Application>>,
   #[account(
-    mut,
     constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
     constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace
   )]

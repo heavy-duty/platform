@@ -1,4 +1,6 @@
-use crate::collections::{Budget, Collaborator, Instruction, InstructionAccount, User};
+use crate::collections::{
+  Budget, Collaborator, Instruction, InstructionAccount, InstructionStats, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,18 +8,19 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteInstructionAccount<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Account<'info, Instruction>,
   #[account(
     mut,
     close = budget,
     constraint = account.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+    constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace
   )]
   pub account: Account<'info, InstructionAccount>,
-  #[account(
-    mut,
-    constraint = instruction.workspace == account.workspace @ ErrorCode::InstructionDoesNotBelongToWorkspace
-  )]
-  pub instruction: Account<'info, Instruction>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -45,10 +48,19 @@ pub struct DeleteInstructionAccount<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    mut,
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump = instruction.instruction_stats_bump
+  )]
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
 }
 
 pub fn handle(ctx: Context<DeleteInstructionAccount>) -> Result<()> {
   msg!("Delete instruction account");
-  ctx.accounts.instruction.decrease_account_quantity();
+  ctx.accounts.instruction_stats.decrease_account_quantity();
   Ok(())
 }

@@ -122,6 +122,7 @@ pub fn handle(
     *ctx.bumps.get("application_stats").unwrap(),
   );
   ctx.accounts.application.initialize_timestamp()?;
+  ctx.accounts.application_stats.initialize();
   ctx.accounts.workspace_stats.increase_application_quantity();
   Ok(())
 }

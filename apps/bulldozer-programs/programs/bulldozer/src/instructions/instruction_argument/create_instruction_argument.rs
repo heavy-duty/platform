@@ -1,5 +1,6 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Instruction, InstructionArgument, User, Workspace,
+  Application, Budget, Collaborator, Instruction, InstructionArgument, InstructionStats, User,
+  Workspace,
 };
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
@@ -19,17 +20,23 @@ pub struct CreateInstructionArgumentArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionArgumentArguments)]
 pub struct CreateInstructionArgument<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
   pub application: Box<Account<'info, Application>>,
   #[account(
-    mut,
     constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
     constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
   )]
   pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionArgument::space(),
+  )]
+  pub argument: Box<Account<'info, InstructionArgument>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,12 +65,14 @@ pub struct CreateInstructionArgument<'info> {
   )]
   pub budget: Box<Account<'info, Budget>>,
   #[account(
-    init,
-    payer = authority,
-    space = InstructionArgument::space(),
+    mut,
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump = instruction.instruction_stats_bump
   )]
-  pub argument: Box<Account<'info, InstructionArgument>>,
-  pub system_program: Program<'info, System>,
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
 }
 
 pub fn validate(
@@ -106,6 +115,6 @@ pub fn handle(
     AttributeModifiers::create(arguments.modifier, arguments.size)?,
   );
   ctx.accounts.argument.initialize_timestamp()?;
-  ctx.accounts.instruction.increase_argument_quantity();
+  ctx.accounts.instruction_stats.increase_argument_quantity();
   Ok(())
 }

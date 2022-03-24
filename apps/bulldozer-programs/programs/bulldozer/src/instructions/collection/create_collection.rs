@@ -122,6 +122,7 @@ pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArgumen
     *ctx.bumps.get("collection_stats").unwrap(),
   );
   ctx.accounts.collection.initialize_timestamp()?;
+  ctx.accounts.collection_stats.initialize();
   ctx
     .accounts
     .application_stats

@@ -1,9 +1,10 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Instruction, User, Workspace,
+  Application, ApplicationStats, Budget, Collaborator, Instruction, InstructionStats, User,
+  Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -65,14 +66,35 @@ pub struct CreateInstruction<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionStats::space(),
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump
+  )]
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
 }
 
 pub fn validate(ctx: &Context<CreateInstruction>) -> Result<bool> {
-  if !has_enough_funds(
-    ctx.accounts.budget.to_account_info(),
-    ctx.accounts.instruction.to_account_info(),
-    Budget::get_rent_exemption()?,
-  ) {
+  let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let instruction_rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
+  let instruction_stats_rent = **ctx
+    .accounts
+    .instruction_stats
+    .to_account_info()
+    .lamports
+    .borrow();
+  let funds_required = &Budget::get_rent_exemption()?
+    .checked_add(instruction_rent)
+    .unwrap()
+    .checked_add(instruction_stats_rent)
+    .unwrap();
+
+  if budget_lamports.lt(funds_required) {
     return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
@@ -89,13 +111,25 @@ pub fn handle(
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.instruction.to_account_info().lamports.borrow(),
   )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .instruction_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
   ctx.accounts.instruction.initialize(
     arguments.name,
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
+    *ctx.bumps.get("instruction_stats").unwrap(),
   );
   ctx.accounts.instruction.initialize_timestamp()?;
+  ctx.accounts.instruction_stats.initialize();
   ctx
     .accounts
     .application_stats

@@ -1,5 +1,5 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Instruction, User, Workspace,
+  Application, ApplicationStats, Budget, Collaborator, Instruction, InstructionStats, User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -13,9 +13,7 @@ pub struct DeleteInstruction<'info> {
   pub application: Account<'info, Application>,
   #[account(
     mut,
-    close = budget,
-    constraint = instruction.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments,
-    constraint = instruction.quantity_of_accounts == 0 @ ErrorCode::CantDeleteInstructionWithAccounts,
+    close = budget,    
     constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
   )]
   pub instruction: Account<'info, Instruction>,
@@ -28,6 +26,18 @@ pub struct DeleteInstruction<'info> {
     bump = application.application_stats_bump
   )]
   pub application_stats: Box<Account<'info, ApplicationStats>>,
+  #[account(
+    mut,
+    close = budget, 
+    constraint = instruction_stats.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments,
+    constraint = instruction_stats.quantity_of_accounts == 0 @ ErrorCode::CantDeleteInstructionWithAccounts,
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump = instruction.instruction_stats_bump
+  )]
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),

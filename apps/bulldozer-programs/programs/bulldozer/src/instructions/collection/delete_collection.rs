@@ -15,6 +15,7 @@ pub struct DeleteCollection<'info> {
     mut,
     close = budget,
     constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
+    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace,
   )]
   pub collection: Account<'info, Collection>,
   #[account(
@@ -27,6 +28,8 @@ pub struct DeleteCollection<'info> {
   )]
   pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
+    mut,
+    close = budget,
     constraint = collection_stats.quantity_of_attributes == 0 @ ErrorCode::CantDeleteCollectionWithAttributes,
     seeds = [
       b"collection_stats".as_ref(),

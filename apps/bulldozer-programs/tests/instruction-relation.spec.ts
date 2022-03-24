@@ -36,17 +36,9 @@ describe('instruction relation', () => {
     space: null,
   };
   let relationPublicKey: PublicKey;
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
@@ -284,6 +276,9 @@ describe('instruction relation', () => {
           lamports:
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               2155 // instruction account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // instruction stats account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               125 // application account size
