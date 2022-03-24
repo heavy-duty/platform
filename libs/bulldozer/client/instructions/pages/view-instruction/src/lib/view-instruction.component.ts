@@ -41,9 +41,15 @@ import { ViewInstructionStore } from './view-instruction.store';
             (createInstructionArgument)="
               onCreateInstructionArgument(instruction, $event)
             "
-            (updateInstructionArgument)="onUpdateInstructionArgument($event)"
+            (updateInstructionArgument)="
+              onUpdateInstructionArgument(instruction.data.workspace, $event)
+            "
             (deleteInstructionArgument)="
-              onDeleteInstructionArgument(instruction.id, $event)
+              onDeleteInstructionArgument(
+                instruction.data.workspace,
+                instruction.id,
+                $event
+              )
             "
           ></bd-instruction-arguments-list>
           <bd-instruction-documents-list
@@ -54,9 +60,15 @@ import { ViewInstructionStore } from './view-instruction.store';
             (createInstructionDocument)="
               onCreateInstructionAccount(instruction, $event)
             "
-            (updateInstructionDocument)="onUpdateInstructionAccount($event)"
+            (updateInstructionDocument)="
+              onUpdateInstructionAccount(instruction.data.workspace, $event)
+            "
             (deleteInstructionDocument)="
-              onDeleteInstructionAccount(instruction.id, $event)
+              onDeleteInstructionAccount(
+                instruction.data.workspace,
+                instruction.id,
+                $event
+              )
             "
             (createInstructionRelation)="
               onCreateInstructionRelation(
@@ -65,7 +77,9 @@ import { ViewInstructionStore } from './view-instruction.store';
                 $event.toAccountId
               )
             "
-            (deleteInstructionRelation)="onDeleteInstructionRelation($event)"
+            (deleteInstructionRelation)="
+              onDeleteInstructionRelation(instruction.data.workspace, $event)
+            "
           >
           </bd-instruction-documents-list>
           <bd-instruction-signers-list
@@ -74,9 +88,15 @@ import { ViewInstructionStore } from './view-instruction.store';
             (createInstructionSigner)="
               onCreateInstructionAccount(instruction, $event)
             "
-            (updateInstructionSigner)="onUpdateInstructionAccount($event)"
+            (updateInstructionSigner)="
+              onUpdateInstructionAccount(instruction.data.workspace, $event)
+            "
             (deleteInstructionSigner)="
-              onDeleteInstructionAccount(instruction.id, $event)
+              onDeleteInstructionAccount(
+                instruction.data.workspace,
+                instruction.id,
+                $event
+              )
             "
           >
           </bd-instruction-signers-list>
@@ -100,7 +120,12 @@ import { ViewInstructionStore } from './view-instruction.store';
                 <button
                   mat-raised-button
                   color="primary"
-                  (click)="onUpdateInstructionBody(instruction.id)"
+                  (click)="
+                    onUpdateInstructionBody(
+                      instruction.data.workspace,
+                      instruction.id
+                    )
+                  "
                 >
                   Save
                 </button>
@@ -194,8 +219,9 @@ export class ViewInstructionComponent {
     );
   }
 
-  onUpdateInstructionBody(instructionId: string) {
+  onUpdateInstructionBody(workspaceId: string, instructionId: string) {
     this._instructionStore.updateInstructionBody({
+      workspaceId,
       instructionId,
       instructionBody: this.instructionBody,
     });
@@ -211,18 +237,26 @@ export class ViewInstructionComponent {
     });
   }
 
-  onUpdateInstructionArgument(request: {
-    instructionArgumentId: string;
-    instructionArgumentDto: InstructionArgumentDto;
-  }) {
-    this._instructionArgumentsStore.updateInstructionArgument(request);
+  onUpdateInstructionArgument(
+    workspaceId: string,
+    request: {
+      instructionArgumentId: string;
+      instructionArgumentDto: InstructionArgumentDto;
+    }
+  ) {
+    this._instructionArgumentsStore.updateInstructionArgument({
+      ...request,
+      workspaceId,
+    });
   }
 
   onDeleteInstructionArgument(
+    workspaceId: string,
     instructionId: string,
     instructionArgumentId: string
   ) {
     this._instructionArgumentsStore.deleteInstructionArgument({
+      workspaceId,
       instructionId,
       instructionArgumentId,
     });
@@ -238,18 +272,26 @@ export class ViewInstructionComponent {
     });
   }
 
-  onUpdateInstructionAccount(request: {
-    instructionAccountId: string;
-    instructionAccountDto: InstructionAccountDto;
-  }) {
-    this._instructionAccountsStore.updateInstructionAccount(request);
+  onUpdateInstructionAccount(
+    workspaceId: string,
+    request: {
+      instructionAccountId: string;
+      instructionAccountDto: InstructionAccountDto;
+    }
+  ) {
+    this._instructionAccountsStore.updateInstructionAccount({
+      ...request,
+      workspaceId,
+    });
   }
 
   onDeleteInstructionAccount(
+    workspaceId: string,
     instructionId: string,
     instructionAccountId: string
   ) {
     this._instructionAccountsStore.deleteInstructionAccount({
+      workspaceId,
       instructionId,
       instructionAccountId,
     });
@@ -267,11 +309,17 @@ export class ViewInstructionComponent {
     });
   }
 
-  onDeleteInstructionRelation(request: {
-    instructionRelationId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }) {
-    this._instructionRelationsStore.deleteInstructionRelation(request);
+  onDeleteInstructionRelation(
+    workspaceId: string,
+    request: {
+      instructionRelationId: string;
+      fromAccountId: string;
+      toAccountId: string;
+    }
+  ) {
+    this._instructionRelationsStore.deleteInstructionRelation({
+      ...request,
+      workspaceId,
+    });
   }
 }

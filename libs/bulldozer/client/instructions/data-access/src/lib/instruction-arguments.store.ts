@@ -230,6 +230,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstructionArgument = this.effect<{
+    workspaceId: string;
     instructionArgumentId: string;
     instructionArgumentDto: InstructionArgumentDto;
   }>(
@@ -238,15 +239,19 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ instructionArgumentId, instructionArgumentDto }, authority]) => {
+        ([
+          { workspaceId, instructionArgumentId, instructionArgumentDto },
+          authority,
+        ]) => {
           if (authority === null) {
             return EMPTY;
           }
 
           return this._instructionArgumentApiService
             .update({
-              instructionArgumentDto,
               authority: authority.toBase58(),
+              workspaceId,
+              instructionArgumentDto,
               instructionArgumentId,
             })
             .pipe(
@@ -264,6 +269,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionArgument = this.effect<{
+    workspaceId: string;
     instructionId: string;
     instructionArgumentId: string;
   }>(
@@ -271,27 +277,33 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ instructionId, instructionArgumentId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([
+          { workspaceId, instructionId, instructionArgumentId },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionArgumentApiService
-          .delete({
-            authority: authority.toBase58(),
-            instructionArgumentId,
-            instructionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete argument request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionArgumentApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionArgumentId,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete argument request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }

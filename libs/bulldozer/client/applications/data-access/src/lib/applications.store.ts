@@ -208,6 +208,7 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateApplication = this.effect<{
+    workspaceId: string;
     applicationId: string;
     applicationName: string;
   }>(
@@ -215,27 +216,30 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ applicationId, applicationName }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, applicationId, applicationName }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._applicationApiService
-          .update({
-            applicationName,
-            authority: authority.toBase58(),
-            applicationId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Update application request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._applicationApiService
+            .update({
+              authority: authority.toBase58(),
+              workspaceId,
+              applicationName,
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update application request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 

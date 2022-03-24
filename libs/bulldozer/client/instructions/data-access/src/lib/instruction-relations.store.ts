@@ -231,6 +231,7 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionRelation = this.effect<{
+    workspaceId: string;
     fromAccountId: string;
     toAccountId: string;
   }>(
@@ -238,7 +239,7 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ fromAccountId, toAccountId }, authority]) => {
+      concatMap(([{ workspaceId, fromAccountId, toAccountId }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -246,6 +247,7 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
         return this._instructionRelationApiService
           .delete({
             authority: authority.toBase58(),
+            workspaceId,
             fromAccountId,
             toAccountId,
           })

@@ -13,6 +13,7 @@ export const updateInstructionArgument = (
         .methods.updateInstructionArgument(params.instructionArgumentDto)
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           argument: new PublicKey(params.instructionArgumentId),
         })
         .instruction() as Promise<TransactionInstruction>

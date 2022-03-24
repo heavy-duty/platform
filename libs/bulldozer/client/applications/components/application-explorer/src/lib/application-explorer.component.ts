@@ -14,7 +14,7 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
           class="block"
           [disabled]="!connected"
           bdEditApplicationTrigger
-          (editApplication)="onCreateApplication($event)"
+          (editApplication)="onCreateApplication(workspaceId, $event)"
         >
           Create application
         </button>
@@ -72,7 +72,13 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
               mat-menu-item
               bdEditApplicationTrigger
               [application]="application"
-              (editApplication)="onUpdateApplication(application.id, $event)"
+              (editApplication)="
+                onUpdateApplication(
+                  application.data.workspace,
+                  application.id,
+                  $event
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -80,7 +86,9 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteApplication(application.id)"
+              (click)="
+                onDeleteApplication(application.data.workspace, application.id)
+              "
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -117,23 +125,28 @@ export class ApplicationExplorerComponent {
     private readonly _walletStore: WalletStore
   ) {}
 
-  onCreateApplication(applicationName: string) {
+  onCreateApplication(workspaceId: string, applicationName: string) {
     this._applicationsStore.createApplication({
-      workspaceId: this.workspaceId,
+      workspaceId,
       applicationName,
     });
   }
 
-  onUpdateApplication(applicationId: string, applicationName: string) {
+  onUpdateApplication(
+    workspaceId: string,
+    applicationId: string,
+    applicationName: string
+  ) {
     this._applicationsStore.updateApplication({
+      workspaceId,
       applicationId,
       applicationName,
     });
   }
 
-  onDeleteApplication(applicationId: string) {
+  onDeleteApplication(workspaceId: string, applicationId: string) {
     this._applicationsStore.deleteApplication({
-      workspaceId: this.workspaceId,
+      workspaceId,
       applicationId,
     });
   }

@@ -11,12 +11,14 @@ export interface CreateCollectionAttributeParams {
 
 export interface UpdateCollectionAttributeParams {
   authority: string;
+  workspaceId: string;
   collectionAttributeId: string;
   collectionAttributeDto: CollectionAttributeDto;
 }
 
 export interface DeleteCollectionAttributeParams {
   authority: string;
+  workspaceId: string;
   collectionId: string;
   collectionAttributeId: string;
 }

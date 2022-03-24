@@ -13,6 +13,7 @@ export const updateCollaborator = (
         .methods.updateCollaborator({ status: params.status })
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           collaborator: new PublicKey(params.collaboratorId),
         })
         .instruction() as Promise<TransactionInstruction>

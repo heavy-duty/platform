@@ -13,6 +13,7 @@ export const deleteInstruction = (
         .methods.deleteInstruction()
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
           instruction: new PublicKey(params.instructionId),
         })

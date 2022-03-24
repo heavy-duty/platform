@@ -235,6 +235,7 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateCollectionAttribute = this.effect<{
+    workspaceId: string;
     collectionAttributeId: string;
     collectionAttributeDto: CollectionAttributeDto;
   }>(
@@ -243,15 +244,19 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ collectionAttributeId, collectionAttributeDto }, authority]) => {
+        ([
+          { workspaceId, collectionAttributeId, collectionAttributeDto },
+          authority,
+        ]) => {
           if (authority === null) {
             return EMPTY;
           }
 
           return this._collectionAttributeApiService
             .update({
-              collectionAttributeDto,
               authority: authority.toBase58(),
+              workspaceId,
+              collectionAttributeDto,
               collectionAttributeId,
             })
             .pipe(
@@ -269,6 +274,7 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteCollectionAttribute = this.effect<{
+    workspaceId: string;
     collectionId: string;
     collectionAttributeId: string;
   }>(
@@ -276,27 +282,30 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ collectionId, collectionAttributeId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, collectionId, collectionAttributeId }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._collectionAttributeApiService
-          .delete({
-            authority: authority.toBase58(),
-            collectionAttributeId,
-            collectionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete attribute request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._collectionAttributeApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              collectionAttributeId,
+              collectionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete attribute request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }

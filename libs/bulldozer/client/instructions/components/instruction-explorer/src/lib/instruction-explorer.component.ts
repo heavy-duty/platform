@@ -14,7 +14,9 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
             aria-label="Create instruction"
             bdStopPropagation
             bdEditInstructionTrigger
-            (editInstruction)="onCreateInstruction($event)"
+            (editInstruction)="
+              onCreateInstruction(workspaceId, applicationId, $event)
+            "
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -55,7 +57,13 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
               mat-menu-item
               bdEditInstructionTrigger
               [instruction]="instruction"
-              (editInstruction)="onUpdateInstruction(instruction.id, $event)"
+              (editInstruction)="
+                onUpdateInstruction(
+                  instruction.data.workspace,
+                  instruction.id,
+                  $event
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -63,7 +71,13 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteInstruction(instruction.id)"
+              (click)="
+                onDeleteInstruction(
+                  instruction.data.workspace,
+                  instruction.data.application,
+                  instruction.id
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -102,24 +116,38 @@ export class InstructionExplorerComponent {
 
   constructor(private readonly _instructionsStore: InstructionsStore) {}
 
-  onCreateInstruction(instructionName: string) {
+  onCreateInstruction(
+    workspaceId: string,
+    applicationId: string,
+    instructionName: string
+  ) {
     this._instructionsStore.createInstruction({
-      workspaceId: this.workspaceId,
-      applicationId: this.applicationId,
+      workspaceId,
+      applicationId,
       instructionName,
     });
   }
 
-  onUpdateInstruction(instructionId: string, instructionName: string) {
+  onUpdateInstruction(
+    workspaceId: string,
+    instructionId: string,
+    instructionName: string
+  ) {
     this._instructionsStore.updateInstruction({
+      workspaceId,
       instructionId,
       instructionName,
     });
   }
 
-  onDeleteInstruction(instructionId: string) {
+  onDeleteInstruction(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
     this._instructionsStore.deleteInstruction({
-      applicationId: this.applicationId,
+      workspaceId,
+      applicationId,
       instructionId,
     });
   }

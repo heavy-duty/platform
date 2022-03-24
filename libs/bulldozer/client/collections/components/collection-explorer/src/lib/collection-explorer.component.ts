@@ -14,7 +14,9 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
             aria-label="Create collection"
             bdStopPropagation
             bdEditCollectionTrigger
-            (editCollection)="onCreateCollection($event)"
+            (editCollection)="
+              onCreateCollection(workspaceId, applicationId, $event)
+            "
           >
             <mat-icon>add</mat-icon>
           </button>
@@ -55,7 +57,13 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
               mat-menu-item
               bdEditCollectionTrigger
               [collection]="collection"
-              (editCollection)="onUpdateCollection(collection.id, $event)"
+              (editCollection)="
+                onUpdateCollection(
+                  collection.data.workspace,
+                  collection.id,
+                  $event
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -63,7 +71,13 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteCollection(collection.id)"
+              (click)="
+                onDeleteCollection(
+                  collection.data.workspace,
+                  collection.data.application,
+                  collection.id
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -102,21 +116,38 @@ export class CollectionExplorerComponent {
 
   constructor(private readonly _collectionsStore: CollectionsStore) {}
 
-  onCreateCollection(collectionName: string) {
+  onCreateCollection(
+    workspaceId: string,
+    applicationId: string,
+    collectionName: string
+  ) {
     this._collectionsStore.createCollection({
-      workspaceId: this.workspaceId,
-      applicationId: this.applicationId,
+      workspaceId,
+      applicationId,
       collectionName,
     });
   }
 
-  onUpdateCollection(collectionId: string, collectionName: string) {
-    this._collectionsStore.updateCollection({ collectionId, collectionName });
+  onUpdateCollection(
+    workspaceId: string,
+    collectionId: string,
+    collectionName: string
+  ) {
+    this._collectionsStore.updateCollection({
+      workspaceId,
+      collectionId,
+      collectionName,
+    });
   }
 
-  onDeleteCollection(collectionId: string) {
+  onDeleteCollection(
+    workspaceId: string,
+    applicationId: string,
+    collectionId: string
+  ) {
     this._collectionsStore.deleteCollection({
-      applicationId: this.applicationId,
+      workspaceId,
+      applicationId,
       collectionId,
     });
   }

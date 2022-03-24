@@ -52,18 +52,22 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           [readyCollaborators]="(readyCollaborators$ | ngrxPush) ?? null"
           [pendingCollaborators]="(pendingCollaborators$ | ngrxPush) ?? null"
           (approveCollaboratorStatusRequest)="
-            onApproveCollaboratorStatusRequest($event)
+            onApproveCollaboratorStatusRequest(workspace.id, $event)
           "
-          (grantCollaboratorStatus)="onGrantCollaboratorStatus($event)"
+          (grantCollaboratorStatus)="
+            onGrantCollaboratorStatus(workspace.id, $event)
+          "
           (rejectCollaboratorStatusRequest)="
-            onRejectCollaboratorStatusRequest($event)
+            onRejectCollaboratorStatusRequest(workspace.id, $event)
           "
           (requestCollaboratorStatus)="
             onRequestCollaboratorStatus(workspace.id)
           "
-          (revokeCollaboratorStatus)="onRevokeCollaboratorStatus($event)"
+          (revokeCollaboratorStatus)="
+            onRevokeCollaboratorStatus(workspace.id, $event)
+          "
           (retryCollaboratorStatusRequest)="
-            onRetryCollaboratorStatusRequest($event)
+            onRetryCollaboratorStatusRequest(workspace.id, $event)
           "
           (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
           (toggleShowRejected)="onToggleShowRejectedCollaborators()"
@@ -127,35 +131,49 @@ export class ViewWorkspaceComponent {
     });
   }
 
-  onRetryCollaboratorStatusRequest(collaboratorId: string) {
+  onRetryCollaboratorStatusRequest(
+    workspaceId: string,
+    collaboratorId: string
+  ) {
     this._viewWorkspaceStore.retryCollaboratorStatusRequest({
+      workspaceId,
       collaboratorId,
     });
   }
 
-  onApproveCollaboratorStatusRequest(collaboratorId: string) {
+  onApproveCollaboratorStatusRequest(
+    workspaceId: string,
+    collaboratorId: string
+  ) {
     this._viewWorkspaceStore.updateCollaborator({
-      collaboratorId,
-      status: 1,
-    });
-  }
-
-  onGrantCollaboratorStatus(collaboratorId: string) {
-    this._viewWorkspaceStore.updateCollaborator({
+      workspaceId,
       collaboratorId,
       status: 1,
     });
   }
 
-  onRejectCollaboratorStatusRequest(collaboratorId: string) {
+  onGrantCollaboratorStatus(workspaceId: string, collaboratorId: string) {
     this._viewWorkspaceStore.updateCollaborator({
+      workspaceId,
+      collaboratorId,
+      status: 1,
+    });
+  }
+
+  onRejectCollaboratorStatusRequest(
+    workspaceId: string,
+    collaboratorId: string
+  ) {
+    this._viewWorkspaceStore.updateCollaborator({
+      workspaceId,
       collaboratorId,
       status: 2,
     });
   }
 
-  onRevokeCollaboratorStatus(collaboratorId: string) {
+  onRevokeCollaboratorStatus(workspaceId: string, collaboratorId: string) {
     this._viewWorkspaceStore.updateCollaborator({
+      workspaceId,
       collaboratorId,
       status: 2,
     });

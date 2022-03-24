@@ -210,6 +210,7 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstruction = this.effect<{
+    workspaceId: string;
     instructionId: string;
     instructionName: string;
   }>(
@@ -217,31 +218,35 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ instructionId, instructionName }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, instructionId, instructionName }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionApiService
-          .update({
-            instructionName,
-            authority: authority.toBase58(),
-            instructionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Update instruction request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionApiService
+            .update({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionName,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update instruction request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 
   readonly deleteInstruction = this.effect<{
+    workspaceId: string;
     applicationId: string;
     instructionId: string;
   }>(
@@ -249,27 +254,30 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ instructionId, applicationId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, instructionId, applicationId }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionApiService
-          .delete({
-            authority: authority.toBase58(),
-            instructionId,
-            applicationId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete instruction request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionId,
+              applicationId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete instruction request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }

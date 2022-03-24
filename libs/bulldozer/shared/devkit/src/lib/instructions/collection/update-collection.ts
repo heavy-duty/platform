@@ -13,6 +13,7 @@ export const updateCollection = (
         .methods.updateCollection({ name: params.collectionName })
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           collection: new PublicKey(params.collectionId),
         })
         .instruction() as Promise<TransactionInstruction>

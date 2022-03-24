@@ -208,6 +208,7 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateCollection = this.effect<{
+    workspaceId: string;
     collectionId: string;
     collectionName: string;
   }>(
@@ -215,31 +216,35 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ collectionId, collectionName }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, collectionId, collectionName }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._collectionApiService
-          .update({
-            collectionName,
-            authority: authority.toBase58(),
-            collectionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Update collection request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._collectionApiService
+            .update({
+              authority: authority.toBase58(),
+              workspaceId,
+              collectionName,
+              collectionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update collection request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 
   readonly deleteCollection = this.effect<{
+    workspaceId: string;
     applicationId: string;
     collectionId: string;
   }>(
@@ -247,7 +252,7 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ collectionId, applicationId }, authority]) => {
+      concatMap(([{ workspaceId, collectionId, applicationId }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -255,6 +260,7 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
         return this._collectionApiService
           .delete({
             authority: authority.toBase58(),
+            workspaceId,
             collectionId,
             applicationId,
           })

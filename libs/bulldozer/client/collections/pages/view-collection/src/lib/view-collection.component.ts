@@ -38,12 +38,14 @@ import { ViewCollectionStore } from './view-collection.store';
             "
             (updateCollectionAttribute)="
               onUpdateCollectionAttribute(
+                collection.data.workspace,
                 $event.collectionAttributeId,
                 $event.collectionAttributeDto
               )
             "
             (deleteCollectionAttribute)="
               onDeleteCollectionAttribute(
+                collection.data.workspace,
                 $event.collectionId,
                 $event.collectionAttributeId
               )
@@ -112,20 +114,24 @@ export class ViewCollectionComponent {
   }
 
   onUpdateCollectionAttribute(
+    workspaceId: string,
     collectionAttributeId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
     this._collectionAttributesStore.updateCollectionAttribute({
+      workspaceId,
       collectionAttributeId,
       collectionAttributeDto,
     });
   }
 
   onDeleteCollectionAttribute(
+    workspaceId: string,
     collectionId: string,
     collectionAttributeId: string
   ) {
     this._collectionAttributesStore.deleteCollectionAttribute({
+      workspaceId,
       collectionId,
       collectionAttributeId,
     });

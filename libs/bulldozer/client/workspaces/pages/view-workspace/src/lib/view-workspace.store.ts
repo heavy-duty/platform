@@ -216,13 +216,14 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly updateCollaborator = this.effect<{
     collaboratorId: string;
+    workspaceId: string;
     status: number;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ collaboratorId, status }, authority]) => {
+      concatMap(([{ workspaceId, collaboratorId, status }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -230,6 +231,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         return this._collaboratorApiService
           .update({
             authority: authority.toBase58(),
+            workspaceId,
             status,
             collaboratorId,
           })
@@ -277,13 +279,14 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   );
 
   readonly retryCollaboratorStatusRequest = this.effect<{
+    workspaceId: string;
     collaboratorId: string;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ collaboratorId }, authority]) => {
+      concatMap(([{ workspaceId, collaboratorId }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -291,6 +294,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         return this._collaboratorApiService
           .retryCollaboratorStatusRequest({
             authority: authority.toBase58(),
+            workspaceId,
             collaboratorId,
           })
           .pipe(

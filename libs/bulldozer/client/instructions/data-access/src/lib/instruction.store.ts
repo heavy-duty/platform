@@ -69,6 +69,7 @@ export class InstructionStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstructionBody = this.effect<{
+    workspaceId: string;
     instructionId: string;
     instructionBody: string;
   }>(
@@ -76,25 +77,28 @@ export class InstructionStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ instructionId, instructionBody }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, instructionId, instructionBody }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionApiService
-          .updateBody({
-            instructionId,
-            instructionBody,
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Update body request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionApiService
+            .updateBody({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionId,
+              instructionBody,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent('Update body request sent'),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }

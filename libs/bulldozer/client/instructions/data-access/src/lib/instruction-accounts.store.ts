@@ -221,6 +221,7 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
   );
 
   readonly updateInstructionAccount = this.effect<{
+    workspaceId: string;
     instructionAccountId: string;
     instructionAccountDto: InstructionAccountDto;
   }>(
@@ -229,15 +230,19 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ instructionAccountId, instructionAccountDto }, authority]) => {
+        ([
+          { workspaceId, instructionAccountId, instructionAccountDto },
+          authority,
+        ]) => {
           if (authority === null) {
             return EMPTY;
           }
 
           return this._instructionAccountApiService
             .update({
-              instructionAccountDto,
               authority: authority.toBase58(),
+              workspaceId,
+              instructionAccountDto,
               instructionAccountId,
             })
             .pipe(
@@ -255,6 +260,7 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
   );
 
   readonly deleteInstructionAccount = this.effect<{
+    workspaceId: string;
     instructionId: string;
     instructionAccountId: string;
   }>(
@@ -262,25 +268,30 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ instructionId, instructionAccountId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([{ workspaceId, instructionId, instructionAccountId }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionAccountApiService
-          .delete({
-            authority: authority.toBase58(),
-            instructionAccountId,
-            instructionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Delete account request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionAccountApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionAccountId,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete account request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }
