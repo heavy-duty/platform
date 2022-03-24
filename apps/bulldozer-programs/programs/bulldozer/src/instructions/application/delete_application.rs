@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, User, Workspace, WorkspaceStats};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, User, Workspace, WorkspaceStats,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -10,11 +12,21 @@ pub struct DeleteApplication<'info> {
   #[account(
     mut,
     close = budget,
-    constraint = application.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
-    constraint = application.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions,
     constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub application: Account<'info, Application>,
+  #[account(
+    mut,
+    close = budget,
+    constraint = application_stats.quantity_of_collections == 0 @ ErrorCode::CantDeleteApplicationWithCollections,
+    constraint = application_stats.quantity_of_instructions == 0 @ ErrorCode::CantDeleteApplicationWithInstructions,
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
+  )]
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     mut,
     seeds = [

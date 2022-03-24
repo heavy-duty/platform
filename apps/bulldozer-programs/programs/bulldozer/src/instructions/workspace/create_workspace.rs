@@ -10,8 +10,15 @@ pub struct CreateWorkspaceArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateWorkspaceArguments)]
 pub struct CreateWorkspace<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(
+    init,
+    payer = authority,
+    space = Workspace::space(),
+  )]
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -20,12 +27,6 @@ pub struct CreateWorkspace<'info> {
     bump = user.bump
   )]
   pub user: Box<Account<'info, User>>,
-  #[account(
-    init,
-    payer = authority,
-    space = Workspace::space(),
-  )]
-  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     init,
     payer = authority,
@@ -60,7 +61,6 @@ pub struct CreateWorkspace<'info> {
     space = Budget::space(),
   )]
   pub budget: Box<Account<'info, Budget>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {

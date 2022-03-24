@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, Collection, User};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Collection, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,6 +8,9 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteCollection<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Account<'info, Application>,
   #[account(
     mut,
     close = budget,
@@ -15,9 +20,13 @@ pub struct DeleteCollection<'info> {
   pub collection: Account<'info, Collection>,
   #[account(
     mut,
-    constraint = application.workspace == collection.workspace @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
   )]
-  pub application: Account<'info, Application>,
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -29,7 +38,7 @@ pub struct DeleteCollection<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      collection.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -40,7 +49,7 @@ pub struct DeleteCollection<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      collection.workspace.as_ref(),
+      workspace.key().as_ref(),
     ],
     bump = budget.bump,
   )]
@@ -49,6 +58,9 @@ pub struct DeleteCollection<'info> {
 
 pub fn handle(ctx: Context<DeleteCollection>) -> Result<()> {
   msg!("Delete collection");
-  ctx.accounts.application.decrease_collection_quantity();
+  ctx
+    .accounts
+    .application_stats
+    .decrease_collection_quantity();
   Ok(())
 }

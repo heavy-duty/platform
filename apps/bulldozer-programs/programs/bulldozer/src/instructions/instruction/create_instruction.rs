@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, Instruction, User, Workspace};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Instruction, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use crate::utils::{fund_rent_for_account, has_enough_funds};
@@ -12,6 +14,7 @@ pub struct CreateInstructionArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionArguments)]
 pub struct CreateInstruction<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -20,6 +23,21 @@ pub struct CreateInstruction<'info> {
     constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub application: Box<Account<'info, Application>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Instruction::space()
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    mut,
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
+  )]
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -47,13 +65,6 @@ pub struct CreateInstruction<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
-  #[account(
-    init,
-    payer = authority,
-    space = Instruction::space()
-  )]
-  pub instruction: Box<Account<'info, Instruction>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn validate(ctx: &Context<CreateInstruction>) -> Result<bool> {
@@ -85,6 +96,9 @@ pub fn handle(
     ctx.accounts.application.key(),
   );
   ctx.accounts.instruction.initialize_timestamp()?;
-  ctx.accounts.application.increase_instruction_quantity();
+  ctx
+    .accounts
+    .application_stats
+    .increase_instruction_quantity();
   Ok(())
 }

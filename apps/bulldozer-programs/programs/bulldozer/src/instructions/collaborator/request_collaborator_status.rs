@@ -4,6 +4,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct RequestCollaboratorStatus<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -36,7 +37,6 @@ pub struct RequestCollaboratorStatus<'info> {
     bump
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn handle(ctx: Context<RequestCollaboratorStatus>) -> Result<()> {

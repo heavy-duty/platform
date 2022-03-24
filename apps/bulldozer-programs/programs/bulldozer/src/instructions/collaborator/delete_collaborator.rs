@@ -7,6 +7,8 @@ pub struct DeleteCollaborator<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(mut, has_one = workspace, close = authority)]
+  pub collaborator: Box<Account<'info, Collaborator>>,
   #[account(
     mut,
     seeds = [
@@ -34,8 +36,6 @@ pub struct DeleteCollaborator<'info> {
     constraint = authority_collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
   )]
   pub authority_collaborator: Box<Account<'info, Collaborator>>,
-  #[account(mut, has_one = workspace, close = authority)]
-  pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
 pub fn handle(ctx: Context<DeleteCollaborator>) -> Result<()> {

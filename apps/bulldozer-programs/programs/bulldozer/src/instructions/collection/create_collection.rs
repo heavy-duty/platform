@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, Collection, User, Workspace};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Collection, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use crate::utils::{fund_rent_for_account, has_enough_funds};
@@ -12,14 +14,27 @@ pub struct CreateCollectionArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateCollectionArguments)]
 pub struct CreateCollection<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Collection::space()
+  )]
+  pub collection: Box<Account<'info, Collection>>,
   #[account(
     mut,
-    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
   )]
-  pub application: Box<Account<'info, Application>>,
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -47,13 +62,6 @@ pub struct CreateCollection<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
-  #[account(
-    init,
-    payer = authority,
-    space = Collection::space()
-  )]
-  pub collection: Box<Account<'info, Collection>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn validate(ctx: &Context<CreateCollection>) -> Result<bool> {
@@ -82,6 +90,9 @@ pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArgumen
     ctx.accounts.application.key(),
   );
   ctx.accounts.collection.initialize_timestamp()?;
-  ctx.accounts.application.increase_collection_quantity();
+  ctx
+    .accounts
+    .application_stats
+    .increase_collection_quantity();
   Ok(())
 }

@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, Instruction, User};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Instruction, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,6 +8,9 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteInstruction<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Account<'info, Application>,
   #[account(
     mut,
     close = budget,
@@ -16,9 +21,13 @@ pub struct DeleteInstruction<'info> {
   pub instruction: Account<'info, Instruction>,
   #[account(
     mut,
-    constraint = application.workspace == instruction.workspace @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
   )]
-  pub application: Account<'info, Application>,
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -30,7 +39,7 @@ pub struct DeleteInstruction<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      instruction.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -41,7 +50,7 @@ pub struct DeleteInstruction<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      instruction.workspace.as_ref(),
+      workspace.key().as_ref(),
     ],
     bump = budget.bump,
   )]
@@ -50,6 +59,9 @@ pub struct DeleteInstruction<'info> {
 
 pub fn handle(ctx: Context<DeleteInstruction>) -> Result<()> {
   msg!("Delete instruction");
-  ctx.accounts.application.decrease_instruction_quantity();
+  ctx
+    .accounts
+    .application_stats
+    .decrease_instruction_quantity();
   Ok(())
 }
