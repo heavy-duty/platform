@@ -17,12 +17,29 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   selector: 'bd-workspace-selector',
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
-      <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
-        {{
-          workspace === null
-            ? 'Select workspace'
-            : 'Workspace:' + workspace?.name
-        }}
+      <button
+        type="button"
+        mat-raised-button
+        [matMenuTriggerFor]="menu"
+        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
+      >
+        <div class="w-36 flex justify-between gap-2 items-center">
+          <span
+            class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+          >
+            {{
+              workspace === null
+                ? 'Select workspace'
+                : 'Workspace:' + workspace?.name
+            }}
+          </span>
+          <mat-progress-spinner
+            class="flex-shrink-0"
+            *ngIf="showSpinner$ | ngrxPush"
+            mode="indeterminate"
+            diameter="16"
+          ></mat-progress-spinner>
+        </div>
       </button>
       <mat-menu #menu="matMenu">
         <div class="px-4 py-2" bdStopPropagation>
@@ -33,7 +50,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             <div class="w-full">
               <p class="text-xl font-bold mb-0 flex justify-between">
                 <span
-                  class="flex-grow leading-8 overflow-hidden"
+                  class="flex-grow leading-8"
                   [matTooltip]="workspace.name"
                   matTooltipShowDelay="500"
                 >
@@ -123,6 +140,8 @@ export class WorkspaceSelectorComponent {
   @Input() connected = false;
 
   readonly workspace$ = this._workspaceStore.workspace$;
+  readonly showSpinner$ = this._workspaceSelectorStore.showSpinner$;
+  readonly tooltipMessage$ = this._workspaceSelectorStore.tooltipMessage$;
 
   constructor(
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,

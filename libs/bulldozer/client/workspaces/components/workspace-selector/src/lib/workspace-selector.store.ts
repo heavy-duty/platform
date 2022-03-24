@@ -12,20 +12,68 @@ import {
   InstructionRelationApiService,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceApiService,
+  WorkspaceInstructionsStore,
   WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
 import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
 } from '@heavy-duty/generator';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, forkJoin, of, pipe, withLatestFrom } from 'rxjs';
+import {
+  concatMap,
+  EMPTY,
+  filter,
+  forkJoin,
+  from,
+  merge,
+  of,
+  pipe,
+  switchMap,
+  take,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 @Injectable()
 export class WorkspaceSelectorStore extends ComponentStore<object> {
+  readonly showSpinner$ = this.select(
+    this._workspaceStore.workspace$,
+    this._workspaceStore.isCreating$,
+    this._workspaceStore.isUpdating$,
+    this._workspaceStore.isDeleting$,
+    (workspace, isCreating, isUpdating, isDeleting) =>
+      workspace !== null && (isCreating || isUpdating || isDeleting)
+  );
+  readonly tooltipMessage$ = this.select(
+    this._workspaceStore.workspace$,
+    this._workspaceStore.isCreating$,
+    this._workspaceStore.isUpdating$,
+    this._workspaceStore.isDeleting$,
+    (workspace, isCreating, isUpdating, isDeleting) => {
+      if (workspace === null) {
+        return '';
+      }
+
+      const message = `Workspace "${workspace.name}"`;
+
+      if (isCreating) {
+        return `${message} being created...`;
+      } else if (isUpdating) {
+        return `${message} being updated...`;
+      } else if (isDeleting) {
+        return `${message} being deleted...`;
+      }
+
+      return `${message}.`;
+    }
+  );
+
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _applicationApiService: ApplicationApiService,
@@ -37,13 +85,53 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
-    configStore: ConfigStore,
-    workspaceStore: WorkspaceStore
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
+    private readonly _userInstructionsStore: UserInstructionsStore,
+    private readonly _workspaceStore: WorkspaceStore,
+    configStore: ConfigStore
   ) {
     super({});
 
-    workspaceStore.setWorkspaceId(configStore.workspaceId$);
+    this._workspaceStore.setWorkspaceId(configStore.workspaceId$);
+    this._watchWorkspace(this._workspaceStore.workspaceId$);
   }
+
+  private readonly _watchWorkspace = this.effect<string | null>(
+    switchMap((workspaceId) =>
+      merge(
+        this._workspaceInstructionsStore.instructionStatuses$.pipe(
+          take(1),
+          concatMap((instructionStatuses) => from(instructionStatuses))
+        ),
+        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        ),
+        this._userInstructionsStore.instructionStatuses$.pipe(
+          take(1),
+          concatMap((instructionStatuses) => from(instructionStatuses))
+        ),
+        this._userInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        )
+      ).pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createWorkspace' ||
+              instructionStatus.name === 'updateWorkspace' ||
+              instructionStatus.name === 'deleteWorkspace') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized') &&
+            instructionStatus.accounts.some(
+              (account) =>
+                account.name === 'Workspace' && account.pubkey === workspaceId
+            )
+        ),
+        tap((workspaceInstruction) =>
+          this._workspaceStore.handleWorkspaceInstruction(workspaceInstruction)
+        )
+      )
+    )
+  );
 
   readonly downloadWorkspace = this.effect<string>(
     concatMap((workspaceId) =>
