@@ -82,7 +82,6 @@ pub fn validate(ctx: &Context<CreateApplication>) -> Result<bool> {
     .to_account_info()
     .lamports
     .borrow();
-
   let funds_required = &Budget::get_rent_exemption()?
     .checked_add(application_rent)
     .unwrap()
@@ -105,6 +104,16 @@ pub fn handle(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.application.to_account_info().lamports.borrow(),
+  )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .application_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
   )?;
   ctx.accounts.application.initialize(
     arguments.name,

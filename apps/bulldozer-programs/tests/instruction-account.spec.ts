@@ -864,7 +864,10 @@ describe('instruction account', () => {
               2155 // instruction account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
             )),
         }),
       ])

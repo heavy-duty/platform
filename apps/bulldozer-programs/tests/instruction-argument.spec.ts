@@ -22,21 +22,14 @@ describe('instruction argument', () => {
   const workspace = Keypair.generate();
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+
     try {
       await program.methods
         .createUser()
@@ -349,7 +342,10 @@ describe('instruction argument', () => {
               2155 // instruction account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
             )),
         }),
       ])

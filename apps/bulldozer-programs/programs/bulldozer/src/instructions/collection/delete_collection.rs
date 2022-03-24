@@ -1,5 +1,5 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Collection, User, Workspace,
+  Application, ApplicationStats, Budget, Collaborator, Collection, CollectionStats, User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -14,7 +14,6 @@ pub struct DeleteCollection<'info> {
   #[account(
     mut,
     close = budget,
-    constraint = collection.quantity_of_attributes == 0 @ ErrorCode::CantDeleteCollectionWithAttributes,
     constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
   )]
   pub collection: Account<'info, Collection>,
@@ -27,6 +26,15 @@ pub struct DeleteCollection<'info> {
     bump = application.application_stats_bump
   )]
   pub application_stats: Box<Account<'info, ApplicationStats>>,
+  #[account(
+    constraint = collection_stats.quantity_of_attributes == 0 @ ErrorCode::CantDeleteCollectionWithAttributes,
+    seeds = [
+      b"collection_stats".as_ref(),
+      collection.key().as_ref()
+    ],
+    bump = collection.collection_stats_bump
+  )]
+  pub collection_stats: Box<Account<'info, CollectionStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),

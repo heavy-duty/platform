@@ -1,9 +1,9 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Collection, User, Workspace,
+  Application, ApplicationStats, Budget, Collaborator, Collection, CollectionStats, User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -62,14 +62,35 @@ pub struct CreateCollection<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    init,
+    payer = authority,
+    space = CollectionStats::space(),
+    seeds = [
+      b"collection_stats".as_ref(),
+      collection.key().as_ref()
+    ],
+    bump
+  )]
+  pub collection_stats: Box<Account<'info, CollectionStats>>,
 }
 
 pub fn validate(ctx: &Context<CreateCollection>) -> Result<bool> {
-  if !has_enough_funds(
-    ctx.accounts.budget.to_account_info(),
-    ctx.accounts.collection.to_account_info(),
-    Budget::get_rent_exemption()?,
-  ) {
+  let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let collection_rent = **ctx.accounts.collection.to_account_info().lamports.borrow();
+  let collection_stats_rent = **ctx
+    .accounts
+    .collection_stats
+    .to_account_info()
+    .lamports
+    .borrow();
+  let funds_required = &Budget::get_rent_exemption()?
+    .checked_add(collection_rent)
+    .unwrap()
+    .checked_add(collection_stats_rent)
+    .unwrap();
+
+  if budget_lamports.lt(funds_required) {
     return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
@@ -83,11 +104,22 @@ pub fn handle(ctx: Context<CreateCollection>, arguments: CreateCollectionArgumen
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.collection.to_account_info().lamports.borrow(),
   )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .collection_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
   ctx.accounts.collection.initialize(
     arguments.name,
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
+    *ctx.bumps.get("collection_stats").unwrap(),
   );
   ctx.accounts.collection.initialize_timestamp()?;
   ctx

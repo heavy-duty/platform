@@ -1,9 +1,10 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Collection, CollectionAttribute, User, Workspace,
+  Application, Budget, Collaborator, Collection, CollectionAttribute, CollectionStats, User,
+  Workspace,
 };
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -19,6 +20,7 @@ pub struct CreateCollectionAttributeArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateCollectionAttributeArguments)]
 pub struct CreateCollectionAttribute<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -30,6 +32,12 @@ pub struct CreateCollectionAttribute<'info> {
     constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace
   )]
   pub collection: Box<Account<'info, Collection>>,
+  #[account(
+    init,
+    payer = authority,
+    space = CollectionAttribute::space(),
+  )]
+  pub attribute: Box<Account<'info, CollectionAttribute>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,12 +66,14 @@ pub struct CreateCollectionAttribute<'info> {
   )]
   pub budget: Box<Account<'info, Budget>>,
   #[account(
-    init,
-    payer = authority,
-    space = CollectionAttribute::space(),
+    mut,
+    seeds = [
+      b"collection_stats".as_ref(),
+      collection.key().as_ref()
+    ],
+    bump = collection.collection_stats_bump
   )]
-  pub attribute: Box<Account<'info, CollectionAttribute>>,
-  pub system_program: Program<'info, System>,
+  pub collection_stats: Box<Account<'info, CollectionStats>>,
 }
 
 pub fn validate(
@@ -74,13 +84,17 @@ pub fn validate(
     (1, None, _) => Err(error!(ErrorCode::MissingMax)),
     (2, _, None) => Err(error!(ErrorCode::MissingMaxLength)),
     _ => {
-      if !has_enough_funds(
-        ctx.accounts.budget.to_account_info(),
-        ctx.accounts.attribute.to_account_info(),
-        Budget::get_rent_exemption()?,
-      ) {
+      let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+      let collection_attribute_rent = **ctx.accounts.attribute.to_account_info().lamports.borrow();
+
+      let funds_required = &Budget::get_rent_exemption()?
+        .checked_add(collection_attribute_rent)
+        .unwrap();
+
+      if budget_lamports.lt(funds_required) {
         return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
       }
+
       Ok(true)
     }
   }
@@ -105,7 +119,7 @@ pub fn handle(
     AttributeKinds::create(arguments.kind, arguments.max, arguments.max_length)?,
     AttributeModifiers::create(arguments.modifier, arguments.size)?,
   );
-  ctx.accounts.collection.increase_attribute_quantity();
+  ctx.accounts.collection_stats.increase_attribute_quantity();
   ctx.accounts.attribute.initialize_timestamp()?;
   Ok(())
 }
