@@ -12,22 +12,19 @@ import {
   switchMap,
 } from 'rxjs';
 import { ApplicationApiService } from './application-api.service';
+import { ItemView } from './types';
+
+export type ApplicationView = ItemView<Document<Application>>;
 
 interface ViewModel {
   applicationId: string | null;
-  application: Document<Application> | null;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
+  application: ApplicationView | null;
   loading: boolean;
 }
 
 const initialState: ViewModel = {
   applicationId: null,
   application: null,
-  isCreating: false,
-  isUpdating: false,
-  isDeleting: false,
   loading: false,
 };
 
@@ -37,9 +34,6 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
   private readonly reload$ = this._reload.asObservable();
   readonly application$ = this.select(({ application }) => application);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
-  readonly isCreating$ = this.select(({ isCreating }) => isCreating);
-  readonly isUpdating$ = this.select(({ isUpdating }) => isUpdating);
-  readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
   readonly loading$ = this.select(({ loading }) => loading);
 
   constructor(
@@ -62,6 +56,27 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     })
   );
 
+  private readonly _patchApplicationStatuses = this.updater<{
+    isCreating?: boolean;
+    isUpdating?: boolean;
+    isDeleting?: boolean;
+  }>((state, statuses) => ({
+    ...state,
+    application: state.application
+      ? {
+          ...state.application,
+          ...statuses,
+        }
+      : null,
+  }));
+
+  private readonly _setApplication = this.updater<ItemView<
+    Document<Application>
+  > | null>((state, application) => ({
+    ...state,
+    application,
+  }));
+
   private readonly _loadApplication = this.effect<string | null>(
     switchMap((applicationId) => {
       if (applicationId === null) {
@@ -73,7 +88,17 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
 
       return this._applicationApiService.findById(applicationId).pipe(
         tapResponse(
-          (application) => this.patchState({ application, loading: false }),
+          (application) => {
+            if (application !== null) {
+              this._setApplication({
+                document: application,
+                isCreating: false,
+                isUpdating: false,
+                isDeleting: false,
+              });
+            }
+            this.patchState({ loading: false });
+          },
           (error) => this._notificationStore.setError({ error, loading: false })
         )
       );
@@ -93,7 +118,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
       switch (applicationInstruction.name) {
         case 'createApplication': {
           if (applicationInstruction.status === 'finalized') {
-            this.patchState({ isCreating: false });
+            this._patchApplicationStatuses({ isCreating: false });
             return EMPTY;
           }
 
@@ -102,10 +127,15 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             .pipe(
               tapResponse(
                 (application) => {
-                  this.patchState({
-                    application,
-                    isCreating: true,
-                  });
+                  if (application !== null) {
+                    this._setApplication({
+                      document: application,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
+                  this._patchApplicationStatuses({ isCreating: true });
                 },
                 (error) => this._notificationStore.setError({ error })
               )
@@ -113,7 +143,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         }
         case 'updateApplication': {
           if (applicationInstruction.status === 'finalized') {
-            this.patchState({ isUpdating: false });
+            this._patchApplicationStatuses({ isUpdating: false });
             return EMPTY;
           }
 
@@ -121,20 +151,27 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             .findById(applicationAccountMeta.pubkey, 'confirmed')
             .pipe(
               tapResponse(
-                (application) =>
-                  this.patchState({
-                    application,
-                    isUpdating: true,
-                  }),
+                (application) => {
+                  if (application !== null) {
+                    this._setApplication({
+                      document: application,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
+                  this._patchApplicationStatuses({ isUpdating: true });
+                },
                 (error) => this._notificationStore.setError({ error })
               )
             );
         }
         case 'deleteApplication': {
           if (applicationInstruction.status === 'confirmed') {
-            this.patchState({ isDeleting: true });
+            this._patchApplicationStatuses({ isDeleting: true });
           } else {
-            this.patchState({ application: null, isDeleting: false });
+            this.patchState({ application: null });
+            this._patchApplicationStatuses({ isDeleting: false });
           }
 
           return EMPTY;

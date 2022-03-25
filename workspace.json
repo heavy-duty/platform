@@ -48,6 +48,7 @@
     "bulldozer-client-shared-directives-page-header": "libs/bulldozer/client/shared/directives/page-header",
     "bulldozer-client-shared-directives-section-header": "libs/bulldozer/client/shared/directives/section-header",
     "bulldozer-client-shared-directives-stop-propagation": "libs/bulldozer/client/shared/directives/stop-propagation",
+    "bulldozer-client-shared-pipes-item-updating": "libs/bulldozer/client/shared/pipes/item-updating",
     "bulldozer-client-shared-pipes-obscure-address": "libs/bulldozer/client/shared/pipes/obscure-address",
     "bulldozer-client-shell": "libs/bulldozer/client/shell",
     "bulldozer-client-users-components-profile-tab": "libs/bulldozer/client/users/components/profile-tab",

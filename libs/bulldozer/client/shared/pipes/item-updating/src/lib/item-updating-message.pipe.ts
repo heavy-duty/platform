@@ -7,9 +7,9 @@ interface ItemStats {
 }
 
 @Pipe({
-  name: 'bdItemTooltipMessage',
+  name: 'bdItemUpdatingMessage',
 })
-export class ItemTooltipMessagePipe implements PipeTransform {
+export class ItemUpdatingMessagePipe implements PipeTransform {
   transform(title: string, stats: ItemStats, label: string): string {
     const message = `${label} "${title}"`;
 

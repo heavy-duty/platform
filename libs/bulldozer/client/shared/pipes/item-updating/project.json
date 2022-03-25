@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/shared/pipes/item-updating",
+  "sourceRoot": "libs/bulldozer/client/shared/pipes/item-updating/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/bulldozer/client/shared/pipes/item-updating"],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/shared/pipes/item-updating/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/shared/pipes/item-updating/src/**/*.ts",
+          "libs/bulldozer/client/shared/pipes/item-updating/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

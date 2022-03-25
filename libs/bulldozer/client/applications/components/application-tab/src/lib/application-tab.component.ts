@@ -12,21 +12,24 @@ import { ApplicationTabStore } from './application-tab.store';
       <a
         [routerLink]="[
           '/workspaces',
-          application.data.workspace,
+          application.document.data.workspace,
           'applications',
-          application.id
+          application.document.id
         ]"
         class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
-        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
+        [matTooltip]="
+          application.document.name
+            | bdItemUpdatingMessage: application:'Application'
+        "
       >
         <span
           class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
         >
-          {{ application.name }}
+          {{ application.document.name }}
         </span>
         <mat-progress-spinner
+          *ngIf="application | bdItemShowSpinner"
           class="flex-shrink-0"
-          *ngIf="showSpinner$ | ngrxPush"
           mode="indeterminate"
           diameter="16"
         ></mat-progress-spinner>
@@ -34,7 +37,7 @@ import { ApplicationTabStore } from './application-tab.store';
 
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + application.name + ' tab'"
+        [attr.aria-label]="'Close ' + application.document.name + ' tab'"
         (click)="onCloseTab()"
       >
         <mat-icon>close</mat-icon>
@@ -56,8 +59,6 @@ export class ApplicationTabComponent {
   }
 
   readonly application$ = this._applicationStore.application$;
-  readonly showSpinner$ = this._applicationTabStore.showSpinner$;
-  readonly tooltipMessage$ = this._applicationTabStore.tooltipMessage$;
 
   constructor(
     private readonly _applicationTabStore: ApplicationTabStore,

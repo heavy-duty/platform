@@ -130,6 +130,9 @@
       "@bulldozer-client/internet-connectivity": [
         "libs/bulldozer/client/shared/directives/internet-connectivity/src/index.ts"
       ],
+      "@bulldozer-client/item-updating": [
+        "libs/bulldozer/client/shared/pipes/item-updating/src/index.ts"
+      ],
       "@bulldozer-client/loaded-workspaces-list": [
         "libs/bulldozer/client/workspaces/components/loaded-workspaces-list/src/index.ts"
       ],

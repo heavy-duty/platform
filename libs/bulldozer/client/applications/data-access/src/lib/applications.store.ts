@@ -6,24 +6,20 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { ApplicationApiService } from './application-api.service';
+import { ItemView } from './types';
 
-export interface ApplicationView {
-  document: Document<Application>;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
-}
+export type ApplicationItemView = ItemView<Document<Application>>;
 
 interface ViewModel {
   loading: boolean;
   applicationIds: string[] | null;
-  applicationsMap: Map<string, ApplicationView>;
+  applicationsMap: Map<string, ApplicationItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
   applicationIds: null,
-  applicationsMap: new Map<string, ApplicationView>(),
+  applicationsMap: new Map<string, ApplicationItemView>(),
 };
 
 @Injectable()
@@ -50,7 +46,7 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
     this._loadApplications(this.applicationIds$);
   }
 
-  private readonly _setApplication = this.updater<ApplicationView>(
+  private readonly _setApplication = this.updater<ApplicationItemView>(
     (state, newApplication) => {
       const applicationsMap = new Map(state.applicationsMap);
       applicationsMap.set(newApplication.document.id, newApplication);
@@ -123,7 +119,7 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
                       isUpdating: false,
                       isDeleting: false,
                     }),
-                  new Map<string, ApplicationView>()
+                  new Map<string, ApplicationItemView>()
                 ),
             });
           },

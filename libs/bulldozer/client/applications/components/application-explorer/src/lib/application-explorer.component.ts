@@ -34,7 +34,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
               <mat-panel-title
                 [matTooltip]="
                   application.document.name
-                    | bdItemTooltipMessage: application:'Application'
+                    | bdItemUpdatingMessage: application:'Application'
                 "
                 class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
               >
@@ -44,6 +44,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                   {{ application.document.name }}
                 </span>
                 <mat-progress-spinner
+                  *ngIf="application | bdItemShowSpinner"
                   class="flex-shrink-0"
                   diameter="16"
                   mode="indeterminate"
