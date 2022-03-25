@@ -46,21 +46,21 @@ export class ApplicationApiService {
     return throwError(() => parseBulldozerError(error) ?? null);
   }
 
-  // get applications
-  find(filters: ApplicationFilters, commitment: Finality = 'finalized') {
+  // get application ids
+  findIds(filters: ApplicationFilters, commitment: Finality = 'finalized') {
     const query = applicationQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
         ...query,
         commitment,
+        dataSlice: {
+          offset: 0,
+          length: 0,
+        },
       })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createApplicationDocument(pubkey, account)
-          )
-        )
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }
 
@@ -75,6 +75,27 @@ export class ApplicationApiService {
         map(
           (accountInfo) =>
             accountInfo && createApplicationDocument(applicationId, accountInfo)
+        )
+      );
+  }
+
+  // get applications
+  findByIds(
+    applicationIds: string[],
+    commitment: Finality = 'finalized'
+  ): Observable<(Document<Application> | null)[]> {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(applicationIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createApplicationDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
         )
       );
   }

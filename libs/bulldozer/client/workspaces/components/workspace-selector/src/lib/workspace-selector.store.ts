@@ -37,6 +37,7 @@ import {
   switchMap,
   take,
   tap,
+  toArray,
   withLatestFrom,
 } from 'rxjs';
 
@@ -137,9 +138,19 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
     concatMap((workspaceId) =>
       forkJoin({
         workspace: this._workspaceApiService.findById(workspaceId),
-        applications: this._applicationApiService.find({
-          workspace: workspaceId,
-        }),
+        applications: this._applicationApiService
+          .findIds({ workspace: workspaceId })
+          .pipe(
+            concatMap((applicationIds) =>
+              this._applicationApiService
+                .findByIds(applicationIds)
+                .pipe(
+                  concatMap((applications) =>
+                    from(applications).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
         collections: this._collectionApiService.find({
           workspace: workspaceId,
         }),

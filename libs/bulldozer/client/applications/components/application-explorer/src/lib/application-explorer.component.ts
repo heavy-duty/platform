@@ -1,7 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
+import {
+  ApplicationQueryStore,
+  ApplicationsStore,
+  ApplicationView,
+} from '@bulldozer-client/applications-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -27,11 +31,30 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
         >
           <mat-expansion-panel-header class="pl-4 pr-0">
             <div class="flex justify-between items-center flex-grow">
-              <mat-panel-title> {{ application.name }} </mat-panel-title>
+              <mat-panel-title
+                [matTooltip]="
+                  application.document.name
+                    | bdItemTooltipMessage: application:'Application'
+                "
+                class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
+              >
+                <span
+                  class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+                >
+                  {{ application.document.name }}
+                </span>
+                <mat-progress-spinner
+                  class="flex-shrink-0"
+                  diameter="16"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+              </mat-panel-title>
               <button
                 mat-icon-button
                 [attr.aria-label]="
-                  'More options of ' + application.name + ' application'
+                  'More options of ' +
+                  application.document.name +
+                  ' application'
                 "
                 [matMenuTriggerFor]="applicationOptionsMenu"
                 bdStopPropagation
@@ -43,14 +66,14 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 
           <bd-collection-explorer
             [connected]="connected"
-            [applicationId]="application.id"
+            [applicationId]="application.document.id"
             [workspaceId]="workspaceId"
           >
           </bd-collection-explorer>
 
           <bd-instruction-explorer
             [connected]="connected"
-            [applicationId]="application.id"
+            [applicationId]="application.document.id"
             [workspaceId]="workspaceId"
           >
           </bd-instruction-explorer>
@@ -60,9 +83,9 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
               mat-menu-item
               [routerLink]="[
                 '/workspaces',
-                application.data.workspace,
+                application.document.data.workspace,
                 'applications',
-                application.id
+                application.document.id
               ]"
             >
               <mat-icon>launch</mat-icon>
@@ -71,11 +94,11 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             <button
               mat-menu-item
               bdEditApplicationTrigger
-              [application]="application"
+              [application]="application.document"
               (editApplication)="
                 onUpdateApplication(
-                  application.data.workspace,
-                  application.id,
+                  application.document.data.workspace,
+                  application.document.id,
                   $event
                 )
               "
@@ -87,7 +110,10 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             <button
               mat-menu-item
               (click)="
-                onDeleteApplication(application.data.workspace, application.id)
+                onDeleteApplication(
+                  application.document.data.workspace,
+                  application.document.id
+                )
               "
               [disabled]="!connected"
             >
@@ -101,7 +127,11 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ApplicationsStore],
+  providers: [
+    ApplicationsStore,
+    ApplicationQueryStore,
+    ApplicationExplorerStore,
+  ],
 })
 export class ApplicationExplorerComponent {
   @Input() connected = false;
@@ -112,9 +142,7 @@ export class ApplicationExplorerComponent {
   }
   @Input() set workspaceId(value: string) {
     this._workspaceId = value;
-    this._applicationsStore.setFilters({
-      workspace: value,
-    });
+    this._applicationExplorerStore.setWorkspaceId(value);
   }
 
   readonly applications$ = this._applicationsStore.applications$;
@@ -122,11 +150,12 @@ export class ApplicationExplorerComponent {
 
   constructor(
     private readonly _applicationsStore: ApplicationsStore,
-    private readonly _walletStore: WalletStore
+    private readonly _walletStore: WalletStore,
+    private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
   onCreateApplication(workspaceId: string, applicationName: string) {
-    this._applicationsStore.createApplication({
+    this._applicationExplorerStore.createApplication({
       workspaceId,
       applicationName,
     });
@@ -137,7 +166,7 @@ export class ApplicationExplorerComponent {
     applicationId: string,
     applicationName: string
   ) {
-    this._applicationsStore.updateApplication({
+    this._applicationExplorerStore.updateApplication({
       workspaceId,
       applicationId,
       applicationName,
@@ -145,13 +174,13 @@ export class ApplicationExplorerComponent {
   }
 
   onDeleteApplication(workspaceId: string, applicationId: string) {
-    this._applicationsStore.deleteApplication({
+    this._applicationExplorerStore.deleteApplication({
       workspaceId,
       applicationId,
     });
   }
 
-  identify(_: number, document: Document<Application>) {
-    return document.id;
+  identify(_: number, application: ApplicationView) {
+    return application.document.id;
   }
 }
