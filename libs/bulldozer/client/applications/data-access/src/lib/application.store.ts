@@ -70,12 +70,12 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
       : null,
   }));
 
-  private readonly _setApplication = this.updater<ItemView<
-    Document<Application>
-  > | null>((state, application) => ({
-    ...state,
-    application,
-  }));
+  private readonly _setApplication = this.updater<ApplicationView | null>(
+    (state, application) => ({
+      ...state,
+      application,
+    })
+  );
 
   private readonly _loadApplication = this.effect<string | null>(
     switchMap((applicationId) => {
@@ -130,12 +130,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
                   if (application !== null) {
                     this._setApplication({
                       document: application,
-                      isCreating: false,
+                      isCreating: true,
                       isUpdating: false,
                       isDeleting: false,
                     });
                   }
-                  this._patchApplicationStatuses({ isCreating: true });
                 },
                 (error) => this._notificationStore.setError({ error })
               )
@@ -156,11 +155,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
                     this._setApplication({
                       document: application,
                       isCreating: false,
-                      isUpdating: false,
+                      isUpdating: true,
                       isDeleting: false,
                     });
                   }
-                  this._patchApplicationStatuses({ isUpdating: true });
                 },
                 (error) => this._notificationStore.setError({ error })
               )

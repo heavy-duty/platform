@@ -43,38 +43,6 @@ import {
 
 @Injectable()
 export class WorkspaceSelectorStore extends ComponentStore<object> {
-  readonly showSpinner$ = this.select(
-    this._workspaceStore.workspace$,
-    this._workspaceStore.isCreating$,
-    this._workspaceStore.isUpdating$,
-    this._workspaceStore.isDeleting$,
-    (workspace, isCreating, isUpdating, isDeleting) =>
-      workspace !== null && (isCreating || isUpdating || isDeleting)
-  );
-  readonly tooltipMessage$ = this.select(
-    this._workspaceStore.workspace$,
-    this._workspaceStore.isCreating$,
-    this._workspaceStore.isUpdating$,
-    this._workspaceStore.isDeleting$,
-    (workspace, isCreating, isUpdating, isDeleting) => {
-      if (workspace === null) {
-        return '';
-      }
-
-      const message = `Workspace "${workspace.name}"`;
-
-      if (isCreating) {
-        return `${message} being created...`;
-      } else if (isUpdating) {
-        return `${message} being updated...`;
-      } else if (isDeleting) {
-        return `${message} being deleted...`;
-      }
-
-      return `${message}.`;
-    }
-  );
-
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _applicationApiService: ApplicationApiService,

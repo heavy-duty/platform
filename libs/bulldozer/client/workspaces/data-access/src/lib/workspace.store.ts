@@ -10,24 +10,21 @@ import {
   map,
   switchMap,
 } from 'rxjs';
+import { ItemView } from './types';
 import { WorkspaceApiService } from './workspace-api.service';
 import { InstructionStatus } from './workspace-instructions.store';
 
+export type WorkspaceView = ItemView<Document<Workspace>>;
+
 interface ViewModel {
   workspaceId: string | null;
-  workspace: Document<Workspace> | null;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
+  workspace: WorkspaceView | null;
   loading: boolean;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
   workspace: null,
-  isCreating: false,
-  isUpdating: false,
-  isDeleting: false,
   loading: false,
 };
 
@@ -37,9 +34,6 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
   private readonly reload$ = this._reload.asObservable();
   readonly workspace$ = this.select(({ workspace }) => workspace);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
-  readonly isCreating$ = this.select(({ isCreating }) => isCreating);
-  readonly isUpdating$ = this.select(({ isUpdating }) => isUpdating);
-  readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
   readonly loading$ = this.select(({ loading }) => loading);
 
   constructor(
@@ -66,7 +60,17 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
 
       return this._workspaceApiService.findById(workspaceId).pipe(
         tapResponse(
-          (workspace) => this.patchState({ workspace, loading: false }),
+          (workspace) => {
+            if (workspace !== null) {
+              this._setWorkspace({
+                document: workspace,
+                isCreating: false,
+                isUpdating: false,
+                isDeleting: false,
+              });
+            }
+            this.patchState({ loading: false });
+          },
           (error) => this._notificationStore.setError({ error, loading: false })
         )
       );
@@ -77,6 +81,27 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({
       ...state,
       workspaceId,
+    })
+  );
+
+  private readonly _patchWorkspaceStatuses = this.updater<{
+    isCreating?: boolean;
+    isUpdating?: boolean;
+    isDeleting?: boolean;
+  }>((state, statuses) => ({
+    ...state,
+    workspace: state.workspace
+      ? {
+          ...state.workspace,
+          ...statuses,
+        }
+      : null,
+  }));
+
+  private readonly _setWorkspace = this.updater<WorkspaceView | null>(
+    (state, workspace) => ({
+      ...state,
+      workspace,
     })
   );
 
@@ -93,7 +118,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
       switch (workspaceInstruction.name) {
         case 'createWorkspace': {
           if (workspaceInstruction.status === 'finalized') {
-            this.patchState({ isCreating: false });
+            this._patchWorkspaceStatuses({ isCreating: false });
             return EMPTY;
           }
 
@@ -102,10 +127,14 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             .pipe(
               tapResponse(
                 (workspace) => {
-                  this.patchState({
-                    workspace,
-                    isCreating: true,
-                  });
+                  if (workspace !== null) {
+                    this._setWorkspace({
+                      document: workspace,
+                      isCreating: true,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
                 },
                 (error) => this._notificationStore.setError({ error })
               )
@@ -113,7 +142,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         }
         case 'updateWorkspace': {
           if (workspaceInstruction.status === 'finalized') {
-            this.patchState({ isUpdating: false });
+            this._patchWorkspaceStatuses({ isUpdating: false });
             return EMPTY;
           }
 
@@ -121,20 +150,26 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             .findById(workspaceAccountMeta.pubkey, 'confirmed')
             .pipe(
               tapResponse(
-                (workspace) =>
-                  this.patchState({
-                    workspace,
-                    isUpdating: true,
-                  }),
+                (workspace) => {
+                  if (workspace !== null) {
+                    this._setWorkspace({
+                      document: workspace,
+                      isCreating: false,
+                      isUpdating: true,
+                      isDeleting: false,
+                    });
+                  }
+                },
                 (error) => this._notificationStore.setError({ error })
               )
             );
         }
         case 'deleteWorkspace': {
           if (workspaceInstruction.status === 'confirmed') {
-            this.patchState({ isDeleting: true });
+            this._patchWorkspaceStatuses({ isDeleting: true });
           } else {
-            this.patchState({ workspace: null, isDeleting: false });
+            this._patchWorkspaceStatuses({ isDeleting: false });
+            this.patchState({ workspace: null });
           }
 
           return EMPTY;

@@ -10,25 +10,27 @@ import { WorkspaceTabStore } from './workspace-tab.store';
       class="flex items-stretch p-0"
     >
       <a
-        [routerLink]="['/workspaces', workspace.id]"
+        [routerLink]="['/workspaces', workspace.document.id]"
         class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
-        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
+        [matTooltip]="
+          workspace.document.name | bdItemUpdatingMessage: workspace:'Workspace'
+        "
       >
         <span
           class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
         >
-          {{ workspace.name }}
+          {{ workspace.document.name }}
         </span>
         <mat-progress-spinner
+          *ngIf="workspace | bdItemShowSpinner"
           class="flex-shrink-0"
-          *ngIf="showSpinner$ | ngrxPush"
           mode="indeterminate"
           diameter="16"
         ></mat-progress-spinner>
       </a>
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + workspace.name + ' tab'"
+        [attr.aria-label]="'Close ' + workspace.document.name + ' tab'"
         (click)="onCloseTab()"
       >
         <mat-icon>close</mat-icon>
@@ -50,8 +52,6 @@ export class WorkspaceTabComponent {
   }
 
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly showSpinner$ = this._workspaceTabStore.showSpinner$;
-  readonly tooltipMessage$ = this._workspaceTabStore.tooltipMessage$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,

@@ -17,29 +17,28 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   selector: 'bd-workspace-selector',
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
-      <button
-        type="button"
-        mat-raised-button
-        [matMenuTriggerFor]="menu"
-        [matTooltip]="(tooltipMessage$ | ngrxPush) ?? ''"
-      >
-        <div class="w-36 flex justify-between gap-2 items-center">
+      <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
+        <div
+          class="w-36 flex justify-between gap-2 items-center"
+          *ngIf="workspace !== null; else missingWorkspace"
+          [matTooltip]="
+            workspace.document.name
+              | bdItemUpdatingMessage: workspace:'Workspace'
+          "
+        >
           <span
             class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
           >
-            {{
-              workspace === null
-                ? 'Select workspace'
-                : 'Workspace:' + workspace?.name
-            }}
+            Workspace: {{ workspace.document.name }}
           </span>
           <mat-progress-spinner
+            *ngIf="workspace | bdItemShowSpinner"
             class="flex-shrink-0"
-            *ngIf="showSpinner$ | ngrxPush"
             mode="indeterminate"
             diameter="16"
           ></mat-progress-spinner>
         </div>
+        <ng-template #missingWorkspace> Select workspace </ng-template>
       </button>
       <mat-menu #menu="matMenu">
         <div class="px-4 py-2" bdStopPropagation>
@@ -51,19 +50,19 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
               <p class="text-xl font-bold mb-0 flex justify-between">
                 <span
                   class="flex-grow leading-8"
-                  [matTooltip]="workspace.name"
+                  [matTooltip]="workspace.document.name"
                   matTooltipShowDelay="500"
                 >
-                  {{ workspace.name }}
+                  {{ workspace.document.name }}
                 </span>
                 <button
                   mat-icon-button
                   color="primary"
                   class="w-8 h-8 leading-8 flex-shrink-0"
                   [attr.aria-label]="
-                    'Download ' + workspace.name + ' workspace'
+                    'Download ' + workspace.document.name + ' workspace'
                   "
-                  (click)="onDownloadWorkspace(workspace.id)"
+                  (click)="onDownloadWorkspace(workspace.document.id)"
                 >
                   <mat-icon>download</mat-icon>
                 </button>
@@ -72,7 +71,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
               <p class="mb-2">
                 <a
                   class="text-xs underline text-primary"
-                  [routerLink]="['/workspaces', workspace.id]"
+                  [routerLink]="['/workspaces', workspace.document.id]"
                 >
                   View details
                 </a>
@@ -85,8 +84,10 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                   mat-raised-button
                   color="primary"
                   bdEditWorkspaceTrigger
-                  [workspace]="workspace"
-                  (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
+                  [workspace]="workspace.document"
+                  (editWorkspace)="
+                    onUpdateWorkspace(workspace.document.id, $event)
+                  "
                   [disabled]="!connected"
                 >
                   Edit
@@ -95,7 +96,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                   type="button"
                   mat-raised-button
                   color="primary"
-                  (click)="onDeleteWorkspace(workspace.id)"
+                  (click)="onDeleteWorkspace(workspace.document.id)"
                   [disabled]="!connected"
                 >
                   Delete
@@ -140,8 +141,6 @@ export class WorkspaceSelectorComponent {
   @Input() connected = false;
 
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly showSpinner$ = this._workspaceSelectorStore.showSpinner$;
-  readonly tooltipMessage$ = this._workspaceSelectorStore.tooltipMessage$;
 
   constructor(
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,

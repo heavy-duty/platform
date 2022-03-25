@@ -20,15 +20,19 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     >
       <header bdPageHeader>
         <h1>
-          {{ workspace.name }}
-          <span *ngIf="(isCreatingWorkspace$ | ngrxPush) ?? false">
-            (Creating...)
-          </span>
-          <span *ngIf="(isUpdatingWorkspace$ | ngrxPush) ?? false">
-            (Updating...)
-          </span>
-          <span *ngIf="(isDeletingWorkspace$ | ngrxPush) ?? false">
-            (Deleting...)
+          <span
+            [matTooltip]="
+              workspace.document.name
+                | bdItemUpdatingMessage: workspace:'Workspace'
+            "
+            class="flex items-center justify-start gap-2"
+          >
+            {{ workspace.document.name }}
+            <mat-progress-spinner
+              *ngIf="workspace | bdItemShowSpinner"
+              diameter="16"
+              mode="indeterminate"
+            ></mat-progress-spinner>
           </span>
         </h1>
         <p>Visualize all the details about this workspace.</p>
@@ -52,22 +56,22 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           [readyCollaborators]="(readyCollaborators$ | ngrxPush) ?? null"
           [pendingCollaborators]="(pendingCollaborators$ | ngrxPush) ?? null"
           (approveCollaboratorStatusRequest)="
-            onApproveCollaboratorStatusRequest(workspace.id, $event)
+            onApproveCollaboratorStatusRequest(workspace.document.id, $event)
           "
           (grantCollaboratorStatus)="
-            onGrantCollaboratorStatus(workspace.id, $event)
+            onGrantCollaboratorStatus(workspace.document.id, $event)
           "
           (rejectCollaboratorStatusRequest)="
-            onRejectCollaboratorStatusRequest(workspace.id, $event)
+            onRejectCollaboratorStatusRequest(workspace.document.id, $event)
           "
           (requestCollaboratorStatus)="
-            onRequestCollaboratorStatus(workspace.id)
+            onRequestCollaboratorStatus(workspace.document.id)
           "
           (revokeCollaboratorStatus)="
-            onRevokeCollaboratorStatus(workspace.id, $event)
+            onRevokeCollaboratorStatus(workspace.document.id, $event)
           "
           (retryCollaboratorStatusRequest)="
-            onRetryCollaboratorStatusRequest(workspace.id, $event)
+            onRetryCollaboratorStatusRequest(workspace.document.id, $event)
           "
           (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
           (toggleShowRejected)="onToggleShowRejectedCollaborators()"
@@ -105,9 +109,6 @@ export class ViewWorkspaceComponent {
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
-  readonly isCreatingWorkspace$ = this._workspaceStore.isCreating$;
-  readonly isUpdatingWorkspace$ = this._workspaceStore.isUpdating$;
-  readonly isDeletingWorkspace$ = this._workspaceStore.isDeleting$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,

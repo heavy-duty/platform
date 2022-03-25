@@ -5,25 +5,21 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { ItemView } from './types';
 import { WorkspaceApiService } from './workspace-api.service';
 
-export interface WorkspaceView {
-  document: Document<Workspace>;
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
-}
+export type WorkspaceItemView = ItemView<Document<Workspace>>;
 
 interface ViewModel {
   loading: boolean;
   workspaceIds: string[] | null;
-  workspacesMap: Map<string, WorkspaceView>;
+  workspacesMap: Map<string, WorkspaceItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
   workspaceIds: null,
-  workspacesMap: new Map<string, WorkspaceView>(),
+  workspacesMap: new Map<string, WorkspaceItemView>(),
 };
 
 @Injectable()
@@ -44,7 +40,7 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
     this._loadWorkspaces(this.workspaceIds$);
   }
 
-  private readonly _setWorkspace = this.updater<WorkspaceView>(
+  private readonly _setWorkspace = this.updater<WorkspaceItemView>(
     (state, newWorkspace) => {
       const workspacesMap = new Map(state.workspacesMap);
       workspacesMap.set(newWorkspace.document.id, newWorkspace);
@@ -117,7 +113,7 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
                       isUpdating: false,
                       isDeleting: false,
                     }),
-                  new Map<string, WorkspaceView>()
+                  new Map<string, WorkspaceItemView>()
                 ),
             });
           },

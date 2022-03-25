@@ -4,8 +4,8 @@ import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceInstructionsStore,
   WorkspaceStore,
+  WorkspaceView,
 } from '@bulldozer-client/workspaces-data-access';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import {
@@ -22,38 +22,6 @@ import {
 
 @Injectable()
 export class WorkspaceTabStore extends ComponentStore<object> {
-  readonly showSpinner$ = this.select(
-    this._workspaceStore.workspace$,
-    this._workspaceStore.isCreating$,
-    this._workspaceStore.isUpdating$,
-    this._workspaceStore.isDeleting$,
-    (workspace, isCreating, isUpdating, isDeleting) =>
-      workspace !== null && (isCreating || isUpdating || isDeleting)
-  );
-  readonly tooltipMessage$ = this.select(
-    this._workspaceStore.workspace$,
-    this._workspaceStore.isCreating$,
-    this._workspaceStore.isUpdating$,
-    this._workspaceStore.isDeleting$,
-    (workspace, isCreating, isUpdating, isDeleting) => {
-      if (workspace === null) {
-        return '';
-      }
-
-      const message = `Workspace "${workspace.name}"`;
-
-      if (isCreating) {
-        return `${message} being created...`;
-      } else if (isUpdating) {
-        return `${message} being updated...`;
-      } else if (isDeleting) {
-        return `${message} being deleted...`;
-      }
-
-      return `${message}.`;
-    }
-  );
-
   constructor(
     private readonly _tabStore: TabStore,
     private readonly _workspaceStore: WorkspaceStore,
@@ -103,21 +71,20 @@ export class WorkspaceTabStore extends ComponentStore<object> {
     )
   );
 
-  private readonly _handleWorkspaceDeleted =
-    this.effect<Document<Workspace> | null>(
-      pipe(
-        pairwise(),
-        filter(
-          ([previousWorkspace, currentWorkspace]) =>
-            previousWorkspace !== null && currentWorkspace === null
-        ),
-        tap(([workspace]) => {
-          if (workspace !== null) {
-            this._tabStore.closeTab(workspace.id);
-          }
-        })
-      )
-    );
+  private readonly _handleWorkspaceDeleted = this.effect<WorkspaceView | null>(
+    pipe(
+      pairwise(),
+      filter(
+        ([previousWorkspace, currentWorkspace]) =>
+          previousWorkspace !== null && currentWorkspace === null
+      ),
+      tap(([workspace]) => {
+        if (workspace !== null) {
+          this._tabStore.closeTab(workspace.document.id);
+        }
+      })
+    )
+  );
 
   closeTab(tabId: string) {
     this._tabStore.closeTab(tabId);
