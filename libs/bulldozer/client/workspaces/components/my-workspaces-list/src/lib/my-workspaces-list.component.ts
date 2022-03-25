@@ -34,33 +34,38 @@ import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
                 {{ i + 1 }}
               </div>
               <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ workspace.document.name }}
-
-                  <span *ngIf="workspace.isCreating">(Creating...)</span>
-                  <span *ngIf="workspace.isDeleting">(Deleting...)</span>
-                  <span *ngIf="workspace.isUpdating">(Updating...)</span>
+                <h3
+                  class="mb-0 text-lg font-bold flex items-center justify-start gap-2"
+                >
+                  <span
+                    [matTooltip]="
+                      workspace.document.name
+                        | bdItemUpdatingMessage: workspace:'Workspace'
+                    "
+                  >
+                    {{ workspace.document.name }}
+                  </span>
+                  <mat-progress-spinner
+                    *ngIf="workspace | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
                 </h3>
+
                 <p class="text-xs mb-0 italic">
                   Workspace ID:
                   {{ workspace.document.id }}
                 </p>
-                <a
-                  class="text-xs underline text-primary"
-                  [routerLink]="['/workspaces', workspace.document.id]"
-                >
-                  View details
-                </a>
               </div>
-              <button
+              <a
                 mat-mini-fab
                 aria-label="Load workspace"
                 color="primary"
-                (click)="onActivateWorkspace(workspace.document.id)"
+                [routerLink]="['/workspaces', workspace.document.id]"
                 [disabled]="activeWorkspaceId === workspace.document.id"
               >
-                <mat-icon>check</mat-icon>
-              </button>
+                <mat-icon>open_in_new</mat-icon>
+              </a>
             </div>
           </mat-list-item>
         </mat-list>
