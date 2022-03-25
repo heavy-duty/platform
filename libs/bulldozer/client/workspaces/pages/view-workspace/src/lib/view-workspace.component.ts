@@ -19,21 +19,20 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       class="flex flex-col gap-5 p-5"
     >
       <header bdPageHeader>
-        <h1>
+        <h1 class="flex items-center justify-start gap-2">
           <span
             [matTooltip]="
               workspace.document.name
                 | bdItemUpdatingMessage: workspace:'Workspace'
             "
-            class="flex items-center justify-start gap-2"
           >
             {{ workspace.document.name }}
-            <mat-progress-spinner
-              *ngIf="workspace | bdItemShowSpinner"
-              diameter="16"
-              mode="indeterminate"
-            ></mat-progress-spinner>
           </span>
+          <mat-progress-spinner
+            *ngIf="workspace | bdItemShowSpinner"
+            diameter="16"
+            mode="indeterminate"
+          ></mat-progress-spinner>
         </h1>
         <p>Visualize all the details about this workspace.</p>
       </header>
