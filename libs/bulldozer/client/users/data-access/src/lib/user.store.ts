@@ -11,17 +11,17 @@ import {
   EMPTY,
   map,
   switchMap,
-  tap,
 } from 'rxjs';
+import { ItemView } from './types';
 import { UserApiService } from './user-api.service';
 import { InstructionStatus } from './user-instructions.store';
+
+export type UserView = ItemView<Document<User>>;
 
 interface ViewModel {
   loading: boolean;
   userId: string | null;
-  user: Document<User> | null;
-  isCreating: boolean;
-  isDeleting: boolean;
+  user: UserView | null;
   error: unknown | null;
 }
 
@@ -29,8 +29,6 @@ const initialState: ViewModel = {
   userId: null,
   user: null,
   loading: false,
-  isCreating: false,
-  isDeleting: false,
   error: null,
 };
 
@@ -41,8 +39,6 @@ export class UserStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
   readonly user$ = this.select(({ user }) => user);
   readonly userId$ = this.select(({ userId }) => userId);
-  readonly isCreating$ = this.select(({ isCreating }) => isCreating);
-  readonly isDeleting$ = this.select(({ isDeleting }) => isDeleting);
 
   constructor(
     private readonly _userApiService: UserApiService,
@@ -58,6 +54,25 @@ export class UserStore extends ComponentStore<ViewModel> {
       )
     );
   }
+
+  private readonly _setUser = this.updater<UserView | null>((state, user) => ({
+    ...state,
+    user,
+  }));
+
+  private readonly _patchUserStatuses = this.updater<{
+    isCreating?: boolean;
+    isUpdating?: boolean;
+    isDeleting?: boolean;
+  }>((state, statuses) => ({
+    ...state,
+    user: state.user
+      ? {
+          ...state.user,
+          ...statuses,
+        }
+      : null,
+  }));
 
   private readonly _loadUserId = this.effect<PublicKey | null>(
     concatMap((walletPublicKey) => {
@@ -86,13 +101,20 @@ export class UserStore extends ComponentStore<ViewModel> {
       return this._userApiService.findById(userId).pipe(
         tapResponse(
           (user) => {
+            if (user) {
+              this._setUser({
+                document: user,
+                isCreating: false,
+                isUpdating: false,
+                isDeleting: false,
+              });
+            }
             this.patchState({
-              user,
               loading: false,
             });
           },
           (error) => {
-            this.patchState({ error });
+            this.patchState({ error, loading: false });
             this._notificationStore.setError(error);
           }
         )
@@ -101,27 +123,52 @@ export class UserStore extends ComponentStore<ViewModel> {
   );
 
   readonly handleUserInstruction = this.effect<InstructionStatus>(
-    tap((userInstruction) => {
+    concatMap((userInstruction) => {
+      const userAccountMeta = userInstruction.accounts.find(
+        (account) => account.name === 'User'
+      );
+
+      if (userAccountMeta === undefined) {
+        return EMPTY;
+      }
+
       switch (userInstruction.name) {
         case 'createUser': {
-          if (userInstruction.status === 'confirmed') {
-            this.patchState({ isCreating: true });
-            this.reload();
-          } else {
-            this.patchState({ isCreating: false });
+          if (userInstruction.status === 'finalized') {
+            this._patchUserStatuses({ isCreating: false });
+            return EMPTY;
           }
 
-          break;
+          return this._userApiService
+            .findById(userAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (user) => {
+                  if (user !== null) {
+                    this._setUser({
+                      document: user,
+                      isCreating: true,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
         }
         case 'deleteUser': {
           if (userInstruction.status === 'confirmed') {
-            this.patchState({ isDeleting: true });
+            this._patchUserStatuses({ isDeleting: true });
           } else {
-            this.patchState({ user: null, isDeleting: false });
+            this._patchUserStatuses({ isDeleting: false });
+            this.patchState({ user: null });
           }
 
-          break;
+          return EMPTY;
         }
+        default:
+          return EMPTY;
       }
     })
   );

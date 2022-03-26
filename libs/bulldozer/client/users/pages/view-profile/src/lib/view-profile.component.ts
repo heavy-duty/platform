@@ -6,6 +6,7 @@ import {
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { tap } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
 
 @Component({
@@ -21,8 +22,6 @@ import { ViewProfileStore } from './view-profile.store';
         <bd-user-details
           [connected]="(connected$ | ngrxPush) ?? false"
           [user]="(user$ | ngrxPush) ?? null"
-          [isCreating]="(isCreatingUser$ | ngrxPush) ?? false"
-          [isDeleting]="(isDeletingUser$ | ngrxPush) ?? false"
           (createUser)="onCreateUser()"
           (deleteUser)="onDeleteUser()"
         ></bd-user-details>
@@ -41,11 +40,9 @@ import { ViewProfileStore } from './view-profile.store';
 })
 export class ViewProfileComponent {
   readonly connected$ = this._walletStore.connected$;
-  readonly user$ = this._userStore.user$;
+  readonly user$ = this._userStore.user$.pipe(tap((a) => console.log(a)));
   readonly activeWorkspaceId$ = this._configStore.workspaceId$;
   readonly workspaces$ = this._workspacesStore.workspaces$;
-  readonly isCreatingUser$ = this._userStore.isCreating$;
-  readonly isDeletingUser$ = this._userStore.isDeleting$;
 
   constructor(
     private readonly _userStore: UserStore,

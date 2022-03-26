@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Document, User } from '@heavy-duty/bulldozer-devkit';
+import { UserView } from '@bulldozer-client/users-data-access';
 
 @Component({
   selector: 'bd-user-details',
@@ -15,33 +15,27 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
         <ng-container *ngIf="connected; else notConnected">
           <ng-container *ngIf="user; else userNotDefined">
             <header bdSectionHeader>
-              <h2>User ID: {{ user.id | obscureAddress }}</h2>
+              <h2 class="flex items-center justify-start gap-2">
+                <span
+                  [matTooltip]="
+                    user.document.id | bdItemUpdatingMessage: user:'User'
+                  "
+                >
+                  User ID: {{ user.document.id | obscureAddress }}
+                </span>
+                <mat-progress-spinner
+                  *ngIf="user | bdItemShowSpinner"
+                  diameter="16"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+              </h2>
+
               <p>Visualize your user details.</p>
             </header>
 
-            <p class="m-0 flex items-center gap-2" *ngIf="isCreating">
-              <mat-progress-spinner
-                diameter="16"
-                mode="indeterminate"
-                color="primary"
-              >
-              </mat-progress-spinner>
-              Creating user...
-            </p>
-
-            <p class="m-0 flex items-center gap-2" *ngIf="isDeleting">
-              <mat-progress-spinner
-                diameter="16"
-                mode="indeterminate"
-                color="primary"
-              >
-              </mat-progress-spinner>
-              Deleting user...
-            </p>
-
-            <p class="m-0" *ngIf="!isCreating && !isDeleting">
+            <p class="m-0" *ngIf="!user.isCreating && !user.isDeleting">
               Created at:
-              {{ user.createdAt.toNumber() * 1000 | date: 'medium' }}
+              {{ user.document.createdAt.toNumber() * 1000 | date: 'medium' }}
             </p>
 
             <footer>
@@ -49,7 +43,7 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
                 mat-raised-button
                 color="warn"
                 (click)="onDeleteUser()"
-                [disabled]="isCreating || isDeleting"
+                [disabled]="user.isCreating || user.isDeleting"
               >
                 Delete User
               </button>
@@ -76,7 +70,7 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
                 mat-raised-button
                 color="primary"
                 (click)="onCreateUser()"
-                [disabled]="isCreating"
+                [disabled]="user !== null && user.isCreating"
               >
                 Create User
               </button>
@@ -91,9 +85,7 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
 })
 export class UserDetailsComponent {
   @Input() connected = false;
-  @Input() user: Document<User> | null = null;
-  @Input() isCreating = false;
-  @Input() isDeleting = false;
+  @Input() user: UserView | null = null;
   @Output() createUser = new EventEmitter();
   @Output() deleteUser = new EventEmitter();
 

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
+  InstructionStatus,
   UserApiService,
   UserInstructionsStore,
   UserStore,
@@ -51,7 +52,14 @@ export class ViewProfileStore extends ComponentStore<object> {
       this._workspaceQueryStore.workspaceIds$
     );
     this._watchWorkspaces(this._workspacesStore.loading$);
-    this._watchUser(this._userStore.loading$);
+    this._handleUserInstructions(
+      this._userInstructionsStore.instructionStatuses$.pipe(take(1))
+    );
+    this._handleLastUserInstruction(
+      this._userInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined
+      )
+    );
     this._tabStore.openTab({
       id: 'profile',
       kind: 'profile',
@@ -94,37 +102,35 @@ export class ViewProfileStore extends ComponentStore<object> {
     )
   );
 
-  private readonly _watchUser = this.effect<boolean>(
-    pipe(
-      concatMap((loading) =>
-        of(loading).pipe(withLatestFrom(this._userStore.user$))
-      ),
-      switchMap(([loading, user]) => {
-        if (loading !== false && user === null) {
-          return EMPTY;
-        }
+  private readonly _handleUserInstructions = this.effect<InstructionStatus[]>(
+    concatMap((instructionStatuses) =>
+      from(instructionStatuses).pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createUser' ||
+              instructionStatus.name === 'deleteUser') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
+        ),
+        tap((userInstruction) =>
+          this._userStore.handleUserInstruction(userInstruction)
+        )
+      )
+    )
+  );
 
-        return merge(
-          this._userInstructionsStore.instructionStatuses$.pipe(
-            take(1),
-            concatMap((instructionStatuses) => from(instructionStatuses))
-          ),
-          this._userInstructionsStore.lastInstructionStatus$.pipe(
-            isNotNullOrUndefined
-          )
-        ).pipe(
-          filter(
-            (instructionStatus) =>
-              (instructionStatus.name === 'createUser' ||
-                instructionStatus.name === 'deleteUser') &&
-              (instructionStatus.status === 'confirmed' ||
-                instructionStatus.status === 'finalized')
-          ),
-          tap((userInstruction) =>
-            this._userStore.handleUserInstruction(userInstruction)
-          )
-        );
-      })
+  private readonly _handleLastUserInstruction = this.effect<InstructionStatus>(
+    pipe(
+      filter(
+        (instructionStatus) =>
+          (instructionStatus.name === 'createUser' ||
+            instructionStatus.name === 'deleteUser') &&
+          (instructionStatus.status === 'confirmed' ||
+            instructionStatus.status === 'finalized')
+      ),
+      tap((userInstruction) =>
+        this._userStore.handleUserInstruction(userInstruction)
+      )
     )
   );
 

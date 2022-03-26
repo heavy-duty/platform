@@ -5,7 +5,8 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
+import { UserView } from '@bulldozer-client/users-data-access';
+import { Collaborator, Document } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-collaborators-list',
@@ -155,7 +156,9 @@ import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
                       mat-stroked-button
                       color="warn"
                       (click)="onRevokeCollaboratorStatus(collaborator.id)"
-                      [disabled]="currentUser?.id === collaborator.data.user"
+                      [disabled]="
+                        currentUser?.document?.id === collaborator.data.user
+                      "
                     >
                       Revoke
                       <mat-icon>cancel</mat-icon>
@@ -172,13 +175,17 @@ import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
                       mat-stroked-button
                       class="text-green-500"
                       (click)="onGrantCollaboratorStatus(collaborator.id)"
-                      [disabled]="currentUser?.id === collaborator.data.user"
+                      [disabled]="
+                        currentUser?.document?.id === collaborator.data.user
+                      "
                     >
                       Grant
                       <mat-icon>check_circle</mat-icon>
                     </button>
                     <button
-                      *ngIf="currentUser?.id === collaborator.data.user"
+                      *ngIf="
+                        currentUser?.document?.id === collaborator.data.user
+                      "
                       mat-stroked-button
                       class="text-green-500"
                       (click)="
@@ -310,7 +317,7 @@ import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
 export class CollaboratorsListComponent {
   @Input() showRejected = false;
   @Input() mode: 'ready' | 'pending' = 'ready';
-  @Input() currentUser: Document<User> | null = null;
+  @Input() currentUser: UserView | null = null;
   @Input() currentCollaborator: Document<Collaborator> | null = null;
   @Input() readyCollaborators: Document<Collaborator>[] | null = null;
   @Input() pendingCollaborators: Document<Collaborator>[] | null = null;
