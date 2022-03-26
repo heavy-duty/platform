@@ -25,6 +25,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
             workspace.document.name
               | bdItemUpdatingMessage: workspace:'Workspace'
           "
+          matTooltipShowDelay="500"
         >
           <span
             class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"

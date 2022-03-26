@@ -22,6 +22,7 @@ import { ApplicationTabStore } from './application-tab.store';
           application.document.name
             | bdItemUpdatingMessage: application:'Application'
         "
+        matTooltipShowDelay="500"
       >
         <span
           class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"

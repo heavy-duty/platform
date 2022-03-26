@@ -42,6 +42,7 @@ import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
                       workspace.document.name
                         | bdItemUpdatingMessage: workspace:'Workspace'
                     "
+                    matTooltipShowDelay="500"
                   >
                     {{ workspace.document.name }}
                   </span>
@@ -62,7 +63,6 @@ import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
                 aria-label="Load workspace"
                 color="primary"
                 [routerLink]="['/workspaces', workspace.document.id]"
-                [disabled]="activeWorkspaceId === workspace.document.id"
               >
                 <mat-icon>open_in_new</mat-icon>
               </a>

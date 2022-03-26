@@ -27,6 +27,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               workspace.document.name
                 | bdItemUpdatingMessage: workspace:'Workspace'
             "
+            matTooltipShowDelay="500"
           >
             {{ workspace.document.name }}
           </span>

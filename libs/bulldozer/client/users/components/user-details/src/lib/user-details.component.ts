@@ -20,6 +20,7 @@ import { UserView } from '@bulldozer-client/users-data-access';
                   [matTooltip]="
                     user.document.id | bdItemUpdatingMessage: user:'User'
                   "
+                  matTooltipShowDelay="500"
                 >
                   User ID: {{ user.document.id | obscureAddress }}
                 </span>

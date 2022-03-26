@@ -183,8 +183,8 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
                 account.name === 'Workspace' && account.pubkey === workspaceId
             )
         ),
-        tap((workspaceInstruction) =>
-          this._workspaceStore.handleWorkspaceInstruction(workspaceInstruction)
+        tap((instructionStatus) =>
+          this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
         )
       )
     )

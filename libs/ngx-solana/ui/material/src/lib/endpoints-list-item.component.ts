@@ -8,6 +8,7 @@ import { Component, Input } from '@angular/core';
       <span
         class="font-thin flex-shrink overflow-ellipsis whitespace-nowrap overflow-hidden"
         [matTooltip]="endpoint"
+        matTooltipShowDelay="500"
       >
         {{ endpoint }}
       </span>

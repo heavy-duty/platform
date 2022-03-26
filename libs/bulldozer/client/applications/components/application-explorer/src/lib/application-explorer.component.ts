@@ -12,6 +12,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
     <ng-container *ngrxLet="applications$; let applications">
       <div class="flex flex-col items-center pb-3 bd-custom-background">
         <button
+          *ngIf="workspaceId$ | ngrxPush as workspaceId"
           mat-raised-button
           color="primary"
           class="block"
@@ -35,6 +36,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                   application.document.name
                     | bdItemUpdatingMessage: application:'Application'
                 "
+                matTooltipShowDelay="500"
                 class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
               >
                 <span
@@ -67,14 +69,14 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           <bd-collection-explorer
             [connected]="connected"
             [applicationId]="application.document.id"
-            [workspaceId]="workspaceId"
+            [workspaceId]="application.document.data.workspace"
           >
           </bd-collection-explorer>
 
           <bd-instruction-explorer
             [connected]="connected"
             [applicationId]="application.document.id"
-            [workspaceId]="workspaceId"
+            [workspaceId]="application.document.data.workspace"
           >
           </bd-instruction-explorer>
 
@@ -140,6 +142,7 @@ export class ApplicationExplorerComponent {
     this._applicationExplorerStore.setWorkspaceId(value);
   }
 
+  readonly workspaceId$ = this._applicationExplorerStore.workspaceId$;
   readonly applications$ = this._applicationsStore.applications$;
 
   constructor(

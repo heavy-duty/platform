@@ -94,10 +94,8 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
                 account.pubkey === applicationId
             )
         ),
-        tap((applicationInstruction) =>
-          this._applicationStore.handleApplicationInstruction(
-            applicationInstruction
-          )
+        tap((instructionStatus) =>
+          this._applicationStore.handleApplicationInstruction(instructionStatus)
         )
       )
     )

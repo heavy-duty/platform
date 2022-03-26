@@ -15,6 +15,7 @@ import { ViewApplicationStore } from './view-application.store';
               application.document.name
                 | bdItemUpdatingMessage: application:'Application'
             "
+            matTooltipShowDelay="500"
             class="flex items-center justify-start gap-2"
           >
             {{ application.document.name }}
