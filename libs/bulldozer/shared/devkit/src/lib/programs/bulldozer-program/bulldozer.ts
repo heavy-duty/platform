@@ -1578,6 +1578,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'collection';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'attribute';
           isMut: true;
           isSigner: false;
@@ -6031,6 +6036,11 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'collection',
           isMut: false,
           isSigner: false,
         },

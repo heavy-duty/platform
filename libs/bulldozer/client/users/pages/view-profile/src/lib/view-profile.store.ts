@@ -15,6 +15,7 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  combineLatest,
   concatMap,
   EMPTY,
   filter,
@@ -42,9 +43,12 @@ export class ViewProfileStore extends ComponentStore<object> {
     super({});
 
     this._workspaceQueryStore.setFilters(
-      this._walletStore.publicKey$.pipe(
-        map((publicKey) => publicKey && { authority: publicKey.toBase58() })
-      )
+      combineLatest({
+        authority: this._walletStore.publicKey$.pipe(
+          isNotNullOrUndefined,
+          map((publicKey) => publicKey.toBase58())
+        ),
+      })
     );
     this._workspacesStore.setWorkspaceIds(
       this._workspaceQueryStore.workspaceIds$

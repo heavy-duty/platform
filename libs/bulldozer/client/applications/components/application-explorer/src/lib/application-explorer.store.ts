@@ -11,11 +11,11 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  combineLatest,
   concatMap,
   EMPTY,
   filter,
   from,
-  map,
   of,
   pipe,
   tap,
@@ -45,10 +45,9 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._applicationQueryStore.setFilters(
-      this.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        map((workspace) => ({ workspace }))
-      )
+      combineLatest({
+        workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
+      })
     );
     this._applicationsStore.setApplicationIds(
       this._applicationQueryStore.applicationIds$
