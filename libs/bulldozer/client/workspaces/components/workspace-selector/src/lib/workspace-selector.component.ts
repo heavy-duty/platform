@@ -72,6 +72,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
                 <a
                   class="text-xs underline text-primary"
                   [routerLink]="['/workspaces', workspace.document.id]"
+                  (click)="onActivateWorkspace(workspace.document.id)"
                 >
                   View details
                 </a>
@@ -180,6 +181,7 @@ export class WorkspaceSelectorComponent {
   }
 
   onActivateWorkspace(workspaceId: string) {
+    this._closeMenu();
     this._configStore.setWorkspaceId(workspaceId);
   }
 

@@ -12,7 +12,7 @@ import {
   InstructionRelationApiService,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceApiService,
   WorkspaceInstructionsStore,
@@ -26,16 +26,14 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  combineLatest,
   concatMap,
   EMPTY,
   filter,
   forkJoin,
   from,
-  merge,
   of,
   pipe,
-  switchMap,
-  take,
   tap,
   toArray,
   withLatestFrom,
@@ -54,35 +52,36 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
-    private readonly _userInstructionsStore: UserInstructionsStore,
     private readonly _workspaceStore: WorkspaceStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore,
     configStore: ConfigStore
   ) {
     super({});
 
     this._workspaceStore.setWorkspaceId(configStore.workspaceId$);
-    this._watchWorkspace(this._workspaceStore.workspaceId$);
+    this._handleWorkspaceInstructions(
+      combineLatest({
+        workspaceId: configStore.workspaceId$.pipe(isNotNullOrUndefined),
+        instructionStatuses: workspaceInstructionsStore.instructionStatuses$,
+      })
+    );
+    this._handleLastWorkspaceInstruction(
+      combineLatest({
+        workspaceId: configStore.workspaceId$.pipe(isNotNullOrUndefined),
+        instructionStatus:
+          workspaceInstructionsStore.lastInstructionStatus$.pipe(
+            isNotNullOrUndefined
+          ),
+      })
+    );
   }
 
-  private readonly _watchWorkspace = this.effect<string | null>(
-    switchMap((workspaceId) =>
-      merge(
-        this._workspaceInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        ),
-        this._userInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._userInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        )
-      ).pipe(
+  private readonly _handleWorkspaceInstructions = this.effect<{
+    workspaceId: string;
+    instructionStatuses: InstructionStatus[];
+  }>(
+    concatMap(({ workspaceId, instructionStatuses }) =>
+      from(instructionStatuses).pipe(
         filter(
           (instructionStatus) =>
             (instructionStatus.name === 'createWorkspace' ||
@@ -98,6 +97,29 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
         tap((workspaceInstruction) =>
           this._workspaceStore.handleWorkspaceInstruction(workspaceInstruction)
         )
+      )
+    )
+  );
+
+  private readonly _handleLastWorkspaceInstruction = this.effect<{
+    workspaceId: string;
+    instructionStatus: InstructionStatus;
+  }>(
+    pipe(
+      filter(
+        ({ workspaceId, instructionStatus }) =>
+          (instructionStatus.name === 'createWorkspace' ||
+            instructionStatus.name === 'updateWorkspace' ||
+            instructionStatus.name === 'deleteWorkspace') &&
+          (instructionStatus.status === 'confirmed' ||
+            instructionStatus.status === 'finalized') &&
+          instructionStatus.accounts.some(
+            (account) =>
+              account.name === 'Workspace' && account.pubkey === workspaceId
+          )
+      ),
+      tap(({ instructionStatus }) =>
+        this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
       )
     )
   );

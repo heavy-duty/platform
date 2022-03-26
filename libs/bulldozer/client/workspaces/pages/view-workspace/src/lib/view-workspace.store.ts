@@ -12,7 +12,7 @@ import {
 import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
-  UserInstructionsStore,
+  InstructionStatus,
   UserStore,
 } from '@bulldozer-client/users-data-access';
 import {
@@ -24,16 +24,15 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  combineLatest,
   concatMap,
   EMPTY,
   filter,
   from,
   map,
-  merge,
   of,
   pipe,
   switchMap,
-  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -107,7 +106,6 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _userStore: UserStore,
     private readonly _budgetStore: BudgetStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
-    private readonly _userInstructionsStore: UserInstructionsStore,
     route: ActivatedRoute
   ) {
     super(initialState);
@@ -115,7 +113,22 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     this._openTab(this.workspaceId$);
     this._setRouteParameters(route.paramMap);
     this._loadBudgetMinimumBalanceForRentExemption();
-    this._watchWorkspace(this.workspaceId$);
+    this._handleWorkspaceInstructions(
+      combineLatest({
+        workspaceId: this.workspaceId$.pipe(isNotNullOrUndefined),
+        instructionStatuses:
+          this._workspaceInstructionsStore.instructionStatuses$,
+      })
+    );
+    this._handleLastWorkspaceInstruction(
+      combineLatest({
+        workspaceId: this.workspaceId$.pipe(isNotNullOrUndefined),
+        instructionStatus:
+          this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
+            isNotNullOrUndefined
+          ),
+      })
+    );
     this._collaboratorStore.setWorkspaceId(this.workspaceId$);
     this._collaboratorStore.setUserId(this._userStore.userId$);
     this._collaboratorsStore.setFilters(
@@ -133,24 +146,12 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
   );
 
-  private readonly _watchWorkspace = this.effect<string | null>(
-    switchMap((workspaceId) =>
-      merge(
-        this._workspaceInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        ),
-        this._userInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._userInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        )
-      ).pipe(
+  private readonly _handleWorkspaceInstructions = this.effect<{
+    workspaceId: string;
+    instructionStatuses: InstructionStatus[];
+  }>(
+    concatMap(({ workspaceId, instructionStatuses }) =>
+      from(instructionStatuses).pipe(
         filter(
           (instructionStatus) =>
             (instructionStatus.name === 'createWorkspace' ||
@@ -166,6 +167,29 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         tap((workspaceInstruction) =>
           this._workspaceStore.handleWorkspaceInstruction(workspaceInstruction)
         )
+      )
+    )
+  );
+
+  private readonly _handleLastWorkspaceInstruction = this.effect<{
+    workspaceId: string;
+    instructionStatus: InstructionStatus;
+  }>(
+    pipe(
+      filter(
+        ({ workspaceId, instructionStatus }) =>
+          (instructionStatus.name === 'createWorkspace' ||
+            instructionStatus.name === 'updateWorkspace' ||
+            instructionStatus.name === 'deleteWorkspace') &&
+          (instructionStatus.status === 'confirmed' ||
+            instructionStatus.status === 'finalized') &&
+          instructionStatus.accounts.some(
+            (account) =>
+              account.name === 'Workspace' && account.pubkey === workspaceId
+          )
+      ),
+      tap(({ instructionStatus }) =>
+        this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
       )
     )
   );

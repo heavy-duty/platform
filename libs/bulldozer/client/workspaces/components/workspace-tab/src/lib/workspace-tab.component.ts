@@ -1,4 +1,5 @@
 import { Component, HostBinding, Input } from '@angular/core';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceTabStore } from './workspace-tab.store';
 
@@ -45,7 +46,7 @@ export class WorkspaceTabComponent {
   private _workspaceId!: string;
   @Input() set workspaceId(value: string) {
     this._workspaceId = value;
-    this._workspaceStore.setWorkspaceId(this.workspaceId);
+    this._workspaceTabStore.setWorkspaceId(this.workspaceId);
   }
   get workspaceId() {
     return this._workspaceId;
@@ -54,11 +55,12 @@ export class WorkspaceTabComponent {
   readonly workspace$ = this._workspaceStore.workspace$;
 
   constructor(
+    private readonly _tabStore: TabStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _workspaceTabStore: WorkspaceTabStore
   ) {}
 
   onCloseTab() {
-    this._workspaceTabStore.closeTab(this.workspaceId);
+    this._tabStore.closeTab(this.workspaceId);
   }
 }
