@@ -155,6 +155,7 @@ describe('collection attribute', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
+        collection: collection.publicKey,
         attribute: attribute.publicKey,
       })
       .rpc();

@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, CollectionAttribute, User, Workspace};
+use crate::collections::{Collaborator, Collection, CollectionAttribute, User, Workspace};
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -19,7 +19,12 @@ pub struct UpdateCollectionAttribute<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
+    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace
+  )]
+  pub collection: Account<'info, Collection>,
+  #[account(
     mut,
+    constraint = attribute.collection == collection.key() @ ErrorCode::CollectionAttributeDoesNotBelongToCollection,
     constraint = attribute.workspace == workspace.key() @ ErrorCode::CollectionAttributeDoesNotBelongToWorkspace,
   )]
   pub attribute: Account<'info, CollectionAttribute>,
