@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
 import {
   BudgetApiService,
   BudgetStore,
@@ -29,7 +28,6 @@ import {
   EMPTY,
   filter,
   from,
-  map,
   of,
   pipe,
   switchMap,
@@ -105,42 +103,63 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     private readonly _configStore: ConfigStore,
     private readonly _userStore: UserStore,
     private readonly _budgetStore: BudgetStore,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
-    route: ActivatedRoute
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
-    this._openTab(this.workspaceId$);
-    this._setRouteParameters(route.paramMap);
-    this._loadBudgetMinimumBalanceForRentExemption();
-    this._handleWorkspaceInstructions(
-      combineLatest({
-        workspaceId: this.workspaceId$.pipe(isNotNullOrUndefined),
-        instructionStatuses:
-          this._workspaceInstructionsStore.instructionStatuses$,
-      })
-    );
-    this._handleLastWorkspaceInstruction(
-      combineLatest({
-        workspaceId: this.workspaceId$.pipe(isNotNullOrUndefined),
-        instructionStatus:
-          this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-            isNotNullOrUndefined
-          ),
-      })
-    );
+    this._workspaceStore.setWorkspaceId(this.workspaceId$);
     this._collaboratorStore.setWorkspaceId(this.workspaceId$);
     this._collaboratorStore.setUserId(this._userStore.userId$);
     this._collaboratorsStore.setFilters(
-      this.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        map((workspaceId) => ({ workspace: workspaceId }))
+      combineLatest({
+        workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
+      })
+    );
+    this._budgetStore.setWorkspaceId(this.workspaceId$);
+    this._loadBudgetMinimumBalanceForRentExemption();
+    this._openTab(this.workspaceId$);
+    this._activateWorkspace(this.workspaceId$);
+    this._handleWorkspaceInstructions(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.instructionStatuses$,
+        (workspaceId, instructionStatuses) => ({
+          workspaceId,
+          instructionStatuses,
+        }),
+        { debounce: true }
       )
     );
-    this._workspaceStore.setWorkspaceId(this.workspaceId$);
-    this._budgetStore.setWorkspaceId(this.workspaceId$);
-    this._activateWorkspace(this.workspaceId$);
+    this._handleLastWorkspaceInstruction(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        ),
+        (workspaceId, instructionStatus) => ({
+          workspaceId,
+          instructionStatus,
+        }),
+        { debounce: true }
+      )
+    );
   }
+
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  readonly toggleShowRejectedCollaborators = this.updater((state) => ({
+    ...state,
+    showRejectedCollaborators: !state.showRejectedCollaborators,
+  }));
+
+  readonly setCollaboratorListMode = this.updater<'ready' | 'pending'>(
+    (state, collaboratorListMode) => ({
+      ...state,
+      collaboratorListMode,
+    })
+  );
 
   private readonly _activateWorkspace = this.effect<string | null>(
     tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
@@ -192,25 +211,6 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
       )
     )
-  );
-
-  private readonly _setRouteParameters = this.updater<ParamMap>(
-    (state, paramMap) => ({
-      ...state,
-      workspaceId: paramMap.get('workspaceId'),
-    })
-  );
-
-  readonly toggleShowRejectedCollaborators = this.updater((state) => ({
-    ...state,
-    showRejectedCollaborators: !state.showRejectedCollaborators,
-  }));
-
-  readonly setCollaboratorListMode = this.updater<'ready' | 'pending'>(
-    (state, collaboratorListMode) => ({
-      ...state,
-      collaboratorListMode,
-    })
   );
 
   private readonly _openTab = this.effect<string | null>(

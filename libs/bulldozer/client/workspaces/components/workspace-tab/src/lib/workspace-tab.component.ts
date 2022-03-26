@@ -32,7 +32,7 @@ import { WorkspaceTabStore } from './workspace-tab.store';
       <button
         mat-icon-button
         [attr.aria-label]="'Close ' + workspace.document.name + ' tab'"
-        (click)="onCloseTab()"
+        (click)="onCloseTab(workspace.document.id)"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -43,13 +43,8 @@ import { WorkspaceTabStore } from './workspace-tab.store';
 export class WorkspaceTabComponent {
   @HostBinding('class') class = 'block w-full';
 
-  private _workspaceId!: string;
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
-    this._workspaceTabStore.setWorkspaceId(this.workspaceId);
-  }
-  get workspaceId() {
-    return this._workspaceId;
+    this._workspaceTabStore.setWorkspaceId(value);
   }
 
   readonly workspace$ = this._workspaceStore.workspace$;
@@ -60,7 +55,7 @@ export class WorkspaceTabComponent {
     private readonly _workspaceTabStore: WorkspaceTabStore
   ) {}
 
-  onCloseTab() {
-    this._tabStore.closeTab(this.workspaceId);
+  onCloseTab(workspaceId: string) {
+    this._tabStore.closeTab(workspaceId);
   }
 }
