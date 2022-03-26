@@ -42,7 +42,9 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
         collectionAttributesStore.collectionAttributes$,
         (collection, collectionAttributes) => ({
           collection: collection?.document ?? null,
-          collectionAttributes,
+          collectionAttributes: collectionAttributes.map(
+            ({ document }) => document
+          ),
         }),
         { debounce: true }
       )

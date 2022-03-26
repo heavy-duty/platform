@@ -1,45 +1,35 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  CollectionAttribute,
-  CollectionAttributeDto,
-  CollectionAttributeFilters,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  mergeMap,
-  of,
-  pipe,
-  switchMap,
-  take,
-  takeUntil,
-  takeWhile,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { CollectionAttributeApiService } from './collection-attribute-api.service';
-import { CollectionAttributeEventService } from './collection-attribute-event.service';
+import { ItemView } from './types';
+
+export type CollectionAttributeItemView = ItemView<
+  Document<CollectionAttribute>
+>;
 
 interface ViewModel {
   loading: boolean;
-  filters: CollectionAttributeFilters | null;
-  collectionAttributesMap: Map<string, Document<CollectionAttribute>>;
+  collectionAttributeIds: string[] | null;
+  collectionAttributesMap: Map<string, CollectionAttributeItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  filters: null,
-  collectionAttributesMap: new Map<string, Document<CollectionAttribute>>(),
+  collectionAttributeIds: null,
+  collectionAttributesMap: new Map<string, CollectionAttributeItemView>(),
 };
 
 @Injectable()
 export class CollectionAttributesStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
-  readonly filters$ = this.select(({ filters }) => filters);
+  readonly collectionAttributeIds$ = this.select(
+    ({ collectionAttributeIds }) => collectionAttributeIds
+  );
   readonly collectionAttributesMap$ = this.select(
     ({ collectionAttributesMap }) => collectionAttributesMap
   );
@@ -54,44 +44,55 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _collectionAttributeApiService: CollectionAttributeApiService,
-    private readonly _collectionAttributeEventService: CollectionAttributeEventService,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._loadCollectionAttributes(this.filters$);
-    this._handleCollectionAttributeCreated(this.filters$);
+    this._loadCollectionAttributes(this.collectionAttributeIds$);
   }
 
-  private readonly _setCollectionAttribute = this.updater<
-    Document<CollectionAttribute>
-  >((state, newCollectionAttribute) => {
-    const collectionAttributesMap = new Map(state.collectionAttributesMap);
-    collectionAttributesMap.set(
-      newCollectionAttribute.id,
-      newCollectionAttribute
-    );
-    return {
-      ...state,
-      collectionAttributesMap,
-    };
-  });
+  private readonly _setCollectionAttribute =
+    this.updater<CollectionAttributeItemView>(
+      (state, newCollectionAttribute) => {
+        const collectionAttributesMap = new Map(state.collectionAttributesMap);
+        collectionAttributesMap.set(
+          newCollectionAttribute.document.id,
+          newCollectionAttribute
+        );
 
-  private readonly _addCollectionAttribute = this.updater<
-    Document<CollectionAttribute>
-  >((state, newCollectionAttribute) => {
-    if (state.collectionAttributesMap.has(newCollectionAttribute.id)) {
+        return {
+          ...state,
+          collectionAttributesMap,
+        };
+      }
+    );
+
+  private readonly _patchCollectionAttributeStatuses = this.updater<{
+    collectionAttributeId: string;
+    statuses: {
+      isCreating?: boolean;
+      isUpdating?: boolean;
+      isDeleting?: boolean;
+    };
+  }>((state, { collectionAttributeId, statuses }) => {
+    const collectionAttributesMap = new Map(state.collectionAttributesMap);
+    const collectionAttribute = collectionAttributesMap.get(
+      collectionAttributeId
+    );
+
+    if (collectionAttribute === undefined) {
       return state;
     }
-    const collectionAttributesMap = new Map(state.collectionAttributesMap);
-    collectionAttributesMap.set(
-      newCollectionAttribute.id,
-      newCollectionAttribute
-    );
+
     return {
       ...state,
-      collectionAttributesMap,
+      collectionAttributesMap: collectionAttributesMap.set(
+        collectionAttributeId,
+        {
+          ...collectionAttribute,
+          ...statuses,
+        }
+      ),
     };
   });
 
@@ -106,206 +107,139 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _handleCollectionAttributeChanges = this.effect<string>(
-    mergeMap((collectionAttributeId) =>
-      this._collectionAttributeEventService
-        .collectionAttributeChanges(collectionAttributeId)
-        .pipe(
-          tapResponse(
-            (changes) => {
-              if (changes === null) {
-                this._removeCollectionAttribute(collectionAttributeId);
-              } else {
-                this._setCollectionAttribute(changes);
-              }
-            },
-            (error) => this._notificationStore.setError(error)
-          ),
-          takeUntil(
-            this.loading$.pipe(
-              filter((loading) => loading),
-              take(1)
-            )
-          ),
-          takeWhile((collection) => collection !== null)
-        )
-    )
-  );
-
-  private readonly _handleCollectionAttributeCreated =
-    this.effect<CollectionAttributeFilters | null>(
-      switchMap((filters) => {
-        if (filters === null) {
-          return EMPTY;
-        }
-
-        return this._collectionAttributeEventService
-          .collectionAttributeCreated(filters)
-          .pipe(
-            tapResponse(
-              (collectionAttribute) => {
-                this._addCollectionAttribute(collectionAttribute);
-                this._handleCollectionAttributeChanges(collectionAttribute.id);
-              },
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    );
-
-  private readonly _loadCollectionAttributes =
-    this.effect<CollectionAttributeFilters | null>(
-      switchMap((filters) => {
-        if (filters === null) {
-          return EMPTY;
-        }
-
-        this.patchState({ loading: true });
-
-        return this._collectionAttributeApiService.find(filters).pipe(
-          tapResponse(
-            (collectionAttributes) => {
-              this.patchState({
-                collectionAttributesMap: collectionAttributes.reduce(
-                  (collectionAttributesMap, collectionAttribute) =>
-                    collectionAttributesMap.set(
-                      collectionAttribute.id,
-                      collectionAttribute
-                    ),
-                  new Map<string, Document<CollectionAttribute>>()
-                ),
-                loading: false,
-              });
-              collectionAttributes.forEach(({ id }) =>
-                this._handleCollectionAttributeChanges(id)
-              );
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-      })
-    );
-
-  readonly setFilters = this.updater<CollectionAttributeFilters>(
-    (state, filters) => ({
+  readonly setCollectionAttributeIds = this.updater<string[] | null>(
+    (state, collectionAttributeIds) => ({
       ...state,
-      filters,
+      collectionAttributeIds,
     })
   );
 
-  readonly createCollectionAttribute = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    collectionId: string;
-    collectionAttributeDto: CollectionAttributeDto;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          { workspaceId, applicationId, collectionId, collectionAttributeDto },
-          authority,
-        ]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
+  private readonly _loadCollectionAttributes = this.effect<string[] | null>(
+    switchMap((collectionAttributeIds) => {
+      if (collectionAttributeIds === null) {
+        return EMPTY;
+      }
 
-          return this._collectionAttributeApiService
-            .create({
-              collectionAttributeDto,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              collectionId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Create attribute request sent'
+      this.patchState({ loading: true });
+
+      return this._collectionAttributeApiService
+        .findByIds(collectionAttributeIds)
+        .pipe(
+          tapResponse(
+            (collectionAttributes) => {
+              this.patchState({
+                loading: false,
+                collectionAttributesMap: collectionAttributes
+                  .filter(
+                    (
+                      collectionAttribute
+                    ): collectionAttribute is Document<CollectionAttribute> =>
+                      collectionAttribute !== null
+                  )
+                  .reduce(
+                    (collectionAttributesMap, collectionAttribute) =>
+                      collectionAttributesMap.set(collectionAttribute.id, {
+                        document: collectionAttribute,
+                        isCreating: false,
+                        isUpdating: false,
+                        isDeleting: false,
+                      }),
+                    new Map<string, CollectionAttributeItemView>()
                   ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
+              });
+            },
+            (error) => this._notificationStore.setError({ error })
+          )
+        );
+    })
   );
 
-  readonly updateCollectionAttribute = this.effect<{
-    workspaceId: string;
-    collectionAttributeId: string;
-    collectionAttributeDto: CollectionAttributeDto;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          { workspaceId, collectionAttributeId, collectionAttributeDto },
-          authority,
-        ]) => {
-          if (authority === null) {
+  readonly handleCollectionAttributeInstruction =
+    this.effect<InstructionStatus>(
+      concatMap((collectionAttributeInstruction) => {
+        const collectionAttributeAccountMeta =
+          collectionAttributeInstruction.accounts.find(
+            (account) => account.name === 'Attribute'
+          );
+
+        if (collectionAttributeAccountMeta === undefined) {
+          return EMPTY;
+        }
+
+        switch (collectionAttributeInstruction.name) {
+          case 'createCollectionAttribute': {
+            if (collectionAttributeInstruction.status === 'finalized') {
+              this._patchCollectionAttributeStatuses({
+                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+                statuses: {
+                  isCreating: false,
+                },
+              });
+
+              return EMPTY;
+            }
+
+            return this._collectionAttributeApiService
+              .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
+              .pipe(
+                isNotNullOrUndefined,
+                tapResponse(
+                  (collectionAttribute) =>
+                    this._setCollectionAttribute({
+                      document: collectionAttribute,
+                      isCreating: true,
+                      isUpdating: false,
+                      isDeleting: false,
+                    }),
+                  (error) => this._notificationStore.setError({ error })
+                )
+              );
+          }
+          case 'updateCollectionAttribute': {
+            if (collectionAttributeInstruction.status === 'finalized') {
+              this._patchCollectionAttributeStatuses({
+                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+                statuses: {
+                  isUpdating: false,
+                },
+              });
+
+              return EMPTY;
+            }
+
+            return this._collectionAttributeApiService
+              .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
+              .pipe(
+                isNotNullOrUndefined,
+                tapResponse(
+                  (collectionAttribute) =>
+                    this._setCollectionAttribute({
+                      document: collectionAttribute,
+                      isCreating: false,
+                      isUpdating: true,
+                      isDeleting: false,
+                    }),
+                  (error) => this._notificationStore.setError({ error })
+                )
+              );
+          }
+          case 'deleteCollectionAttribute': {
+            if (collectionAttributeInstruction.status === 'confirmed') {
+              this._patchCollectionAttributeStatuses({
+                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+                statuses: { isDeleting: true },
+              });
+            } else {
+              this._removeCollectionAttribute(
+                collectionAttributeAccountMeta.pubkey
+              );
+            }
+
             return EMPTY;
           }
-
-          return this._collectionAttributeApiService
-            .update({
-              authority: authority.toBase58(),
-              workspaceId,
-              collectionAttributeDto,
-              collectionAttributeId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Update attribute request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
-  );
-
-  readonly deleteCollectionAttribute = this.effect<{
-    workspaceId: string;
-    collectionId: string;
-    collectionAttributeId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ workspaceId, collectionId, collectionAttributeId }, authority]) => {
-          if (authority === null) {
+          default:
             return EMPTY;
-          }
-
-          return this._collectionAttributeApiService
-            .delete({
-              authority: authority.toBase58(),
-              workspaceId,
-              collectionAttributeId,
-              collectionId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Delete attribute request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
         }
-      )
-    )
-  );
+      })
+    );
 }

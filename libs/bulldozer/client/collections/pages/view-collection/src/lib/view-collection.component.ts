@@ -6,11 +6,11 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  CollectionAttributeQueryStore,
   CollectionAttributesStore,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
 import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
@@ -59,6 +59,7 @@ import { ViewCollectionStore } from './view-collection.store';
             (updateCollectionAttribute)="
               onUpdateCollectionAttribute(
                 collection.document.data.workspace,
+                collection.document.id,
                 $event.collectionAttributeId,
                 $event.collectionAttributeDto
               )
@@ -88,6 +89,7 @@ import { ViewCollectionStore } from './view-collection.store';
   providers: [
     CollectionStore,
     CollectionAttributesStore,
+    CollectionAttributeQueryStore,
     ViewCollectionStore,
     ViewCollectionCodeStore,
   ],
@@ -111,12 +113,6 @@ export class ViewCollectionComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this._collectionAttributesStore.setFilters(
-      this._viewCollectionStore.collectionId$.pipe(
-        isNotNullOrUndefined,
-        map((collectionId) => ({ collection: collectionId }))
-      )
-    );
     this._viewCollectionStore.setWorkspaceId(
       this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
     );
@@ -136,7 +132,7 @@ export class ViewCollectionComponent implements OnInit {
     collectionId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._collectionAttributesStore.createCollectionAttribute({
+    this._viewCollectionStore.createCollectionAttribute({
       workspaceId,
       applicationId,
       collectionId,
@@ -146,11 +142,13 @@ export class ViewCollectionComponent implements OnInit {
 
   onUpdateCollectionAttribute(
     workspaceId: string,
+    collectionId: string,
     collectionAttributeId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._collectionAttributesStore.updateCollectionAttribute({
+    this._viewCollectionStore.updateCollectionAttribute({
       workspaceId,
+      collectionId,
       collectionAttributeId,
       collectionAttributeDto,
     });
@@ -161,7 +159,7 @@ export class ViewCollectionComponent implements OnInit {
     collectionId: string,
     collectionAttributeId: string
   ) {
-    this._collectionAttributesStore.deleteCollectionAttribute({
+    this._viewCollectionStore.deleteCollectionAttribute({
       workspaceId,
       collectionId,
       collectionAttributeId,
