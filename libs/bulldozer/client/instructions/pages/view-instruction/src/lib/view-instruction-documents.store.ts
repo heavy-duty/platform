@@ -66,7 +66,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           instruction,
           instructionAccounts,
           instructionRelations,
-          collections,
+          collections: collections.map(({ document }) => document),
         }),
         { debounce: true }
       )

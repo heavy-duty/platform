@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
   InstructionAccountsStore,
@@ -161,7 +162,9 @@ export class ViewInstructionComponent {
   @HostBinding('class') class = 'block';
   instructionBody = '';
   readonly connected$ = this._walletStore.connected$;
-  readonly collections$ = this._collectionsStore.collections$;
+  readonly collections$ = this._collectionsStore.collections$.pipe(
+    map((collections) => collections.map(({ document }) => document))
+  );
   readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionArguments$ =
     this._instructionArgumentsStore.instructionArguments$;
@@ -179,6 +182,7 @@ export class ViewInstructionComponent {
   readonly handleCode$ = this._viewInstructionCodeStore.handleCode$;
 
   constructor(
+    private readonly _route: ActivatedRoute,
     private readonly _instructionStore: InstructionStore,
     private readonly _instructionArgumentsStore: InstructionArgumentsStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
@@ -190,9 +194,6 @@ export class ViewInstructionComponent {
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {
-    this._instructionStore.setInstructionId(
-      this._viewInstructionStore.instructionId$
-    );
     this._instructionArgumentsStore.setFilters(
       this._viewInstructionStore.instructionId$.pipe(
         isNotNullOrUndefined,
@@ -211,10 +212,17 @@ export class ViewInstructionComponent {
         map((instructionId) => ({ instruction: instructionId }))
       )
     );
-    this._collectionsStore.setFilters(
-      this._viewInstructionStore.applicationId$.pipe(
-        isNotNullOrUndefined,
-        map((applicationId) => ({ application: applicationId }))
+    this._viewInstructionStore.setWorkspaceId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
+    );
+    this._viewInstructionStore.setApplicationId(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('applicationId'))
+      )
+    );
+    this._viewInstructionStore.setInstructionId(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('instructionId'))
       )
     );
   }

@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { CollectionStore } from '@bulldozer-client/collections-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { concatMap, filter, from, pipe, tap } from 'rxjs';
 
 interface ViewModel {
   collectionId: string | null;
@@ -22,10 +25,14 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
-  constructor(private readonly _tabStore: TabStore, route: ActivatedRoute) {
+  constructor(
+    private readonly _collectionStore: CollectionStore,
+    private readonly _tabStore: TabStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
+  ) {
     super(initialState);
 
-    this._setRouteParameters(route.paramMap);
+    this._collectionStore.setCollectionId(this.collectionId$);
     this._openTab(
       this.select(
         this.collectionId$,
@@ -39,15 +46,90 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
+    this._handleCollectionInstructions(
+      this.select(
+        this.collectionId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.instructionStatuses$,
+        (collectionId, instructionStatuses) => ({
+          collectionId,
+          instructionStatuses,
+        }),
+        { debounce: true }
+      )
+    );
+    this._handleLastCollectionInstruction(
+      this.select(
+        this.collectionId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        ),
+        (collectionId, instructionStatus) => ({
+          collectionId,
+          instructionStatus,
+        }),
+        { debounce: true }
+      )
+    );
   }
 
-  private readonly _setRouteParameters = this.updater<ParamMap>(
-    (state, paramMap) => ({
-      ...state,
-      collectionId: paramMap.get('collectionId'),
-      applicationId: paramMap.get('applicationId'),
-      workspaceId: paramMap.get('workspaceId'),
-    })
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  readonly setApplicationId = this.updater<string | null>(
+    (state, applicationId) => ({ ...state, applicationId })
+  );
+
+  readonly setCollectionId = this.updater<string | null>(
+    (state, collectionId) => ({ ...state, collectionId })
+  );
+
+  private readonly _handleCollectionInstructions = this.effect<{
+    collectionId: string;
+    instructionStatuses: InstructionStatus[];
+  }>(
+    concatMap(({ collectionId, instructionStatuses }) =>
+      from(instructionStatuses).pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createCollection' ||
+              instructionStatus.name === 'updateCollection' ||
+              instructionStatus.name === 'deleteCollection') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized') &&
+            instructionStatus.accounts.some(
+              (account) =>
+                account.name === 'Collection' && account.pubkey === collectionId
+            )
+        ),
+        tap((instructionStatus) =>
+          this._collectionStore.handleCollectionInstruction(instructionStatus)
+        )
+      )
+    )
+  );
+
+  private readonly _handleLastCollectionInstruction = this.effect<{
+    collectionId: string;
+    instructionStatus: InstructionStatus;
+  }>(
+    pipe(
+      filter(
+        ({ collectionId, instructionStatus }) =>
+          (instructionStatus.name === 'createCollection' ||
+            instructionStatus.name === 'updateCollection' ||
+            instructionStatus.name === 'deleteCollection') &&
+          (instructionStatus.status === 'confirmed' ||
+            instructionStatus.status === 'finalized') &&
+          instructionStatus.accounts.some(
+            (account) =>
+              account.name === 'Collection' && account.pubkey === collectionId
+          )
+      ),
+      tap(({ instructionStatus }) =>
+        this._collectionStore.handleCollectionInstruction(instructionStatus)
+      )
+    )
   );
 
   private readonly _openTab = this.effect<{

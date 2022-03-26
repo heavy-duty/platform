@@ -1,5 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { CollectionsStore } from '@bulldozer-client/collections-data-access';
+import {
+  CollectionQueryStore,
+  CollectionsStore,
+} from '@bulldozer-client/collections-data-access';
+import { CollectionExplorerStore } from './collection-explorer.store';
 
 @Component({
   selector: 'bd-collection-explorer',
@@ -8,18 +12,21 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Collections </mat-panel-title>
-          <button
-            mat-icon-button
-            [disabled]="!connected"
-            aria-label="Create collection"
-            bdStopPropagation
-            bdEditCollectionTrigger
-            (editCollection)="
-              onCreateCollection(workspaceId, applicationId, $event)
-            "
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+            <button
+              *ngIf="applicationId$ | ngrxPush as applicationId"
+              mat-icon-button
+              [disabled]="!connected"
+              aria-label="Create collection"
+              bdStopPropagation
+              bdEditCollectionTrigger
+              (editCollection)="
+                onCreateCollection(workspaceId, applicationId, $event)
+              "
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </ng-container>
         </div>
       </mat-expansion-panel-header>
       <mat-nav-list dense>
@@ -28,25 +35,39 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
           class="pl-8 pr-0"
         >
           <a
+            class="w-32 flex justify-between gap-2 items-center flex-grow m-0"
             matLine
             [routerLink]="[
               '/workspaces',
-              collection.data.workspace,
+              collection.document.data.workspace,
               'applications',
-              collection.data.application,
+              collection.document.data.application,
               'collections',
-              collection.id
+              collection.document.id
             ]"
-            [matTooltip]="collection.name"
+            [matTooltip]="
+              collection.document.name
+                | bdItemUpdatingMessage: collection:'Collection'
+            "
             matTooltipShowDelay="500"
           >
-            {{ collection.name }}
+            <span
+              class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+            >
+              {{ collection.document.name }}
+            </span>
+            <mat-progress-spinner
+              *ngIf="collection | bdItemShowSpinner"
+              class="flex-shrink-0"
+              diameter="16"
+              mode="indeterminate"
+            ></mat-progress-spinner>
           </a>
 
           <button
             mat-icon-button
             [attr.aria-label]="
-              'More options of ' + collection.name + ' collection'
+              'More options of ' + collection.document.name + ' collection'
             "
             [matMenuTriggerFor]="collectionOptionsMenu"
           >
@@ -56,11 +77,11 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
             <button
               mat-menu-item
               bdEditCollectionTrigger
-              [collection]="collection"
+              [collection]="collection.document"
               (editCollection)="
                 onUpdateCollection(
-                  collection.data.workspace,
-                  collection.id,
+                  collection.document.data.workspace,
+                  collection.document.id,
                   $event
                 )
               "
@@ -73,9 +94,9 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
               mat-menu-item
               (click)="
                 onDeleteCollection(
-                  collection.data.workspace,
-                  collection.data.application,
-                  collection.id
+                  collection.document.data.workspace,
+                  collection.document.data.application,
+                  collection.document.id
                 )
               "
               [disabled]="!connected"
@@ -88,40 +109,33 @@ import { CollectionsStore } from '@bulldozer-client/collections-data-access';
       </mat-nav-list>
     </mat-expansion-panel>
   `,
-  providers: [CollectionsStore],
+  providers: [CollectionsStore, CollectionQueryStore, CollectionExplorerStore],
 })
 export class CollectionExplorerComponent {
   @Input() connected = false;
 
-  private _workspaceId!: string;
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
+    this._collectionExplorerStore.setWorkspaceId(value);
   }
-  get workspaceId() {
-    return this._workspaceId;
-  }
-
-  private _applicationId!: string;
   @Input() set applicationId(value: string) {
-    this._applicationId = value;
-    this._collectionsStore.setFilters({
-      application: this.applicationId,
-    });
-  }
-  get applicationId() {
-    return this._applicationId;
+    this._collectionExplorerStore.setApplicationId(value);
   }
 
+  readonly workspaceId$ = this._collectionExplorerStore.workspaceId$;
+  readonly applicationId$ = this._collectionExplorerStore.applicationId$;
   readonly collections$ = this._collectionsStore.collections$;
 
-  constructor(private readonly _collectionsStore: CollectionsStore) {}
+  constructor(
+    private readonly _collectionExplorerStore: CollectionExplorerStore,
+    private readonly _collectionsStore: CollectionsStore
+  ) {}
 
   onCreateCollection(
     workspaceId: string,
     applicationId: string,
     collectionName: string
   ) {
-    this._collectionsStore.createCollection({
+    this._collectionExplorerStore.createCollection({
       workspaceId,
       applicationId,
       collectionName,
@@ -133,7 +147,7 @@ export class CollectionExplorerComponent {
     collectionId: string,
     collectionName: string
   ) {
-    this._collectionsStore.updateCollection({
+    this._collectionExplorerStore.updateCollection({
       workspaceId,
       collectionId,
       collectionName,
@@ -145,7 +159,7 @@ export class CollectionExplorerComponent {
     applicationId: string,
     collectionId: string
   ) {
-    this._collectionsStore.deleteCollection({
+    this._collectionExplorerStore.deleteCollection({
       workspaceId,
       applicationId,
       collectionId,

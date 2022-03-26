@@ -41,7 +41,7 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
         collectionStore.collection$,
         collectionAttributesStore.collectionAttributes$,
         (collection, collectionAttributes) => ({
-          collection,
+          collection: collection?.document ?? null,
           collectionAttributes,
         }),
         { debounce: true }

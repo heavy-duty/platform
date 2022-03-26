@@ -85,7 +85,7 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
           instructionArguments,
           instructionAccounts,
           instructionRelations,
-          collections,
+          collections: collections.map(({ document }) => document),
         }),
         { debounce: true }
       )
