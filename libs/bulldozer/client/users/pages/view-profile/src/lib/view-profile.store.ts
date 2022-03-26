@@ -20,10 +20,8 @@ import {
   filter,
   from,
   map,
-  merge,
   of,
   pipe,
-  switchMap,
   take,
   tap,
   withLatestFrom,
@@ -51,11 +49,18 @@ export class ViewProfileStore extends ComponentStore<object> {
     this._workspacesStore.setWorkspaceIds(
       this._workspaceQueryStore.workspaceIds$
     );
-    this._watchWorkspaces(this._workspacesStore.loading$);
     this._handleUserInstructions(
       this._userInstructionsStore.instructionStatuses$.pipe(take(1))
     );
     this._handleLastUserInstruction(
+      this._userInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined
+      )
+    );
+    this._handleWorkspaceInstructions(
+      this._userInstructionsStore.instructionStatuses$.pipe(take(1))
+    );
+    this._handleLastWorkspaceInstruction(
       this._userInstructionsStore.lastInstructionStatus$.pipe(
         isNotNullOrUndefined
       )
@@ -67,40 +72,42 @@ export class ViewProfileStore extends ComponentStore<object> {
     });
   }
 
-  private readonly _watchWorkspaces = this.effect<boolean>(
-    pipe(
-      concatMap((loading) =>
-        of(loading).pipe(withLatestFrom(this._workspacesStore.workspaces$))
-      ),
-      switchMap(([loading, workspaces]) => {
-        if (loading !== false && workspaces === null) {
-          return EMPTY;
-        }
-
-        return merge(
-          this._userInstructionsStore.instructionStatuses$.pipe(
-            take(1),
-            concatMap((instructionStatuses) => from(instructionStatuses))
-          ),
-          this._userInstructionsStore.lastInstructionStatus$.pipe(
-            isNotNullOrUndefined
-          )
-        ).pipe(
-          filter(
-            (instructionStatus) =>
-              (instructionStatus.name === 'createWorkspace' ||
-                instructionStatus.name === 'updateWorkspace' ||
-                instructionStatus.name === 'deleteWorkspace') &&
-              (instructionStatus.status === 'confirmed' ||
-                instructionStatus.status === 'finalized')
-          ),
-          tap((userInstruction) =>
-            this._workspacesStore.handleWorkspaceInstruction(userInstruction)
-          )
-        );
-      })
+  private readonly _handleWorkspaceInstructions = this.effect<
+    InstructionStatus[]
+  >(
+    concatMap((instructionStatuses) =>
+      from(instructionStatuses).pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createWorkspace' ||
+              instructionStatus.name === 'updateWorkspace' ||
+              instructionStatus.name === 'deleteWorkspace') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
+        ),
+        tap((workspaceInstruction) =>
+          this._workspacesStore.handleWorkspaceInstruction(workspaceInstruction)
+        )
+      )
     )
   );
+
+  private readonly _handleLastWorkspaceInstruction =
+    this.effect<InstructionStatus>(
+      pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createWorkspace' ||
+              instructionStatus.name === 'updateWorkspace' ||
+              instructionStatus.name === 'deleteWorkspace') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
+        ),
+        tap((workspaceInstruction) =>
+          this._workspacesStore.handleWorkspaceInstruction(workspaceInstruction)
+        )
+      )
+    );
 
   private readonly _handleUserInstructions = this.effect<InstructionStatus[]>(
     concatMap((instructionStatuses) =>

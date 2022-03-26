@@ -6,7 +6,6 @@ import {
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { tap } from 'rxjs';
 import { ViewProfileStore } from './view-profile.store';
 
 @Component({
@@ -40,7 +39,7 @@ import { ViewProfileStore } from './view-profile.store';
 })
 export class ViewProfileComponent {
   readonly connected$ = this._walletStore.connected$;
-  readonly user$ = this._userStore.user$.pipe(tap((a) => console.log(a)));
+  readonly user$ = this._userStore.user$;
   readonly activeWorkspaceId$ = this._configStore.workspaceId$;
   readonly workspaces$ = this._workspacesStore.workspaces$;
 
