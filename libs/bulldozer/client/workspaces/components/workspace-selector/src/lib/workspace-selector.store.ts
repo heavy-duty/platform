@@ -141,9 +141,19 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
                 )
             )
           ),
-        collections: this._collectionApiService.find({
-          workspace: workspaceId,
-        }),
+        collections: this._collectionApiService
+          .findIds({ workspace: workspaceId })
+          .pipe(
+            concatMap((collectionIds) =>
+              this._collectionApiService
+                .findByIds(collectionIds)
+                .pipe(
+                  concatMap((collections) =>
+                    from(collections).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
         collectionAttributes: this._collectionAttributeApiService.find({
           workspace: workspaceId,
         }),

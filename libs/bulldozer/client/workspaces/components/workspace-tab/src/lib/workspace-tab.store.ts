@@ -28,6 +28,7 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
+    this._workspaceStore.setWorkspaceId(this.workspaceId$);
     this._handleWorkspaceDeleted(
       combineLatest({
         workspaceId: this.workspaceId$.pipe(isNotNullOrUndefined),
@@ -52,7 +53,6 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
           ),
       })
     );
-    this._workspaceStore.setWorkspaceId(this.workspaceId$);
   }
 
   readonly setWorkspaceId = this.updater<string | null>(

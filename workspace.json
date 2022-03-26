@@ -61,7 +61,6 @@
     "bulldozer-client-workspaces-components-workspace-instructions": "libs/bulldozer/client/workspaces/components/workspace-instructions",
     "bulldozer-client-workspaces-components-workspace-selector": "libs/bulldozer/client/workspaces/components/workspace-selector",
     "bulldozer-client-workspaces-components-workspace-tab": "libs/bulldozer/client/workspaces/components/workspace-tab",
-    "bulldozer-client-workspaces-components-workspace-transactions": "libs/bulldozer/client/workspaces/components/workspace-transactions",
     "bulldozer-client-workspaces-data-access": "libs/bulldozer/client/workspaces/data-access",
     "bulldozer-client-workspaces-modals-edit-workspace": "libs/bulldozer/client/workspaces/modals/edit-workspace",
     "bulldozer-client-workspaces-modals-import-workspace": "libs/bulldozer/client/workspaces/modals/import-workspace",

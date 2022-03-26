@@ -9,7 +9,6 @@ import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
 import { WorkspaceInstructionsModule } from '@bulldozer-client/workspace-instructions';
-import { WorkspaceTransactionsModule } from '@bulldozer-client/workspace-transactions';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
 
@@ -27,7 +26,6 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     PageHeaderModule,
     BudgetDetailsModule,
     CollaboratorsListModule,
-    WorkspaceTransactionsModule,
     WorkspaceInstructionsModule,
     ItemUpdatingModule,
   ],
