@@ -5,6 +5,7 @@ import {
   ApplicationsStore,
 } from '@bulldozer-client/applications-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -15,11 +16,8 @@ import {
   filter,
   from,
   map,
-  merge,
   of,
   pipe,
-  switchMap,
-  take,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -41,8 +39,8 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     private readonly _applicationQueryStore: ApplicationQueryStore,
     private readonly _applicationsStore: ApplicationsStore,
     private readonly _notificationStore: NotificationStore,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
-    private readonly _walletStore: WalletStore
+    private readonly _walletStore: WalletStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
@@ -55,24 +53,26 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     this._applicationsStore.setApplicationIds(
       this._applicationQueryStore.applicationIds$
     );
-    this._watchApplications(this._applicationQueryStore.applicationIds$);
+
+    this._handleApplicationInstructions(
+      workspaceInstructionsStore.instructionStatuses$
+    );
+    this._handleLastApplicationInstruction(
+      workspaceInstructionsStore.lastInstructionStatus$.pipe(
+        isNotNullOrUndefined
+      )
+    );
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _watchApplications = this.effect(
-    switchMap(() =>
-      merge(
-        this._workspaceInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        )
-      ).pipe(
+  private readonly _handleApplicationInstructions = this.effect<
+    InstructionStatus[]
+  >(
+    concatMap((instructionStatuses) =>
+      from(instructionStatuses).pipe(
         filter(
           (instructionStatus) =>
             (instructionStatus.name === 'createApplication' ||
@@ -81,14 +81,33 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             (instructionStatus.status === 'confirmed' ||
               instructionStatus.status === 'finalized')
         ),
-        tap((applicationInstruction) =>
+        tap((instructionStatus) =>
           this._applicationsStore.handleApplicationInstruction(
-            applicationInstruction
+            instructionStatus
           )
         )
       )
     )
   );
+
+  private readonly _handleLastApplicationInstruction =
+    this.effect<InstructionStatus>(
+      pipe(
+        filter(
+          (instructionStatus) =>
+            (instructionStatus.name === 'createApplication' ||
+              instructionStatus.name === 'updateApplication' ||
+              instructionStatus.name === 'deleteApplication') &&
+            (instructionStatus.status === 'confirmed' ||
+              instructionStatus.status === 'finalized')
+        ),
+        tap((instructionStatus) =>
+          this._applicationsStore.handleApplicationInstruction(
+            instructionStatus
+          )
+        )
+      )
+    );
 
   readonly createApplication = this.effect<{
     workspaceId: string;

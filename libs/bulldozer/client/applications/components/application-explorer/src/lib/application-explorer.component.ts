@@ -4,7 +4,6 @@ import {
   ApplicationsStore,
   ApplicationView,
 } from '@bulldozer-client/applications-data-access';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
@@ -137,21 +136,14 @@ import { ApplicationExplorerStore } from './application-explorer.store';
 export class ApplicationExplorerComponent {
   @Input() connected = false;
 
-  private _workspaceId!: string;
-  get workspaceId() {
-    return this._workspaceId;
-  }
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
     this._applicationExplorerStore.setWorkspaceId(value);
   }
 
   readonly applications$ = this._applicationsStore.applications$;
-  readonly connected$ = this._walletStore.connected$;
 
   constructor(
     private readonly _applicationsStore: ApplicationsStore,
-    private readonly _walletStore: WalletStore,
     private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 

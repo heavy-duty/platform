@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
 import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { concatMap, filter, from, merge, switchMap, take, tap } from 'rxjs';
+import { concatMap, filter, from, pipe, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -24,13 +24,12 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _tabStore: TabStore,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
     private readonly _applicationStore: ApplicationStore,
-    route: ActivatedRoute
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
-    this._watchApplication(this.applicationId$);
+    this._applicationStore.setApplicationId(this.applicationId$);
     this._openTab(
       this.select(
         this.applicationId$,
@@ -42,20 +41,46 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-    this._setRouteParameters(route.paramMap);
+    this._handleApplicationInstructions(
+      this.select(
+        this.applicationId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.instructionStatuses$,
+        (applicationId, instructionStatuses) => ({
+          applicationId,
+          instructionStatuses,
+        }),
+        { debounce: true }
+      )
+    );
+    this._handleLastApplicationInstruction(
+      this.select(
+        this.applicationId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.lastInstructionStatus$.pipe(
+          isNotNullOrUndefined
+        ),
+        (applicationId, instructionStatus) => ({
+          applicationId,
+          instructionStatus,
+        }),
+        { debounce: true }
+      )
+    );
   }
 
-  private readonly _watchApplication = this.effect<string | null>(
-    switchMap((applicationId) =>
-      merge(
-        this._workspaceInstructionsStore.instructionStatuses$.pipe(
-          take(1),
-          concatMap((instructionStatuses) => from(instructionStatuses))
-        ),
-        this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        )
-      ).pipe(
+  readonly setApplicationId = this.updater<string | null>(
+    (state, applicationId) => ({ ...state, applicationId })
+  );
+
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  private readonly _handleApplicationInstructions = this.effect<{
+    applicationId: string;
+    instructionStatuses: InstructionStatus[];
+  }>(
+    concatMap(({ applicationId, instructionStatuses }) =>
+      from(instructionStatuses).pipe(
         filter(
           (instructionStatus) =>
             (instructionStatus.name === 'createApplication' ||
@@ -78,12 +103,27 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
     )
   );
 
-  private readonly _setRouteParameters = this.updater<ParamMap>(
-    (state, paramMap) => ({
-      ...state,
-      workspaceId: paramMap.get('workspaceId'),
-      applicationId: paramMap.get('applicationId'),
-    })
+  private readonly _handleLastApplicationInstruction = this.effect<{
+    applicationId: string;
+    instructionStatus: InstructionStatus;
+  }>(
+    pipe(
+      filter(
+        ({ applicationId, instructionStatus }) =>
+          (instructionStatus.name === 'createApplication' ||
+            instructionStatus.name === 'updateApplication' ||
+            instructionStatus.name === 'deleteApplication') &&
+          (instructionStatus.status === 'confirmed' ||
+            instructionStatus.status === 'finalized') &&
+          instructionStatus.accounts.some(
+            (account) =>
+              account.name === 'Application' && account.pubkey === applicationId
+          )
+      ),
+      tap(({ instructionStatus }) =>
+        this._applicationStore.handleApplicationInstruction(instructionStatus)
+      )
+    )
   );
 
   private readonly _openTab = this.effect<{

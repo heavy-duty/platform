@@ -1,5 +1,6 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { ApplicationStore } from '@bulldozer-client/applications-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { ApplicationTabStore } from './application-tab.store';
 
 @Component({
@@ -38,7 +39,7 @@ import { ApplicationTabStore } from './application-tab.store';
       <button
         mat-icon-button
         [attr.aria-label]="'Close ' + application.document.name + ' tab'"
-        (click)="onCloseTab()"
+        (click)="onCloseTab(application.document.id)"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -49,23 +50,19 @@ import { ApplicationTabStore } from './application-tab.store';
 export class ApplicationTabComponent {
   @HostBinding('class') class = 'block w-full';
 
-  private _applicationId!: string;
   @Input() set applicationId(value: string) {
-    this._applicationId = value;
-    this._applicationStore.setApplicationId(this.applicationId);
-  }
-  get applicationId() {
-    return this._applicationId;
+    this._applicationTabStore.setApplicationId(value);
   }
 
   readonly application$ = this._applicationStore.application$;
 
   constructor(
+    private readonly _tabStore: TabStore,
     private readonly _applicationTabStore: ApplicationTabStore,
     private readonly _applicationStore: ApplicationStore
   ) {}
 
-  onCloseTab() {
-    this._applicationTabStore.closeTab(this.applicationId);
+  onCloseTab(applicationId: string) {
+    this._tabStore.closeTab(applicationId);
   }
 }
