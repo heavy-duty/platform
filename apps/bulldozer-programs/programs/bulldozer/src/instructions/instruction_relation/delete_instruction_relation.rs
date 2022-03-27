@@ -1,6 +1,6 @@
 use crate::collections::{
-  Budget, Collaborator, InstructionAccount, InstructionAccountStats, InstructionRelation, User,
-  Workspace,
+  Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountStats,
+  InstructionRelation, User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -11,11 +11,17 @@ pub struct DeleteInstructionRelation<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
     constraint = from.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = from.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub from: Box<Account<'info, InstructionAccount>>,
   #[account(
     constraint = to.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = to.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub to: Box<Account<'info, InstructionAccount>>,
   #[account(

@@ -1,4 +1,6 @@
-use crate::collections::{Collaborator, Collection, InstructionAccount, User, Workspace};
+use crate::collections::{
+  Collaborator, Collection, Instruction, InstructionAccount, User, Workspace,
+};
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use crate::utils::{get_account_key, get_remaining_account};
@@ -18,8 +20,13 @@ pub struct UpdateInstructionAccount<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace,
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
     mut,
     constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub account: Box<Account<'info, InstructionAccount>>,
   #[account(

@@ -156,6 +156,7 @@ describe('instruction argument', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
+        instruction: instruction.publicKey,
         argument: instructionArgument.publicKey,
       })
       .rpc();

@@ -229,6 +229,7 @@ describe('instruction relation', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
+        instruction: instruction.publicKey,
         from: newFrom.publicKey,
         to: newTo.publicKey,
       })

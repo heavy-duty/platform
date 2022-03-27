@@ -106,9 +106,10 @@ describe('collection', () => {
     await program.methods
       .updateCollection({ name: collectionName })
       .accounts({
-        collection: collection.publicKey,
-        workspace: workspace.publicKey,
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        collection: collection.publicKey,
       })
       .rpc();
     // assert
@@ -124,10 +125,10 @@ describe('collection', () => {
     await program.methods
       .deleteCollection()
       .accounts({
-        collection: collection.publicKey,
-        workspace: workspace.publicKey,
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
+        collection: collection.publicKey,
       })
       .rpc();
     // assert
@@ -159,10 +160,10 @@ describe('collection', () => {
       await program.methods
         .createCollection({ name: collectionName })
         .accounts({
-          collection: collection.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          collection: collection.publicKey,
         })
         .signers([collection])
         .rpc();
@@ -180,10 +181,10 @@ describe('collection', () => {
       await program.methods
         .deleteCollection()
         .accounts({
-          collection: collection.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
+          collection: collection.publicKey,
         })
         .rpc();
     } catch (err) {

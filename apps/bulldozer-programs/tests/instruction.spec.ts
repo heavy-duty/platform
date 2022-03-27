@@ -109,6 +109,7 @@ describe('instruction', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
+        application: application.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -137,6 +138,7 @@ describe('instruction', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         workspace: workspace.publicKey,
+        application: application.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
