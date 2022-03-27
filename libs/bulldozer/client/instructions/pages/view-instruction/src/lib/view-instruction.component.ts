@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CollectionsStore } from '@bulldozer-client/collections-data-access';
+import {
+  CollectionQueryStore,
+  CollectionsStore,
+} from '@bulldozer-client/collections-data-access';
 import {
   InstructionAccountsStore,
   InstructionArgumentsStore,
@@ -30,7 +33,21 @@ import { ViewInstructionStore } from './view-instruction.store';
       >
         <header bdPageHeader>
           <h1>
-            {{ instruction.name }}
+            <span
+              [matTooltip]="
+                instruction.document.name
+                  | bdItemUpdatingMessage: instruction:'Instruction'
+              "
+              matTooltipShowDelay="500"
+              class="flex items-center justify-start gap-2"
+            >
+              {{ instruction.document.name }}
+              <mat-progress-spinner
+                *ngIf="instruction | bdItemShowSpinner"
+                diameter="16"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+            </span>
           </h1>
           <p>Visualize all the details about this instruction.</p>
         </header>
@@ -40,15 +57,19 @@ import { ViewInstructionStore } from './view-instruction.store';
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionArguments]="(instructionArguments$ | ngrxPush) ?? null"
             (createInstructionArgument)="
-              onCreateInstructionArgument(instruction, $event)
+              onCreateInstructionArgument(instruction.document, $event)
             "
             (updateInstructionArgument)="
-              onUpdateInstructionArgument(instruction.data.workspace, $event)
+              onUpdateInstructionArgument(
+                instruction.document.id,
+                instruction.document.data.workspace,
+                $event
+              )
             "
             (deleteInstructionArgument)="
               onDeleteInstructionArgument(
-                instruction.data.workspace,
-                instruction.id,
+                instruction.document.data.workspace,
+                instruction.document.id,
                 $event
               )
             "
@@ -59,27 +80,35 @@ import { ViewInstructionStore } from './view-instruction.store';
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
             (createInstructionDocument)="
-              onCreateInstructionAccount(instruction, $event)
+              onCreateInstructionAccount(instruction.document, $event)
             "
             (updateInstructionDocument)="
-              onUpdateInstructionAccount(instruction.data.workspace, $event)
+              onUpdateInstructionAccount(
+                instruction.document.id,
+                instruction.document.data.workspace,
+                $event
+              )
             "
             (deleteInstructionDocument)="
               onDeleteInstructionAccount(
-                instruction.data.workspace,
-                instruction.id,
+                instruction.document.data.workspace,
+                instruction.document.id,
                 $event
               )
             "
             (createInstructionRelation)="
               onCreateInstructionRelation(
-                instruction,
+                instruction.document,
                 $event.fromAccountId,
                 $event.toAccountId
               )
             "
             (deleteInstructionRelation)="
-              onDeleteInstructionRelation(instruction.data.workspace, $event)
+              onDeleteInstructionRelation(
+                instruction.document.id,
+                instruction.document.data.workspace,
+                $event
+              )
             "
           >
           </bd-instruction-documents-list>
@@ -87,15 +116,19 @@ import { ViewInstructionStore } from './view-instruction.store';
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
             (createInstructionSigner)="
-              onCreateInstructionAccount(instruction, $event)
+              onCreateInstructionAccount(instruction.document, $event)
             "
             (updateInstructionSigner)="
-              onUpdateInstructionAccount(instruction.data.workspace, $event)
+              onUpdateInstructionAccount(
+                instruction.document.id,
+                instruction.document.data.workspace,
+                $event
+              )
             "
             (deleteInstructionSigner)="
               onDeleteInstructionAccount(
-                instruction.data.workspace,
-                instruction.id,
+                instruction.document.data.workspace,
+                instruction.document.id,
                 $event
               )
             "
@@ -113,7 +146,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 
           <ng-container *ngIf="connected$ | ngrxPush">
             <div
-              *ngIf="instruction.data.body !== instructionBody"
+              *ngIf="instruction.document.data.body !== instructionBody"
               class="w-full flex justify-end"
             >
               <p class="ml-2 mb-0">
@@ -123,8 +156,9 @@ import { ViewInstructionStore } from './view-instruction.store';
                   color="primary"
                   (click)="
                     onUpdateInstructionBody(
-                      instruction.data.workspace,
-                      instruction.id
+                      instruction.document.data.application,
+                      instruction.document.data.workspace,
+                      instruction.document.id
                     )
                   "
                 >
@@ -152,6 +186,7 @@ import { ViewInstructionStore } from './view-instruction.store';
     InstructionAccountsStore,
     InstructionRelationsStore,
     CollectionsStore,
+    CollectionQueryStore,
     ViewInstructionStore,
     ViewInstructionDocumentsStore,
     ViewInstructionSignersStore,
@@ -227,9 +262,14 @@ export class ViewInstructionComponent {
     );
   }
 
-  onUpdateInstructionBody(workspaceId: string, instructionId: string) {
-    this._instructionStore.updateInstructionBody({
+  onUpdateInstructionBody(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._viewInstructionStore.updateInstructionBody({
       workspaceId,
+      applicationId,
       instructionId,
       instructionBody: this.instructionBody,
     });
@@ -247,6 +287,7 @@ export class ViewInstructionComponent {
 
   onUpdateInstructionArgument(
     workspaceId: string,
+    instructionId: string,
     request: {
       instructionArgumentId: string;
       instructionArgumentDto: InstructionArgumentDto;
@@ -255,6 +296,7 @@ export class ViewInstructionComponent {
     this._instructionArgumentsStore.updateInstructionArgument({
       ...request,
       workspaceId,
+      instructionId,
     });
   }
 
@@ -282,6 +324,7 @@ export class ViewInstructionComponent {
 
   onUpdateInstructionAccount(
     workspaceId: string,
+    instructionId: string,
     request: {
       instructionAccountId: string;
       instructionAccountDto: InstructionAccountDto;
@@ -290,6 +333,7 @@ export class ViewInstructionComponent {
     this._instructionAccountsStore.updateInstructionAccount({
       ...request,
       workspaceId,
+      instructionId,
     });
   }
 
@@ -319,6 +363,7 @@ export class ViewInstructionComponent {
 
   onDeleteInstructionRelation(
     workspaceId: string,
+    instructionId: string,
     request: {
       instructionRelationId: string;
       fromAccountId: string;
@@ -328,6 +373,7 @@ export class ViewInstructionComponent {
     this._instructionRelationsStore.deleteInstructionRelation({
       ...request,
       workspaceId,
+      instructionId,
     });
   }
 }

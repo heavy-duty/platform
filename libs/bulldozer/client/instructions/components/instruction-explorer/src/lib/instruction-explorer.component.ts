@@ -1,5 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
+import {
+  InstructionQueryStore,
+  InstructionsStore,
+} from '@bulldozer-client/instructions-data-access';
+import { InstructionExplorerStore } from './instruction-explorer.store';
 
 @Component({
   selector: 'bd-instruction-explorer',
@@ -8,18 +12,21 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title> Instructions </mat-panel-title>
-          <button
-            mat-icon-button
-            [disabled]="!connected"
-            aria-label="Create instruction"
-            bdStopPropagation
-            bdEditInstructionTrigger
-            (editInstruction)="
-              onCreateInstruction(workspaceId, applicationId, $event)
-            "
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+            <button
+              *ngIf="applicationId$ | ngrxPush as applicationId"
+              mat-icon-button
+              [disabled]="!connected"
+              aria-label="Create instruction"
+              bdStopPropagation
+              bdEditInstructionTrigger
+              (editInstruction)="
+                onCreateInstruction(workspaceId, applicationId, $event)
+              "
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          </ng-container>
         </div>
       </mat-expansion-panel-header>
       <mat-nav-list dense>
@@ -28,25 +35,39 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
           class="pl-8 pr-0"
         >
           <a
+            class="w-32 flex justify-between gap-2 items-center flex-grow m-0"
             matLine
             [routerLink]="[
               '/workspaces',
-              instruction.data.workspace,
+              instruction.document.data.workspace,
               'applications',
-              instruction.data.application,
+              instruction.document.data.application,
               'instructions',
-              instruction.id
+              instruction.document.id
             ]"
-            [matTooltip]="instruction.name"
+            [matTooltip]="
+              instruction.document.name
+                | bdItemUpdatingMessage: instruction:'Instruction'
+            "
             matTooltipShowDelay="500"
           >
-            {{ instruction.name }}
+            <span
+              class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+            >
+              {{ instruction.document.name }}
+            </span>
+            <mat-progress-spinner
+              *ngIf="instruction | bdItemShowSpinner"
+              class="flex-shrink-0"
+              diameter="16"
+              mode="indeterminate"
+            ></mat-progress-spinner>
           </a>
 
           <button
             mat-icon-button
             [attr.aria-label]="
-              'More options of ' + instruction.name + ' instruction'
+              'More options of ' + instruction.document.name + ' instruction'
             "
             [matMenuTriggerFor]="instructionOptionsMenu"
           >
@@ -56,11 +77,12 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
             <button
               mat-menu-item
               bdEditInstructionTrigger
-              [instruction]="instruction"
+              [instruction]="instruction.document"
               (editInstruction)="
                 onUpdateInstruction(
-                  instruction.data.workspace,
-                  instruction.id,
+                  instruction.document.data.workspace,
+                  instruction.document.data.application,
+                  instruction.document.id,
                   $event
                 )
               "
@@ -73,9 +95,9 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
               mat-menu-item
               (click)="
                 onDeleteInstruction(
-                  instruction.data.workspace,
-                  instruction.data.application,
-                  instruction.id
+                  instruction.document.data.workspace,
+                  instruction.document.data.application,
+                  instruction.document.id
                 )
               "
               [disabled]="!connected"
@@ -88,40 +110,37 @@ import { InstructionsStore } from '@bulldozer-client/instructions-data-access';
       </mat-nav-list>
     </mat-expansion-panel>
   `,
-  providers: [InstructionsStore],
+  providers: [
+    InstructionsStore,
+    InstructionQueryStore,
+    InstructionExplorerStore,
+  ],
 })
 export class InstructionExplorerComponent {
   @Input() connected = false;
 
-  private _workspaceId!: string;
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
+    this._instructionExplorerStore.setWorkspaceId(value);
   }
-  get workspaceId() {
-    return this._workspaceId;
-  }
-
-  private _applicationId!: string;
   @Input() set applicationId(value: string) {
-    this._applicationId = value;
-    this._instructionsStore.setFilters({
-      application: this.applicationId,
-    });
-  }
-  get applicationId() {
-    return this._applicationId;
+    this._instructionExplorerStore.setApplicationId(value);
   }
 
+  readonly workspaceId$ = this._instructionExplorerStore.workspaceId$;
+  readonly applicationId$ = this._instructionExplorerStore.applicationId$;
   readonly instructions$ = this._instructionsStore.instructions$;
 
-  constructor(private readonly _instructionsStore: InstructionsStore) {}
+  constructor(
+    private readonly _instructionExplorerStore: InstructionExplorerStore,
+    private readonly _instructionsStore: InstructionsStore
+  ) {}
 
   onCreateInstruction(
     workspaceId: string,
     applicationId: string,
     instructionName: string
   ) {
-    this._instructionsStore.createInstruction({
+    this._instructionExplorerStore.createInstruction({
       workspaceId,
       applicationId,
       instructionName,
@@ -130,11 +149,13 @@ export class InstructionExplorerComponent {
 
   onUpdateInstruction(
     workspaceId: string,
+    applicationId: string,
     instructionId: string,
     instructionName: string
   ) {
-    this._instructionsStore.updateInstruction({
+    this._instructionExplorerStore.updateInstruction({
       workspaceId,
+      applicationId,
       instructionId,
       instructionName,
     });
@@ -145,7 +166,7 @@ export class InstructionExplorerComponent {
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionsStore.deleteInstruction({
+    this._instructionExplorerStore.deleteInstruction({
       workspaceId,
       applicationId,
       instructionId,

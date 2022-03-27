@@ -81,7 +81,7 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
           instructionRelations,
           collections
         ) => ({
-          instruction,
+          instruction: instruction?.document ?? null,
           instructionArguments,
           instructionAccounts,
           instructionRelations,
@@ -94,7 +94,7 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
     this._loadHandleCode(
       this.select(
         this._instructionStore.instruction$,
-        (instruction) => instruction?.data.body ?? null
+        (instruction) => instruction?.document.data.body ?? null
       )
     );
   }

@@ -35,7 +35,7 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
         instructionStore.instruction$,
         instructionAccountsStore.instructionAccounts$,
         (instruction, instructionAccounts) => ({
-          instruction,
+          instruction: instruction?.document ?? null,
           instructionAccounts,
         }),
         { debounce: true }

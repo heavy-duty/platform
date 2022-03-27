@@ -232,6 +232,7 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
 
   readonly deleteInstructionRelation = this.effect<{
     workspaceId: string;
+    instructionId: string;
     fromAccountId: string;
     toAccountId: string;
   }>(
@@ -239,28 +240,34 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ workspaceId, fromAccountId, toAccountId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+      concatMap(
+        ([
+          { workspaceId, instructionId, fromAccountId, toAccountId },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
 
-        return this._instructionRelationApiService
-          .delete({
-            authority: authority.toBase58(),
-            workspaceId,
-            fromAccountId,
-            toAccountId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete relation request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
+          return this._instructionRelationApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionId,
+              fromAccountId,
+              toAccountId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete relation request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
     )
   );
 }

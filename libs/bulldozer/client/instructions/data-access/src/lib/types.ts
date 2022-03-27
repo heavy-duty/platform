@@ -19,3 +19,10 @@ export interface InstructionDocument extends Document<InstructionAccount> {
   collection: Document<Collection> | null;
   relations: InstructionDocumentRelation[];
 }
+
+export interface ItemView<T> {
+  document: T;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+}

@@ -231,6 +231,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
 
   readonly updateInstructionArgument = this.effect<{
     workspaceId: string;
+    instructionId: string;
     instructionArgumentId: string;
     instructionArgumentDto: InstructionArgumentDto;
   }>(
@@ -240,7 +241,12 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
       ),
       concatMap(
         ([
-          { workspaceId, instructionArgumentId, instructionArgumentDto },
+          {
+            workspaceId,
+            instructionId,
+            instructionArgumentId,
+            instructionArgumentDto,
+          },
           authority,
         ]) => {
           if (authority === null) {
@@ -251,6 +257,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
             .update({
               authority: authority.toBase58(),
               workspaceId,
+              instructionId,
               instructionArgumentDto,
               instructionArgumentId,
             })

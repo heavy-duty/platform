@@ -63,7 +63,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           instructionRelations,
           collections
         ) => ({
-          instruction,
+          instruction: instruction?.document ?? null,
           instructionAccounts,
           instructionRelations,
           collections: collections.map(({ document }) => document),

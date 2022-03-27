@@ -1,44 +1,33 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  Document,
-  Instruction,
-  InstructionFilters,
-} from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  mergeMap,
-  of,
-  pipe,
-  switchMap,
-  take,
-  takeUntil,
-  takeWhile,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { InstructionApiService } from './instruction-api.service';
-import { InstructionEventService } from './instruction-event.service';
+import { ItemView } from './types';
+
+export type InstructionItemView = ItemView<Document<Instruction>>;
 
 interface ViewModel {
   loading: boolean;
-  filters: InstructionFilters | null;
-  instructionsMap: Map<string, Document<Instruction>>;
+  instructionIds: string[] | null;
+  instructionsMap: Map<string, InstructionItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  filters: null,
-  instructionsMap: new Map<string, Document<Instruction>>(),
+  instructionIds: null,
+  instructionsMap: new Map<string, InstructionItemView>(),
 };
 
 @Injectable()
 export class InstructionsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
-  readonly filters$ = this.select(({ filters }) => filters);
+  readonly instructionIds$ = this.select(
+    ({ instructionIds }) => instructionIds
+  );
   readonly instructionsMap$ = this.select(
     ({ instructionsMap }) => instructionsMap
   );
@@ -49,21 +38,19 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionEventService: InstructionEventService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._handleInstructionCreated(this.filters$);
-    this._loadInstructions(this.filters$);
+    this._loadInstructions(this.instructionIds$);
   }
 
-  private readonly _setInstruction = this.updater<Document<Instruction>>(
+  private readonly _setInstruction = this.updater<InstructionItemView>(
     (state, newInstruction) => {
       const instructionsMap = new Map(state.instructionsMap);
-      instructionsMap.set(newInstruction.id, newInstruction);
+      instructionsMap.set(newInstruction.document.id, newInstruction);
+
       return {
         ...state,
         instructionsMap,
@@ -71,19 +58,29 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _addInstruction = this.updater<Document<Instruction>>(
-    (state, newInstruction) => {
-      if (state.instructionsMap.has(newInstruction.id)) {
-        return state;
-      }
-      const instructionsMap = new Map(state.instructionsMap);
-      instructionsMap.set(newInstruction.id, newInstruction);
-      return {
-        ...state,
-        instructionsMap,
-      };
+  private readonly _patchStatus = this.updater<{
+    instructionId: string;
+    statuses: {
+      isCreating?: boolean;
+      isUpdating?: boolean;
+      isDeleting?: boolean;
+    };
+  }>((state, { instructionId, statuses }) => {
+    const instructionsMap = new Map(state.instructionsMap);
+    const instruction = instructionsMap.get(instructionId);
+
+    if (instruction === undefined) {
+      return state;
     }
-  );
+
+    return {
+      ...state,
+      instructionsMap: instructionsMap.set(instructionId, {
+        ...instruction,
+        ...statuses,
+      }),
+    };
+  });
 
   private readonly _removeInstruction = this.updater<string>(
     (state, instructionId) => {
@@ -96,188 +93,133 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _handleInstructionChanges = this.effect<string>(
-    mergeMap((instructionId) =>
-      this._instructionEventService.instructionChanges(instructionId).pipe(
-        tapResponse(
-          (changes) => {
-            if (changes === null) {
-              this._removeInstruction(instructionId);
-            } else {
-              this._setInstruction(changes);
-            }
-          },
-          (error) => this._notificationStore.setError(error)
-        ),
-        takeUntil(
-          this.loading$.pipe(
-            filter((loading) => loading),
-            take(1)
-          )
-        ),
-        takeWhile((instruction) => instruction !== null)
-      )
-    )
-  );
-
-  private readonly _handleInstructionCreated =
-    this.effect<InstructionFilters | null>(
-      switchMap((filters) => {
-        if (filters === null) {
-          return EMPTY;
-        }
-
-        return this._instructionEventService.instructionCreated(filters).pipe(
-          tapResponse(
-            (instruction) => {
-              this._addInstruction(instruction);
-              this._handleInstructionChanges(instruction.id);
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-      })
-    );
-
-  private readonly _loadInstructions = this.effect<InstructionFilters | null>(
-    switchMap((filters) => {
-      if (filters === null) {
+  private readonly _loadInstructions = this.effect<string[] | null>(
+    switchMap((instructionIds) => {
+      if (instructionIds === null) {
         return EMPTY;
       }
 
       this.patchState({ loading: true });
 
-      return this._instructionApiService.find(filters).pipe(
+      return this._instructionApiService.findByIds(instructionIds).pipe(
         tapResponse(
           (instructions) => {
             this.patchState({
-              instructionsMap: instructions.reduce(
-                (instructionsMap, instruction) =>
-                  instructionsMap.set(instruction.id, instruction),
-                new Map<string, Document<Instruction>>()
-              ),
               loading: false,
+              instructionsMap: instructions
+                .filter(
+                  (instruction): instruction is Document<Instruction> =>
+                    instruction !== null
+                )
+                .reduce(
+                  (instructionsMap, instruction) =>
+                    instructionsMap.set(instruction.id, {
+                      document: instruction,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    }),
+                  new Map<string, InstructionItemView>()
+                ),
             });
-            instructions.forEach(({ id }) =>
-              this._handleInstructionChanges(id)
-            );
           },
-          (error) => this._notificationStore.setError(error)
+          (error) => this._notificationStore.setError({ error })
         )
       );
     })
   );
 
-  readonly setFilters = this.updater<InstructionFilters>((state, filters) => ({
-    ...state,
-    filters,
-  }));
-
-  readonly createInstruction = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    instructionName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ instructionName, workspaceId, applicationId }, authority]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
-
-          return this._instructionApiService
-            .create({
-              instructionName,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Create instruction request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
+  readonly setInstructionIds = this.updater<string[] | null>(
+    (state, instructionIds) => ({
+      ...state,
+      instructionIds,
+    })
   );
 
-  readonly updateInstruction = this.effect<{
-    workspaceId: string;
-    instructionId: string;
-    instructionName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ workspaceId, instructionId, instructionName }, authority]) => {
-          if (authority === null) {
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const instructionAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Instruction'
+      );
+
+      if (instructionAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createInstruction': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              instructionId: instructionAccountMeta.pubkey,
+              statuses: {
+                isCreating: false,
+              },
+            });
+
             return EMPTY;
           }
 
           return this._instructionApiService
-            .update({
-              authority: authority.toBase58(),
-              workspaceId,
-              instructionName,
-              instructionId,
-            })
+            .findById(instructionAccountMeta.pubkey, 'confirmed')
             .pipe(
+              isNotNullOrUndefined,
               tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Update instruction request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
+                (instruction) =>
+                  this._setInstruction({
+                    document: instruction,
+                    isCreating: true,
+                    isUpdating: false,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
               )
             );
         }
-      )
-    )
-  );
+        case 'updateInstruction': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              instructionId: instructionAccountMeta.pubkey,
+              statuses: {
+                isUpdating: false,
+              },
+            });
 
-  readonly deleteInstruction = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    instructionId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ workspaceId, instructionId, applicationId }, authority]) => {
-          if (authority === null) {
             return EMPTY;
           }
 
+          console.log(instructionAccountMeta.pubkey);
+
           return this._instructionApiService
-            .delete({
-              authority: authority.toBase58(),
-              workspaceId,
-              instructionId,
-              applicationId,
-            })
+            .findById(instructionAccountMeta.pubkey, 'confirmed')
             .pipe(
+              isNotNullOrUndefined,
               tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Delete instruction request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
+                (instruction) =>
+                  this._setInstruction({
+                    document: instruction,
+                    isCreating: false,
+                    isUpdating: true,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
               )
             );
         }
-      )
-    )
+        case 'deleteInstruction': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
+              instructionId: instructionAccountMeta.pubkey,
+              statuses: { isDeleting: true },
+            });
+          } else {
+            this._removeInstruction(instructionAccountMeta.pubkey);
+          }
+
+          return EMPTY;
+        }
+        default:
+          return EMPTY;
+      }
+    })
   );
 }

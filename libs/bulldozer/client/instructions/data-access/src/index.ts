@@ -6,6 +6,7 @@ export * from './lib/instruction-argument-api.service';
 export * from './lib/instruction-argument-event.service';
 export * from './lib/instruction-arguments.store';
 export * from './lib/instruction-event.service';
+export * from './lib/instruction-query.store';
 export * from './lib/instruction-relation-api.service';
 export * from './lib/instruction-relation-event.service';
 export * from './lib/instruction-relations.store';

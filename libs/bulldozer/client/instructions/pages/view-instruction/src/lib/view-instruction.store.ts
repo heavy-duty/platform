@@ -4,12 +4,18 @@ import {
   CollectionsStore,
 } from '@bulldozer-client/collections-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
-import { InstructionStore } from '@bulldozer-client/instructions-data-access';
+import {
+  InstructionApiService,
+  InstructionStore,
+} from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { ComponentStore } from '@ngrx/component-store';
-import { concatMap, filter, from, map, pipe, tap } from 'rxjs';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { concatMap, EMPTY, map, of, pipe, tap, withLatestFrom } from 'rxjs';
+
 interface ViewModel {
   instructionId: string | null;
   applicationId: string | null;
@@ -29,7 +35,10 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
   constructor(
+    private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionApiService: InstructionApiService,
     private readonly _instructionStore: InstructionStore,
     private readonly _collectionsStore: CollectionsStore,
     private readonly _collectionQueryStore: CollectionQueryStore,
@@ -47,14 +56,8 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     this._collectionsStore.setCollectionIds(
       this._collectionQueryStore.collectionIds$
     );
-    this._handleCollectionInstructions(
-      workspaceInstructionsStore.instructionStatuses$
-    );
-    this._handleLastCollectionInstruction(
-      workspaceInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined
-      )
-    );
+
+    this._handleInstruction(workspaceInstructionsStore.instruction$);
     this._openTab(
       this.select(
         this.instructionId$,
@@ -82,42 +85,26 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     (state, instructionId) => ({ ...state, instructionId })
   );
 
-  private readonly _handleCollectionInstructions = this.effect<
-    InstructionStatus[]
-  >(
-    concatMap((instructionStatuses) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollection' ||
-              instructionStatus.name === 'updateCollection' ||
-              instructionStatus.name === 'deleteCollection') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._collectionsStore.handleCollectionInstruction(instructionStatus)
-        )
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createInstruction':
+        case 'updateInstruction':
+        case 'deleteInstruction': {
+          this._instructionStore.dispatch(instructionStatus);
+          break;
+        }
+        case 'createCollection':
+        case 'updateCollection':
+        case 'deleteCollection': {
+          this._collectionsStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
-
-  private readonly _handleLastCollectionInstruction =
-    this.effect<InstructionStatus>(
-      pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollection' ||
-              instructionStatus.name === 'updateCollection' ||
-              instructionStatus.name === 'deleteCollection') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._collectionsStore.handleCollectionInstruction(instructionStatus)
-        )
-      )
-    );
 
   private readonly _openTab = this.effect<{
     instructionId: string | null;
@@ -137,5 +124,44 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
         });
       }
     })
+  );
+
+  readonly updateInstructionBody = this.effect<{
+    workspaceId: string;
+    applicationId: string;
+    instructionId: string;
+    instructionBody: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(
+        ([
+          { workspaceId, applicationId, instructionId, instructionBody },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._instructionApiService
+            .updateBody({
+              authority: authority.toBase58(),
+              workspaceId,
+              applicationId,
+              instructionId,
+              instructionBody,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent('Update body request sent'),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
+    )
   );
 }
