@@ -22,8 +22,13 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 @include containers.theme($theme);
 // end
 
+// Temporal (use theme colors later)
 .hd-border-gray {
   border-color: #dcdcdc !important;
+}
+
+.hd-highlight-title {
+  color: black;
 }
 
 .darkMode {
@@ -34,6 +39,10 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 
   .hd-border-gray {
     border-color: #2c2c2c !important;
+  }
+
+  .hd-highlight-title {
+    color: #fba807;
   }
 }
 

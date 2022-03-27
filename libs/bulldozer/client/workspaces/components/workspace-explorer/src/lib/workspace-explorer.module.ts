@@ -1,6 +1,8 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ApplicationExplorerModule } from '@bulldozer-client/application-explorer';
@@ -16,6 +18,8 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     ApplicationExplorerModule,
     WorkspaceSelectorModule,
     MatTooltipModule,
+    MatExpansionModule,
+    MatIconModule,
     ClipboardModule,
     ObscureAddressModule,
   ],

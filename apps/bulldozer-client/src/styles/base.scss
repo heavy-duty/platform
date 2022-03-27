@@ -102,6 +102,12 @@ input[readonly] {
   margin-top: -2rem;
 }
 
-.hd-view-profile-size {
+.hd-view-profile-height {
   height: calc(100vh - 126px);
+}
+
+.hd-workspace-explorer-height {
+  height: calc(100% - 234px);
+  overflow-y: auto;
+  overflow-x: hidden;
 }

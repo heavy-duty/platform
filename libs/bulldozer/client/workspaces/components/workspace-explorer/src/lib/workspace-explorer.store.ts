@@ -27,7 +27,8 @@ export class WorkspaceExplorerStore extends ComponentStore<object> {
   private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        case 'createUser': {
+        case 'createUser':
+        case 'deleteUser': {
           this._userStore.handleUserInstruction(instructionStatus);
           break;
         }

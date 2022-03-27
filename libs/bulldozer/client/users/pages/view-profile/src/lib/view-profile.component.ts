@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import {
@@ -12,7 +12,7 @@ import { ViewProfileStore } from './view-profile.store';
   selector: 'bd-view-profile',
   template: `
     <div class="flex flex-col">
-      <mat-sidenav-container class="hd-view-profile-size">
+      <mat-sidenav-container class="hd-view-profile-height">
         <mat-sidenav
           #userProfileInfo
           class="w-96"
@@ -27,25 +27,19 @@ import { ViewProfileStore } from './view-profile.store';
           </header>
 
           <main class="flex flex-col">
-            <!-- <bd-user-details
+            <bd-user-details
               [connected]="(connected$ | ngrxPush) ?? false"
               [user]="(user$ | ngrxPush) ?? null"
               (createUser)="onCreateUser()"
               (deleteUser)="onDeleteUser()"
             ></bd-user-details>
 
-            <bd-loaded-workspaces-list
-              *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-              [workspaces]="(loadedWorkspaces$ | ngrxPush) ?? null"
-              (removeWorkspace)="onRemoveWorkspace($event)"
-            ></bd-loaded-workspaces-list>
-
             <bd-my-workspaces-list
-          *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-          [workspaces]="(workspaces$ | ngrxPush) ?? null"
-          [activeWorkspaceId]="(activeWorkspaceId$ | ngrxPush) ?? null"
-          (activateWorkspace)="onActivateWorkspace($event)"
-            ></bd-my-workspaces-list> -->
+              *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
+              [workspaces]="(workspaces$ | ngrxPush) ?? null"
+              [activeWorkspaceId]="(activeWorkspaceId$ | ngrxPush) ?? null"
+              (activateWorkspace)="onActivateWorkspace($event)"
+            ></bd-my-workspaces-list>
 
             <mat-selection-list #shoes [multiple]="false">
               <mat-list-option
@@ -80,7 +74,7 @@ import { ViewProfileStore } from './view-profile.store';
   providers: [WorkspacesStore, WorkspaceQueryStore, ViewProfileStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewProfileComponent {
+export class ViewProfileComponent implements OnInit {
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
   readonly activeWorkspaceId$ = this._configStore.workspaceId$;
@@ -104,5 +98,11 @@ export class ViewProfileComponent {
 
   onActivateWorkspace(workspaceId: string) {
     this._configStore.setWorkspaceId(workspaceId);
+  }
+
+  ngOnInit(): void {
+    this.workspaces$.subscribe((data) =>
+      console.log('la data desde profile', data)
+    );
   }
 }

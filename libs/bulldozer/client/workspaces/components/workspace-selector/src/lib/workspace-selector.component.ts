@@ -17,125 +17,103 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   selector: 'bd-workspace-selector',
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
-      <button type="button" mat-raised-button [matMenuTriggerFor]="menu">
-        <div
-          class="w-36 flex justify-between gap-2 items-center"
-          *ngIf="workspace !== null; else missingWorkspace"
-          [matTooltip]="
-            workspace.document.name
-              | bdItemUpdatingMessage: workspace:'Workspace'
-          "
-          matTooltipShowDelay="500"
-        >
-          <span
-            class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
-          >
-            Workspace: {{ workspace.document.name }}
-          </span>
-          <mat-progress-spinner
-            *ngIf="workspace | bdItemShowSpinner"
-            class="flex-shrink-0"
-            mode="indeterminate"
-            diameter="16"
-          ></mat-progress-spinner>
-        </div>
-        <ng-template #missingWorkspace> Select workspace </ng-template>
+      <button type="button" mat-mini-fab [matMenuTriggerFor]="menu">
+        <mat-icon aria-label="Add new workspace">add</mat-icon>
       </button>
       <mat-menu #menu="matMenu">
-        <div class="px-4 py-2" bdStopPropagation>
-          <div
-            *ngIf="workspace !== null"
-            class="w-full h-auto mb-2 p-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2 border-b-primary"
-          >
-            <div class="w-full">
-              <p class="text-xl font-bold mb-0 flex justify-between">
-                <span
-                  class="flex-grow leading-8"
-                  [matTooltip]="workspace.document.name"
-                  matTooltipShowDelay="500"
-                >
-                  {{ workspace.document.name }}
-                </span>
-                <button
-                  mat-icon-button
-                  color="primary"
-                  class="w-8 h-8 leading-8 flex-shrink-0"
-                  [attr.aria-label]="
-                    'Download ' + workspace.document.name + ' workspace'
-                  "
-                  (click)="onDownloadWorkspace(workspace.document.id)"
-                >
-                  <mat-icon>download</mat-icon>
-                </button>
-              </p>
+        <div
+          *ngIf="workspace !== null"
+          class="w-full h-auto mb-2 p-4 pb-3 border-b-4 border-transparent bg-white bg-opacity-5 mat-elevation-z2 border-b-primary"
+        >
+          <p class="text-xl font-bold mb-0 flex justify-between">
+            <span
+              class="flex-grow leading-8"
+              [matTooltip]="workspace.document.name"
+              matTooltipShowDelay="500"
+            >
+              {{ workspace.document.name }}
+            </span>
+            <button
+              mat-icon-button
+              color="primary"
+              class="w-8 h-8 leading-8 flex-shrink-0"
+              [attr.aria-label]="
+                'Download ' + workspace.document.name + ' workspace'
+              "
+              (click)="onDownloadWorkspace(workspace.document.id)"
+            >
+              <mat-icon>download</mat-icon>
+            </button>
+          </p>
 
-              <p class="mb-2">
-                <a
-                  class="text-xs underline text-primary"
-                  [routerLink]="['/workspaces', workspace.document.id]"
-                  (click)="onActivateWorkspace(workspace.document.id)"
-                >
-                  View details
-                </a>
-              </p>
-
-              <div>
-                <button
-                  class="mr-2"
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  bdEditWorkspaceTrigger
-                  [workspace]="workspace.document"
-                  (editWorkspace)="
-                    onUpdateWorkspace(workspace.document.id, $event)
-                  "
-                  [disabled]="!connected"
-                >
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  mat-raised-button
-                  color="primary"
-                  (click)="onDeleteWorkspace(workspace.document.id)"
-                  [disabled]="!connected"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button
-            class="w-full h-12 mb-2"
-            type="button"
-            mat-raised-button
-            color="primary"
-            bdEditWorkspaceTrigger
-            (editWorkspace)="onCreateWorkspace($event)"
-            [disabled]="!connected"
-          >
-            New workspace
-          </button>
-
-          <button
-            class="w-full h-12"
-            type="button"
-            mat-raised-button
-            color="accent"
-            bdImportWorkspaceTrigger
-            (importWorkspace)="onImportWorkspace($event)"
-          >
-            Import workspace
-          </button>
+          <p class="mb-2">
+            <a
+              class="text-xs underline text-primary"
+              [routerLink]="['/workspaces', workspace.document.id]"
+              (click)="onActivateWorkspace(workspace.document.id)"
+            >
+              View details
+            </a>
+          </p>
         </div>
+
+        <button
+          class="w-full h-12"
+          type="button"
+          mat-menu-item
+          color="primary"
+          *ngIf="workspaceId$ | ngrxPush as workspaceId"
+          [disabled]="!connected"
+          [matMenuTriggerFor]="applications"
+        >
+          <mat-icon>apps</mat-icon>
+          <span>Applications</span>
+        </button>
+
+        <button
+          class="w-full h-12"
+          type="button"
+          mat-menu-item
+          color="accent"
+          [matMenuTriggerFor]="workspaces"
+        >
+          <mat-icon>apartment</mat-icon>
+          <span>Workspaces</span>
+        </button>
+      </mat-menu>
+
+      <mat-menu #applications="matMenu">
+        <button mat-menu-item class="w-full h-12" [disabled]="!connected">
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Create new application</span>
+        </button>
+      </mat-menu>
+
+      <mat-menu #workspaces="matMenu">
+        <button
+          class="w-full h-12"
+          mat-menu-item
+          bdImportWorkspaceTrigger
+          (importWorkspace)="onImportWorkspace($event)"
+        >
+          <mat-icon>add_circle_outline</mat-icon>
+          <span>Create new workspace</span>
+        </button>
+        <button
+          class="w-full h-12"
+          mat-menu-item
+          bdImportWorkspaceTrigger
+          (importWorkspace)="onImportWorkspace($event)"
+        >
+          <mat-icon>upload</mat-icon>
+          <span>Import workspace</span>
+        </button>
       </mat-menu>
     </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WorkspaceStore, WorkspaceSelectorStore],
+  providers: [WorkspaceSelectorStore],
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
@@ -143,6 +121,7 @@ export class WorkspaceSelectorComponent {
   @Input() connected = false;
 
   readonly workspace$ = this._workspaceStore.workspace$;
+  readonly workspaceId$ = this._workspaceStore.workspaceId$;
 
   constructor(
     private readonly _workspaceSelectorStore: WorkspaceSelectorStore,

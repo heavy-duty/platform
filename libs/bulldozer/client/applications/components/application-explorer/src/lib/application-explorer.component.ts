@@ -10,7 +10,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
   selector: 'bd-application-explorer',
   template: `
     <ng-container *ngrxLet="applications$; let applications">
-      <div class="flex flex-col items-center pb-3 bd-custom-background">
+      <!-- <div class="flex flex-col items-center pb-3 bd-custom-background">
         <button
           *ngIf="workspaceId$ | ngrxPush as workspaceId"
           mat-raised-button
@@ -22,7 +22,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
         >
           Create application
         </button>
-      </div>
+      </div> -->
       <div class="overflow-y-auto">
         <mat-expansion-panel
           *ngFor="let application of applications; trackBy: identify"
