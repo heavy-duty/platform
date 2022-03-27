@@ -1,6 +1,9 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ApplicationExplorerModule } from '@bulldozer-client/application-explorer';
+import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceExplorerComponent } from './workspace-explorer.component';
@@ -11,6 +14,9 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     ReactiveComponentModule,
     ApplicationExplorerModule,
     WorkspaceSelectorModule,
+    MatTooltipModule,
+    ClipboardModule,
+    ObscureAddressModule,
   ],
   declarations: [WorkspaceExplorerComponent],
   exports: [WorkspaceExplorerComponent],

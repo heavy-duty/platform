@@ -7,7 +7,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
   template: `
     <div class="flex h-screen overflow-auto justify-between flex-col ">
       <div class="flex items-center justify-center border-b border-gray-500">
-        <div class="w-36 mt-5 pb-3 cursor-pointer" (click)="onCreateUser()">
+        <div
+          class="w-36 mt-5 pb-3 cursor-pointer"
+          (click)="onCreateUser()"
+          *ngIf="(user$ | ngrxPush) === null"
+        >
           <figure class="w-20 m-auto mb-2 relative">
             <img src="assets/images/default-profile.png" class="w-full" />
             <img
@@ -16,6 +20,20 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             />
           </figure>
           <p class="text-center">Click here to a create new user</p>
+        </div>
+
+        <div class="w-36 mt-5 pb-3" *ngIf="(user$ | ngrxPush) !== null">
+          <figure class="w-20 m-auto mb-2 relative">
+            <img src="assets/images/default-profile.png" class="w-full" />
+          </figure>
+          <p
+            class="text-center"
+            [matTooltip]="(userId$ | async) || ''"
+            [cdkCopyToClipboard]="(userId$ | async) || ''"
+          >
+            <span class="font-bold">ID:</span>
+            {{ userId$ | async | obscureAddress: '.' }}
+          </p>
         </div>
       </div>
 
@@ -43,6 +61,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 export class WorkspaceExplorerComponent {
   @Input() connected = false;
   @Input() workspaceId: string | null = null;
+
+  readonly connected$ = this._walletStore.connected$;
+  readonly workspaceIds$ = this._configStore.workspaceIds$;
+  readonly user$ = this._userStore.user$;
+  readonly userId$ = this._userStore.userId$;
 
   constructor(
     private readonly _workspaceExplorerStore: WorkspaceExplorerStore
