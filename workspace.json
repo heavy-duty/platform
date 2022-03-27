@@ -54,6 +54,7 @@
     "bulldozer-client-users-components-profile-tab": "libs/bulldozer/client/users/components/profile-tab",
     "bulldozer-client-users-components-user-details": "libs/bulldozer/client/users/components/user-details",
     "bulldozer-client-users-components-user-instructions": "libs/bulldozer/client/users/components/user-instructions",
+    "bulldozer-client-users-components-user-explorer": "libs/bulldozer/client/users/components/user-explorer",
     "bulldozer-client-users-data-access": "libs/bulldozer/client/users/data-access",
     "bulldozer-client-users-pages-view-profile": "libs/bulldozer/client/users/pages/view-profile",
     "bulldozer-client-workspaces-components-my-workspaces-list": "libs/bulldozer/client/workspaces/components/my-workspaces-list",

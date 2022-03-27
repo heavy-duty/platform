@@ -21,11 +21,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
           </figure>
           <p class="text-center">Click here to a create new user</p>
         </div>
-
+        <!-- Move to components -->
         <div
           class="w-36 mt-5 pb-3 cursor-pointer"
           *ngIf="(user$ | ngrxPush) !== null"
-          [routerLink]="['/profile']"
+          [routerLink]="['/profile', 'user-info']"
         >
           <figure class="w-20 m-auto mb-2 relative">
             <img src="assets/images/default-profile.png" class="w-full" />
