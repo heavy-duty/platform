@@ -5,11 +5,8 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import {
-  Document,
-  InstructionAccount,
-  InstructionAccountDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-instruction-signers-list',
@@ -52,24 +49,36 @@ import {
                 <mat-icon>rate_review</mat-icon>
               </div>
 
-              <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ instructionSigner.name }}
+              <h3 class="mb-0 flex items-center gap-2 flex-grow">
+                <span
+                  [matTooltip]="
+                    instructionSigner.document.name
+                      | bdItemUpdatingMessage: instructionSigner:'Signer'
+                  "
+                >
+                  <span class="text-lg font-bold">
+                    {{ instructionSigner.document.name }}
+                  </span>
 
                   <span
                     class="text-xs font-thin"
-                    *ngIf="instructionSigner.data.modifier"
-                    [ngSwitch]="instructionSigner.data.modifier.id"
+                    *ngIf="instructionSigner.document.data.modifier"
+                    [ngSwitch]="instructionSigner.document.data.modifier.id"
                   >
                     <ng-container *ngSwitchCase="0">
-                      ({{ instructionSigner.data.modifier.name }}
+                      ({{ instructionSigner.document.data.modifier.name }}
                     </ng-container>
                     <ng-container *ngSwitchCase="1">
-                      ({{ instructionSigner.data.modifier.name }})
+                      ({{ instructionSigner.document.data.modifier.name }})
                     </ng-container>
                   </span>
-                </h3>
-              </div>
+                </span>
+                <mat-progress-spinner
+                  *ngIf="instructionSigner | bdItemShowSpinner"
+                  diameter="16"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+              </h3>
 
               <button
                 mat-mini-fab
@@ -83,9 +92,12 @@ import {
                 <button
                   mat-menu-item
                   bdEditInstructionSignerTrigger
-                  [instructionSigner]="instructionSigner"
+                  [instructionSigner]="instructionSigner.document"
                   (editInstructionSigner)="
-                    onUpdateInstructionSigner(instructionSigner.id, $event)
+                    onUpdateInstructionSigner(
+                      instructionSigner.document.id,
+                      $event
+                    )
                   "
                   [disabled]="!connected"
                 >
@@ -94,7 +106,9 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionSigner(instructionSigner.id)"
+                  (click)="
+                    onDeleteInstructionSigner(instructionSigner.document.id)
+                  "
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -117,7 +131,7 @@ import {
 })
 export class InstructionSignersListComponent {
   @Input() connected = false;
-  @Input() instructionSigners: Document<InstructionAccount>[] | null = null;
+  @Input() instructionSigners: InstructionAccountItemView[] | null = null;
   @Output() createInstructionSigner = new EventEmitter<InstructionAccountDto>();
   @Output() updateInstructionSigner = new EventEmitter<{
     instructionAccountId: string;

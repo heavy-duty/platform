@@ -1,108 +1,56 @@
 import { Injectable } from '@angular/core';
-import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
+  CollectionItemView,
+  CollectionsStore,
+} from '@bulldozer-client/collections-data-access';
+import {
+  InstructionAccountItemView,
   InstructionAccountsStore,
+  InstructionDocumentItemView,
   InstructionRelationsStore,
-  InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
-import {
-  Collection,
-  Document,
-  Instruction,
-  InstructionAccount,
-  InstructionRelation,
-  Relation,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
-
-export interface InstructionDocumentRelation
-  extends Relation<InstructionRelation> {
-  extras: {
-    to: Document<InstructionAccount>;
-  };
-}
-
-export interface InstructionDocument extends Document<InstructionAccount> {
-  close: Document<InstructionAccount> | null;
-  payer: Document<InstructionAccount> | null;
-  collection: Document<Collection> | null;
-  relations: InstructionDocumentRelation[];
-}
+import { Observable } from 'rxjs';
 
 interface ViewModel {
-  instructionDocuments: InstructionDocument[];
+  instructionId: string | null;
 }
 
 const initialState: ViewModel = {
-  instructionDocuments: [],
+  instructionId: null,
 };
 
 @Injectable()
 export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
-  readonly instructionDocuments$ = this.select(
-    ({ instructionDocuments }) => instructionDocuments
-  );
-
-  constructor(
-    instructionStore: InstructionStore,
-    instructionAccountsStore: InstructionAccountsStore,
-    collectionsStore: CollectionsStore,
-    instructionRelationsStore: InstructionRelationsStore
-  ) {
-    super(initialState);
-
-    this._loadDocuments(
-      this.select(
-        instructionStore.instruction$,
-        instructionAccountsStore.instructionAccounts$,
-        instructionRelationsStore.instructionRelations$,
-        collectionsStore.collections$,
-        (
-          instruction,
-          instructionAccounts,
-          instructionRelations,
-          collections
-        ) => ({
-          instruction: instruction?.document ?? null,
-          instructionAccounts,
-          instructionRelations,
-          collections: collections.map(({ document }) => document),
-        }),
-        { debounce: true }
-      )
-    );
-  }
-
-  private readonly _loadDocuments = this.updater<{
-    instruction: Document<Instruction> | null;
-    instructionAccounts: Document<InstructionAccount>[];
-    instructionRelations: Relation<InstructionRelation>[];
-    collections: Document<Collection>[];
-  }>(
-    (
-      state,
-      { instruction, instructionAccounts, instructionRelations, collections }
-    ) => ({
-      ...state,
-      instructionDocuments: instruction
-        ? instructionAccounts
-            .filter(
-              ({ data }) =>
-                data.instruction === instruction.id && data.kind.id === 0
-            )
-            .map((instructionAccount) => ({
-              ...instructionAccount,
+  readonly instructionDocuments$: Observable<InstructionDocumentItemView[]> =
+    this.select(
+      this._instructionAccountsStore.instructionAccounts$,
+      this._collectionsStore.collections$,
+      this._instructionRelationsStore.instructionRelations$,
+      this.select(({ instructionId }) => instructionId),
+      (instructionAccounts, collections, instructionRelations, instructionId) =>
+        instructionAccounts
+          .filter(
+            ({ document }) =>
+              document.data.instruction === instructionId &&
+              document.data.kind.id === 0
+          )
+          .map((instructionAccount) => ({
+            ...instructionAccount,
+            document: {
+              ...instructionAccount.document,
               relations: instructionRelations
-                .filter(({ from }) => from === instructionAccount.id)
+                .filter(({ from }) => from === instructionAccount.document.id)
                 .reduce(
                   (
                     relations: (Relation<InstructionRelation> & {
-                      extras: { to: Document<InstructionAccount> };
+                      extras: { to: InstructionAccountItemView };
                     })[],
                     instructionRelation
                   ) => {
                     const toAccount = instructionAccounts.find(
-                      ({ id }) => id === instructionRelation.to
+                      ({ document }) => document.id === instructionRelation.to
                     );
 
                     return toAccount
@@ -118,29 +66,45 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
                   []
                 ),
               collection: collections.reduce(
-                (found: Document<Collection> | null, collection) =>
+                (found: CollectionItemView | null, collection) =>
                   !found &&
-                  instructionAccount.data.kind.collection === collection.id
+                  instructionAccount.document.data.kind.collection ===
+                    collection.document.id
                     ? collection
                     : null,
                 null
               ),
               payer: instructionAccounts.reduce(
-                (found: Document<InstructionAccount> | null, payer) =>
-                  !found && instructionAccount.data.modifier?.payer === payer.id
+                (found: InstructionAccountItemView | null, payer) =>
+                  !found &&
+                  instructionAccount.document.data.modifier?.payer ===
+                    payer.document.id
                     ? payer
                     : null,
                 null
               ),
               close: instructionAccounts.reduce(
-                (found: Document<InstructionAccount> | null, close) =>
-                  !found && instructionAccount.data.modifier?.close === close.id
+                (found: InstructionAccountItemView | null, close) =>
+                  !found &&
+                  instructionAccount.document.data.modifier?.close ===
+                    close.document.id
                     ? close
                     : null,
                 null
               ),
-            }))
-        : [],
-    })
+            },
+          }))
+    );
+
+  constructor(
+    private readonly _instructionAccountsStore: InstructionAccountsStore,
+    private readonly _collectionsStore: CollectionsStore,
+    private readonly _instructionRelationsStore: InstructionRelationsStore
+  ) {
+    super(initialState);
+  }
+
+  readonly setInstructionId = this.updater<string | null>(
+    (state, instructionId) => ({ ...state, instructionId })
   );
 }

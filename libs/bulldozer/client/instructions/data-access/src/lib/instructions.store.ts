@@ -187,8 +187,6 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
             return EMPTY;
           }
 
-          console.log(instructionAccountMeta.pubkey);
-
           return this._instructionApiService
             .findById(instructionAccountMeta.pubkey, 'confirmed')
             .pipe(

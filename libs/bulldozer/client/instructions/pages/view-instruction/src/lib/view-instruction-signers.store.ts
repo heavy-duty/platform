@@ -1,58 +1,40 @@
 import { Injectable } from '@angular/core';
 import {
+  InstructionAccountItemView,
   InstructionAccountsStore,
-  InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
-import {
-  Document,
-  Instruction,
-  InstructionAccount,
-} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
 
 interface ViewModel {
-  instructionSigners: Document<InstructionAccount>[];
+  instructionSigners: InstructionAccountItemView[];
+  instructionId: string | null;
 }
 
 const initialState: ViewModel = {
   instructionSigners: [],
+  instructionId: null,
 };
 
 @Injectable()
 export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
   readonly instructionSigners$ = this.select(
-    ({ instructionSigners }) => instructionSigners
+    this._instructionAccountsStore.instructionAccounts$,
+    this.select(({ instructionId }) => instructionId),
+    (instructionAccounts, instructionId) =>
+      instructionAccounts.filter(
+        ({ document }) =>
+          document.data.instruction === instructionId &&
+          document.data.kind.id === 1
+      )
   );
 
   constructor(
-    instructionStore: InstructionStore,
-    instructionAccountsStore: InstructionAccountsStore
+    private readonly _instructionAccountsStore: InstructionAccountsStore
   ) {
     super(initialState);
-
-    this._loadSigners(
-      this.select(
-        instructionStore.instruction$,
-        instructionAccountsStore.instructionAccounts$,
-        (instruction, instructionAccounts) => ({
-          instruction: instruction?.document ?? null,
-          instructionAccounts,
-        }),
-        { debounce: true }
-      )
-    );
   }
 
-  private readonly _loadSigners = this.updater<{
-    instruction: Document<Instruction> | null;
-    instructionAccounts: Document<InstructionAccount>[];
-  }>((state, { instruction, instructionAccounts }) => ({
-    ...state,
-    instructionSigners: instruction
-      ? instructionAccounts.filter(
-          ({ data }) =>
-            data.instruction === instruction.id && data.kind.id === 1
-        )
-      : [],
-  }));
+  readonly setInstructionId = this.updater<string | null>(
+    (state, instructionId) => ({ ...state, instructionId })
+  );
 }

@@ -9,6 +9,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
 import {
   Collection,
   Document,
@@ -116,10 +117,10 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-select formControlName="payer" required>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.id"
+            [value]="account.document.id"
           >
-            {{ account.name }} |
-            {{ account.id | obscureAddress }}
+            {{ account.document.name }} |
+            {{ account.document.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">The payer is required.</mat-error>
@@ -136,10 +137,10 @@ import { Subject, takeUntil } from 'rxjs';
           <mat-option> None </mat-option>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.id"
+            [value]="account.document.id"
           >
-            {{ account.name }} |
-            {{ account.id | obscureAddress }}
+            {{ account.document.name }} |
+            {{ account.document.id | obscureAddress }}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -198,7 +199,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     public data?: {
       document?: Document<InstructionAccount>;
       collections: Document<Collection>[];
-      accounts: Document<InstructionAccount>[];
+      accounts: InstructionAccountItemView[];
     }
   ) {
     this.form = new FormGroup({

@@ -1,5 +1,6 @@
 export * from './lib/instruction-account-api.service';
 export * from './lib/instruction-account-event.service';
+export * from './lib/instruction-account-query.store';
 export * from './lib/instruction-accounts.store';
 export * from './lib/instruction-api.service';
 export * from './lib/instruction-argument-api.service';

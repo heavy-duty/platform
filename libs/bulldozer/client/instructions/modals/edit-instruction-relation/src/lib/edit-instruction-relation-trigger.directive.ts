@@ -6,16 +6,13 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  Document,
-  InstructionAccount,
-  InstructionRelationDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
+import { InstructionRelationDto } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionRelationComponent } from './edit-instruction-relation.component';
 
 @Directive({ selector: '[bdEditInstructionRelationTrigger]' })
 export class EditInstructionRelationTriggerDirective {
-  @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
+  @Input() instructionAccounts: InstructionAccountItemView[] | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =
     new EventEmitter<InstructionRelationDto>();
@@ -28,7 +25,7 @@ export class EditInstructionRelationTriggerDirective {
       .open<
         EditInstructionRelationComponent,
         {
-          accounts: Document<InstructionAccount>[];
+          accounts: InstructionAccountItemView[];
           from: string;
         },
         InstructionRelationDto

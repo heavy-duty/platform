@@ -5,6 +5,7 @@ import {
   CollectionsStore,
 } from '@bulldozer-client/collections-data-access';
 import {
+  InstructionAccountQueryStore,
   InstructionAccountsStore,
   InstructionArgumentQueryStore,
   InstructionArgumentsStore,
@@ -87,13 +88,19 @@ import { ViewInstructionStore } from './view-instruction.store';
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
             (createInstructionDocument)="
-              onCreateInstructionAccount(instruction.document, $event)
+              onCreateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
+                $event
+              )
             "
             (updateInstructionDocument)="
               onUpdateInstructionAccount(
                 instruction.document.data.workspace,
                 instruction.document.id,
-                $event
+                $event.instructionAccountId,
+                $event.instructionAccountDto
               )
             "
             (deleteInstructionDocument)="
@@ -123,13 +130,19 @@ import { ViewInstructionStore } from './view-instruction.store';
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
             (createInstructionSigner)="
-              onCreateInstructionAccount(instruction.document, $event)
+              onCreateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
+                $event
+              )
             "
             (updateInstructionSigner)="
               onUpdateInstructionAccount(
                 instruction.document.data.workspace,
                 instruction.document.id,
-                $event
+                $event.instructionAccountId,
+                $event.instructionAccountDto
               )
             "
             (deleteInstructionSigner)="
@@ -192,6 +205,7 @@ import { ViewInstructionStore } from './view-instruction.store';
     InstructionArgumentsStore,
     InstructionArgumentQueryStore,
     InstructionAccountsStore,
+    InstructionAccountQueryStore,
     InstructionRelationsStore,
     CollectionsStore,
     CollectionQueryStore,
@@ -237,12 +251,6 @@ export class ViewInstructionComponent {
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {
-    this._instructionAccountsStore.setFilters(
-      this._viewInstructionStore.instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instructionId) => ({ instruction: instructionId }))
-      )
-    );
     this._instructionRelationsStore.setFilters(
       this._viewInstructionStore.instructionId$.pipe(
         isNotNullOrUndefined,
@@ -318,11 +326,15 @@ export class ViewInstructionComponent {
   }
 
   onCreateInstructionAccount(
-    instruction: Document<Instruction>,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._instructionAccountsStore.createInstructionAccount({
-      instruction,
+    this._viewInstructionStore.createInstructionAccount({
+      workspaceId,
+      applicationId,
+      instructionId,
       instructionAccountDto,
     });
   }
@@ -330,15 +342,14 @@ export class ViewInstructionComponent {
   onUpdateInstructionAccount(
     workspaceId: string,
     instructionId: string,
-    request: {
-      instructionAccountId: string;
-      instructionAccountDto: InstructionAccountDto;
-    }
+    instructionAccountId: string,
+    instructionAccountDto: InstructionAccountDto
   ) {
-    this._instructionAccountsStore.updateInstructionAccount({
-      ...request,
+    this._viewInstructionStore.updateInstructionAccount({
       workspaceId,
       instructionId,
+      instructionAccountId,
+      instructionAccountDto,
     });
   }
 
@@ -347,7 +358,7 @@ export class ViewInstructionComponent {
     instructionId: string,
     instructionAccountId: string
   ) {
-    this._instructionAccountsStore.deleteInstructionAccount({
+    this._viewInstructionStore.deleteInstructionAccount({
       workspaceId,
       instructionId,
       instructionAccountId,
