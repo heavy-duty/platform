@@ -93,3 +93,17 @@ input[readonly] {
     100vh - $toolbar-height - $tabs-height - 1px
   ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
 }
+
+// Temporal (use theme colors later)
+.hd-side-left {
+  background-color: #2c2c2c;
+}
+
+.hd-side-right {
+  background-color: #393939;
+}
+
+.hd-side-right,
+.hd-side-left {
+  color: white;
+}
