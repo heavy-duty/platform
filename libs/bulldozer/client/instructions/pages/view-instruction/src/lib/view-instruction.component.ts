@@ -159,7 +159,7 @@ import { ViewInstructionStore } from './view-instruction.store';
       <div class="w-1/2">
         <div class="bd-custom-height-content overflow-hidden">
           <bd-code-editor
-            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
+            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splitted'"
             [template]="(contextCode$ | ngrxPush) ?? null"
             [options]="(contextEditorOptions$ | ngrxPush) ?? null"
           ></bd-code-editor>
@@ -189,7 +189,7 @@ import { ViewInstructionStore } from './view-instruction.store';
           </ng-container>
 
           <bd-code-editor
-            [customClass]="'bd-custom-monaco-editor-splited'"
+            [customClass]="'bd-custom-monaco-editor-splitted'"
             [template]="(handleCode$ | ngrxPush) ?? null"
             [options]="(handleEditorOptions$ | ngrxPush) ?? null"
             (codeChange)="instructionBody = $event"

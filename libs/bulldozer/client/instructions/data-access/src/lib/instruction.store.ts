@@ -140,7 +140,8 @@ export class InstructionStore extends ComponentStore<ViewModel> {
               )
             );
         }
-        case 'updateInstruction': {
+        case 'updateInstruction':
+        case 'updateInstructionBody': {
           if (instructionStatus.status === 'finalized') {
             this._patchStatus({ isUpdating: false });
             return EMPTY;

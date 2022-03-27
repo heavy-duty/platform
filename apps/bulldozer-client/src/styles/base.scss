@@ -73,7 +73,8 @@ input[readonly] {
   height: calc(100vh - 96px) !important;
 }
 
-.bd-custom-monaco-editor-splited {
+.bd-custom-monaco-editor-splitted {
+  display: block;
   height: calc(50vh - 57px) !important;
 }
 
