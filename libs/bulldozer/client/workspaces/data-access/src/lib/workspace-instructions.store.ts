@@ -5,13 +5,14 @@ import {
   instructionCoder,
 } from '@heavy-duty/bulldozer-devkit';
 import { TransactionStatus } from '@heavy-duty/ngx-solana';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import {
   Transaction,
   TransactionConfirmationStatus,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { concatMap, EMPTY, filter, from, tap } from 'rxjs';
+import { concatMap, EMPTY, filter, from, startWith, tap } from 'rxjs';
 
 export interface InstructionStatus {
   transaction: Transaction;
@@ -102,6 +103,14 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   );
   readonly lastInstructionStatus$ = this.select(
     ({ lastInstructionStatus }) => lastInstructionStatus
+  );
+  readonly instruction$ = this.instructionStatuses$.pipe(
+    concatMap((instructionStatuses) =>
+      this.lastInstructionStatus$.pipe(
+        startWith(...instructionStatuses),
+        isNotNullOrUndefined
+      )
+    )
   );
 
   constructor(private readonly _hdBroadcasterStore: HdBroadcasterStore) {

@@ -26,7 +26,6 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
-  combineLatest,
   concatMap,
   EMPTY,
   filter,
@@ -34,6 +33,7 @@ import {
   from,
   of,
   pipe,
+  switchMap,
   tap,
   toArray,
   withLatestFrom,
@@ -59,69 +59,36 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
     super({});
 
     this._workspaceStore.setWorkspaceId(configStore.workspaceId$);
-    this._handleWorkspaceInstructions(
-      combineLatest({
-        workspaceId: configStore.workspaceId$.pipe(isNotNullOrUndefined),
-        instructionStatuses: workspaceInstructionsStore.instructionStatuses$,
-      })
-    );
-    this._handleLastWorkspaceInstruction(
-      combineLatest({
-        workspaceId: configStore.workspaceId$.pipe(isNotNullOrUndefined),
-        instructionStatus:
-          workspaceInstructionsStore.lastInstructionStatus$.pipe(
-            isNotNullOrUndefined
-          ),
-      })
+    this._handleInstruction(
+      configStore.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
+      )
     );
   }
 
-  private readonly _handleWorkspaceInstructions = this.effect<{
-    workspaceId: string;
-    instructionStatuses: InstructionStatus[];
-  }>(
-    concatMap(({ workspaceId, instructionStatuses }) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createWorkspace' ||
-              instructionStatus.name === 'updateWorkspace' ||
-              instructionStatus.name === 'deleteWorkspace') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized') &&
-            instructionStatus.accounts.some(
-              (account) =>
-                account.name === 'Workspace' && account.pubkey === workspaceId
-            )
-        ),
-        tap((workspaceInstruction) =>
-          this._workspaceStore.handleWorkspaceInstruction(workspaceInstruction)
-        )
-      )
-    )
-  );
-
-  private readonly _handleLastWorkspaceInstruction = this.effect<{
-    workspaceId: string;
-    instructionStatus: InstructionStatus;
-  }>(
-    pipe(
-      filter(
-        ({ workspaceId, instructionStatus }) =>
-          (instructionStatus.name === 'createWorkspace' ||
-            instructionStatus.name === 'updateWorkspace' ||
-            instructionStatus.name === 'deleteWorkspace') &&
-          (instructionStatus.status === 'confirmed' ||
-            instructionStatus.status === 'finalized') &&
-          instructionStatus.accounts.some(
-            (account) =>
-              account.name === 'Workspace' && account.pubkey === workspaceId
-          )
-      ),
-      tap(({ instructionStatus }) =>
-        this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createWorkspace':
+        case 'updateWorkspace':
+        case 'deleteWorkspace': {
+          this._workspaceStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
 
   readonly downloadWorkspace = this.effect<string>(
@@ -170,9 +137,21 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
                 )
             )
           ),
-        instructions: this._instructionApiService.find({
-          workspace: workspaceId,
-        }),
+        instructions: this._instructionApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionIds) =>
+              this._instructionApiService
+                .findByIds(instructionIds)
+                .pipe(
+                  concatMap((instructions) =>
+                    from(instructions).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
         instructionArguments: this._instructionArgumentApiService.find({
           workspace: workspaceId,
         }),

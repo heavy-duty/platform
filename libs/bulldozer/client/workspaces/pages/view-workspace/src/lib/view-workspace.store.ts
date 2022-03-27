@@ -27,7 +27,6 @@ import {
   concatMap,
   EMPTY,
   filter,
-  from,
   of,
   pipe,
   switchMap,
@@ -119,28 +118,19 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     this._loadBudgetMinimumBalanceForRentExemption();
     this._openTab(this.workspaceId$);
     this._activateWorkspace(this.workspaceId$);
-    this._handleWorkspaceInstructions(
-      this.select(
-        this.workspaceId$.pipe(isNotNullOrUndefined),
-        workspaceInstructionsStore.instructionStatuses$,
-        (workspaceId, instructionStatuses) => ({
-          workspaceId,
-          instructionStatuses,
-        }),
-        { debounce: true }
-      )
-    );
-    this._handleLastWorkspaceInstruction(
-      this.select(
-        this.workspaceId$.pipe(isNotNullOrUndefined),
-        workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        ),
-        (workspaceId, instructionStatus) => ({
-          workspaceId,
-          instructionStatus,
-        }),
-        { debounce: true }
+    this._handleInstruction(
+      this.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
       )
     );
   }
@@ -165,52 +155,19 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
   );
 
-  private readonly _handleWorkspaceInstructions = this.effect<{
-    workspaceId: string;
-    instructionStatuses: InstructionStatus[];
-  }>(
-    concatMap(({ workspaceId, instructionStatuses }) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createWorkspace' ||
-              instructionStatus.name === 'updateWorkspace' ||
-              instructionStatus.name === 'deleteWorkspace') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized') &&
-            instructionStatus.accounts.some(
-              (account) =>
-                account.name === 'Workspace' && account.pubkey === workspaceId
-            )
-        ),
-        tap((instructionStatus) =>
-          this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
-        )
-      )
-    )
-  );
-
-  private readonly _handleLastWorkspaceInstruction = this.effect<{
-    workspaceId: string;
-    instructionStatus: InstructionStatus;
-  }>(
-    pipe(
-      filter(
-        ({ workspaceId, instructionStatus }) =>
-          (instructionStatus.name === 'createWorkspace' ||
-            instructionStatus.name === 'updateWorkspace' ||
-            instructionStatus.name === 'deleteWorkspace') &&
-          (instructionStatus.status === 'confirmed' ||
-            instructionStatus.status === 'finalized') &&
-          instructionStatus.accounts.some(
-            (account) =>
-              account.name === 'Workspace' && account.pubkey === workspaceId
-          )
-      ),
-      tap(({ instructionStatus }) =>
-        this._workspaceStore.handleWorkspaceInstruction(instructionStatus)
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createWorkspace':
+        case 'updateWorkspace':
+        case 'deleteWorkspace': {
+          this._workspaceStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
 
   private readonly _openTab = this.effect<string | null>(

@@ -12,6 +12,7 @@ export interface CreateInstructionAccountParams {
 export interface UpdateInstructionAccountParams {
   authority: string;
   workspaceId: string;
+  instructionId: string;
   instructionAccountId: string;
   instructionAccountDto: InstructionAccountDto;
 }

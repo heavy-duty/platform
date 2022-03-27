@@ -56,7 +56,7 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _patchCollectionStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     isCreating?: boolean;
     isUpdating?: boolean;
     isDeleting?: boolean;
@@ -105,9 +105,9 @@ export class CollectionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleCollectionInstruction = this.effect<InstructionStatus>(
-    concatMap((collectionInstruction) => {
-      const collectionAccountMeta = collectionInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collectionAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Collection'
       );
 
@@ -115,10 +115,10 @@ export class CollectionStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (collectionInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createCollection': {
-          if (collectionInstruction.status === 'finalized') {
-            this._patchCollectionStatuses({ isCreating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
             return EMPTY;
           }
 
@@ -141,8 +141,8 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateCollection': {
-          if (collectionInstruction.status === 'finalized') {
-            this._patchCollectionStatuses({ isUpdating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
             return EMPTY;
           }
 
@@ -165,11 +165,11 @@ export class CollectionStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteCollection': {
-          if (collectionInstruction.status === 'confirmed') {
-            this._patchCollectionStatuses({ isDeleting: true });
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
           } else {
             this.patchState({ collection: null });
-            this._patchCollectionStatuses({ isDeleting: false });
+            this._patchStatus({ isDeleting: false });
           }
 
           return EMPTY;

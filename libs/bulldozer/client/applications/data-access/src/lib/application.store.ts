@@ -56,7 +56,7 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _patchApplicationStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     isCreating?: boolean;
     isUpdating?: boolean;
     isDeleting?: boolean;
@@ -105,9 +105,9 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleApplicationInstruction = this.effect<InstructionStatus>(
-    concatMap((applicationInstruction) => {
-      const applicationAccountMeta = applicationInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const applicationAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Application'
       );
 
@@ -115,10 +115,10 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (applicationInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createApplication': {
-          if (applicationInstruction.status === 'finalized') {
-            this._patchApplicationStatuses({ isCreating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
             return EMPTY;
           }
 
@@ -141,8 +141,8 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateApplication': {
-          if (applicationInstruction.status === 'finalized') {
-            this._patchApplicationStatuses({ isUpdating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
             return EMPTY;
           }
 
@@ -165,11 +165,11 @@ export class ApplicationStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteApplication': {
-          if (applicationInstruction.status === 'confirmed') {
-            this._patchApplicationStatuses({ isDeleting: true });
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
           } else {
             this.patchState({ application: null });
-            this._patchApplicationStatuses({ isDeleting: false });
+            this._patchStatus({ isDeleting: false });
           }
 
           return EMPTY;

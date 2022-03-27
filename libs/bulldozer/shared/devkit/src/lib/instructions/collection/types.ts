@@ -9,6 +9,7 @@ export interface CreateCollectionParams {
 export interface UpdateCollectionParams {
   authority: string;
   workspaceId: string;
+  applicationId: string;
   collectionId: string;
   collectionName: string;
 }

@@ -15,9 +15,9 @@ import {
   concatMap,
   EMPTY,
   filter,
-  from,
   of,
   pipe,
+  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -55,12 +55,20 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
     this._collectionsStore.setCollectionIds(
       this._collectionQueryStore.collectionIds$
     );
-    this._handleCollectionInstructions(
-      workspaceInstructionsStore.instructionStatuses$
-    );
-    this._handleLastCollectionInstruction(
-      workspaceInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined
+    this._handleInstruction(
+      this.applicationId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((applicationId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Application' &&
+                  account.pubkey === applicationId
+              )
+            )
+          )
+        )
       )
     );
   }
@@ -73,42 +81,20 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
     (state, applicationId) => ({ ...state, applicationId })
   );
 
-  private readonly _handleCollectionInstructions = this.effect<
-    InstructionStatus[]
-  >(
-    concatMap((instructionStatuses) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollection' ||
-              instructionStatus.name === 'updateCollection' ||
-              instructionStatus.name === 'deleteCollection') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._collectionsStore.handleCollectionInstruction(instructionStatus)
-        )
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createCollection':
+        case 'updateCollection':
+        case 'deleteCollection': {
+          this._collectionsStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
-
-  private readonly _handleLastCollectionInstruction =
-    this.effect<InstructionStatus>(
-      pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollection' ||
-              instructionStatus.name === 'updateCollection' ||
-              instructionStatus.name === 'deleteCollection') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._collectionsStore.handleCollectionInstruction(instructionStatus)
-        )
-      )
-    );
 
   readonly createCollection = this.effect<{
     workspaceId: string;
@@ -148,6 +134,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
 
   readonly updateCollection = this.effect<{
     workspaceId: string;
+    applicationId: string;
     collectionId: string;
     collectionName: string;
   }>(
@@ -156,7 +143,10 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ workspaceId, collectionId, collectionName }, authority]) => {
+        ([
+          { workspaceId, applicationId, collectionId, collectionName },
+          authority,
+        ]) => {
           if (authority === null) {
             return EMPTY;
           }
@@ -165,6 +155,7 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
             .update({
               authority: authority.toBase58(),
               workspaceId,
+              applicationId,
               collectionName,
               collectionId,
             })

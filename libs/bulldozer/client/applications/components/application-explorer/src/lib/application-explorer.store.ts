@@ -15,9 +15,9 @@ import {
   concatMap,
   EMPTY,
   filter,
-  from,
   of,
   pipe,
+  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -52,13 +52,19 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     this._applicationsStore.setApplicationIds(
       this._applicationQueryStore.applicationIds$
     );
-
-    this._handleApplicationInstructions(
-      workspaceInstructionsStore.instructionStatuses$
-    );
-    this._handleLastApplicationInstruction(
-      workspaceInstructionsStore.lastInstructionStatus$.pipe(
-        isNotNullOrUndefined
+    this._handleInstruction(
+      this.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
       )
     );
   }
@@ -67,46 +73,20 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleApplicationInstructions = this.effect<
-    InstructionStatus[]
-  >(
-    concatMap((instructionStatuses) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createApplication' ||
-              instructionStatus.name === 'updateApplication' ||
-              instructionStatus.name === 'deleteApplication') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._applicationsStore.handleApplicationInstruction(
-            instructionStatus
-          )
-        )
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createApplication':
+        case 'updateApplication':
+        case 'deleteApplication': {
+          this._applicationsStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
-
-  private readonly _handleLastApplicationInstruction =
-    this.effect<InstructionStatus>(
-      pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createApplication' ||
-              instructionStatus.name === 'updateApplication' ||
-              instructionStatus.name === 'deleteApplication') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized')
-        ),
-        tap((instructionStatus) =>
-          this._applicationsStore.handleApplicationInstruction(
-            instructionStatus
-          )
-        )
-      )
-    );
 
   readonly createApplication = this.effect<{
     workspaceId: string;

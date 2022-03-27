@@ -81,6 +81,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
               (editCollection)="
                 onUpdateCollection(
                   collection.document.data.workspace,
+                  collection.document.data.application,
                   collection.document.id,
                   $event
                 )
@@ -144,11 +145,13 @@ export class CollectionExplorerComponent {
 
   onUpdateCollection(
     workspaceId: string,
+    applicationId: string,
     collectionId: string,
     collectionName: string
   ) {
     this._collectionExplorerStore.updateCollection({
       workspaceId,
+      applicationId,
       collectionId,
       collectionName,
     });

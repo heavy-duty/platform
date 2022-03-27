@@ -5,7 +5,7 @@ import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { concatMap, filter, from, pipe, tap } from 'rxjs';
+import { filter, switchMap, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -41,28 +41,20 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-    this._handleApplicationInstructions(
-      this.select(
-        this.applicationId$.pipe(isNotNullOrUndefined),
-        workspaceInstructionsStore.instructionStatuses$,
-        (applicationId, instructionStatuses) => ({
-          applicationId,
-          instructionStatuses,
-        }),
-        { debounce: true }
-      )
-    );
-    this._handleLastApplicationInstruction(
-      this.select(
-        this.applicationId$.pipe(isNotNullOrUndefined),
-        workspaceInstructionsStore.lastInstructionStatus$.pipe(
-          isNotNullOrUndefined
-        ),
-        (applicationId, instructionStatus) => ({
-          applicationId,
-          instructionStatus,
-        }),
-        { debounce: true }
+    this._handleInstruction(
+      this.applicationId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((applicationId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Application' &&
+                  account.pubkey === applicationId
+              )
+            )
+          )
+        )
       )
     );
   }
@@ -75,53 +67,19 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleApplicationInstructions = this.effect<{
-    applicationId: string;
-    instructionStatuses: InstructionStatus[];
-  }>(
-    concatMap(({ applicationId, instructionStatuses }) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createApplication' ||
-              instructionStatus.name === 'updateApplication' ||
-              instructionStatus.name === 'deleteApplication') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized') &&
-            instructionStatus.accounts.some(
-              (account) =>
-                account.name === 'Application' &&
-                account.pubkey === applicationId
-            )
-        ),
-        tap((instructionStatus) =>
-          this._applicationStore.handleApplicationInstruction(instructionStatus)
-        )
-      )
-    )
-  );
-
-  private readonly _handleLastApplicationInstruction = this.effect<{
-    applicationId: string;
-    instructionStatus: InstructionStatus;
-  }>(
-    pipe(
-      filter(
-        ({ applicationId, instructionStatus }) =>
-          (instructionStatus.name === 'createApplication' ||
-            instructionStatus.name === 'updateApplication' ||
-            instructionStatus.name === 'deleteApplication') &&
-          (instructionStatus.status === 'confirmed' ||
-            instructionStatus.status === 'finalized') &&
-          instructionStatus.accounts.some(
-            (account) =>
-              account.name === 'Application' && account.pubkey === applicationId
-          )
-      ),
-      tap(({ instructionStatus }) =>
-        this._applicationStore.handleApplicationInstruction(instructionStatus)
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createApplication':
+        case 'updateApplication':
+        case 'deleteApplication': {
+          this._applicationStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
 
   private readonly _openTab = this.effect<{

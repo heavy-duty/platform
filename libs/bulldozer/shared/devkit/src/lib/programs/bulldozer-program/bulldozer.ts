@@ -1246,6 +1246,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'application';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'collection';
           isMut: true;
           isSigner: false;
@@ -1910,6 +1915,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'application';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'instruction';
           isMut: true;
           isSigner: false;
@@ -1979,6 +1989,11 @@ export type Bulldozer = {
         },
         {
           name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'application';
           isMut: false;
           isSigner: false;
         },
@@ -2315,6 +2330,11 @@ export type Bulldozer = {
           isSigner: false;
         },
         {
+          name: 'instruction';
+          isMut: false;
+          isSigner: false;
+        },
+        {
           name: 'argument';
           isMut: true;
           isSigner: false;
@@ -2643,6 +2663,11 @@ export type Bulldozer = {
         },
         {
           name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'instruction';
           isMut: false;
           isSigner: false;
         },
@@ -3019,6 +3044,11 @@ export type Bulldozer = {
         },
         {
           name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'instruction';
           isMut: false;
           isSigner: false;
         },
@@ -5708,6 +5738,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'application',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'collection',
           isMut: true,
           isSigner: false,
@@ -6372,6 +6407,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'application',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'instruction',
           isMut: true,
           isSigner: false,
@@ -6441,6 +6481,11 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'application',
           isMut: false,
           isSigner: false,
         },
@@ -6777,6 +6822,11 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
         {
+          name: 'instruction',
+          isMut: false,
+          isSigner: false,
+        },
+        {
           name: 'argument',
           isMut: true,
           isSigner: false,
@@ -7105,6 +7155,11 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'instruction',
           isMut: false,
           isSigner: false,
         },
@@ -7481,6 +7536,11 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'instruction',
           isMut: false,
           isSigner: false,
         },

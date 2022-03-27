@@ -14,7 +14,7 @@ import { CollectionTabStore } from './collection-tab.store';
         [routerLink]="[
           '/workspaces',
           collection.document.data.workspace,
-          '/applications',
+          'applications',
           collection.document.data.application,
           'collections',
           collection.document.id

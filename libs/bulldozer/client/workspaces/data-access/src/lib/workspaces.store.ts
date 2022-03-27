@@ -52,7 +52,7 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _patchWorkspaceStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     workspaceId: string;
     statuses: {
       isCreating?: boolean;
@@ -130,9 +130,9 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleWorkspaceInstruction = this.effect<InstructionStatus>(
-    concatMap((workspaceInstruction) => {
-      const workspaceAccountMeta = workspaceInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const workspaceAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Workspace'
       );
 
@@ -140,10 +140,10 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (workspaceInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createWorkspace': {
-          if (workspaceInstruction.status === 'finalized') {
-            this._patchWorkspaceStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               workspaceId: workspaceAccountMeta.pubkey,
               statuses: {
                 isCreating: false,
@@ -170,8 +170,8 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateWorkspace': {
-          if (workspaceInstruction.status === 'finalized') {
-            this._patchWorkspaceStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               workspaceId: workspaceAccountMeta.pubkey,
               statuses: {
                 isUpdating: false,
@@ -198,8 +198,8 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteWorkspace': {
-          if (workspaceInstruction.status === 'confirmed') {
-            this._patchWorkspaceStatuses({
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
               workspaceId: workspaceAccountMeta.pubkey,
               statuses: { isDeleting: true },
             });

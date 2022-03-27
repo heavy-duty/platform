@@ -10,6 +10,7 @@ export interface CreateInstructionRelationParams {
 export interface DeleteInstructionRelationParams {
   authority: string;
   workspaceId: string;
+  instructionId: string;
   fromAccountId: string;
   toAccountId: string;
 }

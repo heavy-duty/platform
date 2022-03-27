@@ -14,6 +14,7 @@ export const updateCollection = (
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),
+          application: new PublicKey(params.applicationId),
           collection: new PublicKey(params.collectionId),
         })
         .instruction() as Promise<TransactionInstruction>

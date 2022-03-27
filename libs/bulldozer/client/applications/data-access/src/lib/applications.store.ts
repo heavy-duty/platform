@@ -58,7 +58,7 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _patchApplicationStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     applicationId: string;
     statuses: {
       isCreating?: boolean;
@@ -136,9 +136,9 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleApplicationInstruction = this.effect<InstructionStatus>(
-    concatMap((applicationInstruction) => {
-      const applicationAccountMeta = applicationInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const applicationAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Application'
       );
 
@@ -146,10 +146,10 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (applicationInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createApplication': {
-          if (applicationInstruction.status === 'finalized') {
-            this._patchApplicationStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               applicationId: applicationAccountMeta.pubkey,
               statuses: {
                 isCreating: false,
@@ -176,8 +176,8 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateApplication': {
-          if (applicationInstruction.status === 'finalized') {
-            this._patchApplicationStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               applicationId: applicationAccountMeta.pubkey,
               statuses: {
                 isUpdating: false,
@@ -204,8 +204,8 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteApplication': {
-          if (applicationInstruction.status === 'confirmed') {
-            this._patchApplicationStatuses({
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
               applicationId: applicationAccountMeta.pubkey,
               statuses: { isDeleting: true },
             });

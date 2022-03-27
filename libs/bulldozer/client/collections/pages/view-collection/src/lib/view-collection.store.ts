@@ -18,9 +18,9 @@ import {
   concatMap,
   EMPTY,
   filter,
-  from,
   of,
   pipe,
+  switchMap,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -42,26 +42,6 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   readonly collectionId$ = this.select(({ collectionId }) => collectionId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
-  private readonly _changes$ = this.select(
-    this.collectionId$.pipe(isNotNullOrUndefined),
-    this._workspaceInstructionsStore.instructionStatuses$,
-    (collectionId, instructionStatuses) => ({
-      collectionId,
-      instructionStatuses,
-    }),
-    { debounce: true }
-  );
-  private readonly _lastChange$ = this.select(
-    this.collectionId$.pipe(isNotNullOrUndefined),
-    this._workspaceInstructionsStore.lastInstructionStatus$.pipe(
-      isNotNullOrUndefined
-    ),
-    (collectionId, instructionStatus) => ({
-      collectionId,
-      instructionStatus,
-    }),
-    { debounce: true }
-  );
 
   constructor(
     private readonly _walletStore: WalletStore,
@@ -98,10 +78,22 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-    this._handleCollectionInstructions(this._changes$);
-    this._handleLastCollectionInstruction(this._lastChange$);
-    this._handleCollectionAttributeInstructions(this._changes$);
-    this._handleLastCollectionAttributeInstruction(this._lastChange$);
+    this._handleInstruction(
+      this.collectionId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((collectionId) =>
+          this._workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Collection' &&
+                  account.pubkey === collectionId
+              )
+            )
+          )
+        )
+      )
+    );
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -116,104 +108,25 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
     (state, collectionId) => ({ ...state, collectionId })
   );
 
-  private readonly _handleCollectionInstructions = this.effect<{
-    collectionId: string;
-    instructionStatuses: InstructionStatus[];
-  }>(
-    concatMap(({ collectionId, instructionStatuses }) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollection' ||
-              instructionStatus.name === 'updateCollection' ||
-              instructionStatus.name === 'deleteCollection') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized') &&
-            instructionStatus.accounts.some(
-              (account) =>
-                account.name === 'Collection' && account.pubkey === collectionId
-            )
-        ),
-        tap((instructionStatus) =>
-          this._collectionStore.handleCollectionInstruction(instructionStatus)
-        )
-      )
-    )
-  );
-
-  private readonly _handleLastCollectionInstruction = this.effect<{
-    collectionId: string;
-    instructionStatus: InstructionStatus;
-  }>(
-    pipe(
-      filter(
-        ({ collectionId, instructionStatus }) =>
-          (instructionStatus.name === 'createCollection' ||
-            instructionStatus.name === 'updateCollection' ||
-            instructionStatus.name === 'deleteCollection') &&
-          (instructionStatus.status === 'confirmed' ||
-            instructionStatus.status === 'finalized') &&
-          instructionStatus.accounts.some(
-            (account) =>
-              account.name === 'Collection' && account.pubkey === collectionId
-          )
-      ),
-      tap(({ instructionStatus }) =>
-        this._collectionStore.handleCollectionInstruction(instructionStatus)
-      )
-    )
-  );
-
-  private readonly _handleCollectionAttributeInstructions = this.effect<{
-    collectionId: string;
-    instructionStatuses: InstructionStatus[];
-  }>(
-    concatMap(({ collectionId, instructionStatuses }) =>
-      from(instructionStatuses).pipe(
-        filter(
-          (instructionStatus) =>
-            (instructionStatus.name === 'createCollectionAttribute' ||
-              instructionStatus.name === 'updateCollectionAttribute' ||
-              instructionStatus.name === 'deleteCollectionAttribute') &&
-            (instructionStatus.status === 'confirmed' ||
-              instructionStatus.status === 'finalized') &&
-            instructionStatus.accounts.some(
-              (account) =>
-                account.name === 'Collection' && account.pubkey === collectionId
-            )
-        ),
-        tap((instructionStatus) =>
-          this._collectionAttributesStore.handleCollectionAttributeInstruction(
-            instructionStatus
-          )
-        )
-      )
-    )
-  );
-
-  private readonly _handleLastCollectionAttributeInstruction = this.effect<{
-    collectionId: string;
-    instructionStatus: InstructionStatus;
-  }>(
-    pipe(
-      filter(
-        ({ collectionId, instructionStatus }) =>
-          (instructionStatus.name === 'createCollectionAttribute' ||
-            instructionStatus.name === 'updateCollectionAttribute' ||
-            instructionStatus.name === 'deleteCollectionAttribute') &&
-          (instructionStatus.status === 'confirmed' ||
-            instructionStatus.status === 'finalized') &&
-          instructionStatus.accounts.some(
-            (account) =>
-              account.name === 'Collection' && account.pubkey === collectionId
-          )
-      ),
-      tap(({ instructionStatus }) =>
-        this._collectionAttributesStore.handleCollectionAttributeInstruction(
-          instructionStatus
-        )
-      )
-    )
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createCollection':
+        case 'updateCollection':
+        case 'deleteCollection': {
+          this._collectionStore.dispatch(instructionStatus);
+          break;
+        }
+        case 'createCollectionAttribute':
+        case 'updateCollectionAttribute':
+        case 'deleteCollectionAttribute': {
+          this._collectionAttributesStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
 
   private readonly _openTab = this.effect<{

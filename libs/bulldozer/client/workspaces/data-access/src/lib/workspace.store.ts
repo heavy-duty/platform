@@ -84,7 +84,7 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _patchWorkspaceStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     isCreating?: boolean;
     isUpdating?: boolean;
     isDeleting?: boolean;
@@ -105,9 +105,9 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleWorkspaceInstruction = this.effect<InstructionStatus>(
-    concatMap((workspaceInstruction) => {
-      const workspaceAccountMeta = workspaceInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const workspaceAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Workspace'
       );
 
@@ -115,10 +115,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (workspaceInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createWorkspace': {
-          if (workspaceInstruction.status === 'finalized') {
-            this._patchWorkspaceStatuses({ isCreating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
             return EMPTY;
           }
 
@@ -141,8 +141,8 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateWorkspace': {
-          if (workspaceInstruction.status === 'finalized') {
-            this._patchWorkspaceStatuses({ isUpdating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
             return EMPTY;
           }
 
@@ -165,10 +165,10 @@ export class WorkspaceStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteWorkspace': {
-          if (workspaceInstruction.status === 'confirmed') {
-            this._patchWorkspaceStatuses({ isDeleting: true });
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
           } else {
-            this._patchWorkspaceStatuses({ isDeleting: false });
+            this._patchStatus({ isDeleting: false });
             this.patchState({ workspace: null });
           }
 

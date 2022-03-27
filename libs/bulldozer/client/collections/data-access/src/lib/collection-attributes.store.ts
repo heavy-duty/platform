@@ -67,7 +67,7 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
       }
     );
 
-  private readonly _patchCollectionAttributeStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     collectionAttributeId: string;
     statuses: {
       isCreating?: boolean;
@@ -154,92 +154,90 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly handleCollectionAttributeInstruction =
-    this.effect<InstructionStatus>(
-      concatMap((collectionAttributeInstruction) => {
-        const collectionAttributeAccountMeta =
-          collectionAttributeInstruction.accounts.find(
-            (account) => account.name === 'Attribute'
-          );
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collectionAttributeAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Attribute'
+      );
 
-        if (collectionAttributeAccountMeta === undefined) {
+      if (collectionAttributeAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createCollectionAttribute': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+              statuses: {
+                isCreating: false,
+              },
+            });
+
+            return EMPTY;
+          }
+
+          return this._collectionAttributeApiService
+            .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              isNotNullOrUndefined,
+              tapResponse(
+                (collectionAttribute) =>
+                  this._setCollectionAttribute({
+                    document: collectionAttribute,
+                    isCreating: true,
+                    isUpdating: false,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'updateCollectionAttribute': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+              statuses: {
+                isUpdating: false,
+              },
+            });
+
+            return EMPTY;
+          }
+
+          return this._collectionAttributeApiService
+            .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              isNotNullOrUndefined,
+              tapResponse(
+                (collectionAttribute) =>
+                  this._setCollectionAttribute({
+                    document: collectionAttribute,
+                    isCreating: false,
+                    isUpdating: true,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'deleteCollectionAttribute': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
+              collectionAttributeId: collectionAttributeAccountMeta.pubkey,
+              statuses: { isDeleting: true },
+            });
+          } else {
+            this._removeCollectionAttribute(
+              collectionAttributeAccountMeta.pubkey
+            );
+          }
+
           return EMPTY;
         }
-
-        switch (collectionAttributeInstruction.name) {
-          case 'createCollectionAttribute': {
-            if (collectionAttributeInstruction.status === 'finalized') {
-              this._patchCollectionAttributeStatuses({
-                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
-                statuses: {
-                  isCreating: false,
-                },
-              });
-
-              return EMPTY;
-            }
-
-            return this._collectionAttributeApiService
-              .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
-              .pipe(
-                isNotNullOrUndefined,
-                tapResponse(
-                  (collectionAttribute) =>
-                    this._setCollectionAttribute({
-                      document: collectionAttribute,
-                      isCreating: true,
-                      isUpdating: false,
-                      isDeleting: false,
-                    }),
-                  (error) => this._notificationStore.setError({ error })
-                )
-              );
-          }
-          case 'updateCollectionAttribute': {
-            if (collectionAttributeInstruction.status === 'finalized') {
-              this._patchCollectionAttributeStatuses({
-                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
-                statuses: {
-                  isUpdating: false,
-                },
-              });
-
-              return EMPTY;
-            }
-
-            return this._collectionAttributeApiService
-              .findById(collectionAttributeAccountMeta.pubkey, 'confirmed')
-              .pipe(
-                isNotNullOrUndefined,
-                tapResponse(
-                  (collectionAttribute) =>
-                    this._setCollectionAttribute({
-                      document: collectionAttribute,
-                      isCreating: false,
-                      isUpdating: true,
-                      isDeleting: false,
-                    }),
-                  (error) => this._notificationStore.setError({ error })
-                )
-              );
-          }
-          case 'deleteCollectionAttribute': {
-            if (collectionAttributeInstruction.status === 'confirmed') {
-              this._patchCollectionAttributeStatuses({
-                collectionAttributeId: collectionAttributeAccountMeta.pubkey,
-                statuses: { isDeleting: true },
-              });
-            } else {
-              this._removeCollectionAttribute(
-                collectionAttributeAccountMeta.pubkey
-              );
-            }
-
-            return EMPTY;
-          }
-          default:
-            return EMPTY;
-        }
-      })
-    );
+        default:
+          return EMPTY;
+      }
+    })
+  );
 }

@@ -42,6 +42,13 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     this._loadCollections(this.collectionIds$);
   }
 
+  readonly setCollectionIds = this.updater<string[] | null>(
+    (state, collectionIds) => ({
+      ...state,
+      collectionIds,
+    })
+  );
+
   private readonly _setCollection = this.updater<CollectionItemView>(
     (state, newCollection) => {
       const collectionsMap = new Map(state.collectionsMap);
@@ -54,7 +61,7 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _patchCollectionStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     collectionId: string;
     statuses: {
       isCreating?: boolean;
@@ -125,16 +132,9 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly setCollectionIds = this.updater<string[] | null>(
-    (state, collectionIds) => ({
-      ...state,
-      collectionIds,
-    })
-  );
-
-  readonly handleCollectionInstruction = this.effect<InstructionStatus>(
-    concatMap((collectionInstruction) => {
-      const collectionAccountMeta = collectionInstruction.accounts.find(
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collectionAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'Collection'
       );
 
@@ -142,10 +142,10 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (collectionInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createCollection': {
-          if (collectionInstruction.status === 'finalized') {
-            this._patchCollectionStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               collectionId: collectionAccountMeta.pubkey,
               statuses: {
                 isCreating: false,
@@ -172,8 +172,8 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateCollection': {
-          if (collectionInstruction.status === 'finalized') {
-            this._patchCollectionStatuses({
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
               collectionId: collectionAccountMeta.pubkey,
               statuses: {
                 isUpdating: false,
@@ -200,8 +200,8 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteCollection': {
-          if (collectionInstruction.status === 'confirmed') {
-            this._patchCollectionStatuses({
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
               collectionId: collectionAccountMeta.pubkey,
               statuses: { isDeleting: true },
             });
