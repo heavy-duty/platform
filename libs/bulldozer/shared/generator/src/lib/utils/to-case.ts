@@ -21,3 +21,11 @@ export const toSnakeCase = (str: string) => {
     .map((word) => word.toLowerCase())
     .join('_');
 };
+
+export const toKebabCase = (str: string) => {
+  return str
+    .replace(/\W+/g, ' ')
+    .split(/ |\B(?=[A-Z])/)
+    .map((word) => word.toLowerCase())
+    .join('-');
+};

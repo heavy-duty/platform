@@ -178,7 +178,10 @@ export const generateWorkspaceZip = (
   workspaceFolder?.file('.prettierrc.json', getTemplateByType('prettierrc'));
   workspaceFolder?.file(
     'Anchor.toml',
-    generateCode({ workspaceName }, getTemplateByType('anchor'))
+    generateCode(
+      { applications: metadata.applications },
+      getTemplateByType('anchor')
+    )
   );
   workspaceFolder?.file('Cargo.toml', getTemplateByType('cargo'));
   workspaceFolder?.file(
@@ -242,7 +245,7 @@ export const generateWorkspaceZip = (
 
     // Creating tests per application
     testsFolder?.file(
-      `${application.name.normalCase}.spec.ts`,
+      `${application.name.kebabCase}.spec.ts`,
       generateCode(
         { applicationName: application.name },
         getTemplateByType('test')
@@ -252,6 +255,6 @@ export const generateWorkspaceZip = (
 
   // Save a download file
   zip.generateAsync({ type: 'blob' }).then(function (content) {
-    saveAs(content, workspaceName.normalCase + '-program.zip');
+    saveAs(content, workspaceName.kebabCase + '-program.zip');
   });
 };

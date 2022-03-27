@@ -1,6 +1,7 @@
 import {
   FormattedName,
   toCamelCase,
+  toKebabCase,
   toPascalCase,
   toSnakeCase,
 } from '../utils';
@@ -10,4 +11,5 @@ export const formatName = (str: string): FormattedName => ({
   normalCase: str,
   camelCase: toCamelCase(str),
   pascalCase: toPascalCase(str),
+  kebabCase: toKebabCase(str),
 });

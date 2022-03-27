@@ -16,10 +16,7 @@ export const formatApplication = (
     name: formatName(application.name),
     instructions: instructions.map((instruction) => ({
       ...instruction,
-      data: {
-        ...instruction.data,
-        name: formatName(instruction.name),
-      },
+      name: formatName(instruction.name),
       arguments: formatInstructionArguments(
         instruction.id,
         instructionArguments
