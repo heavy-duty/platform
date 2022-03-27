@@ -65,10 +65,6 @@ input[readonly] {
   height: inherit !important;
 }
 
-.bd-custom-top-toolbar {
-  top: $toolbar-height !important;
-}
-
 .bd-custom-monaco-editor {
   height: calc(100vh - 96px) !important;
 }
@@ -80,12 +76,6 @@ input[readonly] {
 
 .bd-border-bottom {
   border-bottom: 2px solid gray;
-}
-
-.bd-custom-height-layout {
-  height: calc(
-    100vh - $toolbar-height
-  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
 }
 
 .bd-custom-height-content {

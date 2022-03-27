@@ -10,9 +10,9 @@ import { UserView } from '@bulldozer-client/users-data-access';
 @Component({
   selector: 'bd-user-details',
   template: `
-    <mat-card class="p-3">
+    <div>
       <section class="flex flex-col gap-3">
-        <ng-container *ngIf="connected; else notConnected">
+        <ng-container *ngIf="connected">
           <ng-container *ngIf="user; else userNotDefined">
             <header bdSectionHeader>
               <h2 class="flex items-center justify-start gap-2">
@@ -52,19 +52,9 @@ import { UserView } from '@bulldozer-client/users-data-access';
           </ng-container>
         </ng-container>
 
-        <ng-template #notConnected>
-          <section class="flex flex-col gap-3">
-            <h2>Connect your wallet in order to view your profile.</h2>
-
-            <footer>
-              <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
-            </footer>
-          </section>
-        </ng-template>
-
         <ng-template #userNotDefined>
-          <section class="flex flex-col gap-3">
-            <h2>You have no user defined.</h2>
+          <section class="flex flex-col">
+            <h3 class="mb-3">You have no user defined.</h3>
 
             <footer>
               <button
@@ -79,7 +69,7 @@ import { UserView } from '@bulldozer-client/users-data-access';
           </section>
         </ng-template>
       </section>
-    </mat-card>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,

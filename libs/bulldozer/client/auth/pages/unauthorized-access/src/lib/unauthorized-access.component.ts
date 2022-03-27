@@ -31,7 +31,10 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
           </figure>
           <h2 class="mb-1 font-bold">BULLDOZER</h2>
           <p class="mb-7">Connect your wallet to start building</p>
-          <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
+          <hd-wallet-multi-button
+            class="text-white"
+            color="primary"
+          ></hd-wallet-multi-button>
         </div>
       </div>
       <div class="hd-side-right w-1/2 h-screen flex justify-start items-center">

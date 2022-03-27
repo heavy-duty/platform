@@ -11,13 +11,15 @@ import { ViewProfileStore } from './view-profile.store';
 @Component({
   selector: 'bd-view-profile',
   template: `
-    <div class="flex flex-col gap-5 p-5">
-      <header bdPageHeader>
-        <h1>Profile</h1>
-        <p>Visualize all the details about your profile.</p>
+    <div class="flex flex-col">
+      <header class="py-5 px-7 w-80">
+        <h2 class="mb-0 ">PROFILE</h2>
+        <small class="leading-3">
+          Visualize all the details about your profile and workspaces
+        </small>
       </header>
 
-      <main class="flex flex-col gap-4">
+      <main class="flex flex-col px-7">
         <bd-user-details
           [connected]="(connected$ | ngrxPush) ?? false"
           [user]="(user$ | ngrxPush) ?? null"

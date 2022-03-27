@@ -34,37 +34,10 @@ import {
   selector: 'bd-shell',
   template: `
     <div>
-      <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
-        <div class="flex items-center">
-          <figure class="flex justify-center">
-            <img src="assets/images/logo.png" class="w-10" />
-          </figure>
-          <h2 class="text-center font-bold">BULLDOZER</h2>
-        </div>
-        <div class="ml-auto flex items-center">
-          <hd-connection-menu class="mr-6"></hd-connection-menu>
-
-          <button
-            mat-raised-button
-            color="basic"
-            [routerLink]="['/profile']"
-            class="mr-6"
-          >
-            Profile
-          </button>
-
-          <hd-wallet-multi-button
-            class="bd-custom-color h-auto leading-none mr-6"
-            color="basic"
-          ></hd-wallet-multi-button>
-
-          <bd-dark-theme-switch></bd-dark-theme-switch>
-        </div>
-      </mat-toolbar>
-      <mat-sidenav-container class="bd-custom-height-layout w-full">
+      <mat-sidenav-container class="h-screen-layout w-full">
         <mat-sidenav
           #drawer
-          class="bd-h-inherit bd-custom-top-toolbar w-52"
+          class="bd-h-inherit bd-custom-top-toolbar w-60"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
@@ -76,6 +49,27 @@ import {
           ></bd-workspace-explorer>
         </mat-sidenav>
         <mat-sidenav-content>
+          <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
+            <div class="ml-auto flex items-center">
+              <hd-connection-menu class="mr-6"></hd-connection-menu>
+
+              <button
+                mat-raised-button
+                color="basic"
+                [routerLink]="['/profile']"
+                class="mr-6"
+              >
+                Profile
+              </button>
+
+              <hd-wallet-multi-button
+                class="bd-custom-color h-auto leading-none mr-6"
+                color="basic"
+              ></hd-wallet-multi-button>
+
+              <bd-dark-theme-switch></bd-dark-theme-switch>
+            </div>
+          </mat-toolbar>
           <bd-tab-list
             [tabs]="(tabs$ | ngrxPush) ?? null"
             [selectedTab]="(selectedTab$ | ngrxPush) ?? null"

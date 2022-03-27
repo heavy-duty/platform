@@ -2,7 +2,7 @@
 seeds = true
 
 [programs.localnet]
-bulldozer = "EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo"
+bulldozer = "1aPCYua5NYMFbYbW8aLFxUQ6b4k3Y9bKzaw5NwNcDVL"
 
 [registry]
 url = "https://anchor.projectserum.com"
