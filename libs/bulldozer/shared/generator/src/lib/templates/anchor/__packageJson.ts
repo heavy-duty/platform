@@ -14,7 +14,7 @@ export const __packageJson = `{
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@project-serum/anchor": "^0.19.0"
+    "@project-serum/anchor": "^0.22.1"
   }
 }
 `;

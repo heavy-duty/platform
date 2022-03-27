@@ -3,6 +3,7 @@ export interface FormattedName {
   normalCase: string;
   camelCase: string;
   pascalCase: string;
+  kebabCase: string;
 }
 
 export interface CodeGeneratorParameters {

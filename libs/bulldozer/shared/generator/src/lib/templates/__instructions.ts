@@ -6,12 +6,24 @@ use crate::collections::{{collections.[0].name.pascalCase}};
 use crate::collections::{ {{~#each collections}}{{#if @first}}{{else}}, {{/if}}{{this.name.pascalCase}}{{/each~}} };
 {{/gt}}
 
+{{~#if instruction.arguments.length}}
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct {{instruction.name.pascalCase}}Arguments {
+  {{#each instruction.arguments}}
+  {{this.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}
+  {{/each}}
+}
+{{else~}}
+
+{{/if}}
+
 #[derive(Accounts)]
 {{#if instruction.arguments.length}}
-#[instruction({{#each instruction.arguments}}{{#if @first}}{{else}}, {{/if}}{{this.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}})]
+#[instruction(arguments: {{instruction.name.pascalCase}}Arguments)]
 {{/if}}
 pub struct {{instruction.name.pascalCase}}<'info>{
-  {{#each instruction.accounts}}
+  {{#each instruction.accounts ~}}
   {{#switch this.data.kind.id}}
   {{#case '0'}}
   {{#if this.data.modifier.name }}
@@ -41,14 +53,15 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   #[account({{this.data.modifier.name}})]
   {{/if}}
   pub {{this.name.snakeCase}}: Signer<'info>,
-  {{/case}}{{/switch}}{{/each}}
-  {{#if instruction.initializesAccount }}
+  {{/case}}{{/switch}}{{/each~}}
+  {{#if instruction.initializesAccount ~}}
   pub system_program: Program<'info, System>,
+  {{else}}
   {{/if }}
 }
 
 {{#if instruction.handler}}
-pub fn handle(ctx: Context<{{instruction.name.pascalCase}}>{{#each instruction.arguments}}, {{this.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}{{/each}}) -> Result<()> {
+pub fn handle(ctx: Context<{{instruction.name.pascalCase}}>{{#if instruction.arguments.length}}, arguments: {{instruction.name.pascalCase}}Arguments{{/if}}) -> Result<()> {
   {{#each instruction.handler}}
   {{{this}}}
   {{/each}}
