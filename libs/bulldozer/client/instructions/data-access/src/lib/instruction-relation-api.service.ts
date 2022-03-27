@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionRelation,
@@ -17,12 +18,14 @@ import {
   HdSolanaConfigStore,
 } from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
+import { Finality } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -30,7 +33,8 @@ import {
 export class InstructionRelationApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {}
 
   private handleError(error: string) {
@@ -38,26 +42,30 @@ export class InstructionRelationApiService {
   }
 
   // get instruction relations
-  find(filters: InstructionRelationFilters) {
+  findIds(
+    filters: InstructionRelationFilters,
+    commitment: Finality = 'finalized'
+  ) {
     const query = instructionRelationQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
+        ...query,
+        commitment,
+        dataSlice: { offset: 0, length: 0 },
+      })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createInstructionRelationRelation(pubkey, account)
-          )
-        )
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }
 
   // get instruction relation
   findById(
-    instructionRelationId: string
+    instructionRelationId: string,
+    commitment: Finality = 'finalized'
   ): Observable<Relation<InstructionRelation> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(instructionRelationId)
+      .getAccountInfo(instructionRelationId, commitment)
       .pipe(
         map(
           (accountInfo) =>
@@ -66,6 +74,27 @@ export class InstructionRelationApiService {
               instructionRelationId,
               accountInfo
             )
+        )
+      );
+  }
+
+  // get instruction accounts
+  findByIds(
+    instructionAccountIds: string[],
+    commitment: Finality = 'finalized'
+  ) {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(instructionAccountIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createInstructionRelationRelation(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
         )
       );
   }
@@ -86,9 +115,15 @@ export class InstructionRelationApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -109,9 +144,15 @@ export class InstructionRelationApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

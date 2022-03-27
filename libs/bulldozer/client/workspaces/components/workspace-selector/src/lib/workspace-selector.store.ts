@@ -188,9 +188,24 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
                 )
             )
           ),
-        instructionRelations: this._instructionRelationApiService.find({
-          workspace: workspaceId,
-        }),
+        instructionRelations: this._instructionRelationApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionRelationIds) =>
+              this._instructionRelationApiService
+                .findByIds(instructionRelationIds)
+                .pipe(
+                  concatMap((instructionRelations) =>
+                    from(instructionRelations).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
       }).pipe(
         tapResponse(
           ({

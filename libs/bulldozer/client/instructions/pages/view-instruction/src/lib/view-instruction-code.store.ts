@@ -88,7 +88,9 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
           instructionAccounts: instructionAccounts.map(
             ({ document }) => document
           ),
-          instructionRelations,
+          instructionRelations: instructionRelations.map(
+            ({ document }) => document
+          ),
           collections: collections.map(({ document }) => document),
         }),
         { debounce: true }

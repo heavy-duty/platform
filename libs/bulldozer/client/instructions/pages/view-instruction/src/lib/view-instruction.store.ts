@@ -12,6 +12,9 @@ import {
   InstructionArgumentApiService,
   InstructionArgumentQueryStore,
   InstructionArgumentsStore,
+  InstructionRelationApiService,
+  InstructionRelationQueryStore,
+  InstructionRelationsStore,
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
@@ -53,6 +56,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     private readonly _instructionApiService: InstructionApiService,
     private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
+    private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _instructionStore: InstructionStore,
     private readonly _collectionsStore: CollectionsStore,
     private readonly _collectionQueryStore: CollectionQueryStore,
@@ -60,6 +64,8 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     private readonly _instructionArgumentQueryStore: InstructionArgumentQueryStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
     private readonly _instructionAccountQueryStore: InstructionAccountQueryStore,
+    private readonly _instructionRelationsStore: InstructionRelationsStore,
+    private readonly _instructionRelationQueryStore: InstructionRelationQueryStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore,
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     workspaceInstructionsStore: WorkspaceInstructionsStore
@@ -95,6 +101,15 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     );
     this._instructionAccountsStore.setInstructionAccountIds(
       this._instructionAccountQueryStore.instructionAccountIds$
+    );
+    this._instructionRelationQueryStore.setFilters(
+      this.instructionId$.pipe(
+        isNotNullOrUndefined,
+        map((instruction) => ({ instruction }))
+      )
+    );
+    this._instructionRelationsStore.setInstructionRelationIds(
+      this._instructionRelationQueryStore.instructionRelationIds$
     );
     this._handleInstruction(workspaceInstructionsStore.instruction$);
     this._openTab(
@@ -144,6 +159,11 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
         case 'updateInstructionAccount':
         case 'deleteInstructionAccount': {
           this._instructionAccountsStore.dispatch(instructionStatus);
+          break;
+        }
+        case 'createInstructionRelation':
+        case 'deleteInstructionRelation': {
+          this._instructionRelationsStore.dispatch(instructionStatus);
           break;
         }
         case 'createCollection':
@@ -457,6 +477,96 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
                 () =>
                   this._notificationStore.setEvent(
                     'Delete account request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
+    )
+  );
+
+  readonly createInstructionRelation = this.effect<{
+    workspaceId: string;
+    applicationId: string;
+    instructionId: string;
+    fromAccountId: string;
+    toAccountId: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(
+        ([
+          {
+            workspaceId,
+            applicationId,
+            instructionId,
+            fromAccountId,
+            toAccountId,
+          },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._instructionRelationApiService
+            .create({
+              fromAccountId,
+              toAccountId,
+              authority: authority.toBase58(),
+              workspaceId,
+              applicationId,
+              instructionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Create relation request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
+    )
+  );
+
+  readonly deleteInstructionRelation = this.effect<{
+    workspaceId: string;
+    instructionId: string;
+    fromAccountId: string;
+    toAccountId: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(
+        ([
+          { workspaceId, instructionId, fromAccountId, toAccountId },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._instructionRelationApiService
+            .delete({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionId,
+              fromAccountId,
+              toAccountId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Delete relation request sent'
                   ),
                 (error) => this._notificationStore.setError(error)
               )

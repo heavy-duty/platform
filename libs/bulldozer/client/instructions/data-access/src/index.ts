@@ -11,6 +11,7 @@ export * from './lib/instruction-event.service';
 export * from './lib/instruction-query.store';
 export * from './lib/instruction-relation-api.service';
 export * from './lib/instruction-relation-event.service';
+export * from './lib/instruction-relation-query.store';
 export * from './lib/instruction-relations.store';
 export * from './lib/instruction.store';
 export * from './lib/instructions.store';

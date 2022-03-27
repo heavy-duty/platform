@@ -2,34 +2,32 @@ import { Injectable } from '@angular/core';
 import { CollectionItemView } from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import {
-  Document,
-  InstructionAccount,
-  InstructionRelation,
-  Relation,
-} from '@heavy-duty/bulldozer-devkit';
+import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { InstructionAccountApiService } from './instruction-account-api.service';
+import { InstructionRelationItemView } from './instruction-relations.store';
 import { ItemView } from './types';
 
 export type InstructionAccountItemView = ItemView<Document<InstructionAccount>>;
 
-export interface InstructionDocumentRelation
-  extends Relation<InstructionRelation> {
+export type InstructionDocumentRelation = InstructionRelationItemView & {
   extras: {
     to: InstructionAccountItemView;
   };
-}
+};
 
-export interface InstructionDocument extends Document<InstructionAccount> {
+export interface InstructionDocumentItemView {
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  document: Document<InstructionAccount>;
   close: InstructionAccountItemView | null;
   payer: InstructionAccountItemView | null;
   collection: CollectionItemView | null;
   relations: InstructionDocumentRelation[];
 }
-export type InstructionDocumentItemView = ItemView<InstructionDocument>;
 
 interface ViewModel {
   loading: boolean;

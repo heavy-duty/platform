@@ -7,9 +7,9 @@ import {
   InstructionAccountItemView,
   InstructionAccountsStore,
   InstructionDocumentItemView,
+  InstructionRelationItemView,
   InstructionRelationsStore,
 } from '@bulldozer-client/instructions-data-access';
-import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
 import { Observable } from 'rxjs';
 
@@ -37,62 +37,66 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
               document.data.kind.id === 0
           )
           .map((instructionAccount) => ({
-            ...instructionAccount,
-            document: {
-              ...instructionAccount.document,
-              relations: instructionRelations
-                .filter(({ from }) => from === instructionAccount.document.id)
-                .reduce(
-                  (
-                    relations: (Relation<InstructionRelation> & {
-                      extras: { to: InstructionAccountItemView };
-                    })[],
-                    instructionRelation
-                  ) => {
-                    const toAccount = instructionAccounts.find(
-                      ({ document }) => document.id === instructionRelation.to
-                    );
+            isCreating: instructionAccount.isCreating,
+            isUpdating: instructionAccount.isUpdating,
+            isDeleting: instructionAccount.isDeleting,
+            document: instructionAccount.document,
+            relations: instructionRelations
+              .filter(
+                ({ document }) =>
+                  document.from === instructionAccount.document.id
+              )
+              .reduce(
+                (
+                  relations: (InstructionRelationItemView & {
+                    extras: { to: InstructionAccountItemView };
+                  })[],
+                  instructionRelation
+                ) => {
+                  const toAccount = instructionAccounts.find(
+                    ({ document }) =>
+                      document.id === instructionRelation.document.to
+                  );
 
-                    return toAccount
-                      ? [
-                          ...relations,
-                          {
-                            ...instructionRelation,
-                            extras: { to: toAccount },
-                          },
-                        ]
-                      : relations;
-                  },
-                  []
-                ),
-              collection: collections.reduce(
-                (found: CollectionItemView | null, collection) =>
-                  !found &&
-                  instructionAccount.document.data.kind.collection ===
-                    collection.document.id
-                    ? collection
-                    : null,
-                null
+                  return toAccount
+                    ? [
+                        ...relations,
+                        {
+                          ...instructionRelation,
+                          extras: { to: toAccount },
+                        },
+                      ]
+                    : relations;
+                },
+                []
               ),
-              payer: instructionAccounts.reduce(
-                (found: InstructionAccountItemView | null, payer) =>
-                  !found &&
-                  instructionAccount.document.data.modifier?.payer ===
-                    payer.document.id
-                    ? payer
-                    : null,
-                null
-              ),
-              close: instructionAccounts.reduce(
-                (found: InstructionAccountItemView | null, close) =>
-                  !found &&
-                  instructionAccount.document.data.modifier?.close ===
-                    close.document.id
-                    ? close
-                    : null,
-                null
-              ),
-            },
+            collection: collections.reduce(
+              (found: CollectionItemView | null, collection) =>
+                !found &&
+                instructionAccount.document.data.kind.collection ===
+                  collection.document.id
+                  ? collection
+                  : null,
+              null
+            ),
+            payer: instructionAccounts.reduce(
+              (found: InstructionAccountItemView | null, payer) =>
+                !found &&
+                instructionAccount.document.data.modifier?.payer ===
+                  payer.document.id
+                  ? payer
+                  : null,
+              null
+            ),
+            close: instructionAccounts.reduce(
+              (found: InstructionAccountItemView | null, close) =>
+                !found &&
+                instructionAccount.document.data.modifier?.close ===
+                  close.document.id
+                  ? close
+                  : null,
+              null
+            ),
           }))
     );
 

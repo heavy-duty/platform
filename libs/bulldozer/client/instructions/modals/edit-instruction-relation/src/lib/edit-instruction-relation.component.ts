@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
 
 export const equalValidator =
   (a: string, b: string): ValidatorFn =>
@@ -38,10 +38,10 @@ export const equalValidator =
         <mat-select formControlName="to">
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.id"
+            [value]="account.document.id"
           >
-            {{ account.name }} |
-            {{ account.id | obscureAddress }}
+            {{ account.document.name }} |
+            {{ account.document.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">To is required.</mat-error>
@@ -83,7 +83,7 @@ export class EditInstructionRelationComponent {
     private readonly _matDialogRef: MatDialogRef<EditInstructionRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      accounts: Document<InstructionAccount>[];
+      accounts: InstructionAccountItemView[];
       from: string;
     }
   ) {

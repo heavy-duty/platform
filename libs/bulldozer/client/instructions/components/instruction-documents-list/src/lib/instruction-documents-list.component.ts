@@ -52,7 +52,7 @@ import {
               let instructionDocument of instructionDocuments;
               let i = index
             "
-            class="h-28 bg-white bg-opacity-5 mat-elevation-z2"
+            class="h-auto py-2 bg-white bg-opacity-5 mat-elevation-z2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
@@ -97,61 +97,75 @@ import {
 
                 <p
                   class="text-xs mb-0 italic"
-                  *ngIf="instructionDocument.document.collection"
+                  *ngIf="instructionDocument.collection"
                 >
                   Collection:
-                  {{ instructionDocument.document.collection.document.name }}
+                  {{ instructionDocument.collection.document.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
                       '/applications',
                       instructionDocument.document.data.application,
                       'collections',
-                      instructionDocument.document.collection.document.id
+                      instructionDocument.collection.document.id
                     ]"
                     >{{
-                      instructionDocument.document.collection.document.id
+                      instructionDocument.collection.document.id
                         | obscureAddress
                     }}</a
                   >
                 </p>
                 <p
                   class="text-xs mb-0 italic"
-                  *ngIf="instructionDocument.document.close"
+                  *ngIf="instructionDocument.close"
                 >
                   Close:
-                  {{ instructionDocument.document.close.document.name }} ({{
-                    instructionDocument.document.close.document.id
-                      | obscureAddress
+                  {{ instructionDocument.close.document.name }} ({{
+                    instructionDocument.close.document.id | obscureAddress
                   }})
                 </p>
                 <p
                   class="text-xs mb-0 italic"
-                  *ngIf="instructionDocument.document.payer"
+                  *ngIf="instructionDocument.payer"
                 >
                   Payer:
-                  {{ instructionDocument.document.payer.document.name }} ({{
-                    instructionDocument.document.payer.document.id
-                      | obscureAddress
+                  {{ instructionDocument.payer.document.name }} ({{
+                    instructionDocument.payer.document.id | obscureAddress
                   }})
                 </p>
                 <ng-container
                   *ngIf="
-                    instructionDocument.document.relations &&
-                    instructionDocument.document.relations.length > 0
+                    instructionDocument.relations &&
+                    instructionDocument.relations.length > 0
                   "
                 >
                   <p class="mt-2 mb-0 font-bold">Relations</p>
                   <ul class="list-disc pl-4">
                     <li
-                      *ngFor="
-                        let relation of instructionDocument.document.relations
-                      "
-                      class="text-xs"
+                      *ngFor="let relation of instructionDocument.relations"
+                      class="flex items-center gap-2"
                     >
-                      {{ relation.extras.to.document.name }} ({{
-                        relation.id | obscureAddress
-                      }})
+                      <span class="flex items-center gap-2">
+                        <span
+                          [matTooltip]="
+                            relation.extras.to.document.name
+                              | bdItemUpdatingMessage: relation:'Relation to'
+                          "
+                        >
+                          <span class="font-bold">
+                            {{ relation.extras.to.document.name }}
+                          </span>
+
+                          <span class="text-xs font-thin">
+                            ({{ relation.document.id | obscureAddress }})
+                          </span>
+                        </span>
+                        <mat-progress-spinner
+                          *ngIf="relation | bdItemShowSpinner"
+                          diameter="16"
+                          mode="indeterminate"
+                        ></mat-progress-spinner>
+                      </span>
 
                       <button
                         class="w-6 h-6 leading-6"
@@ -162,9 +176,9 @@ import {
                         "
                         (click)="
                           onDeleteInstructionRelation(
-                            relation.id,
-                            relation.from,
-                            relation.to
+                            relation.document.id,
+                            relation.document.from,
+                            relation.document.to
                           )
                         "
                         [disabled]="!connected"

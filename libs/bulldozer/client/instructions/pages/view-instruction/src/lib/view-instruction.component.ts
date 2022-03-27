@@ -9,16 +9,14 @@ import {
   InstructionAccountsStore,
   InstructionArgumentQueryStore,
   InstructionArgumentsStore,
+  InstructionRelationQueryStore,
   InstructionRelationsStore,
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
 import {
-  Document,
-  Instruction,
   InstructionAccountDto,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewInstructionCodeStore } from './view-instruction-code.store';
@@ -112,16 +110,19 @@ import { ViewInstructionStore } from './view-instruction.store';
             "
             (createInstructionRelation)="
               onCreateInstructionRelation(
-                instruction.document,
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
                 $event.fromAccountId,
                 $event.toAccountId
               )
             "
             (deleteInstructionRelation)="
               onDeleteInstructionRelation(
-                instruction.document.id,
                 instruction.document.data.workspace,
-                $event
+                instruction.document.id,
+                $event.fromAccountId,
+                $event.toAccountId
               )
             "
           >
@@ -207,6 +208,7 @@ import { ViewInstructionStore } from './view-instruction.store';
     InstructionAccountsStore,
     InstructionAccountQueryStore,
     InstructionRelationsStore,
+    InstructionRelationQueryStore,
     CollectionsStore,
     CollectionQueryStore,
     ViewInstructionStore,
@@ -243,7 +245,6 @@ export class ViewInstructionComponent {
     private readonly _instructionStore: InstructionStore,
     private readonly _instructionArgumentsStore: InstructionArgumentsStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
-    private readonly _instructionRelationsStore: InstructionRelationsStore,
     private readonly _collectionsStore: CollectionsStore,
     private readonly _walletStore: WalletStore,
     private readonly _viewInstructionStore: ViewInstructionStore,
@@ -251,12 +252,6 @@ export class ViewInstructionComponent {
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {
-    this._instructionRelationsStore.setFilters(
-      this._viewInstructionStore.instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instructionId) => ({ instruction: instructionId }))
-      )
-    );
     this._viewInstructionStore.setWorkspaceId(
       this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
     );
@@ -366,12 +361,16 @@ export class ViewInstructionComponent {
   }
 
   onCreateInstructionRelation(
-    instruction: Document<Instruction>,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
     fromAccountId: string,
     toAccountId: string
   ) {
-    this._instructionRelationsStore.createInstructionRelation({
-      instruction,
+    this._viewInstructionStore.createInstructionRelation({
+      workspaceId,
+      applicationId,
+      instructionId,
       fromAccountId,
       toAccountId,
     });
@@ -380,16 +379,14 @@ export class ViewInstructionComponent {
   onDeleteInstructionRelation(
     workspaceId: string,
     instructionId: string,
-    request: {
-      instructionRelationId: string;
-      fromAccountId: string;
-      toAccountId: string;
-    }
+    fromAccountId: string,
+    toAccountId: string
   ) {
-    this._instructionRelationsStore.deleteInstructionRelation({
-      ...request,
+    this._viewInstructionStore.deleteInstructionRelation({
       workspaceId,
       instructionId,
+      fromAccountId,
+      toAccountId,
     });
   }
 }
