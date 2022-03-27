@@ -5,11 +5,8 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import {
-  Document,
-  InstructionArgument,
-  InstructionArgumentDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionArgumentItemView } from '@bulldozer-client/instructions-data-access';
+import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-instruction-arguments-list',
@@ -55,23 +52,40 @@ import {
                 {{ i + 1 }}
               </div>
               <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ instructionArgument.name }}
+                <h3 class="mb-0 text-lg font-bold flex items-center gap-2">
+                  <span
+                    [matTooltip]="
+                      instructionArgument.document.name
+                        | bdItemUpdatingMessage: instructionArgument:'Argument'
+                    "
+                  >
+                    {{ instructionArgument.document.name }}
+                  </span>
+                  <mat-progress-spinner
+                    *ngIf="instructionArgument | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:
 
-                  <ng-container *ngIf="instructionArgument.data.modifier">
-                    {{ instructionArgument.data.modifier.name }}
+                  <ng-container
+                    *ngIf="instructionArgument.document.data.modifier"
+                  >
+                    {{ instructionArgument.document.data.modifier.name }}
                     <ng-container
-                      *ngIf="instructionArgument.data.modifier.name === 'array'"
+                      *ngIf="
+                        instructionArgument.document.data.modifier.name ===
+                        'array'
+                      "
                     >
-                      ({{ instructionArgument.data.modifier?.size }})
+                      ({{ instructionArgument.document.data.modifier?.size }})
                     </ng-container>
                     of
                   </ng-container>
 
-                  {{ instructionArgument.data.kind.name }}.
+                  {{ instructionArgument.document.data.kind.name }}.
                 </p>
               </div>
               <button
@@ -86,9 +100,12 @@ import {
                 <button
                   mat-menu-item
                   bdEditInstructionArgumentTrigger
-                  [instructionArgument]="instructionArgument"
+                  [instructionArgument]="instructionArgument.document"
                   (editInstructionArgument)="
-                    onUpdateInstructionArgument(instructionArgument.id, $event)
+                    onUpdateInstructionArgument(
+                      instructionArgument.document.id,
+                      $event
+                    )
                   "
                   [disabled]="!connected"
                 >
@@ -97,7 +114,9 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionArgument(instructionArgument.id)"
+                  (click)="
+                    onDeleteInstructionArgument(instructionArgument.document.id)
+                  "
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -119,7 +138,7 @@ import {
 })
 export class InstructionArgumentsListComponent {
   @Input() connected = false;
-  @Input() instructionArguments: Document<InstructionArgument>[] | null = null;
+  @Input() instructionArguments: InstructionArgumentItemView[] | null = null;
   @Output() createInstructionArgument =
     new EventEmitter<InstructionArgumentDto>();
   @Output() updateInstructionArgument = new EventEmitter<{

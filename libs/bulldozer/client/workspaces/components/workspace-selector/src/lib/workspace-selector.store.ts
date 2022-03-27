@@ -152,9 +152,24 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
                 )
             )
           ),
-        instructionArguments: this._instructionArgumentApiService.find({
-          workspace: workspaceId,
-        }),
+        instructionArguments: this._instructionArgumentApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionArgumentIds) =>
+              this._instructionArgumentApiService
+                .findByIds(instructionArgumentIds)
+                .pipe(
+                  concatMap((instructionArguments) =>
+                    from(instructionArguments).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
         instructionAccounts: this._instructionAccountApiService.find({
           workspace: workspaceId,
         }),

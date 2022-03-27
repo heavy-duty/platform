@@ -4,6 +4,7 @@ export * from './lib/instruction-accounts.store';
 export * from './lib/instruction-api.service';
 export * from './lib/instruction-argument-api.service';
 export * from './lib/instruction-argument-event.service';
+export * from './lib/instruction-argument-query.store';
 export * from './lib/instruction-arguments.store';
 export * from './lib/instruction-event.service';
 export * from './lib/instruction-query.store';
