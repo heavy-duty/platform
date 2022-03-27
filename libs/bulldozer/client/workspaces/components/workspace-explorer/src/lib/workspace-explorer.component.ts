@@ -6,7 +6,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
   selector: 'bd-workspace-explorer',
   template: `
     <div class="flex h-screen overflow-auto justify-between flex-col ">
-      <div class="flex items-center justify-center border-b border-gray-500">
+      <div class="flex items-center justify-center border-b hd-border-gray">
         <div
           class="w-36 mt-5 pb-3 cursor-pointer"
           (click)="onCreateUser()"
@@ -22,7 +22,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
           <p class="text-center">Click here to a create new user</p>
         </div>
 
-        <div class="w-36 mt-5 pb-3" *ngIf="(user$ | ngrxPush) !== null">
+        <div
+          class="w-36 mt-5 pb-3 cursor-pointer"
+          *ngIf="(user$ | ngrxPush) !== null"
+          [routerLink]="['/profile']"
+        >
           <figure class="w-20 m-auto mb-2 relative">
             <img src="assets/images/default-profile.png" class="w-full" />
           </figure>

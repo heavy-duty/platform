@@ -22,11 +22,19 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 @include containers.theme($theme);
 // end
 
+.hd-border-gray {
+  border-color: #dcdcdc !important;
+}
+
 .darkMode {
   @include angular-material-theme($darkTheme);
   // set custom themes
   @include containers.theme($darkTheme);
   // end
+
+  .hd-border-gray {
+    border-color: #2c2c2c !important;
+  }
 }
 
 // Specific component overrides, pieces that are not in line with the general theming
@@ -161,4 +169,8 @@ mat-icon {
     color: #444444 !important;
     background-color: rgba(250, 250, 250, 0.42) !important;
   }
+}
+
+.mat-drawer-container {
+  height: 100vh;
 }

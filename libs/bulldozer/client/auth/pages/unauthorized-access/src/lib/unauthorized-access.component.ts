@@ -25,7 +25,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   template: `
     <main class="flex h-screen">
       <div class="hd-side-left w-1/2 h-screen flex justify-end items-center">
-        <div class="content mr-16 -scroll-mt-6">
+        <div class="content mr-16 hd-scroll-mt-8">
           <figure class="mb-4 w-32">
             <img src="assets/images/logo.png" class="w-full" />
           </figure>
@@ -38,7 +38,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
         </div>
       </div>
       <div class="hd-side-right w-1/2 h-screen flex justify-start items-center">
-        <div class="content ml-16 w-96 -scroll-mt-6">
+        <div class="content ml-16 w-96 hd-scroll-mt-8">
           <h2 class="font-bold">WELCOME</h2>
           <p>
             Bulldozer is a open source low code platform to build Solana

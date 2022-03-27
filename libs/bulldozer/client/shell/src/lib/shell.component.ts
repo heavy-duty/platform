@@ -36,8 +36,8 @@ import {
     <div>
       <mat-sidenav-container class="h-screen-layout w-full">
         <mat-sidenav
-          #drawer
-          class="bd-h-inherit bd-custom-top-toolbar w-60"
+          #navigation
+          class="bd-h-inherit w-60"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
@@ -48,36 +48,69 @@ import {
             [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
           ></bd-workspace-explorer>
         </mat-sidenav>
+        <!-- -->
+        <!-- -->
         <mat-sidenav-content>
           <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
             <div class="ml-auto flex items-center">
-              <hd-connection-menu class="mr-6"></hd-connection-menu>
-
-              <button
-                mat-raised-button
-                color="basic"
-                [routerLink]="['/profile']"
-                class="mr-6"
-              >
-                Profile
+              <button type="button" mat-mini-fab (click)="settings.toggle()">
+                <mat-icon
+                  aria-hidden="false"
+                  aria-label="Bulldozer tool settings"
+                  >settings</mat-icon
+                >
               </button>
-
-              <hd-wallet-multi-button
-                class="bd-custom-color h-auto leading-none mr-6"
-                color="basic"
-              ></hd-wallet-multi-button>
-
-              <bd-dark-theme-switch></bd-dark-theme-switch>
             </div>
           </mat-toolbar>
+          <!-- -->
+          <!-- -->
           <bd-tab-list
             [tabs]="(tabs$ | ngrxPush) ?? null"
             [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
             (closeTab)="onCloseTab($event)"
           ></bd-tab-list>
-
+          <!-- -->
+          <!-- -->
           <router-outlet></router-outlet>
         </mat-sidenav-content>
+
+        <!-- -->
+        <!-- -->
+        <mat-sidenav
+          #settings
+          class="bd-h-inherit w-72"
+          fixedInViewport
+          position="end"
+          [mode]="'over'"
+          [opened]="false"
+        >
+          <!-- Move to component -->
+          <!-- -->
+          <mat-toolbar color="accent" class="shadow-md sticky top-0 z-10">
+            <div>
+              <h2>SETTINGS</h2>
+            </div>
+          </mat-toolbar>
+          <main class="flex flex-col">
+            <section class="px-7 py-8 border-b hd-border-gray">
+              <p>WALLET</p>
+              <hd-wallet-multi-button
+                class="bd-custom-color h-auto leading-none mr-6"
+                color="basic"
+              ></hd-wallet-multi-button>
+            </section>
+
+            <section class="px-7 py-8 border-b hd-border-gray">
+              <p>NETWORK</p>
+              <hd-connection-menu class="mr-6"></hd-connection-menu>
+            </section>
+
+            <section class="px-7 py-8 flex justify-between">
+              <p class="m-0">DARK MODE</p>
+              <bd-dark-theme-switch></bd-dark-theme-switch>
+            </section>
+          </main>
+        </mat-sidenav>
       </mat-sidenav-container>
 
       <div class="block fixed bottom-0 right-0 w-screen z-20">
