@@ -1,44 +1,31 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  Collection,
-  CollectionFilters,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  mergeMap,
-  of,
-  pipe,
-  switchMap,
-  take,
-  takeUntil,
-  takeWhile,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { CollectionApiService } from './collection-api.service';
-import { CollectionEventService } from './collection-event.service';
+import { ItemView } from './types';
+
+export type CollectionItemView = ItemView<Document<Collection>>;
 
 interface ViewModel {
   loading: boolean;
-  collectionsMap: Map<string, Document<Collection>>;
-  filters: CollectionFilters | null;
+  collectionIds: string[] | null;
+  collectionsMap: Map<string, CollectionItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  filters: null,
-  collectionsMap: new Map<string, Document<Collection>>(),
+  collectionIds: null,
+  collectionsMap: new Map<string, CollectionItemView>(),
 };
 
 @Injectable()
 export class CollectionsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
-  readonly filters$ = this.select(({ filters }) => filters);
+  readonly collectionIds$ = this.select(({ collectionIds }) => collectionIds);
   readonly collectionsMap$ = this.select(
     ({ collectionsMap }) => collectionsMap
   );
@@ -47,21 +34,26 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _walletStore: WalletStore,
     private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionEventService: CollectionEventService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._handleCollectionCreated(this.filters$);
-    this._loadCollections(this.filters$);
+    this._loadCollections(this.collectionIds$);
   }
 
-  private readonly _setCollection = this.updater<Document<Collection>>(
+  readonly setCollectionIds = this.updater<string[] | null>(
+    (state, collectionIds) => ({
+      ...state,
+      collectionIds,
+    })
+  );
+
+  private readonly _setCollection = this.updater<CollectionItemView>(
     (state, newCollection) => {
       const collectionsMap = new Map(state.collectionsMap);
-      collectionsMap.set(newCollection.id, newCollection);
+      collectionsMap.set(newCollection.document.id, newCollection);
+
       return {
         ...state,
         collectionsMap,
@@ -69,19 +61,29 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _addCollection = this.updater<Document<Collection>>(
-    (state, newCollection) => {
-      if (state.collectionsMap.has(newCollection.id)) {
-        return state;
-      }
-      const collectionsMap = new Map(state.collectionsMap);
-      collectionsMap.set(newCollection.id, newCollection);
-      return {
-        ...state,
-        collectionsMap,
-      };
+  private readonly _patchStatus = this.updater<{
+    collectionId: string;
+    statuses: {
+      isCreating?: boolean;
+      isUpdating?: boolean;
+      isDeleting?: boolean;
+    };
+  }>((state, { collectionId, statuses }) => {
+    const collectionsMap = new Map(state.collectionsMap);
+    const collection = collectionsMap.get(collectionId);
+
+    if (collection === undefined) {
+      return state;
     }
-  );
+
+    return {
+      ...state,
+      collectionsMap: collectionsMap.set(collectionId, {
+        ...collection,
+        ...statuses,
+      }),
+    };
+  });
 
   private readonly _removeCollection = this.updater<string>(
     (state, collectionId) => {
@@ -94,180 +96,124 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _handleCollectionChanges = this.effect<string>(
-    mergeMap((collectionId) =>
-      this._collectionEventService.collectionChanges(collectionId).pipe(
-        tapResponse(
-          (changes) => {
-            if (changes === null) {
-              this._removeCollection(collectionId);
-            } else {
-              this._setCollection(changes);
-            }
-          },
-          (error) => this._notificationStore.setError(error)
-        ),
-        takeUntil(
-          this.loading$.pipe(
-            filter((loading) => loading),
-            take(1)
-          )
-        ),
-        takeWhile((collection) => collection !== null)
-      )
-    )
-  );
-
-  private readonly _handleCollectionCreated =
-    this.effect<CollectionFilters | null>(
-      switchMap((filters) => {
-        if (filters === null) {
-          return EMPTY;
-        }
-
-        return this._collectionEventService.collectionCreated(filters).pipe(
-          tapResponse(
-            (collection) => {
-              this._addCollection(collection);
-              this._handleCollectionChanges(collection.id);
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-      })
-    );
-
-  private readonly _loadCollections = this.effect<CollectionFilters | null>(
-    switchMap((filters) => {
-      if (filters === null) {
+  private readonly _loadCollections = this.effect<string[] | null>(
+    switchMap((collectionIds) => {
+      if (collectionIds === null) {
         return EMPTY;
       }
 
       this.patchState({ loading: true });
 
-      return this._collectionApiService.find(filters).pipe(
+      return this._collectionApiService.findByIds(collectionIds).pipe(
         tapResponse(
           (collections) => {
             this.patchState({
-              collectionsMap: collections.reduce(
-                (collectionsMap, collection) =>
-                  collectionsMap.set(collection.id, collection),
-                new Map<string, Document<Collection>>()
-              ),
               loading: false,
+              collectionsMap: collections
+                .filter(
+                  (collection): collection is Document<Collection> =>
+                    collection !== null
+                )
+                .reduce(
+                  (collectionsMap, collection) =>
+                    collectionsMap.set(collection.id, {
+                      document: collection,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    }),
+                  new Map<string, CollectionItemView>()
+                ),
             });
-            collections.forEach(({ id }) => this._handleCollectionChanges(id));
           },
-          (error) => this._notificationStore.setError(error)
+          (error) => this._notificationStore.setError({ error })
         )
       );
     })
   );
 
-  readonly setFilters = this.updater<CollectionFilters | null>(
-    (state, filters) => ({
-      ...state,
-      filters,
-    })
-  );
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collectionAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Collection'
+      );
 
-  readonly createCollection = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    collectionName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ collectionName, workspaceId, applicationId }, authority]) => {
-          if (authority === null) {
+      if (collectionAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createCollection': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collectionId: collectionAccountMeta.pubkey,
+              statuses: {
+                isCreating: false,
+              },
+            });
+
             return EMPTY;
           }
 
           return this._collectionApiService
-            .create({
-              collectionName,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-            })
+            .findById(collectionAccountMeta.pubkey, 'confirmed')
             .pipe(
+              isNotNullOrUndefined,
               tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Create collection request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
+                (collection) =>
+                  this._setCollection({
+                    document: collection,
+                    isCreating: true,
+                    isUpdating: false,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
               )
             );
         }
-      )
-    )
-  );
+        case 'updateCollection': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collectionId: collectionAccountMeta.pubkey,
+              statuses: {
+                isUpdating: false,
+              },
+            });
 
-  readonly updateCollection = this.effect<{
-    collectionId: string;
-    collectionName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ collectionId, collectionName }, authority]) => {
-        if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._collectionApiService
+            .findById(collectionAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              isNotNullOrUndefined,
+              tapResponse(
+                (collection) =>
+                  this._setCollection({
+                    document: collection,
+                    isCreating: false,
+                    isUpdating: true,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'deleteCollection': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
+              collectionId: collectionAccountMeta.pubkey,
+              statuses: { isDeleting: true },
+            });
+          } else {
+            this._removeCollection(collectionAccountMeta.pubkey);
+          }
+
           return EMPTY;
         }
-
-        return this._collectionApiService
-          .update({
-            collectionName,
-            authority: authority.toBase58(),
-            collectionId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Update collection request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly deleteCollection = this.effect<{
-    applicationId: string;
-    collectionId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ collectionId, applicationId }, authority]) => {
-        if (authority === null) {
+        default:
           return EMPTY;
-        }
-
-        return this._collectionApiService
-          .delete({
-            authority: authority.toBase58(),
-            collectionId,
-            applicationId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete collection request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+      }
+    })
   );
 }

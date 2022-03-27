@@ -13,6 +13,8 @@ export const updateInstruction = (
         .methods.updateInstruction({ name: params.instructionName })
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
+          application: new PublicKey(params.applicationId),
           instruction: new PublicKey(params.instructionId),
         })
         .instruction() as Promise<TransactionInstruction>

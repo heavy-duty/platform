@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createWorkspace,
@@ -22,13 +23,14 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Keypair } from '@solana/web3.js';
+import { Finality, Keypair } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -36,32 +38,39 @@ import {
 export class WorkspaceApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {}
 
   private handleError(error: string) {
     return throwError(() => parseBulldozerError(error) ?? null);
   }
 
-  // get workspaces
-  find(filters: WorkspaceFilters) {
+  // get workspace ids
+  findIds(filters: WorkspaceFilters, commitment: Finality = 'finalized') {
     const query = workspaceQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
+        ...query,
+        dataSlice: {
+          length: 0,
+          offset: 0,
+        },
+        commitment,
+      })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createWorkspaceDocument(pubkey, account)
-          )
-        )
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }
 
   // get workspace
-  findById(workspaceId: string): Observable<Document<Workspace> | null> {
+  findById(
+    workspaceId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<Workspace> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(workspaceId)
+      .getAccountInfo(workspaceId, commitment)
       .pipe(
         map(
           (accountInfo) =>
@@ -72,10 +81,11 @@ export class WorkspaceApiService {
 
   // get workspaces
   findByIds(
-    workspaceIds: string[]
+    workspaceIds: string[],
+    commitment: Finality = 'finalized'
   ): Observable<(Document<Workspace> | null)[]> {
     return this._hdSolanaApiService
-      .getMultipleAccounts(workspaceIds)
+      .getMultipleAccounts(workspaceIds, { commitment })
       .pipe(
         map((keyedAccounts) =>
           keyedAccounts.map(
@@ -135,9 +145,15 @@ export class WorkspaceApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -158,9 +174,15 @@ export class WorkspaceApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

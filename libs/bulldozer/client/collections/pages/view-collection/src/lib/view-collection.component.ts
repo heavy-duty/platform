@@ -1,10 +1,16 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import {
+  CollectionAttributeQueryStore,
   CollectionAttributesStore,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
 import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
@@ -19,7 +25,21 @@ import { ViewCollectionStore } from './view-collection.store';
       >
         <header bdPageHeader>
           <h1>
-            {{ collection.name }}
+            <span
+              [matTooltip]="
+                collection.document.name
+                  | bdItemUpdatingMessage: collection:'Collection'
+              "
+              matTooltipShowDelay="500"
+              class="flex items-center justify-start gap-2"
+            >
+              {{ collection.document.name }}
+              <mat-progress-spinner
+                *ngIf="collection | bdItemShowSpinner"
+                diameter="16"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+            </span>
           </h1>
           <p>Visualize all the details about this collection.</p>
         </header>
@@ -30,20 +50,23 @@ import { ViewCollectionStore } from './view-collection.store';
             [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
             (createCollectionAttribute)="
               onCreateCollectionAttribute(
-                collection.data.workspace,
-                collection.data.application,
-                collection.id,
+                collection.document.data.workspace,
+                collection.document.data.application,
+                collection.document.id,
                 $event
               )
             "
             (updateCollectionAttribute)="
               onUpdateCollectionAttribute(
+                collection.document.data.workspace,
+                collection.document.id,
                 $event.collectionAttributeId,
                 $event.collectionAttributeDto
               )
             "
             (deleteCollectionAttribute)="
               onDeleteCollectionAttribute(
+                collection.document.data.workspace,
                 $event.collectionId,
                 $event.collectionAttributeId
               )
@@ -66,11 +89,12 @@ import { ViewCollectionStore } from './view-collection.store';
   providers: [
     CollectionStore,
     CollectionAttributesStore,
+    CollectionAttributeQueryStore,
     ViewCollectionStore,
     ViewCollectionCodeStore,
   ],
 })
-export class ViewCollectionComponent {
+export class ViewCollectionComponent implements OnInit {
   @HostBinding('class') class = 'block';
   readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._collectionStore.collection$;
@@ -80,20 +104,25 @@ export class ViewCollectionComponent {
   readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
 
   constructor(
+    private readonly _route: ActivatedRoute,
     private readonly _viewCollectionStore: ViewCollectionStore,
     private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
     private readonly _collectionStore: CollectionStore,
     private readonly _collectionAttributesStore: CollectionAttributesStore,
     private readonly _walletStore: WalletStore
-  ) {
-    this._collectionAttributesStore.setFilters(
-      this._viewCollectionStore.collectionId$.pipe(
-        isNotNullOrUndefined,
-        map((collectionId) => ({ collection: collectionId }))
+  ) {}
+
+  ngOnInit() {
+    this._viewCollectionStore.setWorkspaceId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
+    );
+    this._viewCollectionStore.setApplicationId(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('applicationId'))
       )
     );
-    this._collectionStore.setCollectionId(
-      this._viewCollectionStore.collectionId$
+    this._viewCollectionStore.setCollectionId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
     );
   }
 
@@ -103,7 +132,7 @@ export class ViewCollectionComponent {
     collectionId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._collectionAttributesStore.createCollectionAttribute({
+    this._viewCollectionStore.createCollectionAttribute({
       workspaceId,
       applicationId,
       collectionId,
@@ -112,20 +141,26 @@ export class ViewCollectionComponent {
   }
 
   onUpdateCollectionAttribute(
+    workspaceId: string,
+    collectionId: string,
     collectionAttributeId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._collectionAttributesStore.updateCollectionAttribute({
+    this._viewCollectionStore.updateCollectionAttribute({
+      workspaceId,
+      collectionId,
       collectionAttributeId,
       collectionAttributeDto,
     });
   }
 
   onDeleteCollectionAttribute(
+    workspaceId: string,
     collectionId: string,
     collectionAttributeId: string
   ) {
-    this._collectionAttributesStore.deleteCollectionAttribute({
+    this._viewCollectionStore.deleteCollectionAttribute({
+      workspaceId,
       collectionId,
       collectionAttributeId,
     });

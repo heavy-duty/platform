@@ -1,9 +1,14 @@
-import { Program, Provider } from '@heavy-duty/anchor';
+import {
+  BorshAccountsCoder,
+  BorshInstructionCoder,
+  Program,
+  Provider,
+} from '@heavy-duty/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Bulldozer, IDL } from './bulldozer';
 
 export const BULLDOZER_PROGRAM_ID = new PublicKey(
-  '3YZPhioKYt3GpHw93iPKnwf8NEZ4GwMaCDcxFP2VJzgg'
+  'EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo'
 );
 
 let currentEndpoint: string;
@@ -23,3 +28,7 @@ export const getBulldozerProgram = (endpoint: string) => {
 
   return program;
 };
+
+export const accountsCoder = new BorshAccountsCoder(IDL);
+
+export const instructionCoder = new BorshInstructionCoder(IDL);

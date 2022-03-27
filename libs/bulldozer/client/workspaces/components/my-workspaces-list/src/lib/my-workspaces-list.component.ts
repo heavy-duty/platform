@@ -5,7 +5,7 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
 
 @Component({
   selector: 'bd-my-workspaces-list',
@@ -34,28 +34,38 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
                 {{ i + 1 }}
               </div>
               <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ workspace.name }}
+                <h3
+                  class="mb-0 text-lg font-bold flex items-center justify-start gap-2"
+                >
+                  <span
+                    [matTooltip]="
+                      workspace.document.name
+                        | bdItemUpdatingMessage: workspace:'Workspace'
+                    "
+                    matTooltipShowDelay="500"
+                  >
+                    {{ workspace.document.name }}
+                  </span>
+                  <mat-progress-spinner
+                    *ngIf="workspace | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
                 </h3>
+
                 <p class="text-xs mb-0 italic">
                   Workspace ID:
-                  {{ workspace.id }}
+                  {{ workspace.document.id }}
                 </p>
-                <a
-                  class="text-xs underline text-primary"
-                  [routerLink]="['/workspaces', workspace.id]"
-                >
-                  View details
-                </a>
               </div>
-              <button
+              <a
                 mat-mini-fab
                 aria-label="Load workspace"
                 color="primary"
-                (click)="onLoadWorkspace(workspace.id)"
+                [routerLink]="['/workspaces', workspace.document.id]"
               >
-                <mat-icon>add</mat-icon>
-              </button>
+                <mat-icon>open_in_new</mat-icon>
+              </a>
             </div>
           </mat-list-item>
         </mat-list>
@@ -70,10 +80,11 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyWorkspacesListComponent {
-  @Input() workspaces: Document<Workspace>[] | null = null;
-  @Output() loadWorkspace = new EventEmitter<string>();
+  @Input() workspaces: WorkspaceView[] | null = null;
+  @Input() activeWorkspaceId: string | null = null;
+  @Output() activateWorkspace = new EventEmitter<string>();
 
-  onLoadWorkspace(workspaceId: string) {
-    this.loadWorkspace.emit(workspaceId);
+  onActivateWorkspace(workspaceId: string) {
+    this.activateWorkspace.emit(workspaceId);
   }
 }

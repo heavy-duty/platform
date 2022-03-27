@@ -13,6 +13,8 @@ export const deleteInstructionRelation = (
         .methods.deleteInstructionRelation()
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
+          instruction: new PublicKey(params.instructionId),
           from: new PublicKey(params.fromAccountId),
           to: new PublicKey(params.toAccountId),
         })

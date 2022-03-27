@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
-import { LoadedWorkspacesListModule } from '@bulldozer-client/loaded-workspaces-list';
 import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
@@ -28,7 +27,6 @@ import { ViewProfileComponent } from './view-profile.component';
     PageHeaderModule,
     ObscureAddressModule,
     UserDetailsModule,
-    LoadedWorkspacesListModule,
     MyWorkspacesListModule,
   ],
 })

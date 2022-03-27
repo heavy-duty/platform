@@ -29,21 +29,22 @@ describe('instruction account', () => {
   const workspace = Keypair.generate();
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let instructionStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+    [instructionStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_stats', 'utf8'),
+        instruction.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -151,7 +152,7 @@ describe('instruction account', () => {
         space: null,
       };
       // act
-      await program.methods
+      const signature = await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
@@ -169,10 +170,13 @@ describe('instruction account', () => {
           },
         ])
         .rpc();
+      await program.provider.connection.confirmTransaction(signature);
       // assert
       const account = await program.account.instructionAccount.fetch(
         instructionAccount.publicKey
       );
+      const instructionStatsAccount =
+        await program.account.instructionStats.fetch(instructionStatsPublicKey);
       const decodedKind = decodeAccountKind(account.kind as any);
       assert.ok(account.authority.equals(program.provider.wallet.publicKey));
       assert.ok(account.instruction.equals(instruction.publicKey));
@@ -184,6 +188,7 @@ describe('instruction account', () => {
       assert.equal(decodedKind.collection, collection.publicKey.toBase58());
       assert.equal(account.modifier, null);
       assert.ok(account.createdAt.eq(account.updatedAt));
+      assert.equal(instructionStatsAccount.quantityOfAccounts, 1);
     });
 
     it('should remove collection when changing the kind', async () => {
@@ -199,6 +204,8 @@ describe('instruction account', () => {
         .updateInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
         })
         .rpc();
@@ -244,6 +251,7 @@ describe('instruction account', () => {
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           account: instructionAccount.publicKey,
           instruction: instruction.publicKey,
         })
@@ -339,6 +347,8 @@ describe('instruction account', () => {
           .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
           })
           .remainingAccounts([
@@ -542,6 +552,8 @@ describe('instruction account', () => {
           .updateInstructionAccount(accountsData)
           .accounts({
             authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
           })
           .rpc();
@@ -602,36 +614,133 @@ describe('instruction account', () => {
     });
   });
 
-  it('should fail when deleting account with relations', async () => {
-    // arrange
-    const instructionAccount1 = Keypair.generate();
-    const instructionAccount2 = Keypair.generate();
-    const accountsData = {
-      name: '12345678901234567890123456789012',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    let error: ProgramError | null = null;
-    // act
-    try {
+  describe('unhappy paths', () => {
+    let instruction = Keypair.generate();
+
+    before(async () => {
+      [instructionStatsPublicKey] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from('instruction_stats', 'utf8'),
+          instruction.publicKey.toBuffer(),
+        ],
+        program.programId
+      );
+
       await program.methods
-        .createInstructionAccount(accountsData)
+        .createInstruction({ name: instructionName })
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
-          account: instructionAccount1.publicKey,
         })
-        .signers([instructionAccount1])
-        .remainingAccounts([
-          {
-            pubkey: collection.publicKey,
-            isWritable: false,
-            isSigner: false,
-          },
-        ])
+        .signers([instruction])
+        .rpc();
+    });
+
+    it('should fail when deleting account with relations', async () => {
+      // arrange
+      const instructionAccount1 = Keypair.generate();
+      const instructionAccount2 = Keypair.generate();
+      const accountsData = {
+        name: '12345678901234567890123456789012',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      let error: ProgramError | null = null;
+      // act
+      try {
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount1.publicKey,
+          })
+          .signers([instructionAccount1])
+          .remainingAccounts([
+            {
+              pubkey: collection.publicKey,
+              isWritable: false,
+              isSigner: false,
+            },
+          ])
+          .rpc();
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount2.publicKey,
+          })
+          .signers([instructionAccount2])
+          .remainingAccounts([
+            {
+              pubkey: collection.publicKey,
+              isWritable: false,
+              isSigner: false,
+            },
+          ])
+          .rpc();
+        await program.methods
+          .createInstructionRelation()
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            from: instructionAccount1.publicKey,
+            to: instructionAccount2.publicKey,
+          })
+          .rpc();
+        await program.methods
+          .deleteInstructionAccount()
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount1.publicKey,
+          })
+          .rpc();
+      } catch (err) {
+        error = err as ProgramError;
+      }
+      // assert
+      assert.equal(error?.code, 6015);
+    });
+
+    it('should increment instruction account quantity on create', async () => {
+      // arrange
+      const instructionAccount = Keypair.generate();
+      const instruction = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      [instructionStatsPublicKey] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from('instruction_stats', 'utf8'),
+          instruction.publicKey.toBuffer(),
+        ],
+        program.programId
+      );
+      // act
+      await program.methods
+        .createInstruction({ name: instructionName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+        })
+        .signers([instruction])
         .rpc();
       await program.methods
         .createInstructionAccount(accountsData)
@@ -640,9 +749,9 @@ describe('instruction account', () => {
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
-          account: instructionAccount2.publicKey,
+          account: instructionAccount.publicKey,
         })
-        .signers([instructionAccount2])
+        .signers([instructionAccount])
         .remainingAccounts([
           {
             pubkey: collection.publicKey,
@@ -651,292 +760,277 @@ describe('instruction account', () => {
           },
         ])
         .rpc();
+      // assert
+      const instructionStatsAccount =
+        await program.account.instructionStats.fetch(instructionStatsPublicKey);
+      assert.equal(instructionStatsAccount.quantityOfAccounts, 1);
+    });
+
+    it('should decrement instruction account quantity on delete', async () => {
+      // arrange
+      const instructionAccount = Keypair.generate();
+      const instruction = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      [instructionStatsPublicKey] = await PublicKey.findProgramAddress(
+        [
+          Buffer.from('instruction_stats', 'utf8'),
+          instruction.publicKey.toBuffer(),
+        ],
+        program.programId
+      );
+      // act
       await program.methods
-        .createInstructionRelation()
+        .createInstruction({ name: instructionName })
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
-          from: instructionAccount1.publicKey,
-          to: instructionAccount2.publicKey,
         })
+        .signers([instruction])
+        .rpc();
+      await program.methods
+        .createInstructionAccount(accountsData)
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
+          account: instructionAccount.publicKey,
+        })
+        .signers([instructionAccount])
+        .remainingAccounts([
+          {
+            pubkey: collection.publicKey,
+            isWritable: false,
+            isSigner: false,
+          },
+        ])
         .rpc();
       await program.methods
         .deleteInstructionAccount()
         .accounts({
           authority: program.provider.wallet.publicKey,
-          account: instructionAccount1.publicKey,
+          workspace: workspace.publicKey,
           instruction: instruction.publicKey,
+          account: instructionAccount.publicKey,
         })
         .rpc();
-    } catch (err) {
-      error = err as ProgramError;
-    }
-    // assert
-    assert.equal(error?.code, 6015);
-  });
+      // assert
+      const instructionStatsAccount =
+        await program.account.instructionStats.fetch(instructionStatsPublicKey);
+      assert.equal(instructionStatsAccount.quantityOfAccounts, 0);
+    });
 
-  it('should increment instruction account quantity on create', async () => {
-    // arrange
-    const instructionAccount = Keypair.generate();
-    const instruction = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    // act
-    await program.methods
-      .createInstruction({ name: instructionName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-      })
-      .signers([instruction])
-      .rpc();
-    await program.methods
-      .createInstructionAccount(accountsData)
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        account: instructionAccount.publicKey,
-      })
-      .signers([instructionAccount])
-      .remainingAccounts([
-        {
-          pubkey: collection.publicKey,
-          isWritable: false,
-          isSigner: false,
-        },
-      ])
-      .rpc();
-    // assert
-    const account = await program.account.instruction.fetch(
-      instruction.publicKey
-    );
-    assert.equal(account.quantityOfAccounts, 1);
-  });
+    it('should fail when providing wrong "instruction" to delete', async () => {
+      // arrange
+      const newInstruction = Keypair.generate();
+      const newInstructionName = 'sample';
+      const newAccount = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 1,
+        modifier: null,
+        space: null,
+      };
+      let error: ProgramError | null = null;
+      // act
+      try {
+        await program.methods
+          .createInstruction({ name: newInstructionName })
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: newInstruction.publicKey,
+          })
+          .signers([newInstruction])
+          .rpc();
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: newInstruction.publicKey,
+            account: newAccount.publicKey,
+          })
+          .signers([newAccount])
+          .rpc();
+        await program.methods
+          .deleteInstructionAccount()
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
+            account: newAccount.publicKey,
+          })
+          .rpc();
+      } catch (err) {
+        error = err as ProgramError;
+      }
+      // assert
+      assert.equal(error?.code, 6044);
+    });
 
-  it('should decrement instruction account quantity on delete', async () => {
-    // arrange
-    const instructionAccount = Keypair.generate();
-    const instruction = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    // act
-    await program.methods
-      .createInstruction({ name: instructionName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-      })
-      .signers([instruction])
-      .rpc();
-    await program.methods
-      .createInstructionAccount(accountsData)
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: workspace.publicKey,
-        application: application.publicKey,
-        instruction: instruction.publicKey,
-        account: instructionAccount.publicKey,
-      })
-      .signers([instructionAccount])
-      .remainingAccounts([
-        {
-          pubkey: collection.publicKey,
-          isWritable: false,
-          isSigner: false,
-        },
-      ])
-      .rpc();
-    await program.methods
-      .deleteInstructionAccount()
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        account: instructionAccount.publicKey,
-        instruction: instruction.publicKey,
-      })
-      .rpc();
-    // assert
-    const account = await program.account.instruction.fetch(
-      instruction.publicKey
-    );
-    assert.equal(account.quantityOfAccounts, 0);
-  });
-
-  it('should fail when providing wrong "instruction" to delete', async () => {
-    // arrange
-    const newInstruction = Keypair.generate();
-    const newInstructionName = 'sample';
-    const newAccount = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 1,
-      modifier: null,
-      space: null,
-    };
-    let error: ProgramError | null = null;
-    // act
-    try {
+    it('should fail when workspace has insufficient funds', async () => {
+      // arrange
+      const newWorkspace = Keypair.generate();
+      const newWorkspaceName = 'sample';
+      const newApplication = Keypair.generate();
+      const newApplicationName = 'sample';
+      const newInstruction = Keypair.generate();
+      const newInstructionName = 'sample';
+      const newAccount = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
+        [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
+        program.programId
+      );
+      let error: ProgramError | null = null;
+      // act
+      await program.methods
+        .createWorkspace({ name: newWorkspaceName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+        })
+        .signers([newWorkspace])
+        .postInstructions([
+          SystemProgram.transfer({
+            fromPubkey: program.provider.wallet.publicKey,
+            toPubkey: newBudgetPublicKey,
+            lamports:
+              (await program.provider.connection.getMinimumBalanceForRentExemption(
+                2155 // instruction account size
+              )) +
+              (await program.provider.connection.getMinimumBalanceForRentExemption(
+                10 // instruction stats account size
+              )) +
+              (await program.provider.connection.getMinimumBalanceForRentExemption(
+                125 // application account size
+              )) +
+              (await program.provider.connection.getMinimumBalanceForRentExemption(
+                10 // application stats account size
+              )),
+          }),
+        ])
+        .rpc();
+      await program.methods
+        .createApplication({ name: newApplicationName })
+        .accounts({
+          authority: program.provider.wallet.publicKey,
+          workspace: newWorkspace.publicKey,
+          application: newApplication.publicKey,
+        })
+        .signers([newApplication])
+        .rpc();
       await program.methods
         .createInstruction({ name: newInstructionName })
-        .accounts({
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: newInstruction.publicKey,
-        })
-        .signers([newInstruction])
-        .rpc();
-      await program.methods
-        .createInstructionAccount(accountsData)
-        .accounts({
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: newInstruction.publicKey,
-          account: newAccount.publicKey,
-        })
-        .signers([newAccount])
-        .rpc();
-      await program.methods
-        .deleteInstructionAccount()
-        .accounts({
-          authority: program.provider.wallet.publicKey,
-          instruction: instruction.publicKey,
-          account: newAccount.publicKey,
-        })
-        .rpc();
-    } catch (err) {
-      error = err as ProgramError;
-    }
-    // assert
-    assert.equal(error?.code, 6044);
-  });
-
-  it('should fail when workspace has insufficient funds', async () => {
-    // arrange
-    const newWorkspace = Keypair.generate();
-    const newWorkspaceName = 'sample';
-    const newApplication = Keypair.generate();
-    const newApplicationName = 'sample';
-    const newInstruction = Keypair.generate();
-    const newInstructionName = 'sample';
-    const newAccount = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
-      [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
-      program.programId
-    );
-    let error: ProgramError | null = null;
-    // act
-    await program.methods
-      .createWorkspace({ name: newWorkspaceName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: newWorkspace.publicKey,
-      })
-      .signers([newWorkspace])
-      .postInstructions([
-        SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
-          toPubkey: newBudgetPublicKey,
-          lamports:
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
-              2155 // instruction account size
-            )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
-            )),
-        }),
-      ])
-      .rpc();
-    await program.methods
-      .createApplication({ name: newApplicationName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: newWorkspace.publicKey,
-        application: newApplication.publicKey,
-      })
-      .signers([newApplication])
-      .rpc();
-    await program.methods
-      .createInstruction({ name: newInstructionName })
-      .accounts({
-        authority: program.provider.wallet.publicKey,
-        workspace: newWorkspace.publicKey,
-        application: newApplication.publicKey,
-        instruction: newInstruction.publicKey,
-      })
-      .signers([newInstruction])
-      .rpc();
-    try {
-      await program.methods
-        .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
           application: newApplication.publicKey,
           instruction: newInstruction.publicKey,
-          account: newAccount.publicKey,
         })
-        .signers([newAccount])
-        .remainingAccounts([
-          {
-            pubkey: collection.publicKey,
-            isWritable: false,
-            isSigner: false,
-          },
-        ])
+        .signers([newInstruction])
         .rpc();
-    } catch (err) {
-      error = err as ProgramError;
-    }
-    // assert
-    assert.equal(error?.code, 6027);
-  });
+      try {
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: program.provider.wallet.publicKey,
+            workspace: newWorkspace.publicKey,
+            application: newApplication.publicKey,
+            instruction: newInstruction.publicKey,
+            account: newAccount.publicKey,
+          })
+          .signers([newAccount])
+          .remainingAccounts([
+            {
+              pubkey: collection.publicKey,
+              isWritable: false,
+              isSigner: false,
+            },
+          ])
+          .rpc();
+      } catch (err) {
+        error = err as ProgramError;
+      }
+      // assert
+      assert.equal(error?.code, 6027);
+    });
 
-  it('should fail when user is not a collaborator', async () => {
-    // arrange
-    const newUser = Keypair.generate();
-    const newAccount = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    let error: ProgramError | null = null;
-    // act
-    try {
+    it('should fail when user is not a collaborator', async () => {
+      // arrange
+      const newUser = Keypair.generate();
+      const newAccount = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      let error: ProgramError | null = null;
+      // act
+      try {
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: newUser.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: newAccount.publicKey,
+          })
+          .signers([newUser, newAccount])
+          .preInstructions([
+            SystemProgram.transfer({
+              fromPubkey: program.provider.wallet.publicKey,
+              toPubkey: newUser.publicKey,
+              lamports: LAMPORTS_PER_SOL,
+            }),
+          ])
+          .rpc();
+      } catch (err) {
+        error = err as ProgramError;
+      }
+      // assert
+      assert.equal(error?.code, 3012);
+    });
+
+    it('should fail when user is not an approved collaborator', async () => {
+      // arrange
+      const newAccount = Keypair.generate();
+      const accountsData = {
+        name: 'data',
+        kind: 0,
+        modifier: null,
+        space: null,
+      };
+      const newUser = Keypair.generate();
+      let error: ProgramError | null = null;
+      // act
+      const [newUserPublicKey] = await PublicKey.findProgramAddress(
+        [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
+        program.programId
+      );
       await program.methods
-        .createInstructionAccount(accountsData)
+        .createUser()
         .accounts({
           authority: newUser.publicKey,
-          workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: newAccount.publicKey,
         })
-        .signers([newUser, newAccount])
+        .signers([newUser])
         .preInstructions([
           SystemProgram.transfer({
             fromPubkey: program.provider.wallet.publicKey,
@@ -945,69 +1039,33 @@ describe('instruction account', () => {
           }),
         ])
         .rpc();
-    } catch (err) {
-      error = err as ProgramError;
-    }
-    // assert
-    assert.equal(error?.code, 3012);
-  });
-
-  it('should fail when user is not an approved collaborator', async () => {
-    // arrange
-    const newAccount = Keypair.generate();
-    const accountsData = {
-      name: 'data',
-      kind: 0,
-      modifier: null,
-      space: null,
-    };
-    const newUser = Keypair.generate();
-    let error: ProgramError | null = null;
-    // act
-    const [newUserPublicKey] = await PublicKey.findProgramAddress(
-      [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
-      program.programId
-    );
-    await program.methods
-      .createUser()
-      .accounts({
-        authority: newUser.publicKey,
-      })
-      .signers([newUser])
-      .preInstructions([
-        SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
-          toPubkey: newUser.publicKey,
-          lamports: LAMPORTS_PER_SOL,
-        }),
-      ])
-      .rpc();
-    await program.methods
-      .requestCollaboratorStatus()
-      .accounts({
-        authority: newUser.publicKey,
-        user: newUserPublicKey,
-        workspace: workspace.publicKey,
-      })
-      .signers([newUser])
-      .rpc();
-
-    try {
       await program.methods
-        .createInstructionAccount(accountsData)
+        .requestCollaboratorStatus()
         .accounts({
           authority: newUser.publicKey,
           workspace: workspace.publicKey,
-          application: application.publicKey,
-          instruction: instruction.publicKey,
-          account: newAccount.publicKey,
+          user: newUserPublicKey,
         })
-        .signers([newUser, newAccount])
+        .signers([newUser])
         .rpc();
-    } catch (err) {
-      error = err as ProgramError;
-    }
-    // assert
-    assert.equal(error?.code, 6029);
+
+      try {
+        await program.methods
+          .createInstructionAccount(accountsData)
+          .accounts({
+            authority: newUser.publicKey,
+            workspace: workspace.publicKey,
+            application: application.publicKey,
+            instruction: instruction.publicKey,
+            account: newAccount.publicKey,
+          })
+          .signers([newUser, newAccount])
+          .rpc();
+      } catch (err) {
+        error = err as ProgramError;
+      }
+      // assert
+      assert.equal(error?.code, 6029);
+    });
   });
 });

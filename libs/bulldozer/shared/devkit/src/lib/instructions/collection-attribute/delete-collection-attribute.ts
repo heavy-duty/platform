@@ -13,6 +13,7 @@ export const deleteCollectionAttribute = (
         .methods.deleteCollectionAttribute()
         .accounts({
           authority: new PublicKey(params.authority),
+          workspace: new PublicKey(params.workspaceId),
           collection: new PublicKey(params.collectionId),
           attribute: new PublicKey(params.collectionAttributeId),
         })

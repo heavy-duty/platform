@@ -20,21 +20,22 @@ describe('instruction', () => {
   const workspace = Keypair.generate();
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let applicationStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+    [applicationStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('application_stats', 'utf8'),
+        application.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -88,15 +89,14 @@ describe('instruction', () => {
     const account = await program.account.instruction.fetch(
       instruction.publicKey
     );
-    const applicationAccount = await program.account.application.fetch(
-      application.publicKey
-    );
+    const applicationStatsAccount =
+      await program.account.applicationStats.fetch(applicationStatsPublicKey);
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.equal(account.name, instructionName);
     assert.equal(account.body, '');
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
-    assert.equal(applicationAccount.quantityOfInstructions, 1);
+    assert.equal(applicationStatsAccount.quantityOfInstructions, 1);
     assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
@@ -108,6 +108,8 @@ describe('instruction', () => {
       .updateInstruction({ name: instructionName })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -135,6 +137,8 @@ describe('instruction', () => {
       .updateInstructionBody({ body: instructionBody })
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
         instruction: instruction.publicKey,
       })
       .rpc();
@@ -151,6 +155,7 @@ describe('instruction', () => {
       .deleteInstruction()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         instruction: instruction.publicKey,
         application: application.publicKey,
       })
@@ -159,11 +164,10 @@ describe('instruction', () => {
     const account = await program.account.instruction.fetchNullable(
       instruction.publicKey
     );
-    const applicationAccount = await program.account.application.fetch(
-      application.publicKey
-    );
+    const applicationStatsAccount =
+      await program.account.applicationStats.fetch(applicationStatsPublicKey);
     assert.equal(account, null);
-    assert.equal(applicationAccount.quantityOfInstructions, 0);
+    assert.equal(applicationStatsAccount.quantityOfInstructions, 0);
   });
 
   it('should fail when deleting instruction with arguments', async () => {
@@ -185,10 +189,10 @@ describe('instruction', () => {
       await program.methods
         .createInstruction({ name: instructionName })
         .accounts({
-          instruction: instruction.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
         })
         .signers([instruction])
         .rpc();
@@ -206,9 +210,10 @@ describe('instruction', () => {
       await program.methods
         .deleteInstruction()
         .accounts({
-          instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
+          instruction: instruction.publicKey,
         })
         .rpc();
     } catch (err) {
@@ -235,10 +240,10 @@ describe('instruction', () => {
       await program.methods
         .createInstruction({ name: instructionName })
         .accounts({
-          instruction: instruction.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          instruction: instruction.publicKey,
         })
         .signers([instruction])
         .rpc();
@@ -256,9 +261,10 @@ describe('instruction', () => {
       await program.methods
         .deleteInstruction()
         .accounts({
-          instruction: instruction.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
+          instruction: instruction.publicKey,
         })
         .rpc();
     } catch (err) {
@@ -300,6 +306,7 @@ describe('instruction', () => {
         .deleteInstruction()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: newInstruction.publicKey,
         })
@@ -337,9 +344,12 @@ describe('instruction', () => {
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
           lamports:
-            await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
               126 // application account size
-            ),
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
+            )),
         }),
       ])
       .rpc();
@@ -431,8 +441,8 @@ describe('instruction', () => {
       .requestCollaboratorStatus()
       .accounts({
         authority: newUser.publicKey,
-        user: newUserPublicKey,
         workspace: workspace.publicKey,
+        user: newUserPublicKey,
       })
       .signers([newUser])
       .rpc();

@@ -13,8 +13,9 @@ export const deleteCollection = (
         .methods.deleteCollection()
         .accounts({
           authority: new PublicKey(params.authority),
-          collection: new PublicKey(params.collectionId),
+          workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),
+          collection: new PublicKey(params.collectionId),
         })
         .instruction() as Promise<TransactionInstruction>
     )

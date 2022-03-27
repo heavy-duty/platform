@@ -4,29 +4,30 @@ import {
   BreakpointState,
 } from '@angular/cdk/layout';
 import { Injectable } from '@angular/core';
-import { WorkspaceEventService } from '@bulldozer-client/workspaces-data-access';
+import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
-import { LocalStorageSubject } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { isNotNullOrUndefined, LocalStorageSubject } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { PublicKey } from '@solana/web3.js';
 import {
+  concatMap,
   distinctUntilChanged,
-  EMPTY,
+  filter,
+  map,
+  merge,
+  of,
   pairwise,
   pipe,
-  switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 
 interface ViewModel {
-  workspaceIds: string[] | null;
   workspaceId: string | null;
   isHandset: boolean;
 }
 
 const initialState: ViewModel = {
-  workspaceIds: null,
   workspaceId: null,
   isHandset: false,
 };
@@ -36,34 +37,54 @@ export class ConfigStore extends ComponentStore<ViewModel> {
   private readonly _workspaceId = new LocalStorageSubject<string>(
     'workspaceId'
   );
-  private readonly _loadedWorkspaces = new LocalStorageSubject<string[]>(
-    'loadedWorkspaces'
-  );
   readonly isHandset$ = this.select(({ isHandset }) => isHandset);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
-  readonly workspaceIds$ = this.select(({ workspaceIds }) => workspaceIds);
 
   constructor(
     private readonly _breakpointObserver: BreakpointObserver,
     private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _workspaceEventService: WorkspaceEventService,
-    private readonly _walletStore: WalletStore
+    private readonly _userInstructionsStore: UserInstructionsStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
     this._loadHandset(this._breakpointObserver.observe(Breakpoints.Handset));
     this._loadWorkspaceId(this._workspaceId.asObservable());
-    this._loadWorkspaces(this._loadedWorkspaces.asObservable());
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
-    this._handleWorkspaceCreated(this._walletStore.publicKey$);
-    this._handleWorkspaceRemoved(
-      this.select(
-        this.workspaceId$,
-        this.workspaceIds$,
-        (workspaceId, workspaceIds) => ({ workspaceId, workspaceIds })
+    this._removeActiveWorkspaceOnDelete(
+      merge(
+        this._workspaceInstructionsStore.lastInstructionStatus$,
+        this._userInstructionsStore.lastInstructionStatus$
+      ).pipe(
+        isNotNullOrUndefined,
+        filter(
+          (instructionStatus) =>
+            instructionStatus.name === 'deleteWorkspace' &&
+            instructionStatus.status === 'finalized'
+        ),
+        map(
+          (instructionStatus) =>
+            instructionStatus.accounts.find(
+              (account) => account.name === 'Workspace'
+            )?.pubkey ?? null
+        ),
+        isNotNullOrUndefined
       )
     );
   }
+
+  private readonly _removeActiveWorkspaceOnDelete = this.effect<string>(
+    pipe(
+      concatMap((workspaceDeletedId) =>
+        of(workspaceDeletedId).pipe(withLatestFrom(this.workspaceId$))
+      ),
+      filter(
+        ([activeWorkspaceId, workspaceDeletedId]) =>
+          activeWorkspaceId === workspaceDeletedId
+      ),
+      tap(() => this._workspaceId.next(null))
+    )
+  );
 
   private readonly _loadHandset = this.updater<BreakpointState>(
     (state, result) => ({
@@ -76,25 +97,6 @@ export class ConfigStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _loadWorkspaces = this.updater<string[] | null>(
-    (state, workspaceIds) => ({ ...state, workspaceIds })
-  );
-
-  private readonly _handleWorkspaceRemoved = this.effect<{
-    workspaceId: string | null;
-    workspaceIds: string[] | null;
-  }>(
-    tap(({ workspaceId, workspaceIds }) => {
-      if (
-        workspaceId !== null &&
-        workspaceIds !== null &&
-        !workspaceIds.some((id) => id === workspaceId)
-      ) {
-        this.setWorkspaceId(null);
-      }
-    })
-  );
-
   private readonly _handleNetworkChanges = this.effect(
     pipe(
       distinctUntilChanged(),
@@ -102,49 +104,12 @@ export class ConfigStore extends ComponentStore<ViewModel> {
       tap(() =>
         this.patchState({
           workspaceId: null,
-          workspaceIds: null,
         })
       )
     )
   );
 
-  private readonly _handleWorkspaceCreated = this.effect<PublicKey | null>(
-    switchMap((walletPublicKey) => {
-      if (walletPublicKey === null) {
-        return EMPTY;
-      }
-
-      return this._workspaceEventService
-        .workspaceCreated({
-          authority: walletPublicKey.toBase58(),
-        })
-        .pipe(tap((workspace) => this.addWorkspace(workspace.id)));
-    })
-  );
-
   setWorkspaceId(workspaceId: string | null) {
     this._workspaceId.next(workspaceId);
-  }
-
-  addWorkspace(workspaceId: string) {
-    const { workspaceIds } = this.get();
-
-    if (workspaceIds === null) {
-      this._loadedWorkspaces.next([workspaceId]);
-    } else {
-      this._loadedWorkspaces.next([...new Set([...workspaceIds, workspaceId])]);
-    }
-  }
-
-  removeWorkspace(workspaceId: string) {
-    const { workspaceIds } = this.get();
-
-    if (workspaceIds !== null) {
-      this._loadedWorkspaces.next(
-        workspaceIds.filter(
-          (loadedWorkspaceId) => loadedWorkspaceId !== workspaceId
-        )
-      );
-    }
   }
 }

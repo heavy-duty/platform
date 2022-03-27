@@ -19,19 +19,16 @@ describe('application', () => {
   const workspace = Keypair.generate();
   const application = Keypair.generate();
   const applicationName = 'my-app';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let workspaceStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
+      program.programId
+    );
+    [workspaceStatsPublicKey] = await PublicKey.findProgramAddress(
+      [Buffer.from('workspace_stats', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
 
@@ -78,13 +75,13 @@ describe('application', () => {
     const account = await program.account.application.fetch(
       application.publicKey
     );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
+    const workspaceStatsAccount = await program.account.workspaceStats.fetch(
+      workspaceStatsPublicKey
     );
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.equal(account.name, applicationName);
-    assert.equal(workspaceAccount.quantityOfApplications, 1);
+    assert.equal(workspaceStatsAccount.quantityOfApplications, 1);
     assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
@@ -97,6 +94,7 @@ describe('application', () => {
       .accounts({
         authority: program.provider.wallet.publicKey,
         application: application.publicKey,
+        workspace: workspace.publicKey,
       })
       .rpc();
     // assert
@@ -121,11 +119,11 @@ describe('application', () => {
     const account = await program.account.application.fetchNullable(
       application.publicKey
     );
-    const workspaceAccount = await program.account.workspace.fetch(
-      workspace.publicKey
+    const workspaceStatsAccount = await program.account.workspaceStats.fetch(
+      workspaceStatsPublicKey
     );
     assert.equal(account, null);
-    assert.equal(workspaceAccount.quantityOfApplications, 0);
+    assert.equal(workspaceStatsAccount.quantityOfApplications, 0);
   });
 
   it('should fail when deleting application with collections', async () => {

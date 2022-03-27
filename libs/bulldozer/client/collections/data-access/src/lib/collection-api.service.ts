@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   Collection,
@@ -22,13 +23,14 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Keypair } from '@solana/web3.js';
+import { Finality, Keypair } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -36,32 +38,57 @@ import {
 export class CollectionApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {}
 
   private handleError(error: string) {
     return throwError(() => parseBulldozerError(error) ?? null);
   }
 
-  // get collections
-  find(filters: CollectionFilters) {
+  // get collection ids
+  findIds(filters: CollectionFilters, commitment: Finality = 'finalized') {
     const query = collectionQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
+        ...query,
+        commitment,
+        dataSlice: {
+          offset: 0,
+          length: 0,
+        },
+      })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createCollectionDocument(pubkey, account)
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
+      );
+  }
+
+  // get collections
+  findByIds(collectionIds: string[], commitment: Finality = 'finalized') {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(collectionIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createCollectionDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
           )
         )
       );
   }
 
   // get collection
-  findById(collectionId: string): Observable<Document<Collection> | null> {
+  findById(
+    collectionId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<Collection> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(collectionId)
+      .getAccountInfo(collectionId, commitment)
       .pipe(
         map(
           (accountInfo) =>
@@ -92,9 +119,15 @@ export class CollectionApiService {
       ),
       partiallySignTransaction(collectionKeypair),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -115,9 +148,15 @@ export class CollectionApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -138,9 +177,15 @@ export class CollectionApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

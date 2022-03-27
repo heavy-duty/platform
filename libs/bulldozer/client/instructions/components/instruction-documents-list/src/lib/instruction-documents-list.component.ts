@@ -5,11 +5,13 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import { InstructionDocument } from '@bulldozer-client/instructions-data-access';
+import {
+  InstructionAccountItemView,
+  InstructionDocumentItemView,
+} from '@bulldozer-client/instructions-data-access';
 import {
   Collection,
   Document,
-  InstructionAccount,
   InstructionAccountDto,
 } from '@heavy-duty/bulldozer-devkit';
 
@@ -50,7 +52,7 @@ import {
               let instructionDocument of instructionDocuments;
               let i = index
             "
-            class="h-28 bg-white bg-opacity-5 mat-elevation-z2"
+            class="h-auto py-2 bg-white bg-opacity-5 mat-elevation-z2"
           >
             <div class="flex items-center gap-4 w-full">
               <div
@@ -60,38 +62,57 @@ import {
               </div>
 
               <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ instructionDocument.name }}
-
+                <h3 class="mb-0 flex items-center gap-2 flex-grow">
                   <span
-                    class="text-xs font-thin"
-                    *ngIf="instructionDocument.data.modifier"
-                    [ngSwitch]="instructionDocument.data.modifier.id"
+                    [matTooltip]="
+                      instructionDocument.document.name
+                        | bdItemUpdatingMessage: instructionDocument:'Document'
+                    "
                   >
-                    <ng-container *ngSwitchCase="0">
-                      ({{ instructionDocument.data.modifier.name }}: space
-                      {{ instructionDocument.data.modifier.space }})
-                    </ng-container>
-                    <ng-container *ngSwitchCase="1">
-                      ({{ instructionDocument.data.modifier.name }})
-                    </ng-container>
+                    <span class="text-lg font-bold">
+                      {{ instructionDocument.document.name }}
+                    </span>
+
+                    <span
+                      class="text-xs font-thin"
+                      *ngIf="instructionDocument.document.data.modifier"
+                      [ngSwitch]="instructionDocument.document.data.modifier.id"
+                    >
+                      <ng-container *ngSwitchCase="0">
+                        ({{ instructionDocument.document.data.modifier.name }}:
+                        space
+                        {{ instructionDocument.document.data.modifier.space }})
+                      </ng-container>
+                      <ng-container *ngSwitchCase="1">
+                        ({{ instructionDocument.document.data.modifier.name }})
+                      </ng-container>
+                    </span>
                   </span>
+                  <mat-progress-spinner
+                    *ngIf="instructionDocument | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
                 </h3>
+
                 <p
                   class="text-xs mb-0 italic"
                   *ngIf="instructionDocument.collection"
                 >
                   Collection:
-                  {{ instructionDocument.collection.name }}
+                  {{ instructionDocument.collection.document.name }}
                   <a
                     class="underline text-accent"
                     [routerLink]="[
                       '/applications',
-                      instructionDocument.data.application,
+                      instructionDocument.document.data.application,
                       'collections',
-                      instructionDocument.collection.id
+                      instructionDocument.collection.document.id
                     ]"
-                    >{{ instructionDocument.collection.id | obscureAddress }}</a
+                    >{{
+                      instructionDocument.collection.document.id
+                        | obscureAddress
+                    }}</a
                   >
                 </p>
                 <p
@@ -99,8 +120,8 @@ import {
                   *ngIf="instructionDocument.close"
                 >
                   Close:
-                  {{ instructionDocument.close.name }} ({{
-                    instructionDocument.close.id | obscureAddress
+                  {{ instructionDocument.close.document.name }} ({{
+                    instructionDocument.close.document.id | obscureAddress
                   }})
                 </p>
                 <p
@@ -108,8 +129,8 @@ import {
                   *ngIf="instructionDocument.payer"
                 >
                   Payer:
-                  {{ instructionDocument.payer.name }} ({{
-                    instructionDocument.payer.id | obscureAddress
+                  {{ instructionDocument.payer.document.name }} ({{
+                    instructionDocument.payer.document.id | obscureAddress
                   }})
                 </p>
                 <ng-container
@@ -122,23 +143,42 @@ import {
                   <ul class="list-disc pl-4">
                     <li
                       *ngFor="let relation of instructionDocument.relations"
-                      class="text-xs"
+                      class="flex items-center gap-2"
                     >
-                      {{ relation.extras.to.name }} ({{
-                        relation.id | obscureAddress
-                      }})
+                      <span class="flex items-center gap-2">
+                        <span
+                          [matTooltip]="
+                            relation.extras.to.document.name
+                              | bdItemUpdatingMessage: relation:'Relation to'
+                          "
+                        >
+                          <span class="font-bold">
+                            {{ relation.extras.to.document.name }}
+                          </span>
+
+                          <span class="text-xs font-thin">
+                            ({{ relation.document.id | obscureAddress }})
+                          </span>
+                        </span>
+                        <mat-progress-spinner
+                          *ngIf="relation | bdItemShowSpinner"
+                          diameter="16"
+                          mode="indeterminate"
+                        ></mat-progress-spinner>
+                      </span>
 
                       <button
                         class="w-6 h-6 leading-6"
                         mat-icon-button
                         [attr.aria-label]="
-                          'Delete relation to ' + relation.extras.to.name
+                          'Delete relation to ' +
+                          relation.extras.to.document.name
                         "
                         (click)="
                           onDeleteInstructionRelation(
-                            relation.id,
-                            relation.from,
-                            relation.to
+                            relation.document.id,
+                            relation.document.from,
+                            relation.document.to
                           )
                         "
                         [disabled]="!connected"
@@ -163,7 +203,7 @@ import {
                   mat-menu-item
                   bdEditInstructionRelationTrigger
                   [instructionAccounts]="instructionAccounts"
-                  [from]="instructionDocument.id"
+                  [from]="instructionDocument.document.id"
                   (editInstructionRelation)="
                     onCreateInstructionRelation($event.from, $event.to)
                   "
@@ -177,9 +217,12 @@ import {
                   bdEditInstructionDocumentTrigger
                   [collections]="collections"
                   [instructionAccounts]="instructionAccounts"
-                  [instructionDocument]="instructionDocument"
+                  [instructionDocument]="instructionDocument.document"
                   (editInstructionDocument)="
-                    onUpdateInstructionDocument(instructionDocument.id, $event)
+                    onUpdateInstructionDocument(
+                      instructionDocument.document.id,
+                      $event
+                    )
                   "
                   [disabled]="!connected"
                 >
@@ -188,7 +231,9 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  (click)="onDeleteInstructionDocument(instructionDocument.id)"
+                  (click)="
+                    onDeleteInstructionDocument(instructionDocument.document.id)
+                  "
                   [disabled]="!connected"
                 >
                   <mat-icon>delete</mat-icon>
@@ -211,8 +256,8 @@ import {
 })
 export class InstructionDocumentsListComponent {
   @Input() connected = false;
-  @Input() instructionDocuments: InstructionDocument[] | null = null;
-  @Input() instructionAccounts: Document<InstructionAccount>[] | null = null;
+  @Input() instructionDocuments: InstructionDocumentItemView[] | null = null;
+  @Input() instructionAccounts: InstructionAccountItemView[] | null = null;
   @Input() collections: Document<Collection>[] | null = null;
   @Output() createInstructionDocument =
     new EventEmitter<InstructionAccountDto>();

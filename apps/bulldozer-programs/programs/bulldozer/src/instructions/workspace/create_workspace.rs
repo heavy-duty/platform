@@ -1,4 +1,4 @@
-use crate::collections::{Budget, Collaborator, User, Workspace};
+use crate::collections::{Budget, Collaborator, User, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
 use anchor_lang::prelude::*;
 
@@ -10,8 +10,15 @@ pub struct CreateWorkspaceArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateWorkspaceArguments)]
 pub struct CreateWorkspace<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(
+    init,
+    payer = authority,
+    space = Workspace::space(),
+  )]
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -23,9 +30,14 @@ pub struct CreateWorkspace<'info> {
   #[account(
     init,
     payer = authority,
-    space = Workspace::space(),
+    space = WorkspaceStats::space(),
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump,
   )]
-  pub workspace: Box<Account<'info, Workspace>>,
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
     init,
     payer = authority,
@@ -49,16 +61,17 @@ pub struct CreateWorkspace<'info> {
     space = Budget::space(),
   )]
   pub budget: Box<Account<'info, Budget>>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {
   msg!("Create workspace");
-  ctx
-    .accounts
-    .workspace
-    .initialize(arguments.name, *ctx.accounts.authority.key);
+  ctx.accounts.workspace.initialize(
+    arguments.name,
+    *ctx.accounts.authority.key,
+    *ctx.bumps.get("workspace_stats").unwrap(),
+  );
   ctx.accounts.workspace.initialize_timestamp()?;
+  ctx.accounts.workspace_stats.initialize();
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),

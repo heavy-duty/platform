@@ -1,5 +1,6 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { ApplicationStore } from '@bulldozer-client/applications-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { ApplicationTabStore } from './application-tab.store';
 
 @Component({
@@ -12,18 +13,34 @@ import { ApplicationTabStore } from './application-tab.store';
       <a
         [routerLink]="[
           '/workspaces',
-          application.data.workspace,
+          application.document.data.workspace,
           'applications',
-          application.id
+          application.document.id
         ]"
-        class="flex items-center pl-4 flex-grow"
+        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        [matTooltip]="
+          application.document.name
+            | bdItemUpdatingMessage: application:'Application'
+        "
+        matTooltipShowDelay="500"
       >
-        {{ application.name }}
+        <span
+          class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
+          {{ application.document.name }}
+        </span>
+        <mat-progress-spinner
+          *ngIf="application | bdItemShowSpinner"
+          class="flex-shrink-0"
+          mode="indeterminate"
+          diameter="16"
+        ></mat-progress-spinner>
       </a>
+
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + application.name + ' tab'"
-        (click)="onCloseTab()"
+        [attr.aria-label]="'Close ' + application.document.name + ' tab'"
+        (click)="onCloseTab(application.document.id)"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -34,23 +51,19 @@ import { ApplicationTabStore } from './application-tab.store';
 export class ApplicationTabComponent {
   @HostBinding('class') class = 'block w-full';
 
-  private _applicationId!: string;
   @Input() set applicationId(value: string) {
-    this._applicationId = value;
-    this._applicationStore.setApplicationId(this.applicationId);
-  }
-  get applicationId() {
-    return this._applicationId;
+    this._applicationTabStore.setApplicationId(value);
   }
 
   readonly application$ = this._applicationStore.application$;
 
   constructor(
+    private readonly _tabStore: TabStore,
     private readonly _applicationTabStore: ApplicationTabStore,
     private readonly _applicationStore: ApplicationStore
   ) {}
 
-  onCloseTab() {
-    this._applicationTabStore.closeTab(this.applicationId);
+  onCloseTab(applicationId: string) {
+    this._tabStore.closeTab(applicationId);
   }
 }

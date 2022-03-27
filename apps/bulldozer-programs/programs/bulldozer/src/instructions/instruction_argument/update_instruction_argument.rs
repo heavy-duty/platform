@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, InstructionArgument, User};
+use crate::collections::{Collaborator, Instruction, InstructionArgument, User, Workspace};
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -17,7 +17,16 @@ pub struct UpdateInstructionArgumentArguments {
 #[instruction(arguments: UpdateInstructionArgumentArguments)]
 pub struct UpdateInstructionArgument<'info> {
   pub authority: Signer<'info>,
-  #[account(mut)]
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Account<'info, Instruction>,
+  #[account(
+    mut,
+    constraint = argument.workspace == workspace.key() @ ErrorCode::InstructionArgumentDoesNotBelongToWorkspace,
+    constraint = argument.instruction == instruction.key() @ ErrorCode::InstructionArgumentDoesNotBelongToInstruction
+  )]
   pub argument: Box<Account<'info, InstructionArgument>>,
   #[account(
     seeds = [

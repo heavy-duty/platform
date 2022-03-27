@@ -1,4 +1,7 @@
-use crate::collections::{Budget, Collaborator, InstructionAccount, InstructionRelation, User};
+use crate::collections::{
+  Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountStats,
+  InstructionRelation, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,9 +9,23 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteInstructionRelation<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    constraint = from.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = from.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+  )]
+  pub from: Box<Account<'info, InstructionAccount>>,
+  #[account(
+    constraint = to.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = to.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+  )]
+  pub to: Box<Account<'info, InstructionAccount>>,
   #[account(
     mut,
-    has_one = authority,
     close = authority,
     seeds = [
       b"instruction_relation".as_ref(),
@@ -18,20 +35,6 @@ pub struct DeleteInstructionRelation<'info> {
     bump = relation.bump
   )]
   pub relation: Account<'info, InstructionRelation>,
-  #[account(
-    mut,
-    constraint = from.workspace == relation.workspace @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
-    constraint = from.application == relation.application @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
-    constraint = from.instruction == relation.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
-  )]
-  pub from: Box<Account<'info, InstructionAccount>>,
-  #[account(
-    mut,
-    constraint = to.workspace == relation.workspace @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
-    constraint = to.application == relation.application @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
-    constraint = to.instruction == relation.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
-  )]
-  pub to: Box<Account<'info, InstructionAccount>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -43,7 +46,7 @@ pub struct DeleteInstructionRelation<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      relation.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -54,16 +57,34 @@ pub struct DeleteInstructionRelation<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      relation.workspace.as_ref(),
+      workspace.key().as_ref(),
     ],
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    mut,
+    seeds = [
+      b"instruction_account_stats".as_ref(),
+      from.key().as_ref()
+    ],
+    bump = from.instruction_account_stats_bump
+  )]
+  pub from_stats: Box<Account<'info, InstructionAccountStats>>,
+  #[account(
+    mut,
+    seeds = [
+      b"instruction_account_stats".as_ref(),
+      to.key().as_ref()
+    ],
+    bump = to.instruction_account_stats_bump
+  )]
+  pub to_stats: Box<Account<'info, InstructionAccountStats>>,
 }
 
 pub fn handle(ctx: Context<DeleteInstructionRelation>) -> Result<()> {
   msg!("Delete instruction relation");
-  ctx.accounts.from.decrease_relation_quantity();
-  ctx.accounts.to.decrease_relation_quantity();
+  ctx.accounts.from_stats.decrease_relation_quantity();
+  ctx.accounts.to_stats.decrease_relation_quantity();
   Ok(())
 }

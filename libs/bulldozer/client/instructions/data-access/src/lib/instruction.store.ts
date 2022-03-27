@@ -1,65 +1,53 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import {
+  BehaviorSubject,
+  combineLatest,
   concatMap,
   EMPTY,
-  of,
-  pipe,
-  startWith,
+  map,
   switchMap,
-  withLatestFrom,
 } from 'rxjs';
 import { InstructionApiService } from './instruction-api.service';
-import { InstructionEventService } from './instruction-event.service';
+import { ItemView } from './types';
+
+export type InstructionView = ItemView<Document<Instruction>>;
 
 interface ViewModel {
-  instruction: Document<Instruction> | null;
   instructionId: string | null;
+  instruction: InstructionView | null;
+  loading: boolean;
 }
 
 const initialState: ViewModel = {
-  instruction: null,
   instructionId: null,
+  instruction: null,
+  loading: false,
 };
 
 @Injectable()
 export class InstructionStore extends ComponentStore<ViewModel> {
+  private readonly _reload = new BehaviorSubject(null);
+  private readonly reload$ = this._reload.asObservable();
   readonly instruction$ = this.select(({ instruction }) => instruction);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
+  readonly loading$ = this.select(({ loading }) => loading);
 
   constructor(
-    private readonly _walletStore: WalletStore,
     private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionEventService: InstructionEventService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._loadInstruction(this.instructionId$);
+    this._loadInstruction(
+      combineLatest([this.instructionId$, this.reload$]).pipe(
+        map(([instructionId]) => instructionId)
+      )
+    );
   }
-
-  private readonly _loadInstruction = this.effect<string | null>(
-    switchMap((instructionId) => {
-      if (instructionId === null) {
-        return EMPTY;
-      }
-
-      return this._instructionApiService.findById(instructionId).pipe(
-        concatMap((instruction) =>
-          this._instructionEventService
-            .instructionChanges(instructionId)
-            .pipe(startWith(instruction))
-        ),
-        tapResponse(
-          (instruction) => this.patchState({ instruction }),
-          (error) => this._notificationStore.setError(error)
-        )
-      );
-    })
-  );
 
   readonly setInstructionId = this.updater<string | null>(
     (state, instructionId) => ({
@@ -68,33 +56,132 @@ export class InstructionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly updateInstructionBody = this.effect<{
-    instructionId: string;
-    instructionBody: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ instructionId, instructionBody }, authority]) => {
-        if (authority === null) {
+  private readonly _patchStatus = this.updater<{
+    isCreating?: boolean;
+    isUpdating?: boolean;
+    isDeleting?: boolean;
+  }>((state, statuses) => ({
+    ...state,
+    instruction: state.instruction
+      ? {
+          ...state.instruction,
+          ...statuses,
+        }
+      : null,
+  }));
+
+  private readonly _setInstruction = this.updater<InstructionView | null>(
+    (state, instruction) => ({
+      ...state,
+      instruction,
+    })
+  );
+
+  private readonly _loadInstruction = this.effect<string | null>(
+    switchMap((instructionId) => {
+      if (instructionId === null) {
+        this.patchState({ instruction: null });
+        return EMPTY;
+      }
+
+      this.patchState({ loading: true });
+
+      return this._instructionApiService.findById(instructionId).pipe(
+        tapResponse(
+          (instruction) => {
+            if (instruction !== null) {
+              this._setInstruction({
+                document: instruction,
+                isCreating: false,
+                isUpdating: false,
+                isDeleting: false,
+              });
+            }
+            this.patchState({ loading: false });
+          },
+          (error) => this._notificationStore.setError({ error, loading: false })
+        )
+      );
+    })
+  );
+
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const instructionAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Instruction'
+      );
+
+      if (instructionAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createInstruction': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
+            return EMPTY;
+          }
+
+          return this._instructionApiService
+            .findById(instructionAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (instruction) => {
+                  if (instruction !== null) {
+                    this._setInstruction({
+                      document: instruction,
+                      isCreating: true,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'updateInstruction':
+        case 'updateInstructionBody': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
+            return EMPTY;
+          }
+
+          return this._instructionApiService
+            .findById(instructionAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (instruction) => {
+                  if (instruction !== null) {
+                    this._setInstruction({
+                      document: instruction,
+                      isCreating: false,
+                      isUpdating: true,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'deleteInstruction': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
+          } else {
+            this.patchState({ instruction: null });
+            this._patchStatus({ isDeleting: false });
+          }
+
           return EMPTY;
         }
-
-        return this._instructionApiService
-          .updateBody({
-            instructionId,
-            instructionBody,
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Update body request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        default:
+          return EMPTY;
+      }
+    })
   );
+
+  reload() {
+    this._reload.next(null);
+  }
 }

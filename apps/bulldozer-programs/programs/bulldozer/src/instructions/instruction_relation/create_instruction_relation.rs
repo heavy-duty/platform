@@ -1,6 +1,6 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionRelation, User,
-  Workspace,
+  Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountStats,
+  InstructionRelation, User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -9,6 +9,7 @@ use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct CreateInstructionRelation<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -33,6 +34,19 @@ pub struct CreateInstructionRelation<'info> {
     constraint = to.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace
   )]
   pub to: Box<Account<'info, InstructionAccount>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionRelation::space(),
+    seeds = [
+      b"instruction_relation".as_ref(),
+      from.key().as_ref(),
+      to.key().as_ref()
+    ],
+    bump,
+    constraint = from.key().as_ref() != to.key().as_ref()
+  )]
+  pub relation: Box<Account<'info, InstructionRelation>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -61,19 +75,25 @@ pub struct CreateInstructionRelation<'info> {
   )]
   pub budget: Box<Account<'info, Budget>>,
   #[account(
-    init,
-    payer = authority,
-    space = InstructionRelation::space(),
+    mut,
+    constraint = from_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     seeds = [
-      b"instruction_relation".as_ref(),
-      from.key().as_ref(),
+      b"instruction_account_stats".as_ref(),
+      from.key().as_ref()
+    ],
+    bump = from.instruction_account_stats_bump
+  )]
+  pub from_stats: Box<Account<'info, InstructionAccountStats>>,
+  #[account(
+    mut,
+    constraint = to_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
+    seeds = [
+      b"instruction_account_stats".as_ref(),
       to.key().as_ref()
     ],
-    bump,
-    constraint = from.key().as_ref() != to.key().as_ref()
+    bump = to.instruction_account_stats_bump
   )]
-  pub relation: Box<Account<'info, InstructionRelation>>,
-  pub system_program: Program<'info, System>,
+  pub to_stats: Box<Account<'info, InstructionAccountStats>>,
 }
 
 pub fn validate(ctx: &Context<CreateInstructionRelation>) -> Result<bool> {
@@ -105,7 +125,7 @@ pub fn handle(ctx: Context<CreateInstructionRelation>) -> Result<()> {
     *ctx.bumps.get("relation").unwrap(),
   );
   ctx.accounts.relation.initialize_timestamp()?;
-  ctx.accounts.from.increase_relation_quantity();
-  ctx.accounts.to.increase_relation_quantity();
+  ctx.accounts.from_stats.increase_relation_quantity();
+  ctx.accounts.to_stats.increase_relation_quantity();
   Ok(())
 }

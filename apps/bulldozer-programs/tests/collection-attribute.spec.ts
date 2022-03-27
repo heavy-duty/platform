@@ -22,21 +22,22 @@ describe('collection attribute', () => {
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
   const collectionName = 'my-collection';
-  let userPublicKey: PublicKey;
+  let collectionStatsPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+    [collectionStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('collection_stats', 'utf8'),
+        collection.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -109,8 +110,8 @@ describe('collection attribute', () => {
     // assert
     const collectionAttributeAccount =
       await program.account.collectionAttribute.fetch(attribute.publicKey);
-    const collectionAccount = await program.account.collection.fetch(
-      collection.publicKey
+    const collectionStatsAccount = await program.account.collectionStats.fetch(
+      collectionStatsPublicKey
     );
     const decodedKind = decodeAttributeEnum(
       collectionAttributeAccount.kind as any
@@ -130,7 +131,7 @@ describe('collection attribute', () => {
       collectionAttributeAccount.application.equals(application.publicKey)
     );
     assert.ok(collectionAttributeAccount.workspace.equals(workspace.publicKey));
-    assert.equal(collectionAccount.quantityOfAttributes, 1);
+    assert.equal(collectionStatsAccount.quantityOfAttributes, 1);
     assert.ok(
       collectionAttributeAccount.createdAt.eq(
         collectionAttributeAccount.updatedAt
@@ -153,6 +154,8 @@ describe('collection attribute', () => {
       .updateCollectionAttribute(attributesData)
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        collection: collection.publicKey,
         attribute: attribute.publicKey,
       })
       .rpc();
@@ -178,6 +181,7 @@ describe('collection attribute', () => {
       .deleteCollectionAttribute()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         collection: collection.publicKey,
         attribute: attribute.publicKey,
       })
@@ -187,11 +191,11 @@ describe('collection attribute', () => {
       await program.account.collectionAttribute.fetchNullable(
         attribute.publicKey
       );
-    const collectionAccount = await program.account.collection.fetch(
-      collection.publicKey
+    const collectionStatsAccount = await program.account.collectionStats.fetch(
+      collectionStatsPublicKey
     );
     assert.equal(collectionAttributeAccount, null);
-    assert.equal(collectionAccount.quantityOfAttributes, 0);
+    assert.equal(collectionStatsAccount.quantityOfAttributes, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {
@@ -297,6 +301,7 @@ describe('collection attribute', () => {
         .deleteCollectionAttribute()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           collection: collection.publicKey,
           attribute: newAttribute.publicKey,
         })
@@ -347,7 +352,13 @@ describe('collection attribute', () => {
               157 // collection account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
+              9 // collection stats account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
             )),
         }),
       ])
@@ -466,8 +477,8 @@ describe('collection attribute', () => {
       .requestCollaboratorStatus()
       .accounts({
         authority: newUser.publicKey,
-        user: newUserPublicKey,
         workspace: workspace.publicKey,
+        user: newUserPublicKey,
       })
       .signers([newUser])
       .rpc();

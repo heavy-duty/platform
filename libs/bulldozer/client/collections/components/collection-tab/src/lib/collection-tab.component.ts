@@ -1,5 +1,6 @@
 import { Component, HostBinding, Input } from '@angular/core';
 import { CollectionStore } from '@bulldozer-client/collections-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { CollectionTabStore } from './collection-tab.store';
 
 @Component({
@@ -12,20 +13,36 @@ import { CollectionTabStore } from './collection-tab.store';
       <a
         [routerLink]="[
           '/workspaces',
-          collection.data.workspace,
+          collection.document.data.workspace,
           'applications',
-          collection.data.application,
+          collection.document.data.application,
           'collections',
-          collection.id
+          collection.document.id
         ]"
-        class="flex items-center pl-4 flex-grow"
+        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        [matTooltip]="
+          collection.document.name
+            | bdItemUpdatingMessage: collection:'Collection'
+        "
+        matTooltipShowDelay="500"
       >
-        {{ collection.name }}
+        <span
+          class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
+          {{ collection.document.name }}
+        </span>
+        <mat-progress-spinner
+          *ngIf="collection | bdItemShowSpinner"
+          class="flex-shrink-0"
+          mode="indeterminate"
+          diameter="16"
+        ></mat-progress-spinner>
       </a>
+
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + collection.name + ' tab'"
-        (click)="onCloseTab()"
+        [attr.aria-label]="'Close ' + collection.document.name + ' tab'"
+        (click)="onCloseTab(collection.document.id)"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -36,23 +53,19 @@ import { CollectionTabStore } from './collection-tab.store';
 export class CollectionTabComponent {
   @HostBinding('class') class = 'block w-full';
 
-  private _collectionId!: string;
   @Input() set collectionId(value: string) {
-    this._collectionId = value;
-    this._collectionStore.setCollectionId(this.collectionId);
-  }
-  get collectionId() {
-    return this._collectionId;
+    this._collectionTabStore.setCollectionId(value);
   }
 
   readonly collection$ = this._collectionStore.collection$;
 
   constructor(
-    private readonly _collectionStore: CollectionStore,
-    private readonly _collectionTabStore: CollectionTabStore
+    private readonly _tabStore: TabStore,
+    private readonly _collectionTabStore: CollectionTabStore,
+    private readonly _collectionStore: CollectionStore
   ) {}
 
-  onCloseTab() {
-    this._collectionTabStore.closeTab(this.collectionId);
+  onCloseTab(collectionId: string) {
+    this._tabStore.closeTab(collectionId);
   }
 }

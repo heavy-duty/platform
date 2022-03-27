@@ -1,12 +1,15 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { BudgetStore } from '@bulldozer-client/budgets-data-access';
 import {
   CollaboratorsStore,
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import {
+  WorkspaceInstructionsStore,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { map } from 'rxjs';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
@@ -18,8 +21,21 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       class="flex flex-col gap-5 p-5"
     >
       <header bdPageHeader>
-        <h1>
-          {{ workspace.name }}
+        <h1 class="flex items-center justify-start gap-2">
+          <span
+            [matTooltip]="
+              workspace.document.name
+                | bdItemUpdatingMessage: workspace:'Workspace'
+            "
+            matTooltipShowDelay="500"
+          >
+            {{ workspace.document.name }}
+          </span>
+          <mat-progress-spinner
+            *ngIf="workspace | bdItemShowSpinner"
+            diameter="16"
+            mode="indeterminate"
+          ></mat-progress-spinner>
         </h1>
         <p>Visualize all the details about this workspace.</p>
       </header>
@@ -42,22 +58,30 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           [readyCollaborators]="(readyCollaborators$ | ngrxPush) ?? null"
           [pendingCollaborators]="(pendingCollaborators$ | ngrxPush) ?? null"
           (approveCollaboratorStatusRequest)="
-            onApproveCollaboratorStatusRequest($event)
+            onUpdateCollaborator(workspace.document.id, $event, 1)
           "
-          (grantCollaboratorStatus)="onGrantCollaboratorStatus($event)"
+          (grantCollaboratorStatus)="
+            onUpdateCollaborator(workspace.document.id, $event, 1)
+          "
           (rejectCollaboratorStatusRequest)="
-            onRejectCollaboratorStatusRequest($event)
+            onUpdateCollaborator(workspace.document.id, $event, 2)
           "
           (requestCollaboratorStatus)="
-            onRequestCollaboratorStatus(workspace.id)
+            onRequestCollaboratorStatus(workspace.document.id)
           "
-          (revokeCollaboratorStatus)="onRevokeCollaboratorStatus($event)"
+          (revokeCollaboratorStatus)="
+            onUpdateCollaborator(workspace.document.id, $event, 2)
+          "
           (retryCollaboratorStatusRequest)="
-            onRetryCollaboratorStatusRequest($event)
+            onRetryCollaboratorStatusRequest(workspace.document.id, $event)
           "
           (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
           (toggleShowRejected)="onToggleShowRejectedCollaborators()"
         ></bd-collaborators-list>
+
+        <bd-workspace-instructions
+          [instructionStatuses]="(instructionStatuses$ | ngrxPush) ?? null"
+        ></bd-workspace-instructions>
       </main>
     </div>
   `,
@@ -71,7 +95,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     BudgetStore,
   ],
 })
-export class ViewWorkspaceComponent {
+export class ViewWorkspaceComponent implements OnInit {
   readonly workspace$ = this._workspaceStore.workspace$;
   readonly readyCollaborators$ = this._viewWorkspaceStore.readyCollaborators$;
   readonly pendingCollaborators$ =
@@ -85,27 +109,23 @@ export class ViewWorkspaceComponent {
   readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly budgetMinimumBalanceForRentExemption$ =
     this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
+  readonly instructionStatuses$ =
+    this._workspaceInstructionsStore.instructionStatuses$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _viewWorkspaceStore: ViewWorkspaceStore,
-    private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
     private readonly _userStore: UserStore,
-    private readonly _budgetStore: BudgetStore
-  ) {
-    this._collaboratorStore.setWorkspaceId(
-      this._viewWorkspaceStore.workspaceId$
+    private readonly _budgetStore: BudgetStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
+    private readonly _route: ActivatedRoute
+  ) {}
+
+  ngOnInit() {
+    this._viewWorkspaceStore.setWorkspaceId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
     );
-    this._collaboratorStore.setUserId(this._userStore.userId$);
-    this._collaboratorsStore.setFilters(
-      this._viewWorkspaceStore.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        map((workspaceId) => ({ workspace: workspaceId }))
-      )
-    );
-    this._workspaceStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
-    this._budgetStore.setWorkspaceId(this._viewWorkspaceStore.workspaceId$);
   }
 
   onDepositToBudget(budgetId: string, lamports: number) {
@@ -121,37 +141,25 @@ export class ViewWorkspaceComponent {
     });
   }
 
-  onRetryCollaboratorStatusRequest(collaboratorId: string) {
+  onRetryCollaboratorStatusRequest(
+    workspaceId: string,
+    collaboratorId: string
+  ) {
     this._viewWorkspaceStore.retryCollaboratorStatusRequest({
+      workspaceId,
       collaboratorId,
     });
   }
 
-  onApproveCollaboratorStatusRequest(collaboratorId: string) {
+  onUpdateCollaborator(
+    workspaceId: string,
+    collaboratorId: string,
+    status: number
+  ) {
     this._viewWorkspaceStore.updateCollaborator({
+      workspaceId,
       collaboratorId,
-      status: 1,
-    });
-  }
-
-  onGrantCollaboratorStatus(collaboratorId: string) {
-    this._viewWorkspaceStore.updateCollaborator({
-      collaboratorId,
-      status: 1,
-    });
-  }
-
-  onRejectCollaboratorStatusRequest(collaboratorId: string) {
-    this._viewWorkspaceStore.updateCollaborator({
-      collaboratorId,
-      status: 2,
-    });
-  }
-
-  onRevokeCollaboratorStatus(collaboratorId: string) {
-    this._viewWorkspaceStore.updateCollaborator({
-      collaboratorId,
-      status: 2,
+      status,
     });
   }
 

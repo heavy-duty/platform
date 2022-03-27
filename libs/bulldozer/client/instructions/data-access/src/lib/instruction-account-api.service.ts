@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionAccount,
@@ -22,13 +23,14 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Keypair } from '@solana/web3.js';
+import { Finality, Keypair } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
+  tap,
   throwError,
 } from 'rxjs';
 
@@ -36,39 +38,68 @@ import {
 export class InstructionAccountApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
+    private readonly _hdBroadcasterStore: HdBroadcasterStore
   ) {}
 
   private handleError(error: string) {
     return throwError(() => parseBulldozerError(error) ?? null);
   }
 
-  // get instruction accounts
-  find(filters: InstructionAccountFilters) {
+  // get instruction account ids
+  findIds(
+    filters: InstructionAccountFilters,
+    commitment: Finality = 'finalized'
+  ) {
     const query = instructionAccountQueryBuilder().where(filters).build();
 
     return this._hdSolanaApiService
-      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), query)
+      .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
+        ...query,
+        dataSlice: {
+          offset: 0,
+          length: 0,
+        },
+        commitment,
+      })
       .pipe(
-        map((programAccounts) =>
-          programAccounts.map(({ pubkey, account }) =>
-            createInstructionAccountDocument(pubkey, account)
-          )
-        )
+        map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }
 
   // get instruction account
   findById(
-    instructionAccountId: string
+    instructionAccountId: string,
+    commitment: Finality = 'finalized'
   ): Observable<Document<InstructionAccount> | null> {
     return this._hdSolanaApiService
-      .getAccountInfo(instructionAccountId)
+      .getAccountInfo(instructionAccountId, commitment)
       .pipe(
         map(
           (accountInfo) =>
             accountInfo &&
             createInstructionAccountDocument(instructionAccountId, accountInfo)
+        )
+      );
+  }
+
+  // get instruction accounts
+  findByIds(
+    instructionAccountIds: string[],
+    commitment: Finality = 'finalized'
+  ) {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(instructionAccountIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createInstructionAccountDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
         )
       );
   }
@@ -96,9 +127,15 @@ export class InstructionAccountApiService {
       ),
       partiallySignTransaction(instructionAccountKeypair),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -119,9 +156,15 @@ export class InstructionAccountApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
@@ -142,9 +185,15 @@ export class InstructionAccountApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              params.workspaceId
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

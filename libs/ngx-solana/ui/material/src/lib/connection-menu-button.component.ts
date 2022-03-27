@@ -9,6 +9,7 @@ import { Network } from '@heavy-duty/ngx-solana';
       class="w-36"
       mat-raised-button
       [matTooltip]="selectedNetwork"
+      matTooltipShowDelay="500"
     >
       <div class="flex justify-between items-center">
         <hd-connection-mini-status-button

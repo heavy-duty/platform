@@ -22,21 +22,22 @@ describe('instruction argument', () => {
   const workspace = Keypair.generate();
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let instructionStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+    [instructionStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_stats', 'utf8'),
+        instruction.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -109,9 +110,8 @@ describe('instruction argument', () => {
       await program.account.instructionArgument.fetch(
         instructionArgument.publicKey
       );
-    const instructionAccount = await program.account.instruction.fetch(
-      instruction.publicKey
-    );
+    const instructionStatsAccount =
+      await program.account.instructionStats.fetch(instructionStatsPublicKey);
     const decodedKind = decodeAttributeEnum(
       instructionArgumentAccount.kind as any
     );
@@ -132,7 +132,7 @@ describe('instruction argument', () => {
     assert.equal(decodedKind.id, argumentsData.kind);
     assert.equal(decodedKind.size, 1);
     assert.equal(instructionArgumentAccount.modifier, null);
-    assert.equal(instructionAccount.quantityOfArguments, 1);
+    assert.equal(instructionStatsAccount.quantityOfArguments, 1);
     assert.ok(
       instructionArgumentAccount.createdAt.eq(
         instructionArgumentAccount.updatedAt
@@ -155,6 +155,8 @@ describe('instruction argument', () => {
       .updateInstructionArgument(argumentsData)
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        instruction: instruction.publicKey,
         argument: instructionArgument.publicKey,
       })
       .rpc();
@@ -180,6 +182,7 @@ describe('instruction argument', () => {
       .deleteInstructionArgument()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         argument: instructionArgument.publicKey,
         instruction: instruction.publicKey,
       })
@@ -189,11 +192,10 @@ describe('instruction argument', () => {
       await program.account.instructionArgument.fetchNullable(
         instructionArgument.publicKey
       );
-    const instructionAccount = await program.account.instruction.fetch(
-      instruction.publicKey
-    );
+    const instructionStatsAccount =
+      await program.account.instructionStats.fetch(instructionStatsPublicKey);
     assert.equal(argumentAccount, null);
-    assert.equal(instructionAccount.quantityOfArguments, 0);
+    assert.equal(instructionStatsAccount.quantityOfArguments, 0);
   });
 
   it('should fail when max is not provided with a number', async () => {
@@ -299,6 +301,7 @@ describe('instruction argument', () => {
         .deleteInstructionArgument()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           instruction: instruction.publicKey,
           argument: newArgument.publicKey,
         })
@@ -349,7 +352,13 @@ describe('instruction argument', () => {
               2155 // instruction account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
+              10 // instruction stats account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
             )),
         }),
       ])
@@ -468,8 +477,8 @@ describe('instruction argument', () => {
       .requestCollaboratorStatus()
       .accounts({
         authority: newUser.publicKey,
-        user: newUserPublicKey,
         workspace: workspace.publicKey,
+        user: newUserPublicKey,
       })
       .signers([newUser])
       .rpc();

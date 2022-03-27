@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { ViewProfileStore } from './view-profile.store';
 
 @Component({
   selector: 'bd-view-profile',
@@ -25,68 +25,41 @@ import { map } from 'rxjs';
           (deleteUser)="onDeleteUser()"
         ></bd-user-details>
 
-        <bd-loaded-workspaces-list
-          *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-          [workspaces]="(loadedWorkspaces$ | ngrxPush) ?? null"
-          (removeWorkspace)="onRemoveWorkspace($event)"
-        ></bd-loaded-workspaces-list>
-
         <bd-my-workspaces-list
           *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-          [workspaces]="(myWorkspaces$ | ngrxPush) ?? null"
-          (loadWorkspace)="onLoadWorkspace($event)"
+          [workspaces]="(workspaces$ | ngrxPush) ?? null"
+          [activeWorkspaceId]="(activeWorkspaceId$ | ngrxPush) ?? null"
+          (activateWorkspace)="onActivateWorkspace($event)"
         ></bd-my-workspaces-list>
       </main>
     </div>
   `,
-  providers: [WorkspacesStore, WorkspaceQueryStore],
+  providers: [WorkspacesStore, WorkspaceQueryStore, ViewProfileStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewProfileComponent {
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
-  readonly loadedWorkspaces$ = this._workspacesStore.workspaces$;
-  readonly myWorkspaces$ = this._workspaceQueryStore.workspaces$;
+  readonly activeWorkspaceId$ = this._configStore.workspaceId$;
+  readonly workspaces$ = this._workspacesStore.workspaces$;
 
   constructor(
     private readonly _userStore: UserStore,
     private readonly _walletStore: WalletStore,
-    private readonly _tabStore: TabStore,
     private readonly _workspacesStore: WorkspacesStore,
-    private readonly _workspaceQueryStore: WorkspaceQueryStore,
-    private readonly _configStore: ConfigStore
-  ) {
-    this._openTab();
-    this._workspacesStore.setWorkspaceIds(this._configStore.workspaceIds$);
-    this._workspaceQueryStore.setFilters(
-      this._walletStore.publicKey$.pipe(
-        map((publicKey) => publicKey && { authority: publicKey.toBase58() })
-      )
-    );
-  }
-
-  private _openTab() {
-    this._tabStore.openTab({
-      id: 'profile',
-      kind: 'profile',
-      url: '/profile',
-    });
-  }
+    private readonly _configStore: ConfigStore,
+    private readonly _viewProfileStore: ViewProfileStore
+  ) {}
 
   onCreateUser() {
-    this._userStore.createUser();
+    this._viewProfileStore.createUser();
   }
 
   onDeleteUser() {
-    this._userStore.deleteUser();
+    this._viewProfileStore.deleteUser();
   }
 
-  onLoadWorkspace(workspaceId: string) {
-    this._configStore.addWorkspace(workspaceId);
+  onActivateWorkspace(workspaceId: string) {
     this._configStore.setWorkspaceId(workspaceId);
-  }
-
-  onRemoveWorkspace(workspaceId: string) {
-    this._configStore.removeWorkspace(workspaceId);
   }
 }

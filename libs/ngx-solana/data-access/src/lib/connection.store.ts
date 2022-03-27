@@ -17,7 +17,10 @@ import { filter, map, Observable } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 import { HdSolanaConfig, HD_SOLANA_CONFIG } from './config';
 import { HdSolanaConfigStore } from './config.store';
-import { hashGetProgramAccountsRequest } from './internal';
+import {
+  hashGetProgramAccountsRequest,
+  hashSignatureListener,
+} from './internal';
 
 @Injectable()
 export class HdSolanaConnectionStore extends WebSocketStore<RpcMessage> {
@@ -187,7 +190,9 @@ export class HdSolanaConnectionStore extends WebSocketStore<RpcMessage> {
     signature: string,
     commitment: Commitment = 'confirmed'
   ): Observable<{ err: unknown }> {
-    const cachedOnSignatureChange = this._signatureChanges.get(signature);
+    const cachedOnSignatureChange = this._signatureChanges.get(
+      hashSignatureListener(signature, commitment)
+    );
 
     if (cachedOnSignatureChange !== undefined) {
       return cachedOnSignatureChange;

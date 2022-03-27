@@ -5,7 +5,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
-import { HdSolanaApiInterceptor, HdSolanaModule } from '@heavy-duty/ngx-solana';
+import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { HdBroadcasterModule } from '@heavy-duty/broadcaster';
+import {
+  HdSolanaApiInterceptor,
+  HdSolanaModule,
+  HdSolanaTransactionsInterceptor,
+} from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
 import { AppComponent } from './app.component';
 
@@ -36,6 +43,7 @@ import { AppComponent } from './app.component';
       autoConnect: true,
     }),
     HdSolanaModule.forRoot(),
+    HdBroadcasterModule.forRoot(),
   ],
   bootstrap: [AppComponent],
   providers: [
@@ -49,6 +57,13 @@ import { AppComponent } from './app.component';
       useClass: HdSolanaApiInterceptor,
       multi: true,
     },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HdSolanaTransactionsInterceptor,
+      multi: true,
+    },
+    UserInstructionsStore,
+    WorkspaceInstructionsStore,
   ],
 })
 export class AppModule {}

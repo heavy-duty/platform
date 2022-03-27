@@ -11,12 +11,15 @@ export interface CreateInstructionArgumentParams {
 
 export interface UpdateInstructionArgumentParams {
   authority: string;
+  workspaceId: string;
+  instructionId: string;
   instructionArgumentId: string;
   instructionArgumentDto: InstructionArgumentDto;
 }
 
 export interface DeleteInstructionArgumentParams {
   authority: string;
+  workspaceId: string;
   instructionId: string;
   instructionArgumentId: string;
 }

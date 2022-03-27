@@ -5,11 +5,8 @@ import {
   Input,
   Output,
 } from '@angular/core';
-import {
-  CollectionAttribute,
-  CollectionAttributeDto,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
+import { CollectionAttributeItemView } from '@bulldozer-client/collections-data-access';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-collection-attributes-list',
@@ -55,23 +52,40 @@ import {
                 {{ i + 1 }}
               </div>
               <div class="flex-grow">
-                <h3 class="mb-0 text-lg font-bold">
-                  {{ collectionAttribute.name }}
+                <h3 class="mb-0 text-lg font-bold flex items-center gap-2">
+                  <span
+                    [matTooltip]="
+                      collectionAttribute.document.name
+                        | bdItemUpdatingMessage: collectionAttribute:'Attribute'
+                    "
+                  >
+                    {{ collectionAttribute.document.name }}
+                  </span>
+                  <mat-progress-spinner
+                    *ngIf="collectionAttribute | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
                 </h3>
                 <p class="text-xs mb-0 italic">
                   Type:
 
-                  <ng-container *ngIf="collectionAttribute.data.modifier">
-                    {{ collectionAttribute.data.modifier.name }}
+                  <ng-container
+                    *ngIf="collectionAttribute.document.data.modifier"
+                  >
+                    {{ collectionAttribute.document.data.modifier.name }}
                     <ng-container
-                      *ngIf="collectionAttribute.data.modifier.name === 'array'"
+                      *ngIf="
+                        collectionAttribute.document.data.modifier.name ===
+                        'array'
+                      "
                     >
-                      ({{ collectionAttribute.data.modifier?.size }})
+                      ({{ collectionAttribute.document.data.modifier?.size }})
                     </ng-container>
                     of
                   </ng-container>
 
-                  {{ collectionAttribute.data.kind.name }}.
+                  {{ collectionAttribute.document.data.kind.name }}.
                 </p>
               </div>
               <button
@@ -86,9 +100,12 @@ import {
                 <button
                   mat-menu-item
                   bdEditCollectionAttributeTrigger
-                  [collectionAttribute]="collectionAttribute"
+                  [collectionAttribute]="collectionAttribute.document"
                   (editCollectionAttribute)="
-                    onUpdateCollectionAttribute(collectionAttribute.id, $event)
+                    onUpdateCollectionAttribute(
+                      collectionAttribute.document.id,
+                      $event
+                    )
                   "
                   [disabled]="!connected"
                 >
@@ -99,8 +116,8 @@ import {
                   mat-menu-item
                   (click)="
                     onDeleteCollectionAttribute(
-                      collectionAttribute.data.collection,
-                      collectionAttribute.id
+                      collectionAttribute.document.data.collection,
+                      collectionAttribute.document.id
                     )
                   "
                   [disabled]="!connected"
@@ -124,7 +141,7 @@ import {
 })
 export class CollectionAttributesListComponent {
   @Input() connected = false;
-  @Input() collectionAttributes: Document<CollectionAttribute>[] | null = null;
+  @Input() collectionAttributes: CollectionAttributeItemView[] | null = null;
   @Output() createCollectionAttribute =
     new EventEmitter<CollectionAttributeDto>();
   @Output() updateCollectionAttribute = new EventEmitter<{

@@ -7,6 +7,7 @@ export interface CreateApplicationParams {
 
 export interface UpdateApplicationParams {
   authority: string;
+  workspaceId: string;
   applicationId: string;
   applicationName: string;
 }

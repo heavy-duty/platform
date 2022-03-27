@@ -12,6 +12,7 @@ export interface DeleteCollaboratorParams {
 
 export interface UpdateCollaboratorParams {
   authority: string;
+  workspaceId: string;
   collaboratorId: string;
   status: number;
 }
@@ -23,5 +24,6 @@ export interface RequestCollaboratorStatusParams {
 
 export interface RetryCollaboratorStatusRequestParams {
   authority: string;
+  workspaceId: string;
   collaboratorId: string;
 }

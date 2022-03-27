@@ -1,38 +1,95 @@
 import { Injectable } from '@angular/core';
 import { TabStore } from '@bulldozer-client/core-data-access';
-import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import {
+  WorkspaceInstructionsStore,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { filter, pairwise, pipe, tap } from 'rxjs';
+import { filter, switchMap, tap } from 'rxjs';
+
+interface ViewModel {
+  workspaceId: string | null;
+}
+
+const initialState: ViewModel = {
+  workspaceId: null,
+};
 
 @Injectable()
-export class WorkspaceTabStore extends ComponentStore<object> {
+export class WorkspaceTabStore extends ComponentStore<ViewModel> {
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+
   constructor(
     private readonly _tabStore: TabStore,
-    workspaceStore: WorkspaceStore
+    private readonly _workspaceStore: WorkspaceStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
-    super({});
+    super(initialState);
 
-    this._handleWorkspaceDeleted(workspaceStore.workspace$);
-  }
-
-  private readonly _handleWorkspaceDeleted =
-    this.effect<Document<Workspace> | null>(
-      pipe(
-        pairwise(),
-        filter(
-          ([previousWorkspace, currentWorkspace]) =>
-            previousWorkspace !== null && currentWorkspace === null
-        ),
-        tap(([workspace]) => {
-          if (workspace !== null) {
-            this._tabStore.closeTab(workspace.id);
-          }
-        })
+    this._workspaceStore.setWorkspaceId(this.workspaceId$);
+    this._handleInstruction(
+      this.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
       )
     );
-
-  closeTab(tabId: string) {
-    this._tabStore.closeTab(tabId);
+    this._handleWorkspaceDeleted(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        workspaceInstructionsStore.instruction$.pipe(
+          filter(
+            (instruction) =>
+              instruction.name === 'deleteWorkspace' &&
+              instruction.status === 'finalized'
+          )
+        ),
+        (workspaceId, instructionStatus) => ({
+          workspaceId,
+          instructionStatus,
+        })
+      ).pipe(
+        filter(({ workspaceId, instructionStatus }) =>
+          instructionStatus.accounts.some(
+            (account) =>
+              account.name === 'Workspace' && account.pubkey === workspaceId
+          )
+        )
+      )
+    );
   }
+
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createWorkspace':
+        case 'updateWorkspace':
+        case 'deleteWorkspace': {
+          this._workspaceStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
+  );
+
+  private readonly _handleWorkspaceDeleted = this.effect<{
+    workspaceId: string;
+    instructionStatus: InstructionStatus;
+  }>(tap(({ workspaceId }) => this._tabStore.closeTab(workspaceId)));
 }

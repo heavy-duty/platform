@@ -1,7 +1,10 @@
-use crate::collections::{Application, Budget, Collaborator, Instruction, User, Workspace};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Instruction, InstructionStats, User,
+  Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -12,6 +15,7 @@ pub struct CreateInstructionArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionArguments)]
 pub struct CreateInstruction<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -20,6 +24,21 @@ pub struct CreateInstruction<'info> {
     constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
   )]
   pub application: Box<Account<'info, Application>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Instruction::space()
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    mut,
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
+  )]
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -50,18 +69,32 @@ pub struct CreateInstruction<'info> {
   #[account(
     init,
     payer = authority,
-    space = Instruction::space()
+    space = InstructionStats::space(),
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump
   )]
-  pub instruction: Box<Account<'info, Instruction>>,
-  pub system_program: Program<'info, System>,
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
 }
 
 pub fn validate(ctx: &Context<CreateInstruction>) -> Result<bool> {
-  if !has_enough_funds(
-    ctx.accounts.budget.to_account_info(),
-    ctx.accounts.instruction.to_account_info(),
-    Budget::get_rent_exemption()?,
-  ) {
+  let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let instruction_rent = **ctx.accounts.instruction.to_account_info().lamports.borrow();
+  let instruction_stats_rent = **ctx
+    .accounts
+    .instruction_stats
+    .to_account_info()
+    .lamports
+    .borrow();
+  let funds_required = &Budget::get_rent_exemption()?
+    .checked_add(instruction_rent)
+    .unwrap()
+    .checked_add(instruction_stats_rent)
+    .unwrap();
+
+  if budget_lamports.lt(funds_required) {
     return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
@@ -78,13 +111,28 @@ pub fn handle(
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.instruction.to_account_info().lamports.borrow(),
   )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .instruction_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
   ctx.accounts.instruction.initialize(
     arguments.name,
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
+    *ctx.bumps.get("instruction_stats").unwrap(),
   );
   ctx.accounts.instruction.initialize_timestamp()?;
-  ctx.accounts.application.increase_instruction_quantity();
+  ctx.accounts.instruction_stats.initialize();
+  ctx
+    .accounts
+    .application_stats
+    .increase_instruction_quantity();
   Ok(())
 }

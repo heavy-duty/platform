@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, Collection, User};
+use crate::collections::{Application, Collaborator, Collection, User, Workspace};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -12,7 +12,16 @@ pub struct UpdateCollectionArguments {
 #[instruction(arguments: UpdateCollectionArguments)]
 pub struct UpdateCollection<'info> {
   pub authority: Signer<'info>,
-  #[account(mut)]
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+  )]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    mut,
+    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace,
+    constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
+  )]
   pub collection: Box<Account<'info, Collection>>,
   #[account(
     seeds = [
@@ -25,7 +34,7 @@ pub struct UpdateCollection<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      collection.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,

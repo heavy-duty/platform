@@ -1,7 +1,9 @@
-use crate::collections::{Application, Budget, Collaborator, User, Workspace};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, User, Workspace, WorkspaceStats,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -12,10 +14,25 @@ pub struct CreateApplicationArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateApplicationArguments)]
 pub struct CreateApplication<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
-  #[account(mut)]
   pub workspace: Box<Account<'info, Workspace>>,
+  #[account(
+    init,
+    payer = authority,
+    space = Application::space()
+  )]
+  pub application: Box<Account<'info, Application>>,
+  #[account(
+    mut,
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump = workspace.workspace_stats_bump,
+  )]
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -46,18 +63,32 @@ pub struct CreateApplication<'info> {
   #[account(
     init,
     payer = authority,
-    space = Application::space()
+    space = ApplicationStats::space(),
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump
   )]
-  pub application: Box<Account<'info, Application>>,
-  pub system_program: Program<'info, System>,
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
 }
 
 pub fn validate(ctx: &Context<CreateApplication>) -> Result<bool> {
-  if !has_enough_funds(
-    ctx.accounts.budget.to_account_info(),
-    ctx.accounts.application.to_account_info(),
-    Budget::get_rent_exemption()?,
-  ) {
+  let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  let application_rent = **ctx.accounts.application.to_account_info().lamports.borrow();
+  let application_stats_rent = **ctx
+    .accounts
+    .application_stats
+    .to_account_info()
+    .lamports
+    .borrow();
+  let funds_required = &Budget::get_rent_exemption()?
+    .checked_add(application_rent)
+    .unwrap()
+    .checked_add(application_stats_rent)
+    .unwrap();
+
+  if budget_lamports.lt(funds_required) {
     return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
   }
 
@@ -74,12 +105,24 @@ pub fn handle(
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.application.to_account_info().lamports.borrow(),
   )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .application_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
   ctx.accounts.application.initialize(
     arguments.name,
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
+    *ctx.bumps.get("application_stats").unwrap(),
   );
   ctx.accounts.application.initialize_timestamp()?;
-  ctx.accounts.workspace.increase_application_quantity();
+  ctx.accounts.application_stats.initialize();
+  ctx.accounts.workspace_stats.increase_application_quantity();
   Ok(())
 }

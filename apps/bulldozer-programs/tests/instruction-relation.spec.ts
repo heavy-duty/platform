@@ -36,17 +36,11 @@ describe('instruction relation', () => {
     space: null,
   };
   let relationPublicKey: PublicKey;
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let fromStatsPublicKey: PublicKey;
+  let toStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
@@ -59,6 +53,21 @@ describe('instruction relation', () => {
       ],
       program.programId
     );
+    [fromStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_account_stats', 'utf8'),
+        from.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+    [toStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('instruction_account_stats', 'utf8'),
+        to.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -142,11 +151,10 @@ describe('instruction relation', () => {
     // assert
     const instructionRelationAccount =
       await program.account.instructionRelation.fetch(relationPublicKey);
-    const fromAccount = await program.account.instructionAccount.fetch(
-      from.publicKey
-    );
-    const toAccount = await program.account.instructionAccount.fetch(
-      to.publicKey
+    const fromStatsAccount =
+      await program.account.instructionAccountStats.fetch(fromStatsPublicKey);
+    const toStatsAccount = await program.account.instructionAccountStats.fetch(
+      toStatsPublicKey
     );
     assert.ok(
       instructionRelationAccount.authority.equals(
@@ -162,8 +170,8 @@ describe('instruction relation', () => {
     );
     assert.ok(instructionRelationAccount.from.equals(from.publicKey));
     assert.ok(instructionRelationAccount.to.equals(to.publicKey));
-    assert.equal(fromAccount.quantityOfRelations, 1);
-    assert.equal(toAccount.quantityOfRelations, 1);
+    assert.equal(fromStatsAccount.quantityOfRelations, 1);
+    assert.equal(toStatsAccount.quantityOfRelations, 1);
     assert.ok(
       instructionRelationAccount.createdAt.eq(
         instructionRelationAccount.updatedAt
@@ -220,6 +228,8 @@ describe('instruction relation', () => {
       .deleteInstructionRelation()
       .accounts({
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        instruction: instruction.publicKey,
         from: newFrom.publicKey,
         to: newTo.publicKey,
       })
@@ -286,13 +296,25 @@ describe('instruction relation', () => {
               2155 // instruction account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
+              10 // instruction stats account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               295 // from account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // from stats account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
               295 // to account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // to stats account size
             )),
         }),
       ])

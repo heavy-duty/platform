@@ -81,11 +81,17 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
           instructionRelations,
           collections
         ) => ({
-          instruction,
-          instructionArguments,
-          instructionAccounts,
-          instructionRelations,
-          collections,
+          instruction: instruction?.document ?? null,
+          instructionArguments: instructionArguments.map(
+            ({ document }) => document
+          ),
+          instructionAccounts: instructionAccounts.map(
+            ({ document }) => document
+          ),
+          instructionRelations: instructionRelations.map(
+            ({ document }) => document
+          ),
+          collections: collections.map(({ document }) => document),
         }),
         { debounce: true }
       )
@@ -94,7 +100,7 @@ export class ViewInstructionCodeStore extends ComponentStore<ViewModel> {
     this._loadHandleCode(
       this.select(
         this._instructionStore.instruction$,
-        (instruction) => instruction?.data.body ?? null
+        (instruction) => instruction?.document.data.body ?? null
       )
     );
   }

@@ -20,21 +20,22 @@ describe('collection', () => {
   const workspace = Keypair.generate();
   const applicationName = 'my-app';
   const workspaceName = 'my-workspace';
-  let userPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  let applicationStatsPublicKey: PublicKey;
 
   before(async () => {
-    [userPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('user', 'utf8'),
-        program.provider.wallet.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
+    [applicationStatsPublicKey] = await PublicKey.findProgramAddress(
+      [
+        Buffer.from('application_stats', 'utf8'),
+        application.publicKey.toBuffer(),
+      ],
+      program.programId
+    );
+
     try {
       await program.methods
         .createUser()
@@ -88,14 +89,13 @@ describe('collection', () => {
     const account = await program.account.collection.fetch(
       collection.publicKey
     );
-    const applicationAccount = await program.account.application.fetch(
-      application.publicKey
-    );
+    const applicationStatsAccount =
+      await program.account.applicationStats.fetch(applicationStatsPublicKey);
     assert.ok(account.authority.equals(program.provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.equal(account.name, collectionName);
-    assert.equal(applicationAccount.quantityOfCollections, 1);
+    assert.equal(applicationStatsAccount.quantityOfCollections, 1);
     assert.ok(account.createdAt.eq(account.updatedAt));
   });
 
@@ -106,8 +106,10 @@ describe('collection', () => {
     await program.methods
       .updateCollection({ name: collectionName })
       .accounts({
-        collection: collection.publicKey,
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
+        application: application.publicKey,
+        collection: collection.publicKey,
       })
       .rpc();
     // assert
@@ -123,20 +125,20 @@ describe('collection', () => {
     await program.methods
       .deleteCollection()
       .accounts({
-        collection: collection.publicKey,
         authority: program.provider.wallet.publicKey,
+        workspace: workspace.publicKey,
         application: application.publicKey,
+        collection: collection.publicKey,
       })
       .rpc();
     // assert
     const account = await program.account.collection.fetchNullable(
       collection.publicKey
     );
-    const applicationAccount = await program.account.application.fetch(
-      application.publicKey
-    );
+    const applicationStatsAccount =
+      await program.account.applicationStats.fetch(applicationStatsPublicKey);
     assert.equal(account, null);
-    assert.equal(applicationAccount.quantityOfCollections, 0);
+    assert.equal(applicationStatsAccount.quantityOfCollections, 0);
   });
 
   it('should fail when deleting collection with attributes', async () => {
@@ -158,10 +160,10 @@ describe('collection', () => {
       await program.methods
         .createCollection({ name: collectionName })
         .accounts({
-          collection: collection.publicKey,
-          application: application.publicKey,
-          workspace: workspace.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
+          application: application.publicKey,
+          collection: collection.publicKey,
         })
         .signers([collection])
         .rpc();
@@ -179,9 +181,10 @@ describe('collection', () => {
       await program.methods
         .deleteCollection()
         .accounts({
-          collection: collection.publicKey,
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
+          collection: collection.publicKey,
         })
         .rpc();
     } catch (err) {
@@ -223,6 +226,7 @@ describe('collection', () => {
         .deleteCollection()
         .accounts({
           authority: program.provider.wallet.publicKey,
+          workspace: workspace.publicKey,
           application: application.publicKey,
           collection: newCollection.publicKey,
         })
@@ -260,9 +264,12 @@ describe('collection', () => {
           fromPubkey: program.provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
           lamports:
-            await program.provider.connection.getMinimumBalanceForRentExemption(
-              126 // application account size
-            ),
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              125 // application account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              10 // application stats account size
+            )),
         }),
       ])
       .rpc();

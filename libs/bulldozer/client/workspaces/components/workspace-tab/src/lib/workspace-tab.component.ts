@@ -1,4 +1,5 @@
 import { Component, HostBinding, Input } from '@angular/core';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceTabStore } from './workspace-tab.store';
 
@@ -10,17 +11,29 @@ import { WorkspaceTabStore } from './workspace-tab.store';
       class="flex items-stretch p-0"
     >
       <a
-        [routerLink]="['/workspaces', workspace.id]"
-        class="flex items-center pl-4 flex-grow"
+        [routerLink]="['/workspaces', workspace.document.id]"
+        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        [matTooltip]="
+          workspace.document.name | bdItemUpdatingMessage: workspace:'Workspace'
+        "
+        matTooltipShowDelay="500"
       >
-        <span>
-          {{ workspace.name }}
+        <span
+          class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+        >
+          {{ workspace.document.name }}
         </span>
+        <mat-progress-spinner
+          *ngIf="workspace | bdItemShowSpinner"
+          class="flex-shrink-0"
+          mode="indeterminate"
+          diameter="16"
+        ></mat-progress-spinner>
       </a>
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + workspace.name + ' tab'"
-        (click)="onCloseTab()"
+        [attr.aria-label]="'Close ' + workspace.document.name + ' tab'"
+        (click)="onCloseTab(workspace.document.id)"
       >
         <mat-icon>close</mat-icon>
       </button>
@@ -31,23 +44,19 @@ import { WorkspaceTabStore } from './workspace-tab.store';
 export class WorkspaceTabComponent {
   @HostBinding('class') class = 'block w-full';
 
-  private _workspaceId!: string;
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
-    this._workspaceStore.setWorkspaceId(this.workspaceId);
-  }
-  get workspaceId() {
-    return this._workspaceId;
+    this._workspaceTabStore.setWorkspaceId(value);
   }
 
   readonly workspace$ = this._workspaceStore.workspace$;
 
   constructor(
+    private readonly _tabStore: TabStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _workspaceTabStore: WorkspaceTabStore
   ) {}
 
-  onCloseTab() {
-    this._workspaceTabStore.closeTab(this.workspaceId);
+  onCloseTab(workspaceId: string) {
+    this._tabStore.closeTab(workspaceId);
   }
 }

@@ -1,4 +1,6 @@
-use crate::collections::{Application, Budget, Collaborator, Instruction, User};
+use crate::collections::{
+  Application, ApplicationStats, Budget, Collaborator, Instruction, InstructionStats, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
@@ -6,19 +8,36 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteInstruction<'info> {
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
+  pub application: Account<'info, Application>,
   #[account(
     mut,
-    close = budget,
-    constraint = instruction.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments,
-    constraint = instruction.quantity_of_accounts == 0 @ ErrorCode::CantDeleteInstructionWithAccounts,
+    close = budget,    
     constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
   )]
   pub instruction: Account<'info, Instruction>,
   #[account(
     mut,
-    constraint = application.workspace == instruction.workspace @ ErrorCode::ApplicationDoesNotBelongToWorkspace
+    seeds = [
+      b"application_stats".as_ref(),
+      application.key().as_ref()
+    ],
+    bump = application.application_stats_bump
   )]
-  pub application: Account<'info, Application>,
+  pub application_stats: Box<Account<'info, ApplicationStats>>,
+  #[account(
+    mut,
+    close = budget, 
+    constraint = instruction_stats.quantity_of_arguments == 0 @ ErrorCode::CantDeleteInstructionWithArguments,
+    constraint = instruction_stats.quantity_of_accounts == 0 @ ErrorCode::CantDeleteInstructionWithAccounts,
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump = instruction.instruction_stats_bump
+  )]
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -30,7 +49,7 @@ pub struct DeleteInstruction<'info> {
   #[account(
     seeds = [
       b"collaborator".as_ref(),
-      instruction.workspace.as_ref(),
+      workspace.key().as_ref(),
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
@@ -41,7 +60,7 @@ pub struct DeleteInstruction<'info> {
     mut,
     seeds = [
       b"budget".as_ref(),
-      instruction.workspace.as_ref(),
+      workspace.key().as_ref(),
     ],
     bump = budget.bump,
   )]
@@ -50,6 +69,9 @@ pub struct DeleteInstruction<'info> {
 
 pub fn handle(ctx: Context<DeleteInstruction>) -> Result<()> {
   msg!("Delete instruction");
-  ctx.accounts.application.decrease_instruction_quantity();
+  ctx
+    .accounts
+    .application_stats
+    .decrease_instruction_quantity();
   Ok(())
 }

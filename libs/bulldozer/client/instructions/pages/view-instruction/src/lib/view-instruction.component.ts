@@ -1,18 +1,22 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { CollectionsStore } from '@bulldozer-client/collections-data-access';
+import { ActivatedRoute } from '@angular/router';
 import {
+  CollectionQueryStore,
+  CollectionsStore,
+} from '@bulldozer-client/collections-data-access';
+import {
+  InstructionAccountQueryStore,
   InstructionAccountsStore,
+  InstructionArgumentQueryStore,
   InstructionArgumentsStore,
+  InstructionRelationQueryStore,
   InstructionRelationsStore,
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
 import {
-  Document,
-  Instruction,
   InstructionAccountDto,
   InstructionArgumentDto,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewInstructionCodeStore } from './view-instruction-code.store';
@@ -29,7 +33,21 @@ import { ViewInstructionStore } from './view-instruction.store';
       >
         <header bdPageHeader>
           <h1>
-            {{ instruction.name }}
+            <span
+              [matTooltip]="
+                instruction.document.name
+                  | bdItemUpdatingMessage: instruction:'Instruction'
+              "
+              matTooltipShowDelay="500"
+              class="flex items-center justify-start gap-2"
+            >
+              {{ instruction.document.name }}
+              <mat-progress-spinner
+                *ngIf="instruction | bdItemShowSpinner"
+                diameter="16"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+            </span>
           </h1>
           <p>Visualize all the details about this instruction.</p>
         </header>
@@ -39,11 +57,27 @@ import { ViewInstructionStore } from './view-instruction.store';
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionArguments]="(instructionArguments$ | ngrxPush) ?? null"
             (createInstructionArgument)="
-              onCreateInstructionArgument(instruction, $event)
+              onCreateInstructionArgument(
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
+                $event
+              )
             "
-            (updateInstructionArgument)="onUpdateInstructionArgument($event)"
+            (updateInstructionArgument)="
+              onUpdateInstructionArgument(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event.instructionArgumentId,
+                $event.instructionArgumentDto
+              )
+            "
             (deleteInstructionArgument)="
-              onDeleteInstructionArgument(instruction.id, $event)
+              onDeleteInstructionArgument(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event
+              )
             "
           ></bd-instruction-arguments-list>
           <bd-instruction-documents-list
@@ -52,31 +86,72 @@ import { ViewInstructionStore } from './view-instruction.store';
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
             (createInstructionDocument)="
-              onCreateInstructionAccount(instruction, $event)
+              onCreateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
+                $event
+              )
             "
-            (updateInstructionDocument)="onUpdateInstructionAccount($event)"
+            (updateInstructionDocument)="
+              onUpdateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event.instructionAccountId,
+                $event.instructionAccountDto
+              )
+            "
             (deleteInstructionDocument)="
-              onDeleteInstructionAccount(instruction.id, $event)
+              onDeleteInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event
+              )
             "
             (createInstructionRelation)="
               onCreateInstructionRelation(
-                instruction,
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
                 $event.fromAccountId,
                 $event.toAccountId
               )
             "
-            (deleteInstructionRelation)="onDeleteInstructionRelation($event)"
+            (deleteInstructionRelation)="
+              onDeleteInstructionRelation(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event.fromAccountId,
+                $event.toAccountId
+              )
+            "
           >
           </bd-instruction-documents-list>
           <bd-instruction-signers-list
             [connected]="(connected$ | ngrxPush) ?? false"
             [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
             (createInstructionSigner)="
-              onCreateInstructionAccount(instruction, $event)
+              onCreateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.data.application,
+                instruction.document.id,
+                $event
+              )
             "
-            (updateInstructionSigner)="onUpdateInstructionAccount($event)"
+            (updateInstructionSigner)="
+              onUpdateInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event.instructionAccountId,
+                $event.instructionAccountDto
+              )
+            "
             (deleteInstructionSigner)="
-              onDeleteInstructionAccount(instruction.id, $event)
+              onDeleteInstructionAccount(
+                instruction.document.data.workspace,
+                instruction.document.id,
+                $event
+              )
             "
           >
           </bd-instruction-signers-list>
@@ -85,14 +160,14 @@ import { ViewInstructionStore } from './view-instruction.store';
       <div class="w-1/2">
         <div class="bd-custom-height-content overflow-hidden">
           <bd-code-editor
-            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splited'"
+            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splitted'"
             [template]="(contextCode$ | ngrxPush) ?? null"
             [options]="(contextEditorOptions$ | ngrxPush) ?? null"
           ></bd-code-editor>
 
           <ng-container *ngIf="connected$ | ngrxPush">
             <div
-              *ngIf="instruction.data.body !== instructionBody"
+              *ngIf="instruction.document.data.body !== instructionBody"
               class="w-full flex justify-end"
             >
               <p class="ml-2 mb-0">
@@ -100,7 +175,13 @@ import { ViewInstructionStore } from './view-instruction.store';
                 <button
                   mat-raised-button
                   color="primary"
-                  (click)="onUpdateInstructionBody(instruction.id)"
+                  (click)="
+                    onUpdateInstructionBody(
+                      instruction.document.data.workspace,
+                      instruction.document.data.application,
+                      instruction.document.id
+                    )
+                  "
                 >
                   Save
                 </button>
@@ -109,7 +190,7 @@ import { ViewInstructionStore } from './view-instruction.store';
           </ng-container>
 
           <bd-code-editor
-            [customClass]="'bd-custom-monaco-editor-splited'"
+            [customClass]="'bd-custom-monaco-editor-splitted'"
             [template]="(handleCode$ | ngrxPush) ?? null"
             [options]="(handleEditorOptions$ | ngrxPush) ?? null"
             (codeChange)="instructionBody = $event"
@@ -123,9 +204,13 @@ import { ViewInstructionStore } from './view-instruction.store';
   providers: [
     InstructionStore,
     InstructionArgumentsStore,
+    InstructionArgumentQueryStore,
     InstructionAccountsStore,
+    InstructionAccountQueryStore,
     InstructionRelationsStore,
+    InstructionRelationQueryStore,
     CollectionsStore,
+    CollectionQueryStore,
     ViewInstructionStore,
     ViewInstructionDocumentsStore,
     ViewInstructionSignersStore,
@@ -136,7 +221,9 @@ export class ViewInstructionComponent {
   @HostBinding('class') class = 'block';
   instructionBody = '';
   readonly connected$ = this._walletStore.connected$;
-  readonly collections$ = this._collectionsStore.collections$;
+  readonly collections$ = this._collectionsStore.collections$.pipe(
+    map((collections) => collections.map(({ document }) => document))
+  );
   readonly instruction$ = this._instructionStore.instruction$;
   readonly instructionArguments$ =
     this._instructionArgumentsStore.instructionArguments$;
@@ -154,10 +241,10 @@ export class ViewInstructionComponent {
   readonly handleCode$ = this._viewInstructionCodeStore.handleCode$;
 
   constructor(
+    private readonly _route: ActivatedRoute,
     private readonly _instructionStore: InstructionStore,
     private readonly _instructionArgumentsStore: InstructionArgumentsStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
-    private readonly _instructionRelationsStore: InstructionRelationsStore,
     private readonly _collectionsStore: CollectionsStore,
     private readonly _walletStore: WalletStore,
     private readonly _viewInstructionStore: ViewInstructionStore,
@@ -165,113 +252,141 @@ export class ViewInstructionComponent {
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {
-    this._instructionStore.setInstructionId(
-      this._viewInstructionStore.instructionId$
+    this._viewInstructionStore.setWorkspaceId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
     );
-    this._instructionArgumentsStore.setFilters(
-      this._viewInstructionStore.instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instructionId) => ({ instruction: instructionId }))
+    this._viewInstructionStore.setApplicationId(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('applicationId'))
       )
     );
-    this._instructionAccountsStore.setFilters(
-      this._viewInstructionStore.instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instructionId) => ({ instruction: instructionId }))
-      )
-    );
-    this._instructionRelationsStore.setFilters(
-      this._viewInstructionStore.instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instructionId) => ({ instruction: instructionId }))
-      )
-    );
-    this._collectionsStore.setFilters(
-      this._viewInstructionStore.applicationId$.pipe(
-        isNotNullOrUndefined,
-        map((applicationId) => ({ application: applicationId }))
+    this._viewInstructionStore.setInstructionId(
+      this._route.paramMap.pipe(
+        map((paramMap) => paramMap.get('instructionId'))
       )
     );
   }
 
-  onUpdateInstructionBody(instructionId: string) {
-    this._instructionStore.updateInstructionBody({
+  onUpdateInstructionBody(
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string
+  ) {
+    this._viewInstructionStore.updateInstructionBody({
+      workspaceId,
+      applicationId,
       instructionId,
       instructionBody: this.instructionBody,
     });
   }
 
   onCreateInstructionArgument(
-    instruction: Document<Instruction>,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
     instructionArgumentDto: InstructionArgumentDto
   ) {
-    this._instructionArgumentsStore.createInstructionArgument({
-      instruction,
+    this._viewInstructionStore.createInstructionArgument({
+      workspaceId,
+      applicationId,
+      instructionId,
       instructionArgumentDto,
     });
   }
 
-  onUpdateInstructionArgument(request: {
-    instructionArgumentId: string;
-    instructionArgumentDto: InstructionArgumentDto;
-  }) {
-    this._instructionArgumentsStore.updateInstructionArgument(request);
+  onUpdateInstructionArgument(
+    workspaceId: string,
+    instructionId: string,
+    instructionArgumentId: string,
+    instructionArgumentDto: InstructionArgumentDto
+  ) {
+    this._viewInstructionStore.updateInstructionArgument({
+      workspaceId,
+      instructionId,
+      instructionArgumentId,
+      instructionArgumentDto,
+    });
   }
 
   onDeleteInstructionArgument(
+    workspaceId: string,
     instructionId: string,
     instructionArgumentId: string
   ) {
-    this._instructionArgumentsStore.deleteInstructionArgument({
+    this._viewInstructionStore.deleteInstructionArgument({
+      workspaceId,
       instructionId,
       instructionArgumentId,
     });
   }
 
   onCreateInstructionAccount(
-    instruction: Document<Instruction>,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._instructionAccountsStore.createInstructionAccount({
-      instruction,
+    this._viewInstructionStore.createInstructionAccount({
+      workspaceId,
+      applicationId,
+      instructionId,
       instructionAccountDto,
     });
   }
 
-  onUpdateInstructionAccount(request: {
-    instructionAccountId: string;
-    instructionAccountDto: InstructionAccountDto;
-  }) {
-    this._instructionAccountsStore.updateInstructionAccount(request);
+  onUpdateInstructionAccount(
+    workspaceId: string,
+    instructionId: string,
+    instructionAccountId: string,
+    instructionAccountDto: InstructionAccountDto
+  ) {
+    this._viewInstructionStore.updateInstructionAccount({
+      workspaceId,
+      instructionId,
+      instructionAccountId,
+      instructionAccountDto,
+    });
   }
 
   onDeleteInstructionAccount(
+    workspaceId: string,
     instructionId: string,
     instructionAccountId: string
   ) {
-    this._instructionAccountsStore.deleteInstructionAccount({
+    this._viewInstructionStore.deleteInstructionAccount({
+      workspaceId,
       instructionId,
       instructionAccountId,
     });
   }
 
   onCreateInstructionRelation(
-    instruction: Document<Instruction>,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
     fromAccountId: string,
     toAccountId: string
   ) {
-    this._instructionRelationsStore.createInstructionRelation({
-      instruction,
+    this._viewInstructionStore.createInstructionRelation({
+      workspaceId,
+      applicationId,
+      instructionId,
       fromAccountId,
       toAccountId,
     });
   }
 
-  onDeleteInstructionRelation(request: {
-    instructionRelationId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }) {
-    this._instructionRelationsStore.deleteInstructionRelation(request);
+  onDeleteInstructionRelation(
+    workspaceId: string,
+    instructionId: string,
+    fromAccountId: string,
+    toAccountId: string
+  ) {
+    this._viewInstructionStore.deleteInstructionRelation({
+      workspaceId,
+      instructionId,
+      fromAccountId,
+      toAccountId,
+    });
   }
 }

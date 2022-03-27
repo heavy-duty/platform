@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRoute, ParamMap } from '@angular/router';
+import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { filter, switchMap, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -19,9 +22,14 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
 
-  constructor(private readonly _tabStore: TabStore, route: ActivatedRoute) {
+  constructor(
+    private readonly _tabStore: TabStore,
+    private readonly _applicationStore: ApplicationStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
+  ) {
     super(initialState);
 
+    this._applicationStore.setApplicationId(this.applicationId$);
     this._openTab(
       this.select(
         this.applicationId$,
@@ -33,14 +41,44 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-    this._setRouteParameters(route.paramMap);
+    this._handleInstruction(
+      this.applicationId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((applicationId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Application' &&
+                  account.pubkey === applicationId
+              )
+            )
+          )
+        )
+      )
+    );
   }
 
-  private readonly _setRouteParameters = this.updater<ParamMap>(
-    (state, paramMap) => ({
-      ...state,
-      workspaceId: paramMap.get('workspaceId'),
-      applicationId: paramMap.get('applicationId'),
+  readonly setApplicationId = this.updater<string | null>(
+    (state, applicationId) => ({ ...state, applicationId })
+  );
+
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({ ...state, workspaceId })
+  );
+
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createApplication':
+        case 'updateApplication':
+        case 'deleteApplication': {
+          this._applicationStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
     })
   );
 

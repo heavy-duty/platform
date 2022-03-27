@@ -1,11 +1,10 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Collection, Instruction, InstructionAccount, User, Workspace,
+  Application, Budget, Collaborator, Collection, Instruction, InstructionAccount,
+  InstructionAccountStats, InstructionStats, User, Workspace,
 };
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
-use crate::utils::{
-  fund_rent_for_account, get_account_key, get_remaining_account, has_enough_funds,
-};
+use crate::utils::{fund_rent_for_account, get_account_key, get_remaining_account};
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -19,17 +18,23 @@ pub struct CreateInstructionAccountArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionAccountArguments)]
 pub struct CreateInstructionAccount<'info> {
+  pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
   pub application: Box<Account<'info, Application>>,
   #[account(
-    mut,
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace,
     constraint = instruction.application == application.key() @ ErrorCode::InstructionDoesNotBelongToApplication,
-    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace
   )]
   pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccount::space()
+  )]
+  pub account: Box<Account<'info, InstructionAccount>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -58,12 +63,25 @@ pub struct CreateInstructionAccount<'info> {
   )]
   pub budget: Box<Account<'info, Budget>>,
   #[account(
+    mut,
+    seeds = [
+      b"instruction_stats".as_ref(),
+      instruction.key().as_ref()
+    ],
+    bump = instruction.instruction_stats_bump
+  )]
+  pub instruction_stats: Box<Account<'info, InstructionStats>>,
+  #[account(
     init,
     payer = authority,
-    space = InstructionAccount::space()
+    space = InstructionAccountStats::space(),
+    seeds = [
+      b"instruction_account_stats".as_ref(),
+      account.key().as_ref()
+    ],
+    bump
   )]
-  pub account: Box<Account<'info, InstructionAccount>>,
-  pub system_program: Program<'info, System>,
+  pub account_stats: Box<Account<'info, InstructionAccountStats>>,
 }
 
 pub fn validate(
@@ -81,13 +99,24 @@ pub fn validate(
     (_, _, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
     (_, _, Some(0), _, None) => Err(error!(ErrorCode::MissingPayerAccount)),
     _ => {
-      if !has_enough_funds(
-        ctx.accounts.budget.to_account_info(),
-        ctx.accounts.account.to_account_info(),
-        Budget::get_rent_exemption()?,
-      ) {
+      let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+      let instruction_account_rent = **ctx.accounts.account.to_account_info().lamports.borrow();
+      let instruction_account_stats_rent = **ctx
+        .accounts
+        .account_stats
+        .to_account_info()
+        .lamports
+        .borrow();
+      let funds_required = &Budget::get_rent_exemption()?
+        .checked_add(instruction_account_rent)
+        .unwrap()
+        .checked_add(instruction_account_stats_rent)
+        .unwrap();
+
+      if budget_lamports.lt(funds_required) {
         return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
       }
+
       Ok(true)
     }
   }
@@ -102,6 +131,16 @@ pub fn handle(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.account.to_account_info().lamports.borrow(),
+  )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .account_stats
+      .to_account_info()
+      .lamports
+      .borrow(),
   )?;
   ctx.accounts.account.initialize(
     arguments.name,
@@ -128,8 +167,10 @@ pub fn handle(
         1,
       )?)?,
     )?,
+    *ctx.bumps.get("account_stats").unwrap(),
   );
   ctx.accounts.account.initialize_timestamp()?;
-  ctx.accounts.instruction.increase_account_quantity();
+  ctx.accounts.account_stats.initialize();
+  ctx.accounts.instruction_stats.increase_account_quantity();
   Ok(())
 }

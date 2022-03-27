@@ -1,4 +1,4 @@
-use crate::collections::{Collaborator, User, Workspace};
+use crate::collections::{Collaborator, User, Workspace, WorkspaceStats};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -6,6 +6,18 @@ use anchor_lang::prelude::*;
 pub struct DeleteCollaborator<'info> {
   #[account(mut)]
   pub authority: Signer<'info>,
+  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(mut, has_one = workspace, close = authority)]
+  pub collaborator: Box<Account<'info, Collaborator>>,
+  #[account(
+    mut,
+    seeds = [
+      b"workspace_stats".as_ref(),
+      workspace.key().as_ref()
+    ],
+    bump = workspace.workspace_stats_bump,
+  )]
+  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -24,14 +36,13 @@ pub struct DeleteCollaborator<'info> {
     constraint = authority_collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
   )]
   pub authority_collaborator: Box<Account<'info, Collaborator>>,
-  #[account(mut)]
-  pub workspace: Box<Account<'info, Workspace>>,
-  #[account(mut, has_one = workspace, close = authority)]
-  pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
 pub fn handle(ctx: Context<DeleteCollaborator>) -> Result<()> {
   msg!("Delete collaborator");
-  ctx.accounts.workspace.decrease_collaborator_quantity();
+  ctx
+    .accounts
+    .workspace_stats
+    .decrease_collaborator_quantity();
   Ok(())
 }

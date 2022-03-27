@@ -12,31 +12,35 @@ import {
   InstructionRelationApiService,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceApiService,
-  WorkspacesStore,
+  WorkspaceInstructionsStore,
+  WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import {
   generateWorkspaceMetadata,
   generateWorkspaceZip,
 } from '@heavy-duty/generator';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, forkJoin, of, pipe, withLatestFrom } from 'rxjs';
-
-interface ViewModel {
-  workspace: Document<Workspace> | null;
-}
-
-const initialState: ViewModel = {
-  workspace: null,
-};
+import {
+  concatMap,
+  EMPTY,
+  filter,
+  forkJoin,
+  from,
+  of,
+  pipe,
+  switchMap,
+  tap,
+  toArray,
+  withLatestFrom,
+} from 'rxjs';
 
 @Injectable()
-export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
-  readonly workspace$ = this.select(({ workspace }) => workspace);
-
+export class WorkspaceSelectorStore extends ComponentStore<object> {
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _applicationApiService: ApplicationApiService,
@@ -48,58 +52,160 @@ export class WorkspaceSelectorStore extends ComponentStore<ViewModel> {
     private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
-    workspacesStore: WorkspacesStore,
+    private readonly _workspaceStore: WorkspaceStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore,
     configStore: ConfigStore
   ) {
-    super(initialState);
+    super({});
 
-    this._loadWorkspace(
-      this.select(
-        configStore.workspaceId$,
-        workspacesStore.workspaces$,
-        (workspaceId, workspaces) => ({
-          workspaceId,
-          workspaces,
-        }),
-        { debounce: true }
+    this._workspaceStore.setWorkspaceId(configStore.workspaceId$);
+    this._handleInstruction(
+      configStore.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
       )
     );
   }
 
-  private readonly _loadWorkspace = this.updater<{
-    workspaceId: string | null;
-    workspaces: Document<Workspace>[];
-  }>((state, { workspaceId, workspaces }) => ({
-    ...state,
-    workspace:
-      workspaces.find((workspace) => workspace?.id === workspaceId) ?? null,
-  }));
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createWorkspace':
+        case 'updateWorkspace':
+        case 'deleteWorkspace': {
+          this._workspaceStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
+  );
 
   readonly downloadWorkspace = this.effect<string>(
     concatMap((workspaceId) =>
       forkJoin({
         workspace: this._workspaceApiService.findById(workspaceId),
-        applications: this._applicationApiService.find({
-          workspace: workspaceId,
-        }),
-        collections: this._collectionApiService.find({
-          workspace: workspaceId,
-        }),
-        collectionAttributes: this._collectionAttributeApiService.find({
-          workspace: workspaceId,
-        }),
-        instructions: this._instructionApiService.find({
-          workspace: workspaceId,
-        }),
-        instructionArguments: this._instructionArgumentApiService.find({
-          workspace: workspaceId,
-        }),
-        instructionAccounts: this._instructionAccountApiService.find({
-          workspace: workspaceId,
-        }),
-        instructionRelations: this._instructionRelationApiService.find({
-          workspace: workspaceId,
-        }),
+        applications: this._applicationApiService
+          .findIds({ workspace: workspaceId })
+          .pipe(
+            concatMap((applicationIds) =>
+              this._applicationApiService
+                .findByIds(applicationIds)
+                .pipe(
+                  concatMap((applications) =>
+                    from(applications).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
+        collections: this._collectionApiService
+          .findIds({ workspace: workspaceId })
+          .pipe(
+            concatMap((collectionIds) =>
+              this._collectionApiService
+                .findByIds(collectionIds)
+                .pipe(
+                  concatMap((collections) =>
+                    from(collections).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
+        collectionAttributes: this._collectionAttributeApiService
+          .findIds({ workspace: workspaceId })
+          .pipe(
+            concatMap((collectionAttributeIds) =>
+              this._collectionAttributeApiService
+                .findByIds(collectionAttributeIds)
+                .pipe(
+                  concatMap((collectionAttributes) =>
+                    from(collectionAttributes).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
+        instructions: this._instructionApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionIds) =>
+              this._instructionApiService
+                .findByIds(instructionIds)
+                .pipe(
+                  concatMap((instructions) =>
+                    from(instructions).pipe(isNotNullOrUndefined, toArray())
+                  )
+                )
+            )
+          ),
+        instructionArguments: this._instructionArgumentApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionArgumentIds) =>
+              this._instructionArgumentApiService
+                .findByIds(instructionArgumentIds)
+                .pipe(
+                  concatMap((instructionArguments) =>
+                    from(instructionArguments).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
+        instructionAccounts: this._instructionAccountApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionAccountIds) =>
+              this._instructionAccountApiService
+                .findByIds(instructionAccountIds)
+                .pipe(
+                  concatMap((instructionAccounts) =>
+                    from(instructionAccounts).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
+        instructionRelations: this._instructionRelationApiService
+          .findIds({
+            workspace: workspaceId,
+          })
+          .pipe(
+            concatMap((instructionRelationIds) =>
+              this._instructionRelationApiService
+                .findByIds(instructionRelationIds)
+                .pipe(
+                  concatMap((instructionRelations) =>
+                    from(instructionRelations).pipe(
+                      isNotNullOrUndefined,
+                      toArray()
+                    )
+                  )
+                )
+            )
+          ),
       }).pipe(
         tapResponse(
           ({

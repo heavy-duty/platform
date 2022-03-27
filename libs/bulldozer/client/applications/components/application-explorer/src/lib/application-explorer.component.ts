@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
-import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
-import { ConfigStore } from '@bulldozer-client/core-data-access';
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import {
+  ApplicationQueryStore,
+  ApplicationsStore,
+  ApplicationView,
+} from '@bulldozer-client/applications-data-access';
+import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -10,12 +12,13 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
     <ng-container *ngrxLet="applications$; let applications">
       <div class="flex flex-col items-center pb-3 bd-custom-background">
         <button
+          *ngIf="workspaceId$ | ngrxPush as workspaceId"
           mat-raised-button
           color="primary"
           class="block"
           [disabled]="!connected"
           bdEditApplicationTrigger
-          (editApplication)="onCreateApplication($event)"
+          (editApplication)="onCreateApplication(workspaceId, $event)"
         >
           Create application
         </button>
@@ -28,11 +31,32 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
         >
           <mat-expansion-panel-header class="pl-4 pr-0">
             <div class="flex justify-between items-center flex-grow">
-              <mat-panel-title> {{ application.name }} </mat-panel-title>
+              <mat-panel-title
+                [matTooltip]="
+                  application.document.name
+                    | bdItemUpdatingMessage: application:'Application'
+                "
+                matTooltipShowDelay="500"
+                class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
+              >
+                <span
+                  class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+                >
+                  {{ application.document.name }}
+                </span>
+                <mat-progress-spinner
+                  *ngIf="application | bdItemShowSpinner"
+                  class="flex-shrink-0"
+                  diameter="16"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+              </mat-panel-title>
               <button
                 mat-icon-button
                 [attr.aria-label]="
-                  'More options of ' + application.name + ' application'
+                  'More options of ' +
+                  application.document.name +
+                  ' application'
                 "
                 [matMenuTriggerFor]="applicationOptionsMenu"
                 bdStopPropagation
@@ -44,15 +68,15 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 
           <bd-collection-explorer
             [connected]="connected"
-            [applicationId]="application.id"
-            [workspaceId]="workspaceId"
+            [applicationId]="application.document.id"
+            [workspaceId]="application.document.data.workspace"
           >
           </bd-collection-explorer>
 
           <bd-instruction-explorer
             [connected]="connected"
-            [applicationId]="application.id"
-            [workspaceId]="workspaceId"
+            [applicationId]="application.document.id"
+            [workspaceId]="application.document.data.workspace"
           >
           </bd-instruction-explorer>
 
@@ -61,9 +85,9 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
               mat-menu-item
               [routerLink]="[
                 '/workspaces',
-                application.data.workspace,
+                application.document.data.workspace,
                 'applications',
-                application.id
+                application.document.id
               ]"
             >
               <mat-icon>launch</mat-icon>
@@ -72,8 +96,14 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             <button
               mat-menu-item
               bdEditApplicationTrigger
-              [application]="application"
-              (editApplication)="onUpdateApplication(application.id, $event)"
+              [application]="application.document"
+              (editApplication)="
+                onUpdateApplication(
+                  application.document.data.workspace,
+                  application.document.id,
+                  $event
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>edit</mat-icon>
@@ -81,7 +111,12 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
             </button>
             <button
               mat-menu-item
-              (click)="onDeleteApplication(application.id)"
+              (click)="
+                onDeleteApplication(
+                  application.document.data.workspace,
+                  application.document.id
+                )
+              "
               [disabled]="!connected"
             >
               <mat-icon>delete</mat-icon>
@@ -94,54 +129,54 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ApplicationsStore],
+  providers: [
+    ApplicationsStore,
+    ApplicationQueryStore,
+    ApplicationExplorerStore,
+  ],
 })
 export class ApplicationExplorerComponent {
   @Input() connected = false;
 
-  private _workspaceId!: string;
-  get workspaceId() {
-    return this._workspaceId;
-  }
   @Input() set workspaceId(value: string) {
-    this._workspaceId = value;
-    this._applicationsStore.setFilters({
-      workspace: value,
-    });
+    this._applicationExplorerStore.setWorkspaceId(value);
   }
 
+  readonly workspaceId$ = this._applicationExplorerStore.workspaceId$;
   readonly applications$ = this._applicationsStore.applications$;
-  readonly connected$ = this._walletStore.connected$;
-  readonly workspaceIds$ = this._configStore.workspaceIds$;
 
   constructor(
     private readonly _applicationsStore: ApplicationsStore,
-    private readonly _configStore: ConfigStore,
-    private readonly _walletStore: WalletStore
+    private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
-  onCreateApplication(applicationName: string) {
-    this._applicationsStore.createApplication({
-      workspaceId: this.workspaceId,
+  onCreateApplication(workspaceId: string, applicationName: string) {
+    this._applicationExplorerStore.createApplication({
+      workspaceId,
       applicationName,
     });
   }
 
-  onUpdateApplication(applicationId: string, applicationName: string) {
-    this._applicationsStore.updateApplication({
+  onUpdateApplication(
+    workspaceId: string,
+    applicationId: string,
+    applicationName: string
+  ) {
+    this._applicationExplorerStore.updateApplication({
+      workspaceId,
       applicationId,
       applicationName,
     });
   }
 
-  onDeleteApplication(applicationId: string) {
-    this._applicationsStore.deleteApplication({
-      workspaceId: this.workspaceId,
+  onDeleteApplication(workspaceId: string, applicationId: string) {
+    this._applicationExplorerStore.deleteApplication({
+      workspaceId,
       applicationId,
     });
   }
 
-  identify(_: number, document: Document<Application>) {
-    return document.id;
+  identify(_: number, application: ApplicationView) {
+    return application.document.id;
   }
 }

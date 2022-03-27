@@ -10,7 +10,15 @@ export class PageHeaderDirective implements OnInit {
     this.renderer.setAttribute(
       this.el.nativeElement,
       'class',
-      `${this.el.nativeElement.classList.toString()} pl-4 border-l-4 border-solid border-primary`
+      [
+        ...new Set([
+          'pl-4',
+          'border-l-4',
+          'border-solid',
+          'border-primary',
+          ...this.el.nativeElement.classList.toString().split(' '),
+        ]),
+      ].join(' ')
     );
 
     if (!this.titleElement) {
@@ -19,7 +27,15 @@ export class PageHeaderDirective implements OnInit {
       this.renderer.setAttribute(
         this.titleElement,
         'class',
-        'text-2xl flex items-center m-0'
+        [
+          ...new Set([
+            'text-2xl',
+            'flex',
+            'items-center',
+            'm-0',
+            ...this.titleElement.classList.toString().split(' '),
+          ]),
+        ].join(' ')
       );
     }
 
@@ -27,7 +43,14 @@ export class PageHeaderDirective implements OnInit {
       this.renderer.setAttribute(
         this.subtitleElement,
         'class',
-        'text-xs opacity-50 m-0'
+        [
+          ...new Set([
+            'text-xs',
+            'opacity-50',
+            'm-0',
+            ...this.subtitleElement.classList.toString().split(' '),
+          ]),
+        ].join(' ')
       );
     }
   }
