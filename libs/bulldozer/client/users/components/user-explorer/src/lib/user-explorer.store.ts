@@ -8,6 +8,7 @@ import {
   UserStore,
 } from '@bulldozer-client/users-data-access';
 import {
+  WorkspaceApiService,
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
@@ -35,7 +36,8 @@ export class UserExplorerStore extends ComponentStore<object> {
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceQueryStore: WorkspaceQueryStore,
     private readonly _userStore: UserStore,
-    private readonly _userInstructionsStore: UserInstructionsStore
+    private readonly _userInstructionsStore: UserInstructionsStore,
+    private readonly _workspaceApiService: WorkspaceApiService
   ) {
     super({});
 
@@ -121,6 +123,34 @@ export class UserExplorerStore extends ComponentStore<object> {
             tapResponse(
               () =>
                 this._notificationStore.setEvent('Delete user request sent'),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  readonly deleteWorkspace = this.effect<string>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([workspaceId, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._workspaceApiService
+          .delete({
+            authority: authority.toBase58(),
+            workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Delete workspace request sent'
+                ),
               (error) => this._notificationStore.setError(error)
             )
           );

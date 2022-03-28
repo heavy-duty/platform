@@ -125,14 +125,13 @@ export class MyWorkspacesListComponent {
   @Input() workspaces: WorkspaceView[] | null = null;
   @Input() activeWorkspaceId: string | null = null;
   @Output() activateWorkspace = new EventEmitter<string>();
-
-  constructor(private readonly _myWorkspaceListStore: MyWorkspaceListStore) {}
+  @Output() deleteWorkspace = new EventEmitter<string>();
 
   onActivateWorkspace(workspaceId: string) {
     this.activateWorkspace.emit(workspaceId);
   }
 
   onDeleteWorkspace(workspaceId: string) {
-    this._myWorkspaceListStore.deleteWorkspace(workspaceId);
+    this.deleteWorkspace.emit(workspaceId);
   }
 }

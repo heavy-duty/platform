@@ -1,9 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
-import {
-  WorkspaceQueryStore,
-  WorkspacesStore,
-} from '@bulldozer-client/workspaces-data-access';
 
 @Component({
   selector: 'bd-view-profile',
@@ -32,7 +28,7 @@ import {
                 [routerLinkActive]="'active'"
               >
                 <div class="py-6 px-3">
-                  <h2 class="mb-1">User Info</h2>
+                  <h2 class="mb-1">User Info 1</h2>
                   <small class="leading-3"> Visualize your user details </small>
                 </div>
               </mat-list-option>
@@ -57,7 +53,7 @@ import {
       </mat-sidenav-container>
     </div>
   `,
-  providers: [WorkspacesStore, WorkspaceQueryStore],
+  providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewProfileComponent {

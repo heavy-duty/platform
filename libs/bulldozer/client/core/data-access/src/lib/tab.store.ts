@@ -136,18 +136,16 @@ export class TabStore extends ComponentStore<ViewModel> {
   readonly closeTab = this.effect<string>(
     pipe(
       tap((tabId) => this._removeTab(tabId)),
-      concatMap(() =>
-        of(null).pipe(
-          withLatestFrom(this.tabs$, (_, tabs) =>
-            tabs.length > 0 ? tabs[0] : null
-          )
-        )
+      concatMap((tabId) =>
+        of(tabId).pipe(withLatestFrom(this.tabs$, this.selected$))
       ),
-      tap((tab) => {
-        if (tab) {
-          this._router.navigateByUrl(tab.url);
-        } else {
-          this._router.navigate(['/']);
+      tap(([tabId, tabs, selected]) => {
+        if (tabId === selected) {
+          if (tabs.length > 0) {
+            this._router.navigateByUrl(tabs[0].url);
+          } else {
+            this._router.navigate(['/']);
+          }
         }
       })
     )

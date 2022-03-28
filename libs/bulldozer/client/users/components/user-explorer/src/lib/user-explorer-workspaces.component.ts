@@ -1,11 +1,9 @@
 import { Component } from '@angular/core';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import {
-  WorkspacesStore,
-  WorkspaceStore,
-} from '@bulldozer-client/workspaces-data-access';
+import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { UserExplorerStore } from './user-explorer.store';
 
 @Component({
   selector: 'bd-user-explorer-workspaces',
@@ -16,11 +14,12 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
         [workspaces]="(workspaces$ | ngrxPush) ?? null"
         [activeWorkspaceId]="(activeWorkspaceId$ | ngrxPush) ?? null"
         (activateWorkspace)="onActivateWorkspace($event)"
+        (deleteWorkspace)="onDeleteWorkspace($event)"
       ></bd-my-workspaces-list>
     </div>
   `,
   styles: [],
-  providers: [WorkspaceStore],
+  providers: [],
 })
 export class UserExplorerWorkspacesComponent {
   readonly connected$ = this._walletStore.connected$;
@@ -32,10 +31,15 @@ export class UserExplorerWorkspacesComponent {
     private readonly _walletStore: WalletStore,
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _userStore: UserStore,
-    private readonly _configStore: ConfigStore
+    private readonly _configStore: ConfigStore,
+    private readonly _userExplorerStore: UserExplorerStore
   ) {}
 
   onActivateWorkspace(workspaceId: string) {
     this._configStore.setWorkspaceId(workspaceId);
+  }
+
+  onDeleteWorkspace(workspaceId: string) {
+    this._userExplorerStore.deleteWorkspace(workspaceId);
   }
 }

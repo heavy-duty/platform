@@ -16,7 +16,7 @@ import { UserExplorerStore } from './user-explorer.store';
     </div>
   `,
   styles: [],
-  providers: [UserExplorerStore],
+  providers: [],
 })
 export class UserExplorerInfoComponent {
   readonly connected$ = this._walletStore.connected$;
