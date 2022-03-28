@@ -4,7 +4,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { RouterModule } from '@angular/router';
-import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
 import { UserDetailsModule } from '@bulldozer-client/user-details';
@@ -43,7 +42,6 @@ import { ViewProfileComponent } from './view-profile.component';
     PageHeaderModule,
     ObscureAddressModule,
     UserDetailsModule,
-    MyWorkspacesListModule,
   ],
 })
 export class ViewProfileModule {}

@@ -105,7 +105,7 @@ import {
               <hd-connection-menu class="mr-6"></hd-connection-menu>
             </section>
 
-            <section class="px-7 py-8 flex justify-between">
+            <section class="px-7 py-8 flex justify-between items-center">
               <p class="m-0">DARK MODE</p>
               <bd-dark-theme-switch></bd-dark-theme-switch>
             </section>

@@ -26,7 +26,7 @@ import {
 } from 'rxjs';
 
 @Injectable()
-export class ViewProfileStore extends ComponentStore<object> {
+export class UserExplorerStore extends ComponentStore<object> {
   constructor(
     private readonly _userApiService: UserApiService,
     private readonly _notificationStore: NotificationStore,

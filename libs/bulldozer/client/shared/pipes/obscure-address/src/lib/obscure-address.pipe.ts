@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
   pure: true,
 })
 export class ObscureAddressPipe implements PipeTransform {
-  transform(value: string | null, symbol = '*'): string {
+  transform(value: string | null, symbol = '*', limits = [3, 39]): string {
     if (value === null) {
       return '';
     }
@@ -14,7 +14,7 @@ export class ObscureAddressPipe implements PipeTransform {
       .split('')
       .reduce(
         (state: string, curr: string, index: number) =>
-          state + (index <= 3 || index >= 39 ? curr : symbol)
+          state + (index <= limits[0] || index >= limits[1] ? curr : symbol)
       )
       .split(symbol)
       .filter((segment) => segment)

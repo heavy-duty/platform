@@ -14,41 +14,45 @@ import { UserView } from '@bulldozer-client/users-data-access';
       <section class="flex flex-col gap-3">
         <ng-container *ngIf="connected">
           <ng-container *ngIf="user; else userNotDefined">
-            <header bdSectionHeader>
-              <h2 class="flex items-center justify-start gap-2">
-                <span
-                  [matTooltip]="
-                    user.document.id | bdItemUpdatingMessage: user:'User'
-                  "
-                  matTooltipShowDelay="500"
+            <div class="flex justify-between items-center">
+              <div>
+                <h2 class="flex items-center justify-start gap-2 mb-0">
+                  <span
+                    [matTooltip]="
+                      user.document.id | bdItemUpdatingMessage: user:'User'
+                    "
+                    matTooltipShowDelay="500"
+                  >
+                    User ID: {{ user.document.id | obscureAddress }}
+                  </span>
+                  <mat-progress-spinner
+                    *ngIf="user | bdItemShowSpinner"
+                    diameter="16"
+                    mode="indeterminate"
+                  ></mat-progress-spinner>
+                </h2>
+
+                <div class="flex">
+                  <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
+                  <p class="m-0" *ngIf="!user.isCreating && !user.isDeleting">
+                    Created at:
+                    {{
+                      user.document.createdAt.toNumber() * 1000 | date: 'medium'
+                    }}
+                  </p>
+                </div>
+              </div>
+              <div>
+                <button
+                  mat-raised-button
+                  color="warn"
+                  (click)="onDeleteUser()"
+                  [disabled]="user.isCreating || user.isDeleting"
                 >
-                  User ID: {{ user.document.id | obscureAddress }}
-                </span>
-                <mat-progress-spinner
-                  *ngIf="user | bdItemShowSpinner"
-                  diameter="16"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
-              </h2>
-
-              <p>Visualize your user details.</p>
-            </header>
-
-            <p class="m-0" *ngIf="!user.isCreating && !user.isDeleting">
-              Created at:
-              {{ user.document.createdAt.toNumber() * 1000 | date: 'medium' }}
-            </p>
-
-            <footer>
-              <button
-                mat-raised-button
-                color="warn"
-                (click)="onDeleteUser()"
-                [disabled]="user.isCreating || user.isDeleting"
-              >
-                Delete User
-              </button>
-            </footer>
+                  Delete User
+                </button>
+              </div>
+            </div>
           </ng-container>
         </ng-container>
 

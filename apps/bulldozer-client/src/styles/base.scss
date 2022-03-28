@@ -111,3 +111,14 @@ input[readonly] {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+.hd-active-status {
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background-color: #fec307;
+}
+
+.hd-active-status.active {
+  background-color: #10b981;
+}

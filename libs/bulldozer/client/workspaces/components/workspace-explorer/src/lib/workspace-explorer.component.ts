@@ -49,6 +49,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 <span class="font-bold">ID:</span>
                 {{ userId$ | async | obscureAddress: '.' }}
               </p>
+              <!-- <p class="text-xs text-center">Ir al perfil</p> -->
             </div>
           </div>
 
@@ -64,7 +65,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 </div>
                 <div>
                   <mat-expansion-panel
-                    class="flex-shrink-0 "
+                    class="flex-shrink-0 shadow-none"
                     togglePosition="before"
                   >
                     <mat-expansion-panel-header class="pl-4 pr-0">
@@ -100,12 +101,13 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               </div>
             </div>
 
-            <h3 class="hd-highlight-title px-5 mb-0 mt-5">EXPLORER</h3>
-            <bd-application-explorer
-              *ngIf="workspaceId !== null"
-              [connected]="connected"
-              [workspaceId]="workspaceId"
-            ></bd-application-explorer>
+            <div *ngIf="workspaceId !== null">
+              <h3 class="hd-highlight-title px-5 mb-0 mt-5">EXPLORER</h3>
+              <bd-application-explorer
+                [connected]="connected"
+                [workspaceId]="workspaceId"
+              ></bd-application-explorer>
+            </div>
           </div>
 
           <div

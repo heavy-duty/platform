@@ -93,8 +93,8 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
         <button
           class="w-full h-12"
           mat-menu-item
-          bdImportWorkspaceTrigger
-          (importWorkspace)="onImportWorkspace($event)"
+          bdEditWorkspaceTrigger
+          (editWorkspace)="onCreateWorkspace($event)"
         >
           <mat-icon>add_circle_outline</mat-icon>
           <span>Create new workspace</span>

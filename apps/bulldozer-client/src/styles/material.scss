@@ -31,6 +31,10 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
   color: black;
 }
 
+.hd-dark-container {
+  background-color: #e6e6e6;
+}
+
 .darkMode {
   @include angular-material-theme($darkTheme);
   // set custom themes
@@ -43,6 +47,10 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 
   .hd-highlight-title {
     color: #fba807;
+  }
+
+  .hd-dark-container {
+    background-color: #2c2c2c;
   }
 }
 
