@@ -6,7 +6,6 @@ import {
   Output,
 } from '@angular/core';
 import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
-import { MyWorkspaceListStore } from './my-workspace-list.store';
 
 @Component({
   selector: 'bd-my-workspaces-list',
@@ -85,17 +84,7 @@ import { MyWorkspaceListStore } from './my-workspace-list.store';
             class="w-full h-12 flex items-center"
             aria-label="View workspace detail"
             color="primary"
-            (click)="onActivateWorkspace(workspace.document.id)"
-            *ngIf="activeWorkspaceId !== workspace.document.id"
-          >
-            <mat-icon class="mr-3">toggle_on</mat-icon>
-            <span>Activate</span>
-          </button>
-          <button
-            class="w-full h-12 flex items-center"
-            aria-label="View workspace detail"
-            color="primary"
-            [routerLink]="['/workspaces', workspace.document.id, 'budget']"
+            [routerLink]="['/workspaces', workspace.document.id]"
           >
             <mat-icon class="mr-3">open_in_new</mat-icon>
             <span>View details</span>
@@ -118,7 +107,6 @@ import { MyWorkspaceListStore } from './my-workspace-list.store';
     </ng-template>
   `,
   styles: [],
-  providers: [MyWorkspaceListStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MyWorkspacesListComponent {

@@ -30,6 +30,10 @@ import { WorkspaceDetailsExplorerComponent } from './workspace-details-explorer.
             path: 'instructions',
             component: WorkspaceDetailsExplorerInstructionsComponent,
           },
+          {
+            path: '**',
+            redirectTo: 'budget',
+          },
         ],
       },
     ]),
