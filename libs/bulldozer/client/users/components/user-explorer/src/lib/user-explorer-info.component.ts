@@ -6,7 +6,7 @@ import { UserExplorerStore } from './user-explorer.store';
 @Component({
   selector: 'bd-user-explorer-info',
   template: `
-    <div class="p-8">
+    <div class="py-4 px-8">
       <bd-user-details
         [connected]="(connected$ | ngrxPush) ?? false"
         [user]="(user$ | ngrxPush) ?? null"

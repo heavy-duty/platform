@@ -15,31 +15,37 @@ import { UserView } from '@bulldozer-client/users-data-access';
         <ng-container *ngIf="connected">
           <ng-container *ngIf="user; else userNotDefined">
             <div class="flex justify-between items-center">
-              <div>
-                <h2 class="flex items-center justify-start gap-2 mb-0">
-                  <span
-                    [matTooltip]="
-                      user.document.id | bdItemUpdatingMessage: user:'User'
-                    "
-                    matTooltipShowDelay="500"
-                  >
-                    User ID: {{ user.document.id | obscureAddress }}
-                  </span>
-                  <mat-progress-spinner
-                    *ngIf="user | bdItemShowSpinner"
-                    diameter="16"
-                    mode="indeterminate"
-                  ></mat-progress-spinner>
-                </h2>
+              <div class="flex items-center">
+                <figure class="w-20 m-auto relative mr-5">
+                  <img src="assets/images/default-profile.png" class="w-full" />
+                </figure>
+                <div>
+                  <h2 class="flex items-center justify-start gap-2 mb-0">
+                    <span
+                      [matTooltip]="
+                        user.document.id | bdItemUpdatingMessage: user:'User'
+                      "
+                      matTooltipShowDelay="500"
+                    >
+                      User ID: {{ user.document.id | obscureAddress }}
+                    </span>
+                    <mat-progress-spinner
+                      *ngIf="user | bdItemShowSpinner"
+                      diameter="16"
+                      mode="indeterminate"
+                    ></mat-progress-spinner>
+                  </h2>
 
-                <div class="flex">
-                  <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
-                  <p class="m-0" *ngIf="!user.isCreating && !user.isDeleting">
-                    Created at:
-                    {{
-                      user.document.createdAt.toNumber() * 1000 | date: 'medium'
-                    }}
-                  </p>
+                  <div class="flex">
+                    <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
+                    <p class="m-0" *ngIf="!user.isCreating && !user.isDeleting">
+                      Created at:
+                      {{
+                        user.document.createdAt.toNumber() * 1000
+                          | date: 'medium'
+                      }}
+                    </p>
+                  </div>
                 </div>
               </div>
               <div>

@@ -32,10 +32,6 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
           },
         ],
       },
-      {
-        path: '**',
-        redirectTo: 'budget',
-      },
     ]),
     MatButtonModule,
     MatProgressSpinnerModule,

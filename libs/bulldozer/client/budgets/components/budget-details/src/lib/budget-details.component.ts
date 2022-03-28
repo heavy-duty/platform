@@ -11,76 +11,77 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 @Component({
   selector: 'bd-budget-details',
   template: `
-    <mat-card class="p-3">
-      <section class="flex flex-col gap-3">
-        <header bdSectionHeader>
-          <h2>Budget</h2>
-          <p>Visualize workspace's budget.</p>
-        </header>
+    <div class="flex gap-6">
+      <mat-card class="px-8 py-4 w-72">
+        <h4 class="font-bold">Total budget</h4>
+        <h1 class="m-0">
+          <span class="font-bold">
+            {{
+              (budget?.metadata?.lamports ?? 0) / lamportsPerSol
+                | number: '1.2-9'
+            }}
+          </span>
+          SOL
+        </h1>
+        <p>
+          <span class="text-sm italic">
+            ({{ budget?.metadata?.lamports | number }}
+            lamports.)
+          </span>
+        </p>
+        <button
+          class="mt-3 w-32"
+          mat-raised-button
+          color="primary"
+          bdDepositToBudgetTrigger
+          (depositToBudget)="onDepositToBudget($event)"
+        >
+          Deposit
+        </button>
+      </mat-card>
 
-        <div class="flex flex-col gap-2">
-          <p class="m-0">
-            Minimum Balance for Rent Exemption:
-            <span class="text-lg font-bold">
-              {{ minimumBalanceForRentExemption | number }}
-            </span>
-            lamports.
-            <span class="text-sm italic">
-              ({{
-                (minimumBalanceForRentExemption ?? 0) / lamportsPerSol
-                  | number: '1.2-9'
-              }}
-              SOL)
-            </span>
-          </p>
-          <p class="m-0">
-            Total:
+      <mat-card class="px-8 py-4 w-96">
+        <h4 class="font-bold">Minimum Balance for Rent Exemption</h4>
+        <h1 class="m-0">
+          <span class="font-bold">
+            {{
+              (minimumBalanceForRentExemption ?? 0) / lamportsPerSol
+                | number: '1.2-9'
+            }}
+          </span>
+          SOL
+        </h1>
+        <p>
+          <span class="text-sm italic">
+            ({{ minimumBalanceForRentExemption | number }}
+            lamports.)
+          </span>
+        </p>
+      </mat-card>
 
-            <span class="text-lg font-bold">
-              {{ budget?.metadata?.lamports | number }}
-            </span>
-            lamports.
-            <span class="text-sm italic">
-              ({{
-                (budget?.metadata?.lamports ?? 0) / lamportsPerSol
-                  | number: '1.2-9'
-              }}
-              SOL)
-            </span>
-          </p>
-          <p class="m-0">
-            Total after rent exemption:
-
-            <span class="text-lg font-bold">
-              {{
-                (budget?.metadata?.lamports ?? 0) -
-                  (minimumBalanceForRentExemption ?? 0) | number
-              }}
-            </span>
-            lamports.
-            <span class="text-sm italic">
-              ({{
-                ((budget?.metadata?.lamports ?? 0) -
-                  (minimumBalanceForRentExemption ?? 0)) /
-                  lamportsPerSol | number: '1.2-9'
-              }}
-              SOL)
-            </span>
-          </p>
-        </div>
-
-        <footer>
-          <button
-            mat-raised-button
-            color="primary"
-            bdDepositToBudgetTrigger
-            (depositToBudget)="onDepositToBudget($event)"
-          >
-            Deposit
-          </button>
-        </footer>
-      </section>
-    </mat-card>
+      <mat-card class="px-8 py-4 w-96">
+        <h4 class="font-bold">Total after rent exemption</h4>
+        <h1 class="m-0">
+          <span class="font-bold">
+            {{
+              ((budget?.metadata?.lamports ?? 0) -
+                (minimumBalanceForRentExemption ?? 0)) /
+                lamportsPerSol | number: '1.2-9'
+            }}
+          </span>
+          SOL
+        </h1>
+        <p>
+          <span class="text-sm italic">
+            ({{
+              (budget?.metadata?.lamports ?? 0) -
+                (minimumBalanceForRentExemption ?? 0) | number
+            }}
+            lamports.)
+          </span>
+        </p>
+      </mat-card>
+    </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -5,7 +5,7 @@ import { WorkspaceDetailsExplorerStore } from './workspace-details-explorer.stor
 @Component({
   selector: 'bd-workspace-details-explorer-budget',
   template: `
-    <div>
+    <div class="py-4 px-8">
       <bd-budget-details
         *ngIf="budget$ | ngrxPush as budget"
         [budget]="budget"

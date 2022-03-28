@@ -13,7 +13,7 @@ import { MyWorkspaceListStore } from './my-workspace-list.store';
   template: `
     <div
       *ngIf="workspaces && workspaces.length > 0; else emptyList"
-      class="flex gap-4 flex-wrap"
+      class="flex gap-6 flex-wrap"
     >
       <mat-card
         *ngFor="let workspace of workspaces; let i = index"
