@@ -7,13 +7,13 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { EditApplicationModule } from '@bulldozer-client/edit-application';
 import { EditWorkspaceComponentModule } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponentModule } from '@bulldozer-client/import-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceSelectorComponent } from './workspace-selector.component';
-
 @NgModule({
   declarations: [WorkspaceSelectorComponent],
   exports: [WorkspaceSelectorComponent],
@@ -29,6 +29,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     ReactiveComponentModule,
     StopPropagationModule,
     EditWorkspaceComponentModule,
+    EditApplicationModule,
     ImportWorkspaceComponentModule,
     ItemUpdatingModule,
   ],

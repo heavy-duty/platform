@@ -5,6 +5,7 @@ import {
   ViewChild,
 } from '@angular/core';
 import { MatMenu } from '@angular/material/menu';
+import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
@@ -83,7 +84,14 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
       </mat-menu>
 
       <mat-menu #applications="matMenu">
-        <button mat-menu-item class="w-full h-12" [disabled]="!connected">
+        <button
+          mat-menu-item
+          class="w-full h-12"
+          [disabled]="!connected"
+          *ngIf="workspaceId$ | ngrxPush as workspaceId"
+          bdEditApplicationTrigger
+          (editApplication)="onCreateApplication(workspaceId, $event)"
+        >
           <mat-icon>add_circle_outline</mat-icon>
           <span>Create new application</span>
         </button>
@@ -113,7 +121,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WorkspaceSelectorStore],
+  providers: [WorkspaceSelectorStore, ApplicationsStore],
 })
 export class WorkspaceSelectorComponent {
   @ViewChild(MatMenu) private _workspaceMenu?: MatMenu;
@@ -172,6 +180,13 @@ export class WorkspaceSelectorComponent {
       } else {
         this._configStore.setWorkspaceId(workspaceId);
       }
+    });
+  }
+
+  onCreateApplication(workspaceId: string, applicationName: string) {
+    this._workspaceSelectorStore.createApplication({
+      workspaceId,
+      applicationName,
     });
   }
 }

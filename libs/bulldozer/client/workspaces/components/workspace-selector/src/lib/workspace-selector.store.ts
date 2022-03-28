@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { ApplicationApiService } from '@bulldozer-client/applications-data-access';
+import {
+  ApplicationApiService,
+  ApplicationsStore,
+} from '@bulldozer-client/applications-data-access';
 import {
   CollectionApiService,
   CollectionAttributeApiService,
@@ -53,6 +56,7 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
     private readonly _workspaceStore: WorkspaceStore,
+    private readonly _applicationsStore: ApplicationsStore,
     workspaceInstructionsStore: WorkspaceInstructionsStore,
     configStore: ConfigStore
   ) {
@@ -83,6 +87,10 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
         case 'updateWorkspace':
         case 'deleteWorkspace': {
           this._workspaceStore.dispatch(instructionStatus);
+          break;
+        }
+        case 'createApplication': {
+          this._applicationsStore.dispatch(instructionStatus);
           break;
         }
         default:
@@ -317,6 +325,38 @@ export class WorkspaceSelectorStore extends ComponentStore<object> {
               () =>
                 this._notificationStore.setEvent(
                   'Delete workspace request sent'
+                ),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  readonly createApplication = this.effect<{
+    workspaceId: string;
+    applicationName: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([{ applicationName, workspaceId }, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._applicationApiService
+          .create({
+            applicationName,
+            authority: authority.toBase58(),
+            workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Create application request sent'
                 ),
               (error) => this._notificationStore.setError(error)
             )
