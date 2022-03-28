@@ -29,10 +29,6 @@ import { ViewProfileComponent } from './view-profile.component';
           },
         ],
       },
-      {
-        path: '**',
-        redirectTo: 'user-info',
-      },
     ]),
     MatButtonModule,
     MatSidenavModule,

@@ -31,7 +31,7 @@ import { WorkspaceDetailsExplorerComponent } from './workspace-details-explorer.
             component: WorkspaceDetailsExplorerInstructionsComponent,
           },
           {
-            path: '**',
+            path: '',
             redirectTo: 'budget',
           },
         ],

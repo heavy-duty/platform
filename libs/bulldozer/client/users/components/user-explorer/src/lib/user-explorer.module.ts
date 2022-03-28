@@ -24,7 +24,7 @@ import { UserExplorerComponent } from './user-explorer.component';
             component: UserExplorerWorkspacesComponent,
           },
           {
-            path: '**',
+            path: '',
             redirectTo: 'user-info',
           },
         ],
