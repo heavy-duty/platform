@@ -86,6 +86,7 @@ import { MyWorkspaceListStore } from './my-workspace-list.store';
             aria-label="View workspace detail"
             color="primary"
             (click)="onActivateWorkspace(workspace.document.id)"
+            *ngIf="activeWorkspaceId !== workspace.document.id"
           >
             <mat-icon class="mr-3">toggle_on</mat-icon>
             <span>Activate</span>
