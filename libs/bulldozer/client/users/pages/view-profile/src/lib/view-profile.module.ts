@@ -31,7 +31,7 @@ import { ViewProfileComponent } from './view-profile.component';
       },
       {
         path: '**',
-        redirectTo: 'explorer',
+        redirectTo: 'user-info',
       },
     ]),
     MatButtonModule,

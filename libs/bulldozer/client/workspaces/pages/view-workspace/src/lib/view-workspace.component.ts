@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BudgetStore } from '@bulldozer-client/budgets-data-access';
 import {
   CollaboratorsStore,
@@ -16,7 +16,86 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 @Component({
   selector: 'bd-view-workspace',
   template: `
-    <div
+    <div class="flex flex-col" *ngIf="workspace$ | ngrxPush as workspace">
+      <mat-sidenav-container class="hd-view-profile-height">
+        <mat-sidenav
+          #userProfileInfo
+          class="w-96"
+          [mode]="'side'"
+          [opened]="true"
+        >
+          <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+            <h2 class="mb-0 ">{{ workspace.document.name }}</h2>
+            <small class="leading-3">
+              Visualize all the details about this workspace
+            </small>
+          </header>
+
+          <main class="flex flex-col">
+            <mat-selection-list [multiple]="false">
+              <mat-list-option
+                [value]="'user-info'"
+                [routerLink]="['/workspaces', workspace.document.id, 'budget']"
+                [selected]="
+                  isRouteActive(
+                    '/workspaces/' + workspace.document.id + '/budget'
+                  )
+                "
+              >
+                <div class="py-6 px-3">
+                  <h2 class="mb-1">Budget</h2>
+                  <small class="leading-3"> Visualize budget details </small>
+                </div>
+              </mat-list-option>
+              <mat-list-option
+                [value]="'workspaces'"
+                [routerLink]="[
+                  '/workspaces',
+                  workspace.document.id,
+                  'collaborators'
+                ]"
+                [selected]="
+                  isRouteActive(
+                    '/workspaces/' + workspace.document.id + '/collaborators'
+                  )
+                "
+              >
+                <div class="py-6 px-3">
+                  <h2 class="mb-1">Collaborators</h2>
+                  <small class="leading-3">
+                    Visualize and manage collaborators
+                  </small>
+                </div>
+              </mat-list-option>
+              <mat-list-option
+                [value]="'workspaces'"
+                [routerLink]="[
+                  '/workspaces',
+                  workspace.document.id,
+                  'instructions'
+                ]"
+                [selected]="
+                  isRouteActive(
+                    '/workspaces/' + workspace.document.id + '/instructions'
+                  )
+                "
+              >
+                <div class="py-6 px-3">
+                  <h2 class="mb-1">Instructions</h2>
+                  <small class="leading-3">
+                    Visualize all the ongoing instructions
+                  </small>
+                </div>
+              </mat-list-option>
+            </mat-selection-list>
+          </main>
+        </mat-sidenav>
+        <mat-sidenav-content>
+          <router-outlet></router-outlet>
+        </mat-sidenav-content>
+      </mat-sidenav-container>
+    </div>
+    <!-- <div
       *ngIf="workspace$ | ngrxPush as workspace"
       class="flex flex-col gap-5 p-5"
     >
@@ -41,49 +120,12 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       </header>
 
       <main class="flex flex-col gap-4">
-        <bd-budget-details
-          *ngIf="budget$ | ngrxPush as budget"
-          [budget]="budget"
-          [minimumBalanceForRentExemption]="
-            (budgetMinimumBalanceForRentExemption$ | ngrxPush) ?? null
-          "
-          (depositToBudget)="onDepositToBudget(budget.id, $event)"
-        ></bd-budget-details>
 
-        <bd-collaborators-list
-          [showRejected]="(showRejectedCollaborators$ | ngrxPush) ?? false"
-          [mode]="(collaboratorListMode$ | ngrxPush) ?? 'ready'"
-          [currentUser]="(user$ | ngrxPush) ?? null"
-          [currentCollaborator]="(collaborator$ | ngrxPush) ?? null"
-          [readyCollaborators]="(readyCollaborators$ | ngrxPush) ?? null"
-          [pendingCollaborators]="(pendingCollaborators$ | ngrxPush) ?? null"
-          (approveCollaboratorStatusRequest)="
-            onUpdateCollaborator(workspace.document.id, $event, 1)
-          "
-          (grantCollaboratorStatus)="
-            onUpdateCollaborator(workspace.document.id, $event, 1)
-          "
-          (rejectCollaboratorStatusRequest)="
-            onUpdateCollaborator(workspace.document.id, $event, 2)
-          "
-          (requestCollaboratorStatus)="
-            onRequestCollaboratorStatus(workspace.document.id)
-          "
-          (revokeCollaboratorStatus)="
-            onUpdateCollaborator(workspace.document.id, $event, 2)
-          "
-          (retryCollaboratorStatusRequest)="
-            onRetryCollaboratorStatusRequest(workspace.document.id, $event)
-          "
-          (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
-          (toggleShowRejected)="onToggleShowRejectedCollaborators()"
-        ></bd-collaborators-list>
 
-        <bd-workspace-instructions
-          [instructionStatuses]="(instructionStatuses$ | ngrxPush) ?? null"
-        ></bd-workspace-instructions>
+
+
       </main>
-    </div>
+    </div> -->
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -97,28 +139,22 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 })
 export class ViewWorkspaceComponent implements OnInit {
   readonly workspace$ = this._workspaceStore.workspace$;
-  readonly readyCollaborators$ = this._viewWorkspaceStore.readyCollaborators$;
-  readonly pendingCollaborators$ =
-    this._viewWorkspaceStore.pendingCollaborators$;
-  readonly collaboratorListMode$ =
-    this._viewWorkspaceStore.collaboratorListMode$;
-  readonly showRejectedCollaborators$ =
-    this._viewWorkspaceStore.showRejectedCollaborators$;
+
   readonly budget$ = this._budgetStore.budget$;
   readonly user$ = this._userStore.user$;
   readonly collaborator$ = this._collaboratorStore.collaborator$;
-  readonly budgetMinimumBalanceForRentExemption$ =
-    this._viewWorkspaceStore.budgetMinimumBalanceForRentExemption$;
+
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
 
   constructor(
     private readonly _workspaceStore: WorkspaceStore,
-    private readonly _viewWorkspaceStore: ViewWorkspaceStore,
     private readonly _collaboratorStore: CollaboratorStore,
     private readonly _userStore: UserStore,
     private readonly _budgetStore: BudgetStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
+    private readonly _router: Router,
+    private readonly _viewWorkspaceStore: ViewWorkspaceStore,
     private readonly _route: ActivatedRoute
   ) {}
 
@@ -128,46 +164,12 @@ export class ViewWorkspaceComponent implements OnInit {
     );
   }
 
-  onDepositToBudget(budgetId: string, lamports: number) {
-    this._budgetStore.depositToBudget({
-      budgetId,
-      lamports,
+  isRouteActive(url: string) {
+    return this._router.isActive(url, {
+      paths: 'exact',
+      queryParams: 'exact',
+      fragment: 'ignored',
+      matrixParams: 'ignored',
     });
-  }
-
-  onRequestCollaboratorStatus(workspaceId: string) {
-    this._viewWorkspaceStore.requestCollaboratorStatus({
-      workspaceId,
-    });
-  }
-
-  onRetryCollaboratorStatusRequest(
-    workspaceId: string,
-    collaboratorId: string
-  ) {
-    this._viewWorkspaceStore.retryCollaboratorStatusRequest({
-      workspaceId,
-      collaboratorId,
-    });
-  }
-
-  onUpdateCollaborator(
-    workspaceId: string,
-    collaboratorId: string,
-    status: number
-  ) {
-    this._viewWorkspaceStore.updateCollaborator({
-      workspaceId,
-      collaboratorId,
-      status,
-    });
-  }
-
-  onSetCollaboratorListMode(mode: 'ready' | 'pending') {
-    this._viewWorkspaceStore.setCollaboratorListMode(mode);
-  }
-
-  onToggleShowRejectedCollaborators() {
-    this._viewWorkspaceStore.toggleShowRejectedCollaborators();
   }
 }

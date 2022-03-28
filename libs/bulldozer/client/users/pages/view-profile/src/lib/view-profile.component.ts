@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { Router } from '@angular/router';
 import {
   WorkspaceQueryStore,
   WorkspacesStore,
@@ -23,10 +24,12 @@ import {
           </header>
 
           <main class="flex flex-col">
-            <mat-selection-list #shoes [multiple]="false">
+            <mat-selection-list [multiple]="false">
               <mat-list-option
                 [value]="'user-info'"
                 [routerLink]="['/profile', 'user-info']"
+                [selected]="isRouteActive('/profile/user-info')"
+                [routerLinkActive]="'active'"
               >
                 <div class="py-6 px-3">
                   <h2 class="mb-1">User Info</h2>
@@ -36,9 +39,10 @@ import {
               <mat-list-option
                 [value]="'workspaces'"
                 [routerLink]="['/profile', 'workspaces']"
+                [selected]="isRouteActive('/profile/workspaces')"
               >
                 <div class="py-6 px-3">
-                  <h3 class="mb-1">Workspaces</h3>
+                  <h2 class="mb-1">Workspaces</h2>
                   <small class="leading-3">
                     Visualize all your workspaces
                   </small>
@@ -56,4 +60,15 @@ import {
   providers: [WorkspacesStore, WorkspaceQueryStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewProfileComponent {}
+export class ViewProfileComponent {
+  constructor(private readonly _router: Router) {}
+
+  isRouteActive(url: string) {
+    return this._router.isActive(url, {
+      paths: 'exact',
+      queryParams: 'exact',
+      fragment: 'ignored',
+      matrixParams: 'ignored',
+    });
+  }
+}

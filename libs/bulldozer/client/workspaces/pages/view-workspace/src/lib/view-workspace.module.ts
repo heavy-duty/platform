@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { BudgetDetailsModule } from '@bulldozer-client/budget-details';
@@ -17,11 +19,29 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
   imports: [
     CommonModule,
     RouterModule.forChild([
-      { path: '', pathMatch: 'full', component: ViewWorkspaceComponent },
+      {
+        path: '',
+        component: ViewWorkspaceComponent,
+        children: [
+          {
+            path: '',
+            loadChildren: () =>
+              import(
+                '@heavy-duty/bulldozer/client/workspaces/components/workspace-details-explorer'
+              ).then((m) => m.WorkspaceDetailsExplorerModule),
+          },
+        ],
+      },
+      {
+        path: '**',
+        redirectTo: 'budget',
+      },
     ]),
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatSidenavModule,
+    MatListModule,
     ReactiveComponentModule,
     PageHeaderModule,
     BudgetDetailsModule,

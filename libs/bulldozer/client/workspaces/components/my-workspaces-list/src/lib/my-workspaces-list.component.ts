@@ -95,7 +95,7 @@ import { MyWorkspaceListStore } from './my-workspace-list.store';
             class="w-full h-12 flex items-center"
             aria-label="View workspace detail"
             color="primary"
-            [routerLink]="['/workspaces', workspace.document.id]"
+            [routerLink]="['/workspaces', workspace.document.id, 'budget']"
           >
             <mat-icon class="mr-3">open_in_new</mat-icon>
             <span>View details</span>

@@ -49,7 +49,6 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 <span class="font-bold">ID:</span>
                 {{ userId$ | async | obscureAddress: '.' }}
               </p>
-              <!-- <p class="text-xs text-center">Ir al perfil</p> -->
             </div>
           </div>
 
@@ -58,7 +57,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             <div id="active-workspace">
               <div *ngIf="workspace !== null">
                 <h3 class="hd-highlight-title px-5 mb-0 mt-5">
-                  ACTIVE WORKSPACES
+                  ACTIVE WORKSPACE
                 </h3>
                 <div *ngFor="let workspace of workspaces">
                   Workspace -> {{ workspace.document.name }}
@@ -157,8 +156,6 @@ export class WorkspaceExplorerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    console.log(this.workspace$, this.workspaces$);
-
     this.workspaces$.subscribe((data) => console.log('la data', data));
     this.workspace$.subscribe((data) => console.log('la data 2', data));
   }
