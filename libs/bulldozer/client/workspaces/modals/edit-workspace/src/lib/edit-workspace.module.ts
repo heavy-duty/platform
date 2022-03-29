@@ -22,4 +22,4 @@ import { EditWorkspaceComponent } from './edit-workspace.component';
   declarations: [EditWorkspaceComponent, EditWorkspaceTriggerDirective],
   exports: [EditWorkspaceTriggerDirective],
 })
-export class EditWorkspaceComponentModule {}
+export class EditWorkspaceModule {}

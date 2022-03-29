@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditApplicationModule } from '@bulldozer-client/edit-application';
-import { EditWorkspaceComponentModule } from '@bulldozer-client/edit-workspace';
+import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponentModule } from '@bulldozer-client/import-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
@@ -28,7 +28,7 @@ import { WorkspaceSelectorComponent } from './workspace-selector.component';
     MatTooltipModule,
     ReactiveComponentModule,
     StopPropagationModule,
-    EditWorkspaceComponentModule,
+    EditWorkspaceModule,
     EditApplicationModule,
     ImportWorkspaceComponentModule,
     ItemUpdatingModule,

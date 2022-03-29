@@ -27,7 +27,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                 class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
               >
                 <span
-                  class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  class="flex-grow font-bold text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
                   {{ application.document.name }}
                 </span>

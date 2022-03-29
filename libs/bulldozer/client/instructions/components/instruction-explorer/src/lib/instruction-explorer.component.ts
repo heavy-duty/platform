@@ -11,7 +11,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
     <mat-expansion-panel togglePosition="before">
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
-          <mat-panel-title> Instructions </mat-panel-title>
+          <mat-panel-title class="font-bold"> Instructions </mat-panel-title>
           <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
             <button
               *ngIf="applicationId$ | ngrxPush as applicationId"
