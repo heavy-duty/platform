@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Connection, TransactionSignature } from '@solana/web3.js';
 import WebSocket, { Server } from 'ws';
+import { environment } from '../../environments/environment';
 
 @WebSocketGateway({
   cors: {
@@ -21,7 +22,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly _server: Server;
   private readonly _topics = new Map<string, Set<WebSocket>>();
-  private readonly _connection = new Connection('http://localhost:8899');
+  private readonly _connection = new Connection(environment.rpcUrl);
 
   private broadcastTransaction(
     event: string,
