@@ -11,8 +11,8 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 @Component({
   selector: 'bd-budget-details',
   template: `
-    <div class="flex gap-6">
-      <mat-card class="px-8 py-4 w-72">
+    <div class="flex flex-wrap gap-6">
+      <mat-card class="px-8 py-4 w-72 bg-white bg-opacity-5">
         <h4 class="font-bold">Total budget</h4>
         <h1 class="m-0">
           <span class="font-bold">
@@ -40,7 +40,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
         </button>
       </mat-card>
 
-      <mat-card class="px-8 py-4 w-96">
+      <mat-card class="px-8 py-4 w-96 bg-white bg-opacity-5">
         <h4 class="font-bold">Minimum Balance for Rent Exemption</h4>
         <h1 class="m-0">
           <span class="font-bold">
@@ -59,7 +59,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
         </p>
       </mat-card>
 
-      <mat-card class="px-8 py-4 w-96">
+      <mat-card class="px-8 py-4 w-96 bg-white bg-opacity-5">
         <h4 class="font-bold">Total after rent exemption</h4>
         <h1 class="m-0">
           <span class="font-bold">

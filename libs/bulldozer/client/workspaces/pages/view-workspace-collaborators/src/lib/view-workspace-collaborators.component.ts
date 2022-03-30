@@ -1,13 +1,18 @@
-import { Component } from '@angular/core';
-import { CollaboratorStore } from '@bulldozer-client/collaborators-data-access';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import {
+  CollaboratorsStore,
+  CollaboratorStore,
+} from '@bulldozer-client/collaborators-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { WorkspaceDetailsExplorerStore } from './workspace-details-explorer.store';
+import { map } from 'rxjs';
+import { ViewWorkspaceCollaboratorsStore } from './view-workspace-collaborators.store';
 
 @Component({
-  selector: 'bd-workspace-details-explorer-collaborators',
+  selector: 'bd-view-workspace-collaborators',
   template: `
-    <div *ngIf="workspace$ | ngrxPush as workspace">
+    <ng-container *ngIf="workspace$ | ngrxPush as workspace">
       <bd-collaborators-list
         [showRejected]="(showRejectedCollaborators$ | ngrxPush) ?? false"
         [mode]="(collaboratorListMode$ | ngrxPush) ?? 'ready'"
@@ -36,31 +41,45 @@ import { WorkspaceDetailsExplorerStore } from './workspace-details-explorer.stor
         (setCollaboratorListMode)="onSetCollaboratorListMode($event)"
         (toggleShowRejected)="onToggleShowRejectedCollaborators()"
       ></bd-collaborators-list>
-    </div>
+    </ng-container>
   `,
   styles: [],
+  providers: [
+    CollaboratorStore,
+    CollaboratorsStore,
+    UserStore,
+    ViewWorkspaceCollaboratorsStore,
+  ],
 })
-export class WorkspaceDetailsExplorerCollaboratorsComponent {
+export class ViewWorkspaceCollaboratorsComponent implements OnInit {
   readonly user$ = this._userStore.user$;
   readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly readyCollaborators$ =
-    this._workspaceDetailsExploreStore.readyCollaborators$;
+    this._viewWorkspaceCollaboratorsStore.readyCollaborators$;
   readonly pendingCollaborators$ =
-    this._workspaceDetailsExploreStore.pendingCollaborators$;
+    this._viewWorkspaceCollaboratorsStore.pendingCollaborators$;
   readonly workspace$ = this._workspaceStore.workspace$;
   readonly showRejectedCollaborators$ =
-    this._workspaceDetailsExploreStore.showRejectedCollaborators$;
+    this._viewWorkspaceCollaboratorsStore.showRejectedCollaborators$;
   readonly collaboratorListMode$ =
-    this._workspaceDetailsExploreStore.collaboratorListMode$;
+    this._viewWorkspaceCollaboratorsStore.collaboratorListMode$;
+
   constructor(
-    private readonly _workspaceDetailsExploreStore: WorkspaceDetailsExplorerStore,
+    private readonly _route: ActivatedRoute,
+    private readonly _viewWorkspaceCollaboratorsStore: ViewWorkspaceCollaboratorsStore,
     private readonly _workspaceStore: WorkspaceStore,
     private readonly _userStore: UserStore,
     private readonly _collaboratorStore: CollaboratorStore
   ) {}
 
+  ngOnInit() {
+    this._viewWorkspaceCollaboratorsStore.setWorkspaceId(
+      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
+    );
+  }
+
   onRequestCollaboratorStatus(workspaceId: string) {
-    this._workspaceDetailsExploreStore.requestCollaboratorStatus({
+    this._viewWorkspaceCollaboratorsStore.requestCollaboratorStatus({
       workspaceId,
     });
   }
@@ -69,7 +88,7 @@ export class WorkspaceDetailsExplorerCollaboratorsComponent {
     workspaceId: string,
     collaboratorId: string
   ) {
-    this._workspaceDetailsExploreStore.retryCollaboratorStatusRequest({
+    this._viewWorkspaceCollaboratorsStore.retryCollaboratorStatusRequest({
       workspaceId,
       collaboratorId,
     });
@@ -80,7 +99,7 @@ export class WorkspaceDetailsExplorerCollaboratorsComponent {
     collaboratorId: string,
     status: number
   ) {
-    this._workspaceDetailsExploreStore.updateCollaborator({
+    this._viewWorkspaceCollaboratorsStore.updateCollaborator({
       workspaceId,
       collaboratorId,
       status,
@@ -88,10 +107,10 @@ export class WorkspaceDetailsExplorerCollaboratorsComponent {
   }
 
   onSetCollaboratorListMode(mode: 'ready' | 'pending') {
-    this._workspaceDetailsExploreStore.setCollaboratorListMode(mode);
+    this._viewWorkspaceCollaboratorsStore.setCollaboratorListMode(mode);
   }
 
   onToggleShowRejectedCollaborators() {
-    this._workspaceDetailsExploreStore.toggleShowRejectedCollaborators();
+    this._viewWorkspaceCollaboratorsStore.toggleShowRejectedCollaborators();
   }
 }

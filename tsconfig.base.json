@@ -206,6 +206,15 @@
       "@bulldozer-client/view-workspace": [
         "libs/bulldozer/client/workspaces/pages/view-workspace/src/index.ts"
       ],
+      "@bulldozer-client/view-workspace-budget": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-budget/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace-collaborators": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace-instructions": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-instructions/src/index.ts"
+      ],
       "@bulldozer-client/workspace-explorer": [
         "libs/bulldozer/client/workspaces/components/workspace-explorer/src/index.ts"
       ],
@@ -234,9 +243,6 @@
       ],
       "@heavy-duty/bulldozer-store": [
         "libs/bulldozer/shared/store/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/client/workspaces/components/workspace-details-explorer": [
-        "libs/bulldozer/client/workspaces/components/workspace-details-explorer/src/index.ts"
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],
       "@heavy-duty/ngx-solana": ["libs/ngx-solana/data-access/src/index.ts"],

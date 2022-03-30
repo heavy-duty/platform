@@ -1,161 +1,117 @@
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BudgetStore } from '@bulldozer-client/budgets-data-access';
-import {
-  CollaboratorsStore,
-  CollaboratorStore,
-} from '@bulldozer-client/collaborators-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
-import {
-  WorkspaceInstructionsStore,
-  WorkspaceStore,
-} from '@bulldozer-client/workspaces-data-access';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import { map } from 'rxjs';
 import { ViewWorkspaceStore } from './view-workspace.store';
 
 @Component({
   selector: 'bd-view-workspace',
   template: `
-    <div class="flex flex-col" *ngIf="workspace$ | ngrxPush as workspace">
-      <mat-sidenav-container class="hd-view-profile-height">
-        <mat-sidenav
-          #userProfileInfo
-          class="w-96"
-          [mode]="'side'"
-          [opened]="true"
-        >
-          <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-            <h2 class="mb-0 ">{{ workspace.document.name }}</h2>
-            <small class="leading-3">
-              Visualize all the details about this workspace
-            </small>
-          </header>
+    <ng-container *ngIf="workspace$ | ngrxPush as workspace">
+      <aside class="w-96 flex flex-col">
+        <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+          <h1 class="mb-0 text-xl uppercase">{{ workspace.document.name }}</h1>
+          <p class="text-xs">Visualize all the details about this workspace.</p>
+        </header>
 
-          <main class="flex flex-col">
-            <mat-selection-list [multiple]="false">
-              <mat-list-option
-                [value]="'user-info'"
-                [routerLink]="['/workspaces', workspace.document.id, 'budget']"
-                [selected]="
-                  isRouteActive(
-                    '/workspaces/' + workspace.document.id + '/budget'
-                  )
-                "
-              >
-                <div class="py-6 px-3">
-                  <h2 class="mb-1">Budget</h2>
-                  <small class="leading-3"> Visualize budget details </small>
-                </div>
-              </mat-list-option>
-              <mat-list-option
-                [value]="'workspaces'"
-                [routerLink]="[
-                  '/workspaces',
-                  workspace.document.id,
-                  'collaborators'
-                ]"
-                [selected]="
-                  isRouteActive(
-                    '/workspaces/' + workspace.document.id + '/collaborators'
-                  )
-                "
-              >
-                <div class="py-6 px-3">
-                  <h2 class="mb-1">Collaborators</h2>
-                  <small class="leading-3">
-                    Visualize and manage collaborators
-                  </small>
-                </div>
-              </mat-list-option>
-              <mat-list-option
-                [value]="'workspaces'"
-                [routerLink]="[
-                  '/workspaces',
-                  workspace.document.id,
-                  'instructions'
-                ]"
-                [selected]="
-                  isRouteActive(
-                    '/workspaces/' + workspace.document.id + '/instructions'
-                  )
-                "
-              >
-                <div class="py-6 px-3">
-                  <h2 class="mb-1">Instructions</h2>
-                  <small class="leading-3">
-                    Visualize all the ongoing instructions
-                  </small>
-                </div>
-              </mat-list-option>
-            </mat-selection-list>
-          </main>
-        </mat-sidenav>
-        <mat-sidenav-content>
-          <router-outlet></router-outlet>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
-    </div>
-    <!-- <div
-      *ngIf="workspace$ | ngrxPush as workspace"
-      class="flex flex-col gap-5 p-5"
-    >
-      <header bdPageHeader>
-        <h1 class="flex items-center justify-start gap-2">
-          <span
-            [matTooltip]="
-              workspace.document.name
-                | bdItemUpdatingMessage: workspace:'Workspace'
-            "
-            matTooltipShowDelay="500"
-          >
-            {{ workspace.document.name }}
-          </span>
-          <mat-progress-spinner
-            *ngIf="workspace | bdItemShowSpinner"
-            diameter="16"
-            mode="indeterminate"
-          ></mat-progress-spinner>
-        </h1>
-        <p>Visualize all the details about this workspace.</p>
-      </header>
+        <ul>
+          <li>
+            <a
+              class="flex flex-col gap-1 border-l-4 py-5 px-7"
+              [routerLink]="['/workspaces', workspace.document.id, 'budget']"
+              [routerLinkActive]="[
+                'bg-white',
+                'bg-opacity-5',
+                'border-primary'
+              ]"
+              [ngClass]="{
+                'border-transparent': !isRouteActive(
+                  '/workspaces/' + workspace.document.id + '/budget'
+                )
+              }"
+            >
+              <span class="text-lg font-bold">Budget</span>
+              <span class="text-xs font-thin"> Visualize budget details. </span>
+            </a>
+          </li>
+          <li>
+            <a
+              class="flex flex-col gap-1 border-l-4 py-5 px-7"
+              [routerLink]="[
+                '/workspaces',
+                workspace.document.id,
+                'collaborators'
+              ]"
+              [routerLinkActive]="[
+                'bg-white',
+                'bg-opacity-5',
+                'border-primary'
+              ]"
+              [ngClass]="{
+                'border-transparent': !isRouteActive(
+                  '/workspaces/' + workspace.document.id + '/collaborators'
+                )
+              }"
+            >
+              <span class="text-lg font-bold">Collaborators</span>
+              <span class="text-xs font-thin">
+                Visualize and manage collaborators.
+              </span>
+            </a>
+          </li>
 
-      <main class="flex flex-col gap-4">
+          <li>
+            <a
+              class="flex flex-col gap-1 border-l-4 py-5 px-7"
+              [routerLink]="[
+                '/workspaces',
+                workspace.document.id,
+                'instructions'
+              ]"
+              [routerLinkActive]="[
+                'bg-white',
+                'bg-opacity-5',
+                'border-primary'
+              ]"
+              [ngClass]="{
+                'border-transparent': !isRouteActive(
+                  '/workspaces/' + workspace.document.id + '/instructions'
+                )
+              }"
+            >
+              <span class="text-lg font-bold">Instructions</span>
+              <span class="text-xs font-thin">
+                Visualize all the ongoing instructions.
+              </span>
+            </a>
+          </li>
+        </ul>
+      </aside>
 
-
-
-
+      <main class="bg-white bg-opacity-5 w-full">
+        <router-outlet></router-outlet>
       </main>
-    </div> -->
+    </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    WorkspaceStore,
-    ViewWorkspaceStore,
-    CollaboratorsStore,
-    CollaboratorStore,
-    BudgetStore,
-  ],
+  providers: [WorkspaceStore, ViewWorkspaceStore],
 })
 export class ViewWorkspaceComponent implements OnInit {
+  @HostBinding('class') class = 'flex h-full';
+
   readonly workspace$ = this._workspaceStore.workspace$;
 
-  readonly budget$ = this._budgetStore.budget$;
-  readonly user$ = this._userStore.user$;
-  readonly collaborator$ = this._collaboratorStore.collaborator$;
-
-  readonly instructionStatuses$ =
-    this._workspaceInstructionsStore.instructionStatuses$;
-
   constructor(
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _collaboratorStore: CollaboratorStore,
-    private readonly _userStore: UserStore,
-    private readonly _budgetStore: BudgetStore,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore,
     private readonly _router: Router,
-    private readonly _viewWorkspaceStore: ViewWorkspaceStore,
-    private readonly _route: ActivatedRoute
+    private readonly _route: ActivatedRoute,
+    private readonly _workspaceStore: WorkspaceStore,
+    private readonly _viewWorkspaceStore: ViewWorkspaceStore
   ) {}
 
   ngOnInit() {

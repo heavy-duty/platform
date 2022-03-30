@@ -1,6 +1,5 @@
 module.exports = {
-  displayName:
-    'bulldozer-client-workspaces-components-workspace-details-explorer',
+  displayName: 'bulldozer-client-workspaces-pages-view-workspace-instructions',
   preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -10,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../../coverage/libs/bulldozer/client/workspaces/components/workspace-details-explorer',
+    '../../../../../../coverage/libs/bulldozer/client/workspaces/pages/view-workspace-instructions',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

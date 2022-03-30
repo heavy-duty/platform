@@ -38,7 +38,10 @@ import { AppComponent } from './app.component';
             ),
         },
       ],
-      { initialNavigation: 'enabledBlocking' }
+      {
+        initialNavigation: 'enabledBlocking',
+        paramsInheritanceStrategy: 'always',
+      }
     ),
     HdWalletAdapterModule.forRoot({
       autoConnect: true,

@@ -1,34 +1,38 @@
 import { Injectable } from '@angular/core';
-import { BudgetApiService } from '@bulldozer-client/budgets-data-access';
 import {
   CollaboratorApiService,
   CollaboratorsStore,
+  CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserStore } from '@bulldozer-client/users-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, of, pipe, switchMap, withLatestFrom } from 'rxjs';
+import {
+  combineLatest,
+  concatMap,
+  EMPTY,
+  of,
+  pipe,
+  withLatestFrom,
+} from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
-  budgetMinimumBalanceForRentExemption: number | null;
   showRejectedCollaborators: boolean;
   collaboratorListMode: 'pending' | 'ready';
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
-  budgetMinimumBalanceForRentExemption: null,
   showRejectedCollaborators: false,
   collaboratorListMode: 'ready',
 };
 
 @Injectable()
-export class WorkspaceDetailsExplorerStore extends ComponentStore<ViewModel> {
-  readonly budgetMinimumBalanceForRentExemption$ = this.select(
-    ({ budgetMinimumBalanceForRentExemption }) =>
-      budgetMinimumBalanceForRentExemption
-  );
+export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
+  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly showRejectedCollaborators$ = this.select(
     ({ showRejectedCollaborators }) => showRejectedCollaborators
   );
@@ -54,30 +58,32 @@ export class WorkspaceDetailsExplorerStore extends ComponentStore<ViewModel> {
         )
         .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
   );
+
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _notificationStore: NotificationStore,
-    private readonly _budgetApiService: BudgetApiService,
     private readonly _collaboratorApiService: CollaboratorApiService,
-    private readonly _collaboratorsStore: CollaboratorsStore
+    private readonly _collaboratorsStore: CollaboratorsStore,
+    private readonly _collaboratorStore: CollaboratorStore,
+    private readonly _userStore: UserStore
   ) {
     super(initialState);
 
-    this._loadBudgetMinimumBalanceForRentExemption();
+    this._collaboratorStore.setWorkspaceId(this.workspaceId$);
+    this._collaboratorStore.setUserId(this._userStore.userId$);
+    this._collaboratorsStore.setFilters(
+      combineLatest({
+        workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
+      })
+    );
   }
 
-  private readonly _loadBudgetMinimumBalanceForRentExemption =
-    this.effect<void>(
-      switchMap(() =>
-        this._budgetApiService.getMinimumBalanceForRentExemption().pipe(
-          tapResponse(
-            (budgetMinimumBalanceForRentExemption) =>
-              this.patchState({ budgetMinimumBalanceForRentExemption }),
-            (error) => this._notificationStore.setError(error)
-          )
-        )
-      )
-    );
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({
+      ...state,
+      workspaceId,
+    })
+  );
 
   readonly setCollaboratorListMode = this.updater<'ready' | 'pending'>(
     (state, collaboratorListMode) => ({

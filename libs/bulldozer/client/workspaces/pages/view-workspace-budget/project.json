@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/workspaces/pages/view-workspace-budget",
+  "sourceRoot": "libs/bulldozer/client/workspaces/pages/view-workspace-budget/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/workspaces/pages/view-workspace-budget"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/workspaces/pages/view-workspace-budget/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/workspaces/pages/view-workspace-budget/src/**/*.ts",
+          "libs/bulldozer/client/workspaces/pages/view-workspace-budget/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

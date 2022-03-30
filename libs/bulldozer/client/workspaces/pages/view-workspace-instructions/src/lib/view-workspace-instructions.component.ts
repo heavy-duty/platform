@@ -2,17 +2,15 @@ import { Component } from '@angular/core';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 
 @Component({
-  selector: 'bd-workspace-details-explorer-instructions',
+  selector: 'bd-view-workspace-instructions',
   template: `
-    <div>
-      <bd-workspace-instructions
-        [instructionStatuses]="(instructionStatuses$ | ngrxPush) ?? null"
-      ></bd-workspace-instructions>
-    </div>
+    <bd-workspace-instructions
+      [instructionStatuses]="(instructionStatuses$ | ngrxPush) ?? null"
+    ></bd-workspace-instructions>
   `,
   styles: [],
 })
-export class WorkspaceDetailsExplorerInstructionsComponent {
+export class ViewWorkspaceInstructionsComponent {
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
 

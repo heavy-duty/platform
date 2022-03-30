@@ -24,11 +24,29 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
         component: ViewWorkspaceComponent,
         children: [
           {
-            path: '',
+            path: 'budget',
             loadChildren: () =>
-              import(
-                '@heavy-duty/bulldozer/client/workspaces/components/workspace-details-explorer'
-              ).then((m) => m.WorkspaceDetailsExplorerModule),
+              import('@bulldozer-client/view-workspace-budget').then(
+                (m) => m.ViewWorkspaceBudgetModule
+              ),
+          },
+          {
+            path: 'collaborators',
+            loadChildren: () =>
+              import('@bulldozer-client/view-workspace-collaborators').then(
+                (m) => m.ViewWorkspaceCollaboratorsModule
+              ),
+          },
+          {
+            path: 'instructions',
+            loadChildren: () =>
+              import('@bulldozer-client/view-workspace-instructions').then(
+                (m) => m.ViewWorkspaceInstructionsModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'budget',
           },
         ],
       },
