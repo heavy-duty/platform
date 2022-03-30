@@ -19,10 +19,8 @@ import { ViewCollectionStore } from './view-collection.store';
 @Component({
   selector: 'bd-view-collection',
   template: `
-    <div class="flex" *ngIf="collection$ | ngrxPush as collection">
-      <div
-        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
-      >
+    <ng-container *ngIf="collection$ | ngrxPush as collection">
+      <div class="p-5 flex-1 flex flex-col gap-5">
         <header bdPageHeader>
           <h1>
             <span
@@ -75,14 +73,14 @@ import { ViewCollectionStore } from './view-collection.store';
           </bd-collection-attributes-list>
         </main>
       </div>
-      <div class="w-1/2 bd-custom-height-content overflow-hidden">
+      <div class="flex-1">
         <bd-code-editor
           [customClass]="'bd-custom-monaco-editor'"
           [template]="(code$ | ngrxPush) ?? null"
           [options]="(editorOptions$ | ngrxPush) ?? null"
         ></bd-code-editor>
       </div>
-    </div>
+    </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -95,7 +93,7 @@ import { ViewCollectionStore } from './view-collection.store';
   ],
 })
 export class ViewCollectionComponent implements OnInit {
-  @HostBinding('class') class = 'block';
+  @HostBinding('class') class = 'flex h-full';
   readonly connected$ = this._walletStore.connected$;
   readonly collection$ = this._collectionStore.collection$;
   readonly collectionAttributes$ =

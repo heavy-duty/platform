@@ -27,10 +27,8 @@ import { ViewInstructionStore } from './view-instruction.store';
 @Component({
   selector: 'bd-view-instruction',
   template: `
-    <div class="flex w-full" *ngIf="instruction$ | ngrxPush as instruction">
-      <div
-        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
-      >
+    <ng-container *ngIf="instruction$ | ngrxPush as instruction">
+      <div class="p-5 flex-1 flex flex-col gap-5">
         <header bdPageHeader>
           <h1>
             <span
@@ -157,47 +155,51 @@ import { ViewInstructionStore } from './view-instruction.store';
           </bd-instruction-signers-list>
         </main>
       </div>
-      <div class="w-1/2">
-        <div class="bd-custom-height-content overflow-hidden">
-          <bd-code-editor
-            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splitted'"
-            [template]="(contextCode$ | ngrxPush) ?? null"
-            [options]="(contextEditorOptions$ | ngrxPush) ?? null"
-          ></bd-code-editor>
+      <div class="flex-1 flex flex-col gap-1">
+        <bd-code-editor
+          class="flex-1"
+          customClass="h-full"
+          [template]="(contextCode$ | ngrxPush) ?? null"
+          [options]="(contextEditorOptions$ | ngrxPush) ?? null"
+        ></bd-code-editor>
 
-          <ng-container *ngIf="connected$ | ngrxPush">
-            <div
-              *ngIf="instruction.document.data.body !== instructionBody"
-              class="w-full flex justify-end"
-            >
-              <p class="ml-2 mb-0">
-                Remember to save the changes below:
-                <button
-                  mat-raised-button
-                  color="primary"
-                  (click)="
-                    onUpdateInstructionBody(
-                      instruction.document.data.workspace,
-                      instruction.document.data.application,
-                      instruction.document.id
-                    )
-                  "
-                >
-                  Save
-                </button>
-              </p>
-            </div>
-          </ng-container>
+        <ng-container *ngIf="connected$ | ngrxPush">
+          <div
+            *ngIf="
+              instructionBody !== null &&
+              instruction.document.data.body !== instructionBody
+            "
+            class="w-full flex justify-end"
+          >
+            <p class="ml-2 mb-0">
+              Remember to save the changes below:
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="
+                  onUpdateInstructionBody(
+                    instruction.document.data.workspace,
+                    instruction.document.data.application,
+                    instruction.document.id,
+                    instructionBody
+                  )
+                "
+              >
+                Save
+              </button>
+            </p>
+          </div>
+        </ng-container>
 
-          <bd-code-editor
-            [customClass]="'bd-custom-monaco-editor-splitted'"
-            [template]="(handleCode$ | ngrxPush) ?? null"
-            [options]="(handleEditorOptions$ | ngrxPush) ?? null"
-            (codeChange)="instructionBody = $event"
-          ></bd-code-editor>
-        </div>
+        <bd-code-editor
+          class="flex-1"
+          customClass="h-full"
+          [template]="(handleCode$ | ngrxPush) ?? null"
+          [options]="(handleEditorOptions$ | ngrxPush) ?? null"
+          (codeChange)="instructionBody = $event"
+        ></bd-code-editor>
       </div>
-    </div>
+    </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -218,8 +220,8 @@ import { ViewInstructionStore } from './view-instruction.store';
   ],
 })
 export class ViewInstructionComponent {
-  @HostBinding('class') class = 'block';
-  instructionBody = '';
+  @HostBinding('class') class = 'flex h-full';
+  instructionBody: string | null = null;
   readonly connected$ = this._walletStore.connected$;
   readonly collections$ = this._collectionsStore.collections$.pipe(
     map((collections) => collections.map(({ document }) => document))
@@ -270,13 +272,14 @@ export class ViewInstructionComponent {
   onUpdateInstructionBody(
     workspaceId: string,
     applicationId: string,
-    instructionId: string
+    instructionId: string,
+    instructionBody: string
   ) {
     this._viewInstructionStore.updateInstructionBody({
       workspaceId,
       applicationId,
       instructionId,
-      instructionBody: this.instructionBody,
+      instructionBody,
     });
   }
 
