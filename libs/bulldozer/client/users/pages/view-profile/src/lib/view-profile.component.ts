@@ -1,5 +1,11 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { TabStore } from '@bulldozer-client/core-data-access';
 
 @Component({
   selector: 'bd-view-profile',
@@ -51,10 +57,21 @@ import { Router } from '@angular/router';
   providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewProfileComponent {
+export class ViewProfileComponent implements OnInit {
   @HostBinding('class') class = 'flex h-full';
 
-  constructor(private readonly _router: Router) {}
+  constructor(
+    private readonly _tabStore: TabStore,
+    private readonly _router: Router
+  ) {}
+
+  ngOnInit() {
+    this._tabStore.openTab({
+      id: 'profile',
+      kind: 'profile',
+      url: '/profile',
+    });
+  }
 
   isRouteActive(url: string) {
     return this._router.isActive(url, {

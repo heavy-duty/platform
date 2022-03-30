@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   InstructionStatus,
@@ -16,18 +15,12 @@ export class ViewUserInfoStore extends ComponentStore<object> {
   constructor(
     private readonly _userApiService: UserApiService,
     private readonly _notificationStore: NotificationStore,
-    private readonly _tabStore: TabStore,
     private readonly _walletStore: WalletStore,
     private readonly _userStore: UserStore,
     private readonly _userInstructionsStore: UserInstructionsStore
   ) {
     super({});
 
-    this._tabStore.openTab({
-      id: 'profile',
-      kind: 'profile',
-      url: '/profile',
-    });
     this._handleInstruction(this._userInstructionsStore.instruction$);
   }
 
