@@ -25,7 +25,7 @@ import {
 } from 'rxjs';
 
 @Injectable()
-export class UserWorkspacesStore extends ComponentStore<object> {
+export class ViewUserWorkspacesStore extends ComponentStore<object> {
   constructor(
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
@@ -48,11 +48,11 @@ export class UserWorkspacesStore extends ComponentStore<object> {
     this._workspacesStore.setWorkspaceIds(
       this._workspaceQueryStore.workspaceIds$
     );
-    /* this._tabStore.openTab({
+    this._tabStore.openTab({
       id: 'profile',
       kind: 'profile',
       url: '/profile',
-    }); */
+    });
     this._handleInstruction(this._userInstructionsStore.instruction$);
   }
 

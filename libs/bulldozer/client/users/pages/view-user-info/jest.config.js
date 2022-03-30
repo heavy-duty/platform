@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'bulldozer-client-users-components-user-workspaces',
+  displayName: 'bulldozer-client-users-pages-view-user-info',
   preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../../coverage/libs/bulldozer/client/users/components/user-workspaces',
+    '../../../../../../coverage/libs/bulldozer/client/users/pages/view-user-info',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },

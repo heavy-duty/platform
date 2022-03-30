@@ -1,10 +1,10 @@
 import { Component, HostBinding } from '@angular/core';
 import { UserStore } from '@bulldozer-client/users-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { UserInfoStore } from './user-info.store';
+import { ViewUserInfoStore } from './view-user-info.store';
 
 @Component({
-  selector: 'bd-user-info',
+  selector: 'bd-view-user-info',
   template: `
     <bd-user-details
       [connected]="(connected$ | ngrxPush) ?? false"
@@ -14,9 +14,9 @@ import { UserInfoStore } from './user-info.store';
     ></bd-user-details>
   `,
   styles: [],
-  providers: [UserInfoStore, UserStore],
+  providers: [ViewUserInfoStore, UserStore],
 })
-export class UserInfoComponent {
+export class ViewUserInfoComponent {
   @HostBinding('class') class = 'block p-8';
   readonly connected$ = this._walletStore.connected$;
   readonly user$ = this._userStore.user$;
@@ -24,14 +24,14 @@ export class UserInfoComponent {
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _userStore: UserStore,
-    private readonly _userInfoStore: UserInfoStore
+    private readonly _viewUserInfoStore: ViewUserInfoStore
   ) {}
 
   onCreateUser() {
-    this._userInfoStore.createUser();
+    this._viewUserInfoStore.createUser();
   }
 
   onDeleteUser() {
-    this._userInfoStore.deleteUser();
+    this._viewUserInfoStore.deleteUser();
   }
 }

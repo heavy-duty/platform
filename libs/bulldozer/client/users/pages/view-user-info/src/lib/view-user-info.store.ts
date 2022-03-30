@@ -12,7 +12,7 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { concatMap, EMPTY, of, pipe, tap, withLatestFrom } from 'rxjs';
 
 @Injectable()
-export class UserInfoStore extends ComponentStore<object> {
+export class ViewUserInfoStore extends ComponentStore<object> {
   constructor(
     private readonly _userApiService: UserApiService,
     private readonly _notificationStore: NotificationStore,

@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
 import { UserDetailsModule } from '@bulldozer-client/user-details';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { UserWorkspacesComponent } from './user-workspaces.component';
+import { ViewUserInfoComponent } from './view-user-info.component';
 
 @NgModule({
   imports: [
@@ -12,13 +13,14 @@ import { UserWorkspacesComponent } from './user-workspaces.component';
     RouterModule.forChild([
       {
         path: '',
-        component: UserWorkspacesComponent,
+        component: ViewUserInfoComponent,
       },
     ]),
-    MyWorkspacesListModule,
+    MatIconModule,
     ReactiveComponentModule,
+    MyWorkspacesListModule,
     UserDetailsModule,
   ],
-  declarations: [UserWorkspacesComponent],
+  declarations: [ViewUserInfoComponent],
 })
-export class UserWorkspacesModule {}
+export class ViewUserInfoModule {}

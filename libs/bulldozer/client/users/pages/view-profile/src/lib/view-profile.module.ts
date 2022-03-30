@@ -23,15 +23,15 @@ import { ViewProfileComponent } from './view-profile.component';
           {
             path: 'info',
             loadChildren: () =>
-              import('@bulldozer-client/user-info').then(
-                (m) => m.UserInfoModule
+              import('@bulldozer-client/view-user-info').then(
+                (m) => m.ViewUserInfoModule
               ),
           },
           {
             path: 'workspaces',
             loadChildren: () =>
-              import('@bulldozer-client/user-workspaces').then(
-                (m) => m.UserWorkspacesModule
+              import('@bulldozer-client/view-user-workspaces').then(
+                (m) => m.ViewUserWorkspacesModule
               ),
           },
           {
