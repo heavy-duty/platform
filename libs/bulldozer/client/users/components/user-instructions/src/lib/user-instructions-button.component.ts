@@ -4,7 +4,9 @@ import { Component, Input } from '@angular/core';
   selector: 'bd-user-instructions-button',
   template: `
     <ng-container
-      *bdUserInstructions="let instructionsInProcess = instructionsInProcess"
+      *bdUserInstructionsStore="
+        let instructionsInProcess = instructionsInProcess
+      "
     >
       <button
         *ngIf="

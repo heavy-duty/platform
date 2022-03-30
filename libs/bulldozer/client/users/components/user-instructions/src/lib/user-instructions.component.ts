@@ -4,7 +4,7 @@ import { Component } from '@angular/core';
   selector: 'bd-user-instructions',
   template: `
     <ng-container
-      *bdUserInstructions="let instructionStatuses = instructionStatuses"
+      *bdUserInstructionsStore="let instructionStatuses = instructionStatuses"
     >
       <mat-list
         role="list"

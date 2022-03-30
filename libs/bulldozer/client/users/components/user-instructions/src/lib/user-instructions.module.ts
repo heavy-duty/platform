@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { UserInstructionsButtonComponent } from './user-instructions-button.component';
+import { UserInstructionsStoreDirective } from './user-instructions-store.directive';
 import { UserInstructionsComponent } from './user-instructions.component';
 import { UserInstructionsDirective } from './user-instructions.directive';
 
@@ -18,12 +19,12 @@ import { UserInstructionsDirective } from './user-instructions.directive';
     UserInstructionsComponent,
     UserInstructionsDirective,
     UserInstructionsButtonComponent,
-    UserInstructionsDirective,
+    UserInstructionsStoreDirective,
   ],
   exports: [
     UserInstructionsDirective,
     UserInstructionsButtonComponent,
-    UserInstructionsDirective,
+    UserInstructionsStoreDirective,
   ],
 })
 export class UserInstructionsModule {}
