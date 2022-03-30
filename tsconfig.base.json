@@ -179,8 +179,14 @@
       "@bulldozer-client/user-details": [
         "libs/bulldozer/client/users/components/user-details/src/index.ts"
       ],
+      "@bulldozer-client/user-info": [
+        "libs/bulldozer/client/users/components/user-info/src/index.ts"
+      ],
       "@bulldozer-client/user-instructions": [
         "libs/bulldozer/client/users/components/user-instructions/src/index.ts"
+      ],
+      "@bulldozer-client/user-workspaces": [
+        "libs/bulldozer/client/users/components/user-workspaces/src/index.ts"
       ],
       "@bulldozer-client/users-data-access": [
         "libs/bulldozer/client/users/data-access/src/index.ts"
@@ -228,9 +234,6 @@
       ],
       "@heavy-duty/bulldozer-store": [
         "libs/bulldozer/shared/store/src/index.ts"
-      ],
-      "@heavy-duty/bulldozer/client/users/components/user-explorer": [
-        "libs/bulldozer/client/users/components/user-explorer/src/index.ts"
       ],
       "@heavy-duty/bulldozer/client/workspaces/components/workspace-details-explorer": [
         "libs/bulldozer/client/workspaces/components/workspace-details-explorer/src/index.ts"

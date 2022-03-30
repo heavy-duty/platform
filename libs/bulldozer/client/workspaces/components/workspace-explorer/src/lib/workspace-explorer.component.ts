@@ -32,7 +32,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
           <div
             class="w-36 mt-5 pb-3 cursor-pointer"
             *ngIf="(user$ | ngrxPush) !== null"
-            [routerLink]="['/profile', 'user-info']"
+            [routerLink]="['/profile', 'info']"
           >
             <figure class="w-20 m-auto mb-2 relative">
               <img src="assets/images/default-profile.png" class="w-full" />

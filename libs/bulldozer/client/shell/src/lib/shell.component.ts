@@ -48,30 +48,34 @@ import {
             [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
           ></bd-workspace-explorer>
         </mat-sidenav>
-        <!-- -->
-        <!-- -->
+
         <mat-sidenav-content>
-          <mat-toolbar color="primary" class="shadow-md sticky top-0 z-10">
-            <div class="ml-auto flex items-center">
-              <button type="button" mat-mini-fab (click)="settings.toggle()">
-                <mat-icon
-                  aria-hidden="false"
-                  aria-label="Bulldozer tool settings"
-                  >settings</mat-icon
-                >
-              </button>
+          <div class="flex flex-col h-screen">
+            <div
+              class="flex items-center gap-2 border-b-1 border-white border-opacity-10"
+            >
+              <bd-tab-list
+                class="flex-grow"
+                [tabs]="(tabs$ | ngrxPush) ?? null"
+                [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
+                (closeTab)="onCloseTab($event)"
+              ></bd-tab-list>
+
+              <div class="px-4">
+                <button type="button" mat-mini-fab (click)="settings.toggle()">
+                  <mat-icon
+                    aria-hidden="false"
+                    aria-label="Bulldozer tool settings"
+                    >settings</mat-icon
+                  >
+                </button>
+              </div>
             </div>
-          </mat-toolbar>
-          <!-- -->
-          <!-- -->
-          <bd-tab-list
-            [tabs]="(tabs$ | ngrxPush) ?? null"
-            [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
-            (closeTab)="onCloseTab($event)"
-          ></bd-tab-list>
-          <!-- -->
-          <!-- -->
-          <router-outlet></router-outlet>
+
+            <div class="flex-grow">
+              <router-outlet></router-outlet>
+            </div>
+          </div>
         </mat-sidenav-content>
 
         <!-- -->

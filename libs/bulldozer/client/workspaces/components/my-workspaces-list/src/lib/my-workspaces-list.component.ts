@@ -16,7 +16,7 @@ import { WorkspaceView } from '@bulldozer-client/workspaces-data-access';
     >
       <mat-card
         *ngFor="let workspace of workspaces; let i = index"
-        class="h-auto bg-opacity-5 mat-elevation-z2 w-96"
+        class="h-auto bg-white bg-opacity-5 mat-elevation-z2 w-96"
       >
         <div class="flex py-2 gap-2">
           <div

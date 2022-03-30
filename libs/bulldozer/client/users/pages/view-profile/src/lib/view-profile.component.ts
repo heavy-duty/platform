@@ -1,62 +1,59 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'bd-view-profile',
   template: `
-    <div class="flex flex-col">
-      <mat-sidenav-container class="hd-view-profile-height">
-        <mat-sidenav
-          #userProfileInfo
-          class="w-96"
-          [mode]="'side'"
-          [opened]="true"
-        >
-          <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-            <h2 class="mb-0 ">PROFILE</h2>
-            <small class="leading-3">
-              Visualize all the details about your profile and workspaces
-            </small>
-          </header>
+    <aside class="w-96 flex flex-col">
+      <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+        <h2 class="mb-0 text-xl uppercase">Profile</h2>
+        <small class="leading-3">
+          Visualize all the details about your profile and workspaces
+        </small>
+      </header>
 
-          <main class="flex flex-col">
-            <mat-selection-list [multiple]="false">
-              <mat-list-option
-                [value]="'user-info'"
-                [routerLink]="['/profile', 'user-info']"
-                [selected]="isRouteActive('/profile/user-info')"
-                [routerLinkActive]="'active'"
-              >
-                <div class="py-6 px-3">
-                  <h2 class="mb-1">User Info 1</h2>
-                  <small class="leading-3"> Visualize your user details </small>
-                </div>
-              </mat-list-option>
-              <mat-list-option
-                [value]="'workspaces'"
-                [routerLink]="['/profile', 'workspaces']"
-                [selected]="isRouteActive('/profile/workspaces')"
-              >
-                <div class="py-6 px-3">
-                  <h2 class="mb-1">Workspaces</h2>
-                  <small class="leading-3">
-                    Visualize all your workspaces
-                  </small>
-                </div>
-              </mat-list-option>
-            </mat-selection-list>
-          </main>
-        </mat-sidenav>
-        <mat-sidenav-content>
-          <router-outlet></router-outlet>
-        </mat-sidenav-content>
-      </mat-sidenav-container>
+      <ul>
+        <li>
+          <a
+            class="flex flex-col gap-1 border-l-4 py-5 px-7"
+            [routerLink]="['/profile', 'info']"
+            [routerLinkActive]="['bg-white', 'bg-opacity-5', 'border-primary']"
+            [ngClass]="{
+              'border-transparent': !isRouteActive('/profile/info')
+            }"
+          >
+            <span class="text-lg font-bold">User Info</span>
+            <span class="text-xs font-thin"> Visualize your user details </span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="flex flex-col gap-1 border-l-4 py-5 px-7"
+            [routerLink]="['/profile', 'workspaces']"
+            [routerLinkActive]="['bg-white', 'bg-opacity-5', 'border-primary']"
+            [ngClass]="{
+              'border-transparent': !isRouteActive('/profile/workspaces')
+            }"
+          >
+            <span class="text-lg font-bold">Workspaces</span>
+            <span class="text-xs font-thin">
+              Visualize all your workspaces
+            </span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <div class="w-full bg-white bg-opacity-5">
+      <router-outlet></router-outlet>
     </div>
   `,
   providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ViewProfileComponent {
+  @HostBinding('class') class = 'flex h-full';
+
   constructor(private readonly _router: Router) {}
 
   isRouteActive(url: string) {

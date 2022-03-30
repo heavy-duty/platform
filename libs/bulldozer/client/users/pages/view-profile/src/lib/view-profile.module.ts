@@ -21,11 +21,22 @@ import { ViewProfileComponent } from './view-profile.component';
         component: ViewProfileComponent,
         children: [
           {
-            path: '',
+            path: 'info',
             loadChildren: () =>
-              import(
-                '@heavy-duty/bulldozer/client/users/components/user-explorer'
-              ).then((m) => m.UserExplorerModule),
+              import('@bulldozer-client/user-info').then(
+                (m) => m.UserInfoModule
+              ),
+          },
+          {
+            path: 'workspaces',
+            loadChildren: () =>
+              import('@bulldozer-client/user-workspaces').then(
+                (m) => m.UserWorkspacesModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'info',
           },
         ],
       },

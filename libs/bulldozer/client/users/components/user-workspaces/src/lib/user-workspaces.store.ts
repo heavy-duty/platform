@@ -3,9 +3,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   InstructionStatus,
-  UserApiService,
   UserInstructionsStore,
-  UserStore,
 } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceApiService,
@@ -27,15 +25,13 @@ import {
 } from 'rxjs';
 
 @Injectable()
-export class UserExplorerStore extends ComponentStore<object> {
+export class UserWorkspacesStore extends ComponentStore<object> {
   constructor(
-    private readonly _userApiService: UserApiService,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
     private readonly _tabStore: TabStore,
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _workspaceQueryStore: WorkspaceQueryStore,
-    private readonly _userStore: UserStore,
     private readonly _userInstructionsStore: UserInstructionsStore,
     private readonly _workspaceApiService: WorkspaceApiService
   ) {
@@ -52,11 +48,11 @@ export class UserExplorerStore extends ComponentStore<object> {
     this._workspacesStore.setWorkspaceIds(
       this._workspaceQueryStore.workspaceIds$
     );
-    this._tabStore.openTab({
+    /* this._tabStore.openTab({
       id: 'profile',
       kind: 'profile',
       url: '/profile',
-    });
+    }); */
     this._handleInstruction(this._userInstructionsStore.instruction$);
   }
 
@@ -69,65 +65,10 @@ export class UserExplorerStore extends ComponentStore<object> {
           this._workspacesStore.dispatch(instructionStatus);
           break;
         }
-        case 'createUser':
-        case 'deleteUser': {
-          this._userStore.handleUserInstruction(instructionStatus);
-          break;
-        }
         default:
           break;
       }
     })
-  );
-
-  readonly createUser = this.effect<void>(
-    pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._userApiService
-          .create({
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Create user request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly deleteUser = this.effect<void>(
-    pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._userApiService
-          .delete({
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Delete user request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
   );
 
   readonly deleteWorkspace = this.effect<string>(
