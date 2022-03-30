@@ -4,14 +4,15 @@ This is the solana wallet adapter library for Angular
 
 ## Pre-requisites
 ```
-@angular/core
-@heavy-duty/rxjs
-@ngrx/component-store
-@solana/web3.js
-@solana/wallet-adapter-base
-@angular-builders/custom-webpack
-rxjs
-
+"@angular/core": "13.2.2",
+"@heavy-duty/rxjs": "0.1.0",
+"rxjs": "7.5.2",
+"@ngrx/component-store": "13.0.2",
+"@solana/web3.js": "1.36.0",
+"@solana/wallet-adapter-base": "0.9.5"
+"@heavy-duty/wallet-adapter": "0.2.2"
+"@solana/wallet-adapter-wallets": "0.15.5",
+"@angular-builders/custom-webpack": "^13.1.0",
 ```
 
 ## Installation
