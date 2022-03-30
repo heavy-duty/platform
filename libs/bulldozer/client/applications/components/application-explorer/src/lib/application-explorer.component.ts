@@ -82,7 +82,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
             </a>
             <button
               mat-menu-item
-              bdEditApplicationTrigger
+              bdEditApplication
               [application]="application.document"
               (editApplication)="
                 onUpdateApplication(

@@ -20,7 +20,7 @@ import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
               color="primary"
               mat-icon-button
               aria-label="Add instruction argument"
-              bdEditInstructionArgumentTrigger
+              bdEditInstructionArgument
               (editInstructionArgument)="onCreateInstructionArgument($event)"
             >
               <mat-icon>add</mat-icon>
@@ -99,7 +99,7 @@ import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
               <mat-menu #instructionArgumentMenu="matMenu">
                 <button
                   mat-menu-item
-                  bdEditInstructionArgumentTrigger
+                  bdEditInstructionArgument
                   [instructionArgument]="instructionArgument.document"
                   (editInstructionArgument)="
                     onUpdateInstructionArgument(

@@ -10,8 +10,8 @@ import { HttpEndpoint } from '@heavy-duty/ngx-solana';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
 
-@Directive({ selector: 'button[hdEditEndpointsModalTrigger]' })
-export class HdEditEndpointsModalTriggerDirective {
+@Directive({ selector: 'button[hdEditEndpointsModal]' })
+export class HdEditEndpointsModalDirective {
   @Input() apiEndpoint!: HttpEndpoint;
   @Input() webSocketEndpoint!: WebSocketEndpoint;
   @Output() editEndpoints = new EventEmitter<{

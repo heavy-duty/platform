@@ -6,8 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { EditInstructionTriggerDirective } from './edit-instruction-trigger.directive';
 import { EditInstructionComponent } from './edit-instruction.component';
+import { EditInstructionDirective } from './edit-instruction.directive';
 
 @NgModule({
   imports: [
@@ -19,7 +19,7 @@ import { EditInstructionComponent } from './edit-instruction.component';
     MatIconModule,
     MatInputModule,
   ],
-  declarations: [EditInstructionComponent, EditInstructionTriggerDirective],
-  exports: [EditInstructionTriggerDirective],
+  declarations: [EditInstructionComponent, EditInstructionDirective],
+  exports: [EditInstructionDirective],
 })
 export class EditInstructionModule {}

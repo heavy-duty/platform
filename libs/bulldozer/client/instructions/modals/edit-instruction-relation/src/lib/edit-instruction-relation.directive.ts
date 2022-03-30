@@ -10,8 +10,8 @@ import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-
 import { InstructionRelationDto } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionRelationComponent } from './edit-instruction-relation.component';
 
-@Directive({ selector: '[bdEditInstructionRelationTrigger]' })
-export class EditInstructionRelationTriggerDirective {
+@Directive({ selector: '[bdEditInstructionRelation]' })
+export class EditInstructionRelationDirective {
   @Input() instructionAccounts: InstructionAccountItemView[] | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =

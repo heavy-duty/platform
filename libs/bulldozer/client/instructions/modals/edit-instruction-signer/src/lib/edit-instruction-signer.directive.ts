@@ -13,8 +13,8 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionSignerComponent } from './edit-instruction-signer.component';
 
-@Directive({ selector: '[bdEditInstructionSignerTrigger]' })
-export class EditInstructionSignerTriggerDirective {
+@Directive({ selector: '[bdEditInstructionSigner]' })
+export class EditInstructionSignerDirective {
   @Input() instructionSigner?: Document<InstructionAccount>;
   @Output() editInstructionSigner = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {

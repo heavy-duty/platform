@@ -9,8 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionComponent } from './edit-instruction.component';
 
-@Directive({ selector: '[bdEditInstructionTrigger]' })
-export class EditInstructionTriggerDirective {
+@Directive({ selector: '[bdEditInstruction]' })
+export class EditInstructionDirective {
   @Input() instruction?: Document<Instruction>;
   @Output() editInstruction = new EventEmitter<string>();
   @HostListener('click') onClick(): void {

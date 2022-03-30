@@ -6,7 +6,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
 import { HdTransactionsListButtonComponent } from './transactions-list-button.component';
 import { HdTransactionsListComponent } from './transactions-list.component';
-import { HdTransactionsListTriggerDirective } from './transactions-list.trigger.directive';
+import { HdTransactionsListDirective } from './transactions-list.directive';
 
 @NgModule({
   imports: [
@@ -19,12 +19,12 @@ import { HdTransactionsListTriggerDirective } from './transactions-list.trigger.
   declarations: [
     HdTransactionsListButtonComponent,
     HdTransactionsListComponent,
-    HdTransactionsListTriggerDirective,
+    HdTransactionsListDirective,
   ],
   exports: [
     HdTransactionsListButtonComponent,
     HdTransactionsListComponent,
-    HdTransactionsListTriggerDirective,
+    HdTransactionsListDirective,
   ],
 })
 export class HdBroadcasterMaterialModule {}

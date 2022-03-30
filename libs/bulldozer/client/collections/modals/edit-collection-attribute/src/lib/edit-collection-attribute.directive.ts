@@ -13,8 +13,8 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { EditCollectionAttributeComponent } from './edit-collection-attribute.component';
 
-@Directive({ selector: '[bdEditCollectionAttributeTrigger]' })
-export class EditCollectionAttributeTriggerDirective {
+@Directive({ selector: '[bdEditCollectionAttribute]' })
+export class EditCollectionAttributeDirective {
   @Input() collectionAttribute?: Document<CollectionAttribute>;
   @Output() editCollectionAttribute =
     new EventEmitter<CollectionAttributeDto>();

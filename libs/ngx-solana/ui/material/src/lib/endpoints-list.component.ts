@@ -9,7 +9,7 @@ import { NetworkConfig } from '@heavy-duty/ngx-solana';
 
       <button
         class="underline text-primary"
-        hdEditEndpointsModalTrigger
+        hdEditEndpointsModal
         [apiEndpoint]="selectedNetworkConfig.apiEndpoint"
         [webSocketEndpoint]="selectedNetworkConfig.webSocketEndpoint"
         (editEndpoints)="

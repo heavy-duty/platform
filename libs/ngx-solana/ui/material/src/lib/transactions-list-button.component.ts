@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
       <button
         type="button"
         mat-raised-button
-        hdTransactionsListTrigger
+        hdTransactionsList
         *ngIf="showEmpty || transactionsInProcess > 0"
       >
         <div class="flex justify-between items-center gap-2">

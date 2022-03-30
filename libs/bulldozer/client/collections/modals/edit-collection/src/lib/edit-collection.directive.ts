@@ -9,8 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
 import { EditCollectionComponent } from './edit-collection.component';
 
-@Directive({ selector: '[bdEditCollectionTrigger]' })
-export class EditCollectionTriggerDirective {
+@Directive({ selector: '[bdEditCollection]' })
+export class EditCollectionDirective {
   @Input() collection?: Document<Collection>;
   @Output() editCollection = new EventEmitter<string>();
   @HostListener('click') onClick(): void {

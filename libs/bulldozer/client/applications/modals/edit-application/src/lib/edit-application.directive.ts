@@ -9,8 +9,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { Application, Document } from '@heavy-duty/bulldozer-devkit';
 import { EditApplicationComponent } from './edit-application.component';
 
-@Directive({ selector: '[bdEditApplicationTrigger]' })
-export class EditApplicationTriggerDirective {
+@Directive({ selector: '[bdEditApplication]' })
+export class EditApplicationDirective {
   @Input() application?: Document<Application>;
   @Output() editApplication = new EventEmitter<string>();
   @HostListener('click') onClick(): void {

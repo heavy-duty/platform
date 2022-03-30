@@ -20,7 +20,7 @@ import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
               color="primary"
               mat-icon-button
               aria-label="Add collection attribute"
-              bdEditCollectionAttributeTrigger
+              bdEditCollectionAttribute
               (editCollectionAttribute)="onCreateCollectionAttribute($event)"
             >
               <mat-icon>add</mat-icon>
@@ -99,7 +99,7 @@ import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
               <mat-menu #collectionAttributeMenu="matMenu">
                 <button
                   mat-menu-item
-                  bdEditCollectionAttributeTrigger
+                  bdEditCollectionAttribute
                   [collectionAttribute]="collectionAttribute.document"
                   (editCollectionAttribute)="
                     onUpdateCollectionAttribute(

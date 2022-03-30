@@ -20,7 +20,7 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
               color="primary"
               mat-icon-button
               aria-label="Add instruction signer"
-              bdEditInstructionSignerTrigger
+              bdEditInstructionSigner
               (editInstructionSigner)="onCreateInstructionSigner($event)"
             >
               <mat-icon>add</mat-icon>
@@ -91,7 +91,7 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
               <mat-menu #instructionSignerMenu="matMenu">
                 <button
                   mat-menu-item
-                  bdEditInstructionSignerTrigger
+                  bdEditInstructionSigner
                   [instructionSigner]="instructionSigner.document"
                   (editInstructionSigner)="
                     onUpdateInstructionSigner(

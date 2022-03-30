@@ -13,7 +13,7 @@ import { Component, Input } from '@angular/core';
         "
         type="button"
         mat-raised-button
-        bdUserInstructionsTrigger
+        bdUserInstructions
       >
         <div class="flex justify-between items-center gap-2">
           <span> Instructions in Process ({{ instructionsInProcess }}) </span>

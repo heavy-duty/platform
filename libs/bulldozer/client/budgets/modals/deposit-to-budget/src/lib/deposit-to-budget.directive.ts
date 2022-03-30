@@ -2,8 +2,8 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { DepositToBudgetComponent } from './deposit-to-budget.component';
 
-@Directive({ selector: '[bdDepositToBudgetTrigger]' })
-export class DepositToBudgetTriggerDirective {
+@Directive({ selector: '[bdDepositToBudget]' })
+export class DepositToBudgetDirective {
   @Output() depositToBudget = new EventEmitter<number>();
   @HostListener('click') onClick(): void {
     this._matDialog

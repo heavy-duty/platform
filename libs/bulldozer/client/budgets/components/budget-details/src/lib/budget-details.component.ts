@@ -33,7 +33,7 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
           class="mt-3 w-32"
           mat-raised-button
           color="primary"
-          bdDepositToBudgetTrigger
+          bdDepositToBudget
           (depositToBudget)="onDepositToBudget($event)"
         >
           Deposit

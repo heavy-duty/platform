@@ -18,14 +18,14 @@ import { HdConnectionMenuButtonComponent } from './connection-menu-button.compon
 import { HdConnectionMenuComponent } from './connection-menu.component';
 import { HdConnectionMiniStatusComponent } from './connection-mini-status.component';
 import { HdConnectionStatusComponent } from './connection-status.component';
-import { HdEditEndpointsModalTriggerDirective } from './edit-endpoints-modal-trigger.directive';
 import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';
+import { HdEditEndpointsModalDirective } from './edit-endpoints-modal.directive';
 import { HdEndpointsListItemComponent } from './endpoints-list-item.component';
 import { HdEndpointsListComponent } from './endpoints-list.component';
 import { HdNetworkSelectorComponent } from './network-selector.component';
 import { HdTransactionsListButtonComponent } from './transactions-list-button.component';
 import { HdTransactionsListComponent } from './transactions-list.component';
-import { HdTransactionsListTriggerDirective } from './transactions-list.trigger.directive';
+import { HdTransactionsListDirective } from './transactions-list.directive';
 
 @NgModule({
   imports: [
@@ -51,13 +51,13 @@ import { HdTransactionsListTriggerDirective } from './transactions-list.trigger.
     HdConnectionMenuComponent,
     HdConnectionMiniStatusComponent,
     HdEditEndpointsComponent,
-    HdEditEndpointsModalTriggerDirective,
+    HdEditEndpointsModalDirective,
     HdEndpointsListComponent,
     HdEndpointsListItemComponent,
     HdNetworkSelectorComponent,
     HdConnectionStatusComponent,
     HdTransactionsListComponent,
-    HdTransactionsListTriggerDirective,
+    HdTransactionsListDirective,
     HdTransactionsListButtonComponent,
   ],
   exports: [HdConnectionMenuComponent, HdTransactionsListButtonComponent],

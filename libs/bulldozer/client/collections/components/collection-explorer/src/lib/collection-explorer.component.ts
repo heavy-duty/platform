@@ -19,7 +19,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
               [disabled]="!connected"
               aria-label="Create collection"
               bdStopPropagation
-              bdEditCollectionTrigger
+              bdEditCollection
               (editCollection)="
                 onCreateCollection(workspaceId, applicationId, $event)
               "
@@ -76,7 +76,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
           <mat-menu #collectionOptionsMenu="matMenu">
             <button
               mat-menu-item
-              bdEditCollectionTrigger
+              bdEditCollection
               [collection]="collection.document"
               (editCollection)="
                 onUpdateCollection(

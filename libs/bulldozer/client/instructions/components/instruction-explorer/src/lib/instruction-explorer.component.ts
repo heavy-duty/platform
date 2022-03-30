@@ -19,7 +19,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
               [disabled]="!connected"
               aria-label="Create instruction"
               bdStopPropagation
-              bdEditInstructionTrigger
+              bdEditInstruction
               (editInstruction)="
                 onCreateInstruction(workspaceId, applicationId, $event)
               "
@@ -76,7 +76,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
           <mat-menu #instructionOptionsMenu="matMenu">
             <button
               mat-menu-item
-              bdEditInstructionTrigger
+              bdEditInstruction
               [instruction]="instruction.document"
               (editInstruction)="
                 onUpdateInstruction(

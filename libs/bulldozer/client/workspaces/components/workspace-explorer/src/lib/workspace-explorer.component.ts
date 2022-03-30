@@ -54,7 +54,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <span class="hd-highlight-title uppercase"> Explorer </span>
               <button
                 mat-icon-button
-                bdEditApplicationTrigger
+                bdEditApplication
                 (editApplication)="
                   onCreateApplication(workspace.document.id, $event)
                 "

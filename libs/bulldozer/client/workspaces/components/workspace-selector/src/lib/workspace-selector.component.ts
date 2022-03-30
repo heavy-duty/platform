@@ -89,7 +89,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
           class="w-full h-12"
           [disabled]="!connected"
           *ngIf="workspaceId$ | ngrxPush as workspaceId"
-          bdEditApplicationTrigger
+          bdEditApplication
           (editApplication)="onCreateApplication(workspaceId, $event)"
         >
           <mat-icon>add_circle_outline</mat-icon>

@@ -15,8 +15,8 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
 
-@Directive({ selector: '[bdEditInstructionDocumentTrigger]' })
-export class EditInstructionDocumentTriggerDirective {
+@Directive({ selector: '[bdEditInstructionDocument]' })
+export class EditInstructionDocumentDirective {
   @Input() instructionDocument: Document<InstructionAccount> | null = null;
   @Input() collections: Document<Collection>[] | null = null;
   @Input() instructionAccounts: InstructionAccountItemView[] | null = null;

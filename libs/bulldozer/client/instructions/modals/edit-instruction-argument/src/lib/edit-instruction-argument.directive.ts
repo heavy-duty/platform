@@ -13,8 +13,8 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionArgumentComponent } from './edit-instruction-argument.component';
 
-@Directive({ selector: '[bdEditInstructionArgumentTrigger]' })
-export class EditInstructionArgumentTriggerDirective {
+@Directive({ selector: '[bdEditInstructionArgument]' })
+export class EditInstructionArgumentDirective {
   @Input() instructionArgument?: Document<InstructionArgument>;
   @Output() editInstructionArgument =
     new EventEmitter<InstructionArgumentDto>();

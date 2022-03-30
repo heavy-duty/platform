@@ -27,7 +27,7 @@ import {
               color="primary"
               mat-icon-button
               aria-label="Add instruction document"
-              bdEditInstructionDocumentTrigger
+              bdEditInstructionDocument
               [collections]="collections"
               [instructionAccounts]="instructionAccounts"
               (editInstructionDocument)="onCreateInstructionDocument($event)"
@@ -201,7 +201,7 @@ import {
               <mat-menu #documentMenu="matMenu">
                 <button
                   mat-menu-item
-                  bdEditInstructionRelationTrigger
+                  bdEditInstructionRelation
                   [instructionAccounts]="instructionAccounts"
                   [from]="instructionDocument.document.id"
                   (editInstructionRelation)="
@@ -214,7 +214,7 @@ import {
                 </button>
                 <button
                   mat-menu-item
-                  bdEditInstructionDocumentTrigger
+                  bdEditInstructionDocument
                   [collections]="collections"
                   [instructionAccounts]="instructionAccounts"
                   [instructionDocument]="instructionDocument.document"
