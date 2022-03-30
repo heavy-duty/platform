@@ -3,7 +3,7 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { DepositToBudgetComponentModule } from '@bulldozer-client/deposit-to-budget';
+import { DepositToBudgetModule } from '@bulldozer-client/deposit-to-budget';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { SectionHeaderModule } from '@bulldozer-client/section-header';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
@@ -19,7 +19,7 @@ import { BudgetDetailsComponent } from './budget-details.component';
     HdWalletAdapterMaterialModule,
     SectionHeaderModule,
     ObscureAddressModule,
-    DepositToBudgetComponentModule,
+    DepositToBudgetModule,
   ],
   exports: [BudgetDetailsComponent],
 })

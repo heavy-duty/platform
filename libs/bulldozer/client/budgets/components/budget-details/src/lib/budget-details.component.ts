@@ -12,74 +12,39 @@ import { LAMPORTS_PER_SOL } from '@solana/web3.js';
   selector: 'bd-budget-details',
   template: `
     <div class="flex flex-wrap gap-6">
-      <mat-card class="px-8 py-4 w-72 bg-white bg-opacity-5">
-        <h4 class="font-bold">Total budget</h4>
-        <h1 class="m-0">
-          <span class="font-bold">
-            {{
-              (budget?.metadata?.lamports ?? 0) / lamportsPerSol
-                | number: '1.2-9'
-            }}
-          </span>
-          SOL
-        </h1>
-        <p>
-          <span class="text-sm italic">
-            ({{ budget?.metadata?.lamports | number }}
-            lamports.)
-          </span>
-        </p>
-        <button
-          class="mt-3 w-32"
-          mat-raised-button
-          color="primary"
-          bdDepositToBudget
-          (depositToBudget)="onDepositToBudget($event)"
-        >
-          Deposit
-        </button>
-      </mat-card>
+      <mat-card class="p-4 w-80 flex flex-col gap-8 bg-white bg-opacity-5">
+        <div class="flex justify-start items-center gap-2">
+          <figure
+            class="w-20 h-20 flex justify-center items-center bg-black rounded-full"
+          >
+            <img src="assets/images/solana-logo.png" class="w-7/12" />
+          </figure>
 
-      <mat-card class="px-8 py-4 w-96 bg-white bg-opacity-5">
-        <h4 class="font-bold">Minimum Balance for Rent Exemption</h4>
-        <h1 class="m-0">
-          <span class="font-bold">
-            {{
-              (minimumBalanceForRentExemption ?? 0) / lamportsPerSol
-                | number: '1.2-9'
-            }}
-          </span>
-          SOL
-        </h1>
-        <p>
-          <span class="text-sm italic">
-            ({{ minimumBalanceForRentExemption | number }}
-            lamports.)
-          </span>
-        </p>
-      </mat-card>
-
-      <mat-card class="px-8 py-4 w-96 bg-white bg-opacity-5">
-        <h4 class="font-bold">Total after rent exemption</h4>
-        <h1 class="m-0">
-          <span class="font-bold">
-            {{
-              ((budget?.metadata?.lamports ?? 0) -
-                (minimumBalanceForRentExemption ?? 0)) /
-                lamportsPerSol | number: '1.2-9'
-            }}
-          </span>
-          SOL
-        </h1>
-        <p>
-          <span class="text-sm italic">
-            ({{
-              (budget?.metadata?.lamports ?? 0) -
-                (minimumBalanceForRentExemption ?? 0) | number
-            }}
-            lamports.)
-          </span>
-        </p>
+          <div class="flex flex-col items-start">
+            <h2 class="m-0">Total budget</h2>
+            <p class="m-0 font-bold text-2xl">
+              {{
+                (budget?.metadata?.lamports ?? 0) / lamportsPerSol
+                  | number: '1.2-9'
+              }}
+            </p>
+            <p class="m-0 text-sm opacity-75">Solana (SOL)</p>
+          </div>
+        </div>
+        <div class="flex gap-4">
+          <button
+            class="flex-1"
+            mat-stroked-button
+            color="primary"
+            bdDepositToBudget
+            (depositToBudget)="onDepositToBudget($event)"
+          >
+            Deposit
+          </button>
+          <button class="flex-1" mat-stroked-button color="primary">
+            Withdraw
+          </button>
+        </div>
       </mat-card>
     </div>
   `,
@@ -92,7 +57,8 @@ export class BudgetDetailsComponent {
   @Input() minimumBalanceForRentExemption: number | null = null;
   @Output() depositToBudget = new EventEmitter();
 
-  onDepositToBudget(lamports: number) {
-    this.depositToBudget.emit(lamports);
+  onDepositToBudget(amount: number) {
+    console.log(amount);
+    this.depositToBudget.emit(amount);
   }
 }

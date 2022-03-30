@@ -16,23 +16,22 @@ import { MatSnackBar } from '@angular/material/snack-bar';
       <mat-form-field
         class="w-full"
         appearance="fill"
-        hintLabel="Enter the lamports."
+        hintLabel="Enter the amount."
       >
-        <mat-label>Lamports</mat-label>
+        <mat-label>Amount</mat-label>
         <input
           matInput
-          formControlName="lamports"
+          formControlName="amount"
           required
           autocomplete="off"
           maxlength="32"
         />
 
         <mat-error
-          *ngIf="submitted && this.form.get('lamports')?.hasError('required')"
-          >The lamports is mandatory.</mat-error
+          *ngIf="submitted && this.form.get('amount')?.hasError('required')"
+          >The amount is mandatory.</mat-error
         >
-        <mat-error
-          *ngIf="submitted && this.form.get('lamports')?.hasError('min')"
+        <mat-error *ngIf="submitted && this.form.get('amount')?.hasError('min')"
           >Minimum of 1 lamport.</mat-error
         >
       </mat-form-field>
@@ -69,8 +68,8 @@ export class DepositToBudgetComponent {
     private readonly _matDialogRef: MatDialogRef<DepositToBudgetComponent>
   ) {
     this.form = new FormGroup({
-      lamports: new FormControl(null, {
-        validators: [Validators.required, Validators.min(1)],
+      amount: new FormControl(null, {
+        validators: [Validators.required, Validators.min(0)],
       }),
     });
   }

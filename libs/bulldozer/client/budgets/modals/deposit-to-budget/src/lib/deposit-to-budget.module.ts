@@ -22,4 +22,4 @@ import { DepositToBudgetDirective } from './deposit-to-budget.directive';
   declarations: [DepositToBudgetComponent, DepositToBudgetDirective],
   exports: [DepositToBudgetDirective],
 })
-export class DepositToBudgetComponentModule {}
+export class DepositToBudgetModule {}
