@@ -2,8 +2,8 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { ImportWorkspaceComponent } from './import-workspace.component';
 
-@Directive({ selector: '[bdImportWorkspaceTrigger]' })
-export class ImportWorkspaceTriggerDirective {
+@Directive({ selector: '[bdImportWorkspace]' })
+export class ImportWorkspaceDirective {
   @Output() importWorkspace = new EventEmitter<string>();
   @HostListener('click') onClick(): void {
     this._matDialog

@@ -6,8 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { ImportWorkspaceTriggerDirective } from './import-workspace-trigger.directive';
 import { ImportWorkspaceComponent } from './import-workspace.component';
+import { ImportWorkspaceDirective } from './import-workspace.directive';
 
 @NgModule({
   imports: [
@@ -19,7 +19,7 @@ import { ImportWorkspaceComponent } from './import-workspace.component';
     MatIconModule,
     MatInputModule,
   ],
-  declarations: [ImportWorkspaceComponent, ImportWorkspaceTriggerDirective],
-  exports: [ImportWorkspaceTriggerDirective],
+  declarations: [ImportWorkspaceComponent, ImportWorkspaceDirective],
+  exports: [ImportWorkspaceDirective],
 })
-export class ImportWorkspaceComponentModule {}
+export class ImportWorkspaceModule {}

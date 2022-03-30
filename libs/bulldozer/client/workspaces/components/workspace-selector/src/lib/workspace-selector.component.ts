@@ -101,7 +101,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
         <button
           class="w-full h-12"
           mat-menu-item
-          bdEditWorkspaceTrigger
+          bdEditWorkspace
           (editWorkspace)="onCreateWorkspace($event)"
         >
           <mat-icon>add_circle_outline</mat-icon>
@@ -110,7 +110,7 @@ import { WorkspaceSelectorStore } from './workspace-selector.store';
         <button
           class="w-full h-12"
           mat-menu-item
-          bdImportWorkspaceTrigger
+          bdImportWorkspace
           (importWorkspace)="onImportWorkspace($event)"
         >
           <mat-icon>upload</mat-icon>

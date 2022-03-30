@@ -1,6 +1,11 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserStore } from '@bulldozer-client/users-data-access';
-import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
+import {
+  WorkspaceApiService,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { WorkspaceExplorerStore } from './workspace-explorer.store';
 
 @Component({
@@ -72,8 +77,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               </span>
               <button
                 mat-icon-button
-                bdEditWorkspaceTrigger
-                (editWorkspace)="onCreateWorkspace($event)"
+                bdAddWorkspace
+                (newWorkspace)="onCreateWorkspace($event)"
+                (importWorkspace)="onImportWorkspace($event)"
               >
                 <mat-icon>add</mat-icon>
               </button>
@@ -128,7 +134,10 @@ export class WorkspaceExplorerComponent {
   constructor(
     private readonly _workspaceExplorerStore: WorkspaceExplorerStore,
     private readonly _workspaceStore: WorkspaceStore,
-    private readonly _userStore: UserStore
+    private readonly _userStore: UserStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
+    private readonly _configStore: ConfigStore,
+    private readonly _notificationStore: NotificationStore
   ) {}
 
   onCreateUser() {
@@ -147,6 +156,16 @@ export class WorkspaceExplorerComponent {
     this._workspaceExplorerStore.createApplication({
       workspaceId,
       applicationName,
+    });
+  }
+
+  onImportWorkspace(workspaceId: string) {
+    this._workspaceApiService.findById(workspaceId).subscribe((workspace) => {
+      if (workspace === null) {
+        this._notificationStore.setError('Workspace does not exist.');
+      } else {
+        this._configStore.setWorkspaceId(workspaceId);
+      }
     });
   }
 }

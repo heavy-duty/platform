@@ -16,6 +16,9 @@
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@bulldozer-client/add-workspace": [
+        "libs/bulldozer/client/workspaces/modals/add-workspace/src/index.ts"
+      ],
       "@bulldozer-client/application-explorer": [
         "libs/bulldozer/client/applications/components/application-explorer/src/index.ts"
       ],

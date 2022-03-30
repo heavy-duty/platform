@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { AddWorkspaceModule } from '@bulldozer-client/add-workspace';
 import { ApplicationExplorerModule } from '@bulldozer-client/application-explorer';
 import { EditApplicationModule } from '@bulldozer-client/edit-application';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
@@ -24,6 +25,7 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     ObscureAddressModule,
     EditWorkspaceModule,
     EditApplicationModule,
+    AddWorkspaceModule,
   ],
   declarations: [WorkspaceExplorerComponent],
   exports: [WorkspaceExplorerComponent],
