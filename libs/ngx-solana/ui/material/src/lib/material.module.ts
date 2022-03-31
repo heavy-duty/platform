@@ -60,6 +60,13 @@ import { HdTransactionsListDirective } from './transactions-list.directive';
     HdTransactionsListDirective,
     HdTransactionsListButtonComponent,
   ],
-  exports: [HdConnectionMenuComponent, HdTransactionsListButtonComponent],
+  exports: [
+    HdConnectionMenuComponent,
+    HdConnectionStatusComponent,
+    HdNetworkSelectorComponent,
+    HdTransactionsListButtonComponent,
+    HdEndpointsListComponent,
+    HdEditEndpointsModalDirective,
+  ],
 })
 export class HdSolanaMaterialModule {}

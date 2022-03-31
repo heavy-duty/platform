@@ -27,6 +27,7 @@ import { MatMenu } from '@angular/material/menu';
             let selectNetwork = selectNetwork
           "
         >
+          <h2 class="m-0 uppercase">network</h2>
           <hd-network-selector
             *ngIf="networkConfigs !== null"
             [selectedNetwork]="selectedNetwork"
@@ -41,6 +42,28 @@ import { MatMenu } from '@angular/material/menu';
             let editNetworkConfig = editNetworkConfig
           "
         >
+          <header class="flex items-baseline gap-2">
+            <h2 class="m-0 uppercase">endpoints</h2>
+
+            <button
+              *ngIf="selectedNetworkConfig !== null"
+              class="underline text-primary"
+              hdEditEndpointsModal
+              [apiEndpoint]="selectedNetworkConfig.apiEndpoint"
+              [webSocketEndpoint]="selectedNetworkConfig.webSocketEndpoint"
+              (editEndpoints)="
+                editNetworkConfig({
+                  network: selectedNetworkConfig.network,
+                  apiEndpoint: $event.apiEndpoint,
+                  webSocketEndpoint: $event.webSocketEndpoint
+                })
+              "
+              (click)="onCloseMenu()"
+            >
+              (change)
+            </button>
+          </header>
+
           <hd-edpoints-list
             *ngIf="selectedNetworkConfig !== null"
             [selectedNetworkConfig]="selectedNetworkConfig"

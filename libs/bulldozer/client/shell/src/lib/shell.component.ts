@@ -78,39 +78,185 @@ import {
           </div>
         </mat-sidenav-content>
 
-        <!-- -->
-        <!-- -->
         <mat-sidenav
           #settings
-          class="bd-h-inherit w-72"
+          class="bd-h-inherit w-80"
           fixedInViewport
           position="end"
           [mode]="'over'"
           [opened]="false"
         >
-          <!-- Move to component -->
-          <!-- -->
-          <mat-toolbar color="accent" class="shadow-md sticky top-0 z-10">
-            <div>
-              <h2>SETTINGS</h2>
-            </div>
-          </mat-toolbar>
+          <header class="px-7 py-8 border-b hd-border-gray">
+            <h1 class="m-0 uppercase">Settings</h1>
+          </header>
+
           <main class="flex flex-col">
-            <section class="px-7 py-8 border-b hd-border-gray">
-              <p>WALLET</p>
-              <hd-wallet-multi-button
-                class="bd-custom-color h-auto leading-none mr-6"
-                color="basic"
-              ></hd-wallet-multi-button>
+            <section
+              class="px-7 py-8 border-b hd-border-gray"
+              *hdWalletAdapter="
+                let wallet = wallet;
+                let wallets = wallets;
+                let publicKey = publicKey;
+                let selectWallet = selectWallet
+              "
+            >
+              <h2 class="m-0 hd-highlight-title uppercase">Wallet</h2>
+
+              <ng-container *ngIf="publicKey !== null && wallet !== null">
+                <p
+                  class="flex items-center gap-2 px-2 bg-black bg-opacity-10 rounded-md"
+                >
+                  <hd-wallet-icon
+                    class="flex-shrink-0"
+                    [wallet]="wallet"
+                  ></hd-wallet-icon>
+
+                  <span
+                    class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  >
+                    {{ publicKey.toBase58() }}
+                  </span>
+
+                  <button
+                    mat-icon-button
+                    [cdkCopyToClipboard]="publicKey.toBase58()"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </p>
+
+                <div class="flex justify-between gap-2">
+                  <button
+                    class="flex-1"
+                    mat-stroked-button
+                    color="accent"
+                    hdWalletModalButton
+                    [wallets]="wallets"
+                    (selectWallet)="selectWallet($event)"
+                  >
+                    Change wallet
+                  </button>
+                  <button
+                    class="flex-1"
+                    mat-stroked-button
+                    color="warn"
+                    hdWalletDisconnectButton
+                  >
+                    Disconnect
+                  </button>
+                </div>
+              </ng-container>
             </section>
 
-            <section class="px-7 py-8 border-b hd-border-gray">
-              <p>NETWORK</p>
-              <hd-connection-menu class="mr-6"></hd-connection-menu>
+            <section
+              class="px-7 py-8 border-b hd-border-gray"
+              *hdSolanaConfig="
+                let selectedNetwork = selectedNetwork;
+                let networkConfigs = networkConfigs;
+                let selectNetwork = selectNetwork;
+                let selectedNetworkConfig = selectedNetworkConfig;
+                let editNetworkConfig = editNetworkConfig
+              "
+            >
+              <h2 class="m-0 hd-highlight-title uppercase">Network</h2>
+
+              <hd-network-selector
+                *ngIf="networkConfigs !== null"
+                [selectedNetwork]="selectedNetwork"
+                [networkConfigs]="networkConfigs"
+                (selectNetwork)="selectNetwork($event)"
+              ></hd-network-selector>
+
+              <header class="flex items-center justify-between gap-2">
+                <h2 class="m-0 hd-highlight-title uppercase">endpoints</h2>
+
+                <button
+                  *ngIf="selectedNetworkConfig !== null"
+                  mat-icon-button
+                  hdEditEndpointsModal
+                  [apiEndpoint]="selectedNetworkConfig.apiEndpoint"
+                  [webSocketEndpoint]="selectedNetworkConfig.webSocketEndpoint"
+                  (editEndpoints)="
+                    editNetworkConfig({
+                      network: selectedNetworkConfig.network,
+                      apiEndpoint: $event.apiEndpoint,
+                      webSocketEndpoint: $event.webSocketEndpoint
+                    })
+                  "
+                  aria-label="Change endpoints"
+                  color="accent"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </header>
+
+              <ng-container *ngIf="selectedNetworkConfig !== null">
+                <h3 class="m-0">API:</h3>
+                <p
+                  class="flex items-center justify-between px-2 bg-black bg-opacity-10 rounded-md"
+                >
+                  <span
+                    class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  >
+                    {{ selectedNetworkConfig.apiEndpoint }}
+                  </span>
+
+                  <button
+                    mat-icon-button
+                    [cdkCopyToClipboard]="selectedNetworkConfig.apiEndpoint"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </p>
+
+                <h3 class="m-0">WebSocket:</h3>
+                <p
+                  class="flex items-center justify-between px-2 bg-black bg-opacity-10 rounded-md"
+                >
+                  <span
+                    class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  >
+                    {{ selectedNetworkConfig.webSocketEndpoint }}
+                  </span>
+
+                  <button
+                    mat-icon-button
+                    [cdkCopyToClipboard]="
+                      selectedNetworkConfig.webSocketEndpoint
+                    "
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </p>
+              </ng-container>
+
+              <hd-connection-status
+                *hdSolanaConnection="
+                  let online = online;
+                  let connected = connected;
+                  let connecting = connecting;
+                  let onlineSince = onlineSince;
+                  let offlineSince = offlineSince;
+                  let connectedAt = connectedAt;
+                  let nextAttemptAt = nextAttemptAt;
+                  let reconnect = reconnect
+                "
+                [online]="online"
+                [connected]="connected"
+                [connecting]="connecting"
+                [onlineSince]="onlineSince"
+                [offlineSince]="offlineSince"
+                [connectedAt]="connectedAt"
+                [nextAttemptRelativeTime]="
+                  nextAttemptAt | hdRelativeTime | async
+                "
+                (reconnect)="reconnect()"
+              >
+              </hd-connection-status>
             </section>
 
             <section class="px-7 py-8 flex justify-between items-center">
-              <p class="m-0">DARK MODE</p>
+              <p class="m-0 uppercase">Dark Mode</p>
               <bd-dark-theme-switch></bd-dark-theme-switch>
             </section>
           </main>

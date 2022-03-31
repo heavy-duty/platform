@@ -1,3 +1,4 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,7 +14,9 @@ import { TabListModule } from '@bulldozer-client/tab-list';
 import { UserInstructionsModule } from '@bulldozer-client/user-instructions';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
 import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { HdSolanaCdkModule } from '@heavy-duty/ngx-solana-cdk';
 import { HdSolanaMaterialModule } from '@heavy-duty/ngx-solana-material';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ShellComponent } from './shell.component';
@@ -69,6 +72,7 @@ import { ShellComponent } from './shell.component';
         redirectTo: 'workspaces',
       },
     ]),
+    ClipboardModule,
     MatButtonModule,
     MatIconModule,
     MatSidenavModule,
@@ -76,7 +80,9 @@ import { ShellComponent } from './shell.component';
     MatToolbarModule,
     ReactiveComponentModule,
     HdWalletAdapterMaterialModule,
+    HdWalletAdapterCdkModule,
     HdSolanaMaterialModule,
+    HdSolanaCdkModule,
     DarkThemeDirectiveModule,
     DarkThemeSwitchModule,
     WorkspaceExplorerModule,

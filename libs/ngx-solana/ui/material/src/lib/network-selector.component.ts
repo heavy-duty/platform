@@ -4,8 +4,6 @@ import { Network, NetworkConfig } from '@heavy-duty/ngx-solana';
 @Component({
   selector: 'hd-network-selector',
   template: `
-    <h2 class="m-0 uppercase">network</h2>
-
     <mat-form-field appearance="fill" class="w-full">
       <mat-label>Choose a network</mat-label>
       <mat-select
