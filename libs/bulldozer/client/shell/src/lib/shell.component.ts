@@ -254,11 +254,6 @@ import {
               >
               </hd-connection-status>
             </section>
-
-            <section class="px-7 py-8 flex justify-between items-center">
-              <p class="m-0 uppercase">Dark Mode</p>
-              <bd-dark-theme-switch></bd-dark-theme-switch>
-            </section>
           </main>
         </mat-sidenav>
       </mat-sidenav-container>

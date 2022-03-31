@@ -11,49 +11,25 @@
 
 @include mat.core($fontConfig);
 
-$theme: set-light-theme($theme-primary, $theme-accent, $theme-warn);
 $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 
-// $bd-background-color: mat.get-color-from-palette($theme);
-
 // Theme Init
-@include angular-material-theme($theme);
+@include angular-material-theme($darkTheme);
 // set custom themes
-@include containers.theme($theme);
+@include containers.theme($darkTheme);
 // end
 
-// Temporal (use theme colors later)
 .hd-border-gray {
-  border-color: #dcdcdc !important;
+  border-color: #2c2c2c !important;
 }
 
 .hd-highlight-title {
-  color: black;
+  color: #fba807;
 }
 
 .hd-dark-container {
-  background-color: #e6e6e6;
+  background-color: #2c2c2c;
 }
-
-.darkMode {
-  @include angular-material-theme($darkTheme);
-  // set custom themes
-  @include containers.theme($darkTheme);
-  // end
-
-  .hd-border-gray {
-    border-color: #2c2c2c !important;
-  }
-
-  .hd-highlight-title {
-    color: #fba807;
-  }
-
-  .hd-dark-container {
-    background-color: #2c2c2c;
-  }
-}
-
 // Specific component overrides, pieces that are not in line with the general theming
 
 // Handle buttons appropriately, with respect to line-height
