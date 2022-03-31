@@ -71,18 +71,8 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 
         <div class="w-full pl-4 flex flex-col gap-2">
           <ng-container *ngIf="workspace !== null">
-            <h3 class="mt-4 mb-0 flex justify-between items-center">
-              <span class="hd-highlight-title uppercase">
-                Active workspace
-              </span>
-              <button
-                mat-icon-button
-                bdAddWorkspace
-                (newWorkspace)="onCreateWorkspace($event)"
-                (importWorkspace)="onImportWorkspace($event)"
-              >
-                <mat-icon>add</mat-icon>
-              </button>
+            <h3 class="mt-4 mb-0 hd-highlight-title uppercase">
+              Active workspace
             </h3>
             <div class="flex items-center">
               <span
@@ -107,11 +97,19 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             </div>
           </ng-container>
 
-          <div class="py-2 flex items-center gap-2">
+          <div class="py-2 flex justify-around items-center gap-2">
             <figure class="w-8">
               <img src="assets/images/logo.png" class="w-full" />
             </figure>
             <span class="text-center font-bold m-0">BULLDOZER</span>
+            <button
+              mat-icon-button
+              bdAddWorkspace
+              (newWorkspace)="onCreateWorkspace($event)"
+              (importWorkspace)="onImportWorkspace($event)"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
           </div>
         </div>
       </div>
