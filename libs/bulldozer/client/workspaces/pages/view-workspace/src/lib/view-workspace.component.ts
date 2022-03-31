@@ -93,7 +93,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         </ul>
       </aside>
 
-      <main class="bg-white bg-opacity-5 w-full">
+      <main class="bg-white bg-opacity-5 flex-1">
         <router-outlet></router-outlet>
       </main>
     </ng-container>

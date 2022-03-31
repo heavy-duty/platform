@@ -18,45 +18,70 @@ import {
   withLatestFrom,
 } from 'rxjs';
 
+export type CollaboratorStatus = 'approved' | 'pending' | 'rejected';
+
 interface ViewModel {
   workspaceId: string | null;
-  showRejectedCollaborators: boolean;
-  collaboratorListMode: 'pending' | 'ready';
+  collaboratorStatus: CollaboratorStatus;
+  collaboratorId: string | null;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
-  showRejectedCollaborators: false,
-  collaboratorListMode: 'ready',
+  collaboratorStatus: 'approved',
+  collaboratorId: null,
 };
 
 @Injectable()
 export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
-  readonly showRejectedCollaborators$ = this.select(
-    ({ showRejectedCollaborators }) => showRejectedCollaborators
+  readonly collaboratorStatus$ = this.select(
+    ({ collaboratorStatus }) => collaboratorStatus
   );
-  readonly collaboratorListMode$ = this.select(
-    ({ collaboratorListMode }) => collaboratorListMode
+  readonly collaboratorId$ = this.select(
+    ({ collaboratorId }) => collaboratorId
   );
-  readonly pendingCollaborators$ = this.select(
+  readonly collaborators$ = this.select(
     this._collaboratorsStore.collaborators$,
-    (collaborators) =>
+    this.collaboratorStatus$,
+    (collaborators, status) =>
       collaborators
-        .filter((collaborator) => collaborator.data.status.id === 0)
+        .filter((collaborator) => {
+          switch (status) {
+            case 'pending':
+              return collaborator.data.status.id === 0;
+            case 'approved':
+              return collaborator.data.status.id === 1;
+            case 'rejected':
+              return collaborator.data.status.id === 2;
+            default:
+              return false;
+          }
+        })
         .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
   );
-  readonly readyCollaborators$ = this.select(
-    this._collaboratorsStore.collaborators$,
-    this.showRejectedCollaborators$,
-    (collaborators, showRejectedCollaborators) =>
-      collaborators
-        .filter(
-          (collaborator) =>
-            collaborator.data.status.id === 1 ||
-            (collaborator.data.status.id === 2 && showRejectedCollaborators)
-        )
-        .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
+  readonly selectedCollaborator$ = this.select(
+    this.collaborators$,
+    this.collaboratorId$,
+    (collaborators, collaboratorId) => {
+      if (collaborators.length === 0) {
+        return null;
+      }
+
+      if (collaboratorId === null) {
+        return collaborators[0];
+      }
+
+      const selectedCollaborator = collaborators.find(
+        (collaborator) => collaborator.id === collaboratorId
+      );
+
+      if (selectedCollaborator === undefined) {
+        return collaborators[0];
+      }
+
+      return selectedCollaborator;
+    }
   );
 
   constructor(
@@ -85,17 +110,19 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly setCollaboratorListMode = this.updater<'ready' | 'pending'>(
-    (state, collaboratorListMode) => ({
+  readonly setCollaboratorStatus = this.updater<CollaboratorStatus>(
+    (state, collaboratorStatus) => ({
       ...state,
-      collaboratorListMode,
+      collaboratorStatus,
     })
   );
 
-  readonly toggleShowRejectedCollaborators = this.updater((state) => ({
-    ...state,
-    showRejectedCollaborators: !state.showRejectedCollaborators,
-  }));
+  readonly setCollaboratorId = this.updater<string | null>(
+    (state, collaboratorId) => ({
+      ...state,
+      collaboratorId,
+    })
+  );
 
   readonly updateCollaborator = this.effect<{
     collaboratorId: string;
