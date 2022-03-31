@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceComponent } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponent } from '@bulldozer-client/import-workspace';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { concatMap, tap } from 'rxjs';
+import { concatMap, EMPTY, tap } from 'rxjs';
 import { AddWorkspaceComponent } from './add-workspace.component';
 
 @Directive({ selector: '[bdAddWorkspace]' })
@@ -28,7 +28,7 @@ export class AddWorkspaceDirective {
               >(EditWorkspaceComponent, { data: { workspace: undefined } })
               .afterClosed()
               .pipe(tap((data) => data && this.newWorkspace.emit(data.name)));
-          } else {
+          } else if (data === 'import') {
             return this._matDialog
               .open<ImportWorkspaceComponent, null, { pubkey: string }>(
                 ImportWorkspaceComponent
@@ -37,6 +37,8 @@ export class AddWorkspaceDirective {
               .pipe(
                 tap((data) => data && this.importWorkspace.emit(data.pubkey))
               );
+          } else {
+            return EMPTY;
           }
         })
       )
