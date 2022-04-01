@@ -42,6 +42,7 @@ import {
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
           [opened]="(isHandset$ | ngrxPush) === false"
+          [disableClose]="(isHandset$ | ngrxPush) === false"
         >
           <bd-workspace-explorer
             [connected]="(connected$ | ngrxPush) ?? false"
@@ -54,6 +55,17 @@ import {
             <div
               class="flex items-center gap-2 border-b-1 border-white border-opacity-10"
             >
+              <div class="px-4">
+                <button
+                  *ngIf="isHandset$ | async"
+                  type="button"
+                  mat-mini-fab
+                  (click)="navigation.toggle()"
+                >
+                  <mat-icon aria-label="Toggle menu">menu</mat-icon>
+                </button>
+              </div>
+
               <bd-tab-list
                 class="flex-grow"
                 [tabs]="(tabs$ | ngrxPush) ?? null"
