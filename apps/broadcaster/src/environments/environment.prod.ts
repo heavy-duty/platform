@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  rpcUrl: 'wss://api.devnet.solana.com',
+  rpcUrl: 'https://api.devnet.solana.com',
 };
