@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 pub struct CreateUserArguments {
   user_name: String,
   name: String,
-  thumbail_url: String,
+  thumbnail_url: String,
 }
 
 #[derive(Accounts)]
@@ -32,7 +32,7 @@ pub fn handle(ctx: Context<CreateUser>, arguments: CreateUserArguments) -> Resul
     *ctx.accounts.authority.key,
     arguments.user_name.to_string(),
     arguments.name.to_string(),
-    arguments.thumbail_url.to_string(),
+    arguments.thumbnail_url.to_string(),
     *ctx.bumps.get("user").unwrap(),
   );
   ctx.accounts.user.initialize_timestamp()?;

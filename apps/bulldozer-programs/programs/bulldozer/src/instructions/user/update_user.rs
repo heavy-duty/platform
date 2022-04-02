@@ -5,25 +5,22 @@ use anchor_lang::prelude::*;
 pub struct UpdateUserArguments {
   user_name: String,
   name: String,
-  thumbail_url: String,
+  thumbnail_url: String,
 }
 
 #[derive(Accounts)]
 pub struct UpdateUser<'info> {
   #[account(
-    init,
-    payer = authority,
-    space = User::space(),
+    mut,
+    has_one = authority,
     seeds = [
       b"user".as_ref(),
       authority.key().as_ref()
     ],
-    bump
+    bump = user.bump
   )]
   pub user: Box<Account<'info, User>>,
-  #[account(mut)]
   pub authority: Signer<'info>,
-  pub system_program: Program<'info, System>,
 }
 
 pub fn handle(ctx: Context<UpdateUser>, arguments: UpdateUserArguments) -> Result<()> {
@@ -31,7 +28,7 @@ pub fn handle(ctx: Context<UpdateUser>, arguments: UpdateUserArguments) -> Resul
   ctx.accounts.user.update(
     arguments.user_name.to_string(),
     arguments.name.to_string(),
-    arguments.thumbail_url.to_string(),
+    arguments.thumbnail_url.to_string(),
   );
   ctx.accounts.user.bump_timestamp()?;
   Ok(())

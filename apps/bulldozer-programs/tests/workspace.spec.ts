@@ -47,7 +47,7 @@ describe('workspace', () => {
       await program.methods
         .createUser({
           name: userName,
-          thumbailUrl: userThumbnailUrl,
+          thumbnailUrl: userThumbnailUrl,
           userName: userUserName,
         })
         .accounts({
@@ -59,7 +59,7 @@ describe('workspace', () => {
     await program.methods
       .createUser({
         name: newUserName,
-        thumbailUrl: newUserThumbnailUrl,
+        thumbnailUrl: newUserThumbnailUrl,
         userName: newUserUserName,
       })
       .accounts({
@@ -276,7 +276,7 @@ describe('workspace', () => {
     await program.methods
       .createUser({
         name: newUserName,
-        thumbailUrl: newUserThumbnailUrl,
+        thumbnailUrl: newUserThumbnailUrl,
         userName: newUserUserName,
       })
       .accounts({

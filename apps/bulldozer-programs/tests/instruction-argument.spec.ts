@@ -48,7 +48,7 @@ describe('instruction argument', () => {
       await program.methods
         .createUser({
           name: userName,
-          thumbailUrl: userThumbnailUrl,
+          thumbnailUrl: userThumbnailUrl,
           userName: userUserName,
         })
         .accounts({
@@ -472,7 +472,7 @@ describe('instruction argument', () => {
     await program.methods
       .createUser({
         name: newUserName,
-        thumbailUrl: newUserThumbnailUrl,
+        thumbnailUrl: newUserThumbnailUrl,
         userName: newUserUserName,
       })
       .accounts({
