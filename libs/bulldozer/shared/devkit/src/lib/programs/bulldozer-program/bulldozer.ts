@@ -35,7 +35,56 @@ export type Bulldozer = {
           isSigner: false;
         }
       ];
-      args: [];
+      args: [
+        {
+          name: 'arguments';
+          type: {
+            defined: 'CreateUserArguments';
+          };
+        }
+      ];
+    },
+    {
+      name: 'updateUser';
+      accounts: [
+        {
+          name: 'user';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        }
+      ];
+      args: [
+        {
+          name: 'arguments';
+          type: {
+            defined: 'UpdateUserArguments';
+          };
+        }
+      ];
     },
     {
       name: 'deleteUser';
@@ -3660,11 +3709,27 @@ export type Bulldozer = {
             type: 'publicKey';
           },
           {
+            name: 'userName';
+            type: 'string';
+          },
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'thumbnailUrl';
+            type: 'string';
+          },
+          {
             name: 'bump';
             type: 'u8';
           },
           {
             name: 'createdAt';
+            type: 'i64';
+          },
+          {
+            name: 'updatedAt';
             type: 'i64';
           }
         ];
@@ -4024,6 +4089,46 @@ export type Bulldozer = {
             type: {
               option: 'u32';
             };
+          }
+        ];
+      };
+    },
+    {
+      name: 'CreateUserArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'userName';
+            type: 'string';
+          },
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'thumbnailUrl';
+            type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'UpdateUserArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'userName';
+            type: 'string';
+          },
+          {
+            name: 'name';
+            type: 'string';
+          },
+          {
+            name: 'thumbnailUrl';
+            type: 'string';
           }
         ];
       };
@@ -4527,7 +4632,56 @@ export const IDL: Bulldozer = {
           isSigner: false,
         },
       ],
-      args: [],
+      args: [
+        {
+          name: 'arguments',
+          type: {
+            defined: 'CreateUserArguments',
+          },
+        },
+      ],
+    },
+    {
+      name: 'updateUser',
+      accounts: [
+        {
+          name: 'user',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+      ],
+      args: [
+        {
+          name: 'arguments',
+          type: {
+            defined: 'UpdateUserArguments',
+          },
+        },
+      ],
     },
     {
       name: 'deleteUser',
@@ -8152,11 +8306,27 @@ export const IDL: Bulldozer = {
             type: 'publicKey',
           },
           {
+            name: 'userName',
+            type: 'string',
+          },
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'thumbnailUrl',
+            type: 'string',
+          },
+          {
             name: 'bump',
             type: 'u8',
           },
           {
             name: 'createdAt',
+            type: 'i64',
+          },
+          {
+            name: 'updatedAt',
             type: 'i64',
           },
         ],
@@ -8516,6 +8686,46 @@ export const IDL: Bulldozer = {
             type: {
               option: 'u32',
             },
+          },
+        ],
+      },
+    },
+    {
+      name: 'CreateUserArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'userName',
+            type: 'string',
+          },
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'thumbnailUrl',
+            type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'UpdateUserArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'userName',
+            type: 'string',
+          },
+          {
+            name: 'name',
+            type: 'string',
+          },
+          {
+            name: 'thumbnailUrl',
+            type: 'string',
           },
         ],
       },

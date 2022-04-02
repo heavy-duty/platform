@@ -7,6 +7,8 @@ import {
   DeleteUserParams,
   Document,
   parseBulldozerError,
+  updateUser,
+  UpdateUserParams,
   User,
 } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -62,6 +64,29 @@ export class UserApiService {
             }
 
             return createUser(apiEndpoint, params);
+          })
+        )
+      ),
+      concatMap((transaction) =>
+        this._hdSolanaApiService
+          .sendTransaction(transaction)
+          .pipe(catchError((error) => this.handleError(error)))
+      )
+    );
+  }
+
+  // update user
+  update(params: UpdateUserParams) {
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateUser(apiEndpoint, params);
           })
         )
       ),

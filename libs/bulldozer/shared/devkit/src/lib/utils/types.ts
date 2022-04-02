@@ -67,6 +67,8 @@ export interface Collaborator {
 
 export interface User {
   authority: string;
+  userName: string;
+  thumbnailUrl: string;
   bump: number;
 }
 

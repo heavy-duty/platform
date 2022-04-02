@@ -106,6 +106,9 @@
       "@bulldozer-client/edit-instruction-signer": [
         "libs/bulldozer/client/instructions/modals/edit-instruction-signer/src/index.ts"
       ],
+      "@bulldozer-client/edit-user": [
+        "libs/bulldozer/client/users/modals/edit-user/src/index.ts"
+      ],
       "@bulldozer-client/edit-workspace": [
         "libs/bulldozer/client/workspaces/modals/edit-workspace/src/index.ts"
       ],

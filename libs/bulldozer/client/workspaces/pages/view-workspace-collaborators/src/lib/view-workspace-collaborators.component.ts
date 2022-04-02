@@ -57,46 +57,56 @@ import {
             "
             (click)="onSelectCollaborator(collaborator.id)"
           >
-            <figure
-              class="w-12 h-12 overflow-hidden rounded-full flex-shrink-0"
-            >
-              <img src="assets/images/default-profile.png" class="w-full" />
+            <figure class="w-12 rounded-full overflow-hidden">
+              <img [src]="collaborator.user.data.thumbnailUrl" class="w-full" />
             </figure>
 
             <div>
-              <p class="m-0 flex">
+              <p class="m-0 text-left">
                 <span
-                  class="w-44 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  class="text-lg font-bold w-44 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ collaborator.id }}
+                  {{ collaborator.user.name }}
                 </span>
 
-                <mat-icon *ngIf="collaborator.data.isAdmin" color="accent">
+                <mat-icon
+                  class="inline"
+                  *ngIf="collaborator.data.isAdmin"
+                  color="accent"
+                  inline
+                >
                   admin_panel_settings
                 </mat-icon>
               </p>
 
-              <p class="m-0 flex items-center gap-2">
-                <ng-container [ngSwitch]="collaborator.data.status.id">
-                  <ng-container *ngSwitchCase="0">
-                    <span
-                      class="inline-block bg-yellow-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Pending
+              <p class="m-0 text-xs text-left">
+                <a
+                  [href]="
+                    'https://explorer.solana.com/address/' +
+                    collaborator.user.id
+                  "
+                  target="__blank"
+                  class="text-accent underline"
+                  >(@{{ collaborator.user.data.userName }})</a
+                >
+              </p>
+
+              <p class="m-0 text-xs text-left">
+                <span
+                  class="inline-block w-2 h-2 rounded-full"
+                  [ngClass]="{
+                    'bg-yellow-500': collaborator.data.status.id === 0,
+                    'bg-green-500': collaborator.data.status.id === 1,
+                    'bg-red-500': collaborator.data.status.id === 2
+                  }"
+                ></span>
+                <span class="text-white text-opacity-50">
+                  <ng-container [ngSwitch]="collaborator.data.status.id">
+                    <ng-container *ngSwitchCase="0"> Pending </ng-container>
+                    <ng-container *ngSwitchCase="1"> Approved </ng-container>
+                    <ng-container *ngSwitchCase="2"> Rejected </ng-container>
                   </ng-container>
-                  <ng-container *ngSwitchCase="1">
-                    <span
-                      class="inline-block bg-green-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Approved
-                  </ng-container>
-                  <ng-container *ngSwitchCase="2">
-                    <span
-                      class="inline-block bg-red-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Rejected
-                  </ng-container>
-                </ng-container>
+                </span>
               </p>
             </div>
           </button>
@@ -135,16 +145,32 @@ import {
         *ngIf="selectedCollaborator$ | ngrxPush as selectedCollaborator"
         class="flex flex-col gap-8"
       >
-        <div class="flex justify-between items-center">
-          <div class="flex items-center">
-            <figure class="w-20 m-auto relative mr-5">
-              <img src="assets/images/default-profile.png" class="w-full" />
+        <header class="flex justify-between items-center">
+          <div class="flex items-center gap-4">
+            <figure>
+              <img
+                [src]="selectedCollaborator.user.data.thumbnailUrl"
+                class="w-20 rounded-full overflow-hidden"
+                alt=""
+              />
+              <figcaption class="m-0 text-xs text-center">
+                <a
+                  [href]="
+                    'https://explorer.solana.com/address/' +
+                    selectedCollaborator.user.id
+                  "
+                  target="__blank"
+                  class="text-accent underline"
+                  >@{{ selectedCollaborator.user.data.userName }}</a
+                >
+              </figcaption>
             </figure>
+
             <div>
               <h2
-                class="w-64 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                class="text-2xl font-bold w-64 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
               >
-                {{ selectedCollaborator.id }}
+                {{ selectedCollaborator.user.name }}
               </h2>
 
               <p class="flex m-0 gap-1 text-sm">
@@ -158,27 +184,24 @@ import {
                 </span>
               </p>
 
-              <p class="flex m-0 gap-1 items-center">
-                <ng-container [ngSwitch]="selectedCollaborator.data.status.id">
-                  <ng-container *ngSwitchCase="0">
-                    <span
-                      class="inline-block bg-yellow-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Pending
+              <p class="m-0 text-xs text-left">
+                <span
+                  class="inline-block w-2 h-2 rounded-full"
+                  [ngClass]="{
+                    'bg-yellow-500': selectedCollaborator.data.status.id === 0,
+                    'bg-green-500': selectedCollaborator.data.status.id === 1,
+                    'bg-red-500': selectedCollaborator.data.status.id === 2
+                  }"
+                ></span>
+                <span class="text-white text-opacity-50">
+                  <ng-container
+                    [ngSwitch]="selectedCollaborator.data.status.id"
+                  >
+                    <ng-container *ngSwitchCase="0"> Pending </ng-container>
+                    <ng-container *ngSwitchCase="1"> Approved </ng-container>
+                    <ng-container *ngSwitchCase="2"> Rejected </ng-container>
                   </ng-container>
-                  <ng-container *ngSwitchCase="1">
-                    <span
-                      class="inline-block bg-green-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Approved
-                  </ng-container>
-                  <ng-container *ngSwitchCase="2">
-                    <span
-                      class="inline-block bg-red-500 w-2 h-2 rounded-full"
-                    ></span>
-                    Rejected
-                  </ng-container>
-                </ng-container>
+                </span>
               </p>
             </div>
           </div>
@@ -241,9 +264,9 @@ import {
               Reject
             </button>
           </div>
-        </div>
+        </header>
 
-        <div>
+        <main>
           <h3 class="m-0 uppercase">User Info</h3>
 
           <dl class="flex justify-between gap-4">
@@ -255,7 +278,7 @@ import {
                 <span
                   class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ selectedCollaborator.data.user }}
+                  {{ selectedCollaborator.user.id }}
                 </span>
 
                 <button mat-icon-button>
@@ -281,7 +304,7 @@ import {
               </dd>
             </div>
           </dl>
-        </div>
+        </main>
       </div>
     </div>
   `,
@@ -294,14 +317,14 @@ import {
   ],
 })
 export class ViewWorkspaceCollaboratorsComponent implements OnInit {
-  @HostBinding('class') class = 'flex h-full';
+  @HostBinding('class') class = 'bg-white bg-opacity-5 flex h-full';
   readonly workspaceId$ = this._viewWorkspaceCollaboratorsStore.workspaceId$;
   readonly user$ = this._userStore.user$;
   readonly collaboratorStatus$ =
     this._viewWorkspaceCollaboratorsStore.collaboratorStatus$;
   readonly collaborator$ = this._collaboratorStore.collaborator$;
   readonly collaborators$ =
-    this._viewWorkspaceCollaboratorsStore.collaborators$;
+    this._viewWorkspaceCollaboratorsStore.filteredCollaborators$;
   readonly selectedCollaborator$ =
     this._viewWorkspaceCollaboratorsStore.selectedCollaborator$;
 

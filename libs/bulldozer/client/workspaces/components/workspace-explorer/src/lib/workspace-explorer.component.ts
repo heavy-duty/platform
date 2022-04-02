@@ -13,39 +13,73 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
       <div class="flex flex-col h-screen">
-        <div class="flex items-center justify-center border-b hd-border-gray">
-          <div
-            class="w-36 mt-5 pb-3 cursor-pointer"
-            (click)="onCreateUser()"
-            *ngIf="(user$ | ngrxPush) === null"
+        <div
+          class="flex items-center justify-center border-b hd-border-gray"
+          *ngrxLet="user$; let user"
+        >
+          <button
+            class="w-36 mt-5 pb-3"
+            bdEditUser
+            (editUser)="
+              onCreateUser($event.name, $event.userName, $event.thumbnailUrl)
+            "
+            *ngIf="user === null"
           >
             <figure class="w-20 m-auto mb-2 relative">
-              <img src="assets/images/default-profile.png" class="w-full" />
               <img
+                alt=""
+                src="assets/images/default-profile.png"
+                class="w-full"
+              />
+              <img
+                alt=""
                 src="assets/images/important.png"
                 class="w-6 absolute right-0 bottom-0"
               />
             </figure>
             <p class="text-center">Click here to a create new user</p>
-          </div>
+          </button>
           <!-- Move to components -->
-          <div
-            class="w-36 mt-5 pb-3 cursor-pointer"
-            *ngIf="(user$ | ngrxPush) !== null"
+          <a
+            class="w-36 mt-5 pb-3"
+            *ngIf="user !== null"
             [routerLink]="['/profile', 'info']"
           >
-            <figure class="w-20 m-auto mb-2 relative">
-              <img src="assets/images/default-profile.png" class="w-full" />
+            <figure class="w-20 mb-2 mx-auto rounded-full overflow-hidden">
+              <img
+                alt=""
+                [src]="user.document.data.thumbnailUrl"
+                class="w-full"
+              />
             </figure>
+
             <p
-              class="text-center"
-              [matTooltip]="(userId$ | async) || ''"
-              [cdkCopyToClipboard]="(userId$ | async) || ''"
+              class="flex items-center justify-center gap-2 mb-0"
+              [matTooltip]="
+                user.document.data.userName | bdItemUpdatingMessage: user:'User'
+              "
+              matTooltipShowDelay="500"
             >
-              <span class="font-bold">ID:</span>
-              {{ userId$ | async | obscureAddress: '.' }}
+              <span>
+                {{ user.document.name }}
+              </span>
+              <mat-progress-spinner
+                *ngIf="user | bdItemShowSpinner"
+                diameter="16"
+                mode="indeterminate"
+              ></mat-progress-spinner>
             </p>
-          </div>
+            <p class="m-0 text-center">
+              <a
+                [href]="
+                  'https://explorer.solana.com/address/' + user.document.id
+                "
+                target="__blank"
+                class="text-accent underline"
+                >@{{ user.document.data.userName }}</a
+              >
+            </p>
+          </a>
         </div>
 
         <div class="flex-grow border-b hd-border-gray overflow-auto">
@@ -138,8 +172,12 @@ export class WorkspaceExplorerComponent {
     private readonly _notificationStore: NotificationStore
   ) {}
 
-  onCreateUser() {
-    this._workspaceExplorerStore.createUser();
+  onCreateUser(name: string, userName: string, thumbnailUrl: string) {
+    this._workspaceExplorerStore.createUser({
+      name,
+      userName,
+      thumbnailUrl,
+    });
   }
 
   onDownloadWorkspace(workspaceId: string) {

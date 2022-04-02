@@ -1,9 +1,15 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { EditUserModule } from '@bulldozer-client/edit-user';
+import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
-import { UserDetailsModule } from '@bulldozer-client/user-details';
+import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewUserInfoComponent } from './view-user-info.component';
 
@@ -16,10 +22,16 @@ import { ViewUserInfoComponent } from './view-user-info.component';
         component: ViewUserInfoComponent,
       },
     ]),
+    ClipboardModule,
+    MatButtonModule,
     MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
     ReactiveComponentModule,
     MyWorkspacesListModule,
-    UserDetailsModule,
+    EditUserModule,
+    ItemUpdatingModule,
+    ObscureAddressModule,
   ],
   declarations: [ViewUserInfoComponent],
 })

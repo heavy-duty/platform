@@ -20,7 +20,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
   providers: [BudgetStore, ViewWorkspaceBudgetStore],
 })
 export class ViewWorkspaceBudgetComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8';
+  @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
 
   readonly budget$ = this._budgetStore.budget$;
   readonly budgetMinimumBalanceForRentExemption$ =

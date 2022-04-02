@@ -13,7 +13,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
   selector: 'bd-view-workspace',
   template: `
     <ng-container *ngIf="workspace$ | ngrxPush as workspace">
-      <aside class="w-96 flex flex-col">
+      <aside class="w-80 flex flex-col flex-shrink-0">
         <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
           <h1 class="mb-0 text-xl uppercase">{{ workspace.document.name }}</h1>
           <p class="text-xs">Visualize all the details about this workspace.</p>
@@ -93,9 +93,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         </ul>
       </aside>
 
-      <main class="bg-white bg-opacity-5 flex-1">
+      <div class="flex-1">
         <router-outlet></router-outlet>
-      </main>
+      </div>
     </ng-container>
   `,
   styles: [],

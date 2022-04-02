@@ -38,12 +38,16 @@ export class ViewUserInfoStore extends ComponentStore<object> {
     })
   );
 
-  readonly createUser = this.effect<void>(
+  readonly createUser = this.effect<{
+    name: string;
+    userName: string;
+    thumbnailUrl: string;
+  }>(
     pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([, authority]) => {
+      concatMap(([{ name, userName, thumbnailUrl }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -51,6 +55,41 @@ export class ViewUserInfoStore extends ComponentStore<object> {
         return this._userApiService
           .create({
             authority: authority.toBase58(),
+            name,
+            userName,
+            thumbnailUrl,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent('Create user request sent'),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  readonly updateUser = this.effect<{
+    name: string;
+    userName: string;
+    thumbnailUrl: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([{ name, userName, thumbnailUrl }, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._userApiService
+          .update({
+            authority: authority.toBase58(),
+            name,
+            userName,
+            thumbnailUrl,
           })
           .pipe(
             tapResponse(

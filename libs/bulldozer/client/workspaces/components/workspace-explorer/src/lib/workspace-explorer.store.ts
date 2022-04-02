@@ -238,12 +238,16 @@ export class WorkspaceExplorerStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly createUser = this.effect<void>(
+  readonly createUser = this.effect<{
+    name: string;
+    userName: string;
+    thumbnailUrl: string;
+  }>(
     pipe(
-      concatMap(() =>
-        of(null).pipe(withLatestFrom(this._walletStore.publicKey$))
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([, authority]) => {
+      concatMap(([{ name, userName, thumbnailUrl }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
@@ -251,6 +255,9 @@ export class WorkspaceExplorerStore extends ComponentStore<ViewModel> {
         return this._userApiService
           .create({
             authority: authority.toBase58(),
+            name,
+            userName,
+            thumbnailUrl,
           })
           .pipe(
             tapResponse(

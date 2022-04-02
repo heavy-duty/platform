@@ -5,7 +5,8 @@ import {
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
+import { UserApiService, UserStore } from '@bulldozer-client/users-data-access';
+import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -13,23 +14,36 @@ import {
   combineLatest,
   concatMap,
   EMPTY,
+  forkJoin,
+  map,
   of,
   pipe,
+  switchMap,
   withLatestFrom,
 } from 'rxjs';
 
 export type CollaboratorStatus = 'approved' | 'pending' | 'rejected';
 
+export interface CollaboratorView extends Document<Collaborator> {
+  user: Document<User>;
+}
+
 interface ViewModel {
   workspaceId: string | null;
   collaboratorStatus: CollaboratorStatus;
+  collaborators: CollaboratorView[];
   collaboratorId: string | null;
+  loading: boolean;
+  error: unknown | null;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
   collaboratorStatus: 'approved',
   collaboratorId: null,
+  collaborators: [],
+  loading: false,
+  error: null,
 };
 
 @Injectable()
@@ -41,8 +55,9 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
   readonly collaboratorId$ = this.select(
     ({ collaboratorId }) => collaboratorId
   );
-  readonly collaborators$ = this.select(
-    this._collaboratorsStore.collaborators$,
+  readonly collaborators$ = this.select(({ collaborators }) => collaborators);
+  readonly filteredCollaborators$ = this.select(
+    this.collaborators$,
     this.collaboratorStatus$,
     (collaborators, status) =>
       collaborators
@@ -90,6 +105,7 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     private readonly _collaboratorApiService: CollaboratorApiService,
     private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
+    private readonly _userApiService: UserApiService,
     private readonly _userStore: UserStore
   ) {
     super(initialState);
@@ -101,6 +117,7 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
         workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
       })
     );
+    this._loadCollaborators(this._collaboratorsStore.collaborators$);
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -121,6 +138,26 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     (state, collaboratorId) => ({
       ...state,
       collaboratorId,
+    })
+  );
+
+  private readonly _loadCollaborators = this.effect<Document<Collaborator>[]>(
+    switchMap((collaborators) => {
+      this.patchState({ loading: true });
+
+      return forkJoin(
+        collaborators.map((collaborator) =>
+          this._userApiService.findById(collaborator.data.user).pipe(
+            isNotNullOrUndefined,
+            map((user) => ({ user, ...collaborator }))
+          )
+        )
+      ).pipe(
+        tapResponse(
+          (collaborators) => this.patchState({ collaborators, loading: false }),
+          (error) => this.patchState({ error, loading: false })
+        )
+      );
     })
   );
 

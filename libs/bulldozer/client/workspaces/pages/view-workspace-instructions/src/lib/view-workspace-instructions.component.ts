@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 
 @Component({
@@ -11,6 +11,7 @@ import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-ac
   styles: [],
 })
 export class ViewWorkspaceInstructionsComponent {
+  @HostBinding('class') class = 'bg-white bg-opacity-5 block h-full';
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
 
