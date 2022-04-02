@@ -24,7 +24,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   selector: 'bd-unauthorized-access',
   template: `
     <main class="flex h-screen">
-      <div class="hd-side-left w-1/2 h-screen flex justify-end items-center">
+      <div class="bd-bg-black w-1/2 h-screen flex justify-end items-center">
         <div class="content mr-16 hd-scroll-mt-8">
           <figure class="mb-4 w-32">
             <img src="assets/images/logo.png" class="w-full" />

@@ -8,7 +8,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditUserModule } from '@bulldozer-client/edit-user';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
-import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewUserInfoComponent } from './view-user-info.component';
@@ -28,7 +27,6 @@ import { ViewUserInfoComponent } from './view-user-info.component';
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
-    MyWorkspacesListModule,
     EditUserModule,
     ItemUpdatingModule,
     ObscureAddressModule,

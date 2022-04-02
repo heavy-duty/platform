@@ -27,9 +27,6 @@ $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
   color: #fba807;
 }
 
-.hd-dark-container {
-  background-color: #2c2c2c;
-}
 // Specific component overrides, pieces that are not in line with the general theming
 
 // Handle buttons appropriately, with respect to line-height

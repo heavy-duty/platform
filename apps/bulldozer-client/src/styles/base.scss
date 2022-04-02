@@ -85,16 +85,13 @@ input[readonly] {
 }
 
 // Temporal (use theme colors later)
-.hd-side-left {
-  background-color: #2c2c2c;
-}
 
 .hd-side-right {
   background-color: #393939;
 }
 
 .hd-side-right,
-.hd-side-left {
+.bd-bg-black {
   color: white;
 }
 
@@ -112,17 +109,15 @@ input[readonly] {
   overflow-x: hidden;
 }
 
-.hd-active-status {
-  width: 10px;
-  height: 10px;
-  border-radius: 10px;
-  background-color: #fec307;
-}
-
-.hd-active-status.active {
-  background-color: #10b981;
-}
-
 .border-b-1 {
   border-bottom-width: 1px;
+}
+
+.bd-bg-black {
+  background-color: #2c2c2c;
+}
+
+.bd-bg-image-1 {
+  background-image: url('../assets/images/backgrounds/workspace.png');
+  background-size: cover;
 }
