@@ -22,6 +22,12 @@ describe('collection', () => {
   const workspaceName = 'my-workspace';
   let budgetPublicKey: PublicKey;
   let applicationStatsPublicKey: PublicKey;
+  const userUserName = 'user-name-1';
+  const userName = 'User Name 1';
+  const userThumbnailUrl = 'https://img/1.com';
+  const newUserUserName = 'user-name-2';
+  const newUserName = 'User Name 2';
+  const newUserThumbnailUrl = 'https://img/2.com';
 
   before(async () => {
     [budgetPublicKey] = await PublicKey.findProgramAddress(
@@ -38,7 +44,11 @@ describe('collection', () => {
 
     try {
       await program.methods
-        .createUser()
+        .createUser({
+          name: userName,
+          thumbailUrl: userThumbnailUrl,
+          userName: userUserName,
+        })
         .accounts({
           authority: program.provider.wallet.publicKey,
         })
@@ -344,7 +354,11 @@ describe('collection', () => {
       program.programId
     );
     await program.methods
-      .createUser()
+      .createUser({
+        name: newUserName,
+        thumbailUrl: newUserThumbnailUrl,
+        userName: newUserUserName,
+      })
       .accounts({
         authority: newUser.publicKey,
       })

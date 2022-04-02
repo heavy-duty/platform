@@ -19,8 +19,13 @@ describe('workspace', () => {
   const newUser = Keypair.generate();
   let userPublicKey: PublicKey;
   let newUserPublicKey: PublicKey;
-  let collaboratorPublicKey: PublicKey;
   let budgetPublicKey: PublicKey;
+  const userUserName = 'user-name-1';
+  const userName = 'User Name 1';
+  const userThumbnailUrl = 'https://img/1.com';
+  const newUserUserName = 'user-name-2';
+  const newUserName = 'User Name 2';
+  const newUserThumbnailUrl = 'https://img/2.com';
 
   before(async () => {
     [userPublicKey] = await PublicKey.findProgramAddress(
@@ -34,21 +39,17 @@ describe('workspace', () => {
       [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
       program.programId
     );
-    [collaboratorPublicKey] = await PublicKey.findProgramAddress(
-      [
-        Buffer.from('collaborator', 'utf8'),
-        workspace.publicKey.toBuffer(),
-        userPublicKey.toBuffer(),
-      ],
-      program.programId
-    );
     [budgetPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('budget', 'utf8'), workspace.publicKey.toBuffer()],
       program.programId
     );
     try {
       await program.methods
-        .createUser()
+        .createUser({
+          name: userName,
+          thumbailUrl: userThumbnailUrl,
+          userName: userUserName,
+        })
         .accounts({
           authority: program.provider.wallet.publicKey,
         })
@@ -56,7 +57,11 @@ describe('workspace', () => {
     } catch (error) {}
 
     await program.methods
-      .createUser()
+      .createUser({
+        name: newUserName,
+        thumbailUrl: newUserThumbnailUrl,
+        userName: newUserUserName,
+      })
       .accounts({
         authority: newUser.publicKey,
       })
@@ -269,7 +274,11 @@ describe('workspace', () => {
       program.programId
     );
     await program.methods
-      .createUser()
+      .createUser({
+        name: newUserName,
+        thumbailUrl: newUserThumbnailUrl,
+        userName: newUserUserName,
+      })
       .accounts({
         authority: newUser.publicKey,
       })
