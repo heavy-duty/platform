@@ -63,6 +63,11 @@ import { ShellComponent } from './shell.component';
                 (m) => m.ViewProfileModule
               ),
           },
+          {
+            path: '',
+            loadChildren: () =>
+              import('@bulldozer-client/home').then((m) => m.HomeModule),
+          },
         ],
       },
       {

@@ -9,17 +9,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 
-// <header class="mt-16 flex justify-center flex-wrap">
-//    <figure class="mb-4 w-80">
-//      <img src="assets/images/logo.png" class="w-full" />
-//    </figure>
-//    <h1 class="w-full text-center">BULLDOZER</h1>
-//    <p class="w-full text-center">Connect your wallet to start building</p>
-// </header>
-// <main class="flex justify-center">
-//    <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
-// </main>
-
 @Component({
   selector: 'bd-unauthorized-access',
   template: `

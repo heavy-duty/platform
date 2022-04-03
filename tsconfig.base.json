@@ -112,6 +112,9 @@
       "@bulldozer-client/edit-workspace": [
         "libs/bulldozer/client/workspaces/modals/edit-workspace/src/index.ts"
       ],
+      "@bulldozer-client/home": [
+        "libs/bulldozer/client/core/pages/home/src/index.ts"
+      ],
       "@bulldozer-client/import-workspace": [
         "libs/bulldozer/client/workspaces/modals/import-workspace/src/index.ts"
       ],

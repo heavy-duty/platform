@@ -13,8 +13,12 @@ import { ViewUserInfoStore } from './view-user-info.store';
           *ngIf="user$ | ngrxPush as user; else userNotDefined"
         >
           <div class="flex items-center gap-4">
-            <figure class="w-20 rounded-full overflow-hidden">
-              <img [src]="user.document.data.thumbnailUrl" class="w-full" />
+            <figure class="w-20 h-20 rounded-full overflow-hidden">
+              <img
+                [src]="user.document.data.thumbnailUrl"
+                class="w-full"
+                onerror="this.src='assets/images/default-profile.png';"
+              />
             </figure>
             <div>
               <h1

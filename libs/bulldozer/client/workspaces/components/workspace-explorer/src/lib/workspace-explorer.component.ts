@@ -25,7 +25,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             "
             *ngIf="user === null"
           >
-            <figure class="w-20 m-auto mb-2 relative">
+            <figure class="w-20 h-20 m-auto mb-2 relative">
               <img
                 alt=""
                 src="assets/images/default-profile.png"
@@ -45,11 +45,14 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             *ngIf="user !== null"
             [routerLink]="['/profile', 'info']"
           >
-            <figure class="w-20 mb-2 mx-auto rounded-full overflow-hidden">
+            <figure
+              class="w-20 h-20 mb-2 mx-auto rounded-full overflow-hidden bg-black bg-opacity-10"
+            >
               <img
                 alt=""
                 [src]="user.document.data.thumbnailUrl"
                 class="w-full"
+                onerror="this.src='assets/images/default-profile.png';"
               />
             </figure>
 

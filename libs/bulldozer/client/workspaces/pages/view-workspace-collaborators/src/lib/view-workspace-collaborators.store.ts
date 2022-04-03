@@ -77,7 +77,7 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
         .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
   );
   readonly selectedCollaborator$ = this.select(
-    this.collaborators$,
+    this.filteredCollaborators$,
     this.collaboratorId$,
     (collaborators, collaboratorId) => {
       if (collaborators.length === 0) {

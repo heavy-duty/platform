@@ -57,8 +57,12 @@ import {
             "
             (click)="onSelectCollaborator(collaborator.id)"
           >
-            <figure class="w-12 rounded-full overflow-hidden">
-              <img [src]="collaborator.user.data.thumbnailUrl" class="w-full" />
+            <figure class="w-12 h-12 rounded-full overflow-hidden">
+              <img
+                [src]="collaborator.user.data.thumbnailUrl"
+                class="w-full"
+                onerror="this.src='assets/images/default-profile.png';"
+              />
             </figure>
 
             <div>
@@ -155,8 +159,9 @@ import {
             <figure>
               <img
                 [src]="selectedCollaborator.user.data.thumbnailUrl"
-                class="w-20 rounded-full overflow-hidden"
+                class="w-20 h-20 rounded-full overflow-hidden"
                 alt=""
+                onerror="this.src='assets/images/default-profile.png';"
               />
               <figcaption class="mt-2 text-xs text-center">
                 <a

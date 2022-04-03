@@ -27,6 +27,7 @@
     "bulldozer-client-collections-pages-view-collection-attributes": "libs/bulldozer/client/collections/pages/view-collection-attributes",
     "bulldozer-client-collections-pages-view-collection-code-viewer": "libs/bulldozer/client/collections/pages/view-collection-code-viewer",
     "bulldozer-client-core-data-access": "libs/bulldozer/client/core/data-access",
+    "bulldozer-client-core-pages-home": "libs/bulldozer/client/core/pages/home",
     "bulldozer-client-e2e": "apps/bulldozer-client-e2e",
     "bulldozer-client-instructions-components-instruction-explorer": "libs/bulldozer/client/instructions/components/instruction-explorer",
     "bulldozer-client-instructions-components-instruction-tab": "libs/bulldozer/client/instructions/components/instruction-tab",
