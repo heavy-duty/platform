@@ -26,7 +26,7 @@ export interface InstructionStatus {
     isSigner: boolean;
     isWritable: boolean;
   }[];
-  viewed?: boolean;
+  confirmedAt?: number;
 }
 
 interface ViewModel {
@@ -42,7 +42,7 @@ const initialState: ViewModel = {
 const createInstructionStatus = (
   transactionStatus: TransactionStatus,
   instruction: TransactionInstruction
-) => {
+): InstructionStatus | null => {
   const transactionResponse = transactionStatus.transactionResponse;
 
   if (transactionResponse === undefined) {
@@ -79,6 +79,7 @@ const createInstructionStatus = (
       name: account.name ?? 'Unknown',
       pubkey: account.pubkey.toBase58(),
     })),
+    confirmedAt: transactionStatus.confirmedAt,
   };
 };
 

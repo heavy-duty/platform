@@ -58,7 +58,6 @@
     "bulldozer-client-users-pages-view-user-info": "libs/bulldozer/client/users/pages/view-user-info",
     "bulldozer-client-users-pages-view-user-workspaces": "libs/bulldozer/client/users/pages/view-user-workspaces",
     "bulldozer-client-workspaces-components-workspace-explorer": "libs/bulldozer/client/workspaces/components/workspace-explorer",
-    "bulldozer-client-workspaces-components-workspace-instructions": "libs/bulldozer/client/workspaces/components/workspace-instructions",
     "bulldozer-client-workspaces-components-workspace-selector": "libs/bulldozer/client/workspaces/components/workspace-selector",
     "bulldozer-client-workspaces-components-workspace-tab": "libs/bulldozer/client/workspaces/components/workspace-tab",
     "bulldozer-client-workspaces-data-access": "libs/bulldozer/client/workspaces/data-access",

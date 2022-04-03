@@ -13,6 +13,7 @@ export interface TransactionStatus {
   status: Finality;
   topic: string;
   transactionResponse?: TransactionResponse<Transaction>;
+  confirmedAt?: number;
 }
 
 interface ViewModel {
@@ -78,6 +79,7 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
         signature,
         topic,
         status: 'confirmed',
+        confirmedAt: Date.now(),
       })
     ),
   }));
