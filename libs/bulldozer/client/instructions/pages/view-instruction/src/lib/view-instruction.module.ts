@@ -5,12 +5,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { CodeEditorModule } from '@bulldozer-client/code-editor';
-import { InstructionArgumentsListModule } from '@bulldozer-client/instruction-arguments-list';
-import { InstructionDocumentsListModule } from '@bulldozer-client/instruction-documents-list';
-import { InstructionSignersListModule } from '@bulldozer-client/instruction-signers-list';
+import { EditInstructionModule } from '@bulldozer-client/edit-instruction';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
-import { PageHeaderModule } from '@bulldozer-client/page-header';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionComponent } from './view-instruction.component';
 
@@ -19,19 +15,52 @@ import { ViewInstructionComponent } from './view-instruction.component';
   imports: [
     CommonModule,
     RouterModule.forChild([
-      { path: '', pathMatch: 'full', component: ViewInstructionComponent },
+      {
+        path: '',
+        component: ViewInstructionComponent,
+        children: [
+          {
+            path: 'arguments',
+            loadChildren: () =>
+              import('@bulldozer-client/view-instruction-arguments').then(
+                (m) => m.ViewInstructionArgumentsModule
+              ),
+          },
+          {
+            path: 'documents',
+            loadChildren: () =>
+              import('@bulldozer-client/view-instruction-documents').then(
+                (m) => m.ViewInstructionDocumentsModule
+              ),
+          },
+          {
+            path: 'signers',
+            loadChildren: () =>
+              import('@bulldozer-client/view-instruction-signers').then(
+                (m) => m.ViewInstructionSignersModule
+              ),
+          },
+          {
+            path: 'code-editor',
+            loadChildren: () =>
+              import('@bulldozer-client/view-instruction-code-editor').then(
+                (m) => m.ViewInstructionCodeEditorModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'arguments',
+          },
+        ],
+      },
     ]),
     MatButtonModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
     ReactiveComponentModule,
-    PageHeaderModule,
-    CodeEditorModule,
-    InstructionArgumentsListModule,
-    InstructionSignersListModule,
-    InstructionDocumentsListModule,
     ItemUpdatingModule,
+    EditInstructionModule,
   ],
 })
 export class ViewInstructionModule {}

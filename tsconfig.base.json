@@ -197,6 +197,18 @@
       "@bulldozer-client/view-instruction": [
         "libs/bulldozer/client/instructions/pages/view-instruction/src/index.ts"
       ],
+      "@bulldozer-client/view-instruction-arguments": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-arguments/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-code-editor": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-code-editor/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-documents": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-documents/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-signers": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-signers/src/index.ts"
+      ],
       "@bulldozer-client/view-profile": [
         "libs/bulldozer/client/users/pages/view-profile/src/index.ts"
       ],

@@ -1,25 +1,18 @@
 import { Injectable } from '@angular/core';
-import { TabStore } from '@bulldozer-client/core-data-access';
 import {
-  InstructionApiService,
-  InstructionStore,
+  InstructionAccountApiService,
+  InstructionAccountQueryStore,
+  InstructionAccountsStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import base58 from 'bs58';
+import { concatMap, EMPTY, map, of, pipe, tap, withLatestFrom } from 'rxjs';
 
 interface ViewModel {
   instructionId: string | null;
@@ -34,51 +27,34 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewInstructionStore extends ComponentStore<ViewModel> {
+export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
   constructor(
     private readonly _walletStore: WalletStore,
-    private readonly _tabStore: TabStore,
     private readonly _notificationStore: NotificationStore,
-    private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionStore: InstructionStore,
+    private readonly _instructionAccountApiService: InstructionAccountApiService,
+    private readonly _instructionAccountsStore: InstructionAccountsStore,
+    private readonly _instructionAccountQueryStore: InstructionAccountQueryStore,
     workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
-    this._instructionStore.setInstructionId(this.instructionId$);
-    this._handleInstruction(
+    this._instructionAccountQueryStore.setFilters(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
-        switchMap((instructionId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Instruction' &&
-                  account.pubkey === instructionId
-              )
-            )
-          )
-        )
+        map((instruction) => ({
+          instruction,
+          accountKind: base58.encode(Buffer.from([0])),
+        }))
       )
     );
-    this._openTab(
-      this.select(
-        this.instructionId$,
-        this.applicationId$,
-        this.workspaceId$,
-        (instructionId, applicationId, workspaceId) => ({
-          instructionId,
-          applicationId,
-          workspaceId,
-        }),
-        { debounce: true }
-      )
+    this._instructionAccountsStore.setInstructionAccountIds(
+      this._instructionAccountQueryStore.instructionAccountIds$
     );
+    this._handleInstruction(workspaceInstructionsStore.instruction$);
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -96,10 +72,10 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
   private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        case 'createInstruction':
-        case 'updateInstruction':
-        case 'deleteInstruction': {
-          this._instructionStore.dispatch(instructionStatus);
+        case 'createInstructionAccount':
+        case 'updateInstructionAccount':
+        case 'deleteInstructionAccount': {
+          this._instructionAccountsStore.dispatch(instructionStatus);
           break;
         }
         default:
@@ -108,31 +84,11 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _openTab = this.effect<{
-    instructionId: string | null;
-    applicationId: string | null;
-    workspaceId: string | null;
-  }>(
-    tap(({ instructionId, applicationId, workspaceId }) => {
-      if (
-        instructionId !== null &&
-        applicationId !== null &&
-        workspaceId !== null
-      ) {
-        this._tabStore.openTab({
-          id: instructionId,
-          kind: 'instruction',
-          url: `/workspaces/${workspaceId}/applications/${applicationId}/instructions/${instructionId}`,
-        });
-      }
-    })
-  );
-
-  readonly updateInstruction = this.effect<{
+  readonly createInstructionAccount = this.effect<{
     workspaceId: string;
     applicationId: string;
     instructionId: string;
-    instructionName: string;
+    instructionAccountDto: InstructionAccountDto;
   }>(
     pipe(
       concatMap((request) =>
@@ -140,26 +96,26 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
       ),
       concatMap(
         ([
-          { workspaceId, applicationId, instructionId, instructionName },
+          { workspaceId, applicationId, instructionId, instructionAccountDto },
           authority,
         ]) => {
           if (authority === null) {
             return EMPTY;
           }
 
-          return this._instructionApiService
-            .update({
+          return this._instructionAccountApiService
+            .create({
+              instructionAccountDto,
               authority: authority.toBase58(),
               workspaceId,
               applicationId,
-              instructionName,
               instructionId,
             })
             .pipe(
               tapResponse(
                 () =>
                   this._notificationStore.setEvent(
-                    'Update instruction request sent'
+                    'Create argument request sent'
                   ),
                 (error) => this._notificationStore.setError(error)
               )
@@ -169,33 +125,79 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     )
   );
 
-  readonly deleteInstruction = this.effect<{
+  readonly updateInstructionAccount = this.effect<{
     workspaceId: string;
-    applicationId: string;
     instructionId: string;
+    instructionAccountId: string;
+    instructionAccountDto: InstructionAccountDto;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ workspaceId, instructionId, applicationId }, authority]) => {
+        ([
+          {
+            workspaceId,
+            instructionId,
+            instructionAccountId,
+            instructionAccountDto,
+          },
+          authority,
+        ]) => {
           if (authority === null) {
             return EMPTY;
           }
 
-          return this._instructionApiService
+          return this._instructionAccountApiService
+            .update({
+              authority: authority.toBase58(),
+              workspaceId,
+              instructionId,
+              instructionAccountDto,
+              instructionAccountId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update argument request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
+    )
+  );
+
+  readonly deleteInstructionAccount = this.effect<{
+    workspaceId: string;
+    instructionId: string;
+    instructionAccountId: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(
+        ([{ workspaceId, instructionId, instructionAccountId }, authority]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._instructionAccountApiService
             .delete({
               authority: authority.toBase58(),
               workspaceId,
-              applicationId,
+              instructionAccountId,
               instructionId,
             })
             .pipe(
               tapResponse(
                 () =>
                   this._notificationStore.setEvent(
-                    'Delete instruction request sent'
+                    'Delete argument request sent'
                   ),
                 (error) => this._notificationStore.setError(error)
               )

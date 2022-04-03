@@ -9,12 +9,9 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CollectionItemView } from '@bulldozer-client/collections-data-access';
 import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
-import {
-  Collection,
-  Document,
-  InstructionAccount,
-} from '@heavy-duty/bulldozer-devkit';
+import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
@@ -61,10 +58,10 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-select formControlName="collection" required>
           <mat-option
             *ngFor="let collection of data?.collections"
-            [value]="collection.id"
+            [value]="collection.document.id"
           >
-            {{ collection.name }} |
-            {{ collection.id | obscureAddress }}
+            {{ collection.document.name }} |
+            {{ collection.document.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">The collection is required.</mat-error>
@@ -198,7 +195,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     public data?: {
       document?: Document<InstructionAccount>;
-      collections: Document<Collection>[];
+      collections: CollectionItemView[];
       accounts: InstructionAccountItemView[];
     }
   ) {

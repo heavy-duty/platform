@@ -1,12 +1,11 @@
-import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatSelectModule } from '@angular/material/select';
 import { RouterModule } from '@angular/router';
+import { CodeEditorModule } from '@bulldozer-client/code-editor';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborators.component';
+import { ViewInstructionCodeEditorComponent } from './view-instruction-code-editor.component';
 
 @NgModule({
   imports: [
@@ -15,15 +14,14 @@ import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborat
       {
         path: '',
         pathMatch: 'full',
-        component: ViewWorkspaceCollaboratorsComponent,
+        component: ViewInstructionCodeEditorComponent,
       },
     ]),
-    ClipboardModule,
     MatButtonModule,
     MatIconModule,
-    MatSelectModule,
     ReactiveComponentModule,
+    CodeEditorModule,
   ],
-  declarations: [ViewWorkspaceCollaboratorsComponent],
+  declarations: [ViewInstructionCodeEditorComponent],
 })
-export class ViewWorkspaceCollaboratorsModule {}
+export class ViewInstructionCodeEditorModule {}
