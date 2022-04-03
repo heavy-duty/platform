@@ -113,7 +113,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                       collectionAttribute.document.data.kind.id === 1,
                     'text-green-500':
                       collectionAttribute.document.data.kind.id === 2,
-                    'text-red-500':
+                    'text-purple-500':
                       collectionAttribute.document.data.kind.id === 3
                   }"
                   >list_alt</mat-icon

@@ -27,6 +27,13 @@ import { ViewCollectionComponent } from './view-collection.component';
               ),
           },
           {
+            path: 'code-viewer',
+            loadChildren: () =>
+              import('@bulldozer-client/view-collection-code-viewer').then(
+                (m) => m.ViewCollectionCodeModule
+              ),
+          },
+          {
             path: '',
             redirectTo: 'attributes',
           },

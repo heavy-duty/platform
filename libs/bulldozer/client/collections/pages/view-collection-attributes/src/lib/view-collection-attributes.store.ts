@@ -5,7 +5,6 @@ import {
   CollectionAttributesStore,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
-import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
@@ -49,7 +48,6 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
     private readonly _collectionStore: CollectionStore,
     private readonly _collectionAttributesStore: CollectionAttributesStore,
     private readonly _collectionAttributeQueryStore: CollectionAttributeQueryStore,
-    private readonly _tabStore: TabStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
