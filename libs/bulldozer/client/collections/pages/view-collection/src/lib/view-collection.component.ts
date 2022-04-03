@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  HostBinding,
-  OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CollectionStore } from '@bulldozer-client/collections-data-access';
 import { map } from 'rxjs';
@@ -55,6 +50,41 @@ import { ViewCollectionStore } from './view-collection.store';
               </span>
             </a>
           </li>
+          <li>
+            <a
+              class="flex flex-col gap-1 border-l-4 py-5 px-7"
+              [routerLink]="[
+                '/workspaces',
+                collection.document.data.workspace,
+                'applications',
+                collection.document.data.application,
+                'collections',
+                collection.document.id,
+                'code-viewer'
+              ]"
+              [routerLinkActive]="[
+                'bg-white',
+                'bg-opacity-5',
+                'border-primary'
+              ]"
+              [ngClass]="{
+                'border-transparent': !isRouteActive(
+                  '/workspaces/' +
+                    collection.document.data.workspace +
+                    '/applications/' +
+                    collection.document.data.application +
+                    '/collections/' +
+                    collection.document.id +
+                    '/code-viewer'
+                )
+              }"
+            >
+              <span class="text-lg font-bold">Code Viewer</span>
+              <span class="text-xs font-thin">
+                Visualize the collection source code
+              </span>
+            </a>
+          </li>
         </ul>
       </aside>
 
@@ -67,7 +97,7 @@ import { ViewCollectionStore } from './view-collection.store';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [CollectionStore, ViewCollectionStore],
 })
-export class ViewCollectionComponent implements OnInit {
+export class ViewCollectionComponent {
   @HostBinding('class') class = 'flex h-full';
 
   readonly collection$ = this._collectionStore.collection$;
@@ -77,9 +107,7 @@ export class ViewCollectionComponent implements OnInit {
     private readonly _route: ActivatedRoute,
     private readonly _viewCollectionStore: ViewCollectionStore,
     private readonly _collectionStore: CollectionStore
-  ) {}
-
-  ngOnInit() {
+  ) {
     this._viewCollectionStore.setWorkspaceId(
       this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
     );
