@@ -104,11 +104,9 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 
           <header class="flex items-center gap-4 p-4">
             <div
-              class="w-16 h-16 flex justify-center items-center rounded-full bd-bg-black text-5xl"
+              class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full"
             >
-              <mat-icon color="accent" inline class="w-auto h-auto">
-                assignment_ind
-              </mat-icon>
+              <mat-icon color="accent" class="w-1/2"> assignment_ind </mat-icon>
             </div>
 
             <div>
@@ -121,10 +119,17 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
               >
                 {{ signer.document.name }}
               </h2>
-              <p *ngIf="signer.document.data.modifier" class="m-0">
-                <ng-container [ngSwitch]="signer.document.data.modifier.id">
-                  <ng-container *ngSwitchCase="0"> Initialize </ng-container>
-                  <ng-container *ngSwitchCase="1"> Mutable </ng-container>
+              <p class="m-0">
+                <ng-container *ngIf="signer.document.data.modifier === null">
+                  Non-mutable
+                </ng-container>
+                <ng-container
+                  *ngIf="
+                    signer.document.data.modifier !== null &&
+                    signer.document.data.modifier.id === 1
+                  "
+                >
+                  Mutable
                 </ng-container>
               </p>
             </div>

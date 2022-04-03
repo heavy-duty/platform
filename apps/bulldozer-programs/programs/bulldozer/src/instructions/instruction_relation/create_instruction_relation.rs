@@ -76,7 +76,6 @@ pub struct CreateInstructionRelation<'info> {
   pub budget: Box<Account<'info, Budget>>,
   #[account(
     mut,
-    constraint = from_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     seeds = [
       b"instruction_account_stats".as_ref(),
       from.key().as_ref()
@@ -86,7 +85,6 @@ pub struct CreateInstructionRelation<'info> {
   pub from_stats: Box<Account<'info, InstructionAccountStats>>,
   #[account(
     mut,
-    constraint = to_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     seeds = [
       b"instruction_account_stats".as_ref(),
       to.key().as_ref()

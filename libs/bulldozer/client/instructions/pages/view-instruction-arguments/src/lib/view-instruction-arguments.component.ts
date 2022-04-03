@@ -106,7 +106,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
           <div class="px-8 mt-4">
             <header class="flex gap-2 mb-8">
               <figure
-                class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full mr-2"
+                class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full"
               >
                 <mat-icon
                   class="w-1/2"
