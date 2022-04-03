@@ -26,6 +26,7 @@ export interface InstructionStatus {
     isSigner: boolean;
     isWritable: boolean;
   }[];
+  viewed?: boolean;
 }
 
 interface ViewModel {

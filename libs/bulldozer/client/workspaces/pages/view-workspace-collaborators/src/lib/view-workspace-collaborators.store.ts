@@ -55,6 +55,7 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
   readonly collaboratorId$ = this.select(
     ({ collaboratorId }) => collaboratorId
   );
+  readonly loading$ = this.select(({ loading }) => loading);
   readonly collaborators$ = this.select(({ collaborators }) => collaborators);
   readonly filteredCollaborators$ = this.select(
     this.collaborators$,

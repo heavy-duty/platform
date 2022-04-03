@@ -13,6 +13,7 @@ export interface TransactionStatus {
   signature: TransactionSignature;
   status: TransactionConfirmationStatus | 'pending';
   transactionResponse?: TransactionResponse<Transaction>;
+  confirmedAt?: number;
 }
 
 interface ViewModel {
@@ -65,7 +66,14 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
     ...state,
     transactionStatuses: state.transactionStatuses.map((transactionStatus) =>
       transactionStatus.signature === signature
-        ? { ...transactionStatus, status }
+        ? {
+            ...transactionStatus,
+            status,
+            confirmedAt:
+              status === 'confirmed'
+                ? Date.now()
+                : transactionStatus.confirmedAt,
+          }
         : transactionStatus
     ),
   }));

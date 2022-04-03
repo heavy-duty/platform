@@ -1,8 +1,13 @@
 import { Injectable } from '@angular/core';
 import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
-import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
-import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import {
+  WorkspaceApiService,
+  WorkspaceStore,
+} from '@bulldozer-client/workspaces-data-access';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { concatMap, EMPTY, of, pipe, tap, withLatestFrom } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -19,6 +24,9 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _tabStore: TabStore,
     private readonly _configStore: ConfigStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _walletStore: WalletStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _workspaceStore: WorkspaceStore
   ) {
     super(initialState);
@@ -46,5 +54,65 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         });
       }
     })
+  );
+
+  readonly updateWorkspace = this.effect<{
+    workspaceId: string;
+    workspaceName: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([{ workspaceId, workspaceName }, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._workspaceApiService
+          .update({
+            workspaceName,
+            authority: authority.toBase58(),
+            workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Update workspace request sent'
+                ),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
+  );
+
+  readonly deleteWorkspace = this.effect<string>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([workspaceId, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._workspaceApiService
+          .delete({
+            authority: authority.toBase58(),
+            workspaceId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Delete workspace request sent'
+                ),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
   );
 }

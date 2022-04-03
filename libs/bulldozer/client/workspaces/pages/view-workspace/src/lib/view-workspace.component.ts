@@ -19,7 +19,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           <p class="text-xs">Visualize all the details about this workspace.</p>
         </header>
 
-        <ul>
+        <ul class="flex-1">
           <li>
             <a
               class="flex flex-col gap-1 border-l-4 py-5 px-7"
@@ -91,6 +91,25 @@ import { ViewWorkspaceStore } from './view-workspace.store';
             </a>
           </li>
         </ul>
+
+        <footer class="py-5 px-7 w-full flex justify-center items-center gap-2">
+          <button
+            mat-stroked-button
+            color="accent"
+            bdEditWorkspace
+            [workspace]="workspace.document"
+            (editWorkspace)="onUpdateWorkspace(workspace.document.id, $event)"
+          >
+            Edit
+          </button>
+          <button
+            mat-stroked-button
+            color="warn"
+            (click)="onDeleteWorkspace(workspace.document.id)"
+          >
+            Delete
+          </button>
+        </footer>
       </aside>
 
       <div class="flex-1">
@@ -127,5 +146,16 @@ export class ViewWorkspaceComponent implements OnInit {
       fragment: 'ignored',
       matrixParams: 'ignored',
     });
+  }
+
+  onUpdateWorkspace(workspaceId: string, workspaceName: string) {
+    this._viewWorkspaceStore.updateWorkspace({
+      workspaceId,
+      workspaceName,
+    });
+  }
+
+  onDeleteWorkspace(workspaceId: string) {
+    this._viewWorkspaceStore.deleteWorkspace(workspaceId);
   }
 }

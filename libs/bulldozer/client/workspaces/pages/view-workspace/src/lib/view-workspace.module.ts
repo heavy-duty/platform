@@ -7,6 +7,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
+import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
 import { WorkspaceInstructionsModule } from '@bulldozer-client/workspace-instructions';
@@ -60,6 +61,7 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     CollaboratorsListModule,
     WorkspaceInstructionsModule,
     ItemUpdatingModule,
+    EditWorkspaceModule,
   ],
 })
 export class ViewWorkspaceModule {}

@@ -113,13 +113,16 @@ import {
         </li>
       </ul>
 
-      <div class="py-5 px-7 w-full flex justify-center items-center">
-        <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+      <footer
+        class="py-5 px-7 w-full flex justify-center items-center"
+        *ngIf="workspaceId$ | ngrxPush as workspaceId"
+      >
+        <ng-container *ngIf="(loading$ | ngrxPush) === false">
           <ng-container *ngrxLet="collaborator$; let collaborator">
             <button
               *ngIf="collaborator === null"
               mat-stroked-button
-              color="primary"
+              color="accent"
               (click)="onRequestCollaboratorStatus(workspaceId)"
             >
               Become Collaborator
@@ -128,7 +131,7 @@ import {
             <button
               *ngIf="collaborator !== null && collaborator.data.status.id === 2"
               mat-stroked-button
-              color="primary"
+              color="accent"
               (click)="
                 onRetryCollaboratorStatusRequest(workspaceId, collaborator.id)
               "
@@ -137,7 +140,7 @@ import {
             </button>
           </ng-container>
         </ng-container>
-      </div>
+      </footer>
     </aside>
 
     <div class="flex-1 bg-white bg-opacity-5 p-8">
@@ -327,6 +330,7 @@ export class ViewWorkspaceCollaboratorsComponent implements OnInit {
     this._viewWorkspaceCollaboratorsStore.filteredCollaborators$;
   readonly selectedCollaborator$ =
     this._viewWorkspaceCollaboratorsStore.selectedCollaborator$;
+  readonly loading$ = this._viewWorkspaceCollaboratorsStore.loading$;
 
   constructor(
     private readonly _route: ActivatedRoute,

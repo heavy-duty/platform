@@ -13,13 +13,18 @@ import { tap } from 'rxjs';
 
 interface TransactionsChanges {
   instructionStatuses: InstructionStatus[] | null;
-  instructionsInProcess: number;
+  instructionInProcessStatuses: InstructionStatus[] | null;
+  instructionNotViewedStatuses: InstructionStatus[] | null;
+  markAsViewed: () => void;
 }
 
 export class UserInstructionsContext implements TransactionsChanges {
-  public $implicit!: unknown;
-  public instructionStatuses: InstructionStatus[] | null = null;
-  public instructionsInProcess = 0;
+  $implicit!: unknown;
+  instructionStatuses: InstructionStatus[] | null = null;
+  instructionInProcessStatuses: InstructionStatus[] | null = null;
+  instructionNotViewedStatuses: InstructionStatus[] | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  markAsViewed: () => void = () => {};
 }
 
 @Directive({
@@ -30,17 +35,17 @@ export class UserInstructionsStoreDirective extends ComponentStore<object> {
 
   constructor(
     private readonly _changeDetectionRef: ChangeDetectorRef,
+    private readonly _userInstructionsStore: UserInstructionsStore,
     templateRef: TemplateRef<UserInstructionsContext>,
-    viewContainerRef: ViewContainerRef,
-    userInstructionsStore: UserInstructionsStore
+    viewContainerRef: ViewContainerRef
   ) {
     super({});
 
     viewContainerRef.createEmbeddedView(templateRef, this._context);
     this._handleChanges(
       this.select(
-        userInstructionsStore.instructionStatuses$,
-        userInstructionsStore.instructionsInProcess$,
+        this._userInstructionsStore.instructionStatuses$,
+        this._userInstructionsStore.instructionsInProcess$,
         (instructionStatuses, instructionsInProcess) => ({
           instructionStatuses,
           instructionsInProcess,
@@ -54,9 +59,18 @@ export class UserInstructionsStoreDirective extends ComponentStore<object> {
     instructionStatuses: InstructionStatus[] | null;
     instructionsInProcess: number;
   }>(
-    tap(({ instructionStatuses, instructionsInProcess }) => {
+    tap(({ instructionStatuses }) => {
       this._context.instructionStatuses = instructionStatuses;
-      this._context.instructionsInProcess = instructionsInProcess;
+      this._context.instructionInProcessStatuses =
+        instructionStatuses?.filter(
+          (instructionStatus) => instructionStatus.status !== 'finalized'
+        ) ?? null;
+      this._context.instructionNotViewedStatuses =
+        instructionStatuses?.filter(
+          (instructionStatus) => !instructionStatus.viewed
+        ) ?? null;
+      this._context.markAsViewed = () =>
+        this._userInstructionsStore.markAsViewed();
       this._context.$implicit = this._context;
       this._changeDetectionRef.markForCheck();
     })

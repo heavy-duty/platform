@@ -73,8 +73,14 @@ import {
                 (closeTab)="onCloseTab($event)"
               ></bd-tab-list>
 
-              <div class="px-4">
-                <button type="button" mat-mini-fab (click)="settings.toggle()">
+              <div class="px-4 flex items-center gap-4">
+                <bd-user-instructions-button></bd-user-instructions-button>
+
+                <button
+                  type="button"
+                  mat-icon-button
+                  (click)="settings.toggle()"
+                >
                   <mat-icon
                     aria-hidden="false"
                     aria-label="Bulldozer tool settings"
@@ -269,14 +275,6 @@ import {
           </main>
         </mat-sidenav>
       </mat-sidenav-container>
-
-      <div class="block fixed bottom-0 right-0 w-screen z-20">
-        <div class="flex justify-center">
-          <bd-user-instructions-button
-            class="mat-elevation-z8"
-          ></bd-user-instructions-button>
-        </div>
-      </div>
     </div>
   `,
   providers: [

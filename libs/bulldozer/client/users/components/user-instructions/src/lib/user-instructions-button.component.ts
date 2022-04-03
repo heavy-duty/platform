@@ -1,36 +1,138 @@
 import { Component, Input } from '@angular/core';
+import { interval, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'bd-user-instructions-button',
   template: `
     <ng-container
       *bdUserInstructionsStore="
-        let instructionsInProcess = instructionsInProcess
+        let instructionNotViewedStatuses = instructionNotViewedStatuses;
+        let instructionInProcessStatuses = instructionInProcessStatuses;
+        let markAsViewed = markAsViewed
       "
     >
-      <button
-        *ngIf="
-          instructionsInProcess !== null &&
-          (showEmpty || instructionsInProcess > 0)
-        "
-        type="button"
-        mat-raised-button
-        bdUserInstructions
+      <ng-container
+        *ngIf="instructionNotViewedStatuses && instructionInProcessStatuses"
       >
-        <div class="flex justify-between items-center gap-2">
-          <span> Instructions in Process ({{ instructionsInProcess }}) </span>
+        <div
+          class="inline-block relative"
+          *ngIf="
+            instructionNotViewedStatuses.length === 0 ||
+            instructionInProcessStatuses.length > 0
+          "
+        >
+          <button
+            type="button"
+            mat-icon-button
+            [matMenuTriggerFor]="menu"
+            (menuClosed)="markAsViewed()"
+            class="z-10"
+          >
+            <mat-icon>notifications</mat-icon>
+          </button>
           <mat-progress-spinner
-            diameter="16"
+            *ngIf="instructionInProcessStatuses.length > 0"
+            color="accent"
             mode="indeterminate"
-            [color]="color"
+            diameter="44"
+            class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
           >
           </mat-progress-spinner>
         </div>
-      </button>
+
+        <button
+          *ngIf="
+            instructionNotViewedStatuses.length > 0 &&
+            instructionInProcessStatuses.length === 0
+          "
+          type="button"
+          class="rounded-full w-8 h-8 border-2 border-green-500"
+          [matMenuTriggerFor]="menu"
+          (menuClosed)="markAsViewed()"
+        >
+          {{ instructionNotViewedStatuses.length }}
+        </button>
+      </ng-container>
+
+      <mat-menu #menu="matMenu">
+        <div class="w-80 h-auto px-4 py-2 flex flex-col gap-2">
+          <header class="py-2">
+            <h1 class="m-0 text-lg text-center font-bold">Instructions</h1>
+          </header>
+
+          <main>
+            <ul
+              *ngIf="
+                instructionNotViewedStatuses &&
+                  instructionNotViewedStatuses.length > 0;
+                else emptyInstructions
+              "
+            >
+              <li
+                *ngFor="let instructionStatus of instructionNotViewedStatuses"
+                class="w-full h-8 flex items-center gap-4"
+              >
+                <div>
+                  <mat-progress-spinner
+                    *ngIf="instructionStatus.status !== 'finalized'"
+                    color="accent"
+                    diameter="16"
+                    mode="indeterminate"
+                  >
+                  </mat-progress-spinner>
+                  <mat-icon
+                    *ngIf="instructionStatus.status === 'finalized'"
+                    class="text-green-500"
+                    inline
+                    >check_circle</mat-icon
+                  >
+                </div>
+
+                <p
+                  class="flex-1 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  [matTooltip]="instructionStatus.title"
+                  matTooltipShowDelay="500"
+                >
+                  {{ instructionStatus.title }}
+                </p>
+
+                <ng-container *ngrxLet="timeNow$; let timeNow">
+                  <p
+                    *ngIf="instructionStatus.confirmedAt !== undefined"
+                    class="text-xs m-0 text-white text-opacity-50"
+                  >
+                    {{
+                      timeNow - instructionStatus.confirmedAt
+                        | bdRelativeTime: true
+                    }}
+                  </p>
+                </ng-container>
+              </li>
+            </ul>
+
+            <ng-template #emptyInstructions>
+              <p class="text-center m-0">There's no pending instructions.</p>
+            </ng-template>
+          </main>
+
+          <footer class="py-2 flex justify-center">
+            <button bdUserInstructions class="text-underline text-accent">
+              See more
+            </button>
+          </footer>
+        </div>
+      </mat-menu>
     </ng-container>
   `,
 })
 export class UserInstructionsButtonComponent {
   @Input() color = 'primary';
-  @Input() showEmpty = false;
+  readonly timeNow$ = interval(60 * 1000).pipe(
+    startWith(Date.now()),
+    map(() => Date.now())
+  );
+
+  onMenuOpened() {
+    console.log('mmgvo menor');
+  }
 }
