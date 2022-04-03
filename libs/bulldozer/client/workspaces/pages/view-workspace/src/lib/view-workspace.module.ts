@@ -3,14 +3,10 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
-import { PageHeaderModule } from '@bulldozer-client/page-header';
-import { WorkspaceInstructionsModule } from '@bulldozer-client/workspace-instructions';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
 
@@ -54,12 +50,8 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    MatSidenavModule,
     MatListModule,
     ReactiveComponentModule,
-    PageHeaderModule,
-    CollaboratorsListModule,
-    WorkspaceInstructionsModule,
     ItemUpdatingModule,
     EditWorkspaceModule,
   ],

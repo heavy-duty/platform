@@ -16,7 +16,7 @@ import {
   template: `
     <aside class="w-80 flex flex-col gap-2">
       <header class="py-5 px-7 mb-0 w-full">
-        <h2 class="uppercase m-0">Collaborators</h2>
+        <h1 class="text-2xl uppercase m-0">Collaborators</h1>
         <p>Visualize and manage collaborators.</p>
 
         <mat-form-field appearance="fill" class="w-full">
@@ -146,9 +146,11 @@ import {
     <div class="flex-1 bg-white bg-opacity-5 p-8">
       <div
         *ngIf="selectedCollaborator$ | ngrxPush as selectedCollaborator"
-        class="flex flex-col gap-8"
+        class="flex flex-col"
       >
-        <header class="flex justify-between items-center">
+        <header
+          class="flex justify-between items-center pb-8 mb-8 border-b-2 border-yellow-500"
+        >
           <div class="flex items-center gap-4">
             <figure>
               <img
@@ -156,7 +158,7 @@ import {
                 class="w-20 rounded-full overflow-hidden"
                 alt=""
               />
-              <figcaption class="m-0 text-xs text-center">
+              <figcaption class="mt-2 text-xs text-center">
                 <a
                   [href]="
                     'https://explorer.solana.com/address/' +
@@ -270,11 +272,11 @@ import {
         </header>
 
         <main>
-          <h3 class="m-0 uppercase">User Info</h3>
+          <h2 class="mb-4 uppercase font-bold">User Info</h2>
 
           <dl class="flex justify-between gap-4">
             <div class="flex-1">
-              <dt>User ID:</dt>
+              <dt class="font-bold">User ID:</dt>
               <dd
                 class="flex items-center w-64 gap-1 px-2 bg-black bg-opacity-10 rounded-md"
               >
@@ -291,7 +293,7 @@ import {
             </div>
 
             <div class="flex-1">
-              <dt>Wallet:</dt>
+              <dt class="font-bold">Wallet:</dt>
               <dd
                 class="flex items-center w-64 gap-1 px-2 bg-black bg-opacity-10 rounded-md"
               >

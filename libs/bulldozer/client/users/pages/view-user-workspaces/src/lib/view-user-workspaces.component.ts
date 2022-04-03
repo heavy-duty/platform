@@ -10,9 +10,10 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
   selector: 'bd-view-user-workspaces',
   template: `
     <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="uppercase mb-1">Workspaces</h1>
-      <p class="text-lg font-thin mb-2">List of all your workspaces.</p>
+      <h1 class="text-2xl uppercase mb-1">Workspaces</h1>
+      <p class="text-sm font-thin mb-2">List of all your workspaces.</p>
     </header>
+
     <ng-container *ngIf="workspaces$ | ngrxPush as workspaces">
       <div
         *ngIf="workspaces && workspaces.length > 0; else emptyList"

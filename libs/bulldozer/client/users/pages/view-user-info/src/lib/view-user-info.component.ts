@@ -6,10 +6,10 @@ import { ViewUserInfoStore } from './view-user-info.store';
 @Component({
   selector: 'bd-view-user-info',
   template: `
-    <div class="flex flex-col gap-3" *ngIf="connected$ | ngrxPush">
+    <div class="flex flex-col" *ngIf="connected$ | ngrxPush">
       <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
         <header
-          class="flex justify-between items-center"
+          class="flex justify-between items-center pb-8 mb-8 border-b-2 border-yellow-500"
           *ngIf="user$ | ngrxPush as user; else userNotDefined"
         >
           <div class="flex items-center gap-4">
@@ -17,7 +17,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
               <img [src]="user.document.data.thumbnailUrl" class="w-full" />
             </figure>
             <div>
-              <h2
+              <h1
                 class="flex items-center justify-start gap-2 mb-0"
                 [matTooltip]="
                   user.document.data.userName
@@ -33,7 +33,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                   diameter="16"
                   mode="indeterminate"
                 ></mat-progress-spinner>
-              </h2>
+              </h1>
               <p class="m-0">
                 <a
                   [href]="
@@ -78,11 +78,11 @@ import { ViewUserInfoStore } from './view-user-info.store';
         </header>
 
         <main>
-          <h3 class="m-0 uppercase">User Info</h3>
+          <h2 class="mb-4 uppercase font-bold">User Info</h2>
 
           <dl class="flex justify-between gap-4">
             <div class="flex-1">
-              <dt>Name:</dt>
+              <dt class="font-bold">Name:</dt>
               <dd
                 class="flex items-center w-64 h-12 gap-1 px-2 bg-black bg-opacity-10 rounded-md"
               >

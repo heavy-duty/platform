@@ -10,7 +10,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 @Component({
   selector: 'bd-view-profile',
   template: `
-    <aside class="w-96 flex flex-col">
+    <aside class="w-80 flex flex-col flex-shrink-0">
       <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
         <h2 class="mb-0 text-xl uppercase">Profile</h2>
         <small class="leading-3">

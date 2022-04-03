@@ -9,12 +9,13 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
   selector: 'bd-workspace-details-explorer-budget',
   template: `
     <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="uppercase mb-1">budget</h1>
-      <p class="text-lg font-thin mb-2">
+      <h1 class="text-2xl uppercase mb-1">budget</h1>
+      <p class="text-sm font-thin mb-2">
         List of the budgets for this workspaces.
       </p>
     </header>
-    <div class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
+
+    <main class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
       <mat-card
         class="h-auto w-80 rounded-lg overflow-hidden bd-bg-image-2 p-0"
       >
@@ -58,7 +59,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
           </footer>
         </div>
       </mat-card>
-    </div>
+    </main>
   `,
   styles: [],
   providers: [BudgetStore, ViewWorkspaceBudgetStore],
