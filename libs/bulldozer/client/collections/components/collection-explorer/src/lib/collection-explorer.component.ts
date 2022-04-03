@@ -32,10 +32,10 @@ import { CollectionExplorerStore } from './collection-explorer.store';
       <mat-nav-list dense>
         <mat-list-item
           *ngFor="let collection of collections$ | ngrxPush"
-          class="pl-8 pr-0"
+          class="pr-0"
         >
           <a
-            class="w-32 flex justify-between gap-2 items-center flex-grow m-0"
+            class="w-full flex justify-between gap-2 items-center flex-grow m-0 pl-0"
             matLine
             [routerLink]="[
               '/workspaces',
@@ -52,7 +52,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
             matTooltipShowDelay="500"
           >
             <span
-              class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
+              class="pl-12 flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
             >
               {{ collection.document.name }}
             </span>

@@ -68,7 +68,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           </bd-instruction-explorer>
 
           <mat-menu #applicationOptionsMenu="matMenu">
-            <a
+            <!-- <a
               mat-menu-item
               [routerLink]="[
                 '/workspaces',
@@ -79,7 +79,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
             >
               <mat-icon>launch</mat-icon>
               <span>View application</span>
-            </a>
+            </a> -->
             <button
               mat-menu-item
               bdEditApplication
