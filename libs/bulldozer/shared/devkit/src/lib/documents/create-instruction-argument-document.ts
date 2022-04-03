@@ -16,7 +16,7 @@ export const createInstructionArgumentDocument = (
   );
   const decodedKind = decodeAttributeEnum(decodedAccount.kind);
   const decodedModifier =
-    decodedAccount.modifer && decodeAttributeEnum(decodedAccount.modifer);
+    decodedAccount.modifier && decodeAttributeEnum(decodedAccount.modifier);
 
   return {
     id: publicKey,

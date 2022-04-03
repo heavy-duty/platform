@@ -49,80 +49,30 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
       </ng-container>
     </header>
 
-    <main
-      class="flex flex-col gap-4"
-      *ngrxLet="instructionArguments$; let instructionArguments"
-    >
-      <mat-list
-        role="list"
+    <main *ngrxLet="instructionArguments$; let instructionArguments">
+      <div
+        class="flex gap-6 flex-wrap"
         *ngIf="
           instructionArguments && instructionArguments.length > 0;
           else emptyList
         "
-        class="flex flex-col gap-2"
       >
-        <mat-list-item
-          role="listitem"
+        <mat-card
           *ngFor="
             let instructionArgument of instructionArguments;
             let i = index
           "
-          class="h-20 bg-white bg-opacity-5 mat-elevation-z2"
+          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
         >
-          <div class="flex items-center gap-4 w-full">
-            <div
-              class="flex justify-center items-center w-12 h-12 rounded-full bg-black bg-opacity-10 text-xl font-bold"
-            >
-              {{ i + 1 }}
-            </div>
-            <div class="flex-grow">
-              <h3 class="mb-0 text-lg font-bold flex items-center gap-2">
-                <span
-                  [matTooltip]="
-                    instructionArgument.document.name
-                      | bdItemUpdatingMessage: instructionArgument:'Argument'
-                  "
-                >
-                  {{ instructionArgument.document.name }}
-                </span>
-                <mat-progress-spinner
-                  *ngIf="instructionArgument | bdItemShowSpinner"
-                  diameter="16"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
-              </h3>
-              <p class="text-xs mb-0 italic">
-                Type:
-
-                <ng-container
-                  *ngIf="instructionArgument.document.data.modifier"
-                >
-                  {{ instructionArgument.document.data.modifier.name }}
-                  <ng-container
-                    *ngIf="
-                      instructionArgument.document.data.modifier.name ===
-                      'array'
-                    "
-                  >
-                    ({{ instructionArgument.document.data.modifier?.size }})
-                  </ng-container>
-                  of
-                </ng-container>
-
-                {{ instructionArgument.document.data.kind.name }}.
-              </p>
-            </div>
-            <button
-              mat-mini-fab
-              color="primary"
-              aria-label="Arguments menu"
-              [matMenuTriggerFor]="instructionArgumentMenu"
-            >
-              <mat-icon>more_horiz</mat-icon>
-            </button>
-            <mat-menu #instructionArgumentMenu="matMenu">
+          <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
+            <mat-progress-spinner
+              *ngIf="instructionArgument | bdItemShowSpinner"
+              diameter="24"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <div class="flex flex-1 justify-end">
               <button
-                mat-menu-item
+                mat-icon-button
                 bdEditInstructionArgument
                 [instructionArgument]="instructionArgument.document"
                 (editInstructionArgument)="
@@ -136,29 +86,101 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                 [disabled]="(connected$ | ngrxPush) === false"
               >
                 <mat-icon>edit</mat-icon>
-                <span>Update argument</span>
               </button>
               <button
-                mat-menu-item
+                mat-icon-button
                 (click)="
                   onDeleteInstructionArgument(
                     instructionArgument.document.data.workspace,
-                    instructionArgument.document.data.application,
+                    instructionArgument.document.data.instruction,
                     instructionArgument.document.id
                   )
                 "
                 [disabled]="(connected$ | ngrxPush) === false"
               >
                 <mat-icon>delete</mat-icon>
-                <span>Delete argument</span>
               </button>
-            </mat-menu>
+            </div>
+          </aside>
+
+          <div class="px-8 mt-4">
+            <header class="flex gap-2 mb-8">
+              <figure
+                class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full mr-2"
+              >
+                <mat-icon
+                  class="w-1/2"
+                  [ngClass]="{
+                    'text-yellow-500':
+                      instructionArgument.document.data.kind.id === 0,
+                    'text-blue-500':
+                      instructionArgument.document.data.kind.id === 1,
+                    'text-green-500':
+                      instructionArgument.document.data.kind.id === 2,
+                    'text-red-500':
+                      instructionArgument.document.data.kind.id === 3
+                  }"
+                  >code</mat-icon
+                >
+              </figure>
+
+              <div>
+                <h2
+                  class="mb-0 text-lg font-bold flex items-center gap-2"
+                  [matTooltip]="
+                    instructionArgument.document.name
+                      | bdItemUpdatingMessage: instructionArgument:'Argument'
+                  "
+                  matTooltipShowDelay="500"
+                >
+                  {{ instructionArgument.document.name }}
+                </h2>
+                <p class="text-sm mb-0">
+                  Type: {{ instructionArgument.document.data.kind.name }}.
+                </p>
+              </div>
+            </header>
+
+            <section class="flex gap-6 mb-4 justify-between">
+              <p class="text-sm font-thin m-0">
+                <mat-icon inline>auto_awesome_motion</mat-icon>
+                &nbsp;
+                <ng-container
+                  *ngIf="instructionArgument.document.data.modifier !== null"
+                  [ngSwitch]="instructionArgument.document.data.modifier.id"
+                >
+                  <ng-container *ngSwitchCase="0">
+                    Array of Items
+                  </ng-container>
+                  <ng-container *ngSwitchCase="1">
+                    Vector of Items
+                  </ng-container>
+                </ng-container>
+
+                <ng-container
+                  *ngIf="instructionArgument.document.data.modifier === null"
+                >
+                  Single Item
+                </ng-container>
+              </p>
+              <p
+                class="text-sm font-thin m-0"
+                *ngIf="
+                  instructionArgument.document.data.modifier !== null &&
+                  instructionArgument.document.data.modifier.size
+                "
+              >
+                <mat-icon inline="">data_array</mat-icon>
+                &nbsp; Size:
+                {{ instructionArgument.document.data.modifier?.size }}
+              </p>
+            </section>
           </div>
-        </mat-list-item>
-      </mat-list>
+        </mat-card>
+      </div>
 
       <ng-template #emptyList>
-        <p class="text-center text-xl py-8">There's no arguments yet.</p>
+        <p class="text-center text-xl py-8">There's no attributes yet.</p>
       </ng-template>
     </main>
   `,

@@ -17,7 +17,7 @@ import {
 } from '@bulldozer-client/instructions-data-access';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
 
 @Component({
@@ -293,9 +293,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
   readonly workspaceId$ = this._viewInstructionDocumentsStore.workspaceId$;
   readonly applicationId$ = this._viewInstructionDocumentsStore.applicationId$;
   readonly instructionId$ = this._viewInstructionDocumentsStore.instructionId$;
-  readonly documents$ = this._viewInstructionDocumentsStore.documents$.pipe(
-    tap((a) => console.log(a))
-  );
+  readonly documents$ = this._viewInstructionDocumentsStore.documents$;
   readonly collections$ = this._collectionsStore.collections$;
   readonly instructionAccounts$ =
     this._instructionAccountsStore.instructionAccounts$;
@@ -330,7 +328,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
     instructionId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    console.log('da fuck?');
     this._viewInstructionDocumentsStore.createInstructionAccount({
       workspaceId,
       applicationId,

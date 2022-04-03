@@ -121,11 +121,17 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
               </figure>
 
               <div>
-                <p class="mb-0 text-lg font-bold flex items-center gap-2">
-                  <span>
-                    {{ collectionAttribute.document.name }}
-                  </span>
-                </p>
+                <h2
+                  class="mb-0 text-lg font-bold flex items-center gap-2"
+                  [matTooltip]="
+                    collectionAttribute.document.name
+                      | bdItemUpdatingMessage: collectionAttribute:'Attribute'
+                  "
+                  matTooltipShowDelay="500"
+                >
+                  {{ collectionAttribute.document.name }}
+                </h2>
+
                 <p class="text-sm mb-0">
                   Type: {{ collectionAttribute.document.data.kind.name }}.
                 </p>

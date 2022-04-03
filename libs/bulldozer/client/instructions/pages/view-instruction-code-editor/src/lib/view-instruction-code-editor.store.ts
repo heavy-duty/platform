@@ -112,28 +112,19 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           instructionAccounts,
           instructionRelations,
           collections
-        ) => {
-          console.log({
-            instruction,
-            instructionArguments,
-            instructionAccounts,
-            instructionRelations,
-            collections,
-          });
-          return {
-            instruction: instruction?.document ?? null,
-            instructionArguments: instructionArguments.map(
-              ({ document }) => document
-            ),
-            instructionAccounts: instructionAccounts.map(
-              ({ document }) => document
-            ),
-            instructionRelations: instructionRelations.map(
-              ({ document }) => document
-            ),
-            collections: collections.map(({ document }) => document),
-          };
-        },
+        ) => ({
+          instruction: instruction?.document ?? null,
+          instructionArguments: instructionArguments.map(
+            ({ document }) => document
+          ),
+          instructionAccounts: instructionAccounts.map(
+            ({ document }) => document
+          ),
+          instructionRelations: instructionRelations.map(
+            ({ document }) => document
+          ),
+          collections: collections.map(({ document }) => document),
+        }),
         { debounce: true }
       )
     );
