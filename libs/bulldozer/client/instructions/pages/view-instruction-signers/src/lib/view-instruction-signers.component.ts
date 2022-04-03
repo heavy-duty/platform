@@ -157,11 +157,10 @@ export class ViewInstructionSignersComponent implements OnInit {
   readonly workspaceId$ = this._viewInstructionSignersStore.workspaceId$;
   readonly applicationId$ = this._viewInstructionSignersStore.applicationId$;
   readonly instructionId$ = this._viewInstructionSignersStore.instructionId$;
-  readonly signers$ = this._instructionAccountsStore.instructionAccounts$;
+  readonly signers$ = this._viewInstructionSignersStore.signers$;
 
   constructor(
     private readonly _route: ActivatedRoute,
-    private readonly _instructionAccountsStore: InstructionAccountsStore,
     private readonly _walletStore: WalletStore,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {}
