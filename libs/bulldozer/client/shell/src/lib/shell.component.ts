@@ -166,7 +166,7 @@ import {
               </ng-container>
             </section>
 
-            <section
+            <!-- <section
               class="px-7 py-8 border-b hd-border-gray"
               *hdSolanaConfig="
                 let selectedNetwork = selectedNetwork;
@@ -271,7 +271,7 @@ import {
                 (reconnect)="reconnect()"
               >
               </hd-connection-status>
-            </section>
+            </section> -->
           </main>
         </mat-sidenav>
       </mat-sidenav-container>
