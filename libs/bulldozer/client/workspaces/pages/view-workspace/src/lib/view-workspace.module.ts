@@ -6,7 +6,6 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { BudgetDetailsModule } from '@bulldozer-client/budget-details';
 import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
@@ -58,7 +57,6 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     MatListModule,
     ReactiveComponentModule,
     PageHeaderModule,
-    BudgetDetailsModule,
     CollaboratorsListModule,
     WorkspaceInstructionsModule,
     ItemUpdatingModule,

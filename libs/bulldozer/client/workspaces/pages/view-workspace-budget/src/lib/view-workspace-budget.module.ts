@@ -1,7 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { BudgetDetailsModule } from '@bulldozer-client/budget-details';
+import { DepositToBudgetModule } from '@bulldozer-client/deposit-to-budget';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceBudgetComponent } from './view-workspace-budget.component';
 
@@ -11,8 +14,11 @@ import { ViewWorkspaceBudgetComponent } from './view-workspace-budget.component'
     RouterModule.forChild([
       { path: '', pathMatch: 'full', component: ViewWorkspaceBudgetComponent },
     ]),
+    MatButtonModule,
+    MatCardModule,
+    MatIconModule,
     ReactiveComponentModule,
-    BudgetDetailsModule,
+    DepositToBudgetModule,
   ],
   declarations: [ViewWorkspaceBudgetComponent],
 })

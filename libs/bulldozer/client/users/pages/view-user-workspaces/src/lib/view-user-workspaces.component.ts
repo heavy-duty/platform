@@ -9,14 +9,14 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 @Component({
   selector: 'bd-view-user-workspaces',
   template: `
-    <header>
-      <h1 class="uppercase">Workspaces</h1>
-      <p>List of all your workspaces.</p>
+    <header class="mb-8 border-b-2 border-yellow-500">
+      <h1 class="uppercase mb-1">Workspaces</h1>
+      <p class="text-lg font-thin mb-2">List of all your workspaces.</p>
     </header>
     <ng-container *ngIf="workspaces$ | ngrxPush as workspaces">
       <div
         *ngIf="workspaces && workspaces.length > 0; else emptyList"
-        class="flex gap-6 flex-wrap mt-4"
+        class="flex gap-6 flex-wrap"
       >
         <mat-card
           *ngFor="let workspace of workspaces; let i = index"
