@@ -16,9 +16,7 @@ import { ViewCollectionStore } from './view-collection.store';
       <aside class="w-96 flex flex-col">
         <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
           <p class="mb-0 text-xl uppercase">{{ collection.document.name }}</p>
-          <p class="leading-3">
-            Visualize all the details about this collection
-          </p>
+          <p class="text-xs">Visualize all the details about this collection</p>
         </header>
 
         <ul>
