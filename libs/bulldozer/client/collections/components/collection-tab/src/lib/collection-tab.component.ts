@@ -8,7 +8,7 @@ import { CollectionTabStore } from './collection-tab.store';
   template: `
     <div
       *ngIf="collection$ | ngrxPush as collection"
-      class="flex items-stretch p-0"
+      class="flex items-center p-0"
     >
       <a
         [routerLink]="[
@@ -19,7 +19,7 @@ import { CollectionTabStore } from './collection-tab.store';
           'collections',
           collection.document.id
         ]"
-        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        class="w-40 h-12 flex justify-between gap-2 items-center pl-4 flex-grow"
         [matTooltip]="
           collection.document.name
             | bdItemUpdatingMessage: collection:'Collection'

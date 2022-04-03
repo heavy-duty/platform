@@ -78,12 +78,6 @@ input[readonly] {
   border-bottom: 2px solid gray;
 }
 
-.bd-custom-height-content {
-  height: calc(
-    100vh - $toolbar-height - $tabs-height - 1px
-  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
-}
-
 // Temporal (use theme colors later)
 
 .hd-side-right {

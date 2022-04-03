@@ -4,8 +4,11 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 @Component({
   selector: 'bd-profile-tab',
   template: `
-    <div class="flex items-stretch p-0">
-      <a [routerLink]="['/profile']" class="flex items-center pl-4 flex-grow">
+    <div class="flex items-center p-0">
+      <a
+        [routerLink]="['/profile']"
+        class="w-40 h-12 flex items-center pl-4 flex-grow"
+      >
         Profile
       </a>
       <button

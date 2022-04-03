@@ -139,12 +139,8 @@ mat-icon {
     0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%) !important;
 }
 
-.mat-tab-links {
-  height: $tabs-height;
-}
-
 .mat-tab-link {
-  height: $tabs-height !important;
+  height: auto !important;
 }
 
 .darkMode {

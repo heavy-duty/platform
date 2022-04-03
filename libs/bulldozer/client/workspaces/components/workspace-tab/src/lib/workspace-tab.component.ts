@@ -8,11 +8,11 @@ import { WorkspaceTabStore } from './workspace-tab.store';
   template: `
     <div
       *ngIf="workspace$ | ngrxPush as workspace"
-      class="flex items-stretch p-0"
+      class="flex items-center p-0"
     >
       <a
         [routerLink]="['/workspaces', workspace.document.id]"
-        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        class="w-40 h-12 flex justify-between gap-2 items-center pl-4 flex-grow"
         [matTooltip]="
           workspace.document.name | bdItemUpdatingMessage: workspace:'Workspace'
         "
