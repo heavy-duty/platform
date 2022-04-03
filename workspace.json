@@ -26,6 +26,7 @@
     "bulldozer-client-collections-modals-edit-collection-attribute": "libs/bulldozer/client/collections/modals/edit-collection-attribute",
     "bulldozer-client-collections-pages-view-collection": "libs/bulldozer/client/collections/pages/view-collection",
     "bulldozer-client-core-data-access": "libs/bulldozer/client/core/data-access",
+    "bulldozer-client-collections-pages-view-collection-attributes": "libs/bulldozer/client/collections/pages/view-collection-attributes",
     "bulldozer-client-e2e": "apps/bulldozer-client-e2e",
     "bulldozer-client-instructions-components-instruction-arguments-list": "libs/bulldozer/client/instructions/components/instruction-arguments-list",
     "bulldozer-client-instructions-components-instruction-documents-list": "libs/bulldozer/client/instructions/components/instruction-documents-list",

@@ -15,7 +15,23 @@ import { ViewCollectionComponent } from './view-collection.component';
   imports: [
     CommonModule,
     RouterModule.forChild([
-      { path: '', pathMatch: 'full', component: ViewCollectionComponent },
+      {
+        path: '',
+        component: ViewCollectionComponent,
+        children: [
+          {
+            path: 'attributes',
+            loadChildren: () =>
+              import('../../../view-collection-attributes/src').then(
+                (m) => m.ViewCollectionAttributesModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'attributes',
+          },
+        ],
+      },
     ]),
     MatProgressSpinnerModule,
     MatTooltipModule,
