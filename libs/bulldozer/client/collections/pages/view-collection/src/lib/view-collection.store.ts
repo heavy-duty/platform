@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { CollectionStore } from '@bulldozer-client/collections-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { ComponentStore } from '@ngrx/component-store';
 import { tap } from 'rxjs';
@@ -21,7 +22,10 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
-  constructor(private readonly _tabStore: TabStore) {
+  constructor(
+    private readonly _tabStore: TabStore,
+    private readonly _collectionStore: CollectionStore
+  ) {
     super(initialState);
 
     this._openTab(
@@ -37,6 +41,8 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
+
+    this._collectionStore.setCollectionId(this.collectionId$);
   }
 
   readonly setWorkspaceId = this.updater<string | null>(

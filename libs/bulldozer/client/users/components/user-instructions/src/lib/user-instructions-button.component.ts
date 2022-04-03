@@ -131,8 +131,4 @@ export class UserInstructionsButtonComponent {
     startWith(Date.now()),
     map(() => Date.now())
   );
-
-  onMenuOpened() {
-    console.log('mmgvo menor');
-  }
 }

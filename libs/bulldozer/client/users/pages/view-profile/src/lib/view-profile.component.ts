@@ -12,10 +12,10 @@ import { TabStore } from '@bulldozer-client/core-data-access';
   template: `
     <aside class="w-80 flex flex-col flex-shrink-0">
       <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-        <h2 class="mb-0 text-xl uppercase">Profile</h2>
-        <small class="leading-3">
+        <p class="mb-0 text-xl uppercase">Profile</p>
+        <p class="leading-3">
           Visualize all the details about your profile and workspaces
-        </small>
+        </p>
       </header>
 
       <ul>

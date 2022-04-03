@@ -15,7 +15,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     <ng-container *ngIf="workspace$ | ngrxPush as workspace">
       <aside class="w-80 flex flex-col flex-shrink-0">
         <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-          <h1 class="mb-0 text-xl uppercase">{{ workspace.document.name }}</h1>
+          <p class="mb-0 text-xl uppercase">{{ workspace.document.name }}</p>
           <p class="text-xs">Visualize all the details about this workspace.</p>
         </header>
 

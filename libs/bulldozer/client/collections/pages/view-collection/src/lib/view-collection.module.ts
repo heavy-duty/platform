@@ -22,7 +22,7 @@ import { ViewCollectionComponent } from './view-collection.component';
           {
             path: 'attributes',
             loadChildren: () =>
-              import('../../../view-collection-attributes/src').then(
+              import('@bulldozer-client/view-collection-attributes').then(
                 (m) => m.ViewCollectionAttributesModule
               ),
           },

@@ -247,7 +247,7 @@
       "@heavy-duty/bulldozer-store": [
         "libs/bulldozer/shared/store/src/index.ts"
       ],
-      "@heavy-duty/bulldozer/client/collections/pages/view-collection-attributes": [
+      "@bulldozer-client/view-collection-attributes": [
         "libs/bulldozer/client/collections/pages/view-collection-attributes/src/index.ts"
       ],
       "@heavy-duty/generator": ["libs/bulldozer/shared/generator/src/index.ts"],

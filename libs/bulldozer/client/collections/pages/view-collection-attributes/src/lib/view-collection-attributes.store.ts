@@ -64,8 +64,6 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
       this._collectionAttributeQueryStore.collectionAttributeIds$
     );
 
-    this._collectionStore.setCollectionId(this.collectionId$);
-
     this._handleInstruction(
       this.collectionId$.pipe(
         isNotNullOrUndefined,
