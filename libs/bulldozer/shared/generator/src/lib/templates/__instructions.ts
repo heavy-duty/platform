@@ -11,7 +11,7 @@ use crate::collections::{ {{~#each collections}}{{#if @first}}{{else}}, {{/if}}{
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct {{instruction.name.pascalCase}}Arguments {
   {{#each instruction.arguments}}
-  {{this.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}}
+  {{this.name.camelCase}}: {{#switch this.data.modifier.id}}{{#case null}}{{this.data.kind.name}}{{/case}}{{#case '0'}}[{{this.data.kind.name}};{{this.data.modifier.size}}]{{/case}}{{#case '1'}}Vec<{{this.data.kind.name}}>{{/case}}{{/switch}},
   {{/each}}
 }
 {{else~}}
