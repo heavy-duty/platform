@@ -1,8 +1,27 @@
 import { Injectable } from '@angular/core';
-import { CollectionStore } from '@bulldozer-client/collections-data-access';
+import {
+  CollectionApiService,
+  CollectionStore,
+} from '@bulldozer-client/collections-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
-import { ComponentStore } from '@ngrx/component-store';
-import { tap } from 'rxjs';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import {
+  InstructionStatus,
+  WorkspaceInstructionsStore,
+} from '@bulldozer-client/workspaces-data-access';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import {
+  concatMap,
+  EMPTY,
+  filter,
+  of,
+  pipe,
+  switchMap,
+  tap,
+  withLatestFrom,
+} from 'rxjs';
 
 interface ViewModel {
   collectionId: string | null;
@@ -23,8 +42,12 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
 
   constructor(
+    private readonly _collectionApiService: CollectionApiService,
+    private readonly _walletStore: WalletStore,
+    private readonly _notificationStore: NotificationStore,
     private readonly _tabStore: TabStore,
-    private readonly _collectionStore: CollectionStore
+    private readonly _collectionStore: CollectionStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
@@ -41,7 +64,22 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-
+    this._handleInstruction(
+      this.collectionId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((collectionId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Collection' &&
+                  account.pubkey === collectionId
+              )
+            )
+          )
+        )
+      )
+    );
     this._collectionStore.setCollectionId(this.collectionId$);
   }
 
@@ -55,6 +93,21 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
 
   readonly setCollectionId = this.updater<string | null>(
     (state, collectionId) => ({ ...state, collectionId })
+  );
+
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createCollection':
+        case 'updateCollection':
+        case 'deleteCollection': {
+          this._collectionStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
   );
 
   private readonly _openTab = this.effect<{
@@ -75,5 +128,80 @@ export class ViewCollectionStore extends ComponentStore<ViewModel> {
         });
       }
     })
+  );
+
+  readonly updateCollection = this.effect<{
+    workspaceId: string;
+    applicationId: string;
+    collectionId: string;
+    collectionName: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(
+        ([
+          { workspaceId, applicationId, collectionId, collectionName },
+          authority,
+        ]) => {
+          if (authority === null) {
+            return EMPTY;
+          }
+
+          return this._collectionApiService
+            .update({
+              authority: authority.toBase58(),
+              workspaceId,
+              applicationId,
+              collectionName,
+              collectionId,
+            })
+            .pipe(
+              tapResponse(
+                () =>
+                  this._notificationStore.setEvent(
+                    'Update collection request sent'
+                  ),
+                (error) => this._notificationStore.setError(error)
+              )
+            );
+        }
+      )
+    )
+  );
+
+  readonly deleteCollection = this.effect<{
+    workspaceId: string;
+    applicationId: string;
+    collectionId: string;
+  }>(
+    pipe(
+      concatMap((request) =>
+        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
+      ),
+      concatMap(([{ workspaceId, collectionId, applicationId }, authority]) => {
+        if (authority === null) {
+          return EMPTY;
+        }
+
+        return this._collectionApiService
+          .delete({
+            authority: authority.toBase58(),
+            workspaceId,
+            collectionId,
+            applicationId,
+          })
+          .pipe(
+            tapResponse(
+              () =>
+                this._notificationStore.setEvent(
+                  'Delete collection request sent'
+                ),
+              (error) => this._notificationStore.setError(error)
+            )
+          );
+      })
+    )
   );
 }
