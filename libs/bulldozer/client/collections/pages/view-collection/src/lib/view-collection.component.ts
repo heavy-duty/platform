@@ -14,7 +14,7 @@ import { ViewCollectionStore } from './view-collection.store';
           <p class="text-xs">Visualize all the details about this collection</p>
         </header>
 
-        <ul>
+        <ul class="flex-1">
           <li>
             <a
               class="flex flex-col gap-1 border-l-4 py-5 px-7"
@@ -86,6 +86,40 @@ import { ViewCollectionStore } from './view-collection.store';
             </a>
           </li>
         </ul>
+
+        <footer
+          class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+        >
+          <button
+            mat-stroked-button
+            color="accent"
+            bdEditCollection
+            [collection]="collection.document"
+            (editCollection)="
+              onUpdateCollection(
+                collection.document.data.workspace,
+                collection.document.data.application,
+                collection.document.id,
+                $event
+              )
+            "
+          >
+            Edit
+          </button>
+          <button
+            mat-stroked-button
+            color="warn"
+            (click)="
+              onDeleteCollection(
+                collection.document.data.workspace,
+                collection.document.data.application,
+                collection.document.id
+              )
+            "
+          >
+            Delete
+          </button>
+        </footer>
       </aside>
 
       <div class="w-full bg-white bg-opacity-5">
@@ -127,6 +161,32 @@ export class ViewCollectionComponent {
       queryParams: 'exact',
       fragment: 'ignored',
       matrixParams: 'ignored',
+    });
+  }
+
+  onUpdateCollection(
+    workspaceId: string,
+    applicationId: string,
+    collectionId: string,
+    collectionName: string
+  ) {
+    this._viewCollectionStore.updateCollection({
+      workspaceId,
+      applicationId,
+      collectionId,
+      collectionName,
+    });
+  }
+
+  onDeleteCollection(
+    workspaceId: string,
+    applicationId: string,
+    collectionId: string
+  ) {
+    this._viewCollectionStore.deleteCollection({
+      workspaceId,
+      applicationId,
+      collectionId,
     });
   }
 }
