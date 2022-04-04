@@ -122,9 +122,15 @@ export class WorkspaceApiService {
       ),
       partiallySignTransaction(workspaceKeypair),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          tap((transactionSignature) =>
+            this._hdBroadcasterStore.sendTransaction(
+              transactionSignature,
+              workspaceKeypair.publicKey.toBase58()
+            )
+          ),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
