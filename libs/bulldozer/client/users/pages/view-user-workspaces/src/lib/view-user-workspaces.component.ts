@@ -23,21 +23,30 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
           *ngFor="let workspace of workspaces; let i = index"
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
         >
-          <aside class="flex justify-end bd-bg-black px-4 py-1 gap-1">
-            <a
-              [attr.aria-label]="'View ' + workspace.document.name"
-              [routerLink]="['/workspaces', workspace.document.id]"
-              mat-icon-button
-            >
-              <mat-icon>open_in_new</mat-icon>
-            </a>
-            <button
-              mat-icon-button
-              [attr.aria-label]="'Delete ' + workspace.document.name"
-              (click)="onDeleteWorkspace(workspace.document.id)"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+          <aside
+            class="flex justify-between items-center bd-bg-black px-4 py-1 gap-1"
+          >
+            <mat-progress-spinner
+              *ngIf="workspace | bdItemShowSpinner"
+              diameter="24"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <div class="flex flex-1 justify-end">
+              <a
+                [attr.aria-label]="'View ' + workspace.document.name"
+                [routerLink]="['/workspaces', workspace.document.id]"
+                mat-icon-button
+              >
+                <mat-icon>open_in_new</mat-icon>
+              </a>
+              <button
+                mat-icon-button
+                [attr.aria-label]="'Delete ' + workspace.document.name"
+                (click)="onDeleteWorkspace(workspace.document.id)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           </aside>
 
           <div class="px-8 mt-4">
