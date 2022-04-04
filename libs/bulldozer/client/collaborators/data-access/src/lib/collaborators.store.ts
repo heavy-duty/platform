@@ -1,44 +1,32 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  Collaborator,
-  CollaboratorFilters,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { InstructionStatus } from '@bulldozer-client/users-data-access';
+import { Collaborator, Document } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  mergeMap,
-  of,
-  pipe,
-  switchMap,
-  take,
-  takeUntil,
-  takeWhile,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { CollaboratorApiService } from './collaborator-api.service';
-import { CollaboratorEventService } from './collaborator-event.service';
+import { ItemView } from './types';
 
+export type CollaboratorItemView = ItemView<Document<Collaborator>>;
 interface ViewModel {
   loading: boolean;
-  collaboratorsMap: Map<string, Document<Collaborator>>;
-  filters: CollaboratorFilters | null;
+  collaboratorIds: string[] | null;
+  collaboratorsMap: Map<string, CollaboratorItemView>;
 }
 
 const initialState: ViewModel = {
   loading: false,
-  filters: null,
-  collaboratorsMap: new Map<string, Document<Collaborator>>(),
+  collaboratorIds: null,
+  collaboratorsMap: new Map<string, CollaboratorItemView>(),
 };
 
 @Injectable()
 export class CollaboratorsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
-  readonly filters$ = this.select(({ filters }) => filters);
+  readonly collaboratorIds$ = this.select(
+    ({ collaboratorIds }) => collaboratorIds
+  );
   readonly collaboratorsMap$ = this.select(
     ({ collaboratorsMap }) => collaboratorsMap
   );
@@ -49,21 +37,19 @@ export class CollaboratorsStore extends ComponentStore<ViewModel> {
   );
 
   constructor(
-    private readonly _walletStore: WalletStore,
     private readonly _collaboratorApiService: CollaboratorApiService,
-    private readonly _collaboratorEventService: CollaboratorEventService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._handleCollaboratorCreated(this.filters$);
-    this._loadCollaborators(this.filters$);
+    this._loadCollaborators(this.collaboratorIds$);
   }
 
-  private readonly _setCollaborator = this.updater<Document<Collaborator>>(
+  private readonly _setCollaborator = this.updater<CollaboratorItemView>(
     (state, newCollaborator) => {
       const collaboratorsMap = new Map(state.collaboratorsMap);
-      collaboratorsMap.set(newCollaborator.id, newCollaborator);
+      collaboratorsMap.set(newCollaborator.document.id, newCollaborator);
+
       return {
         ...state,
         collaboratorsMap,
@@ -71,19 +57,29 @@ export class CollaboratorsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _addCollaborator = this.updater<Document<Collaborator>>(
-    (state, newCollaborator) => {
-      if (state.collaboratorsMap.has(newCollaborator.id)) {
-        return state;
-      }
-      const collaboratorsMap = new Map(state.collaboratorsMap);
-      collaboratorsMap.set(newCollaborator.id, newCollaborator);
-      return {
-        ...state,
-        collaboratorsMap,
-      };
+  private readonly _patchStatus = this.updater<{
+    collaboratorId: string;
+    statuses: {
+      isCreating?: boolean;
+      isUpdating?: boolean;
+      isDeleting?: boolean;
+    };
+  }>((state, { collaboratorId, statuses }) => {
+    const collaboratorsMap = new Map(state.collaboratorsMap);
+    const collaborator = collaboratorsMap.get(collaboratorId);
+
+    if (collaborator === undefined) {
+      return state;
     }
-  );
+
+    return {
+      ...state,
+      collaboratorsMap: collaboratorsMap.set(collaboratorId, {
+        ...collaborator,
+        ...statuses,
+      }),
+    };
+  });
 
   private readonly _removeCollaborator = this.updater<string>(
     (state, collaboratorId) => {
@@ -96,146 +92,131 @@ export class CollaboratorsStore extends ComponentStore<ViewModel> {
     }
   );
 
-  private readonly _handleCollaboratorChanges = this.effect<string>(
-    mergeMap((collaboratorId) =>
-      this._collaboratorEventService.collaboratorChanges(collaboratorId).pipe(
-        tapResponse(
-          (changes) => {
-            if (changes === null) {
-              this._removeCollaborator(collaboratorId);
-            } else {
-              this._setCollaborator(changes);
-            }
-          },
-          (error) => this._notificationStore.setError(error)
-        ),
-        takeUntil(
-          this.loading$.pipe(
-            filter((loading) => loading),
-            take(1)
-          )
-        ),
-        takeWhile((collaborator) => collaborator !== null)
-      )
-    )
+  readonly setCollaboratorIds = this.updater<string[] | null>(
+    (state, collaboratorIds) => ({
+      ...state,
+      collaboratorIds,
+    })
   );
 
-  private readonly _handleCollaboratorCreated =
-    this.effect<CollaboratorFilters | null>(
-      switchMap((filters) => {
-        if (filters === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorEventService.collaboratorCreated(filters).pipe(
-          tapResponse(
-            (collaborator) => {
-              this._addCollaborator(collaborator);
-              this._handleCollaboratorChanges(collaborator.id);
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-      })
-    );
-
-  private readonly _loadCollaborators = this.effect<CollaboratorFilters | null>(
-    switchMap((filters) => {
-      if (filters === null) {
+  private readonly _loadCollaborators = this.effect<string[] | null>(
+    switchMap((collaboratorIds) => {
+      if (collaboratorIds === null) {
         return EMPTY;
       }
 
       this.patchState({ loading: true });
 
-      return this._collaboratorApiService.find(filters).pipe(
+      return this._collaboratorApiService.findByIds(collaboratorIds).pipe(
         tapResponse(
           (collaborators) => {
             this.patchState({
-              collaboratorsMap: collaborators.reduce(
-                (collaboratorsMap, collaborator) =>
-                  collaboratorsMap.set(collaborator.id, collaborator),
-                new Map<string, Document<Collaborator>>()
-              ),
               loading: false,
+              collaboratorsMap: collaborators
+                .filter(
+                  (collaborator): collaborator is Document<Collaborator> =>
+                    collaborator !== null
+                )
+                .reduce(
+                  (collaboratorsMap, collaborator) =>
+                    collaboratorsMap.set(collaborator.id, {
+                      document: collaborator,
+                      isCreating: false,
+                      isUpdating: false,
+                      isDeleting: false,
+                    }),
+                  new Map<string, CollaboratorItemView>()
+                ),
             });
-            collaborators.forEach(({ id }) =>
-              this._handleCollaboratorChanges(id)
-            );
           },
-          (error) => this._notificationStore.setError(error)
+          (error) => this._notificationStore.setError({ error })
         )
       );
     })
   );
 
-  readonly setFilters = this.updater<CollaboratorFilters | null>(
-    (state, filters) => ({
-      ...state,
-      filters,
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collaboratorAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Collaborator'
+      );
+
+      if (collaboratorAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createCollaborator': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collaboratorId: collaboratorAccountMeta.pubkey,
+              statuses: {
+                isCreating: false,
+              },
+            });
+
+            return EMPTY;
+          }
+
+          return this._collaboratorApiService
+            .findById(collaboratorAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              isNotNullOrUndefined,
+              tapResponse(
+                (collaborator) =>
+                  this._setCollaborator({
+                    document: collaborator,
+                    isCreating: true,
+                    isUpdating: false,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'updateCollaborator': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({
+              collaboratorId: collaboratorAccountMeta.pubkey,
+              statuses: {
+                isUpdating: false,
+              },
+            });
+
+            return EMPTY;
+          }
+
+          return this._collaboratorApiService
+            .findById(collaboratorAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              isNotNullOrUndefined,
+              tapResponse(
+                (collaborator) =>
+                  this._setCollaborator({
+                    document: collaborator,
+                    isCreating: false,
+                    isUpdating: true,
+                    isDeleting: false,
+                  }),
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'deleteCollaborator': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({
+              collaboratorId: collaboratorAccountMeta.pubkey,
+              statuses: { isDeleting: true },
+            });
+          } else {
+            this._removeCollaborator(collaboratorAccountMeta.pubkey);
+          }
+
+          return EMPTY;
+        }
+        default:
+          return EMPTY;
+      }
     })
-  );
-
-  readonly createCollaborator = this.effect<{
-    workspaceId: string;
-    userId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, userId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorApiService
-          .create({
-            authority: authority.toBase58(),
-            workspaceId,
-            userId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Create collaborator request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly deleteCollaborator = this.effect<{
-    workspaceId: string;
-    collaboratorId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ collaboratorId, workspaceId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorApiService
-          .delete({
-            authority: authority.toBase58(),
-            collaboratorId,
-            workspaceId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete collaborator request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
   );
 }

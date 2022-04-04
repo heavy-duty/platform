@@ -1,23 +1,24 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { InstructionStatus } from '@bulldozer-client/workspaces-data-access';
 import {
   Collaborator,
   Document,
   findCollaboratorAddress,
 } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey } from '@solana/web3.js';
 import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { CollaboratorApiService } from './collaborator-api.service';
-import { CollaboratorEventService } from './collaborator-event.service';
+import { ItemView } from './types';
+
+export type CollaboratorView = ItemView<Document<Collaborator>>;
 
 interface ViewModel {
   loading: boolean;
   workspaceId: string | null;
   userId: string | null;
   collaboratorId: string | null;
-  collaborator: Document<Collaborator> | null;
+  collaborator: CollaboratorView | null;
 }
 
 const initialState: ViewModel = {
@@ -40,9 +41,7 @@ export class CollaboratorStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _collaboratorApiService: CollaboratorApiService,
-    private readonly _collaboratorEventService: CollaboratorEventService,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
@@ -53,8 +52,6 @@ export class CollaboratorStore extends ComponentStore<ViewModel> {
       }))
     );
     this._loadCollaborator(this.collaboratorId$);
-    this._handleCollaboratorCreated(this._walletStore.publicKey$);
-    this._handleCollaboratorDeleted(this.collaboratorId$);
   }
 
   readonly setUserId = this.updater<string | null>((state, userId) => ({
@@ -66,37 +63,24 @@ export class CollaboratorStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleCollaboratorDeleted = this.effect<string | null>(
-    switchMap((collaboratorId) => {
-      if (collaboratorId === null) {
-        return EMPTY;
-      }
+  private readonly _patchStatus = this.updater<{
+    isCreating?: boolean;
+    isUpdating?: boolean;
+    isDeleting?: boolean;
+  }>((state, statuses) => ({
+    ...state,
+    collaborator: state.collaborator
+      ? {
+          ...state.collaborator,
+          ...statuses,
+        }
+      : null,
+  }));
 
-      return this._collaboratorEventService
-        .collaboratorDeleted(collaboratorId)
-        .pipe(
-          tapResponse(
-            () => this.patchState({ collaborator: null }),
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-    })
-  );
-
-  private readonly _handleCollaboratorCreated = this.effect<PublicKey | null>(
-    switchMap((walletPublicKey) => {
-      if (walletPublicKey === null) {
-        return EMPTY;
-      }
-
-      return this._collaboratorEventService
-        .collaboratorCreated({ authority: walletPublicKey.toBase58() })
-        .pipe(
-          tapResponse(
-            (collaborator) => this.patchState({ collaborator }),
-            (error) => this._notificationStore.setError(error)
-          )
-        );
+  private readonly _setCollaborator = this.updater<CollaboratorView | null>(
+    (state, collaborator) => ({
+      ...state,
+      collaborator,
     })
   );
 
@@ -122,6 +106,7 @@ export class CollaboratorStore extends ComponentStore<ViewModel> {
   private readonly _loadCollaborator = this.effect<string | null>(
     switchMap((collaboratorId) => {
       if (collaboratorId === null) {
+        this.patchState({ collaborator: null });
         return EMPTY;
       }
 
@@ -130,14 +115,94 @@ export class CollaboratorStore extends ComponentStore<ViewModel> {
       return this._collaboratorApiService.findById(collaboratorId).pipe(
         tapResponse(
           (collaborator) => {
-            this.patchState({
-              collaborator,
-              loading: false,
-            });
+            if (collaborator !== null) {
+              this._setCollaborator({
+                document: collaborator,
+                isCreating: false,
+                isUpdating: false,
+                isDeleting: false,
+              });
+            }
+            this.patchState({ loading: false });
           },
-          (error) => this._notificationStore.setError(error)
+          (error) => this._notificationStore.setError({ error, loading: false })
         )
       );
+    })
+  );
+
+  readonly dispatch = this.effect<InstructionStatus>(
+    concatMap((instructionStatus) => {
+      const collaboratorAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Collaborator'
+      );
+
+      if (collaboratorAccountMeta === undefined) {
+        return EMPTY;
+      }
+
+      switch (instructionStatus.name) {
+        case 'createCollaborator': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
+            return EMPTY;
+          }
+
+          return this._collaboratorApiService
+            .findById(collaboratorAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (collaborator) => {
+                  if (collaborator !== null) {
+                    this._setCollaborator({
+                      document: collaborator,
+                      isCreating: true,
+                      isUpdating: false,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'updateCollaborator': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
+            return EMPTY;
+          }
+
+          return this._collaboratorApiService
+            .findById(collaboratorAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (collaborator) => {
+                  if (collaborator !== null) {
+                    this._setCollaborator({
+                      document: collaborator,
+                      isCreating: false,
+                      isUpdating: true,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
+        case 'deleteCollaborator': {
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
+          } else {
+            this.patchState({ collaborator: null });
+            this._patchStatus({ isDeleting: false });
+          }
+
+          return EMPTY;
+        }
+        default:
+          return EMPTY;
+      }
     })
   );
 }

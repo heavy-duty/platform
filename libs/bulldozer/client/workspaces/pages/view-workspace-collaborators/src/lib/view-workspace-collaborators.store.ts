@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import {
   CollaboratorApiService,
+  CollaboratorItemView,
+  CollaboratorQueryStore,
   CollaboratorsStore,
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserApiService, UserStore } from '@bulldozer-client/users-data-access';
+import {
+  InstructionStatus,
+  WorkspaceInstructionsStore,
+} from '@bulldozer-client/workspaces-data-access';
 import { Collaborator, Document, User } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -14,24 +20,30 @@ import {
   combineLatest,
   concatMap,
   EMPTY,
+  filter,
   forkJoin,
   map,
   of,
   pipe,
   switchMap,
+  tap,
   withLatestFrom,
 } from 'rxjs';
 
 export type CollaboratorStatus = 'approved' | 'pending' | 'rejected';
 
-export interface CollaboratorView extends Document<Collaborator> {
-  user: Document<User>;
+export interface ViewCollaboratorItemView {
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  document: Document<Collaborator>;
+  user: Document<User> | null;
 }
 
 interface ViewModel {
   workspaceId: string | null;
   collaboratorStatus: CollaboratorStatus;
-  collaborators: CollaboratorView[];
+  collaborators: ViewCollaboratorItemView[];
   collaboratorId: string | null;
   loading: boolean;
   error: unknown | null;
@@ -65,16 +77,19 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
         .filter((collaborator) => {
           switch (status) {
             case 'pending':
-              return collaborator.data.status.id === 0;
+              return collaborator.document.data.status.id === 0;
             case 'approved':
-              return collaborator.data.status.id === 1;
+              return collaborator.document.data.status.id === 1;
             case 'rejected':
-              return collaborator.data.status.id === 2;
+              return collaborator.document.data.status.id === 2;
             default:
               return false;
           }
         })
-        .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
+        .sort(
+          (a, b) =>
+            a.document.createdAt.toNumber() - b.document.createdAt.toNumber()
+        )
   );
   readonly selectedCollaborator$ = this.select(
     this.filteredCollaborators$,
@@ -89,7 +104,7 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
       }
 
       const selectedCollaborator = collaborators.find(
-        (collaborator) => collaborator.id === collaboratorId
+        (collaborator) => collaborator.document.id === collaboratorId
       );
 
       if (selectedCollaborator === undefined) {
@@ -106,19 +121,40 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     private readonly _collaboratorApiService: CollaboratorApiService,
     private readonly _collaboratorsStore: CollaboratorsStore,
     private readonly _collaboratorStore: CollaboratorStore,
+    private readonly _collaboratorQueryStore: CollaboratorQueryStore,
     private readonly _userApiService: UserApiService,
-    private readonly _userStore: UserStore
+    private readonly _userStore: UserStore,
+    workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
-    this._collaboratorStore.setWorkspaceId(this.workspaceId$);
-    this._collaboratorStore.setUserId(this._userStore.userId$);
-    this._collaboratorsStore.setFilters(
+    this._collaboratorQueryStore.setFilters(
       combineLatest({
         workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
       })
     );
+    this._collaboratorsStore.setCollaboratorIds(
+      this._collaboratorQueryStore.collaboratorIds$
+    );
+
+    this._collaboratorStore.setWorkspaceId(this.workspaceId$);
+    this._collaboratorStore.setUserId(this._userStore.userId$);
     this._loadCollaborators(this._collaboratorsStore.collaborators$);
+    this._handleInstruction(
+      this.workspaceId$.pipe(
+        isNotNullOrUndefined,
+        switchMap((workspaceId) =>
+          workspaceInstructionsStore.instruction$.pipe(
+            filter((instruction) =>
+              instruction.accounts.some(
+                (account) =>
+                  account.name === 'Workspace' && account.pubkey === workspaceId
+              )
+            )
+          )
+        )
+      )
+    );
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -142,15 +178,30 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _loadCollaborators = this.effect<Document<Collaborator>[]>(
+  private readonly _handleInstruction = this.effect<InstructionStatus>(
+    tap((instructionStatus) => {
+      switch (instructionStatus.name) {
+        case 'createCollaborator':
+        case 'updateCollaborator':
+        case 'deleteCollaborator': {
+          this._collaboratorsStore.dispatch(instructionStatus);
+          break;
+        }
+        default:
+          break;
+      }
+    })
+  );
+
+  private readonly _loadCollaborators = this.effect<CollaboratorItemView[]>(
     switchMap((collaborators) => {
       this.patchState({ loading: true });
 
       return forkJoin(
         collaborators.map((collaborator) =>
-          this._userApiService.findById(collaborator.data.user).pipe(
+          this._userApiService.findById(collaborator.document.data.user).pipe(
             isNotNullOrUndefined,
-            map((user) => ({ user, ...collaborator }))
+            map((user) => ({ ...collaborator, user }))
           )
         )
       ).pipe(

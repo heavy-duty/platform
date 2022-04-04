@@ -1,6 +1,7 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  CollaboratorQueryStore,
   CollaboratorsStore,
   CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
@@ -51,15 +52,16 @@ import {
           <button
             class="w-full py-5 px-7 border-l-4 flex items-center gap-2"
             [ngClass]="
-              (selectedCollaborator$ | ngrxPush)?.id === collaborator.id
+              (selectedCollaborator$ | ngrxPush)?.document?.id ===
+              collaborator.document.id
                 ? 'bg-white bg-opacity-5 border-primary'
                 : 'border-transparent'
             "
-            (click)="onSelectCollaborator(collaborator.id)"
+            (click)="onSelectCollaborator(collaborator.document.id)"
           >
             <figure class="w-12 h-12 rounded-full overflow-hidden">
               <img
-                [src]="collaborator.user.data.thumbnailUrl"
+                [src]="collaborator.user?.data?.thumbnailUrl"
                 class="w-full"
                 onerror="this.src='assets/images/default-profile.png';"
               />
@@ -70,12 +72,12 @@ import {
                 <span
                   class="text-lg font-bold w-44 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ collaborator.user.name }}
+                  {{ collaborator.user?.name }}
                 </span>
 
                 <mat-icon
                   class="inline"
-                  *ngIf="collaborator.data.isAdmin"
+                  *ngIf="collaborator.document.data.isAdmin"
                   color="accent"
                   inline
                 >
@@ -87,11 +89,11 @@ import {
                 <a
                   [href]="
                     'https://explorer.solana.com/address/' +
-                    collaborator.user.id
+                    collaborator.user?.id
                   "
                   target="__blank"
                   class="text-accent underline"
-                  >(@{{ collaborator.user.data.userName }})</a
+                  >(@{{ collaborator.user?.data?.userName }})</a
                 >
               </p>
 
@@ -99,13 +101,15 @@ import {
                 <span
                   class="inline-block w-2 h-2 rounded-full"
                   [ngClass]="{
-                    'bg-yellow-500': collaborator.data.status.id === 0,
-                    'bg-green-500': collaborator.data.status.id === 1,
-                    'bg-red-500': collaborator.data.status.id === 2
+                    'bg-yellow-500': collaborator.document.data.status.id === 0,
+                    'bg-green-500': collaborator.document.data.status.id === 1,
+                    'bg-red-500': collaborator.document.data.status.id === 2
                   }"
                 ></span>
                 <span class="text-white text-opacity-50">
-                  <ng-container [ngSwitch]="collaborator.data.status.id">
+                  <ng-container
+                    [ngSwitch]="collaborator.document.data.status.id"
+                  >
                     <ng-container *ngSwitchCase="0"> Pending </ng-container>
                     <ng-container *ngSwitchCase="1"> Approved </ng-container>
                     <ng-container *ngSwitchCase="2"> Rejected </ng-container>
@@ -133,11 +137,17 @@ import {
             </button>
 
             <button
-              *ngIf="collaborator !== null && collaborator.data.status.id === 2"
+              *ngIf="
+                collaborator !== null &&
+                collaborator.document.data.status.id === 2
+              "
               mat-stroked-button
               color="accent"
               (click)="
-                onRetryCollaboratorStatusRequest(workspaceId, collaborator.id)
+                onRetryCollaboratorStatusRequest(
+                  workspaceId,
+                  collaborator.document.id
+                )
               "
             >
               Try again
@@ -158,7 +168,7 @@ import {
           <div class="flex items-center gap-4">
             <figure>
               <img
-                [src]="selectedCollaborator.user.data.thumbnailUrl"
+                [src]="selectedCollaborator.user?.data?.thumbnailUrl"
                 class="w-20 h-20 rounded-full overflow-hidden"
                 alt=""
                 onerror="this.src='assets/images/default-profile.png';"
@@ -167,11 +177,11 @@ import {
                 <a
                   [href]="
                     'https://explorer.solana.com/address/' +
-                    selectedCollaborator.user.id
+                    selectedCollaborator.user?.id
                   "
                   target="__blank"
                   class="text-accent underline"
-                  >@{{ selectedCollaborator.user.data.userName }}</a
+                  >@{{ selectedCollaborator.user?.data?.userName }}</a
                 >
               </figcaption>
             </figure>
@@ -180,7 +190,7 @@ import {
               <h2
                 class="text-2xl font-bold w-64 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
               >
-                {{ selectedCollaborator.user.name }}
+                {{ selectedCollaborator.user?.name }}
               </h2>
 
               <p class="flex m-0 gap-1 text-sm">
@@ -188,7 +198,7 @@ import {
                 <span>
                   Collaborator since
                   {{
-                    selectedCollaborator.createdAt.toNumber() * 1000
+                    selectedCollaborator.document.createdAt.toNumber() * 1000
                       | date: 'mediumDate'
                   }}
                 </span>
@@ -198,14 +208,17 @@ import {
                 <span
                   class="inline-block w-2 h-2 rounded-full"
                   [ngClass]="{
-                    'bg-yellow-500': selectedCollaborator.data.status.id === 0,
-                    'bg-green-500': selectedCollaborator.data.status.id === 1,
-                    'bg-red-500': selectedCollaborator.data.status.id === 2
+                    'bg-yellow-500':
+                      selectedCollaborator.document.data.status.id === 0,
+                    'bg-green-500':
+                      selectedCollaborator.document.data.status.id === 1,
+                    'bg-red-500':
+                      selectedCollaborator.document.data.status.id === 2
                   }"
                 ></span>
                 <span class="text-white text-opacity-50">
                   <ng-container
-                    [ngSwitch]="selectedCollaborator.data.status.id"
+                    [ngSwitch]="selectedCollaborator.document.data.status.id"
                   >
                     <ng-container *ngSwitchCase="0"> Pending </ng-container>
                     <ng-container *ngSwitchCase="1"> Approved </ng-container>
@@ -218,13 +231,13 @@ import {
 
           <div class="flex gap-2">
             <button
-              *ngIf="selectedCollaborator.data.status.id === 1"
+              *ngIf="selectedCollaborator.document.data.status.id === 1"
               mat-stroked-button
               color="warn"
               (click)="
                 onUpdateCollaborator(
-                  selectedCollaborator.data.workspace,
-                  selectedCollaborator.id,
+                  selectedCollaborator.document.data.workspace,
+                  selectedCollaborator.document.id,
                   2
                 )
               "
@@ -232,13 +245,13 @@ import {
               Revoke
             </button>
             <button
-              *ngIf="selectedCollaborator.data.status.id === 0"
+              *ngIf="selectedCollaborator.document.data.status.id === 0"
               mat-stroked-button
               color="accent"
               (click)="
                 onUpdateCollaborator(
-                  selectedCollaborator.data.workspace,
-                  selectedCollaborator.id,
+                  selectedCollaborator.document.data.workspace,
+                  selectedCollaborator.document.id,
                   1
                 )
               "
@@ -246,13 +259,13 @@ import {
               Approve
             </button>
             <button
-              *ngIf="selectedCollaborator.data.status.id === 2"
+              *ngIf="selectedCollaborator.document.data.status.id === 2"
               mat-stroked-button
               color="accent"
               (click)="
                 onUpdateCollaborator(
-                  selectedCollaborator.data.workspace,
-                  selectedCollaborator.id,
+                  selectedCollaborator.document.data.workspace,
+                  selectedCollaborator.document.id,
                   1
                 )
               "
@@ -260,13 +273,13 @@ import {
               Grant
             </button>
             <button
-              *ngIf="selectedCollaborator.data.status.id === 0"
+              *ngIf="selectedCollaborator.document.data.status.id === 0"
               mat-stroked-button
               color="warn"
               (click)="
                 onUpdateCollaborator(
-                  selectedCollaborator.data.workspace,
-                  selectedCollaborator.id,
+                  selectedCollaborator.document.data.workspace,
+                  selectedCollaborator.document.id,
                   2
                 )
               "
@@ -288,7 +301,7 @@ import {
                 <span
                   class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ selectedCollaborator.user.id }}
+                  {{ selectedCollaborator.user?.id }}
                 </span>
 
                 <button mat-icon-button>
@@ -305,7 +318,7 @@ import {
                 <span
                   class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ selectedCollaborator.data.authority }}
+                  {{ selectedCollaborator.document.data.authority }}
                 </span>
 
                 <button mat-icon-button>
@@ -321,6 +334,7 @@ import {
   styles: [],
   providers: [
     CollaboratorStore,
+    CollaboratorQueryStore,
     CollaboratorsStore,
     UserStore,
     ViewWorkspaceCollaboratorsStore,

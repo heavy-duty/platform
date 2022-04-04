@@ -93,6 +93,13 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
     }
   );
 
+  readonly setApplicationIds = this.updater<string[] | null>(
+    (state, applicationIds) => ({
+      ...state,
+      applicationIds,
+    })
+  );
+
   private readonly _loadApplications = this.effect<string[] | null>(
     switchMap((applicationIds) => {
       if (applicationIds === null) {
@@ -126,13 +133,6 @@ export class ApplicationsStore extends ComponentStore<ViewModel> {
           (error) => this._notificationStore.setError({ error })
         )
       );
-    })
-  );
-
-  readonly setApplicationIds = this.updater<string[] | null>(
-    (state, applicationIds) => ({
-      ...state,
-      applicationIds,
     })
   );
 
