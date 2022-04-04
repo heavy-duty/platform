@@ -117,6 +117,31 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
     }
   );
 
+  private readonly _setInstructionAccountsMap = this.updater<
+    Map<string, InstructionAccountItemView>
+  >((state, newInstructionAccountsMap) => {
+    const instructionAccountsMap = new Map(state.instructionAccountsMap);
+    newInstructionAccountsMap.forEach((newInstructionAccount) => {
+      const foundInstructionAccount = instructionAccountsMap.get(
+        newInstructionAccount.document.id
+      );
+
+      if (foundInstructionAccount === undefined) {
+        instructionAccountsMap.set(
+          newInstructionAccount.document.id,
+          newInstructionAccount
+        );
+      } else {
+        instructionAccountsMap.set(newInstructionAccount.document.id, {
+          ...foundInstructionAccount,
+          document: newInstructionAccount.document,
+        });
+      }
+    });
+
+    return { ...state, instructionAccountsMap };
+  });
+
   private readonly _loadInstructionAccounts = this.effect<string[] | null>(
     switchMap((instructionAccountIds) => {
       if (instructionAccountIds === null) {
@@ -130,9 +155,8 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
         .pipe(
           tapResponse(
             (instructionAccounts) => {
-              this.patchState({
-                loading: false,
-                instructionAccountsMap: instructionAccounts
+              this._setInstructionAccountsMap(
+                instructionAccounts
                   .filter(
                     (
                       instructionAccount
@@ -148,7 +172,10 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
                         isDeleting: false,
                       }),
                     new Map<string, InstructionAccountItemView>()
-                  ),
+                  )
+              );
+              this.patchState({
+                loading: false,
               });
             },
             (error) => this._notificationStore.setError({ error })

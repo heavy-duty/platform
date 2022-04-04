@@ -67,6 +67,31 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
       }
     );
 
+  private readonly _setInstructionArgumentsMap = this.updater<
+    Map<string, InstructionArgumentItemView>
+  >((state, newInstructionArgumentsMap) => {
+    const instructionArgumentsMap = new Map(state.instructionArgumentsMap);
+    newInstructionArgumentsMap.forEach((newInstructionArgument) => {
+      const foundInstructionArgument = instructionArgumentsMap.get(
+        newInstructionArgument.document.id
+      );
+
+      if (foundInstructionArgument === undefined) {
+        instructionArgumentsMap.set(
+          newInstructionArgument.document.id,
+          newInstructionArgument
+        );
+      } else {
+        instructionArgumentsMap.set(newInstructionArgument.document.id, {
+          ...foundInstructionArgument,
+          document: newInstructionArgument.document,
+        });
+      }
+    });
+
+    return { ...state, instructionArgumentsMap };
+  });
+
   private readonly _patchStatus = this.updater<{
     instructionArgumentId: string;
     statuses: {
@@ -120,9 +145,8 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
         .pipe(
           tapResponse(
             (instructionArguments) => {
-              this.patchState({
-                loading: false,
-                instructionArgumentsMap: instructionArguments
+              this._setInstructionArgumentsMap(
+                instructionArguments
                   .filter(
                     (
                       instructionArgument
@@ -138,7 +162,10 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
                         isDeleting: false,
                       }),
                     new Map<string, InstructionArgumentItemView>()
-                  ),
+                  )
+              );
+              this.patchState({
+                loading: false,
               });
             },
             (error) => this._notificationStore.setError({ error })
@@ -155,19 +182,20 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   );
 
   readonly dispatch = this.effect<InstructionStatus>(
-    concatMap((instructionArgumentStatus) => {
-      const instructionArgumentAccountMeta =
-        instructionArgumentStatus.accounts.find(
-          (account) => account.name === 'Argument'
-        );
+    concatMap((instructionStatus) => {
+      console.log(instructionStatus);
+
+      const instructionArgumentAccountMeta = instructionStatus.accounts.find(
+        (account) => account.name === 'Argument'
+      );
 
       if (instructionArgumentAccountMeta === undefined) {
         return EMPTY;
       }
 
-      switch (instructionArgumentStatus.name) {
+      switch (instructionStatus.name) {
         case 'createInstructionArgument': {
-          if (instructionArgumentStatus.status === 'finalized') {
+          if (instructionStatus.status === 'finalized') {
             this._patchStatus({
               instructionArgumentId: instructionArgumentAccountMeta.pubkey,
               statuses: {
@@ -195,7 +223,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'updateInstructionArgument': {
-          if (instructionArgumentStatus.status === 'finalized') {
+          if (instructionStatus.status === 'finalized') {
             this._patchStatus({
               instructionArgumentId: instructionArgumentAccountMeta.pubkey,
               statuses: {
@@ -223,7 +251,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
             );
         }
         case 'deleteInstructionArgument': {
-          if (instructionArgumentStatus.status === 'confirmed') {
+          if (instructionStatus.status === 'confirmed') {
             this._patchStatus({
               instructionArgumentId: instructionArgumentAccountMeta.pubkey,
               statuses: { isDeleting: true },

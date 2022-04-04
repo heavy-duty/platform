@@ -65,68 +65,95 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <mat-progress-spinner
-              *ngIf="instructionArgument | bdItemShowSpinner"
-              diameter="24"
-              mode="indeterminate"
-            ></mat-progress-spinner>
-            <div class="flex flex-1 justify-end">
-              <button
-                mat-icon-button
-                bdEditInstructionArgument
-                [instructionArgument]="instructionArgument.document"
-                (editInstructionArgument)="
-                  onUpdateInstructionArgument(
-                    instructionArgument.document.data.workspace,
-                    instructionArgument.document.data.instruction,
-                    instructionArgument.document.id,
-                    $event
-                  )
-                "
-                [disabled]="(connected$ | ngrxPush) === false"
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                (click)="
-                  onDeleteInstructionArgument(
-                    instructionArgument.document.data.workspace,
-                    instructionArgument.document.data.instruction,
-                    instructionArgument.document.id
-                  )
-                "
-                [disabled]="(connected$ | ngrxPush) === false"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+            <div class="flex-1 flex items-center gap-2">
+              <ng-container *ngIf="instructionArgument | bdItemChanging">
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+
+                <p class="m-0 text-xs text-white text-opacity-60">
+                  <ng-container *ngIf="instructionArgument.isCreating">
+                    Creating...
+                  </ng-container>
+                  <ng-container *ngIf="instructionArgument.isUpdating">
+                    Updating...
+                  </ng-container>
+                  <ng-container *ngIf="instructionArgument.isDeleting">
+                    Deleting...
+                  </ng-container>
+                </p>
+              </ng-container>
             </div>
+            <button
+              [attr.aria-label]="
+                'Update argument ' + instructionArgument.document.name
+              "
+              mat-icon-button
+              bdEditInstructionArgument
+              [instructionArgument]="instructionArgument.document"
+              (editInstructionArgument)="
+                onUpdateInstructionArgument(
+                  instructionArgument.document.data.workspace,
+                  instructionArgument.document.data.instruction,
+                  instructionArgument.document.id,
+                  $event
+                )
+              "
+              [disabled]="
+                (connected$ | ngrxPush) === false ||
+                (instructionArgument | bdItemChanging)
+              "
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              [attr.aria-label]="
+                'Delete argument ' + instructionArgument.document.name
+              "
+              mat-icon-button
+              (click)="
+                onDeleteInstructionArgument(
+                  instructionArgument.document.data.workspace,
+                  instructionArgument.document.data.instruction,
+                  instructionArgument.document.id
+                )
+              "
+              [disabled]="
+                (connected$ | ngrxPush) === false ||
+                (instructionArgument | bdItemChanging)
+              "
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
           </aside>
 
           <div class="px-8 mt-4">
             <header class="flex gap-2 mb-8">
-              <figure
-                class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full"
-              >
-                <mat-icon
-                  class="w-1/2"
-                  [ngClass]="{
-                    'text-yellow-500':
-                      instructionArgument.document.data.kind.id === 0,
-                    'text-blue-500':
-                      instructionArgument.document.data.kind.id === 1,
-                    'text-green-500':
-                      instructionArgument.document.data.kind.id === 2,
-                    'text-red-500':
-                      instructionArgument.document.data.kind.id === 3
-                  }"
-                  >code</mat-icon
+              <div class="w-1/5">
+                <figure
+                  class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full flex-shrink-0"
                 >
-              </figure>
+                  <mat-icon
+                    class="w-1/2"
+                    [ngClass]="{
+                      'text-yellow-500':
+                        instructionArgument.document.data.kind.id === 0,
+                      'text-blue-500':
+                        instructionArgument.document.data.kind.id === 1,
+                      'text-green-500':
+                        instructionArgument.document.data.kind.id === 2,
+                      'text-red-500':
+                        instructionArgument.document.data.kind.id === 3
+                    }"
+                    >code</mat-icon
+                  >
+                </figure>
+              </div>
 
-              <div>
+              <div class="w-4/5">
                 <h2
-                  class="mb-0 text-lg font-bold flex items-center gap-2"
+                  class="mb-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
                   [matTooltip]="
                     instructionArgument.document.name
                       | bdItemUpdatingMessage: instructionArgument:'Argument'

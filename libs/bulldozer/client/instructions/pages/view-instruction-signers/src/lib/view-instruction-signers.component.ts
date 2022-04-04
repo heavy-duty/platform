@@ -60,14 +60,30 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-6 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <mat-progress-spinner
-              *ngIf="signer | bdItemShowSpinner"
-              diameter="24"
-              mode="indeterminate"
-            ></mat-progress-spinner>
+            <div class="flex-1 flex items-center gap-2">
+              <ng-container *ngIf="signer | bdItemChanging">
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+
+                <p class="m-0 text-xs text-white text-opacity-60">
+                  <ng-container *ngIf="signer.isCreating">
+                    Creating...
+                  </ng-container>
+                  <ng-container *ngIf="signer.isUpdating">
+                    Updating...
+                  </ng-container>
+                  <ng-container *ngIf="signer.isDeleting">
+                    Deleting...
+                  </ng-container>
+                </p>
+              </ng-container>
+            </div>
 
             <div class="flex-1 flex justify-end">
               <button
+                [attr.aria-label]="'Update signer ' + signer.document.name"
                 mat-icon-button
                 bdEditInstructionSigner
                 [instructionSigner]="signer.document"
@@ -79,61 +95,72 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                     $event
                   )
                 "
-                [disabled]="(connected$ | ngrxPush) === false"
-                [attr.aria-label]="'Update signer ' + signer.document.name"
+                [disabled]="
+                  (connected$ | ngrxPush) === false || (signer | bdItemChanging)
+                "
               >
                 <mat-icon>edit</mat-icon>
               </button>
 
               <button
-                mat-icon-button
                 [attr.aria-label]="'Delete signer ' + signer.document.name"
+                mat-icon-button
                 (click)="
                   onDeleteInstructionAccount(
                     signer.document.data.workspace,
-                    signer.document.data.application,
+                    signer.document.data.instruction,
                     signer.document.id
                   )
                 "
-                [disabled]="(connected$ | ngrxPush) === false"
+                [disabled]="
+                  (connected$ | ngrxPush) === false || (signer | bdItemChanging)
+                "
               >
                 <mat-icon>delete</mat-icon>
               </button>
             </div>
           </aside>
 
-          <header class="flex items-center gap-4 p-4">
-            <div
-              class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full"
-            >
-              <mat-icon color="accent" class="w-1/2"> assignment_ind </mat-icon>
-            </div>
-
-            <div>
-              <h2
-                class="mb-0 text-lg font-bold uppercase"
-                [matTooltip]="
-                  signer.document.name | bdItemUpdatingMessage: signer:'Signer'
-                "
-                matTooltipShowDelay="500"
-              >
-                {{ signer.document.name }}
-              </h2>
-              <p class="m-0">
-                <ng-container *ngIf="signer.document.data.modifier === null">
-                  Non-mutable
-                </ng-container>
-                <ng-container
-                  *ngIf="
-                    signer.document.data.modifier !== null &&
-                    signer.document.data.modifier.id === 1
-                  "
+          <div class="px-8 py-6">
+            <header class="flex gap-2">
+              <div class="w-1/5">
+                <figure
+                  class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full flex-shrink-0"
                 >
-                  Mutable
-                </ng-container>
-              </p>
-            </div>
-          </header>
+                  <mat-icon color="accent" class="w-1/2">
+                    assignment_ind
+                  </mat-icon>
+                </figure>
+              </div>
+
+              <div class="w-4/5">
+                <h2
+                  class="m-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  [matTooltip]="
+                    signer.document.name
+                      | bdItemUpdatingMessage: signer:'Signer'
+                  "
+                  matTooltipShowDelay="500"
+                >
+                  {{ signer.document.name }}
+                </h2>
+
+                <p class="m-0">
+                  <ng-container *ngIf="signer.document.data.modifier === null">
+                    Non-mutable
+                  </ng-container>
+                  <ng-container
+                    *ngIf="
+                      signer.document.data.modifier !== null &&
+                      signer.document.data.modifier.id === 1
+                    "
+                  >
+                    Mutable
+                  </ng-container>
+                </p>
+              </div>
+            </header>
+          </div>
         </mat-card>
       </div>
 

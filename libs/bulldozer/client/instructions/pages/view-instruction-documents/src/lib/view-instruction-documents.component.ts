@@ -67,54 +67,71 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
           class="h-auto w-full rounded-lg overflow-hidden bd-bg-image-5 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <mat-progress-spinner
-              *ngIf="instructionDocument | bdItemShowSpinner"
-              diameter="24"
-              mode="indeterminate"
-            ></mat-progress-spinner>
+            <div class="flex-1 flex items-center gap-2">
+              <ng-container *ngIf="instructionDocument | bdItemChanging">
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
 
-            <div class="flex-1 flex justify-end">
-              <button
-                mat-icon-button
-                bdEditInstructionDocument
-                [collections]="(collections$ | ngrxPush) ?? null"
-                [instructionAccounts]="
-                  (instructionAccounts$ | ngrxPush) ?? null
-                "
-                [instructionDocument]="instructionDocument.document"
-                (editInstructionDocument)="
-                  onUpdateInstructionDocument(
-                    instructionDocument.document.data.workspace,
-                    instructionDocument.document.data.instruction,
-                    instructionDocument.document.id,
-                    $event
-                  )
-                "
-                [disabled]="(connected$ | ngrxPush) === false"
-                [attr.aria-label]="
-                  'Update document ' + instructionDocument.document.name
-                "
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-
-              <button
-                mat-icon-button
-                [attr.aria-label]="
-                  'Delete document ' + instructionDocument.document.name
-                "
-                (click)="
-                  onDeleteInstructionDocument(
-                    instructionDocument.document.data.workspace,
-                    instructionDocument.document.data.instruction,
-                    instructionDocument.document.id
-                  )
-                "
-                [disabled]="(connected$ | ngrxPush) === false"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+                <p class="m-0 text-xs text-white text-opacity-60">
+                  <ng-container *ngIf="instructionDocument.isCreating">
+                    Creating...
+                  </ng-container>
+                  <ng-container *ngIf="instructionDocument.isUpdating">
+                    Updating...
+                  </ng-container>
+                  <ng-container *ngIf="instructionDocument.isDeleting">
+                    Deleting...
+                  </ng-container>
+                </p>
+              </ng-container>
             </div>
+
+            <button
+              mat-icon-button
+              bdEditInstructionDocument
+              [collections]="(collections$ | ngrxPush) ?? null"
+              [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
+              [instructionDocument]="instructionDocument.document"
+              (editInstructionDocument)="
+                onUpdateInstructionDocument(
+                  instructionDocument.document.data.workspace,
+                  instructionDocument.document.data.instruction,
+                  instructionDocument.document.id,
+                  $event
+                )
+              "
+              [disabled]="
+                (connected$ | ngrxPush) === false ||
+                (instructionDocument | bdItemChanging)
+              "
+              [attr.aria-label]="
+                'Update document ' + instructionDocument.document.name
+              "
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+
+            <button
+              mat-icon-button
+              [attr.aria-label]="
+                'Delete document ' + instructionDocument.document.name
+              "
+              (click)="
+                onDeleteInstructionDocument(
+                  instructionDocument.document.data.workspace,
+                  instructionDocument.document.data.instruction,
+                  instructionDocument.document.id
+                )
+              "
+              [disabled]="
+                (connected$ | ngrxPush) === false ||
+                (instructionDocument | bdItemChanging)
+              "
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
           </aside>
 
           <header class="flex items-center gap-4 p-4">
@@ -301,13 +318,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                       "
                     >
                       {{ relation.extras.to.document.name }}
-
-                      <mat-progress-spinner
-                        *ngIf="relation | bdItemShowSpinner"
-                        class="inline-flex"
-                        diameter="16"
-                        mode="indeterminate"
-                      ></mat-progress-spinner>
                     </h3>
 
                     <p class="text-xs font-thin m-0">
@@ -329,7 +339,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                           relation.document.to
                         )
                       "
-                      [disabled]="(connected$ | ngrxPush) === false"
+                      [disabled]="
+                        (connected$ | ngrxPush) === false ||
+                        (relation | bdItemChanging)
+                      "
                     >
                       <mat-icon>delete</mat-icon>
                     </button>
