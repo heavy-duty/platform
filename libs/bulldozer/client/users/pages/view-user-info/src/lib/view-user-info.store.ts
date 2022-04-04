@@ -28,6 +28,7 @@ export class ViewUserInfoStore extends ComponentStore<object> {
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'createUser':
+        case 'updateUser':
         case 'deleteUser': {
           this._userStore.handleUserInstruction(instructionStatus);
           break;

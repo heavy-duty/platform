@@ -60,7 +60,7 @@ export class UserStore extends ComponentStore<ViewModel> {
     user,
   }));
 
-  private readonly _patchUserStatuses = this.updater<{
+  private readonly _patchStatus = this.updater<{
     isCreating?: boolean;
     isUpdating?: boolean;
     isDeleting?: boolean;
@@ -123,8 +123,8 @@ export class UserStore extends ComponentStore<ViewModel> {
   );
 
   readonly handleUserInstruction = this.effect<InstructionStatus>(
-    concatMap((userInstruction) => {
-      const userAccountMeta = userInstruction.accounts.find(
+    concatMap((instructionStatus) => {
+      const userAccountMeta = instructionStatus.accounts.find(
         (account) => account.name === 'User'
       );
 
@@ -132,10 +132,10 @@ export class UserStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
-      switch (userInstruction.name) {
+      switch (instructionStatus.name) {
         case 'createUser': {
-          if (userInstruction.status === 'finalized') {
-            this._patchUserStatuses({ isCreating: false });
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isCreating: false });
             return EMPTY;
           }
 
@@ -157,11 +157,35 @@ export class UserStore extends ComponentStore<ViewModel> {
               )
             );
         }
+        case 'updateUser': {
+          if (instructionStatus.status === 'finalized') {
+            this._patchStatus({ isUpdating: false });
+            return EMPTY;
+          }
+
+          return this._userApiService
+            .findById(userAccountMeta.pubkey, 'confirmed')
+            .pipe(
+              tapResponse(
+                (user) => {
+                  if (user !== null) {
+                    this._setUser({
+                      document: user,
+                      isCreating: false,
+                      isUpdating: true,
+                      isDeleting: false,
+                    });
+                  }
+                },
+                (error) => this._notificationStore.setError({ error })
+              )
+            );
+        }
         case 'deleteUser': {
-          if (userInstruction.status === 'confirmed') {
-            this._patchUserStatuses({ isDeleting: true });
+          if (instructionStatus.status === 'confirmed') {
+            this._patchStatus({ isDeleting: true });
           } else {
-            this._patchUserStatuses({ isDeleting: false });
+            this._patchStatus({ isDeleting: false });
             this.patchState({ user: null });
           }
 
