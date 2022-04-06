@@ -7,7 +7,7 @@ import {
 } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { Finality } from '@solana/web3.js';
-import { concatMap, EMPTY, filter, map, Observable, of, tap } from 'rxjs';
+import { concatMap, EMPTY, filter, map, Observable, of } from 'rxjs';
 import { InstructionArgumentApiService } from './instruction-argument-api.service';
 
 @Injectable({ providedIn: 'root' })
@@ -19,7 +19,6 @@ export class InstructionArgumentEventService {
 
   documentCreated(filters: InstructionArgumentFilters) {
     return this._workspaceInstructionStore.instruction$.pipe(
-      tap((a) => console.log(a)),
       filter(
         (instruction) =>
           instruction.name === 'createInstructionArgument' &&
@@ -51,8 +50,6 @@ export class InstructionArgumentEventService {
           })
       ),
       concatMap((instruction) => {
-        console.log(instruction);
-
         const status = instruction.status;
         const documentId = instruction.accounts.find(
           (account) => account.name === 'Argument'
@@ -89,7 +86,6 @@ export class InstructionArgumentEventService {
     data?: Document<InstructionArgument>;
   }> {
     return this._workspaceInstructionStore.instruction$.pipe(
-      tap((a) => console.log('maldita sea todo siempre', a)),
       filter(
         (instruction) =>
           instruction.name === 'updateInstructionArgument' &&

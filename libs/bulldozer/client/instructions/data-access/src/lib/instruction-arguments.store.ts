@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import {
   Document,
   InstructionArgument,
@@ -109,8 +108,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
     private readonly _notificationStore: NotificationStore,
-    private readonly _instructionArgumentEventService: InstructionArgumentEventService,
-    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _instructionArgumentEventService: InstructionArgumentEventService
   ) {
     super(initialState);
 
