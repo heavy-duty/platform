@@ -1,27 +1,14 @@
 import { Injectable } from '@angular/core';
 import {
   InstructionArgumentApiService,
-  InstructionArgumentQueryStore,
   InstructionArgumentsStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  map,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, map, of, pipe, withLatestFrom } from 'rxjs';
 
 interface ViewModel {
   instructionId: string | null;
@@ -45,35 +32,14 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     private readonly _walletStore: WalletStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
-    private readonly _instructionArgumentsStore: InstructionArgumentsStore,
-    private readonly _instructionArgumentQueryStore: InstructionArgumentQueryStore,
-    workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _instructionArgumentsStore: InstructionArgumentsStore
   ) {
     super(initialState);
 
-    this._instructionArgumentQueryStore.setFilters(
+    this._instructionArgumentsStore.setFilters(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
         map((instruction) => ({ instruction }))
-      )
-    );
-    this._instructionArgumentsStore.setInstructionArgumentIds(
-      this._instructionArgumentQueryStore.instructionArgumentIds$
-    );
-    this._handleInstruction(
-      this.instructionId$.pipe(
-        isNotNullOrUndefined,
-        switchMap((instructionId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Instruction' &&
-                  account.pubkey === instructionId
-              )
-            )
-          )
-        )
       )
     );
   }
@@ -88,21 +54,6 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
 
   readonly setInstructionId = this.updater<string | null>(
     (state, instructionId) => ({ ...state, instructionId })
-  );
-
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createInstructionArgument':
-        case 'updateInstructionArgument':
-        case 'deleteInstructionArgument': {
-          this._instructionArgumentsStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
-      }
-    })
   );
 
   readonly createInstructionArgument = this.effect<{

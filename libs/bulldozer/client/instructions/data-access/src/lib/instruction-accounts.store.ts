@@ -82,6 +82,31 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
       };
     });
 
+  private readonly _setInstructionAccountsMap = this.updater<
+    Map<string, InstructionAccountItemView>
+  >((state, newInstructionAccountsMap) => {
+    const instructionAccountsMap = new Map(state.instructionAccountsMap);
+    newInstructionAccountsMap.forEach((newInstructionAccount) => {
+      const foundInstructionAccount = instructionAccountsMap.get(
+        newInstructionAccount.document.id
+      );
+
+      if (foundInstructionAccount === undefined) {
+        instructionAccountsMap.set(
+          newInstructionAccount.document.id,
+          newInstructionAccount
+        );
+      } else {
+        instructionAccountsMap.set(newInstructionAccount.document.id, {
+          ...foundInstructionAccount,
+          document: newInstructionAccount.document,
+        });
+      }
+    });
+
+    return { ...state, instructionAccountsMap };
+  });
+
   private readonly _patchStatus = this.updater<{
     instructionAccountId: string;
     statuses: {
@@ -116,31 +141,6 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
       };
     }
   );
-
-  private readonly _setInstructionAccountsMap = this.updater<
-    Map<string, InstructionAccountItemView>
-  >((state, newInstructionAccountsMap) => {
-    const instructionAccountsMap = new Map(state.instructionAccountsMap);
-    newInstructionAccountsMap.forEach((newInstructionAccount) => {
-      const foundInstructionAccount = instructionAccountsMap.get(
-        newInstructionAccount.document.id
-      );
-
-      if (foundInstructionAccount === undefined) {
-        instructionAccountsMap.set(
-          newInstructionAccount.document.id,
-          newInstructionAccount
-        );
-      } else {
-        instructionAccountsMap.set(newInstructionAccount.document.id, {
-          ...foundInstructionAccount,
-          document: newInstructionAccount.document,
-        });
-      }
-    });
-
-    return { ...state, instructionAccountsMap };
-  });
 
   private readonly _loadInstructionAccounts = this.effect<string[] | null>(
     switchMap((instructionAccountIds) => {

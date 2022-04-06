@@ -4,22 +4,31 @@ import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { concatMap, EMPTY, Observable, switchMap } from 'rxjs';
 import { ItemView } from './types';
 import { WorkspaceApiService } from './workspace-api.service';
+import { WorkspaceInstructionsStore } from './workspace-instructions.store';
 
 export type WorkspaceItemView = ItemView<Document<Workspace>>;
+
+interface ItemStatus {
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+}
 
 interface ViewModel {
   loading: boolean;
   workspaceIds: string[] | null;
-  workspacesMap: Map<string, WorkspaceItemView>;
+  workspacesMap: Map<string, Document<Workspace>>;
+  workspaceStatusesMap: Map<string, ItemStatus>;
 }
 
 const initialState: ViewModel = {
   loading: false,
   workspaceIds: null,
-  workspacesMap: new Map<string, WorkspaceItemView>(),
+  workspacesMap: new Map<string, Document<Workspace>>(),
+  workspaceStatusesMap: new Map<string, ItemStatus>(),
 };
 
 @Injectable()
@@ -27,23 +36,37 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
   readonly workspaceIds$ = this.select(({ workspaceIds }) => workspaceIds);
   readonly workspacesMap$ = this.select(({ workspacesMap }) => workspacesMap);
-  readonly workspaces$ = this.select(this.workspacesMap$, (workspacesMap) =>
-    Array.from(workspacesMap, ([, workspace]) => workspace)
+  readonly workspaceStatusesMap$ = this.select(
+    ({ workspaceStatusesMap }) => workspaceStatusesMap
+  );
+  readonly workspaces$: Observable<WorkspaceItemView[]> = this.select(
+    this.workspacesMap$,
+    this.workspaceStatusesMap$,
+    (workspacesMap, workspaceStatusesMap) =>
+      Array.from(workspacesMap, ([workspaceId, workspace]) => ({
+        document: workspace,
+        ...(workspaceStatusesMap.get(workspaceId) ?? {
+          isCreating: false,
+          isUpdating: false,
+          isDeleting: false,
+        }),
+      }))
   );
 
   constructor(
     private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _notificationStore: NotificationStore
+    private readonly _notificationStore: NotificationStore,
+    private readonly _workspaceInstructionsStore: WorkspaceInstructionsStore
   ) {
     super(initialState);
 
     this._loadWorkspaces(this.workspaceIds$);
   }
 
-  private readonly _setWorkspace = this.updater<WorkspaceItemView>(
+  private readonly _setWorkspace = this.updater<Document<Workspace>>(
     (state, newWorkspace) => {
       const workspacesMap = new Map(state.workspacesMap);
-      workspacesMap.set(newWorkspace.document.id, newWorkspace);
+      workspacesMap.set(newWorkspace.id, newWorkspace);
 
       return {
         ...state,
@@ -51,6 +74,18 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
       };
     }
   );
+
+  private readonly _setWorkspacesMap = this.updater<
+    Map<string, Document<Workspace>>
+  >((state, newWorkspacesMap) => {
+    const workspacesMap = new Map(state.workspacesMap);
+
+    newWorkspacesMap.forEach((newWorkspace) => {
+      workspacesMap.set(newWorkspace.id, newWorkspace);
+    });
+
+    return { ...state, workspacesMap };
+  });
 
   private readonly _patchStatus = this.updater<{
     workspaceId: string;
@@ -60,17 +95,15 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
       isDeleting?: boolean;
     };
   }>((state, { workspaceId, statuses }) => {
-    const workspacesMap = new Map(state.workspacesMap);
-    const workspace = workspacesMap.get(workspaceId);
-
-    if (workspace === undefined) {
-      return state;
-    }
+    const workspaceStatusesMap = new Map(state.workspaceStatusesMap);
+    const workspaceStatus = workspaceStatusesMap.get(workspaceId);
 
     return {
       ...state,
-      workspacesMap: workspacesMap.set(workspaceId, {
-        ...workspace,
+      workspaceStatusesMap: workspaceStatusesMap.set(workspaceId, {
+        ...(workspaceStatus === undefined
+          ? { isCreating: false, isUpdating: false, isDeleting: false }
+          : workspaceStatus),
         ...statuses,
       }),
     };
@@ -98,23 +131,20 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
       return this._workspaceApiService.findByIds(workspaceIds).pipe(
         tapResponse(
           (workspaces) => {
-            this.patchState({
-              loading: false,
-              workspacesMap: workspaces
+            this._setWorkspacesMap(
+              workspaces
                 .filter(
                   (workspace): workspace is Document<Workspace> =>
                     workspace !== null
                 )
                 .reduce(
                   (workspacesMap, workspace) =>
-                    workspacesMap.set(workspace.id, {
-                      document: workspace,
-                      isCreating: false,
-                      isUpdating: false,
-                      isDeleting: false,
-                    }),
-                  new Map<string, WorkspaceItemView>()
-                ),
+                    workspacesMap.set(workspace.id, workspace),
+                  new Map<string, Document<Workspace>>()
+                )
+            );
+            this.patchState({
+              loading: false,
             });
           },
           (error) => this._notificationStore.setError({ error })
@@ -158,13 +188,15 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
             .pipe(
               isNotNullOrUndefined,
               tapResponse(
-                (workspace) =>
-                  this._setWorkspace({
-                    document: workspace,
-                    isCreating: true,
-                    isUpdating: false,
-                    isDeleting: false,
-                  }),
+                (workspace) => {
+                  this._setWorkspace(workspace);
+                  this._patchStatus({
+                    workspaceId: workspaceAccountMeta.pubkey,
+                    statuses: {
+                      isCreating: true,
+                    },
+                  });
+                },
                 (error) => this._notificationStore.setError({ error })
               )
             );
@@ -186,13 +218,15 @@ export class WorkspacesStore extends ComponentStore<ViewModel> {
             .pipe(
               isNotNullOrUndefined,
               tapResponse(
-                (workspace) =>
-                  this._setWorkspace({
-                    document: workspace,
-                    isCreating: false,
-                    isUpdating: true,
-                    isDeleting: false,
-                  }),
+                (workspace) => {
+                  this._setWorkspace(workspace);
+                  this._patchStatus({
+                    workspaceId: workspaceAccountMeta.pubkey,
+                    statuses: {
+                      isUpdating: true,
+                    },
+                  });
+                },
                 (error) => this._notificationStore.setError({ error })
               )
             );

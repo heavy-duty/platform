@@ -4,6 +4,7 @@ import {
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 
 @Component({
@@ -23,30 +24,45 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
           *ngFor="let workspace of workspaces; let i = index"
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
         >
-          <aside
-            class="flex justify-between items-center bd-bg-black px-4 py-1 gap-1"
-          >
-            <mat-progress-spinner
-              *ngIf="workspace | bdItemShowSpinner"
-              diameter="24"
-              mode="indeterminate"
-            ></mat-progress-spinner>
-            <div class="flex flex-1 justify-end">
-              <a
-                [attr.aria-label]="'View ' + workspace.document.name"
-                [routerLink]="['/workspaces', workspace.document.id]"
-                mat-icon-button
-              >
-                <mat-icon>open_in_new</mat-icon>
-              </a>
-              <button
-                mat-icon-button
-                [attr.aria-label]="'Delete ' + workspace.document.name"
-                (click)="onDeleteWorkspace(workspace.document.id)"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+          <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
+            <div class="flex-1 flex items-center gap-2">
+              <ng-container *ngIf="workspace | bdItemChanging">
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+
+                <p class="m-0 text-xs text-white text-opacity-60">
+                  <ng-container *ngIf="workspace.isCreating">
+                    Creating...
+                  </ng-container>
+                  <ng-container *ngIf="workspace.isUpdating">
+                    Updating...
+                  </ng-container>
+                  <ng-container *ngIf="workspace.isDeleting">
+                    Deleting...
+                  </ng-container>
+                </p>
+              </ng-container>
             </div>
+            <a
+              [attr.aria-label]="'View ' + workspace.document.name"
+              [routerLink]="['/workspaces', workspace.document.id]"
+              mat-icon-button
+            >
+              <mat-icon>open_in_new</mat-icon>
+            </a>
+            <button
+              mat-icon-button
+              [attr.aria-label]="'Delete ' + workspace.document.name"
+              (click)="onDeleteWorkspace(workspace.document.id)"
+              [disabled]="
+                (connected$ | ngrxPush) === false ||
+                (workspace | bdItemChanging)
+              "
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
           </aside>
 
           <div class="px-8 mt-4">
@@ -105,10 +121,12 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 })
 export class ViewUserWorkspacesComponent {
   @HostBinding('class') class = 'block p-8';
+  readonly connected$ = this._walletStore.connected$;
   readonly workspaces$ = this._workspacesStore.workspaces$;
   readonly workspaceId$ = this._configStore.workspaceId$;
 
   constructor(
+    private readonly _walletStore: WalletStore,
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _configStore: ConfigStore,
     private readonly _viewUserWorkspacesStore: ViewUserWorkspacesStore

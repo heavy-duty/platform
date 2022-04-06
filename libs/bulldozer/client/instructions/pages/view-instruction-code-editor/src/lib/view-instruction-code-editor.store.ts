@@ -141,8 +141,11 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         map((instruction) => ({ instruction }))
       )
     );
-    this._instructionArgumentsStore.setInstructionArgumentIds(
-      this._instructionArgumentQueryStore.instructionArgumentIds$
+    this._instructionArgumentsStore.setFilters(
+      this.instructionId$.pipe(
+        isNotNullOrUndefined,
+        map((instruction) => ({ instruction }))
+      )
     );
     this._instructionAccountQueryStore.setFilters(
       this.instructionId$.pipe(
@@ -297,12 +300,6 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         case 'updateInstructionBody':
         case 'deleteInstruction': {
           this._instructionStore.dispatch(instructionStatus);
-          break;
-        }
-        case 'createInstructionArgument':
-        case 'updateInstructionArgument':
-        case 'deleteInstructionArgument': {
-          this._instructionArgumentsStore.dispatch(instructionStatus);
           break;
         }
         case 'createInstructionAccount':

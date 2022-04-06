@@ -107,12 +107,12 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
     ({ lastInstructionStatus }) => lastInstructionStatus
   );
   readonly instruction$ = this.instructionStatuses$.pipe(
-    concatMap((instructionStatuses) =>
-      this.lastInstructionStatus$.pipe(
+    concatMap((instructionStatuses) => {
+      return this.lastInstructionStatus$.pipe(
         startWith(...instructionStatuses),
         isNotNullOrUndefined
-      )
-    )
+      );
+    })
   );
 
   constructor(private readonly _hdBroadcasterStore: HdBroadcasterStore) {
@@ -142,14 +142,14 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
           filter((instruction) =>
             instruction.programId.equals(BULLDOZER_PROGRAM_ID)
           ),
-          tap((instruction) =>
+          tap((instruction) => {
             this.patchState({
               lastInstructionStatus: createInstructionStatus(
                 lastTransactionStatus,
                 instruction
               ),
-            })
-          )
+            });
+          })
         );
       })
     );

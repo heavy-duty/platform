@@ -370,6 +370,8 @@ export class ShellComponent extends ComponentStore<object> {
         .pipe(
           tapResponse(
             (confirmedSignatureInfos) => {
+              console.log(confirmedSignatureInfos);
+
               this._hdBroadcasterStore.clearTransactions();
               confirmedSignatureInfos
                 .filter(
@@ -380,6 +382,7 @@ export class ShellComponent extends ComponentStore<object> {
                   this._hdBroadcasterStore.handleTransactionConfirmed({
                     signature: confirmedSignatureInfo.signature,
                     topic: workspaceId,
+                    updateLastTransactionStatus: false,
                   })
                 );
             },

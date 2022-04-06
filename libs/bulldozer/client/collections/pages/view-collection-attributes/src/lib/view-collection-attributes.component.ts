@@ -61,11 +61,26 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-3 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <mat-progress-spinner
-              *ngIf="collectionAttribute | bdItemShowSpinner"
-              diameter="24"
-              mode="indeterminate"
-            ></mat-progress-spinner>
+            <div class="flex-1 flex items-center gap-2">
+              <ng-container *ngIf="collectionAttribute | bdItemChanging">
+                <mat-progress-spinner
+                  diameter="20"
+                  mode="indeterminate"
+                ></mat-progress-spinner>
+
+                <p class="m-0 text-xs text-white text-opacity-60">
+                  <ng-container *ngIf="collectionAttribute.isCreating">
+                    Creating...
+                  </ng-container>
+                  <ng-container *ngIf="collectionAttribute.isUpdating">
+                    Updating...
+                  </ng-container>
+                  <ng-container *ngIf="collectionAttribute.isDeleting">
+                    Deleting...
+                  </ng-container>
+                </p>
+              </ng-container>
+            </div>
             <div class="flex flex-1 justify-end">
               <button
                 mat-icon-button
@@ -79,7 +94,10 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                     $event
                   )
                 "
-                [disabled]="(connected$ | ngrxPush) === false"
+                [disabled]="
+                  (connected$ | ngrxPush) === false ||
+                  (collectionAttribute | bdItemChanging)
+                "
               >
                 <mat-icon>edit</mat-icon>
               </button>
@@ -92,7 +110,10 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                     collectionAttribute.document.id
                   )
                 "
-                [disabled]="(connected$ | ngrxPush) === false"
+                [disabled]="
+                  (connected$ | ngrxPush) === false ||
+                  (collectionAttribute | bdItemChanging)
+                "
               >
                 <mat-icon>delete</mat-icon>
               </button>

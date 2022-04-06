@@ -101,7 +101,7 @@ import { Subject, takeUntil } from 'rxjs';
         >
       </mat-form-field>
 
-      <mat-radio-group
+      <!-- <mat-radio-group
         class="w-full bg-white bg-opacity-5 px-2 py-1 flex flex-col gap-2"
         ariaLabel="Attribute modifier"
         formControlName="modifier"
@@ -132,7 +132,7 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-error *ngIf="submitted && sizeControl.hasError('min')"
           >The size has to be above 1</mat-error
         >
-      </mat-form-field>
+      </mat-form-field> -->
 
       <button
         mat-stroked-button

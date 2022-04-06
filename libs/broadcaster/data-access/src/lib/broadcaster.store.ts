@@ -136,8 +136,9 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
   readonly handleTransactionConfirmed = this.effect<{
     signature: TransactionSignature;
     topic: string;
+    updateLastTransactionStatus?: boolean;
   }>(
-    mergeMap(({ signature, topic }) => {
+    mergeMap(({ signature, topic, updateLastTransactionStatus = true }) => {
       this._addTransactionSignature({ signature, topic });
 
       return this._hdSolanaApiService
@@ -145,14 +146,17 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
         .pipe(
           tapResponse(
             (transactionResponse) => {
-              this.patchState({
-                lastTransactionStatus: {
-                  topic,
-                  signature,
-                  transactionResponse,
-                  status: 'confirmed',
-                },
-              });
+              if (updateLastTransactionStatus) {
+                this.patchState({
+                  lastTransactionStatus: {
+                    topic,
+                    signature,
+                    transactionResponse,
+                    status: 'confirmed',
+                  },
+                });
+              }
+
               this._setTransactionResponse({
                 signature: signature,
                 transactionResponse,

@@ -1,65 +1,144 @@
 import { Injectable } from '@angular/core';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import {
-  BULLDOZER_PROGRAM_ID,
-  createInstructionArgumentDocument,
   Document,
   InstructionArgument,
   InstructionArgumentFilters,
-  instructionArgumentQueryBuilder,
 } from '@heavy-duty/bulldozer-devkit';
-import { HdSolanaConnectionStore } from '@heavy-duty/ngx-solana';
-import { concatMap, EMPTY, map, Observable, of } from 'rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { Finality } from '@solana/web3.js';
+import { concatMap, EMPTY, filter, map, Observable, of, tap } from 'rxjs';
+import { InstructionArgumentApiService } from './instruction-argument-api.service';
 
 @Injectable({ providedIn: 'root' })
 export class InstructionArgumentEventService {
   constructor(
-    private readonly _hdSolanaConnectionStore: HdSolanaConnectionStore
+    private readonly _instructionArgumentApiService: InstructionArgumentApiService,
+    private readonly _workspaceInstructionStore: WorkspaceInstructionsStore
   ) {}
 
-  instructionArgumentChanges(
-    instructionArgumentId: string
-  ): Observable<Document<InstructionArgument> | null> {
-    return this._hdSolanaConnectionStore
-      .onAccountChange(instructionArgumentId)
-      .pipe(
-        map((accountInfo) =>
-          accountInfo.lamports > 0
-            ? createInstructionArgumentDocument(
-                instructionArgumentId,
-                accountInfo
-              )
-            : null
-        )
-      );
+  documentCreated(filters: InstructionArgumentFilters) {
+    return this._workspaceInstructionStore.instruction$.pipe(
+      tap((a) => console.log(a)),
+      filter(
+        (instruction) =>
+          instruction.name === 'createInstructionArgument' &&
+          instruction.accounts.some((account) => {
+            switch (account.name) {
+              case 'Authority':
+                return (
+                  filters.authority === undefined ||
+                  account.pubkey === filters.authority
+                );
+              case 'Workspace':
+                return (
+                  filters.workspace === undefined ||
+                  account.pubkey === filters.workspace
+                );
+              case 'Application':
+                return (
+                  filters.application === undefined ||
+                  account.pubkey === filters.application
+                );
+              case 'Instruction':
+                return (
+                  filters.instruction === undefined ||
+                  account.pubkey === filters.instruction
+                );
+              default:
+                return false;
+            }
+          })
+      ),
+      concatMap((instruction) => {
+        console.log(instruction);
+
+        const status = instruction.status;
+        const documentId = instruction.accounts.find(
+          (account) => account.name === 'Argument'
+        )?.pubkey;
+
+        if (documentId === undefined) {
+          return EMPTY;
+        }
+
+        if (status === 'confirmed') {
+          return this._instructionArgumentApiService
+            .findById(documentId, status)
+            .pipe(
+              isNotNullOrUndefined,
+              map((data) => ({
+                data,
+                status,
+              }))
+            );
+        } else if (status === 'finalized') {
+          return of({
+            data: documentId,
+            status,
+          });
+        } else {
+          return EMPTY;
+        }
+      })
+    );
   }
 
-  instructionArgumentCreated(
-    filters: InstructionArgumentFilters
-  ): Observable<Document<InstructionArgument>> {
-    const query = instructionArgumentQueryBuilder()
-      .where(filters)
-      .setCommitment('finalized')
-      .build();
+  documentUpdated(documentId: string): Observable<{
+    status: Finality;
+    data?: Document<InstructionArgument>;
+  }> {
+    return this._workspaceInstructionStore.instruction$.pipe(
+      tap((a) => console.log('maldita sea todo siempre', a)),
+      filter(
+        (instruction) =>
+          instruction.name === 'updateInstructionArgument' &&
+          instruction.accounts.some(
+            (account) =>
+              account.name === 'Argument' && account.pubkey === documentId
+          )
+      ),
+      concatMap(({ status }) => {
+        if (status === 'confirmed') {
+          return this._instructionArgumentApiService
+            .findById(documentId, status)
+            .pipe(
+              isNotNullOrUndefined,
+              map((data) => ({
+                data,
+                status,
+              }))
+            );
+        } else if (status === 'finalized') {
+          return of({
+            status,
+          });
+        } else {
+          return EMPTY;
+        }
+      })
+    );
+  }
 
-    return this._hdSolanaConnectionStore
-      .onProgramAccountChange(BULLDOZER_PROGRAM_ID.toBase58(), query)
-      .pipe(
-        concatMap(({ account, pubkey }) => {
-          if (account.lamports === 0) {
-            return EMPTY;
-          } else {
-            const document = createInstructionArgumentDocument(pubkey, account);
-
-            if (
-              document.updatedAt !== undefined &&
-              document.createdAt.eq(document.updatedAt)
-            ) {
-              return of(document);
-            } else {
-              return EMPTY;
-            }
-          }
-        })
-      );
+  documentDeleted(documentId: string): Observable<Finality> {
+    return this._workspaceInstructionStore.instruction$.pipe(
+      filter(
+        (instruction) =>
+          instruction.name === 'deleteInstructionArgument' &&
+          instruction.accounts.some(
+            (account) =>
+              account.name === 'Argument' && account.pubkey === documentId
+          )
+      ),
+      concatMap(({ status }) => {
+        if (status === 'confirmed') {
+          return of(status);
+        } else if (status === 'finalized') {
+          return of(status);
+        } else {
+          return EMPTY;
+        }
+      })
+    );
   }
 }
