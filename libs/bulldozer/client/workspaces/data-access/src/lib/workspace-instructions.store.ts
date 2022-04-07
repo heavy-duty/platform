@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore, TransactionStatus } from '@heavy-duty/broadcaster';
+import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   instructionCoder,
 } from '@heavy-duty/bulldozer-devkit';
+import { TransactionStatus } from '@heavy-duty/ngx-solana';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import {
@@ -13,7 +14,6 @@ import {
 } from '@solana/web3.js';
 import {
   concatMap,
-  distinctUntilChanged,
   EMPTY,
   filter,
   from,
@@ -35,16 +35,17 @@ export interface InstructionStatus {
     isWritable: boolean;
   }[];
   confirmedAt?: number;
-  isPending?: boolean;
 }
 
 interface ViewModel {
+  pendingInstructionStatusesMap: Map<string, InstructionStatus>;
   instructionStatusesMap: Map<string, InstructionStatus>;
   lastInstructionStatus: InstructionStatus | null;
 }
 
 const initialState: ViewModel = {
   instructionStatusesMap: new Map<string, InstructionStatus>(),
+  pendingInstructionStatusesMap: new Map<string, InstructionStatus>(),
   lastInstructionStatus: null,
 };
 
@@ -89,7 +90,6 @@ const createInstructionStatus = (
       pubkey: account.pubkey.toBase58(),
     })),
     confirmedAt: transactionStatus.confirmedAt,
-    isPending: transactionStatus.isPending ?? false,
   };
 };
 
@@ -97,6 +97,9 @@ const createInstructionStatus = (
 export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   readonly instructionStatusesMap$ = this.select(
     ({ instructionStatusesMap }) => instructionStatusesMap
+  );
+  readonly pendingInstructionStatusesMap$ = this.select(
+    ({ pendingInstructionStatusesMap }) => pendingInstructionStatusesMap
   );
   readonly instructionStatuses$ = this.select(
     this.instructionStatusesMap$,
@@ -107,14 +110,13 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
       )
   );
   readonly pendingInstructionStatuses$ = this.select(
-    this.instructionStatuses$,
-    (instructionStatuses) =>
-      instructionStatuses.filter(
-        (instructionStatus) =>
-          instructionStatus.isPending === true &&
-          instructionStatus.status === 'confirmed'
+    this.pendingInstructionStatusesMap$,
+    (pendingInstructionStatusesMap) =>
+      Array.from(
+        pendingInstructionStatusesMap,
+        ([, pendingInstructionStatus]) => pendingInstructionStatus
       )
-  ).pipe(distinctUntilChanged((previous, current) => previous !== current));
+  );
   readonly instructionsInProcess$ = this.select(
     this.instructionStatuses$,
     (instructionStatuses) =>
@@ -147,6 +149,9 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
 
     this._handleTransactionStatuses(
       this._hdBroadcasterStore.transactionStatuses$
+    );
+    this._handlePendingTransactionStatuses(
+      this._hdBroadcasterStore.pendingTransactionStatuses$
     );
     this._handleLastTransactionStatus(
       this._hdBroadcasterStore.lastTransactionStatus$
@@ -186,6 +191,40 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   >((state, transactionStatuses) => ({
     ...state,
     instructionStatusesMap: new Map(
+      transactionStatuses.reduce(
+        (
+          instructionStatuses: [string, InstructionStatus][],
+          transactionStatus: TransactionStatus
+        ) => [
+          ...instructionStatuses,
+          ...(transactionStatus.transactionResponse === undefined
+            ? []
+            : transactionStatus.transactionResponse.transaction.instructions
+                .map((instruction, index) =>
+                  instruction.programId.equals(BULLDOZER_PROGRAM_ID)
+                    ? [
+                        `${transactionStatus.signature}:${index}`,
+                        createInstructionStatus(transactionStatus, instruction),
+                      ]
+                    : null
+                )
+                .filter(
+                  (
+                    instructionStatus
+                  ): instructionStatus is [string, InstructionStatus] =>
+                    instructionStatus !== null
+                )),
+        ],
+        []
+      )
+    ),
+  }));
+
+  private readonly _handlePendingTransactionStatuses = this.updater<
+    TransactionStatus[]
+  >((state, transactionStatuses) => ({
+    ...state,
+    pendingInstructionStatusesMap: new Map(
       transactionStatuses.reduce(
         (
           instructionStatuses: [string, InstructionStatus][],

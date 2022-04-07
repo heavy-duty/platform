@@ -30,7 +30,6 @@ export interface InstructionStatus {
   }[];
   confirmedAt?: number;
   viewed?: boolean;
-  isPending?: boolean;
 }
 
 interface ViewModel {

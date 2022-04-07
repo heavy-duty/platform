@@ -14,16 +14,20 @@ export interface TransactionStatus {
   topic: string;
   transactionResponse?: TransactionResponse<Transaction>;
   confirmedAt?: number;
-  isPending?: boolean;
 }
 
 interface ViewModel {
+  pendingTransactionStatusMap: Map<TransactionSignature, TransactionStatus>;
   transactionStatusMap: Map<TransactionSignature, TransactionStatus>;
   error?: unknown;
   lastTransactionStatus: TransactionStatus | null;
 }
 
 const initialState: ViewModel = {
+  pendingTransactionStatusMap: new Map<
+    TransactionSignature,
+    TransactionStatus
+  >(),
   transactionStatusMap: new Map<TransactionSignature, TransactionStatus>(),
   lastTransactionStatus: null,
 };
@@ -33,12 +37,26 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
   readonly transactionStatusMap$ = this.select(
     ({ transactionStatusMap }) => transactionStatusMap
   );
+  readonly pendingTransactionStatusMap$ = this.select(
+    ({ pendingTransactionStatusMap }) => pendingTransactionStatusMap
+  );
   readonly transactionStatuses$ = this.select(
     this.transactionStatusMap$,
     (transactionStatusMap) =>
       Array.from(
         transactionStatusMap,
         ([, transactionStatus]) => transactionStatus
+      )
+  );
+  readonly pendingTransactionStatuses$ = this.select(
+    this.pendingTransactionStatusMap$,
+    (pendingTransactionStatusMap) =>
+      Array.from(
+        pendingTransactionStatusMap,
+        ([, pendingTransactionStatus]) => pendingTransactionStatus
+      ).filter(
+        (pendingTransactionStatus) =>
+          pendingTransactionStatus.status === 'confirmed'
       )
   );
   readonly transactionsInProcess$ = this.select(
@@ -73,8 +91,7 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
   private readonly _addTransactionSignature = this.updater<{
     signature: TransactionSignature;
     topic: string;
-    isPending?: boolean;
-  }>((state, { signature, topic, isPending = false }) => ({
+  }>((state, { signature, topic }) => ({
     ...state,
     transactionStatusMap: new Map(
       state.transactionStatusMap.set(signature, {
@@ -82,7 +99,21 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
         topic,
         status: 'confirmed',
         confirmedAt: Date.now(),
-        isPending,
+      })
+    ),
+  }));
+
+  private readonly _addPendingTransactionSignature = this.updater<{
+    signature: TransactionSignature;
+    topic: string;
+  }>((state, { signature, topic }) => ({
+    ...state,
+    pendingTransactionStatusMap: new Map(
+      state.pendingTransactionStatusMap.set(signature, {
+        signature,
+        topic,
+        status: 'confirmed',
+        confirmedAt: Date.now(),
       })
     ),
   }));
@@ -108,11 +139,34 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
     };
   });
 
+  private readonly _setPendingTransactionResponse = this.updater<{
+    signature: TransactionSignature;
+    transactionResponse: TransactionResponse<Transaction>;
+  }>((state, { signature, transactionResponse }) => {
+    const transactionStatus = state.pendingTransactionStatusMap.get(signature);
+
+    if (transactionStatus === undefined) {
+      return state;
+    }
+
+    return {
+      ...state,
+      pendingTransactionStatusMap: new Map(
+        state.pendingTransactionStatusMap.set(signature, {
+          ...transactionStatus,
+          transactionResponse: transactionResponse,
+        })
+      ),
+    };
+  });
+
   private readonly _handleTransactionFinalized = this.updater<{
     signature: TransactionSignature;
     topic: string;
   }>((state, { signature }) => {
     const transactionStatus = state.transactionStatusMap.get(signature);
+    const pendingTransactionStatus =
+      state.pendingTransactionStatusMap.get(signature);
 
     return {
       ...state,
@@ -130,34 +184,68 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
               ...transactionStatus,
               status: 'finalized',
             }),
+      pendingTransactionStatusMap:
+        pendingTransactionStatus === undefined
+          ? state.pendingTransactionStatusMap
+          : new Map(state.pendingTransactionStatusMap).set(signature, {
+              ...pendingTransactionStatus,
+              status: 'finalized',
+            }),
     };
   });
 
   readonly handleTransactionConfirmed = this.effect<{
     signature: TransactionSignature;
     topic: string;
-    isPending?: boolean;
+    updateLastTransactionStatus?: boolean;
   }>(
-    mergeMap(({ signature, topic, isPending = false }) => {
-      this._addTransactionSignature({ signature, topic, isPending });
+    mergeMap(({ signature, topic, updateLastTransactionStatus = true }) => {
+      this._addTransactionSignature({ signature, topic });
 
       return this._hdSolanaApiService
         .getTransaction(signature, 'confirmed')
         .pipe(
           tapResponse(
             (transactionResponse) => {
-              if (!isPending) {
+              if (updateLastTransactionStatus) {
                 this.patchState({
                   lastTransactionStatus: {
                     topic,
                     signature,
                     transactionResponse,
                     status: 'confirmed',
-                    isPending: false,
                   },
                 });
               }
 
+              this._setTransactionResponse({
+                signature: signature,
+                transactionResponse,
+              });
+            },
+            (error) => this.patchState({ error })
+          )
+        );
+    })
+  );
+
+  readonly handlePendingTransactionConfirmed = this.effect<{
+    signature: TransactionSignature;
+    topic: string;
+  }>(
+    mergeMap(({ signature, topic }) => {
+      this._addPendingTransactionSignature({ signature, topic });
+      this._addTransactionSignature({ signature, topic });
+
+      return this._hdSolanaApiService
+        .getTransaction(signature, 'confirmed')
+        .pipe(
+          tapResponse(
+            (transactionResponse) => {
+              this._setPendingTransactionResponse({
+                signature: signature,
+                transactionResponse,
+              });
               this._setTransactionResponse({
                 signature: signature,
                 transactionResponse,
@@ -186,10 +274,9 @@ export class HdBroadcasterStore extends ComponentStore<ViewModel> {
                     confirmedSignatureInfo.confirmationStatus === 'confirmed'
                 )
                 .forEach((confirmedSignatureInfo) =>
-                  this.handleTransactionConfirmed({
+                  this.handlePendingTransactionConfirmed({
                     signature: confirmedSignatureInfo.signature,
                     topic: workspaceId,
-                    isPending: true,
                   })
                 );
             },
