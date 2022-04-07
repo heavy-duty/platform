@@ -12,7 +12,15 @@ import {
   TransactionConfirmationStatus,
   TransactionInstruction,
 } from '@solana/web3.js';
-import { concatMap, EMPTY, filter, from, startWith, tap } from 'rxjs';
+import {
+  concatMap,
+  EMPTY,
+  filter,
+  from,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs';
 
 export interface InstructionStatus {
   transaction: Transaction;
@@ -30,12 +38,14 @@ export interface InstructionStatus {
 }
 
 interface ViewModel {
+  pendingInstructionStatusesMap: Map<string, InstructionStatus>;
   instructionStatusesMap: Map<string, InstructionStatus>;
   lastInstructionStatus: InstructionStatus | null;
 }
 
 const initialState: ViewModel = {
   instructionStatusesMap: new Map<string, InstructionStatus>(),
+  pendingInstructionStatusesMap: new Map<string, InstructionStatus>(),
   lastInstructionStatus: null,
 };
 
@@ -88,12 +98,23 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   readonly instructionStatusesMap$ = this.select(
     ({ instructionStatusesMap }) => instructionStatusesMap
   );
+  readonly pendingInstructionStatusesMap$ = this.select(
+    ({ pendingInstructionStatusesMap }) => pendingInstructionStatusesMap
+  );
   readonly instructionStatuses$ = this.select(
     this.instructionStatusesMap$,
     (instructionStatusesMap) =>
       Array.from(
         instructionStatusesMap,
         ([, instructionStatus]) => instructionStatus
+      )
+  );
+  readonly pendingInstructionStatuses$ = this.select(
+    this.pendingInstructionStatusesMap$,
+    (pendingInstructionStatusesMap) =>
+      Array.from(
+        pendingInstructionStatusesMap,
+        ([, pendingInstructionStatus]) => pendingInstructionStatus
       )
   );
   readonly instructionsInProcess$ = this.select(
@@ -114,12 +135,23 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
       );
     })
   );
+  readonly instruction2$ = this.pendingInstructionStatuses$.pipe(
+    switchMap((instructionStatuses) => {
+      return this.lastInstructionStatus$.pipe(
+        startWith(...instructionStatuses),
+        isNotNullOrUndefined
+      );
+    })
+  );
 
   constructor(private readonly _hdBroadcasterStore: HdBroadcasterStore) {
     super(initialState);
 
     this._handleTransactionStatuses(
       this._hdBroadcasterStore.transactionStatuses$
+    );
+    this._handlePendingTransactionStatuses(
+      this._hdBroadcasterStore.pendingTransactionStatuses$
     );
     this._handleLastTransactionStatus(
       this._hdBroadcasterStore.lastTransactionStatus$
@@ -159,6 +191,40 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   >((state, transactionStatuses) => ({
     ...state,
     instructionStatusesMap: new Map(
+      transactionStatuses.reduce(
+        (
+          instructionStatuses: [string, InstructionStatus][],
+          transactionStatus: TransactionStatus
+        ) => [
+          ...instructionStatuses,
+          ...(transactionStatus.transactionResponse === undefined
+            ? []
+            : transactionStatus.transactionResponse.transaction.instructions
+                .map((instruction, index) =>
+                  instruction.programId.equals(BULLDOZER_PROGRAM_ID)
+                    ? [
+                        `${transactionStatus.signature}:${index}`,
+                        createInstructionStatus(transactionStatus, instruction),
+                      ]
+                    : null
+                )
+                .filter(
+                  (
+                    instructionStatus
+                  ): instructionStatus is [string, InstructionStatus] =>
+                    instructionStatus !== null
+                )),
+        ],
+        []
+      )
+    ),
+  }));
+
+  private readonly _handlePendingTransactionStatuses = this.updater<
+    TransactionStatus[]
+  >((state, transactionStatuses) => ({
+    ...state,
+    pendingInstructionStatusesMap: new Map(
       transactionStatuses.reduce(
         (
           instructionStatuses: [string, InstructionStatus][],

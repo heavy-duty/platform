@@ -323,7 +323,9 @@ export class ShellComponent extends ComponentStore<object> {
       )
     );
     this._loadWalletTransactions(this._walletStore.publicKey$);
-    this._loadWorkspaceTransactions(this._configStore.workspaceId$);
+    this._hdBroadcasterStore.loadPendingInstructions(
+      this._configStore.workspaceId$
+    );
   }
 
   private readonly _loadWalletTransactions = this.effect<PublicKey | null>(
@@ -349,39 +351,6 @@ export class ShellComponent extends ComponentStore<object> {
                   this._hdSolanaTransactionsStore.reportProgress(
                     confirmedSignatureInfo.signature
                   )
-                );
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-    })
-  );
-
-  private readonly _loadWorkspaceTransactions = this.effect<string | null>(
-    switchMap((workspaceId) => {
-      this._hdBroadcasterStore.clearTransactions();
-
-      if (workspaceId === null) {
-        return EMPTY;
-      }
-
-      return this._hdSolanaApiService
-        .getSignaturesForAddress(workspaceId, undefined, 'confirmed')
-        .pipe(
-          tapResponse(
-            (confirmedSignatureInfos) => {
-              this._hdBroadcasterStore.clearTransactions();
-              confirmedSignatureInfos
-                .filter(
-                  (confirmedSignatureInfo) =>
-                    confirmedSignatureInfo.confirmationStatus === 'confirmed'
-                )
-                .forEach((confirmedSignatureInfo) =>
-                  this._hdBroadcasterStore.handleTransactionConfirmed({
-                    signature: confirmedSignatureInfo.signature,
-                    topic: workspaceId,
-                    updateLastTransactionStatus: false,
-                  })
                 );
             },
             (error) => this._notificationStore.setError(error)

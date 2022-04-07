@@ -18,7 +18,7 @@ export class InstructionArgumentEventService {
   ) {}
 
   documentCreated(filters: InstructionArgumentFilters) {
-    return this._workspaceInstructionStore.instruction$.pipe(
+    return this._workspaceInstructionStore.instruction2$.pipe(
       filter(
         (instruction) =>
           instruction.name === 'createInstructionArgument' &&
@@ -85,7 +85,7 @@ export class InstructionArgumentEventService {
     status: Finality;
     data?: Document<InstructionArgument>;
   }> {
-    return this._workspaceInstructionStore.instruction$.pipe(
+    return this._workspaceInstructionStore.instruction2$.pipe(
       filter(
         (instruction) =>
           instruction.name === 'updateInstructionArgument' &&
@@ -117,7 +117,7 @@ export class InstructionArgumentEventService {
   }
 
   documentDeleted(documentId: string): Observable<Finality> {
-    return this._workspaceInstructionStore.instruction$.pipe(
+    return this._workspaceInstructionStore.instruction2$.pipe(
       filter(
         (instruction) =>
           instruction.name === 'deleteInstructionArgument' &&

@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  InstructionArgumentItemView,
   InstructionArgumentQueryStore,
   InstructionArgumentsStore,
 } from '@bulldozer-client/instructions-data-access';
@@ -60,7 +61,8 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
         <mat-card
           *ngFor="
             let instructionArgument of instructionArguments;
-            let i = index
+            let i = index;
+            trackBy: identify
           "
           class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
         >
@@ -290,5 +292,9 @@ export class ViewInstructionArgumentsComponent implements OnInit {
       instructionId,
       instructionArgumentId,
     });
+  }
+
+  identify(_: number, instructionArgument: InstructionArgumentItemView) {
+    return instructionArgument.document.id;
   }
 }
