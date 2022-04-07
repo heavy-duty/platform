@@ -13,12 +13,14 @@ import {
   TransactionInstruction,
 } from '@solana/web3.js';
 import {
+  combineLatest,
   concatMap,
   EMPTY,
   filter,
   from,
+  map,
   startWith,
-  switchMap,
+  take,
   tap,
 } from 'rxjs';
 
@@ -38,14 +40,14 @@ export interface InstructionStatus {
 }
 
 interface ViewModel {
-  pendingInstructionStatusesMap: Map<string, InstructionStatus>;
+  pendingInstructionStatusesMap: Map<string, InstructionStatus> | null;
   instructionStatusesMap: Map<string, InstructionStatus>;
   lastInstructionStatus: InstructionStatus | null;
 }
 
 const initialState: ViewModel = {
   instructionStatusesMap: new Map<string, InstructionStatus>(),
-  pendingInstructionStatusesMap: new Map<string, InstructionStatus>(),
+  pendingInstructionStatusesMap: null,
   lastInstructionStatus: null,
 };
 
@@ -112,10 +114,12 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   readonly pendingInstructionStatuses$ = this.select(
     this.pendingInstructionStatusesMap$,
     (pendingInstructionStatusesMap) =>
-      Array.from(
-        pendingInstructionStatusesMap,
-        ([, pendingInstructionStatus]) => pendingInstructionStatus
-      )
+      pendingInstructionStatusesMap
+        ? Array.from(
+            pendingInstructionStatusesMap,
+            ([, pendingInstructionStatus]) => pendingInstructionStatus
+          )
+        : null
   );
   readonly instructionsInProcess$ = this.select(
     this.instructionStatuses$,
@@ -129,14 +133,6 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   );
   readonly instruction$ = this.instructionStatuses$.pipe(
     concatMap((instructionStatuses) => {
-      return this.lastInstructionStatus$.pipe(
-        startWith(...instructionStatuses),
-        isNotNullOrUndefined
-      );
-    })
-  );
-  readonly instruction2$ = this.pendingInstructionStatuses$.pipe(
-    switchMap((instructionStatuses) => {
       return this.lastInstructionStatus$.pipe(
         startWith(...instructionStatuses),
         isNotNullOrUndefined
@@ -221,36 +217,80 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   }));
 
   private readonly _handlePendingTransactionStatuses = this.updater<
-    TransactionStatus[]
+    TransactionStatus[] | null
   >((state, transactionStatuses) => ({
     ...state,
-    pendingInstructionStatusesMap: new Map(
-      transactionStatuses.reduce(
-        (
-          instructionStatuses: [string, InstructionStatus][],
-          transactionStatus: TransactionStatus
-        ) => [
-          ...instructionStatuses,
-          ...(transactionStatus.transactionResponse === undefined
-            ? []
-            : transactionStatus.transactionResponse.transaction.instructions
-                .map((instruction, index) =>
-                  instruction.programId.equals(BULLDOZER_PROGRAM_ID)
-                    ? [
-                        `${transactionStatus.signature}:${index}`,
-                        createInstructionStatus(transactionStatus, instruction),
-                      ]
-                    : null
-                )
-                .filter(
-                  (
-                    instructionStatus
-                  ): instructionStatus is [string, InstructionStatus] =>
-                    instructionStatus !== null
-                )),
-        ],
-        []
-      )
-    ),
+    pendingInstructionStatusesMap:
+      transactionStatuses === null
+        ? null
+        : new Map(
+            transactionStatuses.reduce(
+              (
+                instructionStatuses: [string, InstructionStatus][],
+                transactionStatus: TransactionStatus
+              ) => [
+                ...instructionStatuses,
+                ...(transactionStatus.transactionResponse === undefined
+                  ? []
+                  : transactionStatus.transactionResponse.transaction.instructions
+                      .map((instruction, index) =>
+                        instruction.programId.equals(BULLDOZER_PROGRAM_ID)
+                          ? [
+                              `${transactionStatus.signature}:${index}`,
+                              createInstructionStatus(
+                                transactionStatus,
+                                instruction
+                              ),
+                            ]
+                          : null
+                      )
+                      .filter(
+                        (
+                          instructionStatus
+                        ): instructionStatus is [string, InstructionStatus] =>
+                          instructionStatus !== null
+                      )),
+              ],
+              []
+            )
+          ),
   }));
+
+  getInstruction() {
+    return combineLatest([
+      this.pendingInstructionStatuses$.pipe(
+        map(
+          (instructionStatuses) =>
+            instructionStatuses?.filter(
+              (instructionStatus) => instructionStatus.status === 'confirmed'
+            ) ?? null
+        ),
+        isNotNullOrUndefined,
+        take(1)
+      ),
+      this.instructionStatuses$.pipe(
+        map((instructionStatuses) =>
+          instructionStatuses.filter(
+            (instructionStatus) => instructionStatus.status === 'confirmed'
+          )
+        )
+      ),
+      this.lastInstructionStatus$,
+    ]).pipe(
+      concatMap(([, instructionStatuses, lastInstructionStatus]) => {
+        return this.lastInstructionStatus$.pipe(
+          startWith(
+            ...(lastInstructionStatus === null
+              ? instructionStatuses
+              : instructionStatuses.filter(
+                  (instructionStatus) =>
+                    instructionStatus.transaction.signature !==
+                    lastInstructionStatus.transaction.signature
+                ))
+          ),
+          isNotNullOrUndefined
+        );
+      })
+    );
+  }
 }

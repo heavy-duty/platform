@@ -210,6 +210,28 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
     };
   });
 
+  private readonly _resetUpdatingStatus = this.updater<string>(
+    (state, instructionArgumentId) => {
+      const instructionArgumentStatusesMap = new Map(
+        state.instructionArgumentStatusesMap
+      );
+      const instructionArgumentStatus = instructionArgumentStatusesMap.get(
+        instructionArgumentId
+      );
+
+      return {
+        ...state,
+        instructionArgumentStatusesMap: instructionArgumentStatusesMap.set(
+          instructionArgumentId,
+          {
+            isUpdating: 0,
+            isDeleting: instructionArgumentStatus?.isDeleting ?? 0,
+          }
+        ),
+      };
+    }
+  );
+
   private readonly _markAsDeleting = this.updater<{
     instructionArgumentId: string;
     isDeleting: boolean;
@@ -290,8 +312,10 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
 
       return from(instructionArgumentIds).pipe(
         isNotNullOrUndefined,
-        mergeMap((instructionArgumentId) =>
-          this._instructionArgumentEventService
+        mergeMap((instructionArgumentId) => {
+          this._resetUpdatingStatus(instructionArgumentId);
+
+          return this._instructionArgumentEventService
             .documentUpdated(instructionArgumentId)
             .pipe(
               tapResponse(
@@ -307,8 +331,8 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
                 },
                 (error) => this._notificationStore.setError({ error })
               )
-            )
-        )
+            );
+        })
       );
     })
   );
