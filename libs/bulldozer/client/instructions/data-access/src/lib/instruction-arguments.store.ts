@@ -394,6 +394,22 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
+      if (instructionArgumentIds.length === 0) {
+        this.patchState({
+          instructionArgumentsMap: new Map<
+            string,
+            Document<InstructionArgument>
+          >(),
+          creatingInstructionArgumentsMap: new Map<
+            string,
+            Document<InstructionArgument>
+          >(),
+          instructionArgumentStatusesMap: new Map<string, ItemStatus>(),
+        });
+
+        return EMPTY;
+      }
+
       this.patchState({ loading: true });
 
       return this._instructionArgumentApiService
