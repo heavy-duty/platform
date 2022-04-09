@@ -323,9 +323,6 @@ export class ShellComponent extends ComponentStore<object> {
       )
     );
     this._loadWalletTransactions(this._walletStore.publicKey$);
-    this._hdBroadcasterStore.loadPendingInstructions(
-      this._configStore.workspaceId$
-    );
   }
 
   private readonly _loadWalletTransactions = this.effect<PublicKey | null>(
@@ -364,11 +361,9 @@ export class ShellComponent extends ComponentStore<object> {
       startWith(null),
       pairwise(),
       tap(([previous, current]) => {
-        if (previous !== null) {
+        if (previous !== null && previous !== current) {
           this._hdBroadcasterStore.unsubscribe(previous);
-        }
-
-        if (current !== null) {
+        } else if (current !== null) {
           this._hdBroadcasterStore.subscribe(current);
         }
       })

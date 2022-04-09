@@ -66,30 +66,43 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
           </aside>
 
           <div class="px-8 mt-4">
-            <header>
-              <h2
-                class="mb-0 text-lg font-bold flex justify-start"
-                [matTooltip]="
-                  workspace.document.name
-                    | bdItemUpdatingMessage: workspace:'Workspace'
-                "
-                matTooltipShowDelay="500"
-              >
-                {{ workspace.document.name }}
-              </h2>
-              <p *ngIf="workspaceId$ | ngrxPush as workspaceId">
-                <span
-                  class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
-                  [ngClass]="
-                    workspaceId === workspace.document.id
-                      ? 'bg-green-500'
-                      : 'bg-yellow-500'
+            <header class="flex items-center">
+              <div class="flex-1">
+                <h2
+                  class="mb-0 text-lg font-bold flex justify-start"
+                  [matTooltip]="
+                    workspace.document.name
+                      | bdItemUpdatingMessage: workspace:'Workspace'
                   "
-                ></span>
-                <span class="font-thin">{{
-                  workspaceId === workspace.document.id ? 'Active' : 'Inactive'
-                }}</span>
-              </p>
+                  matTooltipShowDelay="500"
+                >
+                  {{ workspace.document.name }}
+                </h2>
+                <p *ngIf="workspaceId$ | ngrxPush as workspaceId">
+                  <span
+                    class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
+                    [ngClass]="
+                      workspaceId === workspace.document.id
+                        ? 'bg-green-500'
+                        : 'bg-yellow-500'
+                    "
+                  ></span>
+                  <span class="font-thin">{{
+                    workspaceId === workspace.document.id
+                      ? 'Active'
+                      : 'Inactive'
+                  }}</span>
+                </p>
+              </div>
+              <div>
+                <button
+                  mat-stroked-button
+                  color="accent"
+                  (click)="onActivateWorkspace(workspace.document.id)"
+                >
+                  Activate
+                </button>
+              </div>
             </header>
 
             <section class="mt-5">

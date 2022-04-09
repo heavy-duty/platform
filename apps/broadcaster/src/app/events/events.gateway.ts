@@ -8,9 +8,21 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Connection, TransactionSignature } from '@solana/web3.js';
+import {
+  Connection,
+  Finality,
+  TransactionResponse,
+  TransactionSignature,
+} from '@solana/web3.js';
 import WebSocket, { Server } from 'ws';
 import { environment } from '../../environments/environment';
+
+export interface TransactionStatus {
+  signature: TransactionSignature;
+  status: Finality;
+  transactionResponse: TransactionResponse;
+  timestamp: number;
+}
 
 @WebSocketGateway({
   cors: {
@@ -24,19 +36,15 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly _topics = new Map<string, Set<WebSocket>>();
   private readonly _connection = new Connection(environment.rpcUrl);
 
-  private broadcastTransaction(
-    event: string,
-    signature: TransactionSignature,
-    topic: string
+  private broadcastTransactionStatus(
+    topic: string,
+    transactionStatus: TransactionStatus
   ) {
     this._topics.get(topic)?.forEach((client) =>
       client.send(
         JSON.stringify({
-          event,
-          data: {
-            signature,
-            topic,
-          },
+          event: topic,
+          data: transactionStatus,
         })
       )
     );
@@ -127,11 +135,17 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this._logger.log(`Transaction confirmed [${transactionSignature}].`);
 
-    this.broadcastTransaction(
-      'transactionConfirmed',
+    const transactionResponse = await this._connection.getTransaction(
       transactionSignature,
-      topic
+      { commitment: 'confirmed' }
     );
+
+    this.broadcastTransactionStatus(topic, {
+      signature: transactionSignature,
+      status: 'confirmed',
+      timestamp: Date.now(),
+      transactionResponse,
+    });
 
     await this._connection.confirmTransaction(
       transactionSignature,
@@ -140,10 +154,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     this._logger.log(`Transaction finalized [${transactionSignature}].`);
 
-    this.broadcastTransaction(
-      'transactionFinalized',
-      transactionSignature,
-      topic
-    );
+    this.broadcastTransactionStatus(topic, {
+      signature: transactionSignature,
+      status: 'finalized',
+      timestamp: Date.now(),
+      transactionResponse,
+    });
   }
 }

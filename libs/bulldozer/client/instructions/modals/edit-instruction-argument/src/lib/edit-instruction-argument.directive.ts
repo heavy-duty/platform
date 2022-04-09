@@ -6,26 +6,22 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  Document,
-  InstructionArgument,
-  InstructionArgumentDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionArgumentComponent } from './edit-instruction-argument.component';
 
 @Directive({ selector: '[bdEditInstructionArgument]' })
 export class EditInstructionArgumentDirective {
-  @Input() instructionArgument?: Document<InstructionArgument>;
+  @Input() instructionArgument?: InstructionArgumentDto;
   @Output() editInstructionArgument =
     new EventEmitter<InstructionArgumentDto>();
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<
         EditInstructionArgumentComponent,
-        { instructionArgument?: Document<InstructionArgument> },
+        InstructionArgumentDto,
         InstructionArgumentDto
       >(EditInstructionArgumentComponent, {
-        data: { instructionArgument: this.instructionArgument },
+        data: this.instructionArgument,
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionArgument.emit(data));

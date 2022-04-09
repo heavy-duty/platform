@@ -164,7 +164,7 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
   reportProgress(signature: string) {
     const { transactionStatuses } = this.get();
 
-    if (
+    /* if (
       !transactionStatuses.some(
         (transactionStatus) => transactionStatus.signature === signature
       )
@@ -172,7 +172,7 @@ export class HdSolanaTransactionsStore extends ComponentStore<ViewModel> {
       this._addTransactionStatus(signature);
       this._handleTransactionConfirmed(signature);
       this._handleTransactionFinalized(signature);
-    }
+    } */
   }
 
   clearTransactions() {

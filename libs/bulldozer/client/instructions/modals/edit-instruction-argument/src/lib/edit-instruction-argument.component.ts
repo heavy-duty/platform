@@ -8,14 +8,14 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
+import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'bd-edit-argument',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.instructionArgument ? 'Edit' : 'Create' }} argument
+      {{ instructionArgument ? 'Edit' : 'Create' }} argument
     </h2>
 
     <form
@@ -101,7 +101,7 @@ import { Subject, takeUntil } from 'rxjs';
         >
       </mat-form-field>
 
-      <!-- <mat-radio-group
+      <mat-radio-group
         class="w-full bg-white bg-opacity-5 px-2 py-1 flex flex-col gap-2"
         ariaLabel="Attribute modifier"
         formControlName="modifier"
@@ -132,7 +132,7 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-error *ngIf="submitted && sizeControl.hasError('min')"
           >The size has to be above 1</mat-error
         >
-      </mat-form-field> -->
+      </mat-form-field>
 
       <button
         mat-stroked-button
@@ -140,7 +140,7 @@ import { Subject, takeUntil } from 'rxjs';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.instructionArgument ? 'Save' : 'Create' }}
+        {{ instructionArgument ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -191,31 +191,19 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditInstructionArgumentComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      instructionArgument?: Document<InstructionArgument>;
-    }
+    public instructionArgument?: InstructionArgumentDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.instructionArgument?.name ?? '', {
+      name: new FormControl(this.instructionArgument?.name ?? '', {
         validators: [Validators.required],
       }),
-      kind: new FormControl(this.data?.instructionArgument?.data.kind.id ?? 0, {
+      kind: new FormControl(this.instructionArgument?.kind ?? 0, {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(
-        this.data?.instructionArgument?.data.modifier !== null
-          ? this.data?.instructionArgument?.data.modifier.id
-          : null
-      ),
-      size: new FormControl(
-        this.data?.instructionArgument?.data.modifier !== null
-          ? this.data?.instructionArgument?.data.modifier.size
-          : null
-      ),
-      max: new FormControl(this.data?.instructionArgument?.data.max ?? null),
-      maxLength: new FormControl(
-        this.data?.instructionArgument?.data.maxLength ?? null
-      ),
+      modifier: new FormControl(this.instructionArgument?.modifier ?? null),
+      size: new FormControl(this.instructionArgument?.size ?? null),
+      max: new FormControl(this.instructionArgument?.max ?? null),
+      maxLength: new FormControl(this.instructionArgument?.maxLength ?? null),
     });
   }
 

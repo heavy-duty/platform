@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import {
@@ -37,7 +37,6 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _tabStore: TabStore,
-    private readonly _configStore: ConfigStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _walletStore: WalletStore,
     private readonly _workspaceApiService: WorkspaceApiService,
@@ -49,7 +48,6 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
     this._workspaceStore.setWorkspaceId(this.workspaceId$);
     this._openTab(this.workspaceId$);
-    this._activateWorkspace(this.workspaceId$);
     this._handleInstruction(
       this.workspaceId$.pipe(
         isNotNullOrUndefined,
@@ -89,10 +87,6 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
   readonly setWorkspaceId = this.updater<string | null>(
     (state, workspaceId) => ({ ...state, workspaceId })
-  );
-
-  private readonly _activateWorkspace = this.effect<string | null>(
-    tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
   );
 
   private readonly _openTab = this.effect<string | null>(

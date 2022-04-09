@@ -136,7 +136,7 @@ export class InstructionArgumentApiService {
           tap((transactionSignature) =>
             this._hdBroadcasterStore.sendTransaction(
               transactionSignature,
-              params.workspaceId
+              params.instructionId
             )
           ),
           catchError((error) => this.handleError(error))
@@ -165,7 +165,7 @@ export class InstructionArgumentApiService {
           tap((transactionSignature) =>
             this._hdBroadcasterStore.sendTransaction(
               transactionSignature,
-              params.workspaceId
+              params.instructionId
             )
           ),
           catchError((error) => this.handleError(error))
@@ -194,7 +194,7 @@ export class InstructionArgumentApiService {
           tap((transactionSignature) =>
             this._hdBroadcasterStore.sendTransaction(
               transactionSignature,
-              params.workspaceId
+              params.instructionId
             )
           ),
           catchError((error) => this.handleError(error))

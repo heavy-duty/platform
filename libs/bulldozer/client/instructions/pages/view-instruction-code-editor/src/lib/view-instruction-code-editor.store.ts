@@ -114,9 +114,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           collections
         ) => ({
           instruction: instruction?.document ?? null,
-          instructionArguments: instructionArguments.map(
-            ({ document }) => document
-          ),
+          instructionArguments: instructionArguments ?? [],
           instructionAccounts: instructionAccounts.map(
             ({ document }) => document
           ),
