@@ -43,7 +43,7 @@ export class HdBroadcasterDirective extends ComponentStore<object> {
     super({});
 
     viewContainerRef.createEmbeddedView(templateRef, this._context);
-    this._handleChanges(this._changes$);
+    // this._handleChanges(this._changes$);
   }
 
   private readonly _handleChanges = this.effect<BroadcasterChanges>(

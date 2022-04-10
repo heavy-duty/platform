@@ -68,6 +68,11 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
           return EMPTY;
         }
 
+        this.patchState({
+          loading: true,
+          instructionArgumentsMap: null,
+        });
+
         return this._instructionArgumentApiService.findIds(filters).pipe(
           tapResponse(
             (instructionArgumentIds) => {
@@ -86,11 +91,6 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
       if (instructionArgumentIds === null) {
         return EMPTY;
       }
-
-      this.patchState({
-        loading: true,
-        instructionArgumentsMap: null,
-      });
 
       return this._instructionArgumentApiService
         .findByIds(instructionArgumentIds)

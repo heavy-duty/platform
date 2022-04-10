@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditInstructionArgumentModule } from '@bulldozer-client/edit-instruction-argument';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionArgumentsComponent } from './view-instruction-arguments.component';
@@ -33,6 +34,7 @@ import { ViewInstructionArgumentsComponent } from './view-instruction-arguments.
     MatTooltipModule,
     ReactiveComponentModule,
     HdWalletAdapterCdkModule,
+    HdBroadcasterCdkModule,
     ItemUpdatingModule,
     EditInstructionArgumentModule,
   ],

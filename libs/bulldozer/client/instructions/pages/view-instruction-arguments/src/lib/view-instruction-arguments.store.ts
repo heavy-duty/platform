@@ -8,7 +8,7 @@ import {
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
 import { HdSolanaApiService } from '@heavy-duty/ngx-solana';
-import { isNotNullOrUndefined, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Finality } from '@solana/web3.js';
 import { concatMap, EMPTY, map, switchMap } from 'rxjs';
@@ -39,9 +39,13 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     ({ currentTransactions }) => currentTransactions
   );
   private readonly _instructionStatuses$ = this.select(
-    this._pendingTransactions$.pipe(isNotNullOrUndefined),
+    this._pendingTransactions$,
     this._currentTransactions$,
     (pendingTransactions, currentTransactions) => {
+      if (pendingTransactions === null) {
+        return null;
+      }
+
       const pendingInstructionStatuses = pendingTransactions.reduce<
         InstructionStatus[]
       >(
@@ -59,13 +63,14 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
       );
 
       return [...pendingInstructionStatuses, ...currentInstructionStatuses];
-    }
+    },
+    { debounce: true }
   );
   readonly instructionArguments$ = this.select(
     this._instructionArgumentsStore.instructionArguments$,
     this._instructionStatuses$,
     (instructionsArguments, instructionStatuses) => {
-      if (instructionsArguments === null) {
+      if (instructionsArguments === null || instructionStatuses === null) {
         return null;
       }
 
@@ -73,7 +78,8 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         reduceInstructions,
         instructionsArguments.map(documentToView)
       );
-    }
+    },
+    { debounce: true }
   );
   readonly loading$ = this.select(
     this._instructionArgumentsStore.loading$,
@@ -107,11 +113,20 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
       )
     );
     this._loadPendingTransactions(this._instructionId$);
-    this._registerTopic(this._instructionId$);
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        this._instructionId$.pipe(isNotNullOrUndefined),
+        (_, instructionId) => instructionId
+      )
+    );
   }
 
   readonly setInstructionId = this.updater<string | null>(
-    (state, instructionId) => ({ ...state, instructionId })
+    (state, instructionId) => ({
+      ...state,
+      instructionId,
+    })
   );
 
   private readonly _addTransaction = this.updater<TransactionStatus>(
@@ -121,7 +136,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _registerTopic = this.effect<string | null>(
+  private readonly _registerTopic = this.effect<string>(
     tapEffect((instructionId) => {
       this._hdBroadcasterSocketStore.send(
         JSON.stringify({

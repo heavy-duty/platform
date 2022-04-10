@@ -61,184 +61,228 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
     </header>
 
     <main>
-      <ng-container *ngIf="(loading$ | ngrxPush) === false; else loadingData">
-        <ng-container
-          *ngrxLet="instructionArguments$; let instructionArguments"
-        >
-          <section
-            class="flex gap-6 flex-wrap"
-            *ngIf="
-              instructionArguments && instructionArguments.length > 0;
-              else emptyList
-            "
-          >
-            <mat-card
-              *ngFor="
-                let instructionArgument of instructionArguments;
-                let i = index;
-                trackBy: identify
-              "
-              class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
+      <ng-container
+        *hdBroadcasterStatus="let connected = connected; let online = online"
+      >
+        <ng-container *ngIf="online; else offline">
+          <ng-container *ngIf="connected; else disconnected">
+            <ng-container
+              *ngIf="(loading$ | ngrxPush) === false; else loadingData"
             >
-              <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-                <div class="flex-1 flex items-center gap-2">
-                  <ng-container *ngIf="instructionArgument | bdItemChanging">
-                    <mat-progress-spinner
-                      diameter="20"
-                      mode="indeterminate"
-                    ></mat-progress-spinner>
-
-                    <p class="m-0 text-xs text-white text-opacity-60">
-                      <ng-container *ngIf="instructionArgument.isCreating">
-                        Creating...
-                      </ng-container>
-                      <ng-container *ngIf="instructionArgument.isUpdating">
-                        Updating...
-                      </ng-container>
-                      <ng-container *ngIf="instructionArgument.isDeleting">
-                        Deleting...
-                      </ng-container>
-                    </p>
-                  </ng-container>
-                </div>
-
-                <ng-container
-                  *hdWalletAdapter="
-                    let publicKey = publicKey;
-                    let connected = connected
+              <ng-container
+                *ngrxLet="instructionArguments$; let instructionArguments"
+              >
+                <section
+                  class="flex gap-6 flex-wrap"
+                  *ngIf="
+                    instructionArguments && instructionArguments.length > 0;
+                    else emptyList
                   "
                 >
-                  <button
-                    *ngIf="publicKey !== null"
-                    [attr.aria-label]="
-                      'Update argument ' + instructionArgument.name
+                  <mat-card
+                    *ngFor="
+                      let instructionArgument of instructionArguments;
+                      let i = index;
+                      trackBy: identify
                     "
-                    mat-icon-button
-                    bdEditInstructionArgument
-                    [instructionArgument]="{
-                      name: instructionArgument.name,
-                      kind: instructionArgument.kind.id,
-                      max:
-                        instructionArgument.kind.id === 1
-                          ? instructionArgument.kind.size
-                          : null,
-                      maxLength: instructionArgument.kind.size,
-                      modifier: instructionArgument.modifier?.id ?? null,
-                      size: instructionArgument.modifier?.size ?? null
-                    }"
-                    (editInstructionArgument)="
-                      onUpdateInstructionArgument(
-                        publicKey.toBase58(),
-                        instructionArgument.workspaceId,
-                        instructionArgument.instructionId,
-                        instructionArgument.id,
-                        $event
-                      )
-                    "
-                    [disabled]="
-                      !connected || (instructionArgument | bdItemChanging)
-                    "
+                    class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
                   >
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button
-                    *ngIf="publicKey !== null"
-                    [attr.aria-label]="
-                      'Delete argument ' + instructionArgument.name
-                    "
-                    mat-icon-button
-                    (click)="
-                      onDeleteInstructionArgument(
-                        publicKey.toBase58(),
-                        instructionArgument.workspaceId,
-                        instructionArgument.instructionId,
-                        instructionArgument.id
-                      )
-                    "
-                    [disabled]="
-                      !connected || (instructionArgument | bdItemChanging)
-                    "
-                  >
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </ng-container>
-              </aside>
-
-              <div class="px-8 mt-4">
-                <header class="flex gap-2 mb-8">
-                  <div class="w-1/5">
-                    <figure
-                      class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full flex-shrink-0"
+                    <aside
+                      class="flex items-center bd-bg-black px-4 py-1 gap-1"
                     >
-                      <mat-icon
-                        class="w-1/2"
-                        [ngClass]="{
-                          'text-yellow-500': instructionArgument.kind.id === 0,
-                          'text-blue-500': instructionArgument.kind.id === 1,
-                          'text-green-500': instructionArgument.kind.id === 2,
-                          'text-red-500': instructionArgument.kind.id === 3
-                        }"
-                        >code</mat-icon
+                      <div class="flex-1 flex items-center gap-2">
+                        <ng-container
+                          *ngIf="instructionArgument | bdItemChanging"
+                        >
+                          <mat-progress-spinner
+                            diameter="20"
+                            mode="indeterminate"
+                          ></mat-progress-spinner>
+
+                          <p class="m-0 text-xs text-white text-opacity-60">
+                            <ng-container
+                              *ngIf="instructionArgument.isCreating"
+                            >
+                              Creating...
+                            </ng-container>
+                            <ng-container
+                              *ngIf="instructionArgument.isUpdating"
+                            >
+                              Updating...
+                            </ng-container>
+                            <ng-container
+                              *ngIf="instructionArgument.isDeleting"
+                            >
+                              Deleting...
+                            </ng-container>
+                          </p>
+                        </ng-container>
+                      </div>
+
+                      <ng-container
+                        *hdWalletAdapter="
+                          let publicKey = publicKey;
+                          let connected = connected
+                        "
                       >
-                    </figure>
-                  </div>
-
-                  <div class="w-4/5">
-                    <h2
-                      class="mb-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
-                      [matTooltip]="
-                        instructionArgument.name
-                          | bdItemUpdatingMessage
-                            : instructionArgument
-                            : 'Argument'
-                      "
-                      matTooltipShowDelay="500"
-                    >
-                      {{ instructionArgument.name }}
-                    </h2>
-                    <p class="text-sm mb-0">
-                      Type: {{ instructionArgument.kind.name }}.
-                    </p>
-                  </div>
-                </header>
-
-                <section class="flex gap-6 mb-4 justify-between">
-                  <p class="text-sm font-thin m-0">
-                    <mat-icon inline>auto_awesome_motion</mat-icon>
-                    &nbsp;
-                    <ng-container
-                      *ngIf="instructionArgument.modifier !== null"
-                      [ngSwitch]="instructionArgument.modifier.id"
-                    >
-                      <ng-container *ngSwitchCase="0">
-                        Array of Items
+                        <button
+                          *ngIf="publicKey !== null"
+                          [attr.aria-label]="
+                            'Update argument ' + instructionArgument.name
+                          "
+                          mat-icon-button
+                          bdEditInstructionArgument
+                          [instructionArgument]="{
+                            name: instructionArgument.name,
+                            kind: instructionArgument.kind.id,
+                            max:
+                              instructionArgument.kind.id === 1
+                                ? instructionArgument.kind.size
+                                : null,
+                            maxLength: instructionArgument.kind.size,
+                            modifier: instructionArgument.modifier?.id ?? null,
+                            size: instructionArgument.modifier?.size ?? null
+                          }"
+                          (editInstructionArgument)="
+                            onUpdateInstructionArgument(
+                              publicKey.toBase58(),
+                              instructionArgument.workspaceId,
+                              instructionArgument.instructionId,
+                              instructionArgument.id,
+                              $event
+                            )
+                          "
+                          [disabled]="
+                            !connected || (instructionArgument | bdItemChanging)
+                          "
+                        >
+                          <mat-icon>edit</mat-icon>
+                        </button>
+                        <button
+                          *ngIf="publicKey !== null"
+                          [attr.aria-label]="
+                            'Delete argument ' + instructionArgument.name
+                          "
+                          mat-icon-button
+                          (click)="
+                            onDeleteInstructionArgument(
+                              publicKey.toBase58(),
+                              instructionArgument.workspaceId,
+                              instructionArgument.instructionId,
+                              instructionArgument.id
+                            )
+                          "
+                          [disabled]="
+                            !connected || (instructionArgument | bdItemChanging)
+                          "
+                        >
+                          <mat-icon>delete</mat-icon>
+                        </button>
                       </ng-container>
-                      <ng-container *ngSwitchCase="1">
-                        Vector of Items
-                      </ng-container>
-                    </ng-container>
+                    </aside>
 
-                    <ng-container *ngIf="instructionArgument.modifier === null">
-                      Single Item
-                    </ng-container>
-                  </p>
-                  <p
-                    class="text-sm font-thin m-0"
-                    *ngIf="
-                      instructionArgument.modifier !== null &&
-                      instructionArgument.modifier.size
-                    "
-                  >
-                    <mat-icon inline="">data_array</mat-icon>
-                    &nbsp; Size:
-                    {{ instructionArgument.modifier?.size }}
-                  </p>
+                    <div class="px-8 mt-4">
+                      <header class="flex gap-2 mb-8">
+                        <div class="w-1/5">
+                          <figure
+                            class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full flex-shrink-0"
+                          >
+                            <mat-icon
+                              class="w-1/2"
+                              [ngClass]="{
+                                'text-yellow-500':
+                                  instructionArgument.kind.id === 0,
+                                'text-blue-500':
+                                  instructionArgument.kind.id === 1,
+                                'text-green-500':
+                                  instructionArgument.kind.id === 2,
+                                'text-red-500':
+                                  instructionArgument.kind.id === 3
+                              }"
+                              >code</mat-icon
+                            >
+                          </figure>
+                        </div>
+
+                        <div class="w-4/5">
+                          <h2
+                            class="mb-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
+                            [matTooltip]="
+                              instructionArgument.name
+                                | bdItemUpdatingMessage
+                                  : instructionArgument
+                                  : 'Argument'
+                            "
+                            matTooltipShowDelay="500"
+                          >
+                            {{ instructionArgument.name }}
+                          </h2>
+                          <p class="text-sm mb-0">
+                            Type: {{ instructionArgument.kind.name }}.
+                          </p>
+                        </div>
+                      </header>
+
+                      <section class="flex gap-6 mb-4 justify-between">
+                        <p class="text-sm font-thin m-0">
+                          <mat-icon inline>auto_awesome_motion</mat-icon>
+                          &nbsp;
+                          <ng-container
+                            *ngIf="instructionArgument.modifier !== null"
+                            [ngSwitch]="instructionArgument.modifier.id"
+                          >
+                            <ng-container *ngSwitchCase="0">
+                              Array of Items
+                            </ng-container>
+                            <ng-container *ngSwitchCase="1">
+                              Vector of Items
+                            </ng-container>
+                          </ng-container>
+
+                          <ng-container
+                            *ngIf="instructionArgument.modifier === null"
+                          >
+                            Single Item
+                          </ng-container>
+                        </p>
+                        <p
+                          class="text-sm font-thin m-0"
+                          *ngIf="
+                            instructionArgument.modifier !== null &&
+                            instructionArgument.modifier.size
+                          "
+                        >
+                          <mat-icon inline="">data_array</mat-icon>
+                          &nbsp; Size:
+                          {{ instructionArgument.modifier?.size }}
+                        </p>
+                      </section>
+                    </div>
+                  </mat-card>
                 </section>
-              </div>
-            </mat-card>
-          </section>
+              </ng-container>
+            </ng-container>
+          </ng-container>
         </ng-container>
       </ng-container>
+
+      <ng-template #offline>
+        <div class="py-8">
+          <p class="text-center text-xl">
+            You're
+            <span class="font-bold text-red-500">offline</span>.
+          </p>
+        </div>
+      </ng-template>
+
+      <ng-template #disconnected>
+        <div class="py-8">
+          <p class="text-center text-xl">
+            You're currently
+            <span class="font-bold text-red-500">disconnected</span>.
+          </p>
+        </div>
+      </ng-template>
 
       <ng-template #loadingData>
         <div class="py-8" *ngIf="loading$ | ngrxPush">
