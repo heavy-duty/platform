@@ -11,7 +11,7 @@ import {
 import {
   Connection,
   Finality,
-  TransactionResponse,
+  Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
 import { Map, Set } from 'immutable';
@@ -20,8 +20,8 @@ import { environment } from '../../environments/environment';
 
 export interface TransactionStatus {
   signature: TransactionSignature;
-  status: Finality;
-  transactionResponse: TransactionResponse;
+  status?: Finality;
+  transaction: Transaction;
   timestamp: number;
 }
 
@@ -168,12 +168,20 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     {
       transactionSignature,
+      transaction,
       topicName,
     }: {
       transactionSignature: TransactionSignature;
+      transaction: Transaction;
       topicName: string;
     }
   ) {
+    this.broadcastTransactionStatus(topicName, {
+      signature: transactionSignature,
+      timestamp: Date.now(),
+      transaction,
+    });
+
     this._logger.log(
       `Transaction received [${transactionSignature}]. (${topicName})`
     );
@@ -187,11 +195,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Transaction confirmed [${transactionSignature}]. (${topicName})`
     );
 
-    const transactionResponse = await this._connection.getTransaction(
-      transactionSignature,
-      { commitment: 'confirmed' }
-    );
-
     let topic = this._topics.get(topicName);
 
     if (topic !== undefined) {
@@ -201,7 +204,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           signature: transactionSignature,
           status: 'confirmed',
           timestamp: Date.now(),
-          transactionResponse,
+          transaction,
         }),
       });
     }
@@ -210,7 +213,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       signature: transactionSignature,
       status: 'confirmed',
       timestamp: Date.now(),
-      transactionResponse,
+      transaction,
     });
 
     await this._connection.confirmTransaction(
@@ -241,7 +244,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       signature: transactionSignature,
       status: 'finalized',
       timestamp: Date.now(),
-      transactionResponse,
+      transaction,
     });
   }
 }

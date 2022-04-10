@@ -139,6 +139,7 @@ export class InstructionArgumentApiService {
                 event: 'transaction',
                 data: {
                   transactionSignature,
+                  transaction,
                   topicName: params.instructionId,
                 },
               })
@@ -173,6 +174,7 @@ export class InstructionArgumentApiService {
                 event: 'transaction',
                 data: {
                   transactionSignature,
+                  transaction,
                   topicName: params.instructionId,
                 },
               })
@@ -207,6 +209,7 @@ export class InstructionArgumentApiService {
                 event: 'transaction',
                 data: {
                   transactionSignature,
+                  transaction,
                   topicName: params.instructionId,
                 },
               })

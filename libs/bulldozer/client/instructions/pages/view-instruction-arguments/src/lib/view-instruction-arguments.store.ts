@@ -1,9 +1,7 @@
 import { Injectable } from '@angular/core';
 import { InstructionArgumentsStore } from '@bulldozer-client/instructions-data-access';
 import {
-  flattenInstructions,
   HdBroadcasterSocketStore,
-  InstructionStatus,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
 import { isNotNullOrUndefined, tapEffect } from '@heavy-duty/rxjs';
@@ -11,6 +9,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { map, noop, switchMap } from 'rxjs';
 import { documentToView } from './document-to-view';
 import { reduceInstructions } from './reduce-instructions';
+import { flattenInstructions, InstructionStatus } from './utils';
 
 interface ViewModel {
   instructionId: string | null;

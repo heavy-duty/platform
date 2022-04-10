@@ -1,22 +1,11 @@
+import { TransactionStatus } from '@heavy-duty/broadcaster';
 import { instructionCoder } from '@heavy-duty/bulldozer-devkit';
-import {
-  CompiledInstruction,
-  Finality,
-  Message,
-  TransactionResponse,
-  TransactionSignature,
-} from '@solana/web3.js';
-
-export interface TransactionStatus {
-  signature: TransactionSignature;
-  status: Finality;
-  transactionResponse: TransactionResponse;
-  timestamp: number;
-}
+import { TransactionInstruction } from '@solana/web3.js';
+import base58 from 'bs58';
 
 export interface InstructionStatus {
   transactionStatus: TransactionStatus;
-  instruction: CompiledInstruction;
+  instruction: TransactionInstruction;
   title: string;
   name: string;
   accounts: {
@@ -31,20 +20,12 @@ export interface InstructionStatus {
 export const flattenInstructions = (
   transactionStatus: TransactionStatus
 ): InstructionStatus[] => {
-  const transactionResponse = transactionStatus.transactionResponse;
-
-  const transactionMessage = new Message({
-    header: transactionResponse.transaction.message.header,
-    accountKeys: transactionResponse.transaction.message
-      .accountKeys as unknown as string[],
-    recentBlockhash: transactionResponse.transaction.message.recentBlockhash,
-    instructions: transactionResponse.transaction.message.instructions,
-  });
-
-  return transactionMessage.instructions
+  return transactionStatus.transaction.instructions
     .map((instruction) => {
       const decodedInstruction = instructionCoder.decode(
-        instruction.data,
+        base58.encode(
+          (instruction.data as unknown as { data: Uint8Array }).data
+        ),
         'base58'
       );
 
@@ -52,17 +33,9 @@ export const flattenInstructions = (
         return null;
       }
 
-      const instructionAccountMetas = instruction.accounts.map(
-        (accountIndex) => ({
-          pubkey: transactionMessage.accountKeys[accountIndex],
-          isWritable: transactionMessage.isAccountWritable(accountIndex),
-          isSigner: transactionMessage.isAccountSigner(accountIndex),
-        })
-      );
-
       const decodedAndFormattedInstruction = instructionCoder.format(
         decodedInstruction,
-        instructionAccountMetas
+        instruction.keys
       );
 
       if (decodedAndFormattedInstruction === null) {
@@ -82,7 +55,7 @@ export const flattenInstructions = (
         accounts: decodedAndFormattedInstruction.accounts.map((account) => ({
           ...account,
           name: account.name ?? 'Unknown',
-          pubkey: account.pubkey.toBase58(),
+          pubkey: account.pubkey as unknown as string,
         })),
       };
     })

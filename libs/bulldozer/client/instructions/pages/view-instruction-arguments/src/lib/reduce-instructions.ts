@@ -1,6 +1,6 @@
-import { InstructionStatus } from '@heavy-duty/broadcaster';
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { InstructionArgumentItemView } from './types';
+import { InstructionStatus } from './utils';
 
 const decodeAttributeKind = (
   id: number,
@@ -88,7 +88,10 @@ export const reduceInstructions = (
 ): InstructionArgumentItemView[] => {
   switch (instruction.name) {
     case 'createInstructionArgument': {
-      if (instruction.transactionStatus.status === 'confirmed') {
+      if (
+        instruction.transactionStatus.status === undefined ||
+        instruction.transactionStatus.status === 'confirmed'
+      ) {
         const data = instruction.data as {
           arguments: InstructionArgumentDto;
         };
@@ -171,7 +174,7 @@ export const reduceInstructions = (
             ...items.slice(itemIndex + 1),
           ];
         }
-      } else {
+      } else if (instruction.transactionStatus.status === 'finalized') {
         return items.map((item) => {
           if (
             !instruction.accounts.some(
@@ -187,53 +190,81 @@ export const reduceInstructions = (
             isCreating: false,
           };
         });
+      } else {
+        return items;
       }
     }
     case 'updateInstructionArgument': {
-      const data = instruction.data as {
-        arguments: InstructionArgumentDto;
-      };
-      const name = data.arguments.name;
-      const kind = decodeAttributeKind(
-        data.arguments.kind,
-        getAttributeKindSize(data.arguments.kind, {
-          max: data.arguments.max,
-          maxLength: data.arguments.maxLength,
-        })
-      );
-      let modifier: {
-        id: number;
-        name: string;
-        size: number;
-      } | null = null;
-      if (data.arguments.modifier !== null && data.arguments.size !== null) {
-        modifier = decodeAttributeModifier(
-          data.arguments.modifier,
-          data.arguments.size
+      if (
+        instruction.transactionStatus.status === undefined ||
+        instruction.transactionStatus.status === 'confirmed'
+      ) {
+        const data = instruction.data as {
+          arguments: InstructionArgumentDto;
+        };
+        const name = data.arguments.name;
+        const kind = decodeAttributeKind(
+          data.arguments.kind,
+          getAttributeKindSize(data.arguments.kind, {
+            max: data.arguments.max,
+            maxLength: data.arguments.maxLength,
+          })
         );
-      }
-
-      return items.map((item) => {
-        if (
-          !instruction.accounts.some(
-            (account) =>
-              account.name === 'Argument' && account.pubkey === item.id
-          )
-        ) {
-          return item;
+        let modifier: {
+          id: number;
+          name: string;
+          size: number;
+        } | null = null;
+        if (data.arguments.modifier !== null && data.arguments.size !== null) {
+          modifier = decodeAttributeModifier(
+            data.arguments.modifier,
+            data.arguments.size
+          );
         }
 
-        return {
-          ...item,
-          name,
-          kind,
-          modifier,
-          isUpdating: instruction.transactionStatus.status !== 'finalized',
-        };
-      });
+        return items.map((item) => {
+          if (
+            !instruction.accounts.some(
+              (account) =>
+                account.name === 'Argument' && account.pubkey === item.id
+            )
+          ) {
+            return item;
+          }
+
+          return {
+            ...item,
+            name,
+            kind,
+            modifier,
+            isUpdating: true,
+          };
+        });
+      } else if (instruction.transactionStatus.status === 'finalized') {
+        return items.map((item) => {
+          if (
+            !instruction.accounts.some(
+              (account) =>
+                account.name === 'Argument' && account.pubkey === item.id
+            )
+          ) {
+            return item;
+          }
+
+          return {
+            ...item,
+            isUpdating: false,
+          };
+        });
+      } else {
+        return items;
+      }
     }
     case 'deleteInstructionArgument':
-      if (instruction.transactionStatus.status === 'confirmed') {
+      if (
+        instruction.transactionStatus.status === undefined ||
+        instruction.transactionStatus.status === 'confirmed'
+      ) {
         return items.map((item) => {
           if (
             !instruction.accounts.some(
@@ -249,7 +280,7 @@ export const reduceInstructions = (
             isDeleting: true,
           };
         });
-      } else {
+      } else if (instruction.transactionStatus.status === 'finalized') {
         return items.filter(
           (item) =>
             !instruction.accounts.some(
@@ -257,6 +288,8 @@ export const reduceInstructions = (
                 account.name === 'Argument' && account.pubkey === item.id
             )
         );
+      } else {
+        return items;
       }
     default:
       return items;
