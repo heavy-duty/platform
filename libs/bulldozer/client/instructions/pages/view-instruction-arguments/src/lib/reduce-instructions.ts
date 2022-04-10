@@ -134,21 +134,43 @@ export const reduceInstructions = (
           throw new Error('Malformed Create Instruction Argument');
         }
 
-        return [
-          ...items,
-          {
-            id: argumentId,
-            name,
-            kind,
-            modifier,
-            isCreating: true,
-            isUpdating: false,
-            isDeleting: false,
-            instructionId,
-            applicationId,
-            workspaceId,
-          },
-        ];
+        const itemIndex = items.findIndex((item) => item.id === argumentId);
+
+        if (itemIndex === -1) {
+          return [
+            ...items,
+            {
+              id: argumentId,
+              name,
+              kind,
+              modifier,
+              isCreating: true,
+              isUpdating: false,
+              isDeleting: false,
+              instructionId,
+              applicationId,
+              workspaceId,
+            },
+          ];
+        } else {
+          return [
+            ...items.slice(0, itemIndex),
+            {
+              ...items[itemIndex],
+              id: argumentId,
+              name,
+              kind,
+              modifier,
+              isCreating: true,
+              isUpdating: false,
+              isDeleting: false,
+              instructionId,
+              applicationId,
+              workspaceId,
+            },
+            ...items.slice(itemIndex + 1),
+          ];
+        }
       } else {
         return items.map((item) => {
           if (

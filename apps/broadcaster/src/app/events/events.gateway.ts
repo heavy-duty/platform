@@ -14,6 +14,7 @@ import {
   TransactionResponse,
   TransactionSignature,
 } from '@solana/web3.js';
+import { Map, Set } from 'immutable';
 import WebSocket, { Server } from 'ws';
 import { environment } from '../../environments/environment';
 
@@ -22,6 +23,11 @@ export interface TransactionStatus {
   status: Finality;
   transactionResponse: TransactionResponse;
   timestamp: number;
+}
+
+export interface TopicState {
+  clients: Set<WebSocket>;
+  transactions: Map<string, TransactionStatus>;
 }
 
 @WebSocketGateway({
@@ -33,21 +39,25 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly _logger = new Logger(EventsGateway.name);
   @WebSocketServer()
   private readonly _server: Server;
-  private readonly _topics = new Map<string, Set<WebSocket>>();
+  private _topics = Map<string, TopicState>();
   private readonly _connection = new Connection(environment.rpcUrl);
 
   private broadcastTransactionStatus(
-    topic: string,
+    topicName: string,
     transactionStatus: TransactionStatus
   ) {
-    this._topics.get(topic)?.forEach((client) =>
-      client.send(
-        JSON.stringify({
-          event: topic,
-          data: transactionStatus,
-        })
-      )
-    );
+    const topic = this._topics.get(topicName);
+
+    if (topic !== undefined) {
+      topic.clients.forEach((client) =>
+        client.send(
+          JSON.stringify({
+            event: topicName,
+            data: transactionStatus,
+          })
+        )
+      );
+    }
   }
 
   handleConnection(
@@ -58,7 +68,19 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Client connected. [${this._server.clients.size} clients connected]`
     );
 
-    this._topics.set('*', new Set([...(this._topics.get('*') ?? []), client]));
+    const topic = this._topics.get('*');
+
+    if (topic === undefined) {
+      this._topics = this._topics.set('*', {
+        clients: Set([client]),
+        transactions: Map<string, TransactionStatus>(),
+      });
+    } else {
+      this._topics = this._topics.set('*', {
+        clients: Set(topic.clients).add(client),
+        transactions: topic.transactions,
+      });
+    }
   }
 
   handleDisconnect(
@@ -69,15 +91,18 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Client disconnected. [${this._server.clients.size} clients connected]`
     );
 
-    this._topics.forEach((_, topic) => {
-      const clients = [...(this._topics.get(topic) ?? [])].filter(
-        (ws) => ws !== client
-      );
+    this._topics.forEach((topic, topicName) => {
+      const clients = topic.clients.delete(client);
 
-      if (clients.length === 0) {
-        this._topics.delete(topic);
-      } else {
-        this._topics.set(topic, new Set(clients));
+      if (clients.size === 0 && topic.transactions.size === 0) {
+        this._topics = this._topics.delete(topicName);
+      }
+
+      if (clients.size > 0) {
+        this._topics = this._topics.set(topicName, {
+          clients,
+          transactions: topic.transactions,
+        });
       }
     });
   }
@@ -86,32 +111,59 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onSubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topic: string
+    @MessageBody() topicName: string
   ) {
-    this._logger.log(`Client subscribed to [${topic}].`);
+    this._logger.log(`Client subscribed to [${topicName}].`);
 
-    this._topics.set(
-      topic,
-      new Set([...(this._topics.get(topic) ?? []), client])
-    );
+    const topic = this._topics.get(topicName);
+
+    if (topic === undefined) {
+      this._topics = this._topics.set(topicName, {
+        clients: Set([client]),
+        transactions: Map<string, TransactionStatus>(),
+      });
+    } else {
+      console.log('subscribe transactions', topic.transactions);
+
+      topic.transactions.forEach((transactionStatus) => {
+        console.log(transactionStatus);
+
+        client.send(
+          JSON.stringify({
+            event: topicName,
+            data: transactionStatus,
+          })
+        );
+      });
+
+      this._topics = this._topics.set(topicName, {
+        clients: topic.clients.add(client),
+        transactions: topic.transactions,
+      });
+    }
   }
 
   @SubscribeMessage('unsubscribe')
   onUnsubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topic: string
+    @MessageBody() topicName: string
   ) {
-    this._logger.log(`Client unsubscribed from [${topic}].`);
+    this._logger.log(`Client unsubscribed from [${topicName}].`);
 
-    const clients = [...(this._topics.get(topic) ?? [])].filter(
-      (ws) => ws !== client
-    );
+    const topic = this._topics.get(topicName);
 
-    if (clients.length === 0) {
-      this._topics.delete(topic);
-    } else {
-      this._topics.set(topic, new Set(clients));
+    if (topic !== undefined) {
+      const clients = topic.clients.delete(client);
+
+      if (clients.size > 0) {
+        this._topics = this._topics.set(topicName, {
+          clients: Set(clients),
+          transactions: topic.transactions,
+        });
+      } else if (clients.size === 0 && topic.transactions.size === 0) {
+        this._topics = this._topics.delete(topicName);
+      }
     }
   }
 
@@ -120,27 +172,45 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     {
       transactionSignature,
-      topic,
+      topicName,
     }: {
       transactionSignature: TransactionSignature;
-      topic: string;
+      topicName: string;
     }
   ) {
-    this._logger.log(`Transaction received [${transactionSignature}].`);
+    this._logger.log(
+      `Transaction received [${transactionSignature}]. (${topicName})`
+    );
 
     await this._connection.confirmTransaction(
       transactionSignature,
       'confirmed'
     );
 
-    this._logger.log(`Transaction confirmed [${transactionSignature}].`);
+    this._logger.log(
+      `Transaction confirmed [${transactionSignature}]. (${topicName})`
+    );
 
     const transactionResponse = await this._connection.getTransaction(
       transactionSignature,
       { commitment: 'confirmed' }
     );
 
-    this.broadcastTransactionStatus(topic, {
+    let topic = this._topics.get(topicName);
+
+    if (topic !== undefined) {
+      this._topics = this._topics.set(topicName, {
+        clients: topic.clients,
+        transactions: topic.transactions.set(transactionSignature, {
+          signature: transactionSignature,
+          status: 'confirmed',
+          timestamp: Date.now(),
+          transactionResponse,
+        }),
+      });
+    }
+
+    this.broadcastTransactionStatus(topicName, {
       signature: transactionSignature,
       status: 'confirmed',
       timestamp: Date.now(),
@@ -152,9 +222,26 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       'finalized'
     );
 
-    this._logger.log(`Transaction finalized [${transactionSignature}].`);
+    this._logger.log(
+      `Transaction finalized [${transactionSignature}]. (${topicName})`
+    );
 
-    this.broadcastTransactionStatus(topic, {
+    topic = this._topics.get(topicName);
+
+    if (topic !== undefined) {
+      const transactions = topic.transactions.delete(transactionSignature);
+
+      if (topic.clients.size === 0 && transactions.size === 0) {
+        this._topics = this._topics.delete(topicName);
+      } else {
+        this._topics = this._topics.set(topicName, {
+          clients: topic.clients,
+          transactions,
+        });
+      }
+    }
+
+    this.broadcastTransactionStatus(topicName, {
       signature: transactionSignature,
       status: 'finalized',
       timestamp: Date.now(),

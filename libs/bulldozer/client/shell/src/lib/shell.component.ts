@@ -311,7 +311,7 @@ export class ShellComponent extends ComponentStore<object> {
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
-    this._subscribeToWorkspace(
+    /* this._subscribeToWorkspace(
       this._hdBroadcasterSocketStore.connected$.pipe(
         switchMap((connected) => {
           if (!connected) {
@@ -321,7 +321,7 @@ export class ShellComponent extends ComponentStore<object> {
           return this._configStore.workspaceId$;
         })
       )
-    );
+    ); */
     this._loadWalletTransactions(this._walletStore.publicKey$);
   }
 

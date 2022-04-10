@@ -315,7 +315,7 @@ export class ViewInstructionArgumentsComponent implements OnInit {
   readonly instructionId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('instructionId'))
   );
-  readonly loading$ = this._viewInstructionArgumentsStore.loading$;
+  readonly loading$ = this._instructionArgumentsStore.loading$;
   readonly instructionArguments$ =
     this._viewInstructionArgumentsStore.instructionArguments$;
 
@@ -323,6 +323,7 @@ export class ViewInstructionArgumentsComponent implements OnInit {
     private readonly _route: ActivatedRoute,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
+    private readonly _instructionArgumentsStore: InstructionArgumentsStore,
     private readonly _viewInstructionArgumentsStore: ViewInstructionArgumentsStore
   ) {}
 
