@@ -123,11 +123,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         transactions: Map<string, TransactionStatus>(),
       });
     } else {
-      console.log('subscribe transactions', topic.transactions);
-
       topic.transactions.forEach((transactionStatus) => {
-        console.log(transactionStatus);
-
         client.send(
           JSON.stringify({
             event: topicName,
