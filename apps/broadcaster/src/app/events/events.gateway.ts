@@ -176,6 +176,19 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       topicName: string;
     }
   ) {
+    let topic = this._topics.get(topicName);
+
+    if (topic !== undefined) {
+      this._topics = this._topics.set(topicName, {
+        clients: topic.clients,
+        transactions: topic.transactions.set(transactionSignature, {
+          signature: transactionSignature,
+          timestamp: Date.now(),
+          transaction,
+        }),
+      });
+    }
+
     this.broadcastTransactionStatus(topicName, {
       signature: transactionSignature,
       timestamp: Date.now(),
@@ -195,7 +208,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Transaction confirmed [${transactionSignature}]. (${topicName})`
     );
 
-    let topic = this._topics.get(topicName);
+    topic = this._topics.get(topicName);
 
     if (topic !== undefined) {
       this._topics = this._topics.set(topicName, {

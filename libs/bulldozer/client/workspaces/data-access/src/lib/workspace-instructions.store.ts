@@ -143,7 +143,7 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
   constructor(private readonly _hdBroadcasterStore: HdBroadcasterStore) {
     super(initialState);
 
-    this._handleTransactionStatuses(
+    /* this._handleTransactionStatuses(
       this._hdBroadcasterStore.transactionStatuses$
     );
     this._handlePendingTransactionStatuses(
@@ -151,7 +151,7 @@ export class WorkspaceInstructionsStore extends ComponentStore<ViewModel> {
     );
     this._handleLastTransactionStatus(
       this._hdBroadcasterStore.lastTransactionStatus$
-    );
+    ); */
   }
 
   private readonly _handleLastTransactionStatus =

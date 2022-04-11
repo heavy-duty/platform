@@ -125,12 +125,12 @@ export class UserInstructionsStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
-    this._handleTransactionStatuses(
+    /* this._handleTransactionStatuses(
       this._hdSolanaTransactionsStore.transactionStatuses$
     );
     this._handleLastTransactionStatus(
       this._hdSolanaTransactionsStore.lastTransactionStatus$
-    );
+    ); */
   }
 
   readonly markAsViewed = this.updater((state) => {
