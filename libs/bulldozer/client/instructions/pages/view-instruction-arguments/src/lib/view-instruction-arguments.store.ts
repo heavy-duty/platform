@@ -13,13 +13,11 @@ import { flattenInstructions, InstructionStatus } from './utils';
 
 interface ViewModel {
   instructionId: string | null;
-  pendingTransactions: TransactionStatus[] | null;
   transactions: TransactionStatus[];
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  pendingTransactions: null,
   transactions: [],
 };
 
@@ -70,7 +68,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         map((instruction) => ({ instruction }))
       )
     );
-    this._addTransaction(
+    this._handleTransaction(
       this._instructionId$.pipe(
         isNotNullOrUndefined,
         switchMap((instructionId) =>
@@ -102,11 +100,22 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _addTransaction = this.updater<TransactionStatus>(
-    (state, transaction) => ({
-      ...state,
-      transactions: [...state.transactions, transaction],
-    })
+  private readonly _handleTransaction = this.updater<TransactionStatus>(
+    (state, newTransaction) => {
+      if (newTransaction.error !== undefined) {
+        return {
+          ...state,
+          transactions: state.transactions.filter(
+            (transaction) => transaction.signature !== newTransaction.signature
+          ),
+        };
+      }
+
+      return {
+        ...state,
+        transactions: [...state.transactions, newTransaction],
+      };
+    }
   );
 
   private readonly _registerTopic = this.effect<{

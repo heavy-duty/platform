@@ -21,6 +21,7 @@ import { environment } from '../../environments/environment';
 export interface TransactionStatus {
   signature: TransactionSignature;
   status?: Finality;
+  error?: unknown;
   transaction: Transaction;
   timestamp: number;
 }
@@ -40,7 +41,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   private readonly _server: Server;
   private _topics = Map<string, TopicState>();
-  private readonly _connection = new Connection(environment.rpcUrl);
+  private readonly _connection = new Connection(environment.rpcUrl, {
+    confirmTransactionInitialTimeout: 120_000, // timeout for 2 minutes ~blockhash duration
+  });
 
   private broadcastTransactionStatus(
     topicName: string,
@@ -199,10 +202,39 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Transaction received [${transactionSignature}]. (${topicName})`
     );
 
-    await this._connection.confirmTransaction(
-      transactionSignature,
-      'confirmed'
-    );
+    try {
+      await this._connection.confirmTransaction(
+        transactionSignature,
+        'confirmed'
+      );
+    } catch (error) {
+      this.broadcastTransactionStatus(topicName, {
+        signature: transactionSignature,
+        timestamp: Date.now(),
+        transaction,
+        error: {
+          name: 'ConfirmTransactionError',
+          message: error.message,
+        },
+      });
+
+      topic = this._topics.get(topicName);
+
+      if (topic !== undefined) {
+        const transactions = topic.transactions.delete(transactionSignature);
+
+        if (topic.clients.size === 0 && transactions.size === 0) {
+          this._topics = this._topics.delete(topicName);
+        } else {
+          this._topics = this._topics.set(topicName, {
+            clients: topic.clients,
+            transactions,
+          });
+        }
+      }
+
+      return;
+    }
 
     this._logger.log(
       `Transaction confirmed [${transactionSignature}]. (${topicName})`
@@ -229,10 +261,39 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       transaction,
     });
 
-    await this._connection.confirmTransaction(
-      transactionSignature,
-      'finalized'
-    );
+    try {
+      await this._connection.confirmTransaction(
+        transactionSignature,
+        'finalized'
+      );
+    } catch (error) {
+      this.broadcastTransactionStatus(topicName, {
+        signature: transactionSignature,
+        timestamp: Date.now(),
+        transaction,
+        error: {
+          name: 'ConfirmTransactionError',
+          message: error.message,
+        },
+      });
+
+      topic = this._topics.get(topicName);
+
+      if (topic !== undefined) {
+        const transactions = topic.transactions.delete(transactionSignature);
+
+        if (topic.clients.size === 0 && transactions.size === 0) {
+          this._topics = this._topics.delete(topicName);
+        } else {
+          this._topics = this._topics.set(topicName, {
+            clients: topic.clients,
+            transactions,
+          });
+        }
+      }
+
+      return;
+    }
 
     this._logger.log(
       `Transaction finalized [${transactionSignature}]. (${topicName})`
