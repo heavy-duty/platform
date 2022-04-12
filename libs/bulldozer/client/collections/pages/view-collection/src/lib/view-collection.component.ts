@@ -88,7 +88,7 @@ import { ViewCollectionStore } from './view-collection.store';
         </ul>
 
         <footer
-          class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+          class="sticky bottom-0 py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
         >
           <button
             mat-stroked-button
