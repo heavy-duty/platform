@@ -14,7 +14,7 @@ import {
   Transaction,
   TransactionSignature,
 } from '@solana/web3.js';
-import { Map, Set } from 'immutable';
+import { List, Map, Set } from 'immutable';
 import WebSocket, { Server } from 'ws';
 import { environment } from '../../environments/environment';
 
@@ -46,21 +46,23 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   });
 
   private broadcastTransactionStatus(
-    topicName: string,
+    topicNames: List<string>,
     transactionStatus: TransactionStatus
   ) {
-    const topic = this._topics.get(topicName);
+    topicNames.forEach((topicName) => {
+      const topic = this._topics.get(topicName);
 
-    if (topic !== undefined) {
-      topic.clients.forEach((client) =>
-        client.send(
-          JSON.stringify({
-            event: topicName,
-            data: transactionStatus,
-          })
-        )
-      );
-    }
+      if (topic !== undefined) {
+        topic.clients.forEach((client) =>
+          client.send(
+            JSON.stringify({
+              event: topicName,
+              data: transactionStatus,
+            })
+          )
+        );
+      }
+    });
   }
 
   handleConnection(
@@ -172,34 +174,38 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     {
       transactionSignature,
       transaction,
-      topicName,
+      topicNames,
     }: {
       transactionSignature: TransactionSignature;
       transaction: Transaction;
-      topicName: string;
+      topicNames: List<string>;
     }
   ) {
-    let topic = this._topics.get(topicName);
-
-    if (topic !== undefined) {
-      this._topics = this._topics.set(topicName, {
-        clients: topic.clients,
-        transactions: topic.transactions.set(transactionSignature, {
-          signature: transactionSignature,
-          timestamp: Date.now(),
-          transaction,
-        }),
-      });
-    }
-
-    this.broadcastTransactionStatus(topicName, {
+    this.broadcastTransactionStatus(topicNames, {
       signature: transactionSignature,
       timestamp: Date.now(),
       transaction,
     });
 
+    topicNames.forEach((topicName) => {
+      const topic = this._topics.get(topicName);
+
+      if (topic !== undefined) {
+        this._topics = this._topics.set(topicName, {
+          clients: topic.clients,
+          transactions: topic.transactions.set(transactionSignature, {
+            signature: transactionSignature,
+            timestamp: Date.now(),
+            transaction,
+          }),
+        });
+      }
+    });
+
     this._logger.log(
-      `Transaction received [${transactionSignature}]. (${topicName})`
+      `Transaction received [${transactionSignature}]. (${topicNames.join(
+        ', '
+      )})`
     );
 
     try {
@@ -207,8 +213,36 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         transactionSignature,
         'confirmed'
       );
+      this._logger.log(
+        `Transaction confirmed [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
+
+      this.broadcastTransactionStatus(topicNames, {
+        signature: transactionSignature,
+        status: 'confirmed',
+        timestamp: Date.now(),
+        transaction,
+      });
+
+      topicNames.forEach((topicName) => {
+        const topic = this._topics.get(topicName);
+
+        if (topic !== undefined) {
+          this._topics = this._topics.set(topicName, {
+            clients: topic.clients,
+            transactions: topic.transactions.set(transactionSignature, {
+              signature: transactionSignature,
+              status: 'confirmed',
+              timestamp: Date.now(),
+              transaction,
+            }),
+          });
+        }
+      });
     } catch (error) {
-      this.broadcastTransactionStatus(topicName, {
+      this.broadcastTransactionStatus(topicNames, {
         signature: transactionSignature,
         timestamp: Date.now(),
         transaction,
@@ -218,56 +252,63 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
 
-      topic = this._topics.get(topicName);
+      topicNames.forEach((topicName) => {
+        const topic = this._topics.get(topicName);
 
-      if (topic !== undefined) {
-        const transactions = topic.transactions.delete(transactionSignature);
+        if (topic !== undefined) {
+          const transactions = topic.transactions.delete(transactionSignature);
 
-        if (topic.clients.size === 0 && transactions.size === 0) {
-          this._topics = this._topics.delete(topicName);
-        } else {
-          this._topics = this._topics.set(topicName, {
-            clients: topic.clients,
-            transactions,
-          });
+          if (topic.clients.size === 0 && transactions.size === 0) {
+            this._topics = this._topics.delete(topicName);
+          } else {
+            this._topics = this._topics.set(topicName, {
+              clients: topic.clients,
+              transactions,
+            });
+          }
         }
-      }
+      });
 
       return;
     }
-
-    this._logger.log(
-      `Transaction confirmed [${transactionSignature}]. (${topicName})`
-    );
-
-    topic = this._topics.get(topicName);
-
-    if (topic !== undefined) {
-      this._topics = this._topics.set(topicName, {
-        clients: topic.clients,
-        transactions: topic.transactions.set(transactionSignature, {
-          signature: transactionSignature,
-          status: 'confirmed',
-          timestamp: Date.now(),
-          transaction,
-        }),
-      });
-    }
-
-    this.broadcastTransactionStatus(topicName, {
-      signature: transactionSignature,
-      status: 'confirmed',
-      timestamp: Date.now(),
-      transaction,
-    });
 
     try {
       await this._connection.confirmTransaction(
         transactionSignature,
         'finalized'
       );
+
+      this._logger.log(
+        `Transaction finalized [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
+
+      this.broadcastTransactionStatus(topicNames, {
+        signature: transactionSignature,
+        status: 'finalized',
+        timestamp: Date.now(),
+        transaction,
+      });
+
+      topicNames.forEach((topicName) => {
+        const topic = this._topics.get(topicName);
+
+        if (topic !== undefined) {
+          const transactions = topic.transactions.delete(transactionSignature);
+
+          if (topic.clients.size === 0 && transactions.size === 0) {
+            this._topics = this._topics.delete(topicName);
+          } else {
+            this._topics = this._topics.set(topicName, {
+              clients: topic.clients,
+              transactions,
+            });
+          }
+        }
+      });
     } catch (error) {
-      this.broadcastTransactionStatus(topicName, {
+      this.broadcastTransactionStatus(topicNames, {
         signature: transactionSignature,
         timestamp: Date.now(),
         transaction,
@@ -277,48 +318,24 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
 
-      topic = this._topics.get(topicName);
+      topicNames.forEach((topicName) => {
+        const topic = this._topics.get(topicName);
 
-      if (topic !== undefined) {
-        const transactions = topic.transactions.delete(transactionSignature);
+        if (topic !== undefined) {
+          const transactions = topic.transactions.delete(transactionSignature);
 
-        if (topic.clients.size === 0 && transactions.size === 0) {
-          this._topics = this._topics.delete(topicName);
-        } else {
-          this._topics = this._topics.set(topicName, {
-            clients: topic.clients,
-            transactions,
-          });
+          if (topic.clients.size === 0 && transactions.size === 0) {
+            this._topics = this._topics.delete(topicName);
+          } else {
+            this._topics = this._topics.set(topicName, {
+              clients: topic.clients,
+              transactions,
+            });
+          }
         }
-      }
+      });
 
       return;
     }
-
-    this._logger.log(
-      `Transaction finalized [${transactionSignature}]. (${topicName})`
-    );
-
-    topic = this._topics.get(topicName);
-
-    if (topic !== undefined) {
-      const transactions = topic.transactions.delete(transactionSignature);
-
-      if (topic.clients.size === 0 && transactions.size === 0) {
-        this._topics = this._topics.delete(topicName);
-      } else {
-        this._topics = this._topics.set(topicName, {
-          clients: topic.clients,
-          transactions,
-        });
-      }
-    }
-
-    this.broadcastTransactionStatus(topicName, {
-      signature: transactionSignature,
-      status: 'finalized',
-      timestamp: Date.now(),
-      transaction,
-    });
   }
 }

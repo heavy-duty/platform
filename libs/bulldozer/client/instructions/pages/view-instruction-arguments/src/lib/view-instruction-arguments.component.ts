@@ -297,7 +297,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
       </ng-template>
 
       <ng-template #emptyList>
-        <p class="text-center text-xl py-8">There's no attributes yet.</p>
+        <p class="text-center text-xl py-8">There's no arguments yet.</p>
       </ng-template>
     </main>
   `,
@@ -361,7 +361,10 @@ export class ViewInstructionArgumentsComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicName: `instructionArguments:${instructionId}`,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructionArguments:${instructionId}`,
+                ],
               },
             })
           );
@@ -396,7 +399,10 @@ export class ViewInstructionArgumentsComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicName: `instructionArguments:${instructionId}`,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructionArguments:${instructionId}`,
+                ],
               },
             })
           );
@@ -427,7 +433,10 @@ export class ViewInstructionArgumentsComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicName: `instructionArguments:${instructionId}`,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructionArguments:${instructionId}`,
+                ],
               },
             })
           );
