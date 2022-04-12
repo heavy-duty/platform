@@ -6,7 +6,8 @@ import {
 } from '@heavy-duty/broadcaster';
 import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { map, noop, switchMap } from 'rxjs';
+import { TransactionSignature } from '@solana/web3.js';
+import { map, noop, switchMap, tap } from 'rxjs';
 import { documentToView } from './document-to-view';
 import { reduceInstructions } from './reduce-instructions';
 import { flattenInstructions, InstructionStatus } from './utils';
@@ -48,7 +49,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     this._instructionArgumentsStore.instructionArguments$,
     this._instructionStatuses$,
     (instructionsArguments, instructionStatuses) => {
-      if (instructionsArguments === null || instructionStatuses === null) {
+      if (instructionsArguments === null) {
         return null;
       }
 
@@ -98,6 +99,22 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     );
   }
 
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: [...state.transactions, transaction],
+    })
+  );
+
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
+  );
+
   readonly setInstructionId = this.updater<string | null>(
     (state, instructionId) => ({
       ...state,
@@ -105,22 +122,14 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleTransaction = this.updater<TransactionStatus>(
-    (state, newTransaction) => {
-      if (newTransaction.error !== undefined) {
-        return {
-          ...state,
-          transactions: state.transactions.filter(
-            (transaction) => transaction.signature !== newTransaction.signature
-          ),
-        };
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
-
-      return {
-        ...state,
-        transactions: [...state.transactions, newTransaction],
-      };
-    }
+    })
   );
 
   private readonly _registerTopic = this.effect<{
