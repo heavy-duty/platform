@@ -122,7 +122,7 @@ import { ViewCollectionStore } from './view-collection.store';
         </footer>
       </aside>
 
-      <div class="w-full bg-white bg-opacity-5">
+      <div class="flex-1">
         <router-outlet></router-outlet>
       </div>
     </ng-container>
