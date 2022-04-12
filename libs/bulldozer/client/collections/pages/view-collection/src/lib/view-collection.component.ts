@@ -8,7 +8,7 @@ import { ViewCollectionStore } from './view-collection.store';
   selector: 'bd-view-collection',
   template: `
     <ng-container *ngIf="collection$ | ngrxPush as collection">
-      <aside class="w-96 flex flex-col">
+      <aside class="w-80 flex flex-col">
         <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
           <p class="mb-0 text-xl uppercase">{{ collection.document.name }}</p>
           <p class="text-xs">Visualize all the details about this collection</p>
