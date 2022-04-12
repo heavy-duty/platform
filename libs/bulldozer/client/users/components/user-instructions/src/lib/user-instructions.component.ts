@@ -15,7 +15,7 @@ import { interval, map, startWith } from 'rxjs';
         <mat-list
           role="list"
           *ngIf="
-            instructionStatuses !== null && instructionStatuses.length > 0;
+            instructionStatuses !== null && instructionStatuses.size > 0;
             else emptyTransactionsList
           "
           class="flex flex-col gap-2"
@@ -27,7 +27,9 @@ import { interval, map, startWith } from 'rxjs';
             <div class="w-full h-8 flex items-center gap-4">
               <div>
                 <mat-progress-spinner
-                  *ngIf="instructionStatus.status !== 'finalized'"
+                  *ngIf="
+                    instructionStatus.transactionStatus.status !== 'finalized'
+                  "
                   color="accent"
                   diameter="16"
                   mode="indeterminate"
@@ -35,7 +37,9 @@ import { interval, map, startWith } from 'rxjs';
                 </mat-progress-spinner>
 
                 <mat-icon
-                  *ngIf="instructionStatus.status === 'finalized'"
+                  *ngIf="
+                    instructionStatus.transactionStatus.status === 'finalized'
+                  "
                   class="text-green-500"
                   inline
                   >check_circle</mat-icon
@@ -48,11 +52,13 @@ import { interval, map, startWith } from 'rxjs';
 
               <ng-container *ngrxLet="timeNow$; let timeNow">
                 <p
-                  *ngIf="instructionStatus.confirmedAt !== undefined"
+                  *ngIf="
+                    instructionStatus.transactionStatus.timestamp !== undefined
+                  "
                   class="text-xs m-0 text-white text-opacity-50"
                 >
                   {{
-                    timeNow - instructionStatus.confirmedAt
+                    timeNow - instructionStatus.transactionStatus.timestamp
                       | bdRelativeTime: true
                   }}
                 </p>

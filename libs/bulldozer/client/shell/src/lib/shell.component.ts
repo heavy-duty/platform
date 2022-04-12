@@ -6,29 +6,14 @@ import {
   TabStore,
 } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
 import {
-  HdBroadcasterSocketStore,
-  HdBroadcasterStore,
-} from '@heavy-duty/broadcaster';
-import {
-  HdSolanaApiService,
-  HdSolanaConfigStore,
-  HdSolanaTransactionsStore,
-} from '@heavy-duty/ngx-solana';
+  UserInstructionsStore2,
+  UserStore,
+} from '@bulldozer-client/users-data-access';
+import { HdSolanaConfigStore } from '@heavy-duty/ngx-solana';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { PublicKey } from '@solana/web3.js';
-import {
-  distinctUntilChanged,
-  EMPTY,
-  filter,
-  pairwise,
-  pipe,
-  startWith,
-  switchMap,
-  tap,
-} from 'rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 @Component({
   selector: 'bd-shell',
@@ -283,6 +268,7 @@ import {
     ConfigStore,
     DarkThemeStore,
     UserStore,
+    UserInstructionsStore2,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -300,75 +286,14 @@ export class ShellComponent extends ComponentStore<object> {
     private readonly _configStore: ConfigStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _router: Router,
-    private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaTransactionsStore: HdSolanaTransactionsStore,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore,
-    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {
     super();
 
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
-    /* this._subscribeToWorkspace(
-      this._hdBroadcasterSocketStore.connected$.pipe(
-        switchMap((connected) => {
-          if (!connected) {
-            return EMPTY;
-          }
-
-          return this._configStore.workspaceId$;
-        })
-      )
-    ); */
-    this._loadWalletTransactions(this._walletStore.publicKey$);
   }
-
-  private readonly _loadWalletTransactions = this.effect<PublicKey | null>(
-    switchMap((publicKey) => {
-      this._hdSolanaTransactionsStore.clearTransactions();
-
-      if (publicKey === null) {
-        return EMPTY;
-      }
-
-      return this._hdSolanaApiService
-        .getSignaturesForAddress(publicKey.toBase58(), undefined, 'confirmed')
-        .pipe(
-          tapResponse(
-            (confirmedSignatureInfos) => {
-              this._hdSolanaTransactionsStore.clearTransactions();
-              confirmedSignatureInfos
-                .filter(
-                  (confirmedSignatureInfo) =>
-                    confirmedSignatureInfo.confirmationStatus === 'confirmed'
-                )
-                .forEach((confirmedSignatureInfo) =>
-                  this._hdSolanaTransactionsStore.reportProgress(
-                    confirmedSignatureInfo.signature
-                  )
-                );
-            },
-            (error) => this._notificationStore.setError(error)
-          )
-        );
-    })
-  );
-
-  private readonly _subscribeToWorkspace = this.effect<string | null>(
-    pipe(
-      startWith(null),
-      pairwise(),
-      tap(([previous, current]) => {
-        if (previous !== null && previous !== current) {
-          this._hdBroadcasterStore.unsubscribe(previous);
-        } else if (current !== null) {
-          this._hdBroadcasterStore.subscribe(current);
-        }
-      })
-    )
-  );
 
   private readonly _redirectUnauthorized = this.effect<boolean>(
     pipe(

@@ -8,6 +8,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { RelativeTimePipe } from './relative-time.pipe';
+import { UserInstructionsBottomSheetComponent } from './user-instructions-bottom-sheet.component';
+import { UserInstructionsBottomSheetDirective } from './user-instructions-bottom-sheet.directive';
 import { UserInstructionsButtonComponent } from './user-instructions-button.component';
 import { UserInstructionsStoreDirective } from './user-instructions-store.directive';
 import { UserInstructionsComponent } from './user-instructions.component';
@@ -28,11 +30,15 @@ import { UserInstructionsDirective } from './user-instructions.directive';
     RelativeTimePipe,
     UserInstructionsComponent,
     UserInstructionsDirective,
+    UserInstructionsBottomSheetComponent,
+    UserInstructionsBottomSheetDirective,
     UserInstructionsButtonComponent,
     UserInstructionsStoreDirective,
+    UserInstructionsBottomSheetComponent,
   ],
   exports: [
     UserInstructionsDirective,
+    UserInstructionsBottomSheetDirective,
     UserInstructionsButtonComponent,
     UserInstructionsStoreDirective,
   ],

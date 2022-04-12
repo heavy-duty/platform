@@ -6,19 +6,24 @@ import { interval, map, startWith } from 'rxjs';
   template: `
     <ng-container
       *bdUserInstructionsStore="
+        let instructionStatuses = instructionStatuses;
         let instructionNotViewedStatuses = instructionNotViewedStatuses;
         let instructionInProcessStatuses = instructionInProcessStatuses;
         let markAsViewed = markAsViewed
       "
     >
       <ng-container
-        *ngIf="instructionNotViewedStatuses && instructionInProcessStatuses"
+        *ngIf="
+          instructionNotViewedStatuses !== null &&
+          instructionInProcessStatuses !== null &&
+          markAsViewed
+        "
       >
         <div
           class="inline-block relative"
           *ngIf="
-            instructionNotViewedStatuses.length === 0 ||
-            instructionInProcessStatuses.length > 0
+            instructionNotViewedStatuses.size === 0 ||
+            instructionInProcessStatuses.size > 0
           "
         >
           <button
@@ -31,7 +36,7 @@ import { interval, map, startWith } from 'rxjs';
             <mat-icon>notifications</mat-icon>
           </button>
           <mat-progress-spinner
-            *ngIf="instructionInProcessStatuses.length > 0"
+            *ngIf="instructionInProcessStatuses.size > 0"
             color="accent"
             mode="indeterminate"
             diameter="44"
@@ -42,15 +47,15 @@ import { interval, map, startWith } from 'rxjs';
 
         <button
           *ngIf="
-            instructionNotViewedStatuses.length > 0 &&
-            instructionInProcessStatuses.length === 0
+            instructionNotViewedStatuses.size > 0 &&
+            instructionInProcessStatuses.size === 0
           "
           type="button"
           class="rounded-full w-8 h-8 border-2 border-green-500"
           [matMenuTriggerFor]="menu"
           (menuClosed)="markAsViewed()"
         >
-          {{ instructionNotViewedStatuses.length }}
+          {{ instructionNotViewedStatuses.size }}
         </button>
       </ng-container>
 
@@ -64,7 +69,7 @@ import { interval, map, startWith } from 'rxjs';
             <ul
               *ngIf="
                 instructionNotViewedStatuses &&
-                  instructionNotViewedStatuses.length > 0;
+                  instructionNotViewedStatuses.size > 0;
                 else emptyInstructions
               "
             >
@@ -74,14 +79,18 @@ import { interval, map, startWith } from 'rxjs';
               >
                 <div>
                   <mat-progress-spinner
-                    *ngIf="instructionStatus.status !== 'finalized'"
+                    *ngIf="
+                      instructionStatus.transactionStatus.status !== 'finalized'
+                    "
                     color="accent"
                     diameter="16"
                     mode="indeterminate"
                   >
                   </mat-progress-spinner>
                   <mat-icon
-                    *ngIf="instructionStatus.status === 'finalized'"
+                    *ngIf="
+                      instructionStatus.transactionStatus.status === 'finalized'
+                    "
                     class="text-green-500"
                     inline
                     >check_circle</mat-icon
@@ -98,11 +107,14 @@ import { interval, map, startWith } from 'rxjs';
 
                 <ng-container *ngrxLet="timeNow$; let timeNow">
                   <p
-                    *ngIf="instructionStatus.confirmedAt !== undefined"
+                    *ngIf="
+                      instructionStatus.transactionStatus.timestamp !==
+                      undefined
+                    "
                     class="text-xs m-0 text-white text-opacity-50"
                   >
                     {{
-                      timeNow - instructionStatus.confirmedAt
+                      timeNow - instructionStatus.transactionStatus.timestamp
                         | bdRelativeTime: true
                     }}
                   </p>
@@ -116,7 +128,10 @@ import { interval, map, startWith } from 'rxjs';
           </main>
 
           <footer class="py-2 flex justify-center">
-            <button bdUserInstructions class="text-underline text-accent">
+            <button
+              bdUserInstructionsBottomSheet
+              class="text-underline text-accent"
+            >
               See more
             </button>
           </footer>

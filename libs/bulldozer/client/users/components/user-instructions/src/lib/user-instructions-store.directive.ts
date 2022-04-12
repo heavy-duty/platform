@@ -4,27 +4,26 @@ import {
   TemplateRef,
   ViewContainerRef,
 } from '@angular/core';
-import {
-  InstructionStatus,
-  UserInstructionsStore,
-} from '@bulldozer-client/users-data-access';
+import { UserInstructionsStore2 } from '@bulldozer-client/users-data-access';
+import { InstructionStatus } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List, Set } from 'immutable';
 import { tap } from 'rxjs';
 
 interface TransactionsChanges {
-  instructionStatuses: InstructionStatus[] | null;
-  instructionInProcessStatuses: InstructionStatus[] | null;
-  instructionNotViewedStatuses: InstructionStatus[] | null;
-  markAsViewed: () => void;
+  instructionStatuses: List<InstructionStatus> | null;
+  instructionInProcessStatuses: List<InstructionStatus> | null;
+  instructionNotViewedStatuses: List<InstructionStatus> | null;
+  markAsViewed?: () => void;
 }
 
 export class UserInstructionsContext implements TransactionsChanges {
   $implicit!: unknown;
-  instructionStatuses: InstructionStatus[] | null = null;
-  instructionInProcessStatuses: InstructionStatus[] | null = null;
-  instructionNotViewedStatuses: InstructionStatus[] | null = null;
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  markAsViewed: () => void = () => {};
+  instructionStatuses: List<InstructionStatus> | null = null;
+  instructionInProcessStatuses: List<InstructionStatus> | null = null;
+  instructionNotViewedStatuses: List<InstructionStatus> | null = null;
+  markAsViewed?: () => void;
 }
 
 @Directive({
@@ -35,20 +34,21 @@ export class UserInstructionsStoreDirective extends ComponentStore<object> {
 
   constructor(
     private readonly _changeDetectionRef: ChangeDetectorRef,
-    private readonly _userInstructionsStore: UserInstructionsStore,
+    private readonly _userInstructionsStore: UserInstructionsStore2,
     templateRef: TemplateRef<UserInstructionsContext>,
     viewContainerRef: ViewContainerRef
   ) {
     super({});
 
+    this._userInstructionsStore.viewedTransactionSignatures$;
     viewContainerRef.createEmbeddedView(templateRef, this._context);
     this._handleChanges(
       this.select(
-        this._userInstructionsStore.instructionStatuses$,
-        this._userInstructionsStore.instructionsInProcess$,
-        (instructionStatuses, instructionsInProcess) => ({
-          instructionStatuses,
-          instructionsInProcess,
+        this._userInstructionsStore.groupedInstructionStatuses$,
+        this._userInstructionsStore.viewedTransactionSignatures$,
+        (groupedInstructionStatuses, viewedTransactionSignatures) => ({
+          groupedInstructionStatuses,
+          viewedTransactionSignatures,
         }),
         { debounce: true }
       )
@@ -56,18 +56,24 @@ export class UserInstructionsStoreDirective extends ComponentStore<object> {
   }
 
   private readonly _handleChanges = this.effect<{
-    instructionStatuses: InstructionStatus[] | null;
-    instructionsInProcess: number;
+    groupedInstructionStatuses: List<InstructionStatus> | null;
+    viewedTransactionSignatures: Set<TransactionSignature>;
   }>(
-    tap(({ instructionStatuses }) => {
-      this._context.instructionStatuses = instructionStatuses;
+    tap(({ groupedInstructionStatuses, viewedTransactionSignatures }) => {
+      this._context.instructionStatuses = groupedInstructionStatuses;
       this._context.instructionInProcessStatuses =
-        instructionStatuses?.filter(
-          (instructionStatus) => instructionStatus.status !== 'finalized'
+        groupedInstructionStatuses?.filter(
+          (instructionStatus) =>
+            instructionStatus.transactionStatus.status !== 'finalized'
         ) ?? null;
       this._context.instructionNotViewedStatuses =
-        instructionStatuses?.filter(
-          (instructionStatus) => !instructionStatus.viewed
+        groupedInstructionStatuses?.filter(
+          (instructionStatus) =>
+            !viewedTransactionSignatures.some(
+              (viewedTransactionSignature) =>
+                viewedTransactionSignature ===
+                instructionStatus.transactionStatus.signature
+            )
         ) ?? null;
       this._context.markAsViewed = () =>
         this._userInstructionsStore.markAsViewed();
