@@ -88,9 +88,9 @@ $light-bg-darker-10: darken($light-background, 10%);
 $light-bg-darker-20: darken($light-background, 20%);
 $light-bg-darker-30: darken($light-background, 30%);
 $light-bg-lighter-5: lighten($light-background, 5%);
-$dark-bg-tooltip: lighten(#2c2c2c, 20%);
-$dark-bg-alpha-4: rgba(#2c2c2c, 0.04);
-$dark-bg-alpha-12: rgba(#2c2c2c, 0.12);
+$dark-bg-tooltip: lighten(#242424, 20%);
+$dark-bg-alpha-4: rgba(#242424, 0.04);
+$dark-bg-alpha-12: rgba(#242424, 0.12);
 
 $mat-light-theme-background: (
   background: $light-background,
@@ -111,7 +111,7 @@ $mat-light-theme-background: (
 );
 
 // Dark bg
-$dark-background: #2c2c2c;
+$dark-background: rgba(30, 30, 30, 0.8);
 $dark-bg-lighter-5: lighten($dark-background, 5%);
 $dark-bg-lighter-10: lighten($dark-background, 10%);
 $dark-bg-lighter-20: lighten($dark-background, 20%);

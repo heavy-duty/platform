@@ -26,6 +26,9 @@ body {
   --success-color: $success-bgcolor;
   --warning-color: $warning-bgcolor;
   --error-color: $error-bgcolor;
+  background-image: url('../assets/images/backgrounds/bricks.png');
+  background-size: contain;
+  background-repeat: repeat;
 }
 
 .smooth-transition * {
@@ -108,7 +111,7 @@ input[readonly] {
 }
 
 .bd-bg-black {
-  background-color: #2c2c2c;
+  background-color: #242424;
 }
 
 .bd-bg-image-1,
