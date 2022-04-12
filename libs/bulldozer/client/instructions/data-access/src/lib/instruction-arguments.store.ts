@@ -6,13 +6,14 @@ import {
   InstructionArgumentFilters,
 } from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { List, Map } from 'immutable';
 import { EMPTY, switchMap } from 'rxjs';
 import { InstructionArgumentApiService } from './instruction-argument-api.service';
 
 interface ViewModel {
   loading: boolean;
   filters: InstructionArgumentFilters | null;
-  instructionArgumentIds: string[] | null;
+  instructionArgumentIds: List<string> | null;
   instructionArgumentsMap: Map<string, Document<InstructionArgument>> | null;
 }
 
@@ -38,10 +39,9 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
     (instructionArgumentsMap) =>
       instructionArgumentsMap === null
         ? null
-        : Array.from(
-            instructionArgumentsMap,
-            ([, instructionArgument]) => instructionArgument
-          ).sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
+        : instructionArgumentsMap
+            .toList()
+            .sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
   );
 
   constructor(
@@ -79,7 +79,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
           tapResponse(
             (instructionArgumentIds) => {
               this.patchState({
-                instructionArgumentIds,
+                instructionArgumentIds: List(instructionArgumentIds),
               });
             },
             (error) => this._notificationStore.setError(error)
@@ -88,14 +88,14 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
       })
     );
 
-  private readonly _loadInstructionArguments = this.effect<string[] | null>(
+  private readonly _loadInstructionArguments = this.effect<List<string> | null>(
     switchMap((instructionArgumentIds) => {
       if (instructionArgumentIds === null) {
         return EMPTY;
       }
 
       return this._instructionArgumentApiService
-        .findByIds(instructionArgumentIds)
+        .findByIds(instructionArgumentIds.toArray())
         .pipe(
           tapResponse(
             (instructionArguments) => {
@@ -114,7 +114,7 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
                         instructionArgument.id,
                         instructionArgument
                       ),
-                    new Map<string, Document<InstructionArgument>>()
+                    Map<string, Document<InstructionArgument>>()
                   ),
               });
             },

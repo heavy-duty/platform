@@ -76,7 +76,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                 <section
                   class="flex gap-6 flex-wrap"
                   *ngIf="
-                    instructionArguments && instructionArguments.length > 0;
+                    instructionArguments && instructionArguments.size > 0;
                     else emptyList
                   "
                 >

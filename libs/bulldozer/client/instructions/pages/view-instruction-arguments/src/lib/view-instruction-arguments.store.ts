@@ -7,6 +7,7 @@ import {
 import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
 import { map, noop, switchMap, tap } from 'rxjs';
 import { documentToView } from './document-to-view';
 import { reduceInstructions } from './reduce-instructions';
@@ -14,12 +15,12 @@ import { flattenInstructions, InstructionStatus } from './utils';
 
 interface ViewModel {
   instructionId: string | null;
-  transactions: TransactionStatus[];
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  transactions: [],
+  transactions: List(),
 };
 
 @Injectable()
@@ -35,10 +36,10 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     this.select(({ transactions }) => transactions),
     (transactions) =>
       transactions
-        .reduce<InstructionStatus[]>(
+        .reduce(
           (currentInstructions, transactionStatus) =>
             currentInstructions.concat(flattenInstructions(transactionStatus)),
-          []
+          List<InstructionStatus>()
         )
         .sort(
           (a, b) =>
@@ -102,7 +103,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
   private readonly _addTransaction = this.updater<TransactionStatus>(
     (state, transaction) => ({
       ...state,
-      transactions: [...state.transactions, transaction],
+      transactions: state.transactions.push(transaction),
     })
   );
 
@@ -141,7 +142,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         return noop;
       }
 
-      this.patchState({ transactions: [] });
+      this.patchState({ transactions: List() });
 
       this._hdBroadcasterSocketStore.send(
         JSON.stringify({

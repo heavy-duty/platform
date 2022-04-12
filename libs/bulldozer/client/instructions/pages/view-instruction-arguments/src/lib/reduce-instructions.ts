@@ -1,4 +1,5 @@
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { InstructionArgumentItemView } from './types';
 import { InstructionStatus } from './utils';
 
@@ -83,9 +84,9 @@ const getAttributeKindSize = (
 };
 
 export const reduceInstructions = (
-  items: InstructionArgumentItemView[],
+  items: List<InstructionArgumentItemView>,
   instruction: InstructionStatus
-): InstructionArgumentItemView[] => {
+): List<InstructionArgumentItemView> => {
   switch (instruction.name) {
     case 'createInstructionArgument': {
       if (
@@ -140,39 +141,32 @@ export const reduceInstructions = (
         const itemIndex = items.findIndex((item) => item.id === argumentId);
 
         if (itemIndex === -1) {
-          return [
-            ...items,
-            {
-              id: argumentId,
-              name,
-              kind,
-              modifier,
-              isCreating: true,
-              isUpdating: false,
-              isDeleting: false,
-              instructionId,
-              applicationId,
-              workspaceId,
-            },
-          ];
+          return items.push({
+            id: argumentId,
+            name,
+            kind,
+            modifier,
+            isCreating: true,
+            isUpdating: false,
+            isDeleting: false,
+            instructionId,
+            applicationId,
+            workspaceId,
+          });
         } else {
-          return [
-            ...items.slice(0, itemIndex),
-            {
-              ...items[itemIndex],
-              id: argumentId,
-              name,
-              kind,
-              modifier,
-              isCreating: true,
-              isUpdating: false,
-              isDeleting: false,
-              instructionId,
-              applicationId,
-              workspaceId,
-            },
-            ...items.slice(itemIndex + 1),
-          ];
+          return items.update(itemIndex, (item) => ({
+            ...item,
+            id: argumentId,
+            name,
+            kind,
+            modifier,
+            isCreating: true,
+            isUpdating: false,
+            isDeleting: false,
+            instructionId,
+            applicationId,
+            workspaceId,
+          }));
         }
       } else if (instruction.transactionStatus.status === 'finalized') {
         return items.map((item) => {
