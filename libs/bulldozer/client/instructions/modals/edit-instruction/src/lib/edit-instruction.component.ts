@@ -2,13 +2,13 @@ import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
+import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-instruction',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.instruction ? 'Edit' : 'Create' }} instruction
+      {{ instruction ? 'Edit' : 'Create' }} instruction
     </h2>
 
     <form
@@ -49,7 +49,7 @@ import { Document, Instruction } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.instruction ? 'Save' : 'Create' }}
+        {{ instruction ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -72,12 +72,10 @@ export class EditInstructionComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditInstructionComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      instruction?: Document<Instruction>;
-    }
+    public instruction?: InstructionDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.instruction?.name ?? '', {
+      name: new FormControl(this.instruction?.name ?? '', {
         validators: [Validators.required],
       }),
     });

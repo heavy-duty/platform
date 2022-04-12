@@ -355,7 +355,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
               workspaceId,
               applicationId,
               instructionId,
-              instructionBody,
+              instructionBodyDto: { body: instructionBody },
             })
             .pipe(
               tapResponse(

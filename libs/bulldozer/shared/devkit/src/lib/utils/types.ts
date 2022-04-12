@@ -23,6 +23,14 @@ export interface CollectionAttributeDto {
   maxLength: number | null;
 }
 
+export interface InstructionDto {
+  name: string;
+}
+
+export interface InstructionBodyDto {
+  body: string;
+}
+
 export interface InstructionAccountDto {
   name: string;
   kind: number;

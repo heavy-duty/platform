@@ -1,9 +1,11 @@
+import { InstructionBodyDto, InstructionDto } from '../../utils';
+
 export interface CreateInstructionParams {
   authority: string;
   workspaceId: string;
   applicationId: string;
   instructionId: string;
-  instructionName: string;
+  instructionDto: InstructionDto;
 }
 
 export interface UpdateInstructionParams {
@@ -11,7 +13,7 @@ export interface UpdateInstructionParams {
   workspaceId: string;
   applicationId: string;
   instructionId: string;
-  instructionName: string;
+  instructionDto: InstructionDto;
 }
 
 export interface UpdateInstructionBodyParams {
@@ -19,7 +21,7 @@ export interface UpdateInstructionBodyParams {
   workspaceId: string;
   applicationId: string;
   instructionId: string;
-  instructionBody: string;
+  instructionBodyDto: InstructionBodyDto;
 }
 
 export interface DeleteInstructionParams {

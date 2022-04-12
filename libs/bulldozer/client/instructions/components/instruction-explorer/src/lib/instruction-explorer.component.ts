@@ -1,8 +1,12 @@
 import { Component, Input } from '@angular/core';
 import {
+  InstructionApiService,
   InstructionQueryStore,
   InstructionsStore,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 import { InstructionExplorerStore } from './instruction-explorer.store';
 
 @Component({
@@ -12,20 +16,34 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
       <mat-expansion-panel-header class="pl-6 pr-0">
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title class="font-bold"> Instructions </mat-panel-title>
-          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-            <button
-              *ngIf="applicationId$ | ngrxPush as applicationId"
-              mat-icon-button
-              [disabled]="!connected"
-              aria-label="Create instruction"
-              bdStopPropagation
-              bdEditInstruction
-              (editInstruction)="
-                onCreateInstruction(workspaceId, applicationId, $event)
-              "
-            >
-              <mat-icon>add</mat-icon>
-            </button>
+
+          <ng-container *hdWalletAdapter="let publicKey = publicKey">
+            <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+              <ng-container *ngIf="applicationId$ | ngrxPush as applicationId">
+                <button
+                  *ngIf="
+                    publicKey !== null &&
+                    workspaceId !== null &&
+                    applicationId !== null
+                  "
+                  mat-icon-button
+                  [disabled]="!connected"
+                  aria-label="Create instruction"
+                  bdStopPropagation
+                  bdEditInstruction
+                  (editInstruction)="
+                    onCreateInstruction(
+                      publicKey.toBase58(),
+                      workspaceId,
+                      applicationId,
+                      $event
+                    )
+                  "
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+              </ng-container>
+            </ng-container>
           </ng-container>
         </div>
       </mat-expansion-panel-header>
@@ -39,14 +57,14 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             matLine
             [routerLink]="[
               '/workspaces',
-              instruction.document.data.workspace,
+              instruction.workspaceId,
               'applications',
-              instruction.document.data.application,
+              instruction.applicationId,
               'instructions',
-              instruction.document.id
+              instruction.id
             ]"
             [matTooltip]="
-              instruction.document.name
+              instruction.name
                 | bdItemUpdatingMessage: instruction:'Instruction'
             "
             matTooltipShowDelay="500"
@@ -54,7 +72,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             <span
               class="pl-12 flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
             >
-              {{ instruction.document.name }}
+              {{ instruction.name }}
             </span>
             <mat-progress-spinner
               *ngIf="instruction | bdItemShowSpinner"
@@ -64,48 +82,54 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
             ></mat-progress-spinner>
           </a>
 
-          <button
-            mat-icon-button
-            [attr.aria-label]="
-              'More options of ' + instruction.document.name + ' instruction'
-            "
-            [matMenuTriggerFor]="instructionOptionsMenu"
-          >
-            <mat-icon>more_horiz</mat-icon>
-          </button>
-          <mat-menu #instructionOptionsMenu="matMenu">
-            <button
-              mat-menu-item
-              bdEditInstruction
-              [instruction]="instruction.document"
-              (editInstruction)="
-                onUpdateInstruction(
-                  instruction.document.data.workspace,
-                  instruction.document.data.application,
-                  instruction.document.id,
-                  $event
-                )
-              "
-              [disabled]="!connected"
-            >
-              <mat-icon>edit</mat-icon>
-              <span>Edit instruction</span>
-            </button>
-            <button
-              mat-menu-item
-              (click)="
-                onDeleteInstruction(
-                  instruction.document.data.workspace,
-                  instruction.document.data.application,
-                  instruction.document.id
-                )
-              "
-              [disabled]="!connected"
-            >
-              <mat-icon>delete</mat-icon>
-              <span>Delete instruction</span>
-            </button>
-          </mat-menu>
+          <ng-container *hdWalletAdapter="let publicKey = publicKey">
+            <ng-container *ngIf="publicKey !== null">
+              <button
+                mat-icon-button
+                [attr.aria-label]="
+                  'More options of ' + instruction.name + ' instruction'
+                "
+                [matMenuTriggerFor]="instructionOptionsMenu"
+              >
+                <mat-icon>more_horiz</mat-icon>
+              </button>
+              <mat-menu #instructionOptionsMenu="matMenu">
+                <button
+                  mat-menu-item
+                  bdEditInstruction
+                  [instruction]="instruction"
+                  (editInstruction)="
+                    onUpdateInstruction(
+                      publicKey.toBase58(),
+                      instruction.workspaceId,
+                      instruction.applicationId,
+                      instruction.id,
+                      $event
+                    )
+                  "
+                  [disabled]="!connected"
+                >
+                  <mat-icon>edit</mat-icon>
+                  <span>Edit instruction</span>
+                </button>
+                <button
+                  mat-menu-item
+                  (click)="
+                    onDeleteInstruction(
+                      publicKey.toBase58(),
+                      instruction.workspaceId,
+                      instruction.applicationId,
+                      instruction.id
+                    )
+                  "
+                  [disabled]="!connected"
+                >
+                  <mat-icon>delete</mat-icon>
+                  <span>Delete instruction</span>
+                </button>
+              </mat-menu>
+            </ng-container>
+          </ng-container>
         </mat-list-item>
       </mat-nav-list>
     </mat-expansion-panel>
@@ -128,48 +152,122 @@ export class InstructionExplorerComponent {
 
   readonly workspaceId$ = this._instructionExplorerStore.workspaceId$;
   readonly applicationId$ = this._instructionExplorerStore.applicationId$;
-  readonly instructions$ = this._instructionsStore.instructions$;
+  readonly instructions$ = this._instructionExplorerStore.instructions$;
 
   constructor(
-    private readonly _instructionExplorerStore: InstructionExplorerStore,
-    private readonly _instructionsStore: InstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionApiService: InstructionApiService,
+    private readonly _instructionExplorerStore: InstructionExplorerStore
   ) {}
 
   onCreateInstruction(
+    authority: string,
     workspaceId: string,
     applicationId: string,
-    instructionName: string
+    instructionDto: InstructionDto
   ) {
-    this._instructionExplorerStore.createInstruction({
-      workspaceId,
-      applicationId,
-      instructionName,
-    });
+    this._instructionApiService
+      .create({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create instruction request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${applicationId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateInstruction(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    instructionName: string
+    instructionDto: InstructionDto
   ) {
-    this._instructionExplorerStore.updateInstruction({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionName,
-    });
+    this._instructionApiService
+      .update({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionDto,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update instruction request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${applicationId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDeleteInstruction(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._instructionExplorerStore.deleteInstruction({
-      workspaceId,
-      applicationId,
-      instructionId,
-    });
+    this._instructionApiService
+      .delete({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete instruction request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${applicationId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }

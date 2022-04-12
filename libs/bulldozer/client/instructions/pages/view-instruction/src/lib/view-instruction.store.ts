@@ -7,6 +7,7 @@ import {
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
@@ -132,7 +133,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
     workspaceId: string;
     applicationId: string;
     instructionId: string;
-    instructionName: string;
+    instructionDto: InstructionDto;
   }>(
     pipe(
       concatMap((request) =>
@@ -140,7 +141,7 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
       ),
       concatMap(
         ([
-          { workspaceId, applicationId, instructionId, instructionName },
+          { workspaceId, applicationId, instructionId, instructionDto },
           authority,
         ]) => {
           if (authority === null) {
@@ -152,8 +153,8 @@ export class ViewInstructionStore extends ComponentStore<ViewModel> {
               authority: authority.toBase58(),
               workspaceId,
               applicationId,
-              instructionName,
               instructionId,
+              instructionDto,
             })
             .pipe(
               tapResponse(

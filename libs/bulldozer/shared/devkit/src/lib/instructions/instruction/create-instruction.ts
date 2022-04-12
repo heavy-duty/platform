@@ -10,7 +10,7 @@ export const createInstruction = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.createInstruction({ name: params.instructionName })
+        .methods.createInstruction(params.instructionDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

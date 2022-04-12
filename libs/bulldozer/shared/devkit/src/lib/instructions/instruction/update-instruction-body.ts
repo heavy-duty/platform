@@ -10,7 +10,7 @@ export const updateInstructionBody = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateInstructionBody({ body: params.instructionBody })
+        .methods.updateInstructionBody(params.instructionBodyDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

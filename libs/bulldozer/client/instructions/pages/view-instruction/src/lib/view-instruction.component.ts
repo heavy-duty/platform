@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { InstructionStore } from '@bulldozer-client/instructions-data-access';
+import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { map } from 'rxjs';
 import { ViewInstructionStore } from './view-instruction.store';
@@ -242,13 +243,13 @@ export class ViewInstructionComponent {
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    instructionName: string
+    instructionDto: InstructionDto
   ) {
     this._viewInstructionStore.updateInstruction({
       workspaceId,
       applicationId,
       instructionId,
-      instructionName,
+      instructionDto,
     });
   }
 
