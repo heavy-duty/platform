@@ -4,7 +4,7 @@ import {
   HdBroadcasterSocketStore,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
-import { isNotNullOrUndefined, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { map, noop, switchMap } from 'rxjs';
 import { documentToView } from './document-to-view';
@@ -25,6 +25,10 @@ const initialState: ViewModel = {
 export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
   private readonly _instructionId$ = this.select(
     ({ instructionId }) => instructionId
+  );
+  private readonly _topicName$ = this.select(
+    this._instructionId$.pipe(isNotNullOrUndefined),
+    (instructionId) => `instructionArguments:${instructionId}`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
@@ -63,17 +67,18 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._instructionArgumentsStore.setFilters(
-      this._instructionId$.pipe(
-        isNotNullOrUndefined,
-        map((instruction) => ({ instruction }))
+      this.select(
+        this._instructionId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (instructionId) => ({ instruction: instructionId })
       )
     );
     this._handleTransaction(
-      this._instructionId$.pipe(
+      this._topicName$.pipe(
         isNotNullOrUndefined,
-        switchMap((instructionId) =>
+        switchMap((topicName) =>
           this._hdBroadcasterSocketStore
-            .fromEvent(instructionId)
+            .fromEvent(topicName)
             .pipe(map((message) => message.data))
         )
       )
@@ -81,13 +86,13 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
     this._registerTopic(
       this.select(
         this._hdBroadcasterSocketStore.connected$,
-        this._instructionId$,
+        this._topicName$,
         this._instructionArgumentsStore.instructionArguments$.pipe(
           isNotNullOrUndefined
         ),
-        (connected, instructionId) => ({
+        (connected, topicName) => ({
           connected,
-          instructionId,
+          topicName,
         })
       )
     );
@@ -120,10 +125,10 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
 
   private readonly _registerTopic = this.effect<{
     connected: boolean;
-    instructionId: string | null;
+    topicName: string | null;
   }>(
-    tapEffect(({ connected, instructionId }) => {
-      if (!connected || instructionId === null) {
+    tapEffect(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
         return noop;
       }
 
@@ -132,7 +137,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
       this._hdBroadcasterSocketStore.send(
         JSON.stringify({
           event: 'subscribe',
-          data: instructionId,
+          data: topicName,
         })
       );
 
@@ -140,7 +145,7 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
         this._hdBroadcasterSocketStore.send(
           JSON.stringify({
             event: 'unsubscribe',
-            data: instructionId,
+            data: topicName,
           })
         );
       };

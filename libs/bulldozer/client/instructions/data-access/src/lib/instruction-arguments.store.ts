@@ -58,6 +58,8 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
     (state, filters) => ({
       ...state,
       filters,
+      instructionArgumentIds: null,
+      instructionArgumentsMap: null,
     })
   );
 

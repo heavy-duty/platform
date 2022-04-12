@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionArgument,
@@ -23,14 +22,18 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Finality, Keypair } from '@solana/web3.js';
+import {
+  Finality,
+  Keypair,
+  Transaction,
+  TransactionSignature,
+} from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -38,8 +41,7 @@ import {
 export class InstructionArgumentApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -110,7 +112,10 @@ export class InstructionArgumentApiService {
   // create instruction argument
   create(
     params: Omit<CreateInstructionArgumentParams, 'instructionArgumentId'>
-  ) {
+  ): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     const instructionArgumentKeypair = Keypair.generate();
 
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
@@ -133,18 +138,10 @@ export class InstructionArgumentApiService {
       partiallySignTransaction(instructionArgumentKeypair),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterSocketStore.send(
-              JSON.stringify({
-                event: 'transaction',
-                data: {
-                  transactionSignature,
-                  transaction,
-                  topicName: params.instructionId,
-                },
-              })
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -152,7 +149,10 @@ export class InstructionArgumentApiService {
   }
 
   // update instruction argument
-  update(params: UpdateInstructionArgumentParams) {
+  update(params: UpdateInstructionArgumentParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -168,18 +168,10 @@ export class InstructionArgumentApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterSocketStore.send(
-              JSON.stringify({
-                event: 'transaction',
-                data: {
-                  transactionSignature,
-                  transaction,
-                  topicName: params.instructionId,
-                },
-              })
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -187,7 +179,10 @@ export class InstructionArgumentApiService {
   }
 
   // delete instruction argument
-  delete(params: DeleteInstructionArgumentParams) {
+  delete(params: DeleteInstructionArgumentParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -203,18 +198,10 @@ export class InstructionArgumentApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterSocketStore.send(
-              JSON.stringify({
-                event: 'transaction',
-                data: {
-                  transactionSignature,
-                  transaction,
-                  topicName: params.instructionId,
-                },
-              })
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

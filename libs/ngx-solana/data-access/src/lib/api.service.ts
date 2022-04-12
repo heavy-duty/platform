@@ -399,7 +399,7 @@ export class HdSolanaApiService {
 
   sendTransaction(
     transaction: Transaction | Observable<Transaction>
-  ): Observable<string> {
+  ): Observable<TransactionSignature> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -409,11 +409,15 @@ export class HdSolanaApiService {
 
         return (isObservable(transaction) ? transaction : of(transaction)).pipe(
           concatMap((transaction) =>
-            this._httpClient.post<string>(apiEndpoint, transaction, {
-              headers: {
-                'solana-rpc-method': 'sendTransaction',
-              },
-            })
+            this._httpClient.post<TransactionSignature>(
+              apiEndpoint,
+              transaction,
+              {
+                headers: {
+                  'solana-rpc-method': 'sendTransaction',
+                },
+              }
+            )
           )
         );
       })

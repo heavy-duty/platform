@@ -10,6 +10,7 @@ import {
   InstructionArgumentsStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { map } from 'rxjs';
 import { InstructionArgumentItemView } from './types';
@@ -321,6 +322,7 @@ export class ViewInstructionArgumentsComponent implements OnInit {
 
   constructor(
     private readonly _route: ActivatedRoute,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionArgumentApiService: InstructionArgumentApiService,
     private readonly _instructionArgumentsStore: InstructionArgumentsStore,
@@ -351,8 +353,19 @@ export class ViewInstructionArgumentsComponent implements OnInit {
         instructionId,
       })
       .subscribe({
-        next: () =>
-          this._notificationStore.setEvent('Create argument request sent'),
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create argument request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicName: `instructionArguments:${instructionId}`,
+              },
+            })
+          );
+        },
         error: (error) => {
           this._notificationStore.setError(error);
         },
@@ -375,8 +388,19 @@ export class ViewInstructionArgumentsComponent implements OnInit {
         instructionArgumentId,
       })
       .subscribe({
-        next: () =>
-          this._notificationStore.setEvent('Update argument request sent'),
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update argument request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicName: `instructionArguments:${instructionId}`,
+              },
+            })
+          );
+        },
         error: (error) => this._notificationStore.setError(error),
       });
   }
@@ -395,8 +419,19 @@ export class ViewInstructionArgumentsComponent implements OnInit {
         instructionId,
       })
       .subscribe({
-        next: () =>
-          this._notificationStore.setEvent('Delete argument request sent'),
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete argument request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicName: `instructionArguments:${instructionId}`,
+              },
+            })
+          );
+        },
         error: (error) => this._notificationStore.setError(error),
       });
   }
