@@ -4,14 +4,36 @@ import {
   HdBroadcasterSocketStore,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
+import {
+  Document,
+  flattenInstructions,
+  InstructionArgument,
+  InstructionStatus,
+} from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { map, noop, switchMap, tap } from 'rxjs';
-import { documentToView } from './document-to-view';
 import { reduceInstructions } from './reduce-instructions';
-import { flattenInstructions, InstructionStatus } from './utils';
+import { InstructionArgumentItemView } from './types';
+
+const documentToView = (
+  document: Document<InstructionArgument>
+): InstructionArgumentItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+    kind: document.data.kind,
+    modifier: document.data.modifier,
+    instructionId: document.data.instruction,
+    applicationId: document.data.application,
+    workspaceId: document.data.workspace,
+  };
+};
 
 interface ViewModel {
   instructionId: string | null;
@@ -89,9 +111,6 @@ export class ViewInstructionArgumentsStore extends ComponentStore<ViewModel> {
       this.select(
         this._hdBroadcasterSocketStore.connected$,
         this._topicName$,
-        this._instructionArgumentsStore.instructionArguments$.pipe(
-          isNotNullOrUndefined
-        ),
         (connected, topicName) => ({
           connected,
           topicName,

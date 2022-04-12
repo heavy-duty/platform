@@ -1,7 +1,9 @@
-import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
+import {
+  InstructionArgumentDto,
+  InstructionStatus,
+} from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { InstructionArgumentItemView } from './types';
-import { InstructionStatus } from './utils';
 
 const decodeAttributeKind = (
   id: number,
