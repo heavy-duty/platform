@@ -36,12 +36,13 @@ import { Tab } from '@bulldozer-client/core-data-access';
             (closeTab)="onCloseTab(tab.id)"
             bdStopPropagation
           ></bd-collection-tab>
-          <bd-instruction-tab
+          <bd-view-instruction-tab
             *ngSwitchCase="'instruction'"
             [instructionId]="tab.id"
+            [url]="tab.url"
             (closeTab)="onCloseTab(tab.id)"
             bdStopPropagation
-          ></bd-instruction-tab>
+          ></bd-view-instruction-tab>
           <bd-profile-tab
             *ngSwitchCase="'profile'"
             (closeTab)="onCloseTab('profile')"

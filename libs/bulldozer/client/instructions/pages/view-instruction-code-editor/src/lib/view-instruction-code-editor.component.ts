@@ -54,7 +54,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
             <p
               *ngIf="
                 instructionBody !== null &&
-                instruction.document.data.body !== instructionBody
+                instruction.data.body !== instructionBody
               "
               class="ml-2 mb-0 text-right"
             >
@@ -64,9 +64,9 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
                 class="text-accent underline"
                 (click)="
                   onUpdateInstructionBody(
-                    instruction.document.data.workspace,
-                    instruction.document.data.application,
-                    instruction.document.id,
+                    instruction.data.workspace,
+                    instruction.data.application,
+                    instruction.id,
                     instructionBody
                   )
                 "

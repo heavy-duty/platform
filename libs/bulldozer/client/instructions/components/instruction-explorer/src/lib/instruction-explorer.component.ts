@@ -7,7 +7,9 @@ import {
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
+import { Keypair } from '@solana/web3.js';
 import { InstructionExplorerStore } from './instruction-explorer.store';
+import { InstructionItemView } from './types';
 
 @Component({
   selector: 'bd-instruction-explorer',
@@ -17,7 +19,12 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
         <div class="flex justify-between items-center flex-grow">
           <mat-panel-title class="font-bold"> Instructions </mat-panel-title>
 
-          <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <ng-container
+            *hdWalletAdapter="
+              let publicKey = publicKey;
+              let connected = connected
+            "
+          >
             <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
               <ng-container *ngIf="applicationId$ | ngrxPush as applicationId">
                 <button
@@ -49,7 +56,10 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
       </mat-expansion-panel-header>
       <mat-nav-list dense>
         <mat-list-item
-          *ngFor="let instruction of instructions$ | ngrxPush"
+          *ngFor="
+            let instruction of instructions$ | ngrxPush;
+            trackBy: identify
+          "
           class="pr-0"
         >
           <a
@@ -61,7 +71,8 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
               'applications',
               instruction.applicationId,
               'instructions',
-              instruction.id
+              instruction.id,
+              'arguments'
             ]"
             [matTooltip]="
               instruction.name
@@ -75,14 +86,19 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
               {{ instruction.name }}
             </span>
             <mat-progress-spinner
-              *ngIf="instruction | bdItemShowSpinner"
+              *ngIf="instruction | bdItemChanging"
               class="flex-shrink-0"
               diameter="16"
               mode="indeterminate"
             ></mat-progress-spinner>
           </a>
 
-          <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <ng-container
+            *hdWalletAdapter="
+              let publicKey = publicKey;
+              let connected = connected
+            "
+          >
             <ng-container *ngIf="publicKey !== null">
               <button
                 mat-icon-button
@@ -107,7 +123,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
                       $event
                     )
                   "
-                  [disabled]="!connected"
+                  [disabled]="!connected || (instruction | bdItemChanging)"
                 >
                   <mat-icon>edit</mat-icon>
                   <span>Edit instruction</span>
@@ -122,7 +138,7 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
                       instruction.id
                     )
                   "
-                  [disabled]="!connected"
+                  [disabled]="!connected || (instruction | bdItemChanging)"
                 >
                   <mat-icon>delete</mat-icon>
                   <span>Delete instruction</span>
@@ -141,8 +157,6 @@ import { InstructionExplorerStore } from './instruction-explorer.store';
   ],
 })
 export class InstructionExplorerComponent {
-  @Input() connected = false;
-
   @Input() set workspaceId(value: string) {
     this._instructionExplorerStore.setWorkspaceId(value);
   }
@@ -167,8 +181,10 @@ export class InstructionExplorerComponent {
     applicationId: string,
     instructionDto: InstructionDto
   ) {
+    const instructionKeypair = Keypair.generate();
+
     this._instructionApiService
-      .create({
+      .create(instructionKeypair, {
         authority,
         workspaceId,
         applicationId,
@@ -185,7 +201,8 @@ export class InstructionExplorerComponent {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${applicationId}`,
+                  `applications:${applicationId}:instructions`,
+                  `instructions:${instructionKeypair.publicKey.toBase58()}`,
                 ],
               },
             })
@@ -223,7 +240,8 @@ export class InstructionExplorerComponent {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${applicationId}`,
+                  `applications:${applicationId}:instructions`,
+                  `instructions:${instructionId}`,
                 ],
               },
             })
@@ -259,7 +277,8 @@ export class InstructionExplorerComponent {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${applicationId}`,
+                  `applications:${applicationId}:instructions`,
+                  `instructions:${instructionId}`,
                 ],
               },
             })
@@ -269,5 +288,9 @@ export class InstructionExplorerComponent {
           this._notificationStore.setError(error);
         },
       });
+  }
+
+  identify(_: number, instruction: InstructionItemView) {
+    return instruction.id;
   }
 }

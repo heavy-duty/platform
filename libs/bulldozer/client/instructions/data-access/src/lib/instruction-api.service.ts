@@ -102,12 +102,13 @@ export class InstructionApiService {
   }
 
   // create instruction
-  create(params: Omit<CreateInstructionParams, 'instructionId'>): Observable<{
+  create(
+    instructionKeypair: Keypair,
+    params: Omit<CreateInstructionParams, 'instructionId'>
+  ): Observable<{
     transactionSignature: TransactionSignature;
     transaction: Transaction;
   }> {
-    const instructionKeypair = Keypair.generate();
-
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(

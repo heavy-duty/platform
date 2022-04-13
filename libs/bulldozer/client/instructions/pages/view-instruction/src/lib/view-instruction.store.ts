@@ -1,208 +1,173 @@
 import { Injectable } from '@angular/core';
-import { TabStore } from '@bulldozer-client/core-data-access';
+import { InstructionStore } from '@bulldozer-client/instructions-data-access';
 import {
-  InstructionApiService,
-  InstructionStore,
-} from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
-import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
 import {
-  concatMap,
-  EMPTY,
-  filter,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+  Document,
+  flattenInstructions,
+  Instruction,
+  InstructionStatus,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { map, noop, switchMap, tap } from 'rxjs';
+import { reduceInstructions } from './reduce-instructions';
+import { InstructionItemView } from './types';
+
+const documentToView = (
+  document: Document<Instruction>
+): InstructionItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+    applicationId: document.data.application,
+    workspaceId: document.data.workspace,
+  };
+};
 
 interface ViewModel {
   instructionId: string | null;
-  applicationId: string | null;
-  workspaceId: string | null;
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
-  applicationId: null,
-  workspaceId: null,
+  transactions: List(),
 };
 
 @Injectable()
 export class ViewInstructionStore extends ComponentStore<ViewModel> {
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
-  readonly applicationId$ = this.select(({ applicationId }) => applicationId);
-  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  private readonly _topicName$ = this.select(
+    this.instructionId$.pipe(isNotNullOrUndefined),
+    (instructionId) => `instructions:${instructionId}`
+  );
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
+        )
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
+  );
+  readonly instruction$ = this.select(
+    this._instructionStore.instruction$,
+    this._instructionStatuses$,
+    (instruction, instructionStatuses) =>
+      instructionStatuses.reduce(
+        reduceInstructions,
+        instruction === null ? null : documentToView(instruction)
+      ),
+    { debounce: true }
+  );
 
   constructor(
-    private readonly _walletStore: WalletStore,
-    private readonly _tabStore: TabStore,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionStore: InstructionStore,
-    workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _instructionStore: InstructionStore
   ) {
     super(initialState);
 
-    this._instructionStore.setInstructionId(this.instructionId$);
-    this._handleInstruction(
-      this.instructionId$.pipe(
+    this._instructionStore.setInstructionId(
+      this.select(
+        this.instructionId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (instructionId) => instructionId
+      )
+    );
+    this._handleTransaction(
+      this._topicName$.pipe(
         isNotNullOrUndefined,
-        switchMap((instructionId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Instruction' &&
-                  account.pubkey === instructionId
-              )
-            )
-          )
+        switchMap((topicName) =>
+          this._hdBroadcasterSocketStore
+            .fromEvent(topicName)
+            .pipe(map((message) => message.data))
         )
       )
     );
-    this._openTab(
+    this._registerTopic(
       this.select(
-        this.instructionId$,
-        this.applicationId$,
-        this.workspaceId$,
-        (instructionId, applicationId, workspaceId) => ({
-          instructionId,
-          applicationId,
-          workspaceId,
-        }),
-        { debounce: true }
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
       )
     );
   }
 
-  readonly setWorkspaceId = this.updater<string | null>(
-    (state, workspaceId) => ({ ...state, workspaceId })
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: state.transactions.push(transaction),
+    })
   );
 
-  readonly setApplicationId = this.updater<string | null>(
-    (state, applicationId) => ({ ...state, applicationId })
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
   );
 
   readonly setInstructionId = this.updater<string | null>(
-    (state, instructionId) => ({ ...state, instructionId })
+    (state, instructionId) => ({
+      ...state,
+      instructionId,
+    })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createInstruction':
-        case 'updateInstruction':
-        case 'deleteInstruction': {
-          this._instructionStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  private readonly _openTab = this.effect<{
-    instructionId: string | null;
-    applicationId: string | null;
-    workspaceId: string | null;
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
   }>(
-    tap(({ instructionId, applicationId, workspaceId }) => {
-      if (
-        instructionId !== null &&
-        applicationId !== null &&
-        workspaceId !== null
-      ) {
-        this._tabStore.openTab({
-          id: instructionId,
-          kind: 'instruction',
-          url: `/workspaces/${workspaceId}/applications/${applicationId}/instructions/${instructionId}`,
-        });
+    tapEffect(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return noop;
       }
+
+      this.patchState({ transactions: List() });
+
+      this._hdBroadcasterSocketStore.send(
+        JSON.stringify({
+          event: 'subscribe',
+          data: topicName,
+        })
+      );
+
+      return () => {
+        this._hdBroadcasterSocketStore.send(
+          JSON.stringify({
+            event: 'unsubscribe',
+            data: topicName,
+          })
+        );
+      };
     })
-  );
-
-  readonly updateInstruction = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    instructionId: string;
-    instructionDto: InstructionDto;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          { workspaceId, applicationId, instructionId, instructionDto },
-          authority,
-        ]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
-
-          return this._instructionApiService
-            .update({
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-              instructionDto,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Update instruction request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
-  );
-
-  readonly deleteInstruction = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    instructionId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ workspaceId, instructionId, applicationId }, authority]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
-
-          return this._instructionApiService
-            .delete({
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Delete instruction request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
   );
 }

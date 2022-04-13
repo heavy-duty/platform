@@ -50,7 +50,7 @@ export class InstructionExplorerStore extends ComponentStore<ViewModel> {
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   private readonly _topicName$ = this.select(
     this.applicationId$.pipe(isNotNullOrUndefined),
-    (applicationId) => `instructions:${applicationId}`
+    (applicationId) => `applications:${applicationId}:instructions`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),

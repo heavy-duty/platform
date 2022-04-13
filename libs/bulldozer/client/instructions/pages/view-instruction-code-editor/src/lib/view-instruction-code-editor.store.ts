@@ -113,7 +113,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           instructionRelations,
           collections
         ) => ({
-          instruction: instruction?.document ?? null,
+          instruction: instruction ?? null,
           instructionArguments: instructionArguments?.toArray() ?? [],
           instructionAccounts: instructionAccounts.map(
             ({ document }) => document
@@ -130,7 +130,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
     this._loadHandleCode(
       this.select(
         this._instructionStore.instruction$,
-        (instruction) => instruction?.document.data.body ?? null
+        (instruction) => instruction?.data.body ?? null
       )
     );
     this._instructionArgumentQueryStore.setFilters(
@@ -293,13 +293,13 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
   private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        case 'createInstruction':
+        /*         case 'createInstruction':
         case 'updateInstruction':
         case 'updateInstructionBody':
         case 'deleteInstruction': {
           this._instructionStore.dispatch(instructionStatus);
           break;
-        }
+        } */
         case 'createInstructionAccount':
         case 'updateInstructionAccount':
         case 'deleteInstructionAccount': {

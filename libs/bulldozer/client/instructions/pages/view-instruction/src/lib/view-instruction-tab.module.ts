@@ -7,10 +7,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { InstructionTabComponent } from './instruction-tab.component';
+import { ViewInstructionTabComponent } from './view-instruction-tab.component';
 
 @NgModule({
-  declarations: [InstructionTabComponent],
+  declarations: [ViewInstructionTabComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -21,6 +21,6 @@ import { InstructionTabComponent } from './instruction-tab.component';
     ReactiveComponentModule,
     ItemUpdatingModule,
   ],
-  exports: [InstructionTabComponent],
+  exports: [ViewInstructionTabComponent],
 })
-export class InstructionTabModule {}
+export class ViewInstructionTabModule {}

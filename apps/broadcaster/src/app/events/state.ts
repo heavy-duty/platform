@@ -91,7 +91,12 @@ export const reduce = (state: State, action: ActionTypes): State => {
         const topic = state.topics.get(topicName);
 
         if (topic === undefined) {
-          return newTopics;
+          return newTopics.set(topicName, {
+            clients: Set(),
+            transactions: Map([
+              [transactionStatus.signature, transactionStatus],
+            ]),
+          });
         }
 
         return newTopics.set(topicName, {
@@ -123,8 +128,7 @@ export const reduce = (state: State, action: ActionTypes): State => {
             transactionStatus.signature,
             (transaction) => ({
               ...transaction,
-              timestamp: transactionStatus.timestamp,
-              status: transactionStatus.status,
+              ...transactionStatus,
             })
           ),
         });

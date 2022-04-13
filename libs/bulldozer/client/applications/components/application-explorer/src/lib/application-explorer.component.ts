@@ -61,7 +61,6 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           </bd-collection-explorer>
 
           <bd-instruction-explorer
-            [connected]="connected"
             [applicationId]="application.document.id"
             [workspaceId]="application.document.data.workspace"
           >

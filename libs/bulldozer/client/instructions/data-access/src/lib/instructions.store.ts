@@ -71,6 +71,7 @@ export class InstructionsStore extends ComponentStore<ViewModel> {
 
       this.patchState({
         loading: true,
+        instructionIds: List(),
         instructionsMap: null,
       });
 

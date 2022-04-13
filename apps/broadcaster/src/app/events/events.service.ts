@@ -5,6 +5,7 @@ import {
   mapTo,
   merge,
   scan,
+  share,
   tap,
   withLatestFrom,
 } from 'rxjs';
@@ -30,7 +31,8 @@ export class EventsService {
       }
 
       return reduce(state, action);
-    }, initialState)
+    }, initialState),
+    share()
   );
 
   // When client subscribes send all the transactions in process

@@ -7,6 +7,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditInstructionModule } from '@bulldozer-client/edit-instruction';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionComponent } from './view-instruction.component';
 
@@ -61,6 +63,8 @@ import { ViewInstructionComponent } from './view-instruction.component';
     ReactiveComponentModule,
     ItemUpdatingModule,
     EditInstructionModule,
+    HdWalletAdapterCdkModule,
+    HdBroadcasterCdkModule,
   ],
 })
 export class ViewInstructionModule {}

@@ -3,9 +3,9 @@ import { NgModule } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApplicationTabModule } from '@bulldozer-client/application-tab';
 import { CollectionTabModule } from '@bulldozer-client/collection-tab';
-import { InstructionTabModule } from '@bulldozer-client/instruction-tab';
 import { ProfileTabModule } from '@bulldozer-client/profile-tab';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
+import { ViewInstructionTabModule } from '@bulldozer-client/view-instruction';
 import { WorkspaceTabModule } from '@bulldozer-client/workspace-tab';
 import { TabListComponent } from './tab-list.component';
 
@@ -17,9 +17,9 @@ import { TabListComponent } from './tab-list.component';
     WorkspaceTabModule,
     ApplicationTabModule,
     CollectionTabModule,
-    InstructionTabModule,
     ProfileTabModule,
     StopPropagationModule,
+    ViewInstructionTabModule,
   ],
   exports: [TabListComponent],
 })

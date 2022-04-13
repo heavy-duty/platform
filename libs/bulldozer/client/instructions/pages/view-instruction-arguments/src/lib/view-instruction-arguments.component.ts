@@ -12,7 +12,8 @@ import {
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
-import { map } from 'rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 import { InstructionArgumentItemView } from './types';
 import { ViewInstructionArgumentsStore } from './view-instruction-arguments.store';
 
@@ -308,13 +309,19 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 export class ViewInstructionArgumentsComponent implements OnInit {
   @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
   readonly workspaceId$ = this._route.paramMap.pipe(
-    map((paramMap) => paramMap.get('workspaceId'))
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
   );
   readonly applicationId$ = this._route.paramMap.pipe(
-    map((paramMap) => paramMap.get('applicationId'))
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
   );
   readonly instructionId$ = this._route.paramMap.pipe(
-    map((paramMap) => paramMap.get('instructionId'))
+    map((paramMap) => paramMap.get('instructionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
   );
   readonly loading$ = this._instructionArgumentsStore.loading$;
   readonly instructionArguments$ =
@@ -330,11 +337,7 @@ export class ViewInstructionArgumentsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this._viewInstructionArgumentsStore.setInstructionId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
-      )
-    );
+    this._viewInstructionArgumentsStore.setInstructionId(this.instructionId$);
   }
 
   onCreateInstructionArgument(
