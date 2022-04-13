@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
 import { ProgramError } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
@@ -43,8 +44,13 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       switchMap((error) =>
         this._matSnackBar
-          .open(this.getErrorMessage(error), 'Close', {
-            panelClass: `error-snackbar`,
+          .openFromComponent(ConstructionNotificationComponent, {
+            duration: 10000,
+            data: {
+              title: 'Oops!!',
+              message: this.getErrorMessage(error),
+              type: 'error',
+            },
           })
           .afterDismissed()
       ),
@@ -57,9 +63,13 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       switchMap((event) =>
         this._matSnackBar
-          .open(event, 'Close', {
-            panelClass: `success-snackbar`,
-            duration: 2000,
+          .openFromComponent(ConstructionNotificationComponent, {
+            duration: 5000,
+            data: {
+              title: 'Hooray...',
+              message: event,
+              type: 'success',
+            },
           })
           .afterDismissed()
       ),

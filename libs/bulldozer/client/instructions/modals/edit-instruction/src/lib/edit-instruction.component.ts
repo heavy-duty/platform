@@ -2,6 +2,7 @@ import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
 import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
@@ -88,9 +89,13 @@ export class EditInstructionComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(ConstructionNotificationComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

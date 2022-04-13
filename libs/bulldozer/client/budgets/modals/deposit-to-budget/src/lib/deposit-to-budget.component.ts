@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
 
 @Component({
   selector: 'bd-deposit-to-budget',
@@ -81,9 +82,13 @@ export class DepositToBudgetComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(ConstructionNotificationComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

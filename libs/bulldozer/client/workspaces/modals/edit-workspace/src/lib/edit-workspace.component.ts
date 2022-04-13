@@ -95,9 +95,13 @@ export class EditWorkspaceComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(null as any, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

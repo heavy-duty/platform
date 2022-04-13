@@ -43,6 +43,7 @@
     "bulldozer-client-instructions-pages-view-instruction-signers": "libs/bulldozer/client/instructions/pages/view-instruction-signers",
     "bulldozer-client-notifications-data-access": "libs/bulldozer/client/notifications/data-access",
     "bulldozer-client-shared-components-code-editor": "libs/bulldozer/client/shared/components/code-editor",
+    "bulldozer-client-shared-components-construction-notification": "libs/bulldozer/client/shared/components/construction-notification",
     "bulldozer-client-shared-components-dark-theme-switch": "libs/bulldozer/client/shared/components/dark-theme-switch",
     "bulldozer-client-shared-components-tab-list": "libs/bulldozer/client/shared/components/tab-list",
     "bulldozer-client-shared-directives-dark-theme": "libs/bulldozer/client/shared/directives/dark-theme",

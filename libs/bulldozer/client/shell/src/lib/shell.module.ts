@@ -7,6 +7,7 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
+import { ConstructionNotificationModule } from '@bulldozer-client/construction-notification';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
 import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
 import { TabListModule } from '@bulldozer-client/tab-list';
@@ -90,6 +91,7 @@ import { ShellComponent } from './shell.component';
     WorkspaceExplorerModule,
     TabListModule,
     UserInstructionsModule,
+    ConstructionNotificationModule,
   ],
   providers: [AuthGuard],
 })

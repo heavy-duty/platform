@@ -168,3 +168,12 @@ mat-icon {
 .mat-drawer-backdrop.mat-drawer-shown {
   background-color: rgba(30, 30, 30, 0.7);
 }
+
+.mat-snack-bar-container {
+  display: flex !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}

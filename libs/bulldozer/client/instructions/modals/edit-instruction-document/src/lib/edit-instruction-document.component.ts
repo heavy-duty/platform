@@ -10,6 +10,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CollectionItemView } from '@bulldozer-client/collections-data-access';
+import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
 import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
 import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
@@ -262,9 +263,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
           this.modifierControl.value === 1 ? this.closeControl.value : null,
       });
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(ConstructionNotificationComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }
