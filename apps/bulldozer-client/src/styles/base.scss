@@ -148,6 +148,14 @@ input[readonly] {
   background-image: url('../assets/images/backgrounds/signers.png');
 }
 
+.bd-bg-image-7 {
+  background-image: url('../assets/images/backgrounds/wood.png');
+}
+
+.bd-bg-image-7 > .mat-dialog-container {
+  background: transparent !important;
+}
+
 .bd-bg-black-transparent-80 {
   background-color: rgba(30, 30, 30, 0.8);
 }

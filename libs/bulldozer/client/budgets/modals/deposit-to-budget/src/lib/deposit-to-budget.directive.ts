@@ -9,7 +9,8 @@ export class DepositToBudgetDirective {
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<DepositToBudgetComponent, null, { amount: number }>(
-        DepositToBudgetComponent
+        DepositToBudgetComponent,
+        { panelClass: 'bd-bg-image-7' }
       )
       .afterClosed()
       .subscribe(

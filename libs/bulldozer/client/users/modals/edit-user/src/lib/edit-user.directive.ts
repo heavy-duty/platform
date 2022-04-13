@@ -17,6 +17,7 @@ export class EditUserDirective {
     this._matDialog
       .open<EditUserComponent, UserDto, UserDto>(EditUserComponent, {
         data: this.user,
+        panelClass: 'bd-bg-image-7',
       })
       .afterClosed()
       .subscribe((data) => data && this.editUser.emit(data));

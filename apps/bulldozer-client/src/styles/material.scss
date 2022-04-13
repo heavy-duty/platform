@@ -164,3 +164,7 @@ mat-icon {
 .mat-tab-header {
   border-color: transparent !important;
 }
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(30, 30, 30, 0.7);
+}

@@ -19,7 +19,10 @@ export class EditWorkspaceDirective {
         EditWorkspaceComponent,
         { workspace?: Document<Workspace> },
         { name: string }
-      >(EditWorkspaceComponent, { data: { workspace: this.workspace } })
+      >(EditWorkspaceComponent, {
+        data: { workspace: this.workspace },
+        panelClass: 'bd-bg-image-7',
+      })
       .afterClosed()
       .subscribe((data) => data && this.editWorkspace.emit(data.name));
   }

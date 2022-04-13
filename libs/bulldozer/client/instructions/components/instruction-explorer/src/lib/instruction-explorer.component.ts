@@ -109,7 +109,10 @@ import { InstructionItemView } from './types';
               >
                 <mat-icon>more_horiz</mat-icon>
               </button>
-              <mat-menu #instructionOptionsMenu="matMenu">
+              <mat-menu
+                #instructionOptionsMenu="matMenu"
+                class="bd-bg-image-7 "
+              >
                 <button
                   mat-menu-item
                   bdEditInstruction

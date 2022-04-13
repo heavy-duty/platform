@@ -19,7 +19,10 @@ export class EditCollectionDirective {
         EditCollectionComponent,
         { collection?: Document<Collection> },
         { name: string }
-      >(EditCollectionComponent, { data: { collection: this.collection } })
+      >(EditCollectionComponent, {
+        data: { collection: this.collection },
+        panelClass: 'bd-bg-image-7',
+      })
       .afterClosed()
       .subscribe((data) => data && this.editCollection.emit(data.name));
   }

@@ -41,6 +41,7 @@ export class EditInstructionDocumentDirective {
           collections: this.collections,
           accounts: this.instructionAccounts,
         },
+        panelClass: 'bd-bg-image-7',
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionDocument.emit(data));

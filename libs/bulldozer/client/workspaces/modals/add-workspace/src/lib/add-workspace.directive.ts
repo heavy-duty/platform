@@ -14,7 +14,10 @@ export class AddWorkspaceDirective {
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<AddWorkspaceComponent, null, 'new' | 'import' | null>(
-        AddWorkspaceComponent
+        AddWorkspaceComponent,
+        {
+          panelClass: 'bd-bg-image-7',
+        }
       )
       .afterClosed()
       .pipe(
@@ -23,14 +26,16 @@ export class AddWorkspaceDirective {
           if (data === 'new') {
             return this._matDialog
               .open<EditWorkspaceComponent, undefined, WorkspaceDto>(
-                EditWorkspaceComponent
+                EditWorkspaceComponent,
+                { panelClass: 'bd-bg-image-7' }
               )
               .afterClosed()
               .pipe(tap((data) => data && this.newWorkspace.emit(data)));
           } else if (data === 'import') {
             return this._matDialog
               .open<ImportWorkspaceComponent, null, { pubkey: string }>(
-                ImportWorkspaceComponent
+                ImportWorkspaceComponent,
+                { panelClass: 'bd-bg-image-7' }
               )
               .afterClosed()
               .pipe(

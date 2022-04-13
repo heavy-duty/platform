@@ -67,7 +67,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
           >
           </bd-instruction-explorer>
 
-          <mat-menu #applicationOptionsMenu="matMenu">
+          <mat-menu #applicationOptionsMenu="matMenu" class="bd-bg-image-7 ">
             <!-- <a
               mat-menu-item
               [routerLink]="[

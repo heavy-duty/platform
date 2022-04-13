@@ -26,6 +26,7 @@ export class EditCollectionAttributeDirective {
         CollectionAttributeDto
       >(EditCollectionAttributeComponent, {
         data: { collectionAttribute: this.collectionAttribute },
+        panelClass: 'bd-bg-image-7',
       })
       .afterClosed()
       .subscribe((data) => data && this.editCollectionAttribute.emit(data));

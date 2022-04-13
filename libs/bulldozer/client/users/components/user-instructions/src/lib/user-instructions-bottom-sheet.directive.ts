@@ -14,6 +14,7 @@ export class UserInstructionsBottomSheetDirective {
       Observable<List<InstructionStatus> | null>
     >(UserInstructionsBottomSheetComponent, {
       data: this._userInstructionsStore.groupedInstructionStatuses$,
+      panelClass: 'bd-bg-image-7',
     });
   }
 

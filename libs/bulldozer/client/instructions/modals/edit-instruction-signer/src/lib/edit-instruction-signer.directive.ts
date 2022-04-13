@@ -29,6 +29,7 @@ export class EditInstructionSignerDirective {
         data: {
           signer: this.instructionSigner,
         },
+        panelClass: 'bd-bg-image-7',
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionSigner.emit(data));

@@ -73,7 +73,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
           >
             <mat-icon>more_horiz</mat-icon>
           </button>
-          <mat-menu #collectionOptionsMenu="matMenu">
+          <mat-menu #collectionOptionsMenu="matMenu" class="bd-bg-image-7 ">
             <button
               mat-menu-item
               bdEditCollection
