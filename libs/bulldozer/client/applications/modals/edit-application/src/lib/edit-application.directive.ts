@@ -6,22 +6,21 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
+import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 import { EditApplicationComponent } from './edit-application.component';
 
 @Directive({ selector: '[bdEditApplication]' })
 export class EditApplicationDirective {
-  @Input() application?: Document<Application>;
-  @Output() editApplication = new EventEmitter<string>();
+  @Input() application?: ApplicationDto;
+  @Output() editApplication = new EventEmitter<ApplicationDto>();
   @HostListener('click') onClick(): void {
     this._matDialog
-      .open<
+      .open<EditApplicationComponent, ApplicationDto, ApplicationDto>(
         EditApplicationComponent,
-        { application?: Document<Application> },
-        { name: string }
-      >(EditApplicationComponent, { data: { application: this.application } })
+        { data: this.application }
+      )
       .afterClosed()
-      .subscribe((data) => data && this.editApplication.emit(data.name));
+      .subscribe((data) => data && this.editApplication.emit(data));
   }
 
   constructor(private readonly _matDialog: MatDialog) {}

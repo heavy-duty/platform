@@ -16,9 +16,7 @@ import { HomeStore } from './home.store';
           Hello
 
           <ng-container *ngIf="user === null"> anon! </ng-container>
-          <ng-container *ngIf="user !== null">
-            {{ user.document.name }}!
-          </ng-container>
+          <ng-container *ngIf="user !== null"> {{ user.name }}! </ng-container>
         </h1>
 
         <p

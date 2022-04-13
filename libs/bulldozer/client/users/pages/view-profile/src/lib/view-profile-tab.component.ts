@@ -2,7 +2,7 @@ import { Component, HostBinding } from '@angular/core';
 import { TabStore } from '@bulldozer-client/core-data-access';
 
 @Component({
-  selector: 'bd-profile-tab',
+  selector: 'bd-view-profile-tab',
   template: `
     <div class="flex items-center p-0">
       <a
@@ -21,7 +21,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
     </div>
   `,
 })
-export class ProfileTabComponent {
+export class ViewProfileTabComponent {
   @HostBinding('class') class = 'block w-full';
 
   constructor(private readonly _tabStore: TabStore) {}

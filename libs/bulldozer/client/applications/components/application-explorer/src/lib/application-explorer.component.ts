@@ -4,6 +4,7 @@ import {
   ApplicationsStore,
   ApplicationView,
 } from '@bulldozer-client/applications-data-access';
+import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 import { ApplicationExplorerStore } from './application-explorer.store';
 
 @Component({
@@ -136,22 +137,22 @@ export class ApplicationExplorerComponent {
     private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
-  onCreateApplication(workspaceId: string, applicationName: string) {
+  onCreateApplication(workspaceId: string, applicationDto: ApplicationDto) {
     this._applicationExplorerStore.createApplication({
       workspaceId,
-      applicationName,
+      applicationDto,
     });
   }
 
   onUpdateApplication(
     workspaceId: string,
     applicationId: string,
-    applicationName: string
+    applicationDto: ApplicationDto
   ) {
     this._applicationExplorerStore.updateApplication({
       workspaceId,
       applicationId,
-      applicationName,
+      applicationDto,
     });
   }
 

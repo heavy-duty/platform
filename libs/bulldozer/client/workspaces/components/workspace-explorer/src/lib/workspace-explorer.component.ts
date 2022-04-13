@@ -1,11 +1,29 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Input,
+  OnInit,
+} from '@angular/core';
+import { ApplicationApiService } from '@bulldozer-client/applications-data-access';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
+import { UserApiService, UserStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceApiService,
   WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import {
+  ApplicationDto,
+  UserDto,
+  WorkspaceDto,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { Keypair } from '@solana/web3.js';
+import { map } from 'rxjs';
+import { WorkspaceDownloaderService } from './workspace-downloader.service';
+import { WorkspaceExplorerUserStore } from './workspace-explorer-user.store';
 import { WorkspaceExplorerStore } from './workspace-explorer.store';
 
 @Component({
@@ -17,14 +35,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
           class="flex items-center justify-center border-b hd-border-gray"
           *ngrxLet="user$; let user"
         >
-          <button
-            class="w-36 mt-5 pb-3"
-            bdEditUser
-            (editUser)="
-              onCreateUser($event.name, $event.userName, $event.thumbnailUrl)
-            "
-            *ngIf="user === null"
-          >
+          <div class="w-36 mt-5 pb-3" *ngIf="user === null">
             <figure class="w-20 h-20 m-auto mb-2 relative">
               <img
                 alt=""
@@ -37,9 +48,18 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 class="w-6 absolute right-0 bottom-0"
               />
             </figure>
-            <p class="text-center">Click here to a create new user</p>
-          </button>
+            <ng-container *hdWalletAdapter="let publicKey = publicKey">
+              <button
+                bdEditUser
+                (editUser)="onCreateUser(publicKey.toBase58(), $event)"
+                *ngIf="publicKey !== null"
+              >
+                Click here to a create new user
+              </button>
+            </ng-container>
+          </div>
           <!-- Move to components -->
+
           <a
             class="w-36 mt-5 pb-3"
             *ngIf="user !== null"
@@ -50,58 +70,63 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             >
               <img
                 alt=""
-                [src]="user.document.data.thumbnailUrl"
+                [src]="user.thumbnailUrl"
                 class="w-full"
                 onerror="this.src='assets/images/default-profile.png';"
               />
             </figure>
 
-            <p
-              class="flex items-center justify-center gap-2 mb-0"
-              [matTooltip]="
-                user.document.data.userName | bdItemUpdatingMessage: user:'User'
-              "
-              matTooltipShowDelay="500"
-            >
+            <p class="flex items-center justify-center gap-2 mb-0">
               <span>
-                {{ user.document.name }}
+                {{ user.name }}
               </span>
               <mat-progress-spinner
-                *ngIf="user | bdItemShowSpinner"
+                *ngIf="user | bdItemChanging"
                 diameter="16"
                 mode="indeterminate"
               ></mat-progress-spinner>
             </p>
             <p class="m-0 text-center">
               <a
-                [href]="
-                  'https://explorer.solana.com/address/' + user.document.id
-                "
+                [href]="'https://explorer.solana.com/address/' + user.id"
                 target="__blank"
                 class="text-accent underline"
-                >@{{ user.document.data.userName }}</a
+                >@{{ user.userName }}</a
               >
             </p>
           </a>
         </div>
 
-        <div class="flex-grow border-b hd-border-gray overflow-auto">
+        <div
+          class="flex-grow border-b hd-border-gray overflow-auto"
+          *hdWalletAdapter="
+            let publicKey = publicKey;
+            let connected = connected
+          "
+        >
           <ng-container *ngIf="workspace !== null">
             <h3 class="ml-4 mt-4 mb-0 flex justify-between items-center">
               <span class="hd-highlight-title uppercase"> Explorer </span>
-              <button
-                mat-icon-button
-                bdEditApplication
-                (editApplication)="
-                  onCreateApplication(workspace.document.id, $event)
-                "
-              >
-                <mat-icon>add</mat-icon>
-              </button>
+              <div *hdWalletAdapter="let publicKey = publicKey">
+                <button
+                  *ngIf="publicKey !== null"
+                  mat-icon-button
+                  bdEditApplication
+                  (editApplication)="
+                    onCreateApplication(
+                      publicKey.toBase58(),
+                      workspace.id,
+                      $event
+                    )
+                  "
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+              </div>
             </h3>
             <bd-application-explorer
               [connected]="connected"
-              [workspaceId]="workspace.document.id"
+              [workspaceId]="workspace.id"
             ></bd-application-explorer>
           </ng-container>
         </div>
@@ -115,11 +140,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <span
                 class="flex-grow overflow-hidden whitespace-nowrap overflow-ellipsis"
               >
-                {{ workspace.document.name }}
+                {{ workspace.name }}
               </span>
               <button
                 mat-icon-button
-                (click)="onDownloadWorkspace(workspace.document.id)"
+                (click)="onDownloadWorkspace(workspace.id)"
                 aria-label="Download workspace"
               >
                 <mat-icon inline>download</mat-icon>
@@ -127,7 +152,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <a
                 mat-icon-button
                 aria-label="View workspace details"
-                [routerLink]="['/workspaces', workspace.document.id]"
+                [routerLink]="['/workspaces', workspace.id]"
               >
                 <mat-icon inline>open_in_new</mat-icon>
               </a>
@@ -139,14 +164,18 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <img src="assets/images/logo.png" class="w-full" />
             </figure>
             <span class="text-center font-bold m-0">BULLDOZER</span>
-            <button
-              mat-icon-button
-              bdAddWorkspace
-              (newWorkspace)="onCreateWorkspace($event)"
-              (importWorkspace)="onImportWorkspace($event)"
-            >
-              <mat-icon>add</mat-icon>
-            </button>
+
+            <div *hdWalletAdapter="let publicKey = publicKey">
+              <button
+                *ngIf="publicKey !== null"
+                mat-icon-button
+                bdAddWorkspace
+                (newWorkspace)="onCreateWorkspace(publicKey.toBase58(), $event)"
+                (importWorkspace)="onImportWorkspace($event)"
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -154,48 +183,140 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [WorkspaceExplorerStore, UserStore, WorkspaceStore],
+  providers: [
+    WorkspaceExplorerUserStore,
+    WorkspaceExplorerStore,
+    UserStore,
+    WorkspaceStore,
+  ],
 })
-export class WorkspaceExplorerComponent {
-  @Input() connected = false;
+export class WorkspaceExplorerComponent implements OnInit {
   @Input() set workspaceId(value: string | null) {
     this._workspaceExplorerStore.setWorkspaceId(value);
   }
 
-  readonly user$ = this._userStore.user$;
-  readonly userId$ = this._userStore.userId$;
-  readonly workspace$ = this._workspaceStore.workspace$;
+  readonly user$ = this._workspaceExplorerUserStore.user$;
+  readonly workspace$ = this._workspaceExplorerStore.workspace$;
 
   constructor(
+    private readonly _walletStore: WalletStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _userApiService: UserApiService,
     private readonly _workspaceExplorerStore: WorkspaceExplorerStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _userStore: UserStore,
+    private readonly _workspaceExplorerUserStore: WorkspaceExplorerUserStore,
+    private readonly _applicationApiService: ApplicationApiService,
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _configStore: ConfigStore,
-    private readonly _notificationStore: NotificationStore
+    private readonly _workspaceDownloaderService: WorkspaceDownloaderService
   ) {}
 
-  onCreateUser(name: string, userName: string, thumbnailUrl: string) {
-    this._workspaceExplorerStore.createUser({
-      name,
-      userName,
-      thumbnailUrl,
-    });
+  ngOnInit() {
+    this._workspaceExplorerUserStore.setAuthority(
+      this._walletStore.publicKey$.pipe(
+        isNotNullOrUndefined,
+        map((publicKey) => publicKey.toBase58())
+      )
+    );
+  }
+
+  onCreateUser(authority: string, userDto: UserDto) {
+    this._userApiService
+      .create({
+        authority,
+        userDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create user request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [`authority:${authority}`],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDownloadWorkspace(workspaceId: string) {
-    this._workspaceExplorerStore.downloadWorkspace(workspaceId);
-  }
-
-  onCreateWorkspace(workspaceName: string) {
-    this._workspaceExplorerStore.createWorkspace(workspaceName);
-  }
-
-  onCreateApplication(workspaceId: string, applicationName: string) {
-    this._workspaceExplorerStore.createApplication({
-      workspaceId,
-      applicationName,
+    this._workspaceDownloaderService.downloadWorkspace(workspaceId).subscribe({
+      error: (error) => {
+        this._notificationStore.setError(error);
+      },
     });
+  }
+
+  onCreateWorkspace(authority: string, workspaceDto: WorkspaceDto) {
+    const workspaceKeypair = Keypair.generate();
+
+    this._workspaceApiService
+      .create(workspaceKeypair, {
+        authority,
+        workspaceDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create workspace request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `workspace:${workspaceKeypair.publicKey.toBase58()}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
+  }
+
+  onCreateApplication(
+    authority: string,
+    workspaceId: string,
+    applicationDto: ApplicationDto
+  ) {
+    const applicationKeypair = Keypair.generate();
+
+    this._applicationApiService
+      .create(applicationKeypair, {
+        authority,
+        workspaceId,
+        applicationDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create workspace request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `application:${applicationKeypair.publicKey.toBase58()}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onImportWorkspace(workspaceId: string) {

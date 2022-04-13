@@ -15,7 +15,7 @@ import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { map, noop, switchMap, tap } from 'rxjs';
-import { reduceInstructions } from './reduce-instructions';
+import { reduceInstructions } from './reduce-user-instructions';
 import { UserItemView } from './types';
 
 const documentToView = (document: Document<User>): UserItemView => {
@@ -43,7 +43,7 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewUserInfoStore extends ComponentStore<ViewModel> {
+export class WorkspaceExplorerUserStore extends ComponentStore<ViewModel> {
   readonly authority$ = this.select(({ authority }) => authority);
   private readonly _topicName$ = this.select(
     this.authority$.pipe(isNotNullOrUndefined),

@@ -1,332 +1,169 @@
 import { Injectable } from '@angular/core';
-import { ApplicationApiService } from '@bulldozer-client/applications-data-access';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import {
-  CollectionApiService,
-  CollectionAttributeApiService,
-} from '@bulldozer-client/collections-data-access';
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
 import {
-  InstructionAccountApiService,
-  InstructionApiService,
-  InstructionArgumentApiService,
-  InstructionRelationApiService,
-} from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
+  Document,
+  flattenInstructions,
   InstructionStatus,
-  UserApiService,
-  UserInstructionsStore,
-  UserStore,
-} from '@bulldozer-client/users-data-access';
-import {
-  WorkspaceApiService,
-  WorkspaceStore,
-} from '@bulldozer-client/workspaces-data-access';
-import {
-  generateWorkspaceMetadata,
-  generateWorkspaceZip,
-} from '@heavy-duty/generator';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  forkJoin,
-  from,
-  of,
-  pipe,
-  tap,
-  toArray,
-  withLatestFrom,
-} from 'rxjs';
+  Workspace,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { map, noop, switchMap, tap } from 'rxjs';
+import { reduceInstructions } from './reduce-workspace-instructions';
+import { WorkspaceItemView } from './types';
+
+const documentToView = (document: Document<Workspace>): WorkspaceItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+  };
+};
 
 interface ViewModel {
   workspaceId: string | null;
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
+  transactions: List(),
 };
 
 @Injectable()
 export class WorkspaceExplorerStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  private readonly _topicName$ = this.select(
+    this.workspaceId$.pipe(isNotNullOrUndefined),
+    (workspaceId) => `workspaces:${workspaceId}`
+  );
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
+        )
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
+  );
+  readonly workspace$ = this.select(
+    this._workspaceStore.workspace$,
+    this._instructionStatuses$,
+    (workspace, instructionStatuses) =>
+      instructionStatuses.reduce(
+        reduceInstructions,
+        workspace === null ? null : documentToView(workspace)
+      ),
+    { debounce: true }
+  );
 
   constructor(
-    private readonly _workspaceApiService: WorkspaceApiService,
-    private readonly _applicationApiService: ApplicationApiService,
-    private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionAttributeApiService: CollectionAttributeApiService,
-    private readonly _instructionApiService: InstructionApiService,
-    private readonly _instructionArgumentApiService: InstructionArgumentApiService,
-    private readonly _instructionAccountApiService: InstructionAccountApiService,
-    private readonly _instructionRelationApiService: InstructionRelationApiService,
-    private readonly _userApiService: UserApiService,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _userStore: UserStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _userInstructionsStore: UserInstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _workspaceStore: WorkspaceStore
   ) {
     super(initialState);
 
-    this._workspaceStore.setWorkspaceId(this.workspaceId$);
-    this._handleInstruction(this._userInstructionsStore.instruction$);
+    this._workspaceStore.setWorkspaceId(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (workspaceId) => workspaceId
+      )
+    );
+    this._handleTransaction(
+      this._topicName$.pipe(
+        isNotNullOrUndefined,
+        switchMap((topicName) =>
+          this._hdBroadcasterSocketStore
+            .fromEvent(topicName)
+            .pipe(map((message) => message.data))
+        )
+      )
+    );
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
+      )
+    );
   }
 
-  readonly setWorkspaceId = this.updater<string | null>(
-    (state, workspaceId) => ({ ...state, workspaceId })
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: state.transactions.push(transaction),
+    })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createUser':
-        case 'deleteUser': {
-          this._userStore.handleUserInstruction(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
+  );
+
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  readonly downloadWorkspace = this.effect<string>(
-    concatMap((workspaceId) =>
-      forkJoin({
-        workspace: this._workspaceApiService.findById(workspaceId),
-        applications: this._applicationApiService
-          .findIds({ workspace: workspaceId })
-          .pipe(
-            concatMap((applicationIds) =>
-              this._applicationApiService
-                .findByIds(applicationIds)
-                .pipe(
-                  concatMap((applications) =>
-                    from(applications).pipe(isNotNullOrUndefined, toArray())
-                  )
-                )
-            )
-          ),
-        collections: this._collectionApiService
-          .findIds({ workspace: workspaceId })
-          .pipe(
-            concatMap((collectionIds) =>
-              this._collectionApiService
-                .findByIds(collectionIds)
-                .pipe(
-                  concatMap((collections) =>
-                    from(collections).pipe(isNotNullOrUndefined, toArray())
-                  )
-                )
-            )
-          ),
-        collectionAttributes: this._collectionAttributeApiService
-          .findIds({ workspace: workspaceId })
-          .pipe(
-            concatMap((collectionAttributeIds) =>
-              this._collectionAttributeApiService
-                .findByIds(collectionAttributeIds)
-                .pipe(
-                  concatMap((collectionAttributes) =>
-                    from(collectionAttributes).pipe(
-                      isNotNullOrUndefined,
-                      toArray()
-                    )
-                  )
-                )
-            )
-          ),
-        instructions: this._instructionApiService
-          .findIds({
-            workspace: workspaceId,
-          })
-          .pipe(
-            concatMap((instructionIds) =>
-              this._instructionApiService
-                .findByIds(instructionIds)
-                .pipe(
-                  concatMap((instructions) =>
-                    from(instructions).pipe(isNotNullOrUndefined, toArray())
-                  )
-                )
-            )
-          ),
-        instructionArguments: this._instructionArgumentApiService
-          .findIds({
-            workspace: workspaceId,
-          })
-          .pipe(
-            concatMap((instructionArgumentIds) =>
-              this._instructionArgumentApiService
-                .findByIds(instructionArgumentIds)
-                .pipe(
-                  concatMap((instructionArguments) =>
-                    from(instructionArguments).pipe(
-                      isNotNullOrUndefined,
-                      toArray()
-                    )
-                  )
-                )
-            )
-          ),
-        instructionAccounts: this._instructionAccountApiService
-          .findIds({
-            workspace: workspaceId,
-          })
-          .pipe(
-            concatMap((instructionAccountIds) =>
-              this._instructionAccountApiService
-                .findByIds(instructionAccountIds)
-                .pipe(
-                  concatMap((instructionAccounts) =>
-                    from(instructionAccounts).pipe(
-                      isNotNullOrUndefined,
-                      toArray()
-                    )
-                  )
-                )
-            )
-          ),
-        instructionRelations: this._instructionRelationApiService
-          .findIds({
-            workspace: workspaceId,
-          })
-          .pipe(
-            concatMap((instructionRelationIds) =>
-              this._instructionRelationApiService
-                .findByIds(instructionRelationIds)
-                .pipe(
-                  concatMap((instructionRelations) =>
-                    from(instructionRelations).pipe(
-                      isNotNullOrUndefined,
-                      toArray()
-                    )
-                  )
-                )
-            )
-          ),
-      }).pipe(
-        tapResponse(
-          ({
-            workspace,
-            applications,
-            collections,
-            collectionAttributes,
-            instructions,
-            instructionArguments,
-            instructionAccounts,
-            instructionRelations,
-          }) =>
-            workspace &&
-            generateWorkspaceZip(
-              workspace,
-              generateWorkspaceMetadata(
-                applications,
-                collections,
-                collectionAttributes,
-                instructions,
-                instructionArguments,
-                instructionAccounts,
-                instructionRelations
-              )
-            ),
-          (error) => this._notificationStore.setError(error)
-        )
-      )
-    )
-  );
-
-  readonly createUser = this.effect<{
-    name: string;
-    userName: string;
-    thumbnailUrl: string;
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
   }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ name, userName, thumbnailUrl }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+    tapEffect(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return noop;
+      }
 
-        return this._userApiService
-          .create({
-            authority: authority.toBase58(),
-            name,
-            userName,
-            thumbnailUrl,
+      this.patchState({ transactions: List() });
+
+      this._hdBroadcasterSocketStore.send(
+        JSON.stringify({
+          event: 'subscribe',
+          data: topicName,
+        })
+      );
+
+      return () => {
+        this._hdBroadcasterSocketStore.send(
+          JSON.stringify({
+            event: 'unsubscribe',
+            data: topicName,
           })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Create user request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly createWorkspace = this.effect<string>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([workspaceName, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._workspaceApiService
-          .create({
-            workspaceName,
-            authority: authority.toBase58(),
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Create workspace request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly createApplication = this.effect<{
-    workspaceId: string;
-    applicationName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, applicationName }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._applicationApiService
-          .create({
-            authority: authority.toBase58(),
-            workspaceId,
-            applicationName,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Create application request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        );
+      };
+    })
   );
 }

@@ -1,14 +1,13 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
-  InstructionStatus,
   UserApiService,
   UserInstructionsStore,
   UserStore,
 } from '@bulldozer-client/users-data-access';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, of, pipe, tap, withLatestFrom } from 'rxjs';
+import { concatMap, EMPTY, of, pipe, withLatestFrom } from 'rxjs';
 
 @Injectable()
 export class HomeStore extends ComponentStore<object> {
@@ -21,10 +20,10 @@ export class HomeStore extends ComponentStore<object> {
   ) {
     super({});
 
-    this._handleInstruction(this._userInstructionsStore.instruction$);
+    // this._handleInstruction(this._userInstructionsStore.instruction$);
   }
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'createUser':
@@ -36,7 +35,7 @@ export class HomeStore extends ComponentStore<object> {
           break;
       }
     })
-  );
+  ); */
 
   readonly createUser = this.effect<{
     name: string;
@@ -55,9 +54,7 @@ export class HomeStore extends ComponentStore<object> {
         return this._userApiService
           .create({
             authority: authority.toBase58(),
-            name,
-            userName,
-            thumbnailUrl,
+            userDto: { name, userName, thumbnailUrl },
           })
           .pipe(
             tapResponse(

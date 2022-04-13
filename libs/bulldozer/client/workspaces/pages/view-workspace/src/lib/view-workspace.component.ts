@@ -15,7 +15,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     <ng-container *ngIf="workspace$ | ngrxPush as workspace">
       <aside class="w-80 flex flex-col flex-shrink-0">
         <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-          <p class="mb-0 text-xl uppercase">{{ workspace.document.name }}</p>
+          <p class="mb-0 text-xl uppercase">{{ workspace.name }}</p>
           <p class="text-xs">Visualize all the details about this workspace.</p>
         </header>
 
@@ -23,7 +23,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           <li>
             <a
               class="flex flex-col gap-1 border-l-4 py-5 px-7"
-              [routerLink]="['/workspaces', workspace.document.id, 'budget']"
+              [routerLink]="['/workspaces', workspace.id, 'budget']"
               [routerLinkActive]="[
                 'bg-white',
                 'bg-opacity-5',
@@ -31,7 +31,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               ]"
               [ngClass]="{
                 'border-transparent': !isRouteActive(
-                  '/workspaces/' + workspace.document.id + '/budget'
+                  '/workspaces/' + workspace.id + '/budget'
                 )
               }"
             >
@@ -42,11 +42,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           <li>
             <a
               class="flex flex-col gap-1 border-l-4 py-5 px-7"
-              [routerLink]="[
-                '/workspaces',
-                workspace.document.id,
-                'collaborators'
-              ]"
+              [routerLink]="['/workspaces', workspace.id, 'collaborators']"
               [routerLinkActive]="[
                 'bg-white',
                 'bg-opacity-5',
@@ -54,7 +50,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               ]"
               [ngClass]="{
                 'border-transparent': !isRouteActive(
-                  '/workspaces/' + workspace.document.id + '/collaborators'
+                  '/workspaces/' + workspace.id + '/collaborators'
                 )
               }"
             >
@@ -68,11 +64,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           <li>
             <a
               class="flex flex-col gap-1 border-l-4 py-5 px-7"
-              [routerLink]="[
-                '/workspaces',
-                workspace.document.id,
-                'instructions'
-              ]"
+              [routerLink]="['/workspaces', workspace.id, 'instructions']"
               [routerLinkActive]="[
                 'bg-white',
                 'bg-opacity-5',
@@ -80,7 +72,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               ]"
               [ngClass]="{
                 'border-transparent': !isRouteActive(
-                  '/workspaces/' + workspace.document.id + '/instructions'
+                  '/workspaces/' + workspace.id + '/instructions'
                 )
               }"
             >
@@ -99,15 +91,15 @@ import { ViewWorkspaceStore } from './view-workspace.store';
             mat-stroked-button
             color="accent"
             bdEditWorkspace
-            [workspace]="workspace.document"
-            (editWorkspace)="onUpdateWorkspace(workspace.document.id, $event)"
+            [workspace]="workspace"
+            (editWorkspace)="onUpdateWorkspace(workspace.id, $event)"
           >
             Edit
           </button>
           <button
             mat-stroked-button
             color="warn"
-            (click)="onDeleteWorkspace(workspace.document.id)"
+            (click)="onDeleteWorkspace(workspace.id)"
           >
             Delete
           </button>

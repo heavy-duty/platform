@@ -7,13 +7,13 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-workspace',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.workspace ? 'Edit' : 'Create' }} workspace
+      {{ workspace ? 'Edit' : 'Create' }} workspace
     </h2>
 
     <form
@@ -54,7 +54,7 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.workspace ? 'Save' : 'Create' }}
+        {{ workspace ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -79,12 +79,10 @@ export class EditWorkspaceComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditWorkspaceComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      workspace?: Document<Workspace>;
-    }
+    public workspace?: WorkspaceDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.workspace?.name ?? '', {
+      name: new FormControl(this.workspace?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
     });

@@ -13,6 +13,7 @@ import { EditUserModule } from '@bulldozer-client/edit-user';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceExplorerComponent } from './workspace-explorer.component';
 @NgModule({
@@ -32,6 +33,7 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     AddWorkspaceModule,
     EditUserModule,
     ItemUpdatingModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [WorkspaceExplorerComponent],
   exports: [WorkspaceExplorerComponent],

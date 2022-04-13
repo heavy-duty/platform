@@ -4,10 +4,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { ProfileTabComponent } from './profile-tab.component';
+import { ViewProfileTabComponent } from './view-profile-tab.component';
 
 @NgModule({
-  declarations: [ProfileTabComponent],
+  declarations: [ViewProfileTabComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -15,6 +15,6 @@ import { ProfileTabComponent } from './profile-tab.component';
     MatIconModule,
     ReactiveComponentModule,
   ],
-  exports: [ProfileTabComponent],
+  exports: [ViewProfileTabComponent],
 })
-export class ProfileTabModule {}
+export class ViewProfileTabModule {}

@@ -9,6 +9,7 @@ import { RouterModule } from '@angular/router';
 import { EditUserModule } from '@bulldozer-client/edit-user';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewUserInfoComponent } from './view-user-info.component';
 
@@ -30,6 +31,7 @@ import { ViewUserInfoComponent } from './view-user-info.component';
     EditUserModule,
     ItemUpdatingModule,
     ObscureAddressModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewUserInfoComponent],
 })

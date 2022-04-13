@@ -7,13 +7,13 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, User } from '@heavy-duty/bulldozer-devkit';
+import { UserDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-user',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.user ? 'Edit' : 'Create' }} user
+      {{ user ? 'Edit' : 'Create' }} user
     </h2>
 
     <form
@@ -112,7 +112,7 @@ import { Document, User } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.user ? 'Save' : 'Create' }}
+        {{ user ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -137,18 +137,16 @@ export class EditUserComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditUserComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      user?: Document<User>;
-    }
+    public user?: UserDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.user?.name ?? '', {
+      name: new FormControl(this.user?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
-      userName: new FormControl(this.data?.user?.data.userName ?? '', {
+      userName: new FormControl(this.user?.userName ?? '', {
         validators: [Validators.required, Validators.maxLength(15)],
       }),
-      thumbnailUrl: new FormControl(this.data?.user?.data.thumbnailUrl ?? '', {
+      thumbnailUrl: new FormControl(this.user?.thumbnailUrl ?? '', {
         validators: [Validators.required, Validators.maxLength(100)],
       }),
     });

@@ -80,13 +80,27 @@ export interface User {
   bump: number;
 }
 
+export interface UserDto {
+  name: string;
+  userName: string;
+  thumbnailUrl: string;
+}
+
 export interface Workspace {
   authority: string;
+}
+
+export interface WorkspaceDto {
+  name: string;
 }
 
 export interface Application {
   authority: string;
   workspace: string;
+}
+
+export interface ApplicationDto {
+  name: string;
 }
 
 export interface Collection {

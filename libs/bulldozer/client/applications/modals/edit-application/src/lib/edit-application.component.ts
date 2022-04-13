@@ -2,13 +2,13 @@ import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Application, Document } from '@heavy-duty/bulldozer-devkit';
+import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-application',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.application ? 'Edit' : 'Create' }} application
+      {{ application ? 'Edit' : 'Create' }} application
     </h2>
 
     <form
@@ -47,7 +47,7 @@ import { Application, Document } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.application ? 'Save' : 'Create' }}
+        {{ application ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -70,12 +70,10 @@ export class EditApplicationComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditApplicationComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      application?: Document<Application>;
-    }
+    public application?: ApplicationDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.application?.name ?? '', {
+      name: new FormControl(this.application?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
     });

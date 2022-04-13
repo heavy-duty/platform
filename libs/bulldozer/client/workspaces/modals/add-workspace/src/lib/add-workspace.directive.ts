@@ -2,13 +2,14 @@ import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { EditWorkspaceComponent } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponent } from '@bulldozer-client/import-workspace';
+import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { concatMap, EMPTY, tap } from 'rxjs';
 import { AddWorkspaceComponent } from './add-workspace.component';
 
 @Directive({ selector: '[bdAddWorkspace]' })
 export class AddWorkspaceDirective {
-  @Output() newWorkspace = new EventEmitter<string>();
+  @Output() newWorkspace = new EventEmitter<WorkspaceDto>();
   @Output() importWorkspace = new EventEmitter<string>();
   @HostListener('click') onClick(): void {
     this._matDialog
@@ -21,13 +22,11 @@ export class AddWorkspaceDirective {
         concatMap((data) => {
           if (data === 'new') {
             return this._matDialog
-              .open<
-                EditWorkspaceComponent,
-                { workspace: undefined },
-                { name: string }
-              >(EditWorkspaceComponent, { data: { workspace: undefined } })
+              .open<EditWorkspaceComponent, undefined, WorkspaceDto>(
+                EditWorkspaceComponent
+              )
               .afterClosed()
-              .pipe(tap((data) => data && this.newWorkspace.emit(data.name)));
+              .pipe(tap((data) => data && this.newWorkspace.emit(data)));
           } else if (data === 'import') {
             return this._matDialog
               .open<ImportWorkspaceComponent, null, { pubkey: string }>(

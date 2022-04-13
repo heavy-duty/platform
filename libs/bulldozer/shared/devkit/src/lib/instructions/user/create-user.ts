@@ -10,11 +10,7 @@ export const createUser = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.createUser({
-          name: params.name,
-          thumbnailUrl: params.thumbnailUrl,
-          userName: params.userName,
-        })
+        .methods.createUser(params.userDto)
         .accounts({
           authority: new PublicKey(params.authority),
         })

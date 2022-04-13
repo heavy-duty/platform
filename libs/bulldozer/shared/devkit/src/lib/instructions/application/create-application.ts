@@ -10,7 +10,7 @@ export const createApplication = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.createApplication({ name: params.applicationName })
+        .methods.createApplication(params.applicationDto)
         .accounts({
           workspace: new PublicKey(params.workspaceId),
           application: new PublicKey(params.applicationId),

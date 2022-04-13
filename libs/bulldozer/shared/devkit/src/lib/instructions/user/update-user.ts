@@ -10,11 +10,7 @@ export const updateUser = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateUser({
-          name: params.name,
-          thumbnailUrl: params.thumbnailUrl,
-          userName: params.userName,
-        })
+        .methods.updateUser(params.userDto)
         .accounts({
           authority: new PublicKey(params.authority),
         })

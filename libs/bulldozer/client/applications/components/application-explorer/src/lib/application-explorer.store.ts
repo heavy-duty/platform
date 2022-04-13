@@ -7,9 +7,11 @@ import {
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
+import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { Keypair } from '@solana/web3.js';
 import {
   combineLatest,
   concatMap,
@@ -90,20 +92,22 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
 
   readonly createApplication = this.effect<{
     workspaceId: string;
-    applicationName: string;
+    applicationDto: ApplicationDto;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
-      concatMap(([{ applicationName, workspaceId }, authority]) => {
+      concatMap(([{ applicationDto, workspaceId }, authority]) => {
         if (authority === null) {
           return EMPTY;
         }
 
+        const applicationKeypair = Keypair.generate();
+
         return this._applicationApiService
-          .create({
-            applicationName,
+          .create(applicationKeypair, {
+            applicationDto,
             authority: authority.toBase58(),
             workspaceId,
           })
@@ -123,14 +127,14 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   readonly updateApplication = this.effect<{
     workspaceId: string;
     applicationId: string;
-    applicationName: string;
+    applicationDto: ApplicationDto;
   }>(
     pipe(
       concatMap((request) =>
         of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
       ),
       concatMap(
-        ([{ workspaceId, applicationId, applicationName }, authority]) => {
+        ([{ workspaceId, applicationId, applicationDto }, authority]) => {
           if (authority === null) {
             return EMPTY;
           }
@@ -139,7 +143,7 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
             .update({
               authority: authority.toBase58(),
               workspaceId,
-              applicationName,
+              applicationDto,
               applicationId,
             })
             .pipe(

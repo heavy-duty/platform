@@ -1,16 +1,11 @@
 import { Injectable } from '@angular/core';
 import { TabStore } from '@bulldozer-client/core-data-access';
-import {
-  InstructionStatus,
-  UserInstructionsStore,
-} from '@bulldozer-client/users-data-access';
+import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import {
   WorkspaceInstructionsStore,
   WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { filter, map, switchMap, tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -33,7 +28,7 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._workspaceStore.setWorkspaceId(this.workspaceId$);
-    this._handleInstruction(
+    /* this._handleInstruction(
       this.workspaceId$.pipe(
         isNotNullOrUndefined,
         switchMap((workspaceId) =>
@@ -90,14 +85,14 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
         ),
         map(({ instructionStatus }) => instructionStatus)
       )
-    );
+    ); */
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'updateWorkspace':
@@ -118,5 +113,5 @@ export class WorkspaceTabStore extends ComponentStore<ViewModel> {
   private readonly _handleWorkspaceDeleted = this.effect<{
     workspaceId: string;
     instructionStatus: InstructionStatus;
-  }>(tap(({ workspaceId }) => this._tabStore.closeTab(workspaceId)));
+  }>(tap(({ workspaceId }) => this._tabStore.closeTab(workspaceId))); */
 }

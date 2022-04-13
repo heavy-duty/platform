@@ -30,7 +30,6 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
           [disableClose]="(isHandset$ | ngrxPush) === false"
         >
           <bd-workspace-explorer
-            [connected]="(connected$ | ngrxPush) ?? false"
             [workspaceId]="(workspaceId$ | ngrxPush) ?? null"
           ></bd-workspace-explorer>
         </mat-sidenav>

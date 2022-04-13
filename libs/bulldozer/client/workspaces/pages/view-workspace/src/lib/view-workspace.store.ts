@@ -3,25 +3,13 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { UserInstructionsStore } from '@bulldozer-client/users-data-access';
 import {
-  InstructionStatus,
   WorkspaceApiService,
   WorkspaceInstructionsStore,
   WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  map,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, of, pipe, tap, withLatestFrom } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -48,7 +36,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
     this._workspaceStore.setWorkspaceId(this.workspaceId$);
     this._openTab(this.workspaceId$);
-    this._handleInstruction(
+    /* this._handleInstruction(
       this.workspaceId$.pipe(
         isNotNullOrUndefined,
         switchMap((workspaceId) =>
@@ -62,8 +50,8 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
-    this._handleWorkspaceCreated(
+    ); */
+    /* this._handleWorkspaceCreated(
       this.select(
         this.workspaceId$.pipe(isNotNullOrUndefined),
         userInstructionsStore.instruction$.pipe(
@@ -82,7 +70,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
         ),
         map(({ instructionStatus }) => instructionStatus)
       )
-    );
+    ); */
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -101,7 +89,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'updateWorkspace':
@@ -113,11 +101,11 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
-  private readonly _handleWorkspaceCreated = this.effect<InstructionStatus>(
+  /* private readonly _handleWorkspaceCreated = this.effect<InstructionStatus>(
     tap((instructionStatus) => this._workspaceStore.dispatch(instructionStatus))
-  );
+  ); */
 
   readonly updateWorkspace = this.effect<{
     workspaceId: string;
@@ -134,7 +122,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
 
         return this._workspaceApiService
           .update({
-            workspaceName,
+            workspaceDto: { name: workspaceName },
             authority: authority.toBase58(),
             workspaceId,
           })

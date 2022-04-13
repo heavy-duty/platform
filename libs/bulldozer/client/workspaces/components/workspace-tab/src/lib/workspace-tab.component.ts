@@ -11,29 +11,19 @@ import { WorkspaceTabStore } from './workspace-tab.store';
       class="flex items-center p-0"
     >
       <a
-        [routerLink]="['/workspaces', workspace.document.id]"
+        [routerLink]="['/workspaces', workspace.id]"
         class="w-40 h-12 flex justify-between gap-2 items-center pl-4 flex-grow"
-        [matTooltip]="
-          workspace.document.name | bdItemUpdatingMessage: workspace:'Workspace'
-        "
-        matTooltipShowDelay="500"
       >
         <span
           class="flex-grow text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
         >
-          {{ workspace.document.name }}
+          {{ workspace.name }}
         </span>
-        <mat-progress-spinner
-          *ngIf="workspace | bdItemShowSpinner"
-          class="flex-shrink-0"
-          mode="indeterminate"
-          diameter="16"
-        ></mat-progress-spinner>
       </a>
       <button
         mat-icon-button
-        [attr.aria-label]="'Close ' + workspace.document.name + ' tab'"
-        (click)="onCloseTab(workspace.document.id)"
+        [attr.aria-label]="'Close ' + workspace.name + ' tab'"
+        (click)="onCloseTab(workspace.id)"
       >
         <mat-icon>close</mat-icon>
       </button>

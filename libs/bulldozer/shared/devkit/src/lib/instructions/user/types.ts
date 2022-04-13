@@ -1,15 +1,13 @@
+import { UserDto } from '../../utils';
+
 export interface CreateUserParams {
   authority: string;
-  name: string;
-  userName: string;
-  thumbnailUrl: string;
+  userDto: UserDto;
 }
 
 export interface UpdateUserParams {
   authority: string;
-  name: string;
-  userName: string;
-  thumbnailUrl: string;
+  userDto: UserDto;
 }
 
 export interface DeleteUserParams {
