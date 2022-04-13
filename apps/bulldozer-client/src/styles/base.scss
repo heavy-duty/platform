@@ -119,7 +119,8 @@ input[readonly] {
 .bd-bg-image-3,
 .bd-bg-image-4,
 .bd-bg-image-5,
-.bd-bg-image-6 {
+.bd-bg-image-6,
+.bd-bg-image-7 {
   background-size: cover;
 }
 
@@ -145,4 +146,12 @@ input[readonly] {
 
 .bd-bg-image-6 {
   background-image: url('../assets/images/backgrounds/signers.png');
+}
+
+.bd-bg-black-transparent-80 {
+  background-color: rgba(30, 30, 30, 0.8);
+}
+
+.bd-bg-black-transparent-60 {
+  background-color: rgba(30, 30, 30, 0.6);
 }

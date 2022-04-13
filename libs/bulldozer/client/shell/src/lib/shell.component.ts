@@ -19,10 +19,10 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
   selector: 'bd-shell',
   template: `
     <div>
-      <mat-sidenav-container class="h-screen-layout w-full">
+      <mat-sidenav-container class="h-screen-layout w-full bg-transparent">
         <mat-sidenav
           #navigation
-          class="bd-h-inherit w-60"
+          class="bd-h-inherit w-60 bd-bg-black-transparent-80"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
@@ -35,9 +35,9 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
         </mat-sidenav>
 
         <mat-sidenav-content>
-          <div class="flex flex-col h-screen">
+          <div class="flex flex-col h-screen  bd-bg-black-transparent-60">
             <div
-              class="flex items-center gap-2 border-b-1 border-white border-opacity-10"
+              class="flex items-center gap-2 bd-bg-black-transparent-60 border-b-1 border-white border-opacity-10"
             >
               <div class="px-4">
                 <button
@@ -82,7 +82,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
         <mat-sidenav
           #settings
-          class="bd-h-inherit w-80"
+          class="bd-h-inherit w-80 bd-bg-image-7"
           fixedInViewport
           position="end"
           [mode]="'over'"
