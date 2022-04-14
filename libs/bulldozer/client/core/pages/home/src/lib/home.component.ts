@@ -1,39 +1,63 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { UserStore } from '@bulldozer-client/users-data-access';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserApiService, UserStore } from '@bulldozer-client/users-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { UserDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { map } from 'rxjs';
 import { HomeStore } from './home.store';
 
 @Component({
   selector: 'bd-home',
   template: `
-    <main class="h-full flex flex-col items-center py-8 gap-6">
-      <figure class="w-32">
-        <img src="assets/images/logo.png" class="w-full" />
-        <figcaption class="my-1 text-center font-bold">BULLDOZER</figcaption>
-      </figure>
-
-      <div class="w-96" *ngrxLet="user$; let user">
+    <ng-container *ngrxLet="user$; let user">
+      <header>
+        <figure class="w-32 mx-auto">
+          <img src="assets/images/logo.png" class="w-full" />
+          <figcaption class="my-1 text-center font-bold">BULLDOZER</figcaption>
+        </figure>
         <h1 class="text-2xl text-center font-bold m-0">
-          Hello
-
-          <ng-container *ngIf="user === null"> anon! </ng-container>
-          <ng-container *ngIf="user !== null"> {{ user.name }}! </ng-container>
-        </h1>
-
-        <p
-          *ngIf="user === null"
-          class="text-xs text-white text-center text-opacity-70"
-        >
-          Looking to register and start building?
-          <button
-            class="text-accent underline"
-            bdEditUser
-            (editUser)="
-              onCreateUser($event.name, $event.userName, $event.thumbnailUrl)
-            "
+          <ng-container
+            *ngIf="(loading$ | ngrxPush) === false; else loadingUser"
           >
-            Register here
-          </button>
-        </p>
+            Hello
+
+            <ng-container *ngIf="user === null"> anon! </ng-container>
+            <ng-container *ngIf="user !== null">
+              {{ user.name }}!
+            </ng-container>
+          </ng-container>
+
+          <ng-template #loadingUser>...</ng-template>
+        </h1>
+      </header>
+
+      <main class="w-96 mx-auto">
+        <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <p
+            *ngIf="
+              user === null &&
+              publicKey !== null &&
+              (loading$ | ngrxPush) === false
+            "
+            class="text-xs text-white text-center text-opacity-70"
+          >
+            Looking to register and start building?
+            <button
+              class="text-accent underline"
+              bdEditUser
+              (editUser)="onCreateUser(publicKey.toBase58(), $event)"
+            >
+              Register here
+            </button>
+          </p>
+        </ng-container>
 
         <p class="mt-8 text-justify">
           Bulldozer is a open source low code platform to build Solana programs.
@@ -57,27 +81,59 @@ import { HomeStore } from './home.store';
             </a>
           </figure>
         </div>
-      </div>
-    </main>
+      </main>
+    </ng-container>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [UserStore, HomeStore],
 })
-export class HomeComponent {
-  @HostBinding('class') class = 'block min-h-full';
-  readonly user$ = this._userStore.user$;
+export class HomeComponent implements OnInit {
+  @HostBinding('class') class = 'block min-h-full w-full py-8';
+  readonly user$ = this._homeStore.user$;
+  readonly loading$ = this._userStore.loading$;
 
   constructor(
+    private readonly _walletStore: WalletStore,
+    private readonly _userApiService: UserApiService,
+    private readonly _homeStore: HomeStore,
     private readonly _userStore: UserStore,
-    private readonly _homeStore: HomeStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore
   ) {}
 
-  onCreateUser(name: string, userName: string, thumbnailUrl: string) {
-    this._homeStore.createUser({
-      name,
-      userName,
-      thumbnailUrl,
-    });
+  ngOnInit() {
+    this._homeStore.setAuthority(
+      this._walletStore.publicKey$.pipe(
+        isNotNullOrUndefined,
+        map((publicKey) => publicKey.toBase58())
+      )
+    );
+  }
+
+  onCreateUser(authority: string, userDto: UserDto) {
+    this._userApiService
+      .create({
+        authority,
+        userDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create user request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [`authority:${authority}`],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }
