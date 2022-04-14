@@ -167,6 +167,10 @@ input[readonly] {
   background-image: url('../assets/images/backgrounds/tabs.png');
 }
 
+.bd-bg-image-11 {
+  background-image: url('../assets/images/backgrounds/button_base.png');
+}
+
 .bd-bg-image-7 > .mat-dialog-container {
   background: transparent !important;
 }
@@ -181,4 +185,8 @@ input[readonly] {
 
 .bd-box-shadow-bg-green {
   box-shadow: 0px 0px 20px 3px green;
+}
+
+.bd-box-shadow-bg-white {
+  box-shadow: -0px -2px 2px #444, inset 0px 5px 4px #444;
 }

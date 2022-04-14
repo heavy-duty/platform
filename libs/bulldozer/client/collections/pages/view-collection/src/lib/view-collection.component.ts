@@ -88,10 +88,11 @@ import { ViewCollectionStore } from './view-collection.store';
         </ul>
 
         <footer
-          class="sticky bottom-0 py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+          class="sticky bottom-0 bd-bg-image-11 py-5 px-7 w-full flex justify-center items-center gap-2 bd-box-shadow-bg-white"
         >
           <button
-            mat-stroked-button
+            mat-raised-button
+            class="text-black rounded-none"
             color="accent"
             bdEditCollection
             [collection]="collection.document"
@@ -107,7 +108,8 @@ import { ViewCollectionStore } from './view-collection.store';
             Edit
           </button>
           <button
-            mat-stroked-button
+            mat-raised-button
+            class="text-black rounded-none"
             color="warn"
             (click)="
               onDeleteCollection(
@@ -119,6 +121,17 @@ import { ViewCollectionStore } from './view-collection.store';
           >
             Delete
           </button>
+
+          <div
+            class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+          >
+            <div class="w-full h-px bg-gray-600 rotate-45"></div>
+          </div>
+          <div
+            class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+          >
+            <div class="w-full h-px bg-gray-600"></div>
+          </div>
         </footer>
       </aside>
 
