@@ -43,7 +43,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   private readonly _topicName$ = this.select(
     this.workspaceId$.pipe(isNotNullOrUndefined),
-    (workspaceId) => `workspaces:${workspaceId}`
+    (workspaceId) => `workspace:${workspaceId}`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
@@ -61,7 +61,7 @@ export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   );
   readonly workspace$ = this.select(
     this._workspaceStore.workspace$,
-    this._instructionStatuses$.pipe(tap((a) => console.log(a))),
+    this._instructionStatuses$,
     (workspace, instructionStatuses) =>
       instructionStatuses.reduce(
         reduceInstructions,

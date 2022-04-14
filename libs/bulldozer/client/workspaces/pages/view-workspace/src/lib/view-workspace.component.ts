@@ -204,7 +204,10 @@ export class ViewWorkspaceComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`workspaces:${workspaceId}`],
+                topicNames: [
+                  `workspace:${workspaceId}`,
+                  `authority:${authority}:workspaces`,
+                ],
               },
             })
           );
@@ -230,7 +233,10 @@ export class ViewWorkspaceComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`workspaces:${workspaceId}`],
+                topicNames: [
+                  `workspace:${workspaceId}`,
+                  `authority:${authority}:workspaces`,
+                ],
               },
             })
           );

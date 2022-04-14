@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewUserWorkspacesComponent } from './view-user-workspaces.component';
 
@@ -32,6 +33,7 @@ import { ViewUserWorkspacesComponent } from './view-user-workspaces.component';
     ReactiveComponentModule,
     ItemUpdatingModule,
     ObscureAddressModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewUserWorkspacesComponent],
 })

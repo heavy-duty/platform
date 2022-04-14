@@ -1,94 +1,174 @@
 import { Injectable } from '@angular/core';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { WorkspacesStore } from '@bulldozer-client/workspaces-data-access';
 import {
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
+import {
+  Document,
+  flattenInstructions,
   InstructionStatus,
-  UserInstructionsStore,
-} from '@bulldozer-client/users-data-access';
-import {
-  WorkspaceApiService,
-  WorkspaceQueryStore,
-  WorkspacesStore,
-} from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  combineLatest,
-  concatMap,
-  EMPTY,
-  map,
-  of,
-  pipe,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+  Workspace,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { map, noop, switchMap, tap } from 'rxjs';
+import { reduceInstructions } from './reduce-instructions';
+import { WorkspaceItemView } from './types';
+
+const documentToView = (document: Document<Workspace>): WorkspaceItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+  };
+};
+
+interface ViewModel {
+  authority: string | null;
+  applicationId: string | null;
+  transactions: List<TransactionStatus>;
+}
+
+const initialState: ViewModel = {
+  authority: null,
+  applicationId: null,
+  transactions: List(),
+};
 
 @Injectable()
-export class ViewUserWorkspacesStore extends ComponentStore<object> {
-  constructor(
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _workspacesStore: WorkspacesStore,
-    private readonly _workspaceQueryStore: WorkspaceQueryStore,
-    private readonly _userInstructionsStore: UserInstructionsStore,
-    private readonly _workspaceApiService: WorkspaceApiService
-  ) {
-    super({});
+export class ViewUserWorkspacesStore extends ComponentStore<ViewModel> {
+  readonly authority$ = this.select(({ authority }) => authority);
+  private readonly _topicName$ = this.select(
+    this.authority$.pipe(isNotNullOrUndefined),
+    (authority) => `authority:${authority}:workspaces`
+  );
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
+        )
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
+  );
+  readonly workspaces$ = this.select(
+    this._workspacesStore.workspaces$,
+    this._instructionStatuses$,
+    (workspaces, instructionStatuses) => {
+      if (workspaces === null) {
+        return null;
+      }
 
-    this._workspaceQueryStore.setFilters(
-      combineLatest({
-        authority: this._walletStore.publicKey$.pipe(
-          isNotNullOrUndefined,
-          map((publicKey) => publicKey.toBase58())
-        ),
-      })
+      return instructionStatuses.reduce(
+        reduceInstructions,
+        workspaces.map(documentToView)
+      );
+    },
+    { debounce: true }
+  );
+
+  constructor(
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _workspacesStore: WorkspacesStore
+  ) {
+    super(initialState);
+
+    this._workspacesStore.setFilters(
+      this.select(
+        this.authority$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (authority) => ({ authority })
+      )
     );
-    this._workspacesStore.setWorkspaceIds(
-      this._workspaceQueryStore.workspaceIds$
+    this._handleTransaction(
+      this._topicName$.pipe(
+        isNotNullOrUndefined,
+        switchMap((topicName) =>
+          this._hdBroadcasterSocketStore
+            .fromEvent(topicName)
+            .pipe(map((message) => message.data))
+        )
+      )
     );
-    this._handleInstruction(this._userInstructionsStore.instruction$);
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
+      )
+    );
   }
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createWorkspace':
-        case 'updateWorkspace':
-        case 'deleteWorkspace': {
-          this._workspacesStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: state.transactions.push(transaction),
+    })
+  );
+
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
+  );
+
+  readonly setAuthority = this.updater<string | null>((state, authority) => ({
+    ...state,
+    authority,
+  }));
+
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  readonly deleteWorkspace = this.effect<string>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([workspaceId, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
+  }>(
+    tapEffect(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return noop;
+      }
 
-        return this._workspaceApiService
-          .delete({
-            authority: authority.toBase58(),
-            workspaceId,
+      this.patchState({ transactions: List() });
+
+      this._hdBroadcasterSocketStore.send(
+        JSON.stringify({
+          event: 'subscribe',
+          data: topicName,
+        })
+      );
+
+      return () => {
+        this._hdBroadcasterSocketStore.send(
+          JSON.stringify({
+            event: 'unsubscribe',
+            data: topicName,
           })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete workspace request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        );
+      };
+    })
   );
 }

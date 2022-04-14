@@ -1,10 +1,15 @@
-import { Component, HostBinding } from '@angular/core';
+import { Component, HostBinding, OnInit } from '@angular/core';
 import { ConfigStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
+  WorkspaceApiService,
   WorkspaceQueryStore,
   WorkspacesStore,
 } from '@bulldozer-client/workspaces-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
+import { map } from 'rxjs';
 import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 
 @Component({
@@ -17,7 +22,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 
     <ng-container *ngIf="workspaces$ | ngrxPush as workspaces">
       <div
-        *ngIf="workspaces && workspaces.length > 0; else emptyList"
+        *ngIf="workspaces && workspaces.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
       >
         <mat-card
@@ -46,23 +51,26 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
               </ng-container>
             </div>
             <a
-              [attr.aria-label]="'View ' + workspace.document.name"
-              [routerLink]="['/workspaces', workspace.document.id]"
+              [attr.aria-label]="'View ' + workspace.name"
+              [routerLink]="['/workspaces', workspace.id]"
               mat-icon-button
             >
               <mat-icon>open_in_new</mat-icon>
             </a>
-            <button
-              mat-icon-button
-              [attr.aria-label]="'Delete ' + workspace.document.name"
-              (click)="onDeleteWorkspace(workspace.document.id)"
-              [disabled]="
-                (connected$ | ngrxPush) === false ||
-                (workspace | bdItemChanging)
-              "
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+            <div *hdWalletAdapter="let publicKey = publicKey">
+              <button
+                *ngIf="publicKey !== null"
+                mat-icon-button
+                [attr.aria-label]="'Delete ' + workspace.name"
+                (click)="onDeleteWorkspace(publicKey.toBase58(), workspace.id)"
+                [disabled]="
+                  (connected$ | ngrxPush) === false ||
+                  (workspace | bdItemChanging)
+                "
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
           </aside>
 
           <div class="px-8 mt-4">
@@ -71,26 +79,24 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                 <h2
                   class="mb-0 text-lg font-bold flex justify-start"
                   [matTooltip]="
-                    workspace.document.name
+                    workspace.name
                       | bdItemUpdatingMessage: workspace:'Workspace'
                   "
                   matTooltipShowDelay="500"
                 >
-                  {{ workspace.document.name }}
+                  {{ workspace.name }}
                 </h2>
                 <p *ngIf="workspaceId$ | ngrxPush as workspaceId">
                   <span
                     class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
                     [ngClass]="
-                      workspaceId === workspace.document.id
+                      workspaceId === workspace.id
                         ? 'bg-green-500'
                         : 'bg-yellow-500'
                     "
                   ></span>
                   <span class="font-thin">{{
-                    workspaceId === workspace.document.id
-                      ? 'Active'
-                      : 'Inactive'
+                    workspaceId === workspace.id ? 'Active' : 'Inactive'
                   }}</span>
                 </p>
               </div>
@@ -98,7 +104,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                 <button
                   mat-stroked-button
                   color="accent"
-                  (click)="onActivateWorkspace(workspace.document.id)"
+                  (click)="onActivateWorkspace(workspace.id)"
                 >
                   Activate
                 </button>
@@ -111,11 +117,11 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                 class="bd-bg-black px-5 py-3 flex justify-between items-center rounded-md mt-1 mb-8"
               >
                 <span>
-                  {{ workspace.document.id | obscureAddress: '.':[13, 33] }}
+                  {{ workspace.id | obscureAddress: '.':[13, 33] }}
                 </span>
                 <mat-icon
                   class="cursor-pointer"
-                  [cdkCopyToClipboard]="workspace.document.id"
+                  [cdkCopyToClipboard]="workspace.id"
                   >content_copy</mat-icon
                 >
               </div>
@@ -132,24 +138,61 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
   styles: [],
   providers: [WorkspacesStore, WorkspaceQueryStore, ViewUserWorkspacesStore],
 })
-export class ViewUserWorkspacesComponent {
+export class ViewUserWorkspacesComponent implements OnInit {
   @HostBinding('class') class = 'block p-8';
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaces$ = this._workspacesStore.workspaces$;
+  readonly workspaces$ = this._viewUserWorkspacesStore.workspaces$;
   readonly workspaceId$ = this._configStore.workspaceId$;
 
   constructor(
     private readonly _walletStore: WalletStore,
     private readonly _workspacesStore: WorkspacesStore,
     private readonly _configStore: ConfigStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _workspaceApiService: WorkspaceApiService,
+    private readonly _notificationStore: NotificationStore,
     private readonly _viewUserWorkspacesStore: ViewUserWorkspacesStore
   ) {}
+
+  ngOnInit() {
+    this._viewUserWorkspacesStore.setAuthority(
+      this._walletStore.publicKey$.pipe(
+        isNotNullOrUndefined,
+        map((publicKey) => publicKey.toBase58())
+      )
+    );
+  }
 
   onActivateWorkspace(workspaceId: string) {
     this._configStore.setWorkspaceId(workspaceId);
   }
 
-  onDeleteWorkspace(workspaceId: string) {
-    this._viewUserWorkspacesStore.deleteWorkspace(workspaceId);
+  onDeleteWorkspace(authority: string, workspaceId: string) {
+    this._workspaceApiService
+      .delete({
+        authority,
+        workspaceId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete workspace request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `workspace:${workspaceId}`,
+                  `authority:${authority}:workspaces`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }
