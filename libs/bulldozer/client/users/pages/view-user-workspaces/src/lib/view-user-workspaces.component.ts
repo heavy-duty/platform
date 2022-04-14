@@ -51,6 +51,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
               </ng-container>
             </div>
             <a
+              color="accent"
               [attr.aria-label]="'View ' + workspace.name"
               [routerLink]="['/workspaces', workspace.id]"
               mat-icon-button
@@ -60,6 +61,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
             <div *hdWalletAdapter="let publicKey = publicKey">
               <button
                 *ngIf="publicKey !== null"
+                color="warn"
                 mat-icon-button
                 [attr.aria-label]="'Delete ' + workspace.name"
                 (click)="onDeleteWorkspace(publicKey.toBase58(), workspace.id)"
