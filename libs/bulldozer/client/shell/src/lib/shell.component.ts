@@ -40,9 +40,8 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
             <div
               class="flex items-center gap-2 bg-bd-black bg-opacity-60 border-b-1 border-white border-opacity-10"
             >
-              <div class="px-4">
+              <div class="px-4" *ngIf="isHandset$ | async">
                 <button
-                  *ngIf="isHandset$ | async"
                   type="button"
                   mat-mini-fab
                   (click)="navigation.toggle()"
