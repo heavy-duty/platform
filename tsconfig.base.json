@@ -67,9 +67,6 @@
       "@bulldozer-client/config-store": [
         "libs/bulldozer/client/shared/stores/config-store/src/index.ts"
       ],
-      "@bulldozer-client/construction-notification": [
-        "libs/bulldozer/client/shared/components/construction-notification/src/index.ts"
-      ],
       "@bulldozer-client/core-data-access": [
         "libs/bulldozer/client/core/data-access/src/index.ts"
       ],
@@ -150,6 +147,9 @@
       ],
       "@bulldozer-client/my-workspaces-list": [
         "libs/bulldozer/client/workspaces/components/my-workspaces-list/src/index.ts"
+      ],
+      "@bulldozer-client/notification-snack-bar": [
+        "libs/bulldozer/client/notifications/components/snack-bar/src/index.ts"
       ],
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"

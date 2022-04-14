@@ -2,6 +2,7 @@ import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
@@ -86,7 +87,7 @@ export class EditApplicationComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.openFromComponent(null as any, {
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
         data: {
           title: 'Heey...',

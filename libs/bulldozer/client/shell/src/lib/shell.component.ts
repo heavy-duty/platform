@@ -22,7 +22,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       <mat-sidenav-container class="h-screen-layout w-full bg-transparent">
         <mat-sidenav
           #navigation
-          class="bd-h-inherit w-60 bd-bg-black-transparent-80"
+          class="w-60 bd-bg-black-transparent-80"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"

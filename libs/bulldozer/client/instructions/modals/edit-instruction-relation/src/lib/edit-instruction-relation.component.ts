@@ -7,8 +7,8 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
 import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 
 export const equalValidator =
   (a: string, b: string): ValidatorFn =>
@@ -108,7 +108,7 @@ export class EditInstructionRelationComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.openFromComponent(ConstructionNotificationComponent, {
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
         data: {
           title: 'Heey...',

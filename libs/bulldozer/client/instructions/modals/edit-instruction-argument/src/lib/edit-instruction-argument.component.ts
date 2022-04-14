@@ -8,7 +8,7 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ConstructionNotificationComponent } from '@bulldozer-client/construction-notification';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
@@ -266,7 +266,7 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.openFromComponent(ConstructionNotificationComponent, {
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
         data: {
           title: 'Heey...',

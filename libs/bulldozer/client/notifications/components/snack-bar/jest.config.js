@@ -1,5 +1,5 @@
 module.exports = {
-  displayName: 'bulldozer-client-shared-components-construction-notification',
+  displayName: 'bulldozer-client-notifications-components-snack-bar',
   preset: '../../../../../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
   globals: {
@@ -9,7 +9,7 @@ module.exports = {
     },
   },
   coverageDirectory:
-    '../../../../../../coverage/libs/bulldozer/client/shared/components/construction-notification',
+    '../../../../../../coverage/libs/bulldozer/client/notifications/components/snack-bar',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': 'jest-preset-angular',
   },
