@@ -7,6 +7,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
 
@@ -54,6 +55,7 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
     ReactiveComponentModule,
     ItemUpdatingModule,
     EditWorkspaceModule,
+    HdWalletAdapterCdkModule,
   ],
 })
 export class ViewWorkspaceModule {}

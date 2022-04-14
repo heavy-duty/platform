@@ -18,12 +18,13 @@ import { Tab } from '@bulldozer-client/core-data-access';
         [active]="selectedTab === tab.id"
       >
         <ng-container [ngSwitch]="tab.kind">
-          <bd-workspace-tab
+          <bd-view-workspace-tab
             *ngSwitchCase="'workspace'"
             [workspaceId]="tab.id"
+            [url]="tab.url"
             (closeTab)="onCloseTab(tab.id)"
             bdStopPropagation
-          ></bd-workspace-tab>
+          ></bd-view-workspace-tab>
           <bd-application-tab
             *ngSwitchCase="'application'"
             [applicationId]="tab.id"

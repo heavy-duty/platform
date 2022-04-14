@@ -193,49 +193,53 @@ import { ViewInstructionStore } from './view-instruction.store';
           </ng-container>
         </ng-container>
 
-        <footer
-          class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+        <ng-container
           *hdWalletAdapter="
             let publicKey = publicKey;
             let connected = connected
           "
         >
-          <ng-container *ngIf="publicKey !== null && instruction !== null">
-            <button
-              mat-stroked-button
-              color="accent"
-              bdEditInstruction
-              [instruction]="instruction"
-              (editInstruction)="
-                onUpdateInstruction(
-                  publicKey.toBase58(),
-                  instruction.workspaceId,
-                  instruction.applicationId,
-                  instruction.id,
-                  $event
-                )
-              "
-              [disabled]="!connected || (instruction | bdItemChanging)"
-            >
-              Edit
-            </button>
-            <button
-              mat-stroked-button
-              color="warn"
-              (click)="
-                onDeleteInstruction(
-                  publicKey.toBase58(),
-                  instruction.workspaceId,
-                  instruction.applicationId,
-                  instruction.id
-                )
-              "
-              [disabled]="!connected || (instruction | bdItemChanging)"
-            >
-              Delete
-            </button>
-          </ng-container>
-        </footer>
+          <footer
+            class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+            *ngIf="publicKey !== null && instruction !== null"
+          >
+            <ng-container>
+              <button
+                mat-stroked-button
+                color="accent"
+                bdEditInstruction
+                [instruction]="instruction"
+                (editInstruction)="
+                  onUpdateInstruction(
+                    publicKey.toBase58(),
+                    instruction.workspaceId,
+                    instruction.applicationId,
+                    instruction.id,
+                    $event
+                  )
+                "
+                [disabled]="!connected || (instruction | bdItemChanging)"
+              >
+                Edit
+              </button>
+              <button
+                mat-stroked-button
+                color="warn"
+                (click)="
+                  onDeleteInstruction(
+                    publicKey.toBase58(),
+                    instruction.workspaceId,
+                    instruction.applicationId,
+                    instruction.id
+                  )
+                "
+                [disabled]="!connected || (instruction | bdItemChanging)"
+              >
+                Delete
+              </button>
+            </ng-container>
+          </footer>
+        </ng-container>
       </aside>
     </ng-container>
 

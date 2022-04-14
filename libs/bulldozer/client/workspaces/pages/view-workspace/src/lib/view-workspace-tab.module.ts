@@ -7,20 +7,20 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { WorkspaceTabComponent } from './workspace-tab.component';
+import { ViewWorkspaceTabComponent } from './view-workspace-tab.component';
 
 @NgModule({
-  declarations: [WorkspaceTabComponent],
+  declarations: [ViewWorkspaceTabComponent],
   imports: [
     CommonModule,
     RouterModule,
     MatButtonModule,
     MatIconModule,
-    MatTooltipModule,
     MatProgressSpinnerModule,
+    MatTooltipModule,
     ReactiveComponentModule,
     ItemUpdatingModule,
   ],
-  exports: [WorkspaceTabComponent],
+  exports: [ViewWorkspaceTabComponent],
 })
-export class WorkspaceTabModule {}
+export class ViewWorkspaceTabModule {}

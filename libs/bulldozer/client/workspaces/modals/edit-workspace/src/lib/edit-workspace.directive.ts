@@ -6,25 +6,24 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
 import { EditWorkspaceComponent } from './edit-workspace.component';
 
 @Directive({ selector: '[bdEditWorkspace]' })
 export class EditWorkspaceDirective {
-  @Input() workspace?: Document<Workspace>;
-  @Output() editWorkspace = new EventEmitter<string>();
+  @Input() workspace?: WorkspaceDto;
+  @Output() editWorkspace = new EventEmitter<WorkspaceDto>();
   @HostListener('click') onClick(): void {
     this._matDialog
-      .open<
+      .open<EditWorkspaceComponent, WorkspaceDto, WorkspaceDto>(
         EditWorkspaceComponent,
-        { workspace?: Document<Workspace> },
-        { name: string }
-      >(EditWorkspaceComponent, {
-        data: { workspace: this.workspace },
-        panelClass: 'bd-bg-image-7',
-      })
+        {
+          data: this.workspace,
+          panelClass: 'bd-bg-image-7',
+        }
+      )
       .afterClosed()
-      .subscribe((data) => data && this.editWorkspace.emit(data.name));
+      .subscribe((data) => data && this.editWorkspace.emit(data));
   }
 
   constructor(private readonly _matDialog: MatDialog) {}
