@@ -1,10 +1,9 @@
 import { Map, Set } from 'immutable';
-import WebSocket from 'ws';
-import { ActionTypes, State, TopicState, TransactionStatus } from './types';
+import { ActionTypes, State } from './types';
 
 export const initialState: State = {
-  topics: Map<string, TopicState>(),
-  clients: Set<WebSocket>(),
+  topics: Map(),
+  clients: Map(),
 };
 
 export const reduce = (state: State, action: ActionTypes): State => {
@@ -12,177 +11,179 @@ export const reduce = (state: State, action: ActionTypes): State => {
     case 'CLIENT_CONNECTED':
       return {
         ...state,
-        clients: state.clients.add(action.payload),
+        clients: state.clients.set(action.payload, {
+          client: action.payload,
+          subscriptions: Map(),
+        }),
       };
     case 'CLIENT_DISCONNECTED': {
+      const broadcasterClient = state.clients.get(action.payload);
+
+      if (broadcasterClient === undefined) {
+        return state;
+      }
+
       return {
         ...state,
         clients: state.clients.remove(action.payload),
-        topics: state.topics.reduce((topics, topic, topicName) => {
-          const clients = topic.clients.delete(action.payload);
-
-          if (clients.size === 0 && topic.transactions.size === 0) {
-            return topics.delete(topicName);
-          }
-
-          if (clients.size > 0) {
-            return topics.set(topicName, {
-              clients,
-              transactions: topic.transactions,
-            });
-          }
-
-          return topics;
-        }, state.topics),
+        topics: broadcasterClient.subscriptions
+          .reduce(
+            (topics, topicSubscription) =>
+              topics.update(
+                topicSubscription.topicName,
+                undefined,
+                (topic) => ({
+                  ...topic,
+                  clients: topic.clients.delete(broadcasterClient.client),
+                })
+              ),
+            state.topics
+          )
+          .filter(
+            (topic) => topic.clients.size > 0 || topic.transactions.size > 0
+          ),
       };
     }
     case 'CLIENT_SUBSCRIBED': {
-      const { topicName, client } = action.payload;
-      const topic = state.topics.get(topicName);
-
-      if (topic === undefined) {
-        return {
-          ...state,
-          topics: state.topics.set(topicName, {
-            clients: Set([client]),
-            transactions: Map<string, TransactionStatus>(),
-          }),
-        };
-      }
+      const { client, subscriptionId, topicName } = action.payload;
 
       return {
         ...state,
-        topics: state.topics.set(topicName, {
-          clients: topic.clients.add(client),
-          transactions: topic.transactions,
-        }),
+        clients: state.clients.update(
+          client,
+          {
+            client,
+            subscriptions: Map([
+              [subscriptionId, { topicName, subscriptionId }],
+            ]),
+          },
+          (broadcasterClient) => ({
+            ...broadcasterClient,
+            subscriptions: broadcasterClient.subscriptions.set(subscriptionId, {
+              subscriptionId,
+              topicName,
+            }),
+          })
+        ),
+        topics: state.topics.update(
+          topicName,
+          {
+            topicName,
+            transactions: Map(),
+            clients: Map([
+              [client, { client, subscriptions: Set([subscriptionId]) }],
+            ]),
+          },
+          (topic) => ({
+            ...topic,
+            clients: topic.clients.update(
+              client,
+              { client, subscriptions: Set([subscriptionId]) },
+              (client) => ({
+                ...client,
+                subscriptions: client.subscriptions.add(subscriptionId),
+              })
+            ),
+          })
+        ),
       };
     }
     case 'CLIENT_UNSUBSCRIBED': {
-      const { topicName, client } = action.payload;
-      const topic = state.topics.get(topicName);
-
-      if (topic === undefined) {
-        return state;
-      }
-
-      const clients = topic.clients.delete(client);
-
-      if (clients.size > 0) {
-        return {
-          ...state,
-          topics: state.topics.set(topicName, {
-            clients,
-            transactions: topic.transactions,
-          }),
-        };
-      } else if (clients.size === 0 && topic.transactions.size === 0) {
-        return {
-          ...state,
-          topics: state.topics.delete(topicName),
-        };
-      } else {
-        return state;
-      }
-    }
-    case 'TRANSACTION_RECEIVED': {
-      const { topicNames, transactionStatus } = action.payload;
-      const newTopics = topicNames.reduce((newTopics, topicName) => {
-        const topic = state.topics.get(topicName);
-
-        if (topic === undefined) {
-          return newTopics.set(topicName, {
-            clients: Set(),
-            transactions: Map([
-              [transactionStatus.signature, transactionStatus],
-            ]),
-          });
-        }
-
-        return newTopics.set(topicName, {
-          clients: topic.clients,
-          transactions: topic.transactions.set(
-            transactionStatus.signature,
-            transactionStatus
-          ),
-        });
-      }, Map<string, TopicState>());
+      const { topicName, client, subscriptionId } = action.payload;
 
       return {
         ...state,
-        topics: state.topics.merge(newTopics),
+        topics: state.topics.update(topicName, undefined, (topic) => ({
+          ...topic,
+          clients: topic.clients
+            .update(client, undefined, (topicClient) => ({
+              ...topicClient,
+              subscriptions: topicClient.subscriptions.delete(subscriptionId),
+            }))
+            .filter((topicClient) => topicClient.subscriptions.size > 0),
+        })),
+        clients: state.clients.update(
+          client,
+          undefined,
+          (broadcasterClient) => ({
+            ...broadcasterClient,
+            subscriptions:
+              broadcasterClient.subscriptions.delete(subscriptionId),
+          })
+        ),
+      };
+    }
+    case 'TRANSACTION_RECEIVED': {
+      const { topicNames, transactionStatus } = action.payload;
+
+      return {
+        ...state,
+        topics: topicNames.reduce(
+          (topics, topicName) =>
+            topics.update(
+              topicName,
+              {
+                topicName,
+                clients: Map(),
+                transactions: Map([
+                  [transactionStatus.signature, transactionStatus],
+                ]),
+              },
+              (topic) => ({
+                ...topic,
+                transactions: topic.transactions.set(
+                  transactionStatus.signature,
+                  transactionStatus
+                ),
+              })
+            ),
+
+          state.topics
+        ),
       };
     }
     case 'TRANSACTION_CONFIRMED': {
       const { topicNames, transactionStatus } = action.payload;
-      const newTopics = topicNames.reduce((newTopics, topicName) => {
-        const topic = state.topics.get(topicName);
-
-        if (topic === undefined) {
-          return newTopics;
-        }
-
-        return newTopics.set(topicName, {
-          clients: topic.clients,
-          transactions: topic.transactions.update(
-            transactionStatus.signature,
-            (transaction) => ({
-              ...transaction,
-              ...transactionStatus,
-            })
-          ),
-        });
-      }, Map<string, TopicState>());
 
       return {
         ...state,
-        topics: state.topics.merge(newTopics),
+        topics: topicNames.reduce(
+          (topics, topicName) =>
+            topics.update(topicName, undefined, (topic) => ({
+              ...topic,
+              transactions: topic.transactions.update(
+                transactionStatus.signature,
+                undefined,
+                (transaction) => ({
+                  ...transaction,
+                  ...transactionStatus,
+                })
+              ),
+            })),
+          state.topics
+        ),
       };
     }
     case 'TRANSACTION_FINALIZED':
     case 'TRANSACTION_FAILED': {
       const { topicNames, transactionStatus } = action.payload;
-      const newTopics = topicNames.reduce((newTopics, topicName) => {
-        const topic = state.topics.get(topicName);
-
-        if (topic === undefined) {
-          return newTopics;
-        }
-
-        const transactions = topic.transactions.delete(
-          transactionStatus.signature
-        );
-
-        if (topic.clients.size === 0 && transactions.size === 0) {
-          return newTopics;
-        }
-
-        return newTopics.set(topicName, {
-          clients: topic.clients,
-          transactions,
-        });
-      }, Map<string, TopicState>());
-      const garbageTopics = topicNames.reduce((garbageTopics, topicName) => {
-        const topic = state.topics.get(topicName);
-
-        if (topic === undefined) {
-          return garbageTopics;
-        }
-
-        const transactions = topic.transactions.delete(
-          transactionStatus.signature
-        );
-
-        if (topic.clients.size > 0 || transactions.size > 0) {
-          return garbageTopics;
-        }
-
-        return garbageTopics.add(topicName);
-      }, Set<string>());
 
       return {
         ...state,
-        topics: state.topics.deleteAll(garbageTopics).merge(newTopics),
+        topics: topicNames
+          .reduce(
+            (topics, topicName) =>
+              topics.update(topicName, undefined, (topic) => ({
+                ...topic,
+                transactions: topic.transactions.delete(
+                  transactionStatus.signature
+                ),
+              })),
+            state.topics
+          )
+          .filter(
+            (topic) => topic.clients.size > 0 || topic.transactions.size > 0
+          ),
       };
     }
 

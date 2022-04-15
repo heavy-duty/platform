@@ -43,15 +43,30 @@ export class EventsService {
     ),
     withLatestFrom(this.state$),
     tap(([action, state]: [ClientSubscribed, State]) => {
-      const { client, topicName } = action.payload;
+      const { client, topicName, subscriptionId, correlationId } =
+        action.payload;
       const topic = state.topics.get(topicName);
+
+      client.send(
+        JSON.stringify({
+          event: 'message',
+          data: {
+            id: correlationId,
+            subscriptionId,
+          },
+        })
+      );
 
       if (topic !== undefined) {
         topic.transactions.forEach((transactionStatus) => {
           client.send(
             JSON.stringify({
-              event: topicName,
-              data: transactionStatus,
+              event: 'message',
+              data: {
+                topicName,
+                transactionStatus,
+                subscriptionId,
+              },
             })
           );
         });
@@ -87,14 +102,20 @@ export class EventsService {
           const topic = state.topics.get(topicName);
 
           if (topic !== undefined) {
-            topic.clients.forEach((client) =>
-              client.send(
-                JSON.stringify({
-                  event: topicName,
-                  data: transactionStatus,
-                })
-              )
-            );
+            topic.clients.forEach(({ client, subscriptions }) => {
+              subscriptions.forEach((subscriptionId) => {
+                client.send(
+                  JSON.stringify({
+                    event: 'message',
+                    data: {
+                      topicName,
+                      transactionStatus,
+                      subscriptionId,
+                    },
+                  })
+                );
+              });
+            });
           }
         });
       }

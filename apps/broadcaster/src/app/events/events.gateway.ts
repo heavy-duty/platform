@@ -10,6 +10,7 @@ import {
 } from '@nestjs/websockets';
 import { Connection, Transaction, TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
+import { v4 as uuid } from 'uuid';
 import WebSocket, { Server } from 'ws';
 import { environment } from '../../environments/environment';
 import { EventsService } from './events.service';
@@ -61,7 +62,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onSubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topicName: string
+    @MessageBody()
+    {
+      topicName,
+      correlationId,
+    }: {
+      topicName: string;
+      correlationId: string;
+    }
   ) {
     this._logger.log(`Client subscribed to [${topicName}].`);
 
@@ -70,6 +78,8 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       payload: {
         client,
         topicName,
+        subscriptionId: uuid(),
+        correlationId,
       },
     });
   }
@@ -78,7 +88,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onUnsubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topicName: string
+    @MessageBody()
+    {
+      topicName,
+      subscriptionId,
+    }: {
+      topicName: string;
+      subscriptionId: string;
+    }
   ) {
     this._logger.log(`Client unsubscribed from [${topicName}].`);
 
@@ -87,6 +104,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       payload: {
         client,
         topicName,
+        subscriptionId,
       },
     });
   }
@@ -146,27 +164,7 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           },
         },
       });
-    } catch (error) {
-      this._eventsService.dispatch({
-        type: 'TRANSACTION_FAILED',
-        payload: {
-          topicNames,
-          transactionStatus: {
-            transaction,
-            signature: transactionSignature,
-            timestamp: Date.now(),
-            error: {
-              name: 'ConfirmTransactionError',
-              message: error.message,
-            },
-          },
-        },
-      });
 
-      return;
-    }
-
-    try {
       await this._connection.confirmTransaction(
         transactionSignature,
         'finalized'
@@ -206,8 +204,6 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           },
         },
       });
-
-      return;
     }
   }
 }

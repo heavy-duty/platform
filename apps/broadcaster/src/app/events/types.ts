@@ -10,14 +10,30 @@ export interface TransactionStatus {
   timestamp: number;
 }
 
-export interface TopicState {
-  clients: Set<WebSocket>;
+export interface TopicSubscription {
+  topicName: string;
+  subscriptionId: string;
+}
+
+export interface Topic {
+  topicName: string;
+  clients: Map<WebSocket, TopicClient>;
   transactions: Map<string, TransactionStatus>;
 }
 
+export interface BroadcasterClient {
+  client: WebSocket;
+  subscriptions: Map<string, TopicSubscription>;
+}
+
+export interface TopicClient {
+  client: WebSocket;
+  subscriptions: Set<string>;
+}
+
 export interface State {
-  topics: Map<string, TopicState>;
-  clients: Set<WebSocket>;
+  topics: Map<string, Topic>;
+  clients: Map<WebSocket, BroadcasterClient>;
 }
 
 export interface ClientConnected {
@@ -35,6 +51,8 @@ export interface ClientSubscribed {
   payload: {
     topicName: string;
     client: WebSocket;
+    subscriptionId: string;
+    correlationId: string;
   };
 }
 
@@ -43,6 +61,7 @@ export interface ClientUnsubscribed {
   payload: {
     topicName: string;
     client: WebSocket;
+    subscriptionId: string;
   };
 }
 
