@@ -10,11 +10,12 @@ import {
   flattenInstructions,
   InstructionStatus,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
-import { map, merge, noop, switchMap, tap } from 'rxjs';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 import { reduceInstructions } from './reduce-collaborator-instructions';
 import { CollaboratorItemView } from './types';
 
@@ -76,9 +77,9 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
       );
     }
   );
-  private readonly _topicNames$ = this.select(
+  private readonly _topicName$ = this.select(
     this.workspaceId$.pipe(isNotNullOrUndefined),
-    (workspaceId) => [`workspace:${workspaceId}:collaborators`]
+    (workspaceId) => `workspace:${workspaceId}:collaborators`
   );
 
   constructor(
@@ -94,27 +95,13 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
         (workspaceId) => ({ workspace: workspaceId })
       )
     );
-    this._handleTransaction(
-      this._topicNames$.pipe(
-        isNotNullOrUndefined,
-        switchMap((topicNames) =>
-          merge(
-            ...topicNames.map((topicName) =>
-              this._hdBroadcasterSocketStore
-                .fromEvent(topicName)
-                .pipe(map((message) => message.data))
-            )
-          )
-        )
-      )
-    );
-    this._registerTopics(
+    this._registerTopic(
       this.select(
         this._hdBroadcasterSocketStore.connected$,
-        this._topicNames$,
-        (connected, topicNames) => ({
+        this._topicName$,
+        (connected, topicName) => ({
           connected,
-          topicNames,
+          topicName,
         })
       )
     );
@@ -153,36 +140,59 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _registerTopics = this.effect<{
+  private readonly _registerTopic = this.effect<{
     connected: boolean;
-    topicNames: string[] | null;
+    topicName: string | null;
   }>(
-    tapEffect(({ connected, topicNames }) => {
-      if (!connected || topicNames === null) {
-        return noop;
+    switchMap(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return EMPTY;
       }
 
       this.patchState({ transactions: List() });
 
-      topicNames.forEach((topicName) => {
-        this._hdBroadcasterSocketStore.send(
-          JSON.stringify({
+      const correlationId = uuid();
+      let subscriptionId: string;
+
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
             event: 'subscribe',
-            data: topicName,
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
+            event: 'unsubscribe',
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
+            );
+          }
+        )
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
         );
-      });
-
-      return () => {
-        topicNames.forEach((topicName) => {
-          this._hdBroadcasterSocketStore.send(
-            JSON.stringify({
-              event: 'unsubscribe',
-              data: topicName,
-            })
-          );
-        });
-      };
     })
   );
 }

@@ -10,11 +10,12 @@ import {
   InstructionStatus,
   User,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
-import { map, noop, switchMap, tap } from 'rxjs';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 import { reduceInstructions } from './reduce-user-instructions';
 import { UserItemView } from './types';
 
@@ -87,16 +88,6 @@ export class WorkspaceExplorerUserStore extends ComponentStore<ViewModel> {
         (authority) => authority
       )
     );
-    this._handleTransaction(
-      this._topicName$.pipe(
-        isNotNullOrUndefined,
-        switchMap((topicName) =>
-          this._hdBroadcasterSocketStore
-            .fromEvent(topicName)
-            .pipe(map((message) => message.data))
-        )
-      )
-    );
     this._registerTopic(
       this.select(
         this._hdBroadcasterSocketStore.connected$,
@@ -144,28 +135,55 @@ export class WorkspaceExplorerUserStore extends ComponentStore<ViewModel> {
     connected: boolean;
     topicName: string | null;
   }>(
-    tapEffect(({ connected, topicName }) => {
+    switchMap(({ connected, topicName }) => {
       if (!connected || topicName === null) {
-        return noop;
+        return EMPTY;
       }
 
       this.patchState({ transactions: List() });
 
-      this._hdBroadcasterSocketStore.send(
-        JSON.stringify({
-          event: 'subscribe',
-          data: topicName,
-        })
-      );
+      const correlationId = uuid();
+      let subscriptionId: string;
 
-      return () => {
-        this._hdBroadcasterSocketStore.send(
-          JSON.stringify({
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
+            event: 'subscribe',
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
             event: 'unsubscribe',
-            data: topicName,
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
+            );
+          }
+        )
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
         );
-      };
     })
   );
 }
