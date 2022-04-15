@@ -73,6 +73,10 @@ export interface Collaborator {
   };
 }
 
+export interface CollaboratorDto {
+  status: number;
+}
+
 export interface User {
   authority: string;
   userName: string;

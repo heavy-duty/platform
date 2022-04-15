@@ -65,7 +65,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                 color="accent"
                 bdEditUser
                 [user]="user"
-                (editUser)="onUpdateUser(user.authority, $event)"
+                (editUser)="onUpdateUser(user.authority, user.id, $event)"
                 [disabled]="user | bdItemChanging"
               >
                 Edit
@@ -73,7 +73,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
               <button
                 mat-stroked-button
                 color="warn"
-                (click)="onDeleteUser(user.authority)"
+                (click)="onDeleteUser(user.authority, user.id)"
                 [disabled]="user | bdItemChanging"
               >
                 Delete
@@ -121,14 +121,22 @@ import { ViewUserInfoStore } from './view-user-info.store';
         <ng-template #userNotDefined>
           <main>
             <p class="text-lg mb-3">You have no user defined.</p>
-            <button
-              mat-raised-button
-              color="primary"
-              bdEditUser
-              (editUser)="onCreateUser(publicKey.toBase58(), $event)"
-            >
-              Create User
-            </button>
+
+            <ng-container *hdWalletAdapter="let publicKey = publicKey">
+              <ng-container *ngrxLet="userId$; let userId">
+                <button
+                  *ngIf="publicKey !== null && userId !== null"
+                  mat-raised-button
+                  color="primary"
+                  bdEditUser
+                  (editUser)="
+                    onCreateUser(publicKey.toBase58(), userId, $event)
+                  "
+                >
+                  Create User
+                </button>
+              </ng-container>
+            </ng-container>
           </main>
         </ng-template>
       </div>
@@ -140,6 +148,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
 export class ViewUserInfoComponent implements OnInit {
   @HostBinding('class') class = 'block p-8';
   readonly user$ = this._viewUserInfoStore.user$;
+  readonly userId$ = this._userStore.userId$;
 
   constructor(
     private readonly _walletStore: WalletStore,
@@ -147,6 +156,7 @@ export class ViewUserInfoComponent implements OnInit {
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _userApiService: UserApiService,
+    private readonly _userStore: UserStore,
     private readonly _viewUserInfoStore: ViewUserInfoStore
   ) {}
 
@@ -164,7 +174,7 @@ export class ViewUserInfoComponent implements OnInit {
     });
   }
 
-  onCreateUser(authority: string, userDto: UserDto) {
+  onCreateUser(authority: string, userId: string, userDto: UserDto) {
     this._userApiService
       .create({
         authority,
@@ -179,7 +189,7 @@ export class ViewUserInfoComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`authority:${authority}`],
+                topicNames: [`authority:${authority}`, `user:${userId}`],
               },
             })
           );
@@ -190,7 +200,7 @@ export class ViewUserInfoComponent implements OnInit {
       });
   }
 
-  onUpdateUser(authority: string, userDto: UserDto) {
+  onUpdateUser(authority: string, userId: string, userDto: UserDto) {
     this._userApiService
       .update({
         authority,
@@ -205,7 +215,7 @@ export class ViewUserInfoComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`authority:${authority}`],
+                topicNames: [`authority:${authority}`, `user:${userId}`],
               },
             })
           );
@@ -216,7 +226,7 @@ export class ViewUserInfoComponent implements OnInit {
       });
   }
 
-  onDeleteUser(authority: string) {
+  onDeleteUser(authority: string, userId: string) {
     this._userApiService
       .delete({
         authority,
@@ -230,7 +240,7 @@ export class ViewUserInfoComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`authority:${authority}`],
+                topicNames: [`authority:${authority}`, `user:${userId}`],
               },
             })
           );

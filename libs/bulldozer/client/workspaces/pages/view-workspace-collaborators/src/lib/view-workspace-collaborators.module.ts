@@ -5,6 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { RouterModule } from '@angular/router';
+import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborators.component';
 
@@ -23,6 +25,8 @@ import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborat
     MatIconModule,
     MatSelectModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
+    ItemUpdatingModule,
   ],
   declarations: [ViewWorkspaceCollaboratorsComponent],
 })

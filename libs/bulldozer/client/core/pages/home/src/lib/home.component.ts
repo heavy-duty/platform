@@ -40,23 +40,26 @@ import { HomeStore } from './home.store';
 
       <main class="w-96 mx-auto">
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
-          <p
-            *ngIf="
-              user === null &&
-              publicKey !== null &&
-              (loading$ | ngrxPush) === false
-            "
-            class="text-xs text-white text-center text-opacity-70"
-          >
-            Looking to register and start building?
-            <button
-              class="text-accent underline"
-              bdEditUser
-              (editUser)="onCreateUser(publicKey.toBase58(), $event)"
+          <ng-container *ngrxLet="userId$; let userId">
+            <p
+              *ngIf="
+                user === null &&
+                publicKey !== null &&
+                userId !== null &&
+                (loading$ | ngrxPush) === false
+              "
+              class="text-xs text-white text-center text-opacity-70"
             >
-              Register here
-            </button>
-          </p>
+              Looking to register and start building?
+              <button
+                class="text-accent underline"
+                bdEditUser
+                (editUser)="onCreateUser(publicKey.toBase58(), userId, $event)"
+              >
+                Register here
+              </button>
+            </p>
+          </ng-container>
         </ng-container>
 
         <p class="mt-8 text-justify">
@@ -91,6 +94,7 @@ import { HomeStore } from './home.store';
 export class HomeComponent implements OnInit {
   @HostBinding('class') class = 'block min-h-full w-full py-8';
   readonly user$ = this._homeStore.user$;
+  readonly userId$ = this._userStore.userId$;
   readonly loading$ = this._userStore.loading$;
 
   constructor(
@@ -111,7 +115,7 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  onCreateUser(authority: string, userDto: UserDto) {
+  onCreateUser(authority: string, userId: string, userDto: UserDto) {
     this._userApiService
       .create({
         authority,
@@ -126,7 +130,7 @@ export class HomeComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`authority:${authority}`],
+                topicNames: [`authority:${authority}`, `user:${userId}`],
               },
             })
           );

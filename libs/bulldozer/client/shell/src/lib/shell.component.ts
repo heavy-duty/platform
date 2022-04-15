@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { AuthStore } from '@bulldozer-client/auth-data-access';
 import {
   ConfigStore,
   DarkThemeStore,
@@ -262,6 +263,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
     </div>
   `,
   providers: [
+    AuthStore,
     TabStore,
     NotificationStore,
     ConfigStore,

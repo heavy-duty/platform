@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UserApiService } from '@bulldozer-client/users-data-access';
 import { Document, findUserAddress, User } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
-import { UserApiService } from './user-api.service';
+import { concatMap, EMPTY, map, switchMap } from 'rxjs';
 
 interface ViewModel {
   loading: boolean;
-  authority: string | null;
   userId: string | null;
   user: Document<User> | null;
   error: unknown | null;
@@ -15,33 +16,32 @@ interface ViewModel {
 
 const initialState: ViewModel = {
   userId: null,
-  authority: null,
   user: null,
   loading: false,
   error: null,
 };
 
 @Injectable()
-export class UserStore extends ComponentStore<ViewModel> {
+export class AuthStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
   readonly user$ = this.select(({ user }) => user);
   readonly userId$ = this.select(({ userId }) => userId);
-  readonly authority$ = this.select(({ authority }) => authority);
 
   constructor(
+    private readonly _walletStore: WalletStore,
     private readonly _userApiService: UserApiService,
     private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
-    this._loadUserId(this.authority$);
+    this._loadUserId(
+      this._walletStore.publicKey$.pipe(
+        isNotNullOrUndefined,
+        map((publicKey) => publicKey.toBase58())
+      )
+    );
     this._loadUser(this.userId$);
   }
-
-  readonly setAuthority = this.updater<string | null>((state, authority) => ({
-    ...state,
-    authority,
-  }));
 
   private readonly _loadUserId = this.effect<string | null>(
     concatMap((authority) => {

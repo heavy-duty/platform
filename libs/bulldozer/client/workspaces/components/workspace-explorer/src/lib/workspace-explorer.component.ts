@@ -49,13 +49,17 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               />
             </figure>
             <ng-container *hdWalletAdapter="let publicKey = publicKey">
-              <button
-                bdEditUser
-                (editUser)="onCreateUser(publicKey.toBase58(), $event)"
-                *ngIf="publicKey !== null"
-              >
-                Click here to a create new user
-              </button>
+              <ng-container *ngrxLet="userId$; let userId">
+                <button
+                  bdEditUser
+                  (editUser)="
+                    onCreateUser(publicKey.toBase58(), userId, $event)
+                  "
+                  *ngIf="publicKey !== null && userId !== null"
+                >
+                  Click here to a create new user
+                </button>
+              </ng-container>
             </ng-container>
           </div>
           <!-- Move to components -->
@@ -195,6 +199,7 @@ export class WorkspaceExplorerComponent implements OnInit {
     this._workspaceExplorerStore.setWorkspaceId(value);
   }
 
+  readonly userId$ = this._userStore.userId$;
   readonly user$ = this._workspaceExplorerUserStore.user$;
   readonly workspace$ = this._workspaceExplorerStore.workspace$;
 
@@ -208,6 +213,7 @@ export class WorkspaceExplorerComponent implements OnInit {
     private readonly _applicationApiService: ApplicationApiService,
     private readonly _workspaceApiService: WorkspaceApiService,
     private readonly _configStore: ConfigStore,
+    private readonly _userStore: UserStore,
     private readonly _workspaceDownloaderService: WorkspaceDownloaderService
   ) {}
 
@@ -220,7 +226,7 @@ export class WorkspaceExplorerComponent implements OnInit {
     );
   }
 
-  onCreateUser(authority: string, userDto: UserDto) {
+  onCreateUser(authority: string, userId: string, userDto: UserDto) {
     this._userApiService
       .create({
         authority,
@@ -235,7 +241,7 @@ export class WorkspaceExplorerComponent implements OnInit {
               data: {
                 transactionSignature,
                 transaction,
-                topicNames: [`authority:${authority}`],
+                topicNames: [`authority:${authority}`, `user:${userId}`],
               },
             })
           );

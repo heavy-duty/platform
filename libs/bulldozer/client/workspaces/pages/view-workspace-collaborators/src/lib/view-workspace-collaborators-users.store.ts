@@ -1,57 +1,53 @@
 import { Injectable } from '@angular/core';
-import { CollaboratorsStore } from '@bulldozer-client/collaborators-data-access';
+import { UsersStore } from '@bulldozer-client/users-data-access';
 import {
   HdBroadcasterSocketStore,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
 import {
-  Collaborator,
   Document,
   flattenInstructions,
   InstructionStatus,
+  User,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined, isTruthy, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined, tapEffect } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
-import { List } from 'immutable';
+import { List, Set } from 'immutable';
 import { map, merge, noop, switchMap, tap } from 'rxjs';
-import { reduceInstructions } from './reduce-collaborator-instructions';
-import { CollaboratorItemView } from './types';
+import { reduceInstructions } from './reduce-user-instructions';
+import { UserItemView } from './types';
 
-const documentToView = (
-  collaborator: Document<Collaborator>
-): CollaboratorItemView => {
+const documentToView = (user: Document<User>): UserItemView => {
   return {
-    id: collaborator.id,
+    id: user.id,
     isCreating: false,
     isUpdating: false,
     isDeleting: false,
-    userId: collaborator.data.user,
-    workspaceId: collaborator.data.workspace,
-    isAdmin: collaborator.data.isAdmin,
-    authority: collaborator.data.authority,
-    status: collaborator.data.status,
-    createdAt: collaborator.createdAt.toNumber() * 1000,
+    name: user.name,
+    userName: user.data.userName,
+    thumbnailUrl: user.data.thumbnailUrl,
+    authority: user.data.authority,
   };
 };
 
 interface ViewModel {
-  workspaceId: string | null;
+  userIds: Set<string> | null;
   transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
-  workspaceId: null,
+  userIds: null,
   transactions: List(),
 };
 
 @Injectable()
-export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
-  readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+export class ViewWorkspaceCollaboratorsUsersStore extends ComponentStore<ViewModel> {
+  private readonly _userIds$ = this.select(({ userIds }) => userIds);
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
-    (transactions) =>
-      transactions
+    (transactions) => {
+      return transactions
         .reduce(
           (currentInstructions, transactionStatus) =>
             currentInstructions.concat(flattenInstructions(transactionStatus)),
@@ -60,40 +56,39 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
         .sort(
           (a, b) =>
             a.transactionStatus.timestamp - b.transactionStatus.timestamp
-        )
+        );
+    }
   );
-  readonly collaboratorsMap$ = this.select(
-    this._collaboratorsStore.collaboratorsMap$,
+  readonly usersMap$ = this.select(
+    this._usersStore.usersMap$,
     this._instructionStatuses$,
-    (collaborators, instructionStatuses) => {
-      if (collaborators === null) {
+    (users, instructionStatuses) => {
+      if (users === null) {
         return null;
       }
 
       return instructionStatuses.reduce(
         reduceInstructions,
-        collaborators.map(documentToView)
+        users.map(documentToView)
       );
     }
   );
   private readonly _topicNames$ = this.select(
-    this.workspaceId$.pipe(isNotNullOrUndefined),
-    (workspaceId) => [`workspace:${workspaceId}:collaborators`]
+    this._userIds$,
+    (userIds) =>
+      userIds?.reduce<string[]>(
+        (topicNames, userId) => [...topicNames, `user:${userId}`],
+        []
+      ) ?? null
   );
 
   constructor(
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
-    private readonly _collaboratorsStore: CollaboratorsStore
+    private readonly _usersStore: UsersStore
   ) {
     super(initialState);
 
-    this._collaboratorsStore.setFilters(
-      this.select(
-        this.workspaceId$.pipe(isNotNullOrUndefined),
-        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
-        (workspaceId) => ({ workspace: workspaceId })
-      )
-    );
+    this._usersStore.setUserIds(this._userIds$);
     this._handleTransaction(
       this._topicNames$.pipe(
         isNotNullOrUndefined,
@@ -136,10 +131,10 @@ export class ViewWorkspaceCollaboratorsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly setWorkspaceId = this.updater<string | null>(
-    (state, workspaceId) => ({
+  readonly setUserIds = this.updater<List<string> | string[] | null>(
+    (state, userIds) => ({
       ...state,
-      workspaceId,
+      userIds: userIds ? Set(userIds) : null,
     })
   );
 

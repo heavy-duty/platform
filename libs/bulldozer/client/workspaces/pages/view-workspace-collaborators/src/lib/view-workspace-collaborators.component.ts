@@ -1,16 +1,35 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { AuthStore } from '@bulldozer-client/auth-data-access';
 import {
-  CollaboratorQueryStore,
+  CollaboratorApiService,
   CollaboratorsStore,
-  CollaboratorStore,
 } from '@bulldozer-client/collaborators-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
-import { map } from 'rxjs';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { UsersStore } from '@bulldozer-client/users-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import {
-  CollaboratorStatus,
-  ViewWorkspaceCollaboratorsStore,
-} from './view-workspace-collaborators.store';
+  CollaboratorDto,
+  findCollaboratorAddress,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import {
+  combineLatest,
+  distinctUntilChanged,
+  EMPTY,
+  map,
+  switchMap,
+} from 'rxjs';
+import { CollaboratorItemView, UserItemView } from './types';
+import { ViewWorkspaceCollaboratorsUsersStore } from './view-workspace-collaborators-users.store';
+import { ViewWorkspaceCollaboratorsStore } from './view-workspace-collaborators.store';
+
+interface ViewModel {
+  status: number;
+  selectedCollaboratorId: string | null;
+  currentCollaboratorId: string | null;
+}
 
 @Component({
   selector: 'bd-view-workspace-collaborators',
@@ -23,22 +42,22 @@ import {
         <mat-form-field appearance="fill" class="w-full">
           <mat-label>Status</mat-label>
           <mat-select
-            [value]="collaboratorStatus$ | ngrxPush"
-            (valueChange)="onSetCollaboratorStatus($event)"
+            [value]="status$ | ngrxPush"
+            (valueChange)="onSetStatus($event)"
           >
-            <mat-option value="approved">
+            <mat-option [value]="1">
               <span
                 class="inline-block bg-green-500 w-2 h-2 rounded-full"
               ></span>
               Approved
             </mat-option>
-            <mat-option value="pending">
+            <mat-option [value]="0">
               <span
                 class="inline-block bg-yellow-500 w-2 h-2 rounded-full"
               ></span>
               Pending
             </mat-option>
-            <mat-option value="rejected">
+            <mat-option [value]="2">
               <span class="inline-block bg-red-500 w-2 h-2 rounded-full"></span>
               Rejected
             </mat-option>
@@ -48,20 +67,19 @@ import {
       </header>
 
       <ul class="flex-1">
-        <li *ngFor="let collaborator of collaborators$ | ngrxPush">
+        <li
+          *ngFor="
+            let collaborator of filteredCollaborators$ | ngrxPush;
+            trackBy: identify
+          "
+        >
           <button
-            class="w-full py-5 px-7 border-l-4 flex items-center gap-2"
-            [ngClass]="
-              (selectedCollaborator$ | ngrxPush)?.document?.id ===
-              collaborator.document.id
-                ? 'bg-white bg-opacity-5 border-primary'
-                : 'border-transparent'
-            "
-            (click)="onSelectCollaborator(collaborator.document.id)"
+            class="w-full py-5 px-7 border-l-4 flex items-center gap-2 border-transparent"
+            (click)="onSelectCollaboratorId(collaborator.id)"
           >
             <figure class="w-12 h-12 rounded-full overflow-hidden">
               <img
-                [src]="collaborator.user?.data?.thumbnailUrl"
+                [src]="collaborator.user.thumbnailUrl"
                 class="w-full"
                 onerror="this.src='assets/images/default-profile.png';"
               />
@@ -72,12 +90,12 @@ import {
                 <span
                   class="text-lg font-bold w-44 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ collaborator.user?.name }}
+                  {{ collaborator.user.name }}
                 </span>
 
                 <mat-icon
                   class="inline"
-                  *ngIf="collaborator.document.data.isAdmin"
+                  *ngIf="collaborator.isAdmin"
                   color="accent"
                   inline
                 >
@@ -88,12 +106,11 @@ import {
               <p class="m-0 text-xs text-left">
                 <a
                   [href]="
-                    'https://explorer.solana.com/address/' +
-                    collaborator.user?.id
+                    'https://explorer.solana.com/address/' + collaborator.userId
                   "
                   target="__blank"
                   class="text-accent underline"
-                  >(@{{ collaborator.user?.data?.userName }})</a
+                  >(@{{ collaborator.user.userName }})</a
                 >
               </p>
 
@@ -101,15 +118,13 @@ import {
                 <span
                   class="inline-block w-2 h-2 rounded-full"
                   [ngClass]="{
-                    'bg-yellow-500': collaborator.document.data.status.id === 0,
-                    'bg-green-500': collaborator.document.data.status.id === 1,
-                    'bg-red-500': collaborator.document.data.status.id === 2
+                    'bg-yellow-500': collaborator.status.id === 0,
+                    'bg-green-500': collaborator.status.id === 1,
+                    'bg-red-500': collaborator.status.id === 2
                   }"
                 ></span>
                 <span class="text-white text-opacity-50">
-                  <ng-container
-                    [ngSwitch]="collaborator.document.data.status.id"
-                  >
+                  <ng-container [ngSwitch]="collaborator.status.id">
                     <ng-container *ngSwitchCase="0"> Pending </ng-container>
                     <ng-container *ngSwitchCase="1"> Approved </ng-container>
                     <ng-container *ngSwitchCase="2"> Rejected </ng-container>
@@ -123,32 +138,43 @@ import {
 
       <footer
         class="py-5 px-7 w-full flex justify-center items-center"
-        *ngIf="workspaceId$ | ngrxPush as workspaceId"
+        *hdWalletAdapter="let publicKey = publicKey"
       >
-        <ng-container *ngIf="(loading$ | ngrxPush) === false">
-          <ng-container *ngrxLet="collaborator$; let collaborator">
+        <ng-container *ngIf="publicKey !== null">
+          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
             <button
-              *ngIf="collaborator === null"
+              *ngIf="
+                (collaborators$ | ngrxPush) !== null &&
+                (currentCollaborator$ | ngrxPush) === null
+              "
               mat-stroked-button
               color="accent"
-              (click)="onRequestCollaboratorStatus(workspaceId)"
+              (click)="
+                onRequestCollaboratorStatus(publicKey.toBase58(), workspaceId)
+              "
             >
               Become Collaborator
             </button>
+          </ng-container>
 
+          <ng-container
+            *ngrxLet="currentCollaborator$; let currentCollaborator"
+          >
             <button
               *ngIf="
-                collaborator !== null &&
-                collaborator.document.data.status.id === 2
+                currentCollaborator !== null &&
+                currentCollaborator.status.id === 2
               "
               mat-stroked-button
               color="accent"
               (click)="
                 onRetryCollaboratorStatusRequest(
-                  workspaceId,
-                  collaborator.document.id
+                  publicKey.toBase58(),
+                  currentCollaborator.workspaceId,
+                  currentCollaborator.id
                 )
               "
+              [disabled]="currentCollaborator | bdItemChanging"
             >
               Try again
             </button>
@@ -168,7 +194,7 @@ import {
           <div class="flex items-center gap-4">
             <figure>
               <img
-                [src]="selectedCollaborator.user?.data?.thumbnailUrl"
+                [src]="selectedCollaborator.user.thumbnailUrl"
                 class="w-20 h-20 rounded-full overflow-hidden"
                 alt=""
                 onerror="this.src='assets/images/default-profile.png';"
@@ -181,7 +207,7 @@ import {
                   "
                   target="__blank"
                   class="text-accent underline"
-                  >@{{ selectedCollaborator.user?.data?.userName }}</a
+                  >@{{ selectedCollaborator.user.userName }}</a
                 >
               </figcaption>
             </figure>
@@ -190,17 +216,14 @@ import {
               <h2
                 class="text-2xl font-bold w-64 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
               >
-                {{ selectedCollaborator.user?.name }}
+                {{ selectedCollaborator.user.name }}
               </h2>
 
               <p class="flex m-0 gap-1 text-sm">
                 <mat-icon class="w-4" inline>event</mat-icon>
                 <span>
                   Collaborator since
-                  {{
-                    selectedCollaborator.document.createdAt.toNumber() * 1000
-                      | date: 'mediumDate'
-                  }}
+                  {{ selectedCollaborator.createdAt | date: 'mediumDate' }}
                 </span>
               </p>
 
@@ -208,18 +231,13 @@ import {
                 <span
                   class="inline-block w-2 h-2 rounded-full"
                   [ngClass]="{
-                    'bg-yellow-500':
-                      selectedCollaborator.document.data.status.id === 0,
-                    'bg-green-500':
-                      selectedCollaborator.document.data.status.id === 1,
-                    'bg-red-500':
-                      selectedCollaborator.document.data.status.id === 2
+                    'bg-yellow-500': selectedCollaborator.status.id === 0,
+                    'bg-green-500': selectedCollaborator.status.id === 1,
+                    'bg-red-500': selectedCollaborator.status.id === 2
                   }"
                 ></span>
                 <span class="text-white text-opacity-50">
-                  <ng-container
-                    [ngSwitch]="selectedCollaborator.document.data.status.id"
-                  >
+                  <ng-container [ngSwitch]="selectedCollaborator.status.id">
                     <ng-container *ngSwitchCase="0"> Pending </ng-container>
                     <ng-container *ngSwitchCase="1"> Approved </ng-container>
                     <ng-container *ngSwitchCase="2"> Rejected </ng-container>
@@ -229,63 +247,87 @@ import {
             </div>
           </div>
 
-          <div class="flex gap-2">
-            <button
-              *ngIf="selectedCollaborator.document.data.status.id === 1"
-              mat-stroked-button
-              color="warn"
-              (click)="
-                onUpdateCollaborator(
-                  selectedCollaborator.document.data.workspace,
-                  selectedCollaborator.document.id,
-                  2
-                )
-              "
-            >
-              Revoke
-            </button>
-            <button
-              *ngIf="selectedCollaborator.document.data.status.id === 0"
-              mat-stroked-button
-              color="accent"
-              (click)="
-                onUpdateCollaborator(
-                  selectedCollaborator.document.data.workspace,
-                  selectedCollaborator.document.id,
-                  1
-                )
-              "
-            >
-              Approve
-            </button>
-            <button
-              *ngIf="selectedCollaborator.document.data.status.id === 2"
-              mat-stroked-button
-              color="accent"
-              (click)="
-                onUpdateCollaborator(
-                  selectedCollaborator.document.data.workspace,
-                  selectedCollaborator.document.id,
-                  1
-                )
-              "
-            >
-              Grant
-            </button>
-            <button
-              *ngIf="selectedCollaborator.document.data.status.id === 0"
-              mat-stroked-button
-              color="warn"
-              (click)="
-                onUpdateCollaborator(
-                  selectedCollaborator.document.data.workspace,
-                  selectedCollaborator.document.id,
-                  2
-                )
-              "
-            >
-              Reject
-            </button>
+          <div
+            class="flex gap-2"
+            *hdWalletAdapter="
+              let publicKey = publicKey;
+              let connected = connected
+            "
+          >
+            <ng-container *ngIf="publicKey !== null">
+              <button
+                *ngIf="selectedCollaborator.status.id === 1"
+                mat-stroked-button
+                color="warn"
+                (click)="
+                  onUpdateCollaborator(
+                    publicKey.toBase58(),
+                    selectedCollaborator.workspaceId,
+                    selectedCollaborator.id,
+                    { status: 2 }
+                  )
+                "
+                [disabled]="
+                  !connected || (selectedCollaborator | bdItemChanging)
+                "
+              >
+                Revoke
+              </button>
+              <button
+                *ngIf="selectedCollaborator.status.id === 0"
+                mat-stroked-button
+                color="accent"
+                (click)="
+                  onUpdateCollaborator(
+                    publicKey.toBase58(),
+                    selectedCollaborator.workspaceId,
+                    selectedCollaborator.id,
+                    { status: 1 }
+                  )
+                "
+                [disabled]="
+                  !connected || (selectedCollaborator | bdItemChanging)
+                "
+              >
+                Approve
+              </button>
+              <button
+                *ngIf="selectedCollaborator.status.id === 2"
+                mat-stroked-button
+                color="accent"
+                (click)="
+                  onUpdateCollaborator(
+                    publicKey.toBase58(),
+                    selectedCollaborator.workspaceId,
+                    selectedCollaborator.id,
+                    { status: 1 }
+                  )
+                "
+                [disabled]="
+                  !connected || (selectedCollaborator | bdItemChanging)
+                "
+              >
+                Grant
+              </button>
+              <button
+                *ngIf="selectedCollaborator.status.id === 0"
+                mat-stroked-button
+                color="warn"
+                (click)="
+                  onUpdateCollaborator(
+                    publicKey.toBase58(),
+                    selectedCollaborator.workspaceId,
+                    selectedCollaborator.id,
+                    { status: 2 }
+                  )
+                "
+                [disabled]="
+                  !connected || (selectedCollaborator | bdItemChanging)
+                "
+              >
+                Reject
+              </button>
+            </ng-container>
           </div>
         </header>
 
@@ -318,7 +360,7 @@ import {
                 <span
                   class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ selectedCollaborator.document.data.authority }}
+                  {{ selectedCollaborator.authority }}
                 </span>
 
                 <button mat-icon-button>
@@ -333,72 +375,318 @@ import {
   `,
   styles: [],
   providers: [
-    CollaboratorStore,
-    CollaboratorQueryStore,
     CollaboratorsStore,
-    UserStore,
+    UsersStore,
     ViewWorkspaceCollaboratorsStore,
+    ViewWorkspaceCollaboratorsUsersStore,
   ],
 })
-export class ViewWorkspaceCollaboratorsComponent implements OnInit {
+export class ViewWorkspaceCollaboratorsComponent
+  extends ComponentStore<ViewModel>
+  implements OnInit
+{
   @HostBinding('class') class = 'bg-white bg-opacity-5 flex h-full';
-  readonly workspaceId$ = this._viewWorkspaceCollaboratorsStore.workspaceId$;
-  readonly user$ = this._userStore.user$;
-  readonly collaboratorStatus$ =
-    this._viewWorkspaceCollaboratorsStore.collaboratorStatus$;
-  readonly collaborator$ = this._collaboratorStore.collaborator$;
-  readonly collaborators$ =
-    this._viewWorkspaceCollaboratorsStore.filteredCollaborators$;
-  readonly selectedCollaborator$ =
-    this._viewWorkspaceCollaboratorsStore.selectedCollaborator$;
-  readonly loading$ = this._viewWorkspaceCollaboratorsStore.loading$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly userIds$ = this.select(
+    this._viewWorkspaceCollaboratorsStore.collaboratorsMap$,
+    (collaboratorsMap) => {
+      if (collaboratorsMap === null) {
+        return null;
+      }
+
+      return collaboratorsMap.map(({ userId }) => userId).toList();
+    }
+  ).pipe(
+    distinctUntilChanged(
+      (previous, current) => previous?.join('') === current?.join('')
+    )
+  );
+  readonly status$ = this.select(({ status }) => status);
+  readonly currentCollaboratorId$ = this.select(
+    ({ currentCollaboratorId }) => currentCollaboratorId
+  );
+  readonly selectedCollaboratorId$ = this.select(
+    ({ selectedCollaboratorId }) => selectedCollaboratorId
+  );
+  readonly collaborators$ = this.select(
+    this._viewWorkspaceCollaboratorsStore.collaboratorsMap$,
+    this._viewWorkspaceCollaboratorsUsersStore.usersMap$,
+    (collaboratorsMap, usersMap) => {
+      if (collaboratorsMap === null || usersMap === null) {
+        return null;
+      }
+
+      return collaboratorsMap
+        .map((collaborator) => {
+          const user = usersMap.get(collaborator.userId);
+
+          if (user === undefined) {
+            return null;
+          }
+
+          return {
+            ...collaborator,
+            user,
+          };
+        })
+        .filter(
+          (data): data is CollaboratorItemView & { user: UserItemView } =>
+            data !== null
+        )
+        .sort((a, b) => a.createdAt - b.createdAt)
+        .toList();
+    }
+  );
+  readonly filteredCollaborators$ = this.select(
+    this.collaborators$,
+    this.status$,
+    (collaborators, status) => {
+      if (collaborators === null) {
+        return null;
+      }
+
+      return collaborators.filter(
+        (collaborator) => collaborator.status.id === status
+      );
+    }
+  );
+  readonly selectedCollaborator$ = this.select(
+    this.collaborators$,
+    this.selectedCollaboratorId$,
+    (collaborators, selectedCollaboratorId) => {
+      if (collaborators === null || selectedCollaboratorId === null) {
+        return null;
+      }
+
+      return (
+        collaborators.find(
+          (collaborator) => collaborator.id === selectedCollaboratorId
+        ) ?? null
+      );
+    }
+  );
+  readonly currentCollaborator$ = this.select(
+    this.collaborators$,
+    this.currentCollaboratorId$,
+    (collaborators, currentCollaboratorId) => {
+      if (collaborators === null || currentCollaboratorId === null) {
+        return null;
+      }
+
+      return (
+        collaborators.find(
+          (collaborator) => collaborator.id === currentCollaboratorId
+        ) ?? null
+      );
+    }
+  );
 
   constructor(
+    private readonly _authStore: AuthStore,
     private readonly _route: ActivatedRoute,
+    private readonly _collaboratorApiService: CollaboratorApiService,
     private readonly _viewWorkspaceCollaboratorsStore: ViewWorkspaceCollaboratorsStore,
-    private readonly _userStore: UserStore,
-    private readonly _collaboratorStore: CollaboratorStore
-  ) {}
-
-  ngOnInit() {
-    this._viewWorkspaceCollaboratorsStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
-    );
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _viewWorkspaceCollaboratorsUsersStore: ViewWorkspaceCollaboratorsUsersStore
+  ) {
+    super({
+      status: 1,
+      selectedCollaboratorId: null,
+      currentCollaboratorId: null,
+    });
   }
 
-  onRequestCollaboratorStatus(workspaceId: string) {
-    this._viewWorkspaceCollaboratorsStore.requestCollaboratorStatus({
-      workspaceId,
-    });
+  private readonly _setStatus = this.updater<number>((state, status) => ({
+    ...state,
+    status,
+  }));
+
+  private readonly _selectCollaboratorId = this.updater<string | null>(
+    (state, selectedCollaboratorId) => ({
+      ...state,
+      selectedCollaboratorId,
+    })
+  );
+
+  private readonly _loadCurrentCollaboratorId = this.effect(
+    switchMap(({ workspaceId, userId }) => {
+      this.patchState({ currentCollaboratorId: null });
+
+      if (workspaceId === null || userId === null) {
+        return EMPTY;
+      }
+
+      return findCollaboratorAddress(workspaceId, userId).pipe(
+        tapResponse(
+          ([currentCollaboratorId]) =>
+            this.patchState({ currentCollaboratorId }),
+          (error) => this._notificationStore.setError(error)
+        )
+      );
+    })
+  );
+
+  ngOnInit() {
+    this._selectCollaboratorId(
+      this.select(
+        this.selectedCollaboratorId$,
+        this._viewWorkspaceCollaboratorsStore.collaboratorsMap$,
+        (selectedCollaboratorId, collaboratorsMap) => {
+          if (collaboratorsMap === null || collaboratorsMap.size === 0) {
+            return null;
+          }
+
+          if (selectedCollaboratorId === null) {
+            const firstCollaborator = collaboratorsMap
+              .sort((a, b) => a.createdAt - b.createdAt)
+              .first();
+
+            if (firstCollaborator === undefined) {
+              return null;
+            }
+
+            return firstCollaborator.id;
+          }
+
+          const selectedCollaborator = collaboratorsMap.get(
+            selectedCollaboratorId
+          );
+
+          if (selectedCollaborator === undefined) {
+            return null;
+          }
+
+          return selectedCollaborator.id;
+        }
+      )
+    );
+    this._loadCurrentCollaboratorId(
+      combineLatest({
+        workspaceId: this.workspaceId$,
+        userId: this._authStore.userId$,
+      })
+    );
+    this._viewWorkspaceCollaboratorsStore.setWorkspaceId(this.workspaceId$);
+    this._viewWorkspaceCollaboratorsUsersStore.setUserIds(this.userIds$);
+  }
+
+  onRequestCollaboratorStatus(authority: string, workspaceId: string) {
+    this._collaboratorApiService
+      .requestCollaboratorStatus({
+        authority,
+        workspaceId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent(
+            'Request collaborator status request sent'
+          );
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspace:${workspaceId}:collaborators`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onRetryCollaboratorStatusRequest(
+    authority: string,
     workspaceId: string,
     collaboratorId: string
   ) {
-    this._viewWorkspaceCollaboratorsStore.retryCollaboratorStatusRequest({
-      workspaceId,
-      collaboratorId,
-    });
+    this._collaboratorApiService
+      .retryCollaboratorStatusRequest({
+        authority,
+        workspaceId,
+        collaboratorId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent(
+            'Retry collaborator status request sent'
+          );
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspace:${workspaceId}:collaborators`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateCollaborator(
+    authority: string,
     workspaceId: string,
     collaboratorId: string,
-    status: number
+    collaboratorDto: CollaboratorDto
   ) {
-    this._viewWorkspaceCollaboratorsStore.updateCollaborator({
-      workspaceId,
-      collaboratorId,
-      status,
-    });
+    this._collaboratorApiService
+      .update({
+        authority,
+        workspaceId,
+        collaboratorId,
+        collaboratorDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update collaborator request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspace:${workspaceId}:collaborators`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
-  onSetCollaboratorStatus(status: CollaboratorStatus) {
-    this._viewWorkspaceCollaboratorsStore.setCollaboratorStatus(status);
+  onSetStatus(status: number) {
+    this._setStatus(status);
   }
 
-  onSelectCollaborator(collaboratorId: string) {
-    this._viewWorkspaceCollaboratorsStore.setCollaboratorId(collaboratorId);
+  onSelectCollaboratorId(collaboratorId: string) {
+    this._selectCollaboratorId(collaboratorId);
+  }
+
+  identify(_: number, collaborator: CollaboratorItemView) {
+    return collaborator.id;
   }
 }

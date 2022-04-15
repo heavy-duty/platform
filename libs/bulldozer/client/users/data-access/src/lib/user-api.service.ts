@@ -52,6 +52,27 @@ export class UserApiService {
       );
   }
 
+  // get users
+  findByIds(
+    userIds: string[],
+    commitment: Finality = 'finalized'
+  ): Observable<(Document<User> | null)[]> {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(userIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createUserDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
+        )
+      );
+  }
+
   // create user
   create(params: CreateUserParams): Observable<{
     transactionSignature: TransactionSignature;

@@ -1,3 +1,5 @@
+import { CollaboratorDto } from '../../utils';
+
 export interface CreateCollaboratorParams {
   authority: string;
   workspaceId: string;
@@ -14,7 +16,7 @@ export interface UpdateCollaboratorParams {
   authority: string;
   workspaceId: string;
   collaboratorId: string;
-  status: number;
+  collaboratorDto: CollaboratorDto;
 }
 
 export interface RequestCollaboratorStatusParams {
