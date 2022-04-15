@@ -279,7 +279,7 @@ export class WorkspaceExplorerComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `workspace:${workspaceKeypair.publicKey.toBase58()}`,
-                  `authority:${authority}:workspaces`,
+                  `authority:${authority}`,
                 ],
               },
             })

@@ -7,12 +7,13 @@ import {
   flattenInstructions,
   InstructionStatus,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined, tapEffect } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List, Map, Set } from 'immutable';
-import { map, noop, switchMap, tap } from 'rxjs';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
 
 interface ViewModel {
   transactions: List<TransactionStatus>;
@@ -27,9 +28,8 @@ const initialState: ViewModel = {
 @Injectable()
 export class UserInstructionsStore2 extends ComponentStore<ViewModel> {
   private readonly _topicName$ = this.select(
-    this._walletStore.publicKey$,
-    (walletPublicKey) =>
-      walletPublicKey === null ? null : `authority:${walletPublicKey}`
+    this._walletStore.publicKey$.pipe(isNotNullOrUndefined),
+    (walletPublicKey) => `authority:${walletPublicKey}`
   );
   readonly viewedTransactionSignatures$ = this.select(
     ({ viewedTransactionSignatures }) => viewedTransactionSignatures
@@ -84,16 +84,6 @@ export class UserInstructionsStore2 extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
-    this._handleTransaction(
-      this._topicName$.pipe(
-        isNotNullOrUndefined,
-        switchMap((topicName) =>
-          this._hdBroadcasterSocketStore
-            .fromEvent(topicName)
-            .pipe(map((message) => message.data))
-        )
-      )
-    );
     this._registerTopic(
       this.select(
         this._hdBroadcasterSocketStore.connected$,
@@ -147,28 +137,55 @@ export class UserInstructionsStore2 extends ComponentStore<ViewModel> {
     connected: boolean;
     topicName: string | null;
   }>(
-    tapEffect(({ connected, topicName }) => {
+    switchMap(({ connected, topicName }) => {
       if (!connected || topicName === null) {
-        return noop;
+        return EMPTY;
       }
 
       this.patchState({ transactions: List() });
 
-      this._hdBroadcasterSocketStore.send(
-        JSON.stringify({
-          event: 'subscribe',
-          data: topicName,
-        })
-      );
+      const correlationId = uuid();
+      let subscriptionId: string;
 
-      return () => {
-        this._hdBroadcasterSocketStore.send(
-          JSON.stringify({
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
+            event: 'subscribe',
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
             event: 'unsubscribe',
-            data: topicName,
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
+            );
+          }
+        )
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
         );
-      };
     })
   );
 }

@@ -206,7 +206,7 @@ export class ViewWorkspaceComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `workspace:${workspaceId}`,
-                  `authority:${authority}:workspaces`,
+                  `authority:${authority}`,
                 ],
               },
             })
@@ -235,7 +235,7 @@ export class ViewWorkspaceComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `workspace:${workspaceId}`,
-                  `authority:${authority}:workspaces`,
+                  `authority:${authority}`,
                 ],
               },
             })

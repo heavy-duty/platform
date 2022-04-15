@@ -184,7 +184,7 @@ export class ViewUserWorkspacesComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `workspace:${workspaceId}`,
-                  `authority:${authority}:workspaces`,
+                  `authority:${authority}`,
                 ],
               },
             })

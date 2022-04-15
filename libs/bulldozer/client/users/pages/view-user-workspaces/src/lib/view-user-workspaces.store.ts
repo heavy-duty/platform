@@ -46,7 +46,7 @@ export class ViewUserWorkspacesStore extends ComponentStore<ViewModel> {
   readonly authority$ = this.select(({ authority }) => authority);
   private readonly _topicName$ = this.select(
     this.authority$.pipe(isNotNullOrUndefined),
-    (authority) => `authority:${authority}:workspaces`
+    (authority) => `authority:${authority}`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
