@@ -16,32 +16,23 @@ import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { EMPTY, switchMap, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { reduceInstructions } from './reduce-instructions';
+import { reduceInstructions } from './reduce-account-instructions';
 import { InstructionAccountItemView } from './types';
 
 const documentToView = (
-  document: Document<InstructionAccount>
+  instructionAccount: Document<InstructionAccount>
 ): InstructionAccountItemView => {
   return {
-    id: document.id,
-    name: document.name,
+    id: instructionAccount.id,
+    name: instructionAccount.name,
     isCreating: false,
     isUpdating: false,
     isDeleting: false,
-    kind: {
-      id: 1,
-      name: 'signer',
-    },
-    modifier:
-      document.data.modifier !== null
-        ? {
-            id: document.data.modifier.id,
-            name: document.data.modifier.name,
-          }
-        : null,
-    instructionId: document.data.instruction,
-    applicationId: document.data.application,
-    workspaceId: document.data.workspace,
+    kind: instructionAccount.data.kind,
+    modifier: instructionAccount.data.modifier,
+    instructionId: instructionAccount.data.instruction,
+    applicationId: instructionAccount.data.application,
+    workspaceId: instructionAccount.data.workspace,
   };
 };
 
@@ -56,7 +47,7 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
+export class ViewInstructionDocumentsAccountsStore extends ComponentStore<ViewModel> {
   private readonly _instructionId$ = this.select(
     ({ instructionId }) => instructionId
   );
@@ -88,9 +79,7 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
 
       return instructionStatuses.reduce(
         reduceInstructions,
-        instructionAccounts
-          .filter((instructionAccount) => instructionAccount.data.kind.id === 1)
-          .map(documentToView)
+        instructionAccounts.map(documentToView)
       );
     },
     { debounce: true }

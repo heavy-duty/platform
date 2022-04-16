@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
-import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-access';
+import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
   HdBroadcasterSocketStore,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
 import {
+  Collection,
   Document,
   flattenInstructions,
-  InstructionAccount,
   InstructionStatus,
 } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
@@ -16,53 +16,37 @@ import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { EMPTY, switchMap, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { reduceInstructions } from './reduce-instructions';
-import { InstructionAccountItemView } from './types';
+import { reduceInstructions } from './reduce-collection-instructions';
+import { CollectionItemView } from './types';
 
-const documentToView = (
-  document: Document<InstructionAccount>
-): InstructionAccountItemView => {
+const documentToView = (document: Document<Collection>): CollectionItemView => {
   return {
     id: document.id,
     name: document.name,
     isCreating: false,
     isUpdating: false,
     isDeleting: false,
-    kind: {
-      id: 1,
-      name: 'signer',
-    },
-    modifier:
-      document.data.modifier !== null
-        ? {
-            id: document.data.modifier.id,
-            name: document.data.modifier.name,
-          }
-        : null,
-    instructionId: document.data.instruction,
     applicationId: document.data.application,
     workspaceId: document.data.workspace,
   };
 };
 
 interface ViewModel {
-  instructionId: string | null;
+  applicationId: string | null;
   transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
-  instructionId: null,
+  applicationId: null,
   transactions: List(),
 };
 
 @Injectable()
-export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
-  private readonly _instructionId$ = this.select(
-    ({ instructionId }) => instructionId
-  );
+export class ViewInstructionDocumentsCollectionsStore extends ComponentStore<ViewModel> {
+  readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   private readonly _topicName$ = this.select(
-    this._instructionId$.pipe(isNotNullOrUndefined),
-    (instructionId) => `instructions:${instructionId}:accounts`
+    this.applicationId$.pipe(isNotNullOrUndefined),
+    (applicationId) => `applications:${applicationId}:collections`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
@@ -78,19 +62,17 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
             a.transactionStatus.timestamp - b.transactionStatus.timestamp
         )
   );
-  readonly accounts$ = this.select(
-    this._instructionAccountsStore.instructionAccounts$,
+  readonly collections$ = this.select(
+    this._collectionsStore.collections$,
     this._instructionStatuses$,
-    (instructionAccounts, instructionStatuses) => {
-      if (instructionAccounts === null) {
+    (collections, instructionStatuses) => {
+      if (collections === null) {
         return null;
       }
 
       return instructionStatuses.reduce(
         reduceInstructions,
-        instructionAccounts
-          .filter((instructionAccount) => instructionAccount.data.kind.id === 1)
-          .map(documentToView)
+        collections.map(documentToView)
       );
     },
     { debounce: true }
@@ -98,15 +80,15 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
 
   constructor(
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
-    private readonly _instructionAccountsStore: InstructionAccountsStore
+    private readonly _collectionsStore: CollectionsStore
   ) {
     super(initialState);
 
-    this._instructionAccountsStore.setFilters(
+    this._collectionsStore.setFilters(
       this.select(
-        this._instructionId$.pipe(isNotNullOrUndefined),
+        this.applicationId$.pipe(isNotNullOrUndefined),
         this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
-        (instructionId) => ({ instruction: instructionId })
+        (applicationId) => ({ application: applicationId })
       )
     );
     this._registerTopic(
@@ -137,11 +119,8 @@ export class ViewInstructionSignersStore extends ComponentStore<ViewModel> {
     })
   );
 
-  readonly setInstructionId = this.updater<string | null>(
-    (state, instructionId) => ({
-      ...state,
-      instructionId,
-    })
+  readonly setApplicationId = this.updater<string | null>(
+    (state, applicationId) => ({ ...state, applicationId })
   );
 
   private readonly _handleTransaction = this.effect<TransactionStatus>(

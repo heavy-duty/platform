@@ -12,6 +12,7 @@ import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instructio
 import { EditInstructionRelationModule } from '@bulldozer-client/edit-instruction-relation';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionDocumentsComponent } from './view-instruction-documents.component';
 
@@ -37,6 +38,7 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
     EditInstructionDocumentModule,
     EditInstructionRelationModule,
     ObscureAddressModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewInstructionDocumentsComponent],
 })

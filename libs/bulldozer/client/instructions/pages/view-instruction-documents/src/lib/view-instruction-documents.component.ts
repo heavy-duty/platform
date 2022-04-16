@@ -10,20 +10,27 @@ import {
   CollectionsStore,
 } from '@bulldozer-client/collections-data-access';
 import {
+  InstructionAccountApiService,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
   InstructionRelationQueryStore,
   InstructionRelationsStore,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { Keypair } from '@solana/web3.js';
+import { distinctUntilChanged, map } from 'rxjs';
+import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
+import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
 
 @Component({
   selector: 'bd-view-instruction-documents',
   template: `
-    <!-- <header
+    <header
       class="mb-8 border-b-2 border-yellow-500 flex items-center justify-between"
     >
       <div>
@@ -33,38 +40,50 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
         </p>
       </div>
 
-      <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-        <ng-container *ngIf="applicationId$ | ngrxPush as applicationId">
-          <button
-            *ngIf="instructionId$ | ngrxPush as instructionId"
-            mat-mini-fab
-            color="accent"
-            bdEditInstructionDocument
-            [collections]="(collections$ | ngrxPush)?.toArray() ?? null"
-            [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
-            (editInstructionDocument)="
-              onCreateInstructionDocument(
-                workspaceId,
-                applicationId,
-                instructionId,
-                $event
-              )
-            "
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+      <ng-container *hdWalletAdapter="let publicKey = publicKey">
+        <ng-container *ngrxLet="workspaceId$; let workspaceId">
+          <ng-container *ngrxLet="applicationId$; let applicationId">
+            <ng-container *ngrxLet="instructionId$; let instructionId">
+              <button
+                *ngIf="
+                  publicKey !== null &&
+                  workspaceId !== null &&
+                  applicationId !== null &&
+                  instructionId !== null
+                "
+                mat-mini-fab
+                color="accent"
+                bdEditInstructionDocument
+                [collections]="(collections$ | ngrxPush) ?? null"
+                [instructionAccounts]="
+                  (instructionAccounts$ | ngrxPush) ?? null
+                "
+                (editInstructionDocument)="
+                  onCreateInstructionDocument(
+                    publicKey.toBase58(),
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    $event
+                  )
+                "
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </ng-container>
+          </ng-container>
         </ng-container>
       </ng-container>
     </header>
 
     <main *ngrxLet="documents$; let documents">
       <div
-        *ngIf="documents && documents.length > 0; else emptyList"
+        *ngIf="documents && documents.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
       >
         <mat-card
           *ngFor="let instructionDocument of documents; let i = index"
-          class="h-auto w-full rounded-lg overflow-hidden bd-bg-image-1 p-0"
+          class="h-auto w-full rounded-lg overflow-hidden bd-bg-image-5 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
             <div class="flex-1 flex items-center gap-2">
@@ -88,50 +107,60 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
               </ng-container>
             </div>
 
-            <button
-              mat-icon-button
-              bdEditInstructionDocument
-              [collections]="(collections$ | ngrxPush)?.toArray() ?? null"
-              [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
-              [instructionDocument]="instructionDocument.document"
-              (editInstructionDocument)="
-                onUpdateInstructionDocument(
-                  instructionDocument.document.data.workspace,
-                  instructionDocument.document.data.instruction,
-                  instructionDocument.document.id,
-                  $event
-                )
-              "
-              [disabled]="
-                (connected$ | ngrxPush) === false ||
-                (instructionDocument | bdItemChanging)
-              "
-              [attr.aria-label]="
-                'Update document ' + instructionDocument.document.name
-              "
-            >
-              <mat-icon>edit</mat-icon>
-            </button>
+            <ng-container *hdWalletAdapter="let publicKey = publicKey">
+              <ng-container *ngIf="publicKey !== null">
+                <button
+                  mat-icon-button
+                  bdEditInstructionDocument
+                  [collections]="(collections$ | ngrxPush) ?? null"
+                  [instructionAccounts]="
+                    (instructionAccounts$ | ngrxPush) ?? null
+                  "
+                  [instructionDocument]="{
+                    name: instructionDocument.name,
+                    kind: instructionDocument.kind.id,
+                    space: instructionDocument.modifier?.space ?? null,
+                    payer: instructionDocument.modifier?.payer ?? null,
+                    collection: instructionDocument.kind.collection ?? null,
+                    modifier: instructionDocument.modifier?.id ?? null,
+                    close: instructionDocument.modifier?.close ?? null
+                  }"
+                  (editInstructionDocument)="
+                    onUpdateInstructionDocument(
+                      publicKey.toBase58(),
+                      instructionDocument.workspaceId,
+                      instructionDocument.instructionId,
+                      instructionDocument.id,
+                      $event
+                    )
+                  "
+                  [disabled]="instructionDocument | bdItemChanging"
+                  [attr.aria-label]="
+                    'Update document ' + instructionDocument.name
+                  "
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
 
-            <button
-              mat-icon-button
-              [attr.aria-label]="
-                'Delete document ' + instructionDocument.document.name
-              "
-              (click)="
-                onDeleteInstructionDocument(
-                  instructionDocument.document.data.workspace,
-                  instructionDocument.document.data.instruction,
-                  instructionDocument.document.id
-                )
-              "
-              [disabled]="
-                (connected$ | ngrxPush) === false ||
-                (instructionDocument | bdItemChanging)
-              "
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
+                <button
+                  mat-icon-button
+                  [attr.aria-label]="
+                    'Delete document ' + instructionDocument.name
+                  "
+                  (click)="
+                    onDeleteInstructionDocument(
+                      publicKey.toBase58(),
+                      instructionDocument.workspaceId,
+                      instructionDocument.instructionId,
+                      instructionDocument.id
+                    )
+                  "
+                  [disabled]="instructionDocument | bdItemChanging"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
+            </ng-container>
           </aside>
 
           <header class="flex items-center gap-4 p-4">
@@ -141,16 +170,14 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
               <mat-icon
                 class="w-1/2"
                 [ngClass]="{
-                  'text-green-500':
-                    instructionDocument.document.data.modifier === null,
-                  'text-blue-500':
-                    instructionDocument.document.data.modifier?.id === 0,
+                  'text-green-500': instructionDocument.modifier === null,
+                  'text-blue-500': instructionDocument.modifier?.id === 0,
                   'text-purple-500':
-                    instructionDocument.document.data.modifier?.id === 1 &&
-                    instructionDocument.close === null,
+                    instructionDocument.modifier?.id === 1 &&
+                    instructionDocument.modifier?.close === null,
                   'text-yellow-700':
-                    instructionDocument.document.data.modifier?.id === 1 &&
-                    instructionDocument.close !== null
+                    instructionDocument.modifier?.id === 1 &&
+                    instructionDocument.modifier?.close !== null
                 }"
               >
                 description
@@ -161,12 +188,12 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
               <h2
                 class="mb-0 text-lg font-bold uppercase"
                 [matTooltip]="
-                  instructionDocument.document.name
+                  instructionDocument.name
                     | bdItemUpdatingMessage: instructionDocument:'Document'
                 "
                 matTooltipShowDelay="500"
               >
-                {{ instructionDocument.document.name }}
+                {{ instructionDocument.name }}
               </h2>
 
               <p class="text-xs mb-0" *ngIf="instructionDocument.collection">
@@ -175,14 +202,14 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   class="underline text-accent"
                   [routerLink]="[
                     '/workspaces',
-                    instructionDocument.document.data.workspace,
+                    instructionDocument.workspaceId,
                     'applications',
-                    instructionDocument.document.data.application,
+                    instructionDocument.applicationId,
                     'collections',
-                    instructionDocument.collection.document.id
+                    instructionDocument.collection.id
                   ]"
                 >
-                  {{ instructionDocument.collection.document.name }}
+                  {{ instructionDocument.collection.name }}
                 </a>
               </p>
             </div>
@@ -190,23 +217,25 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
             <div class="w-32 text-center">
               <p class="text-lg uppercase font-bold m-0">
                 <ng-container
-                  *ngIf="instructionDocument.document.data.modifier !== null"
-                  [ngSwitch]="instructionDocument.document.data.modifier.id"
+                  *ngIf="instructionDocument.modifier !== null"
+                  [ngSwitch]="instructionDocument.modifier.id"
                 >
                   <ng-container *ngSwitchCase="0"> create </ng-container>
                   <ng-container *ngSwitchCase="1">
-                    <ng-container *ngIf="instructionDocument.close === null">
+                    <ng-container
+                      *ngIf="instructionDocument.modifier.close === null"
+                    >
                       update
                     </ng-container>
-                    <ng-container *ngIf="instructionDocument.close !== null">
+                    <ng-container
+                      *ngIf="instructionDocument.modifier.close !== null"
+                    >
                       delete
                     </ng-container>
                   </ng-container>
                 </ng-container>
 
-                <ng-container
-                  *ngIf="instructionDocument.document.data.modifier === null"
-                >
+                <ng-container *ngIf="instructionDocument.modifier === null">
                   readonly
                 </ng-container>
               </p>
@@ -214,8 +243,8 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
               <p
                 class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 *ngIf="
-                  instructionDocument.document.data.modifier !== null &&
-                  instructionDocument.document.data.modifier.id === 0 &&
+                  instructionDocument.modifier !== null &&
+                  instructionDocument.modifier.id === 0 &&
                   instructionDocument.payer !== null
                 "
               >
@@ -227,29 +256,29 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   class="underline text-accent"
                   [routerLink]="[
                     '/workspaces',
-                    instructionDocument.document.data.workspace,
+                    instructionDocument.workspaceId,
                     'applications',
-                    instructionDocument.document.data.application,
+                    instructionDocument.applicationId,
                     'instructions',
-                    instructionDocument.document.data.instruction,
-                    instructionDocument.payer.document.data.kind.id === 0
+                    instructionDocument.instructionId,
+                    instructionDocument.payer.kind.id === 0
                       ? 'documents'
                       : 'signers'
                   ]"
-                  >{{ instructionDocument.payer?.document?.name }}</a
+                  >{{ instructionDocument.payer?.name }}</a
                 >
 
                 <br />
 
-                ({{ instructionDocument.document.data.modifier.space }} bytes)
+                ({{ instructionDocument.modifier.space }} bytes)
               </p>
 
               <p
                 class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
                 *ngIf="
-                  instructionDocument.document.data.modifier !== null &&
-                  instructionDocument.document.data.modifier.id === 1 &&
-                  instructionDocument.close !== null
+                  instructionDocument.modifier !== null &&
+                  instructionDocument.modifier.id === 1 &&
+                  instructionDocument.modifier.close !== null
                 "
               >
                 Rent sent to:
@@ -260,17 +289,15 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   class="underline text-accent"
                   [routerLink]="[
                     '/workspaces',
-                    instructionDocument.document.data.workspace,
+                    instructionDocument.workspaceId,
                     'applications',
-                    instructionDocument.document.data.application,
+                    instructionDocument.applicationId,
                     'instructions',
-                    instructionDocument.document.data.instruction,
-                    instructionDocument.close.document.data.kind.id === 0
-                      ? 'documents'
-                      : 'signers'
+                    instructionDocument.instructionId,
+                    instructionDocument.kind.id === 0 ? 'documents' : 'signers'
                   ]"
                 >
-                  {{ instructionDocument.close.document.name }}
+                  {{ instructionDocument.close }}
                 </a>
               </p>
             </div>
@@ -279,18 +306,18 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
           <section class="p-4">
             <div class="flex justify-start items-center">
               <p class="text-lg uppercase m-0">relation</p>
-              <button
+              <!-- <button
                 mat-icon-button
                 bdEditInstructionRelation
                 [instructionAccounts]="
                   (instructionAccounts$ | ngrxPush) ?? null
                 "
-                [from]="instructionDocument.document.id"
+                [from]="instructionDocument.id"
                 (editInstructionRelation)="
                   onCreateInstructionRelation(
-                    instructionDocument.document.data.workspace,
-                    instructionDocument.document.data.application,
-                    instructionDocument.document.data.instruction,
+                    instructionDocument.workspace,
+                    instructionDocument.application,
+                    instructionDocument.instruction,
                     $event.from,
                     $event.to
                   )
@@ -298,10 +325,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                 [disabled]="(connected$ | ngrxPush) === false"
               >
                 <mat-icon>add</mat-icon>
-              </button>
+              </button> -->
             </div>
 
-            <div class="flex justify-start flex-wrap gap-4">
+            <!-- <div class="flex justify-start flex-wrap gap-4">
               <div
                 *ngFor="let relation of instructionDocument.relations"
                 class="relative"
@@ -313,15 +340,15 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                     <h3
                       class="uppercase font-bold m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
                       [matTooltip]="
-                        relation.extras.to.document.name
+                        relation.extras.to.name
                           | bdItemUpdatingMessage: relation:'Relation to'
                       "
                     >
-                      {{ relation.extras.to.document.name }}
+                      {{ relation.extras.to.name }}
                     </h3>
 
                     <p class="text-xs font-thin m-0">
-                      ({{ relation.document.id | obscureAddress }})
+                      ({{ relation.id | obscureAddress }})
                     </p>
                   </div>
 
@@ -329,14 +356,14 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                     <button
                       mat-icon-button
                       [attr.aria-label]="
-                        'Delete relation to ' + relation.extras.to.document.name
+                        'Delete relation to ' + relation.extras.to.name
                       "
                       (click)="
                         onDeleteInstructionRelation(
-                          relation.document.data.workspace,
-                          relation.document.data.instruction,
-                          relation.document.from,
-                          relation.document.to
+                          relation.workspace,
+                          relation.instruction,
+                          relation.from,
+                          relation.to
                         )
                       "
                       [disabled]="
@@ -373,7 +400,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   <div class="w-full h-px bg-gray-600  -rotate-12"></div>
                 </div>
               </div>
-            </div>
+            </div> -->
           </section>
         </mat-card>
       </div>
@@ -381,7 +408,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
       <ng-template #emptyList>
         <p class="text-center text-xl py-8">There's no documents yet.</p>
       </ng-template>
-    </main> -->
+    </main>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -393,85 +420,171 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
     CollectionsStore,
     CollectionQueryStore,
     ViewInstructionDocumentsStore,
+    ViewInstructionDocumentsCollectionsStore,
+    ViewInstructionDocumentsAccountsStore,
   ],
 })
 export class ViewInstructionDocumentsComponent implements OnInit {
   @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
   instructionBody: string | null = null;
   readonly connected$ = this._walletStore.connected$;
-  readonly workspaceId$ = this._viewInstructionDocumentsStore.workspaceId$;
-  readonly applicationId$ = this._viewInstructionDocumentsStore.applicationId$;
-  readonly instructionId$ = this._viewInstructionDocumentsStore.instructionId$;
-  // readonly documents$ = this._viewInstructionDocumentsStore.documents$;
   readonly collections$ = this._collectionsStore.collections$;
   readonly instructionAccounts$ =
     this._instructionAccountsStore.instructionAccounts$;
+  readonly documents$ = this._viewInstructionDocumentsStore.documents$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly instructionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('instructionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _walletStore: WalletStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _collectionsStore: CollectionsStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
-    private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore
+    private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
+    private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
+    private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore
   ) {}
 
   ngOnInit() {
-    this._viewInstructionDocumentsStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
+    this._viewInstructionDocumentsAccountsStore.setInstructionId(
+      this.instructionId$
     );
-    this._viewInstructionDocumentsStore.setApplicationId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
-      )
-    );
-    this._viewInstructionDocumentsStore.setInstructionId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
-      )
+    this._viewInstructionDocumentsCollectionsStore.setApplicationId(
+      this.applicationId$
     );
   }
 
   onCreateInstructionDocument(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._viewInstructionDocumentsStore.createInstructionAccount({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionAccountDto,
-    });
+    const instructionAccountKeypair = Keypair.generate();
+
+    this._instructionAccountApiService
+      .create(instructionAccountKeypair, {
+        instructionAccountDto,
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create document request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:accounts`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateInstructionDocument(
+    authority: string,
     workspaceId: string,
     instructionId: string,
     instructionAccountId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._viewInstructionDocumentsStore.updateInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-      instructionAccountDto,
-    });
+    this._instructionAccountApiService
+      .update({
+        authority,
+        workspaceId,
+        instructionId,
+        instructionAccountDto,
+        instructionAccountId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update document request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:accounts`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDeleteInstructionDocument(
+    authority: string,
     workspaceId: string,
     instructionId: string,
     instructionAccountId: string
   ) {
-    this._viewInstructionDocumentsStore.deleteInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-    });
+    this._instructionAccountApiService
+      .delete({
+        authority,
+        workspaceId,
+        instructionAccountId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete document request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:accounts`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
-  onCreateInstructionRelation(
+  /* onCreateInstructionRelation(
     workspaceId: string,
     applicationId: string,
     instructionId: string,
@@ -499,5 +612,5 @@ export class ViewInstructionDocumentsComponent implements OnInit {
       fromAccountId,
       toAccountId,
     });
-  }
+  } */
 }

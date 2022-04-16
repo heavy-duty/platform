@@ -6,20 +6,16 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {} from '@bulldozer-client/collections-data-access';
-import {} from '@bulldozer-client/instructions-data-access';
-import {
-  Document,
-  InstructionAccount,
-  InstructionAccountDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
+import { Collection, InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionDocument]' })
 export class EditInstructionDocumentDirective {
-  @Input() instructionDocument: Document<InstructionAccount> | null = null;
-  @Input() collections: any[] | null = null;
-  @Input() instructionAccounts: any[] | null = null;
+  @Input() instructionDocument: InstructionAccountDto | null = null;
+  @Input() collections: List<Collection> | null = null;
+  @Input() instructionAccounts: List<InstructionAccount> | null = null;
   @Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {
     if (!this.collections || !this.instructionAccounts) {
@@ -30,9 +26,9 @@ export class EditInstructionDocumentDirective {
       .open<
         EditInstructionDocumentComponent,
         {
-          document: Document<InstructionAccount> | null;
-          collections: any[];
-          accounts: any[];
+          document: InstructionAccountDto | null;
+          collections: List<Collection>;
+          accounts: List<InstructionAccount>;
         },
         InstructionAccountDto
       >(EditInstructionDocumentComponent, {

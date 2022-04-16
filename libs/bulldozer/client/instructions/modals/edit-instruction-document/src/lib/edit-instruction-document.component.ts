@@ -11,8 +11,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {} from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
+import { Collection, InstructionAccount } from './types';
 
 @Component({
   selector: 'bd-edit-document',
@@ -58,10 +60,10 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-select formControlName="collection" required>
           <mat-option
             *ngFor="let collection of data?.collections"
-            [value]="collection.document.id"
+            [value]="collection.id"
           >
-            {{ collection.document.name }} |
-            {{ collection.document.id | obscureAddress }}
+            {{ collection.name }} |
+            {{ collection.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">The collection is required.</mat-error>
@@ -114,10 +116,10 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-select formControlName="payer" required>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.document.id"
+            [value]="account.id"
           >
-            {{ account.document.name }} |
-            {{ account.document.id | obscureAddress }}
+            {{ account.name }} |
+            {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">The payer is required.</mat-error>
@@ -134,10 +136,10 @@ import { Subject, takeUntil } from 'rxjs';
           <mat-option> None </mat-option>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.document.id"
+            [value]="account.id"
           >
-            {{ account.document.name }} |
-            {{ account.document.id | obscureAddress }}
+            {{ account.name }} |
+            {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -194,9 +196,9 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditInstructionDocumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      document?: Document<InstructionAccount>;
-      collections: any[];
-      accounts: any[];
+      document?: InstructionAccountDto;
+      collections: List<Collection>;
+      accounts: List<InstructionAccount>;
     }
   ) {
     this.form = new FormGroup({
@@ -204,17 +206,16 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
         validators: [Validators.required],
       }),
       modifier: new FormControl(
-        this.data?.document?.data.modifier !== null
-          ? this.data?.document?.data.modifier.id
+        this.data?.document?.modifier !== null
+          ? this.data?.document?.modifier
           : null
       ),
-      collection: new FormControl(
-        this.data?.document?.data.kind.collection || null,
-        { validators: [Validators.required] }
-      ),
-      space: new FormControl(this.data?.document?.data.modifier?.space),
-      payer: new FormControl(this.data?.document?.data.modifier?.payer),
-      close: new FormControl(this.data?.document?.data.modifier?.close),
+      collection: new FormControl(this.data?.document?.collection || null, {
+        validators: [Validators.required],
+      }),
+      space: new FormControl(this.data?.document?.space),
+      payer: new FormControl(this.data?.document?.payer),
+      close: new FormControl(this.data?.document?.close),
     });
   }
 

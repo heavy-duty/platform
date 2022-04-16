@@ -215,7 +215,11 @@ export class ViewInstructionSignersComponent implements OnInit {
     isNotNullOrUndefined,
     distinctUntilChanged()
   );
-  readonly signers$ = this._viewInstructionSignersStore.signers$;
+  readonly signers$ = this._viewInstructionSignersStore.accounts$.pipe(
+    map(
+      (accounts) => accounts?.filter((account) => account.kind.id === 1) ?? null
+    )
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
@@ -257,7 +261,7 @@ export class ViewInstructionSignersComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${instructionId}:signers`,
+                  `instructions:${instructionId}:accounts`,
                 ],
               },
             })
@@ -295,7 +299,7 @@ export class ViewInstructionSignersComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${instructionId}:signers`,
+                  `instructions:${instructionId}:accounts`,
                 ],
               },
             })
@@ -331,7 +335,7 @@ export class ViewInstructionSignersComponent implements OnInit {
                 transaction,
                 topicNames: [
                   `authority:${authority}`,
-                  `instructions:${instructionId}:signers`,
+                  `instructions:${instructionId}:accounts`,
                 ],
               },
             })
