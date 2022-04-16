@@ -21,7 +21,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
       <div class="flex gap-6 flex-wrap" *ngIf="publicKey !== null">
         <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
           <mat-card
-            class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-9 p-0"
+            class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0"
           >
             <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
               <div class="flex-1 flex items-center gap-2">
@@ -33,7 +33,6 @@ import { ViewUserInfoStore } from './view-user-info.store';
               </div>
               <button
                 mat-icon-button
-                color="accent"
                 bdEditUser
                 [user]="user"
                 (editUser)="onUpdateUser(user.authority, user.id, $event)"
@@ -43,7 +42,6 @@ import { ViewUserInfoStore } from './view-user-info.store';
               </button>
               <button
                 mat-icon-button
-                color="warn"
                 (click)="onDeleteUser(user.authority, user.id)"
                 [disabled]="user | bdItemChanging"
               >

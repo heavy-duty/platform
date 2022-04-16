@@ -17,7 +17,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 
     <main class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
       <mat-card
-        class="h-auto w-80 rounded-lg overflow-hidden bd-bg-image-5 p-0"
+        class="h-auto w-80 rounded-lg overflow-hidden bd-bg-image-1 p-0"
       >
         <header class="flex items-center bd-bg-black px-6 py-2 gap-1">
           <h2 class="uppercase m-0 text-lg">solana</h2>
