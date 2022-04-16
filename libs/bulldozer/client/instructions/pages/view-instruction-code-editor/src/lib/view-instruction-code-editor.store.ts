@@ -99,7 +99,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
-    this._loadContextCode(
+    /* this._loadContextCode(
       this.select(
         this._instructionStore.instruction$,
         this._instructionArgumentsStore.instructionArguments$,
@@ -125,7 +125,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         }),
         { debounce: true }
       )
-    );
+    ); */
     this._loadEditorOptions(darkThemeStore.isDarkThemeEnabled$);
     this._loadHandleCode(
       this.select(
@@ -151,9 +151,9 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         map((instruction) => ({ instruction }))
       )
     );
-    this._instructionAccountsStore.setInstructionAccountIds(
+    /* this._instructionAccountsStore.setInstructionAccountIds(
       this._instructionAccountQueryStore.instructionAccountIds$
-    );
+    ); */
     this._instructionRelationQueryStore.setFilters(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
@@ -300,12 +300,12 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           this._instructionStore.dispatch(instructionStatus);
           break;
         } */
-        case 'createInstructionAccount':
+        /* case 'createInstructionAccount':
         case 'updateInstructionAccount':
         case 'deleteInstructionAccount': {
           this._instructionAccountsStore.dispatch(instructionStatus);
           break;
-        }
+        } */
         case 'createInstructionRelation':
         case 'deleteInstructionRelation': {
           this._instructionRelationsStore.dispatch(instructionStatus);

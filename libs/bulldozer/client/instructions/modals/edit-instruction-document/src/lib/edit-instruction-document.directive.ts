@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import {} from '@bulldozer-client/collections-data-access';
-import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
+import {} from '@bulldozer-client/instructions-data-access';
 import {
   Document,
   InstructionAccount,
@@ -19,7 +19,7 @@ import { EditInstructionDocumentComponent } from './edit-instruction-document.co
 export class EditInstructionDocumentDirective {
   @Input() instructionDocument: Document<InstructionAccount> | null = null;
   @Input() collections: any[] | null = null;
-  @Input() instructionAccounts: InstructionAccountItemView[] | null = null;
+  @Input() instructionAccounts: any[] | null = null;
   @Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {
     if (!this.collections || !this.instructionAccounts) {
@@ -32,7 +32,7 @@ export class EditInstructionDocumentDirective {
         {
           document: Document<InstructionAccount> | null;
           collections: any[];
-          accounts: InstructionAccountItemView[];
+          accounts: any[];
         },
         InstructionAccountDto
       >(EditInstructionDocumentComponent, {

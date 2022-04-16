@@ -6,12 +6,16 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  InstructionAccountApiService,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { Keypair } from '@solana/web3.js';
+import { distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 
 @Component({
@@ -28,31 +32,41 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
         </p>
       </div>
 
-      <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-        <ng-container *ngIf="applicationId$ | ngrxPush as applicationId">
-          <button
-            *ngIf="instructionId$ | ngrxPush as instructionId"
-            mat-mini-fab
-            color="accent"
-            bdEditInstructionSigner
-            (editInstructionSigner)="
-              onCreateInstructionAccount(
-                workspaceId,
-                applicationId,
-                instructionId,
-                $event
-              )
-            "
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+      <ng-container *hdWalletAdapter="let publicKey = publicKey">
+        <ng-container *ngrxLet="workspaceId$; let workspaceId">
+          <ng-container *ngrxLet="applicationId$; let applicationId">
+            <ng-container *ngrxLet="instructionId$; let instructionId">
+              <button
+                *ngIf="
+                  publicKey !== null &&
+                  workspaceId !== null &&
+                  applicationId !== null &&
+                  instructionId !== null
+                "
+                mat-mini-fab
+                color="accent"
+                bdEditInstructionSigner
+                (editInstructionSigner)="
+                  onCreateInstructionAccount(
+                    publicKey.toBase58(),
+                    workspaceId,
+                    applicationId,
+                    instructionId,
+                    $event
+                  )
+                "
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </ng-container>
+          </ng-container>
         </ng-container>
       </ng-container>
     </header>
 
     <main *ngrxLet="signers$; let signers">
       <div
-        *ngIf="signers && signers.length > 0; else emptyList"
+        *ngIf="signers && signers.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
       >
         <mat-card
@@ -81,43 +95,54 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
               </ng-container>
             </div>
 
-            <div class="flex-1 flex justify-end">
-              <button
-                [attr.aria-label]="'Update signer ' + signer.document.name"
-                mat-icon-button
-                bdEditInstructionSigner
-                [instructionSigner]="signer.document"
-                (editInstructionSigner)="
-                  onUpdateInstructionAccount(
-                    signer.document.data.workspace,
-                    signer.document.data.instruction,
-                    signer.document.id,
-                    $event
-                  )
-                "
-                [disabled]="
-                  (connected$ | ngrxPush) === false || (signer | bdItemChanging)
-                "
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
+            <div
+              class="flex-1 flex justify-end"
+              *hdWalletAdapter="let publicKey = publicKey"
+            >
+              <ng-container *ngIf="publicKey !== null">
+                <button
+                  [attr.aria-label]="'Update signer ' + signer.name"
+                  mat-icon-button
+                  bdEditInstructionSigner
+                  [instructionSigner]="{
+                    name: signer.name,
+                    kind: signer.kind.id,
+                    space: null,
+                    payer: null,
+                    collection: null,
+                    modifier: signer.modifier?.id ?? null,
+                    close: null
+                  }"
+                  (editInstructionSigner)="
+                    onUpdateInstructionAccount(
+                      publicKey.toBase58(),
+                      signer.workspaceId,
+                      signer.instructionId,
+                      signer.id,
+                      $event
+                    )
+                  "
+                  [disabled]="signer | bdItemChanging"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
 
-              <button
-                [attr.aria-label]="'Delete signer ' + signer.document.name"
-                mat-icon-button
-                (click)="
-                  onDeleteInstructionAccount(
-                    signer.document.data.workspace,
-                    signer.document.data.instruction,
-                    signer.document.id
-                  )
-                "
-                [disabled]="
-                  (connected$ | ngrxPush) === false || (signer | bdItemChanging)
-                "
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+                <button
+                  [attr.aria-label]="'Delete signer ' + signer.name"
+                  mat-icon-button
+                  (click)="
+                    onDeleteInstructionAccount(
+                      publicKey.toBase58(),
+                      signer.workspaceId,
+                      signer.instructionId,
+                      signer.id
+                    )
+                  "
+                  [disabled]="signer | bdItemChanging"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
             </div>
           </aside>
 
@@ -137,23 +162,19 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                 <h2
                   class="m-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
                   [matTooltip]="
-                    signer.document.name
-                      | bdItemUpdatingMessage: signer:'Signer'
+                    signer.name | bdItemUpdatingMessage: signer:'Signer'
                   "
                   matTooltipShowDelay="500"
                 >
-                  {{ signer.document.name }}
+                  {{ signer.name }}
                 </h2>
 
                 <p class="m-0">
-                  <ng-container *ngIf="signer.document.data.modifier === null">
+                  <ng-container *ngIf="signer.modifier === null">
                     Non-mutable
                   </ng-container>
                   <ng-container
-                    *ngIf="
-                      signer.document.data.modifier !== null &&
-                      signer.document.data.modifier.id === 1
-                    "
+                    *ngIf="signer.modifier !== null && signer.modifier.id === 1"
                   >
                     Mutable
                   </ng-container>
@@ -179,72 +200,146 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 })
 export class ViewInstructionSignersComponent implements OnInit {
   @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
-  instructionBody: string | null = null;
-  readonly connected$ = this._walletStore.connected$;
-  readonly workspaceId$ = this._viewInstructionSignersStore.workspaceId$;
-  readonly applicationId$ = this._viewInstructionSignersStore.applicationId$;
-  readonly instructionId$ = this._viewInstructionSignersStore.instructionId$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly instructionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('instructionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
   readonly signers$ = this._viewInstructionSignersStore.signers$;
 
   constructor(
     private readonly _route: ActivatedRoute,
-    private readonly _walletStore: WalletStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionAccountApiService: InstructionAccountApiService,
     private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
   ) {}
 
   ngOnInit() {
-    this._viewInstructionSignersStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
-    );
-    this._viewInstructionSignersStore.setApplicationId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
-      )
-    );
-    this._viewInstructionSignersStore.setInstructionId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
-      )
-    );
+    this._viewInstructionSignersStore.setInstructionId(this.instructionId$);
   }
 
   onCreateInstructionAccount(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._viewInstructionSignersStore.createInstructionAccount({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionAccountDto,
-    });
+    const instructionaccountKeypair = Keypair.generate();
+
+    this._instructionAccountApiService
+      .create(instructionaccountKeypair, {
+        instructionAccountDto,
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create signer request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:signers`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateInstructionAccount(
+    authority: string,
     workspaceId: string,
     instructionId: string,
     instructionAccountId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    this._viewInstructionSignersStore.updateInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-      instructionAccountDto,
-    });
+    this._instructionAccountApiService
+      .update({
+        authority,
+        workspaceId,
+        instructionId,
+        instructionAccountDto,
+        instructionAccountId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update signer request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:signers`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDeleteInstructionAccount(
+    authority: string,
     workspaceId: string,
     instructionId: string,
     instructionAccountId: string
   ) {
-    this._viewInstructionSignersStore.deleteInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-    });
+    this._instructionAccountApiService
+      .delete({
+        authority,
+        workspaceId,
+        instructionAccountId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete signer request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:signers`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }

@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditInstructionSignerModule } from '@bulldozer-client/edit-instruction-signer';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionSignersComponent } from './view-instruction-signers.component';
 
@@ -33,6 +34,7 @@ import { ViewInstructionSignersComponent } from './view-instruction-signers.comp
     ReactiveComponentModule,
     ItemUpdatingModule,
     EditInstructionSignerModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewInstructionSignersComponent],
 })

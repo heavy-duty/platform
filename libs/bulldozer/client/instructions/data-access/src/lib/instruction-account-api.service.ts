@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionAccount,
@@ -23,14 +22,18 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Finality, Keypair } from '@solana/web3.js';
+import {
+  Finality,
+  Keypair,
+  Transaction,
+  TransactionSignature,
+} from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -38,8 +41,7 @@ import {
 export class InstructionAccountApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -105,9 +107,13 @@ export class InstructionAccountApiService {
   }
 
   // create instruction account
-  create(params: Omit<CreateInstructionAccountParams, 'instructionAccountId'>) {
-    const instructionAccountKeypair = Keypair.generate();
-
+  create(
+    instructionAccountKeypair: Keypair,
+    params: Omit<CreateInstructionAccountParams, 'instructionAccountId'>
+  ): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -128,12 +134,10 @@ export class InstructionAccountApiService {
       partiallySignTransaction(instructionAccountKeypair),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -141,7 +145,10 @@ export class InstructionAccountApiService {
   }
 
   // update instruction account
-  update(params: UpdateInstructionAccountParams) {
+  update(params: UpdateInstructionAccountParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -157,12 +164,10 @@ export class InstructionAccountApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -170,7 +175,10 @@ export class InstructionAccountApiService {
   }
 
   // delete instruction account
-  delete(params: DeleteInstructionAccountParams) {
+  delete(params: DeleteInstructionAccountParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -186,12 +194,10 @@ export class InstructionAccountApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

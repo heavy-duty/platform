@@ -6,29 +6,21 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  Document,
-  InstructionAccount,
-  InstructionAccountDto,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionSignerComponent } from './edit-instruction-signer.component';
 
 @Directive({ selector: '[bdEditInstructionSigner]' })
 export class EditInstructionSignerDirective {
-  @Input() instructionSigner?: Document<InstructionAccount>;
+  @Input() instructionSigner?: InstructionAccountDto;
   @Output() editInstructionSigner = new EventEmitter<InstructionAccountDto>();
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<
         EditInstructionSignerComponent,
-        {
-          signer?: Document<InstructionAccount>;
-        },
+        InstructionAccountDto,
         InstructionAccountDto
       >(EditInstructionSignerComponent, {
-        data: {
-          signer: this.instructionSigner,
-        },
+        data: this.instructionSigner,
         panelClass: 'bd-bg-image-7',
       })
       .afterClosed()

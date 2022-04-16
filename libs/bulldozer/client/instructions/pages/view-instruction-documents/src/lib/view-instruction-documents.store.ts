@@ -5,36 +5,20 @@ import {
 } from '@bulldozer-client/collections-data-access';
 import {
   InstructionAccountApiService,
-  InstructionAccountItemView,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
-  InstructionDocumentItemView,
   InstructionRelationApiService,
-  InstructionRelationItemView,
   InstructionRelationQueryStore,
   InstructionRelationsStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  InstructionStatus,
-  WorkspaceInstructionsStore,
-} from '@bulldozer-client/workspaces-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  map,
-  Observable,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { Keypair } from '@solana/web3.js';
+import { concatMap, EMPTY, map, of, pipe, withLatestFrom } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -53,7 +37,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
   readonly instructionId$ = this.select(({ instructionId }) => instructionId);
-  readonly documents$: Observable<InstructionDocumentItemView[]> = this.select(
+  /* readonly documents$: Observable<InstructionDocumentItemView[]> = this.select(
     this._instructionAccountsStore.instructionAccounts$,
     this._collectionsStore.collections$,
     this._instructionRelationsStore.instructionRelations$,
@@ -125,7 +109,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
             null
           ),
         }))
-  );
+  ); */
 
   constructor(
     private readonly _walletStore: WalletStore,
@@ -161,7 +145,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
         }))
       )
     );
-    this._instructionAccountsStore.setInstructionAccountIds(
+    /* this._instructionAccountsStore.setInstructionAccountIds(
       this._instructionAccountQueryStore.instructionAccountIds$
     );
     this._instructionRelationQueryStore.setFilters(
@@ -188,7 +172,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
     /* this._handleCollectionUpdate(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) =>
@@ -238,7 +222,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
     collectionId,
   }));
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'createInstructionAccount':
@@ -256,7 +240,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   /* private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
@@ -291,7 +275,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           }
 
           return this._instructionAccountApiService
-            .create({
+            .create(Keypair.generate(), {
               instructionAccountDto,
               authority: authority.toBase58(),
               workspaceId,

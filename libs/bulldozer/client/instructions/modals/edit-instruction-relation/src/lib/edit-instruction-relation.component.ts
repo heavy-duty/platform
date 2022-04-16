@@ -7,7 +7,7 @@ import {
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
+import {} from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 
 export const equalValidator =
@@ -84,7 +84,7 @@ export class EditInstructionRelationComponent {
     private readonly _matDialogRef: MatDialogRef<EditInstructionRelationComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data: {
-      accounts: InstructionAccountItemView[];
+      accounts: any[];
       from: string;
     }
   ) {

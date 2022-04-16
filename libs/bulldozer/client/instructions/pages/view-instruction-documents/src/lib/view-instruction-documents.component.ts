@@ -23,7 +23,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 @Component({
   selector: 'bd-view-instruction-documents',
   template: `
-    <header
+    <!-- <header
       class="mb-8 border-b-2 border-yellow-500 flex items-center justify-between"
     >
       <div>
@@ -381,7 +381,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
       <ng-template #emptyList>
         <p class="text-center text-xl py-8">There's no documents yet.</p>
       </ng-template>
-    </main>
+    </main> -->
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -402,7 +402,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
   readonly workspaceId$ = this._viewInstructionDocumentsStore.workspaceId$;
   readonly applicationId$ = this._viewInstructionDocumentsStore.applicationId$;
   readonly instructionId$ = this._viewInstructionDocumentsStore.instructionId$;
-  readonly documents$ = this._viewInstructionDocumentsStore.documents$;
+  // readonly documents$ = this._viewInstructionDocumentsStore.documents$;
   readonly collections$ = this._collectionsStore.collections$;
   readonly instructionAccounts$ =
     this._instructionAccountsStore.instructionAccounts$;

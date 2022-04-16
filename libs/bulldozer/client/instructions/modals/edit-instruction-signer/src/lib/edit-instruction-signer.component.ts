@@ -3,13 +3,13 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-instruction-signer',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.signer ? 'Edit' : 'Create' }} signer
+      {{ signer ? 'Edit' : 'Create' }} signer
     </h2>
 
     <form
@@ -48,7 +48,7 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.signer ? 'Save' : 'Create' }}
+        {{ signer ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -78,15 +78,13 @@ export class EditInstructionSignerComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditInstructionSignerComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      signer?: Document<InstructionAccount>;
-    }
+    public signer?: InstructionAccountDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.signer?.name ?? '', {
+      name: new FormControl(this.signer?.name ?? '', {
         validators: [Validators.required],
       }),
-      saveChanges: new FormControl(this.data?.signer?.data.modifier?.id === 1),
+      saveChanges: new FormControl(this.signer?.modifier === 1),
     });
   }
 
