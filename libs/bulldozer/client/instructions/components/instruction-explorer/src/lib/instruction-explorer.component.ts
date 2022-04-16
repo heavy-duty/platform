@@ -46,6 +46,7 @@ import { InstructionItemView } from './types';
                       $event
                     )
                   "
+                  [disabled]="disableCreate"
                 >
                   <mat-icon>add</mat-icon>
                 </button>
@@ -160,6 +161,7 @@ import { InstructionItemView } from './types';
   ],
 })
 export class InstructionExplorerComponent {
+  @Input() disableCreate = false;
   @Input() set workspaceId(value: string) {
     this._instructionExplorerStore.setWorkspaceId(value);
   }

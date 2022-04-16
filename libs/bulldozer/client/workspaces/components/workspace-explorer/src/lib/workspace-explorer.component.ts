@@ -278,8 +278,8 @@ export class WorkspaceExplorerComponent implements OnInit {
                 transactionSignature,
                 transaction,
                 topicNames: [
-                  `workspace:${workspaceKeypair.publicKey.toBase58()}`,
                   `authority:${authority}`,
+                  `workspace:${workspaceKeypair.publicKey.toBase58()}`,
                 ],
               },
             })
@@ -314,7 +314,9 @@ export class WorkspaceExplorerComponent implements OnInit {
                 transactionSignature,
                 transaction,
                 topicNames: [
-                  `application:${applicationKeypair.publicKey.toBase58()}`,
+                  `authority:${authority}`,
+                  `workspaces:${workspaceId}:applications`,
+                  `applications:${applicationKeypair.publicKey.toBase58()}`,
                 ],
               },
             })

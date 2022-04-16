@@ -23,6 +23,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
               (editCollection)="
                 onCreateCollection(workspaceId, applicationId, $event)
               "
+              [disabled]="disableCreate"
             >
               <mat-icon>add</mat-icon>
             </button>
@@ -114,7 +115,7 @@ import { CollectionExplorerStore } from './collection-explorer.store';
 })
 export class CollectionExplorerComponent {
   @Input() connected = false;
-
+  @Input() disableCreate = false;
   @Input() set workspaceId(value: string) {
     this._collectionExplorerStore.setWorkspaceId(value);
   }

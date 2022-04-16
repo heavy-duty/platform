@@ -1,11 +1,15 @@
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import {
+  ApplicationApiService,
   ApplicationQueryStore,
   ApplicationsStore,
-  ApplicationView,
 } from '@bulldozer-client/applications-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
+import { Keypair } from '@solana/web3.js';
 import { ApplicationExplorerStore } from './application-explorer.store';
+import { ApplicationItemView } from './types';
 
 @Component({
   selector: 'bd-application-explorer',
@@ -21,7 +25,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
             <div class="flex justify-between items-center flex-grow">
               <mat-panel-title
                 [matTooltip]="
-                  application.document.name
+                  application.name
                     | bdItemUpdatingMessage: application:'Application'
                 "
                 matTooltipShowDelay="500"
@@ -30,7 +34,7 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                 <span
                   class="flex-grow font-bold text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
                 >
-                  {{ application.document.name }}
+                  {{ application.name }}
                 </span>
                 <mat-progress-spinner
                   *ngIf="application | bdItemShowSpinner"
@@ -39,77 +43,87 @@ import { ApplicationExplorerStore } from './application-explorer.store';
                   mode="indeterminate"
                 ></mat-progress-spinner>
               </mat-panel-title>
-              <button
-                mat-icon-button
-                [attr.aria-label]="
-                  'More options of ' +
-                  application.document.name +
-                  ' application'
-                "
-                [matMenuTriggerFor]="applicationOptionsMenu"
-                bdStopPropagation
-              >
-                <mat-icon>more_horiz</mat-icon>
-              </button>
+
+              <ng-container *hdWalletAdapter="let publicKey = publicKey">
+                <ng-container *ngIf="publicKey !== null">
+                  <button
+                    mat-icon-button
+                    [attr.aria-label]="
+                      'More options of ' + application.name + ' application'
+                    "
+                    [matMenuTriggerFor]="applicationOptionsMenu"
+                    bdStopPropagation
+                  >
+                    <mat-icon>more_horiz</mat-icon>
+                  </button>
+
+                  <mat-menu
+                    #applicationOptionsMenu="matMenu"
+                    class="bd-bg-image-7"
+                  >
+                    <!-- <a
+                  mat-menu-item
+                  [routerLink]="[
+                    '/workspaces',
+                    application.document.data.workspace,
+                    'applications',
+                    application.document.id
+                  ]"
+                >
+                  <mat-icon>launch</mat-icon>
+                  <span>View application</span>
+                </a> -->
+                    <button
+                      mat-menu-item
+                      bdEditApplication
+                      [application]="application"
+                      (editApplication)="
+                        onUpdateApplication(
+                          publicKey.toBase58(),
+                          application.workspaceId,
+                          application.id,
+                          $event
+                        )
+                      "
+                      [disabled]="!connected || (application | bdItemChanging)"
+                    >
+                      <mat-icon>edit</mat-icon>
+                      <span>Edit application</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="
+                        onDeleteApplication(
+                          publicKey.toBase58(),
+                          application.workspaceId,
+                          application.id
+                        )
+                      "
+                      [disabled]="!connected || (application | bdItemChanging)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                      <span>Delete application</span>
+                    </button>
+                  </mat-menu>
+                </ng-container>
+              </ng-container>
             </div>
           </mat-expansion-panel-header>
 
           <bd-collection-explorer
             [connected]="connected"
-            [applicationId]="application.document.id"
-            [workspaceId]="application.document.data.workspace"
+            [applicationId]="application.id"
+            [workspaceId]="application.workspaceId"
+            [disableCreate]="application.isCreating || application.isDeleting"
           >
           </bd-collection-explorer>
 
           <bd-instruction-explorer
-            [applicationId]="application.document.id"
-            [workspaceId]="application.document.data.workspace"
+            [applicationId]="application.id"
+            [workspaceId]="application.workspaceId"
+            [disableCreate]="application.isCreating || application.isDeleting"
           >
           </bd-instruction-explorer>
-
-          <mat-menu #applicationOptionsMenu="matMenu" class="bd-bg-image-7 ">
-            <!-- <a
-              mat-menu-item
-              [routerLink]="[
-                '/workspaces',
-                application.document.data.workspace,
-                'applications',
-                application.document.id
-              ]"
-            >
-              <mat-icon>launch</mat-icon>
-              <span>View application</span>
-            </a> -->
-            <button
-              mat-menu-item
-              bdEditApplication
-              [application]="application.document"
-              (editApplication)="
-                onUpdateApplication(
-                  application.document.data.workspace,
-                  application.document.id,
-                  $event
-                )
-              "
-              [disabled]="!connected"
-            >
-              <mat-icon>edit</mat-icon>
-              <span>Edit application</span>
-            </button>
-            <button
-              mat-menu-item
-              (click)="
-                onDeleteApplication(
-                  application.document.data.workspace,
-                  application.document.id
-                )
-              "
-              [disabled]="!connected"
-            >
-              <mat-icon>delete</mat-icon>
-              <span>Delete application</span>
-            </button>
-          </mat-menu>
         </mat-expansion-panel>
       </div>
     </ng-container>
@@ -130,40 +144,125 @@ export class ApplicationExplorerComponent {
   }
 
   readonly workspaceId$ = this._applicationExplorerStore.workspaceId$;
-  readonly applications$ = this._applicationsStore.applications$;
+  readonly applications$ = this._applicationExplorerStore.applications$;
 
   constructor(
-    private readonly _applicationsStore: ApplicationsStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _applicationApiService: ApplicationApiService,
     private readonly _applicationExplorerStore: ApplicationExplorerStore
   ) {}
 
-  onCreateApplication(workspaceId: string, applicationDto: ApplicationDto) {
-    this._applicationExplorerStore.createApplication({
-      workspaceId,
-      applicationDto,
-    });
+  onCreateApplication(
+    authority: string,
+    workspaceId: string,
+    applicationDto: ApplicationDto
+  ) {
+    const applicationKeypair = Keypair.generate();
+
+    this._applicationApiService
+      .create(applicationKeypair, {
+        applicationDto,
+        authority,
+        workspaceId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create application request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspaces:${workspaceId}:applications`,
+                  `applications:${applicationKeypair.publicKey.toBase58()}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateApplication(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     applicationDto: ApplicationDto
   ) {
-    this._applicationExplorerStore.updateApplication({
-      workspaceId,
-      applicationId,
-      applicationDto,
-    });
+    this._applicationApiService
+      .update({
+        authority,
+        workspaceId,
+        applicationId,
+        applicationDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update application request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspaces:${workspaceId}:applications`,
+                  `applications:${applicationId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
-  onDeleteApplication(workspaceId: string, applicationId: string) {
-    this._applicationExplorerStore.deleteApplication({
-      workspaceId,
-      applicationId,
-    });
+  onDeleteApplication(
+    authority: string,
+    workspaceId: string,
+    applicationId: string
+  ) {
+    this._applicationApiService
+      .delete({
+        authority,
+        workspaceId,
+        applicationId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete application request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `workspaces:${workspaceId}:applications`,
+                  `applications:${applicationId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
-  identify(_: number, application: ApplicationView) {
-    return application.document.id;
+  identify(_: number, application: ApplicationItemView) {
+    return application.id;
   }
 }
