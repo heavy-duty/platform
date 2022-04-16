@@ -11,10 +11,12 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
+import { List } from 'immutable';
 import * as JSZip from 'jszip';
 import {
   formatApplication,
   formatCollection,
+  formatCollection2,
   formatInstruction,
   formatName,
 } from './formatters';
@@ -56,6 +58,39 @@ export const generateInstructionCode = (
       collections: Array.from(formattedCollections.values()),
     },
     getTemplateByType('instructions')
+  );
+};
+
+interface CollectionItemView {
+  name: string;
+}
+
+interface CollectionAttributeItemView {
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+    size: number;
+  };
+  modifier: {
+    id: number;
+    name: string;
+    size: number;
+  } | null;
+}
+
+export const generateCollectionCode2 = (
+  collection: CollectionItemView,
+  collectionAttributes: List<CollectionAttributeItemView>
+) => {
+  const formattedCollection = formatCollection2(
+    collection,
+    collectionAttributes
+  );
+
+  return generateCode(
+    { collection: formattedCollection },
+    getTemplateByType('collections')
   );
 };
 

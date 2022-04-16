@@ -16,7 +16,7 @@ import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { EMPTY, switchMap, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { reduceInstructions } from './reduce-instructions';
+import { reduceInstructions } from './reduce-attributes-instructions';
 import { CollectionAttributeItemView } from './types';
 
 const documentToView = (
@@ -47,7 +47,7 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
+export class ViewCollectionCodeAttributesStore extends ComponentStore<ViewModel> {
   private readonly _collectionId$ = this.select(
     ({ collectionId }) => collectionId
   );

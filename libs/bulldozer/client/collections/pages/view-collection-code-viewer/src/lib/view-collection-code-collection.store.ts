@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
-import { CollectionAttributesStore } from '@bulldozer-client/collections-data-access';
+import { CollectionStore } from '@bulldozer-client/collections-data-access';
 import {
   HdBroadcasterSocketStore,
   TransactionStatus,
 } from '@heavy-duty/broadcaster';
 import {
-  CollectionAttribute,
+  Collection,
   Document,
   flattenInstructions,
   InstructionStatus,
@@ -16,21 +16,16 @@ import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { EMPTY, switchMap, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { reduceInstructions } from './reduce-instructions';
-import { CollectionAttributeItemView } from './types';
+import { reduceInstructions } from './reduce-collection-instructions';
+import { CollectionItemView } from './types';
 
-const documentToView = (
-  document: Document<CollectionAttribute>
-): CollectionAttributeItemView => {
+const documentToView = (document: Document<Collection>): CollectionItemView => {
   return {
     id: document.id,
     name: document.name,
     isCreating: false,
     isUpdating: false,
     isDeleting: false,
-    kind: document.data.kind,
-    modifier: document.data.modifier,
-    collectionId: document.data.collection,
     applicationId: document.data.application,
     workspaceId: document.data.workspace,
   };
@@ -47,13 +42,11 @@ const initialState: ViewModel = {
 };
 
 @Injectable()
-export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
-  private readonly _collectionId$ = this.select(
-    ({ collectionId }) => collectionId
-  );
+export class ViewCollectionCodeCollectionStore extends ComponentStore<ViewModel> {
+  readonly collectionId$ = this.select(({ collectionId }) => collectionId);
   private readonly _topicName$ = this.select(
-    this._collectionId$.pipe(isNotNullOrUndefined),
-    (collectionId) => `collections:${collectionId}:attributes`
+    this.collectionId$.pipe(isNotNullOrUndefined),
+    (collectionId) => `collections:${collectionId}`
   );
   private readonly _instructionStatuses$ = this.select(
     this.select(({ transactions }) => transactions),
@@ -69,33 +62,28 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
             a.transactionStatus.timestamp - b.transactionStatus.timestamp
         )
   );
-  readonly collectionAttributes$ = this.select(
-    this._collectionAttributesStore.collectionAttributes$,
+  readonly collection$ = this.select(
+    this._collectionStore.collection$,
     this._instructionStatuses$,
-    (collectionAttributes, instructionStatuses) => {
-      if (collectionAttributes === null) {
-        return null;
-      }
-
-      return instructionStatuses.reduce(
+    (collection, instructionStatuses) =>
+      instructionStatuses.reduce(
         reduceInstructions,
-        collectionAttributes.map(documentToView)
-      );
-    },
+        collection === null ? null : documentToView(collection)
+      ),
     { debounce: true }
   );
 
   constructor(
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
-    private readonly _collectionAttributesStore: CollectionAttributesStore
+    private readonly _collectionStore: CollectionStore
   ) {
     super(initialState);
 
-    this._collectionAttributesStore.setFilters(
+    this._collectionStore.setCollectionId(
       this.select(
-        this._collectionId$.pipe(isNotNullOrUndefined),
+        this.collectionId$.pipe(isNotNullOrUndefined),
         this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
-        (collectionId) => ({ collection: collectionId })
+        (collectionId) => collectionId
       )
     );
     this._registerTopic(

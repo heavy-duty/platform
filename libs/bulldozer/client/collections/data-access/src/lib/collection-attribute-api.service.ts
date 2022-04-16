@@ -34,7 +34,6 @@ import {
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -56,8 +55,6 @@ export class CollectionAttributeApiService {
   ) {
     const query = collectionAttributeQueryBuilder().where(filters).build();
 
-    console.log(query);
-
     return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
         ...query,
@@ -68,7 +65,6 @@ export class CollectionAttributeApiService {
         commitment,
       })
       .pipe(
-        tap((a) => console.log(a)),
         map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
       );
   }

@@ -279,14 +279,6 @@ export class ViewCollectionAttributesComponent implements OnInit {
   ) {
     const collectionAttributeKeypair = Keypair.generate();
 
-    console.log({
-      collectionAttributeDto,
-      authority,
-      workspaceId,
-      applicationId,
-      collectionId,
-    });
-
     this._collectionAttributeApiService
       .create(collectionAttributeKeypair, {
         collectionAttributeDto,

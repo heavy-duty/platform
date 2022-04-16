@@ -78,8 +78,6 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
         return this._collectionAttributeApiService.findIds(filters).pipe(
           tapResponse(
             (collectionAttributeIds) => {
-              console.log({ collectionAttributeIds });
-
               this.patchState({
                 collectionAttributeIds: List(collectionAttributeIds),
               });
@@ -95,8 +93,6 @@ export class CollectionAttributesStore extends ComponentStore<ViewModel> {
       if (collectionAttributeIds === null) {
         return EMPTY;
       }
-
-      console.log(collectionAttributeIds.toArray());
 
       return this._collectionAttributeApiService
         .findByIds(collectionAttributeIds.toArray())

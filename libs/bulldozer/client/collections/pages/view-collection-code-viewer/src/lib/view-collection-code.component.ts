@@ -1,12 +1,13 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
-  CollectionAttributeQueryStore,
   CollectionAttributesStore,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
-import { DarkThemeStore } from '@bulldozer-client/core-data-access';
-import { map } from 'rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
+import { ViewCollectionCodeAttributesStore } from './view-collection-code-attributes.store';
+import { ViewCollectionCodeCollectionStore } from './view-collection-code-collection.store';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
 
 @Component({
@@ -20,12 +21,18 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
     </header>
 
     <main class="flex-1">
-      <div class="h-full" *ngIf="collection$ | ngrxPush as collection">
+      <div class="h-full" *ngIf="code$ | ngrxPush as code">
         <bd-code-editor
           class="flex-1"
           customClass="h-full"
-          [template]="(code$ | ngrxPush) ?? null"
-          [options]="(editorOptions$ | ngrxPush) ?? null"
+          [template]="code"
+          [options]="{
+            theme: 'vs-dark',
+            language: 'rust',
+            automaticLayout: true,
+            readOnly: true,
+            fontSize: 16
+          }"
         ></bd-code-editor>
       </div>
     </main>
@@ -34,9 +41,9 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
   providers: [
     CollectionStore,
     CollectionAttributesStore,
-    CollectionAttributeQueryStore,
-    DarkThemeStore,
     ViewCollectionCodeStore,
+    ViewCollectionCodeCollectionStore,
+    ViewCollectionCodeAttributesStore,
   ],
 })
 export class ViewCollectionCodeComponent implements OnInit {
@@ -44,18 +51,21 @@ export class ViewCollectionCodeComponent implements OnInit {
     'flex flex-col p-8 bg-white bg-opacity-5 h-full';
 
   readonly code$ = this._viewCollectionCodeStore.code$;
-  readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
-  readonly collection$ = this._collectionStore.collection$;
+  readonly collectionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('collectionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
-    private readonly _collectionStore: CollectionStore,
-    private readonly _viewCollectionCodeStore: ViewCollectionCodeStore
+    private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
+    private readonly _viewCollectionCodeAttributesStore: ViewCollectionCodeAttributesStore,
+    private readonly _viewCollectionCodeCollectionStore: ViewCollectionCodeCollectionStore
   ) {}
 
   ngOnInit() {
-    this._viewCollectionCodeStore.setCollectionId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
-    );
+    this._viewCollectionCodeAttributesStore.setCollectionId(this.collectionId$);
+    this._viewCollectionCodeCollectionStore.setCollectionId(this.collectionId$);
   }
 }
