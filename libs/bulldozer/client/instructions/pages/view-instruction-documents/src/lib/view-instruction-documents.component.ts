@@ -40,7 +40,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
             mat-mini-fab
             color="accent"
             bdEditInstructionDocument
-            [collections]="(collections$ | ngrxPush) ?? null"
+            [collections]="(collections$ | ngrxPush)?.toArray() ?? null"
             [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
             (editInstructionDocument)="
               onCreateInstructionDocument(
@@ -91,7 +91,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
             <button
               mat-icon-button
               bdEditInstructionDocument
-              [collections]="(collections$ | ngrxPush) ?? null"
+              [collections]="(collections$ | ngrxPush)?.toArray() ?? null"
               [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
               [instructionDocument]="instructionDocument.document"
               (editInstructionDocument)="

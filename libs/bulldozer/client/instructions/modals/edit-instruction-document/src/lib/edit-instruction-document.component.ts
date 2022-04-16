@@ -9,7 +9,6 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CollectionItemView } from '@bulldozer-client/collections-data-access';
 import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
@@ -196,7 +195,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     public data?: {
       document?: Document<InstructionAccount>;
-      collections: CollectionItemView[];
+      collections: any[];
       accounts: InstructionAccountItemView[];
     }
   ) {

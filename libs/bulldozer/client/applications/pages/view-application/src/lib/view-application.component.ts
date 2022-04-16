@@ -10,7 +10,7 @@ import { ViewApplicationStore } from './view-application.store';
     <div *ngIf="application$ | ngrxPush as application" class="p-5">
       <header bdPageHeader>
         <h1>
-          <span
+          <!-- <span
             [matTooltip]="
               application.document.name
                 | bdItemUpdatingMessage: application:'Application'
@@ -24,7 +24,7 @@ import { ViewApplicationStore } from './view-application.store';
               diameter="16"
               mode="indeterminate"
             ></mat-progress-spinner>
-          </span>
+          </span> -->
         </h1>
         <p>Visualize all the details about this application.</p>
       </header>

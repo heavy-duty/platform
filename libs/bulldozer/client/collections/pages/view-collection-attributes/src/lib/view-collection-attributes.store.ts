@@ -95,12 +95,12 @@ export class ViewCollectionAttributesStore extends ComponentStore<ViewModel> {
   private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        case 'createCollection':
+        /* case 'createCollection':
         case 'updateCollection':
         case 'deleteCollection': {
           this._collectionStore.dispatch(instructionStatus);
           break;
-        }
+        } */
         case 'createCollectionAttribute':
         case 'updateCollectionAttribute':
         case 'deleteCollectionAttribute': {

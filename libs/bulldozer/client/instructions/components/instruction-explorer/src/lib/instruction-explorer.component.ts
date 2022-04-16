@@ -72,8 +72,7 @@ import { InstructionItemView } from './types';
               'applications',
               instruction.applicationId,
               'instructions',
-              instruction.id,
-              'arguments'
+              instruction.id
             ]"
             [matTooltip]="
               instruction.name

@@ -3,13 +3,13 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
+import { CollectionDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-collection',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.collection ? 'Edit' : 'Create' }} collection
+      {{ collection ? 'Edit' : 'Create' }} collection
     </h2>
 
     <form
@@ -50,7 +50,7 @@ import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.collection ? 'Save' : 'Create' }}
+        {{ collection ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -73,12 +73,10 @@ export class EditCollectionComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditCollectionComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      collection?: Document<Collection>;
-    }
+    public collection?: CollectionDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.collection?.name ?? '', {
+      name: new FormControl(this.collection?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
     });

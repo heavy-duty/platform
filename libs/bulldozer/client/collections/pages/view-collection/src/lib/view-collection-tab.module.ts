@@ -7,10 +7,10 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ReactiveComponentModule } from '@ngrx/component';
-import { CollectionTabComponent } from './collection-tab.component';
+import { ViewCollectionTabComponent } from './view-collection-tab.component';
 
 @NgModule({
-  declarations: [CollectionTabComponent],
+  declarations: [ViewCollectionTabComponent],
   imports: [
     CommonModule,
     RouterModule,
@@ -21,6 +21,6 @@ import { CollectionTabComponent } from './collection-tab.component';
     ReactiveComponentModule,
     ItemUpdatingModule,
   ],
-  exports: [CollectionTabComponent],
+  exports: [ViewCollectionTabComponent],
 })
-export class CollectionTabModule {}
+export class ViewCollectionTabModule {}

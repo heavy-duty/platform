@@ -8,7 +8,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { CollectionAttributesListModule } from '@bulldozer-client/collection-attributes-list';
 import { EditCollectionAttributeModule } from '@bulldozer-client/edit-collection-attribute';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ReactiveComponentModule } from '@ngrx/component';
@@ -32,7 +31,6 @@ import { ViewCollectionAttributesComponent } from './view-collection-attributes.
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
-    CollectionAttributesListModule,
     ItemUpdatingModule,
     EditCollectionAttributeModule,
   ],

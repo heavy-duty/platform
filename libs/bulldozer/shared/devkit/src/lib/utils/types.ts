@@ -113,6 +113,10 @@ export interface Collection {
   application: string;
 }
 
+export interface CollectionDto {
+  name: string;
+}
+
 export interface CollectionAttribute {
   authority: string;
   workspace: string;

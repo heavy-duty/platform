@@ -53,7 +53,7 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
         this._collectionStore.collection$,
         this._collectionAttributesStore.collectionAttributes$,
         (collection, collectionAttributes) => ({
-          collection: collection?.document ?? null,
+          collection: collection ?? null,
           collectionAttributes: collectionAttributes.map(
             ({ document }) => document
           ),
@@ -98,11 +98,11 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
   private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        case 'updateCollection':
+        /* case 'updateCollection':
         case 'deleteCollection': {
           this._collectionStore.dispatch(instructionStatus);
           break;
-        }
+        } */
         case 'createCollectionAttribute':
         case 'updateCollectionAttribute':
         case 'deleteCollectionAttribute': {

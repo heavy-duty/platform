@@ -10,7 +10,7 @@ export const updateCollection = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateCollection({ name: params.collectionName })
+        .methods.updateCollection(params.collectionDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

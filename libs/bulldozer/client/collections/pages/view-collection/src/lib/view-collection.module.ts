@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { CodeEditorModule } from '@bulldozer-client/code-editor';
-import { CollectionAttributesListModule } from '@bulldozer-client/collection-attributes-list';
 import { EditCollectionModule } from '@bulldozer-client/edit-collection';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
-import { PageHeaderModule } from '@bulldozer-client/page-header';
+import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewCollectionComponent } from './view-collection.component';
 
@@ -44,13 +44,13 @@ import { ViewCollectionComponent } from './view-collection.component';
     ]),
     MatButtonModule,
     MatProgressSpinnerModule,
+    MatSnackBarModule,
     MatTooltipModule,
     ReactiveComponentModule,
-    PageHeaderModule,
-    CodeEditorModule,
-    CollectionAttributesListModule,
     ItemUpdatingModule,
     EditCollectionModule,
+    HdWalletAdapterCdkModule,
+    HdBroadcasterCdkModule,
   ],
 })
 export class ViewCollectionModule {}

@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import {
-  CollectionItemView,
   CollectionQueryStore,
   CollectionsStore,
 } from '@bulldozer-client/collections-data-access';
@@ -99,11 +98,10 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
               },
               []
             ),
-          collection: collections.reduce(
-            (found: CollectionItemView | null, collection) =>
+          collection: collections?.reduce(
+            (found: any | null, collection) =>
               !found &&
-              instructionAccount.document.data.kind.collection ===
-                collection.document.id
+              instructionAccount.document.data.kind.collection === collection.id
                 ? collection
                 : null,
             null
@@ -152,9 +150,9 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
         }))
       )
     );
-    this._collectionsStore.setCollectionIds(
+    /* this._collectionsStore.setCollectionIds(
       this._collectionQueryStore.collectionIds$
-    );
+    ); */
     this._instructionAccountQueryStore.setFilters(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
@@ -191,7 +189,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
         )
       )
     );
-    this._handleCollectionUpdate(
+    /* this._handleCollectionUpdate(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) =>
           [
@@ -220,7 +218,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
   }
 
   readonly setWorkspaceId = this.updater<string | null>(
@@ -260,7 +258,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
+  /* private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'updateCollection': {
@@ -271,7 +269,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   readonly createInstructionAccount = this.effect<{
     workspaceId: string;

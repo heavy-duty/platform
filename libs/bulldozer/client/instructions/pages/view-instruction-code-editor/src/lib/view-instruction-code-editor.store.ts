@@ -105,7 +105,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         this._instructionArgumentsStore.instructionArguments$,
         this._instructionAccountsStore.instructionAccounts$,
         this._instructionRelationsStore.instructionRelations$,
-        this._collectionsStore.collections$,
+        this._collectionsStore.collections$.pipe(isNotNullOrUndefined),
         (
           instruction,
           instructionArguments,
@@ -121,7 +121,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           instructionRelations: instructionRelations.map(
             ({ document }) => document
           ),
-          collections: collections.map(({ document }) => document),
+          collections: collections.toArray(),
         }),
         { debounce: true }
       )
@@ -163,7 +163,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
     this._instructionRelationsStore.setInstructionRelationIds(
       this._instructionRelationQueryStore.instructionRelationIds$
     );
-    this._collectionsStore.setCollectionIds(
+    /* this._collectionsStore.setCollectionIds(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) => [
           ...new Set(
@@ -182,7 +182,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           ),
         ])
       )
-    );
+    ); */
     this._handleInstruction(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
@@ -199,7 +199,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         )
       )
     );
-    this._handleCollectionUpdate(
+    /* this._handleCollectionUpdate(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) =>
           [
@@ -233,7 +233,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
   }
 
   readonly setInstructionId = this.updater<string | null>(
@@ -317,7 +317,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
+  /* private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'updateCollection': {
@@ -328,7 +328,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   readonly updateInstructionBody = this.effect<{
     workspaceId: string;

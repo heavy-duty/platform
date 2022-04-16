@@ -10,7 +10,7 @@ import { ApplicationTabStore } from './application-tab.store';
       *ngIf="application$ | ngrxPush as application"
       class="flex items-center p-0"
     >
-      <a
+      <!-- <a
         [routerLink]="[
           '/workspaces',
           application.document.data.workspace,
@@ -35,15 +35,15 @@ import { ApplicationTabStore } from './application-tab.store';
           mode="indeterminate"
           diameter="16"
         ></mat-progress-spinner>
-      </a>
+      </a> -->
 
-      <button
+      <!-- <button
         mat-icon-button
         [attr.aria-label]="'Close ' + application.document.name + ' tab'"
         (click)="onCloseTab(application.document.id)"
       >
         <mat-icon>close</mat-icon>
-      </button>
+      </button> -->
     </div>
   `,
   providers: [ApplicationStore, ApplicationTabStore],

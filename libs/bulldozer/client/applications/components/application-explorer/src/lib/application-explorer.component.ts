@@ -111,7 +111,6 @@ import { ApplicationItemView } from './types';
           </mat-expansion-panel-header>
 
           <bd-collection-explorer
-            [connected]="connected"
             [applicationId]="application.id"
             [workspaceId]="application.workspaceId"
             [disableCreate]="application.isCreating || application.isDeleting"

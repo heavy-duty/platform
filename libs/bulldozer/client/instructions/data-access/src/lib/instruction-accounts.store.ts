@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { CollectionItemView } from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
@@ -25,7 +24,7 @@ export interface InstructionDocumentItemView {
   document: Document<InstructionAccount>;
   close: InstructionAccountItemView | null;
   payer: InstructionAccountItemView | null;
-  collection: CollectionItemView | null;
+  collection: any | null;
   relations: InstructionDocumentRelation[];
 }
 

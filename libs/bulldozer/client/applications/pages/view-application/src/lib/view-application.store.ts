@@ -1,11 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ApplicationStore } from '@bulldozer-client/applications-data-access';
 import { TabStore } from '@bulldozer-client/core-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { filter, switchMap, tap } from 'rxjs';
+import { tap } from 'rxjs';
 
 interface ViewModel {
   workspaceId: string | null;
@@ -41,7 +39,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
         { debounce: true }
       )
     );
-    this._handleInstruction(
+    /* this._handleInstruction(
       this.applicationId$.pipe(
         isNotNullOrUndefined,
         switchMap((applicationId) =>
@@ -56,7 +54,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
   }
 
   readonly setApplicationId = this.updater<string | null>(
@@ -67,7 +65,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'createApplication':
@@ -80,7 +78,7 @@ export class ViewApplicationStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   private readonly _openTab = this.effect<{
     applicationId: string | null;
