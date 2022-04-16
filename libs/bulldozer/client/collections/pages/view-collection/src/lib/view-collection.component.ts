@@ -123,51 +123,57 @@ import { ViewCollectionStore } from './view-collection.store';
           </ng-container>
         </ng-container>
 
-        <ng-container
-          *hdWalletAdapter="
-            let publicKey = publicKey;
-            let connected = connected
-          "
-        >
+        <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
-            class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+            class="sticky bottom-0 bd-bg-image-11 py-5 px-7 w-full flex justify-center items-center gap-2 bd-box-shadow-bg-white"
             *ngIf="publicKey !== null && collection !== null"
           >
-            <ng-container>
-              <button
-                mat-stroked-button
-                color="accent"
-                bdEditCollection
-                [collection]="collection"
-                (editCollection)="
-                  onUpdateCollection(
-                    publicKey.toBase58(),
-                    collection.workspaceId,
-                    collection.applicationId,
-                    collection.id,
-                    $event
-                  )
-                "
-                [disabled]="!connected || (collection | bdItemChanging)"
-              >
-                Edit
-              </button>
-              <button
-                mat-stroked-button
-                color="warn"
-                (click)="
-                  onDeleteCollection(
-                    publicKey.toBase58(),
-                    collection.workspaceId,
-                    collection.applicationId,
-                    collection.id
-                  )
-                "
-                [disabled]="!connected || (collection | bdItemChanging)"
-              >
-                Delete
-              </button>
-            </ng-container>
+            <button
+              mat-raised-button
+              class="text-black rounded-none"
+              color="accent"
+              bdEditCollection
+              [collection]="collection"
+              (editCollection)="
+                onUpdateCollection(
+                  publicKey.toBase58(),
+                  collection.workspaceId,
+                  collection.applicationId,
+                  collection.id,
+                  $event
+                )
+              "
+              [disabled]="collection | bdItemChanging"
+            >
+              Edit
+            </button>
+            <button
+              mat-raised-button
+              class="text-black rounded-none"
+              color="warn"
+              (click)="
+                onDeleteCollection(
+                  publicKey.toBase58(),
+                  collection.workspaceId,
+                  collection.applicationId,
+                  collection.id
+                )
+              "
+              [disabled]="collection | bdItemChanging"
+            >
+              Delete
+            </button>
+
+            <div
+              class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
           </footer>
         </ng-container>
       </aside>

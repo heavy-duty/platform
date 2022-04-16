@@ -87,7 +87,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                       let i = index;
                       trackBy: identify
                     "
-                    class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-4 p-0"
+                    class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
                   >
                     <aside
                       class="flex items-center bd-bg-black px-4 py-1 gap-1"

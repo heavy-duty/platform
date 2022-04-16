@@ -21,6 +21,7 @@ module.exports = {
         success: 'var(--success-color)',
         warning: 'var(--warning-color)',
         error: 'var(--error-color)',
+        'bd-black': '#242424',
       },
     },
   },

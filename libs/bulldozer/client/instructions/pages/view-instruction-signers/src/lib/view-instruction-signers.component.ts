@@ -71,7 +71,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
       >
         <mat-card
           *ngFor="let signer of signers; let i = index"
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-6 p-0"
+          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
             <div class="flex-1 flex items-center gap-2">

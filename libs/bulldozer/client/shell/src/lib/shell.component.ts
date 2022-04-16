@@ -23,7 +23,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       <mat-sidenav-container class="h-screen-layout w-full bg-transparent">
         <mat-sidenav
           #navigation
-          class="w-60 bd-bg-black-transparent-80"
+          class="w-60 bd-bg-image-12"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
@@ -36,13 +36,10 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
         </mat-sidenav>
 
         <mat-sidenav-content>
-          <div class="flex flex-col h-screen  bd-bg-black-transparent-60">
-            <div
-              class="flex items-center gap-2 bd-bg-black-transparent-60 border-b-1 border-white border-opacity-10"
-            >
-              <div class="px-4">
+          <div class="flex flex-col h-screen  bg-bd-black bg-opacity-60">
+            <div class="flex items-center gap-2  ">
+              <div class="px-4" *ngIf="isHandset$ | async">
                 <button
-                  *ngIf="isHandset$ | async"
                   type="button"
                   mat-mini-fab
                   (click)="navigation.toggle()"
