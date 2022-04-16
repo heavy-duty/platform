@@ -6,26 +6,22 @@ import {
   Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-  CollectionAttribute,
-  CollectionAttributeDto,
-  Document,
-} from '@heavy-duty/bulldozer-devkit';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
 import { EditCollectionAttributeComponent } from './edit-collection-attribute.component';
 
 @Directive({ selector: '[bdEditCollectionAttribute]' })
 export class EditCollectionAttributeDirective {
-  @Input() collectionAttribute?: Document<CollectionAttribute>;
+  @Input() collectionAttribute?: CollectionAttributeDto;
   @Output() editCollectionAttribute =
     new EventEmitter<CollectionAttributeDto>();
   @HostListener('click') onClick(): void {
     this._matDialog
       .open<
         EditCollectionAttributeComponent,
-        { collectionAttribute?: Document<CollectionAttribute> },
+        CollectionAttributeDto,
         CollectionAttributeDto
       >(EditCollectionAttributeComponent, {
-        data: { collectionAttribute: this.collectionAttribute },
+        data: this.collectionAttribute,
         panelClass: 'bd-bg-image-7',
       })
       .afterClosed()

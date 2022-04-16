@@ -1,13 +1,17 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+  CollectionAttributeApiService,
   CollectionAttributeQueryStore,
   CollectionAttributesStore,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { Keypair } from '@solana/web3.js';
+import { distinctUntilChanged, map } from 'rxjs';
 import { ViewCollectionAttributesStore } from './view-collection-attributes.store';
 
 @Component({
@@ -23,24 +27,34 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
         </p>
       </div>
 
-      <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-        <ng-container *ngIf="applicationId$ | ngrxPush as applicationId">
-          <button
-            *ngIf="collectionId$ | ngrxPush as collectionId"
-            mat-mini-fab
-            color="accent"
-            bdEditCollectionAttribute
-            (editCollectionAttribute)="
-              onCreateCollectionAttribute(
-                workspaceId,
-                applicationId,
-                collectionId,
-                $event
-              )
-            "
-          >
-            <mat-icon>add</mat-icon>
-          </button>
+      <ng-container *hdWalletAdapter="let publicKey = publicKey">
+        <ng-container *ngrxLet="workspaceId$; let workspaceId">
+          <ng-container *ngrxLet="applicationId$; let applicationId">
+            <ng-container *ngrxLet="collectionId$; let collectionId">
+              <button
+                *ngIf="
+                  publicKey !== null &&
+                  workspaceId !== null &&
+                  applicationId !== null &&
+                  collectionId !== null
+                "
+                mat-mini-fab
+                color="accent"
+                bdEditCollectionAttribute
+                (editCollectionAttribute)="
+                  onCreateCollectionAttribute(
+                    publicKey.toBase58(),
+                    workspaceId,
+                    applicationId,
+                    collectionId,
+                    $event
+                  )
+                "
+              >
+                <mat-icon>add</mat-icon>
+              </button>
+            </ng-container>
+          </ng-container>
         </ng-container>
       </ng-container>
     </header>
@@ -49,7 +63,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
       <div
         class="flex gap-6 flex-wrap"
         *ngIf="
-          collectionAttributes && collectionAttributes.length > 0;
+          collectionAttributes && collectionAttributes.size > 0;
           else emptyList
         "
       >
@@ -81,42 +95,60 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                 </p>
               </ng-container>
             </div>
-            <div class="flex flex-1 justify-end">
-              <button
-                mat-icon-button
-                bdEditCollectionAttribute
-                [collectionAttribute]="collectionAttribute.document"
-                (editCollectionAttribute)="
-                  onUpdateCollectionAttribute(
-                    collectionAttribute.document.data.workspace,
-                    collectionAttribute.document.data.collection,
-                    collectionAttribute.document.id,
-                    $event
-                  )
-                "
-                [disabled]="
-                  (connected$ | ngrxPush) === false ||
-                  (collectionAttribute | bdItemChanging)
-                "
-              >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                (click)="
-                  onDeleteCollectionAttribute(
-                    collectionAttribute.document.data.workspace,
-                    collectionAttribute.document.data.collection,
-                    collectionAttribute.document.id
-                  )
-                "
-                [disabled]="
-                  (connected$ | ngrxPush) === false ||
-                  (collectionAttribute | bdItemChanging)
-                "
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
+            <div
+              class="flex flex-1 justify-end"
+              *hdWalletAdapter="
+                let publicKey = publicKey;
+                let connected = connected
+              "
+            >
+              <ng-container *ngIf="publicKey !== null">
+                <button
+                  mat-icon-button
+                  bdEditCollectionAttribute
+                  [collectionAttribute]="{
+                    name: collectionAttribute.name,
+                    kind: collectionAttribute.kind.id,
+                    max:
+                      collectionAttribute.kind.id === 1
+                        ? collectionAttribute.kind.size
+                        : null,
+                    maxLength: collectionAttribute.kind.size,
+                    modifier: collectionAttribute.modifier?.id ?? null,
+                    size: collectionAttribute.modifier?.size ?? null
+                  }"
+                  (editCollectionAttribute)="
+                    onUpdateCollectionAttribute(
+                      publicKey.toBase58(),
+                      collectionAttribute.workspaceId,
+                      collectionAttribute.collectionId,
+                      collectionAttribute.id,
+                      $event
+                    )
+                  "
+                  [disabled]="
+                    !connected || (collectionAttribute | bdItemChanging)
+                  "
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="
+                    onDeleteCollectionAttribute(
+                      publicKey.toBase58(),
+                      collectionAttribute.workspaceId,
+                      collectionAttribute.collectionId,
+                      collectionAttribute.id
+                    )
+                  "
+                  [disabled]="
+                    !connected || (collectionAttribute | bdItemChanging)
+                  "
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </ng-container>
             </div>
           </aside>
 
@@ -128,14 +160,10 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                 <mat-icon
                   class="w-1/2"
                   [ngClass]="{
-                    'text-yellow-500':
-                      collectionAttribute.document.data.kind.id === 0,
-                    'text-blue-500':
-                      collectionAttribute.document.data.kind.id === 1,
-                    'text-green-500':
-                      collectionAttribute.document.data.kind.id === 2,
-                    'text-purple-500':
-                      collectionAttribute.document.data.kind.id === 3
+                    'text-yellow-500': collectionAttribute.kind.id === 0,
+                    'text-blue-500': collectionAttribute.kind.id === 1,
+                    'text-green-500': collectionAttribute.kind.id === 2,
+                    'text-purple-500': collectionAttribute.kind.id === 3
                   }"
                   >list_alt</mat-icon
                 >
@@ -145,16 +173,16 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                 <h2
                   class="mb-0 text-lg font-bold flex items-center gap-2"
                   [matTooltip]="
-                    collectionAttribute.document.name
+                    collectionAttribute.name
                       | bdItemUpdatingMessage: collectionAttribute:'Attribute'
                   "
                   matTooltipShowDelay="500"
                 >
-                  {{ collectionAttribute.document.name }}
+                  {{ collectionAttribute.name }}
                 </h2>
 
                 <p class="text-sm mb-0">
-                  Type: {{ collectionAttribute.document.data.kind.name }}.
+                  Type: {{ collectionAttribute.kind.name }}.
                 </p>
               </div>
             </header>
@@ -164,8 +192,8 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                 <mat-icon inline>auto_awesome_motion</mat-icon>
                 &nbsp;
                 <ng-container
-                  *ngIf="collectionAttribute.document.data.modifier !== null"
-                  [ngSwitch]="collectionAttribute.document.data.modifier.id"
+                  *ngIf="collectionAttribute.modifier !== null"
+                  [ngSwitch]="collectionAttribute.modifier.id"
                 >
                   <ng-container *ngSwitchCase="0">
                     Array of Items
@@ -175,22 +203,20 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                   </ng-container>
                 </ng-container>
 
-                <ng-container
-                  *ngIf="collectionAttribute.document.data.modifier === null"
-                >
+                <ng-container *ngIf="collectionAttribute.modifier === null">
                   Single Item
                 </ng-container>
               </p>
               <p
                 class="text-sm font-thin m-0"
                 *ngIf="
-                  collectionAttribute.document.data.modifier !== null &&
-                  collectionAttribute.document.data.modifier.size
+                  collectionAttribute.modifier !== null &&
+                  collectionAttribute.modifier.size
                 "
               >
                 <mat-icon inline="">data_array</mat-icon>
                 &nbsp; Size:
-                {{ collectionAttribute.document.data.modifier?.size }}
+                {{ collectionAttribute.modifier?.size }}
               </p>
             </section>
           </div>
@@ -213,74 +239,159 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 export class ViewCollectionAttributesComponent implements OnInit {
   @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
 
-  readonly connected$ = this._walletStore.connected$;
-  readonly collection$ = this._collectionStore.collection$;
   readonly collectionAttributes$ =
-    this._collectionAttributesStore.collectionAttributes$;
+    this._viewCollectionAttributesStore.collectionAttributes$;
 
-  readonly workspaceId$ = this._viewCollectionAttributesStore.workspaceId$;
-  readonly applicationId$ = this._viewCollectionAttributesStore.applicationId$;
-  readonly collectionId$ = this._viewCollectionAttributesStore.collectionId$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly collectionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('collectionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
-    private readonly _walletStore: WalletStore,
-    private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore,
-    private readonly _collectionStore: CollectionStore,
-    private readonly _collectionAttributesStore: CollectionAttributesStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _collectionAttributeApiService: CollectionAttributeApiService,
+    private readonly _viewCollectionAttributesStore: ViewCollectionAttributesStore
   ) {}
 
-  ngOnInit(): void {
-    this._viewCollectionAttributesStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
-    );
-    this._viewCollectionAttributesStore.setApplicationId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
-      )
-    );
-    this._viewCollectionAttributesStore.setCollectionId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
-    );
+  ngOnInit() {
+    this._viewCollectionAttributesStore.setCollectionId(this.collectionId$);
   }
 
   onCreateCollectionAttribute(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     collectionId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._viewCollectionAttributesStore.createCollectionAttribute({
+    const collectionAttributeKeypair = Keypair.generate();
+
+    console.log({
+      collectionAttributeDto,
+      authority,
       workspaceId,
       applicationId,
       collectionId,
-      collectionAttributeDto,
     });
+
+    this._collectionAttributeApiService
+      .create(collectionAttributeKeypair, {
+        collectionAttributeDto,
+        authority,
+        workspaceId,
+        applicationId,
+        collectionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create attribute request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `collections:${collectionId}:attributes`,
+                  `collectionAttributes:${collectionAttributeKeypair.publicKey.toBase58()}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onUpdateCollectionAttribute(
+    authority: string,
     workspaceId: string,
     collectionId: string,
     collectionAttributeId: string,
     collectionAttributeDto: CollectionAttributeDto
   ) {
-    this._viewCollectionAttributesStore.updateCollectionAttribute({
-      workspaceId,
-      collectionId,
-      collectionAttributeId,
-      collectionAttributeDto,
-    });
+    this._collectionAttributeApiService
+      .update({
+        authority,
+        workspaceId,
+        collectionId,
+        collectionAttributeDto,
+        collectionAttributeId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update attribute request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `collections:${collectionId}:attributes`,
+                  `collectionAttributes:${collectionAttributeId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDeleteCollectionAttribute(
+    authority: string,
     workspaceId: string,
     collectionId: string,
     collectionAttributeId: string
   ) {
-    this._viewCollectionAttributesStore.deleteCollectionAttribute({
-      workspaceId,
-      collectionId,
-      collectionAttributeId,
-    });
+    this._collectionAttributeApiService
+      .delete({
+        authority,
+        workspaceId,
+        collectionAttributeId,
+        collectionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete attribute request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `collections:${collectionId}:attributes`,
+                  `collectionAttributes:${collectionAttributeId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }

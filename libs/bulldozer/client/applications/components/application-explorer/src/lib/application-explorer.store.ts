@@ -73,8 +73,6 @@ export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
         return null;
       }
 
-      console.log({ applications, instructionStatuses });
-
       return instructionStatuses.reduce(
         reduceInstructions,
         applications.map(documentToView)

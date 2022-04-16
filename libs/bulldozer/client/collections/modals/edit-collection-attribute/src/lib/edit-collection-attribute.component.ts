@@ -9,14 +9,14 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { CollectionAttribute, Document } from '@heavy-duty/bulldozer-devkit';
+import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'bd-edit-attribute',
   template: `
     <h2 mat-dialog-title class="mat-primary">
-      {{ data?.collectionAttribute ? 'Edit' : 'Create' }} attribute
+      {{ collectionAttribute ? 'Edit' : 'Create' }} attribute
     </h2>
 
     <form
@@ -141,7 +141,7 @@ import { Subject, takeUntil } from 'rxjs';
         class="w-full"
         [disabled]="submitted && form.invalid"
       >
-        {{ data?.collectionAttribute ? 'Save' : 'Create' }}
+        {{ collectionAttribute ? 'Save' : 'Create' }}
       </button>
     </form>
 
@@ -185,29 +185,19 @@ export class EditCollectionAttributeComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditCollectionAttributeComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: { collectionAttribute?: Document<CollectionAttribute> }
+    public collectionAttribute?: CollectionAttributeDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.collectionAttribute?.name ?? '', {
+      name: new FormControl(this.collectionAttribute?.name ?? '', {
         validators: [Validators.required],
       }),
-      kind: new FormControl(this.data?.collectionAttribute?.data.kind.id ?? 0, {
+      kind: new FormControl(this.collectionAttribute?.kind ?? 0, {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(
-        this.data?.collectionAttribute?.data.modifier !== null
-          ? this.data?.collectionAttribute?.data.modifier.id
-          : null
-      ),
-      size: new FormControl(
-        this.data?.collectionAttribute?.data.modifier !== null
-          ? this.data?.collectionAttribute?.data.modifier.size
-          : null
-      ),
-      max: new FormControl(this.data?.collectionAttribute?.data.max ?? null),
-      maxLength: new FormControl(
-        this.data?.collectionAttribute?.data.maxLength ?? null
-      ),
+      modifier: new FormControl(this.collectionAttribute?.modifier ?? null),
+      size: new FormControl(this.collectionAttribute?.size ?? null),
+      max: new FormControl(this.collectionAttribute?.max ?? null),
+      maxLength: new FormControl(this.collectionAttribute?.maxLength ?? null),
     });
   }
 

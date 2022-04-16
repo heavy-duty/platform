@@ -189,6 +189,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
       });
     } catch (error) {
+      this._logger.log(
+        `Transaction failed [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
+
       this._eventsService.dispatch({
         type: 'TRANSACTION_FAILED',
         payload: {

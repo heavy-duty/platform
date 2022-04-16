@@ -6,10 +6,7 @@ import {
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
 import { DarkThemeStore } from '@bulldozer-client/core-data-access';
-import {
-  InstructionStatus,
-  WorkspaceInstructionsStore,
-} from '@bulldozer-client/workspaces-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import {
   Collection,
   CollectionAttribute,
@@ -18,7 +15,8 @@ import {
 import { generateCollectionCode } from '@heavy-duty/generator';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { combineLatest, filter, switchMap, tap } from 'rxjs';
+import { List } from 'immutable';
+import { combineLatest } from 'rxjs';
 
 interface ViewModel {
   code: string | null;
@@ -51,12 +49,12 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
     this._loadCode(
       this.select(
         this._collectionStore.collection$,
-        this._collectionAttributesStore.collectionAttributes$,
+        this._collectionAttributesStore.collectionAttributes$.pipe(
+          isNotNullOrUndefined
+        ),
         (collection, collectionAttributes) => ({
           collection: collection ?? null,
-          collectionAttributes: collectionAttributes.map(
-            ({ document }) => document
-          ),
+          collectionAttributes: collectionAttributes,
         }),
         { debounce: true }
       )
@@ -69,7 +67,7 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
         collection: this.collectionId$.pipe(isNotNullOrUndefined),
       })
     );
-    this._collectionAttributesStore.setCollectionAttributeIds(
+    /* this._collectionAttributesStore.setCollectionAttributeIds(
       this._collectionAttributeQueryStore.collectionAttributeIds$
     );
 
@@ -88,21 +86,21 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
   }
 
   readonly setCollectionId = this.updater<string | null>(
     (state, collectionId) => ({ ...state, collectionId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        /* case 'updateCollection':
+        case 'updateCollection':
         case 'deleteCollection': {
           this._collectionStore.dispatch(instructionStatus);
           break;
-        } */
+        }
         case 'createCollectionAttribute':
         case 'updateCollectionAttribute':
         case 'deleteCollectionAttribute': {
@@ -113,7 +111,7 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   private readonly _loadEditorOptions = this.updater<boolean>(
     (state, isDarkThemeEnabled) => ({
@@ -130,10 +128,11 @@ export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
 
   private readonly _loadCode = this.updater<{
     collection: Document<Collection> | null;
-    collectionAttributes: Document<CollectionAttribute>[];
+    collectionAttributes: List<Document<CollectionAttribute>>;
   }>((state, { collection, collectionAttributes }) => ({
     ...state,
     code:
-      collection && generateCollectionCode(collection, collectionAttributes),
+      collection &&
+      generateCollectionCode(collection, collectionAttributes.toArray()),
   }));
 }

@@ -10,6 +10,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditCollectionAttributeModule } from '@bulldozer-client/edit-collection-attribute';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewCollectionAttributesComponent } from './view-collection-attributes.component';
 
@@ -33,6 +34,7 @@ import { ViewCollectionAttributesComponent } from './view-collection-attributes.
     ReactiveComponentModule,
     ItemUpdatingModule,
     EditCollectionAttributeModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewCollectionAttributesComponent],
 })
