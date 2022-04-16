@@ -124,7 +124,8 @@ input[readonly] {
 .bd-bg-image-8,
 .bd-bg-image-9,
 .bd-bg-image-10,
-.bd-bg-image-11 {
+.bd-bg-image-11,
+.bd-bg-image-12 {
   background-size: cover;
 }
 
@@ -170,6 +171,10 @@ input[readonly] {
 
 .bd-bg-image-11 {
   background-image: url('../assets/images/backgrounds/button_base.png');
+}
+
+.bd-bg-image-12 {
+  background-image: url('../assets/images/backgrounds/sidebar.png');
 }
 
 .bd-bg-image-7 > .mat-dialog-container {
