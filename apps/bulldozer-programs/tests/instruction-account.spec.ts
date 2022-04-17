@@ -123,36 +123,6 @@ describe('instruction account', () => {
   describe('document', () => {
     const instructionAccount = Keypair.generate();
 
-    it('should fail when creating without collection', async () => {
-      // arrange
-      const instructionAccount = Keypair.generate();
-      const accountsData = {
-        name: '12345678901234567890123456789012',
-        kind: 0,
-        modifier: null,
-        space: null,
-      };
-      let error: ProgramError | null = null;
-      // act
-      try {
-        await program.methods
-          .createInstructionAccount(accountsData)
-          .accounts({
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: application.publicKey,
-            instruction: instruction.publicKey,
-            account: instructionAccount.publicKey,
-          })
-          .signers([instructionAccount])
-          .rpc();
-      } catch (err) {
-        error = err as ProgramError;
-      }
-      // assert
-      assert.equal(error?.code, 6005);
-    });
-
     it('should create', async () => {
       // arrange
       const accountsData = {
@@ -162,7 +132,7 @@ describe('instruction account', () => {
         space: null,
       };
       // act
-      const signature = await program.methods
+      await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
           authority: program.provider.wallet.publicKey,
@@ -172,19 +142,36 @@ describe('instruction account', () => {
           account: instructionAccount.publicKey,
         })
         .signers([instructionAccount])
-        .remainingAccounts([
-          {
-            pubkey: collection.publicKey,
-            isWritable: false,
-            isSigner: false,
-          },
+        .postInstructions([
+          await program.methods
+            .setInstructionAccountCollection()
+            .accounts({
+              authority: program.provider.wallet.publicKey,
+              workspace: workspace.publicKey,
+              application: application.publicKey,
+              collection: collection.publicKey,
+              account: instructionAccount.publicKey,
+            })
+            .instruction(),
         ])
         .rpc();
-      await program.provider.connection.confirmTransaction(signature);
       // assert
       const account = await program.account.instructionAccount.fetch(
         instructionAccount.publicKey
       );
+      const instructionAccountCollectionPublicKey =
+        await PublicKey.createProgramAddress(
+          [
+            Buffer.from('instruction_account_collection', 'utf8'),
+            instructionAccount.publicKey.toBuffer(),
+            Buffer.from([account.bumps.collection]),
+          ],
+          program.programId
+        );
+      const instructionAccountCollection =
+        await program.account.instructionAccountCollection.fetch(
+          instructionAccountCollectionPublicKey
+        );
       const instructionStatsAccount =
         await program.account.instructionStats.fetch(instructionStatsPublicKey);
       const decodedKind = decodeAccountKind(account.kind as any);
@@ -195,38 +182,12 @@ describe('instruction account', () => {
       assert.equal(account.name, accountsData.name);
       assert.ok('document' in account.kind);
       assert.equal(decodedKind.id, accountsData.kind);
-      assert.equal(decodedKind.collection, collection.publicKey.toBase58());
       assert.equal(account.modifier, null);
       assert.ok(account.createdAt.eq(account.updatedAt));
       assert.equal(instructionStatsAccount.quantityOfAccounts, 1);
-    });
-
-    it('should remove collection when changing the kind', async () => {
-      // arrange
-      const accountsData = {
-        name: 'data',
-        kind: 1,
-        modifier: null,
-        space: null,
-      };
-      // act
-      await program.methods
-        .updateInstructionAccount(accountsData)
-        .accounts({
-          authority: program.provider.wallet.publicKey,
-          workspace: workspace.publicKey,
-          instruction: instruction.publicKey,
-          account: instructionAccount.publicKey,
-        })
-        .rpc();
-      // assert
-      const account = await program.account.instructionAccount.fetch(
-        instructionAccount.publicKey
+      assert.ok(
+        instructionAccountCollection.collection?.equals(collection.publicKey)
       );
-      const decodedKind = decodeAccountKind(account.kind as any);
-      assert.ok('signer' in account.kind);
-      assert.equal(decodedKind.id, accountsData.kind);
-      assert.ok(account.createdAt.lte(account.updatedAt));
     });
 
     it('should delete', async () => {
@@ -249,13 +210,6 @@ describe('instruction account', () => {
           account: instructionAccount.publicKey,
         })
         .signers([instructionAccount])
-        .remainingAccounts([
-          {
-            pubkey: collection.publicKey,
-            isWritable: false,
-            isSigner: false,
-          },
-        ])
         .rpc();
       await program.methods
         .deleteInstructionAccount()
@@ -317,31 +271,55 @@ describe('instruction account', () => {
             account: instructionAccount.publicKey,
           })
           .signers([instructionAccount])
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-            {
-              pubkey: instructionPayerAccount.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
+          .postInstructions([
+            await program.methods
+              .setInstructionAccountCollection()
+              .accounts({
+                authority: program.provider.wallet.publicKey,
+                workspace: workspace.publicKey,
+                application: application.publicKey,
+                collection: collection.publicKey,
+                account: instructionAccount.publicKey,
+              })
+              .instruction(),
+            await program.methods
+              .setInstructionAccountPayer()
+              .accounts({
+                authority: program.provider.wallet.publicKey,
+                workspace: workspace.publicKey,
+                application: application.publicKey,
+                payer: instructionPayerAccount.publicKey,
+                account: instructionAccount.publicKey,
+              })
+              .instruction(),
           ])
           .rpc();
         // assert
         const account = await program.account.instructionAccount.fetch(
           instructionAccount.publicKey
         );
+        const instructionAccountPayerPublicKey =
+          await PublicKey.createProgramAddress(
+            [
+              Buffer.from('instruction_account_payer', 'utf8'),
+              instructionAccount.publicKey.toBuffer(),
+              Buffer.from([account.bumps.payer]),
+            ],
+            program.programId
+          );
+        const instructionAccountPayer =
+          await program.account.instructionAccountPayer.fetch(
+            instructionAccountPayerPublicKey
+          );
         const decodedModifier = decodeAccountModifier(account.modifier as any);
         assert.equal(decodedModifier.id, accountsData.modifier);
         assert.equal(decodedModifier.name, 'init');
-        assert.equal(
-          decodedModifier.payer,
-          instructionPayerAccount.publicKey.toBase58()
+        assert.equal(account.space, 150);
+        assert.ok(
+          instructionAccountPayer.payer?.equals(
+            instructionPayerAccount.publicKey
+          )
         );
-        assert.equal(decodedModifier.space, 150);
       });
 
       it('should remove payer and space when changing the modifier', async () => {
@@ -361,21 +339,27 @@ describe('instruction account', () => {
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
           })
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-          ])
           .rpc();
         // assert
         const account = await program.account.instructionAccount.fetch(
           instructionAccount.publicKey
         );
+        const instructionAccountPayerPublicKey =
+          await PublicKey.createProgramAddress(
+            [
+              Buffer.from('instruction_account_payer', 'utf8'),
+              instructionAccount.publicKey.toBuffer(),
+              Buffer.from([account.bumps.payer]),
+            ],
+            program.programId
+          );
+        const instructionAccountPayer =
+          await program.account.instructionAccountPayer.fetch(
+            instructionAccountPayerPublicKey
+          );
         assert.equal(account.modifier, null);
-        assert.equal(account.payer, null);
         assert.equal(account.space, null);
+        assert.equal(instructionAccountPayer.payer, null);
       });
 
       it('should fail when space is not provided', async () => {
@@ -400,18 +384,6 @@ describe('instruction account', () => {
               account: instructionAccount.publicKey,
             })
             .signers([instructionAccount])
-            .remainingAccounts([
-              {
-                pubkey: collection.publicKey,
-                isWritable: false,
-                isSigner: false,
-              },
-              {
-                pubkey: instructionPayerAccount.publicKey,
-                isWritable: false,
-                isSigner: false,
-              },
-            ])
             .rpc();
         } catch (err) {
           error = err as ProgramError;
@@ -423,60 +395,11 @@ describe('instruction account', () => {
 
     describe('with mut modifier', () => {
       const instructionAccount = Keypair.generate();
-
-      it('should create', async () => {
-        // arrange
-        const accountsData = {
-          name: 'data',
-          kind: 0,
-          modifier: 1,
-          space: null,
-        };
-        // act
-        await program.methods
-          .createInstructionAccount(accountsData)
-          .accounts({
-            authority: program.provider.wallet.publicKey,
-            workspace: workspace.publicKey,
-            application: application.publicKey,
-            instruction: instruction.publicKey,
-            account: instructionAccount.publicKey,
-          })
-          .signers([instructionAccount])
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-          ])
-          .rpc();
-        // assert
-        const account = await program.account.instructionAccount.fetch(
-          instructionAccount.publicKey
-        );
-        const decodedKind = decodeAccountKind(account.kind as any);
-        const decodedModifier = decodeAccountModifier(account.modifier as any);
-        assert.ok(account.authority.equals(program.provider.wallet.publicKey));
-        assert.ok(account.instruction.equals(instruction.publicKey));
-        assert.ok(account.workspace.equals(workspace.publicKey));
-        assert.ok(account.application.equals(application.publicKey));
-        assert.equal(account.name, accountsData.name);
-        assert.equal(decodedKind.id, accountsData.kind);
-        assert.equal(decodedKind.collection, collection.publicKey.toBase58());
-        assert.equal(decodedModifier.id, accountsData.modifier);
-        assert.equal(decodedModifier.name, 'mut');
-        assert.equal(decodedModifier.close, null);
-      });
-    });
-
-    describe('with mut modifier and close constraint', () => {
-      const instructionAccount = Keypair.generate();
       const instructionCloseAccount = Keypair.generate();
 
       before(async () => {
         const accountsData = {
-          name: 'payer',
+          name: 'close',
           kind: 1,
           modifier: 1,
           space: null,
@@ -514,23 +437,46 @@ describe('instruction account', () => {
             account: instructionAccount.publicKey,
           })
           .signers([instructionAccount])
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-            {
-              pubkey: instructionCloseAccount.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
+          .postInstructions([
+            await program.methods
+              .setInstructionAccountCollection()
+              .accounts({
+                authority: program.provider.wallet.publicKey,
+                workspace: workspace.publicKey,
+                application: application.publicKey,
+                collection: collection.publicKey,
+                account: instructionAccount.publicKey,
+              })
+              .instruction(),
+            await program.methods
+              .setInstructionAccountClose()
+              .accounts({
+                authority: program.provider.wallet.publicKey,
+                workspace: workspace.publicKey,
+                application: application.publicKey,
+                close: instructionCloseAccount.publicKey,
+                account: instructionAccount.publicKey,
+              })
+              .instruction(),
           ])
           .rpc();
         // assert
         const account = await program.account.instructionAccount.fetch(
           instructionAccount.publicKey
         );
+        const instructionAccountClosePublicKey =
+          await PublicKey.createProgramAddress(
+            [
+              Buffer.from('instruction_account_close', 'utf8'),
+              instructionAccount.publicKey.toBuffer(),
+              Buffer.from([account.bumps.close]),
+            ],
+            program.programId
+          );
+        const instructionAccountClose =
+          await program.account.instructionAccountClose.fetch(
+            instructionAccountClosePublicKey
+          );
         const decodedKind = decodeAccountKind(account.kind as any);
         const decodedModifier = decodeAccountModifier(account.modifier as any);
         assert.ok(account.authority.equals(program.provider.wallet.publicKey));
@@ -539,13 +485,12 @@ describe('instruction account', () => {
         assert.ok(account.application.equals(application.publicKey));
         assert.equal(account.name, accountsData.name);
         assert.equal(decodedKind.id, accountsData.kind);
-        assert.equal(decodedKind.name, 'document');
-        assert.equal(decodedKind.collection, collection.publicKey.toBase58());
         assert.equal(decodedModifier.id, accountsData.modifier);
         assert.equal(decodedModifier.name, 'mut');
-        assert.equal(
-          decodedModifier.close,
-          instructionCloseAccount.publicKey.toBase58()
+        assert.ok(
+          instructionAccountClose.close?.equals(
+            instructionCloseAccount.publicKey
+          )
         );
       });
 
@@ -553,7 +498,7 @@ describe('instruction account', () => {
         // arrange
         const accountsData = {
           name: 'data',
-          kind: 1,
+          kind: 0,
           modifier: null,
           space: null,
         };
@@ -571,12 +516,22 @@ describe('instruction account', () => {
         const account = await program.account.instructionAccount.fetch(
           instructionAccount.publicKey
         );
-        const decodedKind = decodeAccountKind(account.kind as any);
-        assert.equal(decodedKind.id, accountsData.kind);
-        assert.equal(decodedKind.name, 'signer');
+        const instructionAccountClosePublicKey =
+          await PublicKey.createProgramAddress(
+            [
+              Buffer.from('instruction_account_close', 'utf8'),
+              instructionAccount.publicKey.toBuffer(),
+              Buffer.from([account.bumps.close]),
+            ],
+            program.programId
+          );
+        const instructionAccountClose =
+          await program.account.instructionAccountClose.fetch(
+            instructionAccountClosePublicKey
+          );
         assert.equal(account.modifier, null);
-        assert.equal(account.close, null);
         assert.equal(account.space, null);
+        assert.equal(instructionAccountClose.close, null);
       });
     });
   });
@@ -617,9 +572,6 @@ describe('instruction account', () => {
       assert.equal(decodedKind.id, accountsData.kind);
       assert.equal(decodedKind.name, 'signer');
       assert.equal(account.modifier, null);
-      assert.equal(account.collection, null);
-      assert.equal(account.payer, null);
-      assert.equal(account.close, null);
       assert.equal(account.space, null);
     });
   });
@@ -689,13 +641,6 @@ describe('instruction account', () => {
             account: instructionAccount2.publicKey,
           })
           .signers([instructionAccount2])
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-          ])
           .rpc();
         await program.methods
           .createInstructionRelation()
@@ -814,13 +759,6 @@ describe('instruction account', () => {
           account: instructionAccount.publicKey,
         })
         .signers([instructionAccount])
-        .remainingAccounts([
-          {
-            pubkey: collection.publicKey,
-            isWritable: false,
-            isSigner: false,
-          },
-        ])
         .rpc();
       await program.methods
         .deleteInstructionAccount()
@@ -966,13 +904,6 @@ describe('instruction account', () => {
             account: newAccount.publicKey,
           })
           .signers([newAccount])
-          .remainingAccounts([
-            {
-              pubkey: collection.publicKey,
-              isWritable: false,
-              isSigner: false,
-            },
-          ])
           .rpc();
       } catch (err) {
         error = err as ProgramError;

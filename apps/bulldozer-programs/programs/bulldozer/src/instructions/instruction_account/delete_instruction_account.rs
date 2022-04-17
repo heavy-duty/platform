@@ -1,5 +1,6 @@
 use crate::collections::{
-  Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountStats, InstructionStats,
+  Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountClose,
+  InstructionAccountCollection, InstructionAccountPayer, InstructionAccountStats, InstructionStats,
   User, Workspace,
 };
 use crate::enums::CollaboratorStatus;
@@ -65,9 +66,39 @@ pub struct DeleteInstructionAccount<'info> {
       b"instruction_account_stats".as_ref(),
       account.key().as_ref()
     ],
-    bump = account.instruction_account_stats_bump
+    bump = account.bumps.stats
   )]
   pub account_stats: Box<Account<'info, InstructionAccountStats>>,
+  #[account(
+    mut,
+    close = budget,
+    seeds = [
+      b"instruction_account_collection".as_ref(),
+      account.key().as_ref()
+    ],
+    bump = account.bumps.collection
+  )]
+  pub account_collection: Box<Account<'info, InstructionAccountCollection>>,
+  #[account(
+    mut,
+    close = budget,
+    seeds = [
+      b"instruction_account_close".as_ref(),
+      account.key().as_ref()
+    ],
+    bump = account.bumps.close
+  )]
+  pub account_close: Box<Account<'info, InstructionAccountClose>>,
+  #[account(
+    mut,
+    close = budget,
+    seeds = [
+      b"instruction_account_payer".as_ref(),
+      account.key().as_ref()
+    ],
+    bump = account.bumps.payer
+  )]
+  pub account_payer: Box<Account<'info, InstructionAccountPayer>>,
 }
 
 pub fn handle(ctx: Context<DeleteInstructionAccount>) -> Result<()> {

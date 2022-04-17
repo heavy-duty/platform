@@ -181,12 +181,29 @@ pub mod bulldozer {
     instructions::create_instruction_account::handle(ctx, arguments)
   }
 
-  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
+  #[access_control(instructions::update_instruction_account::validate(&arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
     arguments: UpdateInstructionAccountArguments,
   ) -> Result<()> {
     instructions::update_instruction_account::handle(ctx, arguments)
+  }
+
+  #[access_control(instructions::set_instruction_account_collection::validate(&ctx))]
+  pub fn set_instruction_account_collection(
+    ctx: Context<SetInstructionAccountCollection>,
+  ) -> Result<()> {
+    instructions::set_instruction_account_collection::handle(ctx)
+  }
+
+  #[access_control(instructions::set_instruction_account_close::validate(&ctx))]
+  pub fn set_instruction_account_close(ctx: Context<SetInstructionAccountClose>) -> Result<()> {
+    instructions::set_instruction_account_close::handle(ctx)
+  }
+
+  #[access_control(instructions::set_instruction_account_payer::validate(&ctx))]
+  pub fn set_instruction_account_payer(ctx: Context<SetInstructionAccountPayer>) -> Result<()> {
+    instructions::set_instruction_account_payer::handle(ctx)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> Result<()> {

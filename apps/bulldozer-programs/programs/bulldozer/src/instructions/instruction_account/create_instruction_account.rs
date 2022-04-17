@@ -1,10 +1,11 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Collection, Instruction, InstructionAccount,
+  Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountBumps,
+  InstructionAccountClose, InstructionAccountCollection, InstructionAccountPayer,
   InstructionAccountStats, InstructionStats, User, Workspace,
 };
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, get_account_key, get_remaining_account};
+use crate::utils::fund_rent_for_account;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -82,22 +83,47 @@ pub struct CreateInstructionAccount<'info> {
     bump
   )]
   pub account_stats: Box<Account<'info, InstructionAccountStats>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccountCollection::space(),
+    seeds = [
+      b"instruction_account_collection".as_ref(),
+      account.key().as_ref(),
+    ],
+    bump
+  )]
+  pub account_collection: Box<Account<'info, InstructionAccountCollection>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccountPayer::space(),
+    seeds = [
+      b"instruction_account_payer".as_ref(),
+      account.key().as_ref(),
+    ],
+    bump
+  )]
+  pub account_payer: Box<Account<'info, InstructionAccountPayer>>,
+  #[account(
+    init,
+    payer = authority,
+    space = InstructionAccountClose::space(),
+    seeds = [
+      b"instruction_account_close".as_ref(),
+      account.key().as_ref(),
+    ],
+    bump
+  )]
+  pub account_close: Box<Account<'info, InstructionAccountClose>>,
 }
 
 pub fn validate(
   ctx: &Context<CreateInstructionAccount>,
   arguments: &CreateInstructionAccountArguments,
 ) -> Result<bool> {
-  match (
-    arguments.kind,
-    get_remaining_account::<Collection>(ctx.remaining_accounts, 0)?,
-    arguments.modifier,
-    arguments.space,
-    get_remaining_account::<InstructionAccount>(ctx.remaining_accounts, 1)?,
-  ) {
-    (0, None, _, _, _) => Err(error!(ErrorCode::MissingCollectionAccount)),
-    (_, _, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
-    (_, _, Some(0), _, None) => Err(error!(ErrorCode::MissingPayerAccount)),
+  match (arguments.modifier, arguments.space) {
+    (Some(0), None) => Err(error!(ErrorCode::MissingSpace)),
     _ => {
       let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
       let instruction_account_rent = **ctx.accounts.account.to_account_info().lamports.borrow();
@@ -107,10 +133,34 @@ pub fn validate(
         .to_account_info()
         .lamports
         .borrow();
+      let instruction_account_collection_rent = **ctx
+        .accounts
+        .account_collection
+        .to_account_info()
+        .lamports
+        .borrow();
+      let instruction_account_payer_rent = **ctx
+        .accounts
+        .account_payer
+        .to_account_info()
+        .lamports
+        .borrow();
+      let instruction_account_close_rent = **ctx
+        .accounts
+        .account_close
+        .to_account_info()
+        .lamports
+        .borrow();
       let funds_required = &Budget::get_rent_exemption()?
         .checked_add(instruction_account_rent)
         .unwrap()
         .checked_add(instruction_account_stats_rent)
+        .unwrap()
+        .checked_add(instruction_account_collection_rent)
+        .unwrap()
+        .checked_add(instruction_account_payer_rent)
+        .unwrap()
+        .checked_add(instruction_account_close_rent)
         .unwrap();
 
       if budget_lamports.lt(funds_required) {
@@ -142,35 +192,57 @@ pub fn handle(
       .lamports
       .borrow(),
   )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .account_collection
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .account_payer
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
+  fund_rent_for_account(
+    ctx.accounts.budget.to_account_info(),
+    ctx.accounts.authority.to_account_info(),
+    **ctx
+      .accounts
+      .account_close
+      .to_account_info()
+      .lamports
+      .borrow(),
+  )?;
   ctx.accounts.account.initialize(
     arguments.name,
     ctx.accounts.authority.key(),
     ctx.accounts.workspace.key(),
     ctx.accounts.application.key(),
     ctx.accounts.instruction.key(),
-    AccountKinds::create(
-      arguments.kind,
-      get_account_key(get_remaining_account::<Collection>(
-        ctx.remaining_accounts,
-        0,
-      )?)?,
-    )?,
-    AccountModifiers::create(
-      arguments.modifier,
-      arguments.space,
-      get_account_key(get_remaining_account::<InstructionAccount>(
-        ctx.remaining_accounts,
-        1,
-      )?)?,
-      get_account_key(get_remaining_account::<InstructionAccount>(
-        ctx.remaining_accounts,
-        1,
-      )?)?,
-    )?,
-    *ctx.bumps.get("account_stats").unwrap(),
+    AccountKinds::create(arguments.kind)?,
+    AccountModifiers::create(arguments.modifier)?,
+    arguments.space,
+    InstructionAccountBumps {
+      stats: *ctx.bumps.get("account_stats").unwrap(),
+      collection: *ctx.bumps.get("account_collection").unwrap(),
+      payer: *ctx.bumps.get("account_payer").unwrap(),
+      close: *ctx.bumps.get("account_close").unwrap(),
+    },
   );
   ctx.accounts.account.initialize_timestamp()?;
   ctx.accounts.account_stats.initialize();
+  ctx.accounts.account_collection.set(None);
+  ctx.accounts.account_payer.set(None);
+  ctx.accounts.account_close.set(None);
   ctx.accounts.instruction_stats.increase_account_quantity();
   Ok(())
 }

@@ -94,4 +94,10 @@ pub enum ErrorCode {
   InstructionAccountDoesNotBelongToInstruction,
   #[msg("Only admin collaborator can update")]
   OnlyAdminCollaboratorCanUpdate,
+  #[msg("Only document accounts can have collection")]
+  OnlyDocumentAccountsCanHaveCollection,
+  #[msg("Only init accounts can have a payer")]
+  OnlyInitAccountsCanHavePayer,
+  #[msg("Only mut accounts can have a close")]
+  OnlyMutAccountsCanHaveClose,
 }

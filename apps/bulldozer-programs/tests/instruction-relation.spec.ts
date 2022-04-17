@@ -315,16 +315,34 @@ describe('instruction relation', () => {
               10 // application stats account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              295 // from account size
+              264 // from account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               10 // from stats account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
-              295 // to account size
+              41 // from collection account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              41 // from close account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              41 // from payer account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              264 // to account size
             )) +
             (await program.provider.connection.getMinimumBalanceForRentExemption(
               10 // to stats account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              41 // from collection account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              41 // from close account size
+            )) +
+            (await program.provider.connection.getMinimumBalanceForRentExemption(
+              41 // from payer account size
             )),
         }),
       ])

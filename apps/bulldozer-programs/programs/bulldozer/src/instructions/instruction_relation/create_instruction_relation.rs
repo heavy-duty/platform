@@ -80,7 +80,7 @@ pub struct CreateInstructionRelation<'info> {
       b"instruction_account_stats".as_ref(),
       from.key().as_ref()
     ],
-    bump = from.instruction_account_stats_bump
+    bump = from.bumps.stats
   )]
   pub from_stats: Box<Account<'info, InstructionAccountStats>>,
   #[account(
@@ -89,7 +89,7 @@ pub struct CreateInstructionRelation<'info> {
       b"instruction_account_stats".as_ref(),
       to.key().as_ref()
     ],
-    bump = to.instruction_account_stats_bump
+    bump = to.bumps.stats
   )]
   pub to_stats: Box<Account<'info, InstructionAccountStats>>,
 }
