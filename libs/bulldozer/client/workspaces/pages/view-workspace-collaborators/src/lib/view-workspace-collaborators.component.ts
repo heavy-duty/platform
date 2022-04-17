@@ -79,60 +79,66 @@ interface ViewModel {
           </div>
         </div>
 
-        <div
-          class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center relative"
-          *hdWalletAdapter="let publicKey = publicKey"
+        <ng-container
+          *ngIf="
+            (collaborators$ | ngrxPush) !== null &&
+            (currentCollaborator$ | ngrxPush) === null
+          "
         >
-          <ng-container *ngIf="publicKey !== null">
-            <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-              <button
-                *ngIf="
-                  (collaborators$ | ngrxPush) !== null &&
-                  (currentCollaborator$ | ngrxPush) === null
-                "
-                class="bd-button"
-                (click)="
-                  onRequestCollaboratorStatus(publicKey.toBase58(), workspaceId)
-                "
-              >
-                Become Collaborator
-              </button>
-            </ng-container>
+          <div
+            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center relative"
+            *hdWalletAdapter="let publicKey = publicKey"
+          >
+            <ng-container *ngIf="publicKey !== null">
+              <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+                <button
+                  class="bd-button"
+                  (click)="
+                    onRequestCollaboratorStatus(
+                      publicKey.toBase58(),
+                      workspaceId
+                    )
+                  "
+                >
+                  Become Collaborator
+                </button>
+              </ng-container>
 
-            <ng-container
-              *ngrxLet="currentCollaborator$; let currentCollaborator"
-            >
-              <button
-                *ngIf="
-                  currentCollaborator !== null &&
-                  currentCollaborator.status.id === 2
-                "
-                mat-stroked-button
-                color="accent"
-                (click)="
-                  onRetryCollaboratorStatusRequest(
-                    publicKey.toBase58(),
-                    currentCollaborator.workspaceId,
-                    currentCollaborator.id
-                  )
-                "
-                [disabled]="currentCollaborator | bdItemChanging"
+              <ng-container
+                *ngrxLet="currentCollaborator$; let currentCollaborator"
               >
-                Try again
-              </button>
+                <button
+                  *ngIf="
+                    currentCollaborator !== null &&
+                    currentCollaborator.status.id === 2
+                  "
+                  mat-stroked-button
+                  color="accent"
+                  (click)="
+                    onRetryCollaboratorStatusRequest(
+                      publicKey.toBase58(),
+                      currentCollaborator.workspaceId,
+                      currentCollaborator.id
+                    )
+                  "
+                  [disabled]="currentCollaborator | bdItemChanging"
+                >
+                  Try again
+                </button>
+              </ng-container>
             </ng-container>
-          </ng-container>
-          <div
-            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
-          >
-            <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
           </div>
-          <div
-            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
-          >
-            <div class="w-full h-px bg-gray-600"></div>
-          </div>
-        </div>
+        </ng-container>
       </div>
     </header>
 
