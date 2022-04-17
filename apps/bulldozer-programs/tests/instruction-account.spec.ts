@@ -284,7 +284,6 @@ describe('instruction account', () => {
               .accounts({
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
-                application: application.publicKey,
                 payer: instructionPayerAccount.publicKey,
                 account: instructionAccount.publicKey,
               })
@@ -450,7 +449,6 @@ describe('instruction account', () => {
               .accounts({
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
-                application: application.publicKey,
                 close: instructionCloseAccount.publicKey,
                 account: instructionAccount.publicKey,
               })

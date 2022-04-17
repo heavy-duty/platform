@@ -1,5 +1,5 @@
 use crate::collections::{
-  Application, Collaborator, InstructionAccount, InstructionAccountClose, User, Workspace,
+  Collaborator, InstructionAccount, InstructionAccountClose, User, Workspace,
 };
 use crate::enums::{AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
@@ -10,16 +10,12 @@ pub struct SetInstructionAccountClose<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
-        constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace,
-    )]
-  pub application: Box<Account<'info, Application>>,
-  #[account(
+    constraint = close.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
       constraint = close.instruction == account.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
     )]
   pub close: Box<Account<'info, InstructionAccount>>,
   #[account(
       constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
-      constraint = account.application == application.key() @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
     )]
   pub account: Box<Account<'info, InstructionAccount>>,
   #[account(
