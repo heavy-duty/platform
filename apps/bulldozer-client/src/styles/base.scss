@@ -218,3 +218,7 @@ input[readonly] {
 .bd-button:hover {
   background-image: linear-gradient(#262626, #262626);
 }
+
+.bd-button:active {
+  background-image: linear-gradient(#262626, #303030);
+}

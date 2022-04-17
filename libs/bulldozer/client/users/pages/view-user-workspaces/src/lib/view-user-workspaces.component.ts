@@ -15,8 +15,8 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 @Component({
   selector: 'bd-view-user-workspaces',
   template: `
-    <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="text-2xl uppercase mb-1">Workspaces</h1>
+    <header class="mb-8">
+      <h1 class="text-4xl uppercase mb-1 bd-font">Workspaces</h1>
       <p class="text-sm font-thin mb-2">List of all your workspaces.</p>
     </header>
 
@@ -27,7 +27,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
       >
         <mat-card
           *ngFor="let workspace of workspaces; let i = index"
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
+          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
             <div class="flex-1 flex items-center gap-2">
@@ -88,6 +88,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                 >
                   {{ workspace.name }}
                 </h2>
+
                 <p *ngIf="workspaceId$ | ngrxPush as workspaceId">
                   <span
                     class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
@@ -102,14 +103,25 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                   }}</span>
                 </p>
               </div>
-              <div>
+              <div
+                class="py-2 px-5 w-32 h-12 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
+              >
                 <button
-                  mat-stroked-button
-                  color="accent"
+                  class="bd-button"
                   (click)="onActivateWorkspace(workspace.id)"
                 >
                   Activate
                 </button>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
               </div>
             </header>
 
@@ -141,7 +153,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
   providers: [WorkspacesStore, WorkspaceQueryStore, ViewUserWorkspacesStore],
 })
 export class ViewUserWorkspacesComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8';
+  @HostBinding('class') class = 'block p-8 pt-5';
   readonly connected$ = this._walletStore.connected$;
   readonly workspaces$ = this._viewUserWorkspacesStore.workspaces$;
   readonly workspaceId$ = this._configStore.workspaceId$;

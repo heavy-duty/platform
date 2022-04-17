@@ -12,8 +12,8 @@ import { ViewUserInfoStore } from './view-user-info.store';
 @Component({
   selector: 'bd-view-user-info',
   template: `
-    <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="text-2xl uppercase mb-1">User Info</h1>
+    <header class="mb-8">
+      <h1 class="text-4xl uppercase mb-1 bd-font">User Info</h1>
       <p class="text-sm font-thin mb-2">User account info.</p>
     </header>
 
@@ -21,7 +21,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
       <div class="flex gap-6 flex-wrap" *ngIf="publicKey !== null">
         <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
           <mat-card
-            class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0"
+            class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
           >
             <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
               <div class="flex-1 flex items-center gap-2">
@@ -155,7 +155,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
   providers: [ViewUserInfoStore, UserStore],
 })
 export class ViewUserInfoComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8';
+  @HostBinding('class') class = 'block p-8 pt-5';
   readonly user$ = this._viewUserInfoStore.user$;
   readonly userId$ = this._userStore.userId$;
 

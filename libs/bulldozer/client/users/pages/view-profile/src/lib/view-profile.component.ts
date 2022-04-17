@@ -11,8 +11,8 @@ import { TabStore } from '@bulldozer-client/core-data-access';
   selector: 'bd-view-profile',
   template: `
     <aside class="w-80 flex flex-col flex-shrink-0">
-      <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
-        <p class="mb-0 text-xl uppercase">Profile</p>
+      <header class="py-5 px-7 mb-0 w-full">
+        <p class="mb-0 text-2xl uppercase bd-font">Profile</p>
         <p class="text-xs m-0">
           Visualize all the details about your profile and workspaces
         </p>
@@ -21,9 +21,9 @@ import { TabStore } from '@bulldozer-client/core-data-access';
       <ul>
         <li>
           <a
-            class="flex flex-col gap-1 border-l-4 py-5 px-7"
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
             [routerLink]="['/profile', 'info']"
-            [routerLinkActive]="['bg-white', 'bg-opacity-5', 'border-primary']"
+            [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
             [ngClass]="{
               'border-transparent': !isRouteActive('/profile/info')
             }"
@@ -34,9 +34,9 @@ import { TabStore } from '@bulldozer-client/core-data-access';
         </li>
         <li>
           <a
-            class="flex flex-col gap-1 border-l-4 py-5 px-7"
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
             [routerLink]="['/profile', 'workspaces']"
-            [routerLinkActive]="['bg-white', 'bg-opacity-5', 'border-primary']"
+            [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
             [ngClass]="{
               'border-transparent': !isRouteActive('/profile/workspaces')
             }"
@@ -50,7 +50,11 @@ import { TabStore } from '@bulldozer-client/core-data-access';
       </ul>
     </aside>
 
-    <div class="w-full bg-white bg-opacity-5">
+    <figure class="w-7 ml-6 mr-4">
+      <img src="assets/images/pipe.png" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
       <router-outlet></router-outlet>
     </div>
   `,
