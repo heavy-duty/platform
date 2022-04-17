@@ -1,5 +1,5 @@
 use crate::collections::{
-  Collaborator, InstructionAccount, InstructionAccountPayer, User, Workspace,
+  Collaborator, Instruction, InstructionAccount, InstructionAccountPayer, User, Workspace,
 };
 use crate::enums::{AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
@@ -10,12 +10,17 @@ pub struct SetInstructionAccountPayer<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
+    constraint = instruction.workspace == workspace.key() @ ErrorCode::InstructionDoesNotBelongToWorkspace,
+  )]
+  pub instruction: Box<Account<'info, Instruction>>,
+  #[account(
     constraint = payer.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
-    constraint = payer.instruction == account.instruction @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
+    constraint = payer.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub payer: Box<Account<'info, InstructionAccount>>,
   #[account(
     constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
+    constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub account: Box<Account<'info, InstructionAccount>>,
   #[account(

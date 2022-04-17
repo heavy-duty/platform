@@ -146,6 +146,7 @@ describe('instruction account', () => {
               authority: provider.wallet.publicKey,
               workspace: workspace.publicKey,
               application: application.publicKey,
+              instruction: instruction.publicKey,
               collection: collection.publicKey,
               account: instructionAccount.publicKey,
             })
@@ -275,6 +276,7 @@ describe('instruction account', () => {
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
+                instruction: instruction.publicKey,
                 collection: collection.publicKey,
                 account: instructionAccount.publicKey,
               })
@@ -284,6 +286,7 @@ describe('instruction account', () => {
               .accounts({
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
+                instruction: instruction.publicKey,
                 payer: instructionPayerAccount.publicKey,
                 account: instructionAccount.publicKey,
               })
@@ -440,6 +443,7 @@ describe('instruction account', () => {
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
+                instruction: instruction.publicKey,
                 collection: collection.publicKey,
                 account: instructionAccount.publicKey,
               })
@@ -449,6 +453,7 @@ describe('instruction account', () => {
               .accounts({
                 authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
+                instruction: instruction.publicKey,
                 close: instructionCloseAccount.publicKey,
                 account: instructionAccount.publicKey,
               })
