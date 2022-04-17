@@ -12,7 +12,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
     >
       <div
         *ngIf="(loading$ | ngrxPush) === false; else loading"
-        class="w-40 h-12 flex items-center"
+        class="w-40 h-10 flex items-center"
       >
         <a
           [routerLink]="url"

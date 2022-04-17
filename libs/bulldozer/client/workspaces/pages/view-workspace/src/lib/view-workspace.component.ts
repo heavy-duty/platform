@@ -22,15 +22,15 @@ import { ViewWorkspaceStore } from './view-workspace.store';
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
       <aside class="w-80 flex flex-col flex-shrink-0">
-        <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+        <header class="py-5 px-7 mb-0 w-full">
           <ng-container *ngIf="workspace !== null; else notFound">
-            <p class="mb-0 text-xl uppercase">{{ workspace.name }}</p>
+            <p class="mb-0 text-2xl uppercase bd-font">{{ workspace.name }}</p>
             <p class="text-xs m-0">
               Visualize all the details about this workspace.
             </p>
           </ng-container>
           <ng-template #notFound>
-            <p class="mb-0 text-xl uppercase">not found</p>
+            <p class="mb-0 text-xl uppercase bd-font">not found</p>
             <p class="text-xs m-0">
               The workspace you're trying to visualize is not available.
             </p>
@@ -41,18 +41,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
           <ul class="flex-1" *ngIf="workspaceId !== null">
             <li>
               <a
-                class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                 [routerLink]="['/workspaces', workspaceId, 'budget']"
-                [routerLinkActive]="[
-                  'bg-white',
-                  'bg-opacity-5',
-                  'border-primary'
-                ]"
-                [ngClass]="{
-                  'border-transparent': !isRouteActive(
-                    '/workspaces/' + workspaceId + '/budget'
-                  )
-                }"
+                [routerLinkActive]="['bg-opacity-5', 'bd-box-shadow-bg-white']"
               >
                 <span class="text-lg font-bold">Budget</span>
                 <span class="text-xs font-thin">
@@ -62,18 +53,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
             </li>
             <li>
               <a
-                class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                 [routerLink]="['/workspaces', workspaceId, 'collaborators']"
-                [routerLinkActive]="[
-                  'bg-white',
-                  'bg-opacity-5',
-                  'border-primary'
-                ]"
-                [ngClass]="{
-                  'border-transparent': !isRouteActive(
-                    '/workspaces/' + workspaceId + '/collaborators'
-                  )
-                }"
+                [routerLinkActive]="['bg-opacity-5', 'bd-box-shadow-bg-white']"
               >
                 <span class="text-lg font-bold">Collaborators</span>
                 <span class="text-xs font-thin">
@@ -84,18 +66,9 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 
             <li>
               <a
-                class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                 [routerLink]="['/workspaces', workspaceId, 'instructions']"
-                [routerLinkActive]="[
-                  'bg-white',
-                  'bg-opacity-5',
-                  'border-primary'
-                ]"
-                [ngClass]="{
-                  'border-transparent': !isRouteActive(
-                    '/workspaces/' + workspaceId + '/instructions'
-                  )
-                }"
+                [routerLinkActive]="['bg-opacity-5', 'bd-box-shadow-bg-white']"
               >
                 <span class="text-lg font-bold">Instructions</span>
                 <span class="text-xs font-thin">
@@ -109,11 +82,10 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
             *ngIf="publicKey !== null && workspace !== null"
-            class="sticky bottom-0 py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 bd-box-shadow-gray shadow relative"
           >
             <button
-              mat-stroked-button
-              color="accent"
+              class="bd-button w-24"
               bdEditWorkspace
               [workspace]="workspace"
               (editWorkspace)="
@@ -123,17 +95,30 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               Edit
             </button>
             <button
-              mat-stroked-button
-              color="warn"
+              class="bd-button w-24"
               (click)="onDeleteWorkspace(publicKey.toBase58(), workspace.id)"
             >
               Delete
             </button>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
           </footer>
         </ng-container>
       </aside>
 
-      <div class="flex-1">
+      <figure class="w-7 ml-6 mr-4">
+        <img src="assets/images/pipe.png" />
+      </figure>
+
+      <div class="flex-1 overflow-y-auto">
         <router-outlet></router-outlet>
       </div>
     </ng-container>

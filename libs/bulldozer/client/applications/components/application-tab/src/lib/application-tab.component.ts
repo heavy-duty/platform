@@ -17,7 +17,7 @@ import { ApplicationTabStore } from './application-tab.store';
           'applications',
           application.document.id
         ]"
-        class="w-40 h-12 flex justify-between gap-2 items-center pl-4 flex-grow"
+        class="w-40 h-10 flex justify-between gap-2 items-center pl-4 flex-grow"
         [matTooltip]="
           application.document.name
             | bdItemUpdatingMessage: application:'Application'

@@ -7,7 +7,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
     <div class="flex items-center p-0">
       <a
         [routerLink]="['/profile']"
-        class="w-40 h-12 flex items-center pl-4 flex-grow"
+        class="w-40 h-10 flex items-center pl-4 flex-grow"
       >
         Profile
       </a>

@@ -1,5 +1,5 @@
 @import './constants/colors.scss';
-@import './constants/sizes.scss';
+@import './constants/fonts.scss';
 
 // utilities (TO DO: move to antoher folder)
 @mixin snackbar-span {
@@ -125,7 +125,8 @@ input[readonly] {
 .bd-bg-image-9,
 .bd-bg-image-10,
 .bd-bg-image-11,
-.bd-bg-image-12 {
+.bd-bg-image-12,
+.bd-bg-image-13 {
   background-size: cover;
 }
 
@@ -177,6 +178,10 @@ input[readonly] {
   background-image: url('../assets/images/backgrounds/sidebar.png');
 }
 
+.bd-bg-image-13 {
+  background-image: url('../assets/images/backgrounds/list_element.png');
+}
+
 .bd-bg-image-7 > .mat-dialog-container {
   background: transparent !important;
 }
@@ -194,5 +199,22 @@ input[readonly] {
 }
 
 .bd-box-shadow-bg-white {
+  box-shadow: 0px 1px 2px -1px white;
+}
+
+.bd-box-shadow-gray {
   box-shadow: -0px -2px 2px #444, inset 0px 5px 4px #444;
+}
+
+.bd-button {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-image: linear-gradient(#303030, #262626);
+  border: 2px solid #212121;
+}
+
+.bd-button:hover {
+  background-image: linear-gradient(#262626, #262626);
 }

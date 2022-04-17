@@ -5,8 +5,8 @@ import { interval, map, startWith } from 'rxjs';
 @Component({
   selector: 'bd-view-workspace-instructions',
   template: `
-    <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="text-2xl uppercase mb-1">Instructions</h1>
+    <header class="mb-8">
+      <h1 class="text-4xl uppercase mb-1 bd-font">Instructions</h1>
       <p class="text-sm font-thin mb-2">
         List of the last instructions executed for this workspace.
       </p>
@@ -71,7 +71,7 @@ import { interval, map, startWith } from 'rxjs';
   styles: [],
 })
 export class ViewWorkspaceInstructionsComponent {
-  @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
   readonly instructionStatuses$ =
     this._workspaceInstructionsStore.instructionStatuses$;
   readonly timeNow$ = interval(60 * 1000).pipe(

@@ -72,7 +72,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
               </div>
             </div>
 
-            <div class="flex-grow">
+            <div class="flex-grow overflow-hidden">
               <router-outlet></router-outlet>
             </div>
           </div>

@@ -2,8 +2,11 @@ import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
@@ -22,6 +25,9 @@ import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborat
     ]),
     ClipboardModule,
     MatButtonModule,
+    MatCardModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
     MatIconModule,
     MatSelectModule,
     ReactiveComponentModule,

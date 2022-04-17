@@ -34,217 +34,123 @@ interface ViewModel {
 @Component({
   selector: 'bd-view-workspace-collaborators',
   template: `
-    <aside class="w-80 flex flex-col gap-2">
-      <header class="py-5 px-7 mb-0 w-full">
-        <h1 class="text-2xl uppercase m-0">Collaborators</h1>
-        <p>Visualize and manage collaborators.</p>
+    <header class="mb-10">
+      <h1 class="text-4xl uppercase m-0 bd-font">Collaborators</h1>
+      <p>Filter by collaborator status</p>
 
-        <mat-form-field appearance="fill" class="w-full">
-          <mat-label>Status</mat-label>
-          <mat-select
-            [value]="status$ | ngrxPush"
-            (valueChange)="onSetStatus($event)"
-          >
-            <mat-option [value]="1">
-              <span
-                class="inline-block bg-green-500 w-2 h-2 rounded-full"
-              ></span>
-              Approved
-            </mat-option>
-            <mat-option [value]="0">
-              <span
-                class="inline-block bg-yellow-500 w-2 h-2 rounded-full"
-              ></span>
-              Pending
-            </mat-option>
-            <mat-option [value]="2">
-              <span class="inline-block bg-red-500 w-2 h-2 rounded-full"></span>
-              Rejected
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <p>Filter by collaborator status</p>
-      </header>
-
-      <ul class="flex-1">
-        <li
-          *ngFor="
-            let collaborator of filteredCollaborators$ | ngrxPush;
-            trackBy: identify
-          "
+      <div class="flex gap-4">
+        <div
+          class="px-8 py-3 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow relative"
         >
-          <button
-            class="w-full py-5 px-7 border-l-4 flex items-center gap-2 border-transparent"
-            (click)="onSelectCollaboratorId(collaborator.id)"
-          >
-            <figure class="w-12 h-12 rounded-full overflow-hidden">
-              <img
-                [src]="collaborator.user.thumbnailUrl"
-                class="w-full"
-                onerror="this.src='assets/images/default-profile.png';"
-              />
-            </figure>
-
-            <div>
-              <p class="m-0 text-left">
+          <mat-form-field class="bg-bd-black">
+            <mat-select
+              [value]="status$ | ngrxPush"
+              (valueChange)="onSetStatus($event)"
+            >
+              <mat-option [value]="1">
                 <span
-                  class="text-lg font-bold w-44 overflow-hidden whitespace-nowrap overflow-ellipsis"
-                >
-                  {{ collaborator.user.name }}
-                </span>
-
-                <mat-icon
-                  class="inline"
-                  *ngIf="collaborator.isAdmin"
-                  color="accent"
-                  inline
-                >
-                  admin_panel_settings
-                </mat-icon>
-              </p>
-
-              <p class="m-0 text-xs text-left">
-                <a
-                  [href]="
-                    'https://explorer.solana.com/address/' + collaborator.userId
-                  "
-                  target="__blank"
-                  class="text-accent underline"
-                  >(@{{ collaborator.user.userName }})</a
-                >
-              </p>
-
-              <p class="m-0 text-xs text-left">
-                <span
-                  class="inline-block w-2 h-2 rounded-full"
-                  [ngClass]="{
-                    'bg-yellow-500': collaborator.status.id === 0,
-                    'bg-green-500': collaborator.status.id === 1,
-                    'bg-red-500': collaborator.status.id === 2
-                  }"
+                  class="inline-block bg-green-500 w-2 h-2 rounded-full"
                 ></span>
-                <span class="text-white text-opacity-50">
-                  <ng-container [ngSwitch]="collaborator.status.id">
-                    <ng-container *ngSwitchCase="0"> Pending </ng-container>
-                    <ng-container *ngSwitchCase="1"> Approved </ng-container>
-                    <ng-container *ngSwitchCase="2"> Rejected </ng-container>
-                  </ng-container>
-                </span>
-              </p>
-            </div>
-          </button>
-        </li>
-      </ul>
-
-      <footer
-        class="py-5 px-7 w-full flex justify-center items-center"
-        *hdWalletAdapter="let publicKey = publicKey"
-      >
-        <ng-container *ngIf="publicKey !== null">
-          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-            <button
-              *ngIf="
-                (collaborators$ | ngrxPush) !== null &&
-                (currentCollaborator$ | ngrxPush) === null
-              "
-              mat-stroked-button
-              color="accent"
-              (click)="
-                onRequestCollaboratorStatus(publicKey.toBase58(), workspaceId)
-              "
-            >
-              Become Collaborator
-            </button>
-          </ng-container>
-
-          <ng-container
-            *ngrxLet="currentCollaborator$; let currentCollaborator"
+                Approved
+              </mat-option>
+              <mat-option [value]="0">
+                <span
+                  class="inline-block bg-yellow-500 w-2 h-2 rounded-full"
+                ></span>
+                Pending
+              </mat-option>
+              <mat-option [value]="2">
+                <span
+                  class="inline-block bg-red-500 w-2 h-2 rounded-full"
+                ></span>
+                Rejected
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <div
+            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
           >
-            <button
-              *ngIf="
-                currentCollaborator !== null &&
-                currentCollaborator.status.id === 2
-              "
-              mat-stroked-button
-              color="accent"
-              (click)="
-                onRetryCollaboratorStatusRequest(
-                  publicKey.toBase58(),
-                  currentCollaborator.workspaceId,
-                  currentCollaborator.id
-                )
-              "
-              [disabled]="currentCollaborator | bdItemChanging"
-            >
-              Try again
-            </button>
-          </ng-container>
-        </ng-container>
-      </footer>
-    </aside>
+            <div class="w-full h-px bg-gray-600 rotate-45"></div>
+          </div>
+          <div
+            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+          >
+            <div class="w-full h-px bg-gray-600"></div>
+          </div>
+        </div>
 
-    <div class="flex-1 bg-white bg-opacity-5 p-8">
-      <div
-        *ngIf="selectedCollaborator$ | ngrxPush as selectedCollaborator"
-        class="flex flex-col"
-      >
-        <header
-          class="flex justify-between items-center pb-8 mb-8 border-b-2 border-yellow-500"
+        <div
+          class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center relative"
+          *hdWalletAdapter="let publicKey = publicKey"
         >
-          <div class="flex items-center gap-4">
-            <figure>
-              <img
-                [src]="selectedCollaborator.user.thumbnailUrl"
-                class="w-20 h-20 rounded-full overflow-hidden"
-                alt=""
-                onerror="this.src='assets/images/default-profile.png';"
-              />
-              <figcaption class="mt-2 text-xs text-center">
-                <a
-                  [href]="
-                    'https://explorer.solana.com/address/' +
-                    selectedCollaborator.user?.id
-                  "
-                  target="__blank"
-                  class="text-accent underline"
-                  >@{{ selectedCollaborator.user.userName }}</a
-                >
-              </figcaption>
-            </figure>
-
-            <div>
-              <h2
-                class="text-2xl font-bold w-64 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
+          <ng-container *ngIf="publicKey !== null">
+            <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+              <button
+                *ngIf="
+                  (collaborators$ | ngrxPush) !== null &&
+                  (currentCollaborator$ | ngrxPush) === null
+                "
+                class="bd-button"
+                (click)="
+                  onRequestCollaboratorStatus(publicKey.toBase58(), workspaceId)
+                "
               >
-                {{ selectedCollaborator.user.name }}
-              </h2>
+                Become Collaborator
+              </button>
+            </ng-container>
 
-              <p class="flex m-0 gap-1 text-sm">
-                <mat-icon class="w-4" inline>event</mat-icon>
-                <span>
-                  Collaborator since
-                  {{ selectedCollaborator.createdAt | date: 'mediumDate' }}
-                </span>
-              </p>
+            <ng-container
+              *ngrxLet="currentCollaborator$; let currentCollaborator"
+            >
+              <button
+                *ngIf="
+                  currentCollaborator !== null &&
+                  currentCollaborator.status.id === 2
+                "
+                mat-stroked-button
+                color="accent"
+                (click)="
+                  onRetryCollaboratorStatusRequest(
+                    publicKey.toBase58(),
+                    currentCollaborator.workspaceId,
+                    currentCollaborator.id
+                  )
+                "
+                [disabled]="currentCollaborator | bdItemChanging"
+              >
+                Try again
+              </button>
+            </ng-container>
+          </ng-container>
+          <div
+            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+          >
+            <div class="w-full h-px bg-gray-600 rotate-45"></div>
+          </div>
+          <div
+            class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+          >
+            <div class="w-full h-px bg-gray-600"></div>
+          </div>
+        </div>
+      </div>
+    </header>
 
-              <p class="m-0 text-xs text-left">
-                <span
-                  class="inline-block w-2 h-2 rounded-full"
-                  [ngClass]="{
-                    'bg-yellow-500': selectedCollaborator.status.id === 0,
-                    'bg-green-500': selectedCollaborator.status.id === 1,
-                    'bg-red-500': selectedCollaborator.status.id === 2
-                  }"
-                ></span>
-                <span class="text-white text-opacity-50">
-                  <ng-container [ngSwitch]="selectedCollaborator.status.id">
-                    <ng-container *ngSwitchCase="0"> Pending </ng-container>
-                    <ng-container *ngSwitchCase="1"> Approved </ng-container>
-                    <ng-container *ngSwitchCase="2"> Rejected </ng-container>
-                  </ng-container>
-                </span>
-              </p>
-            </div>
+    <div class="flex flex-wrap gap-4">
+      <mat-card
+        class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0 mb-5 mat-elevation-z8"
+        *ngFor="
+          let collaborator of filteredCollaborators$ | ngrxPush;
+          trackBy: identify
+        "
+      >
+        <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
+          <div class="flex-1 flex items-center gap-2">
+            <mat-progress-spinner
+              *ngIf="collaborator | bdItemChanging"
+              diameter="16"
+              mode="indeterminate"
+            ></mat-progress-spinner>
           </div>
 
           <div
@@ -256,121 +162,101 @@ interface ViewModel {
           >
             <ng-container *ngIf="publicKey !== null">
               <button
-                *ngIf="selectedCollaborator.status.id === 1"
-                mat-stroked-button
-                color="warn"
+                mat-icon-button
                 (click)="
                   onUpdateCollaborator(
                     publicKey.toBase58(),
-                    selectedCollaborator.workspaceId,
-                    selectedCollaborator.id,
+                    collaborator.workspaceId,
+                    collaborator.id,
                     { status: 2 }
                   )
                 "
-                [disabled]="
-                  !connected || (selectedCollaborator | bdItemChanging)
-                "
+                [disabled]="!connected || (collaborator | bdItemChanging)"
               >
-                Revoke
-              </button>
-              <button
-                *ngIf="selectedCollaborator.status.id === 0"
-                mat-stroked-button
-                color="accent"
-                (click)="
-                  onUpdateCollaborator(
-                    publicKey.toBase58(),
-                    selectedCollaborator.workspaceId,
-                    selectedCollaborator.id,
-                    { status: 1 }
-                  )
-                "
-                [disabled]="
-                  !connected || (selectedCollaborator | bdItemChanging)
-                "
-              >
-                Approve
-              </button>
-              <button
-                *ngIf="selectedCollaborator.status.id === 2"
-                mat-stroked-button
-                color="accent"
-                (click)="
-                  onUpdateCollaborator(
-                    publicKey.toBase58(),
-                    selectedCollaborator.workspaceId,
-                    selectedCollaborator.id,
-                    { status: 1 }
-                  )
-                "
-                [disabled]="
-                  !connected || (selectedCollaborator | bdItemChanging)
-                "
-              >
-                Grant
-              </button>
-              <button
-                *ngIf="selectedCollaborator.status.id === 0"
-                mat-stroked-button
-                color="warn"
-                (click)="
-                  onUpdateCollaborator(
-                    publicKey.toBase58(),
-                    selectedCollaborator.workspaceId,
-                    selectedCollaborator.id,
-                    { status: 2 }
-                  )
-                "
-                [disabled]="
-                  !connected || (selectedCollaborator | bdItemChanging)
-                "
-              >
-                Reject
+                <mat-icon>delete</mat-icon>
               </button>
             </ng-container>
           </div>
-        </header>
+        </aside>
 
-        <main>
-          <h2 class="mb-4 uppercase font-bold">User Info</h2>
-
-          <dl class="flex justify-between gap-4">
-            <div class="flex-1">
-              <dt class="font-bold">User ID:</dt>
-              <dd
-                class="flex items-center w-64 gap-1 px-2 bg-black bg-opacity-10 rounded-md"
-              >
-                <span
-                  class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
-                >
-                  {{ selectedCollaborator.user?.id }}
-                </span>
-
-                <button mat-icon-button>
-                  <mat-icon>content_copy</mat-icon>
-                </button>
-              </dd>
+        <div class="px-8 mt-4 pb-8">
+          <main>
+            <div class="flex items-center gap-4 mb-6">
+              <figure class="w-20 h-20 rounded-full overflow-hidden">
+                <img
+                  [src]="collaborator.user.thumbnailUrl"
+                  class="w-full"
+                  onerror="this.src='assets/images/default-profile.png';"
+                />
+              </figure>
+              <div>
+                <h1 class="flex items-center justify-start gap-2 mb-0">
+                  <span
+                    class="leading-none"
+                    [matTooltip]="
+                      collaborator.user.name
+                        | bdItemUpdatingMessage: collaborator.user:'User'
+                    "
+                    matTooltipShowDelay="500"
+                  >
+                    {{ collaborator.user.name }}
+                  </span>
+                </h1>
+                <p class="m-0">
+                  <a
+                    [href]="
+                      'https://explorer.solana.com/address/' +
+                      collaborator.user.id
+                    "
+                    target="__blank"
+                    class="text-accent underline"
+                    >@{{ collaborator.user.userName }}</a
+                  >
+                </p>
+                <p class="m-0">
+                  <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
+                  Builder since
+                  {{ collaborator.createdAt | date: 'mediumDate' }}
+                </p>
+              </div>
             </div>
-
-            <div class="flex-1">
-              <dt class="font-bold">Wallet:</dt>
-              <dd
-                class="flex items-center w-64 gap-1 px-2 bg-black bg-opacity-10 rounded-md"
-              >
-                <span
-                  class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
+            <dl class="flex justify-between gap-5">
+              <div class="flex-1">
+                <dt class="mb-2">Name:</dt>
+                <dd
+                  class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
                 >
-                  {{ selectedCollaborator.authority }}
-                </span>
+                  <span
+                    class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  >
+                    {{ collaborator.user.name }}
+                  </span>
+                </dd>
+              </div>
 
-                <button mat-icon-button>
-                  <mat-icon>content_copy</mat-icon>
-                </button>
-              </dd>
-            </div>
-          </dl>
-        </main>
-      </div>
+              <div class="flex-1">
+                <dt class="mb-2">Authority:</dt>
+                <dd
+                  class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+                >
+                  <span
+                    class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                  >
+                    {{ collaborator.user.authority }}
+                  </span>
+
+                  <button
+                    mat-icon-button
+                    [cdkCopyToClipboard]="collaborator.user.authority"
+                  >
+                    <mat-icon>content_copy</mat-icon>
+                  </button>
+                </dd>
+              </div>
+            </dl>
+          </main>
+        </div>
+      </mat-card>
     </div>
   `,
   styles: [],
@@ -385,7 +271,7 @@ export class ViewWorkspaceCollaboratorsComponent
   extends ComponentStore<ViewModel>
   implements OnInit
 {
-  @HostBinding('class') class = 'bg-white bg-opacity-5 flex h-full';
+  @HostBinding('class') class = 'block py-5 px-7 h-full w-full';
   readonly workspaceId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('workspaceId')),
     isNotNullOrUndefined,

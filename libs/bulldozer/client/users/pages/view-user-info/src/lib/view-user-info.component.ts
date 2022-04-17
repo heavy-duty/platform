@@ -88,7 +88,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     </p>
                   </div>
                 </div>
-                <dl class="flex justify-between gap-10">
+                <dl class="flex justify-between gap-5">
                   <div class="flex-1">
                     <dt class="mb-2">Name:</dt>
                     <dd
