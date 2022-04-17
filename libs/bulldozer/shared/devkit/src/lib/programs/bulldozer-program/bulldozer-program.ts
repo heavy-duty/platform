@@ -1,8 +1,8 @@
 import {
+  AnchorProvider,
   BorshAccountsCoder,
   BorshInstructionCoder,
   Program,
-  Provider,
 } from '@heavy-duty/anchor';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { Bulldozer, IDL } from './bulldozer';
@@ -22,8 +22,12 @@ export const getBulldozerProgram = (endpoint: string) => {
   program = new Program<Bulldozer>(
     IDL,
     BULLDOZER_PROGRAM_ID,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    new Provider(new Connection(endpoint), {} as any, Provider.defaultOptions())
+    new AnchorProvider(
+      new Connection(endpoint),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {} as any,
+      AnchorProvider.defaultOptions()
+    )
   );
 
   return program;

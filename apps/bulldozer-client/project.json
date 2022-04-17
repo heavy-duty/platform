@@ -31,7 +31,8 @@
         "scripts": [],
         "customWebpackConfig": {
           "path": "apps/bulldozer-client/webpack.config.js"
-        }
+        },
+        "buildLibsFromSource": false
       },
       "configurations": {
         "production": {
