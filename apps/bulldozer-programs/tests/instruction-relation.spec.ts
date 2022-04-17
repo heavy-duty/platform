@@ -1,4 +1,4 @@
-import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { AnchorError, AnchorProvider, Program } from '@heavy-duty/anchor';
 import {
   Keypair,
   LAMPORTS_PER_SOL,
@@ -10,11 +10,8 @@ import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('instruction relation', () => {
-  const program = new Program<Bulldozer>(
-    IDL,
-    BULLDOZER_PROGRAM_ID,
-    Provider.env()
-  );
+  const provider = AnchorProvider.env();
+  const program = new Program<Bulldozer>(IDL, BULLDOZER_PROGRAM_ID, provider);
   const instruction = Keypair.generate();
   const instructionName = 'create_document';
   const application = Keypair.generate();
@@ -82,7 +79,7 @@ describe('instruction relation', () => {
           userName: userUserName,
         })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {}
@@ -90,13 +87,13 @@ describe('instruction relation', () => {
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
       })
       .signers([workspace])
       .postInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
         }),
@@ -105,7 +102,7 @@ describe('instruction relation', () => {
     await program.methods
       .createApplication({ name: applicationName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
       })
@@ -114,7 +111,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstruction({ name: instructionName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -124,7 +121,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(fromDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -135,7 +132,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(toDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -150,7 +147,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionRelation()
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -167,9 +164,7 @@ describe('instruction relation', () => {
       toStatsPublicKey
     );
     assert.ok(
-      instructionRelationAccount.authority.equals(
-        program.provider.wallet.publicKey
-      )
+      instructionRelationAccount.authority.equals(provider.wallet.publicKey)
     );
     assert.ok(
       instructionRelationAccount.instruction.equals(instruction.publicKey)
@@ -196,7 +191,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(fromDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -207,7 +202,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(toDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -226,7 +221,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionRelation()
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -237,7 +232,7 @@ describe('instruction relation', () => {
     await program.methods
       .deleteInstructionRelation()
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         instruction: instruction.publicKey,
         from: newFrom.publicKey,
@@ -253,13 +248,13 @@ describe('instruction relation', () => {
   });
 
   it('should fail if from and to are equal', async () => {
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     try {
       await program.methods
         .createInstructionRelation()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -268,10 +263,10 @@ describe('instruction relation', () => {
         })
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 2003);
+    assert.equal(error?.error.errorCode.number, 2003);
   });
 
   it('should fail when workspace has insufficient funds', async () => {
@@ -288,60 +283,60 @@ describe('instruction relation', () => {
       [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
       program.programId
     );
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     await program.methods
       .createWorkspace({ name: newWorkspaceName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
       })
       .signers([newWorkspace])
       .postInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
           lamports:
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               2155 // instruction account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               10 // instruction stats account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               125 // application account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               10 // application stats account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               264 // from account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               10 // from stats account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from collection account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from close account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from payer account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               264 // to account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               10 // to stats account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from collection account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from close account size
             )) +
-            (await program.provider.connection.getMinimumBalanceForRentExemption(
+            (await provider.connection.getMinimumBalanceForRentExemption(
               41 // from payer account size
             )),
         }),
@@ -350,7 +345,7 @@ describe('instruction relation', () => {
     await program.methods
       .createApplication({ name: newApplicationName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
         application: newApplication.publicKey,
       })
@@ -359,7 +354,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstruction({ name: newInstructionName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
         application: newApplication.publicKey,
         instruction: newInstruction.publicKey,
@@ -369,7 +364,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(fromDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
         application: newApplication.publicKey,
         instruction: newInstruction.publicKey,
@@ -380,7 +375,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(toDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
         application: newApplication.publicKey,
         instruction: newInstruction.publicKey,
@@ -392,7 +387,7 @@ describe('instruction relation', () => {
       await program.methods
         .createInstructionRelation()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
           application: newApplication.publicKey,
           instruction: newInstruction.publicKey,
@@ -401,10 +396,10 @@ describe('instruction relation', () => {
         })
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6027);
+    assert.equal(error?.error.errorCode.number, 6027);
   });
 
   it('should fail when user is not a collaborator', async () => {
@@ -412,12 +407,12 @@ describe('instruction relation', () => {
     const newUser = Keypair.generate();
     const newFrom = Keypair.generate();
     const newTo = Keypair.generate();
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     await program.methods
       .createInstructionAccount(fromDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -428,7 +423,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(toDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -450,17 +445,17 @@ describe('instruction relation', () => {
         .signers([newUser])
         .preInstructions([
           SystemProgram.transfer({
-            fromPubkey: program.provider.wallet.publicKey,
+            fromPubkey: provider.wallet.publicKey,
             toPubkey: newUser.publicKey,
             lamports: LAMPORTS_PER_SOL,
           }),
         ])
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 3012);
+    assert.equal(error?.error.errorCode.number, 3012);
   });
 
   it('should fail when user is not an approved collaborator', async () => {
@@ -468,7 +463,7 @@ describe('instruction relation', () => {
     const newFrom = Keypair.generate();
     const newTo = Keypair.generate();
     const newUser = Keypair.generate();
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     const [newUserPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
@@ -486,7 +481,7 @@ describe('instruction relation', () => {
       .signers([newUser])
       .preInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: newUser.publicKey,
           lamports: LAMPORTS_PER_SOL,
         }),
@@ -504,7 +499,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(fromDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -515,7 +510,7 @@ describe('instruction relation', () => {
     await program.methods
       .createInstructionAccount(toDto)
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -538,9 +533,9 @@ describe('instruction relation', () => {
         .signers([newUser])
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6029);
+    assert.equal(error?.error.errorCode.number, 6029);
   });
 });

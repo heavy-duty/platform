@@ -1,4 +1,4 @@
-import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { AnchorError, AnchorProvider, Program } from '@heavy-duty/anchor';
 import {
   Keypair,
   LAMPORTS_PER_SOL,
@@ -14,11 +14,8 @@ import {
 } from './utils';
 
 describe('instruction account', () => {
-  const program = new Program<Bulldozer>(
-    IDL,
-    BULLDOZER_PROGRAM_ID,
-    Provider.env()
-  );
+  const provider = AnchorProvider.env();
+  const program = new Program<Bulldozer>(IDL, BULLDOZER_PROGRAM_ID, provider);
   const instruction = Keypair.generate();
   const instructionName = 'create_document';
   const collection = Keypair.generate();
@@ -59,7 +56,7 @@ describe('instruction account', () => {
           userName: userUserName,
         })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {}
@@ -67,13 +64,13 @@ describe('instruction account', () => {
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
       })
       .signers([workspace])
       .postInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
         }),
@@ -82,7 +79,7 @@ describe('instruction account', () => {
     await program.methods
       .createApplication({ name: applicationName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
       })
@@ -91,7 +88,7 @@ describe('instruction account', () => {
     await program.methods
       .createInstruction({ name: instructionName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         instruction: instruction.publicKey,
@@ -104,7 +101,7 @@ describe('instruction account', () => {
         collection: collection.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
       })
       .signers([collection])
       .rpc();
@@ -114,7 +111,7 @@ describe('instruction account', () => {
         collection: anotherCollection.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
       })
       .signers([anotherCollection])
       .rpc();
@@ -135,7 +132,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -146,7 +143,7 @@ describe('instruction account', () => {
           await program.methods
             .setInstructionAccountCollection()
             .accounts({
-              authority: program.provider.wallet.publicKey,
+              authority: provider.wallet.publicKey,
               workspace: workspace.publicKey,
               application: application.publicKey,
               collection: collection.publicKey,
@@ -175,7 +172,7 @@ describe('instruction account', () => {
       const instructionStatsAccount =
         await program.account.instructionStats.fetch(instructionStatsPublicKey);
       const decodedKind = decodeAccountKind(account.kind as any);
-      assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+      assert.ok(account.authority.equals(provider.wallet.publicKey));
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
@@ -203,7 +200,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -214,7 +211,7 @@ describe('instruction account', () => {
       await program.methods
         .deleteInstructionAccount()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           account: instructionAccount.publicKey,
           instruction: instruction.publicKey,
@@ -242,7 +239,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -264,7 +261,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -275,7 +272,7 @@ describe('instruction account', () => {
             await program.methods
               .setInstructionAccountCollection()
               .accounts({
-                authority: program.provider.wallet.publicKey,
+                authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
                 collection: collection.publicKey,
@@ -285,7 +282,7 @@ describe('instruction account', () => {
             await program.methods
               .setInstructionAccountPayer()
               .accounts({
-                authority: program.provider.wallet.publicKey,
+                authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
                 payer: instructionPayerAccount.publicKey,
@@ -334,7 +331,7 @@ describe('instruction account', () => {
         await program.methods
           .updateInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -371,13 +368,13 @@ describe('instruction account', () => {
           modifier: 0,
           space: null,
         };
-        let error: ProgramError | null = null;
+        let error: AnchorError | null = null;
         // act
         try {
           await program.methods
             .createInstructionAccount(accountsData)
             .accounts({
-              authority: program.provider.wallet.publicKey,
+              authority: provider.wallet.publicKey,
               workspace: workspace.publicKey,
               application: application.publicKey,
               instruction: instruction.publicKey,
@@ -386,10 +383,10 @@ describe('instruction account', () => {
             .signers([instructionAccount])
             .rpc();
         } catch (err) {
-          error = err as ProgramError;
+          error = err as AnchorError;
         }
         // assert
-        assert.equal(error?.code, 6007);
+        assert.equal(error?.error.errorCode.number, 6007);
       });
     });
 
@@ -408,7 +405,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -430,7 +427,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -441,7 +438,7 @@ describe('instruction account', () => {
             await program.methods
               .setInstructionAccountCollection()
               .accounts({
-                authority: program.provider.wallet.publicKey,
+                authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
                 collection: collection.publicKey,
@@ -451,7 +448,7 @@ describe('instruction account', () => {
             await program.methods
               .setInstructionAccountClose()
               .accounts({
-                authority: program.provider.wallet.publicKey,
+                authority: provider.wallet.publicKey,
                 workspace: workspace.publicKey,
                 application: application.publicKey,
                 close: instructionCloseAccount.publicKey,
@@ -479,7 +476,7 @@ describe('instruction account', () => {
           );
         const decodedKind = decodeAccountKind(account.kind as any);
         const decodedModifier = decodeAccountModifier(account.modifier as any);
-        assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+        assert.ok(account.authority.equals(provider.wallet.publicKey));
         assert.ok(account.instruction.equals(instruction.publicKey));
         assert.ok(account.workspace.equals(workspace.publicKey));
         assert.ok(account.application.equals(application.publicKey));
@@ -506,7 +503,7 @@ describe('instruction account', () => {
         await program.methods
           .updateInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount.publicKey,
@@ -551,7 +548,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -564,7 +561,7 @@ describe('instruction account', () => {
         instructionAccount.publicKey
       );
       const decodedKind = decodeAccountKind(account.kind as any);
-      assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+      assert.ok(account.authority.equals(provider.wallet.publicKey));
       assert.ok(account.instruction.equals(instruction.publicKey));
       assert.ok(account.workspace.equals(workspace.publicKey));
       assert.ok(account.application.equals(application.publicKey));
@@ -591,7 +588,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstruction({ name: instructionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -610,13 +607,13 @@ describe('instruction account', () => {
         modifier: null,
         space: null,
       };
-      let error: ProgramError | null = null;
+      let error: AnchorError | null = null;
       // act
       try {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -634,7 +631,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -645,7 +642,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionRelation()
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: instruction.publicKey,
@@ -656,17 +653,17 @@ describe('instruction account', () => {
         await program.methods
           .deleteInstructionAccount()
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             instruction: instruction.publicKey,
             account: instructionAccount1.publicKey,
           })
           .rpc();
       } catch (err) {
-        error = err as ProgramError;
+        error = err as AnchorError;
       }
       // assert
-      assert.equal(error?.code, 6015);
+      assert.equal(error?.error.errorCode.number, 6015);
     });
 
     it('should increment instruction account quantity on create', async () => {
@@ -690,7 +687,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstruction({ name: instructionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -700,7 +697,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -742,7 +739,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstruction({ name: instructionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -752,7 +749,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstructionAccount(accountsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           instruction: instruction.publicKey,
@@ -763,7 +760,7 @@ describe('instruction account', () => {
       await program.methods
         .deleteInstructionAccount()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           instruction: instruction.publicKey,
           account: instructionAccount.publicKey,
@@ -786,13 +783,13 @@ describe('instruction account', () => {
         modifier: null,
         space: null,
       };
-      let error: ProgramError | null = null;
+      let error: AnchorError | null = null;
       // act
       try {
         await program.methods
           .createInstruction({ name: newInstructionName })
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: newInstruction.publicKey,
@@ -802,7 +799,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             application: application.publicKey,
             instruction: newInstruction.publicKey,
@@ -813,17 +810,17 @@ describe('instruction account', () => {
         await program.methods
           .deleteInstructionAccount()
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: workspace.publicKey,
             instruction: instruction.publicKey,
             account: newAccount.publicKey,
           })
           .rpc();
       } catch (err) {
-        error = err as ProgramError;
+        error = err as AnchorError;
       }
       // assert
-      assert.equal(error?.code, 6044);
+      assert.equal(error?.error.errorCode.number, 6044);
     });
 
     it('should fail when workspace has insufficient funds', async () => {
@@ -845,30 +842,30 @@ describe('instruction account', () => {
         [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
         program.programId
       );
-      let error: ProgramError | null = null;
+      let error: AnchorError | null = null;
       // act
       await program.methods
         .createWorkspace({ name: newWorkspaceName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
         })
         .signers([newWorkspace])
         .postInstructions([
           SystemProgram.transfer({
-            fromPubkey: program.provider.wallet.publicKey,
+            fromPubkey: provider.wallet.publicKey,
             toPubkey: newBudgetPublicKey,
             lamports:
-              (await program.provider.connection.getMinimumBalanceForRentExemption(
+              (await provider.connection.getMinimumBalanceForRentExemption(
                 2155 // instruction account size
               )) +
-              (await program.provider.connection.getMinimumBalanceForRentExemption(
+              (await provider.connection.getMinimumBalanceForRentExemption(
                 10 // instruction stats account size
               )) +
-              (await program.provider.connection.getMinimumBalanceForRentExemption(
+              (await provider.connection.getMinimumBalanceForRentExemption(
                 125 // application account size
               )) +
-              (await program.provider.connection.getMinimumBalanceForRentExemption(
+              (await provider.connection.getMinimumBalanceForRentExemption(
                 10 // application stats account size
               )),
           }),
@@ -877,7 +874,7 @@ describe('instruction account', () => {
       await program.methods
         .createApplication({ name: newApplicationName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
           application: newApplication.publicKey,
         })
@@ -886,7 +883,7 @@ describe('instruction account', () => {
       await program.methods
         .createInstruction({ name: newInstructionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
           application: newApplication.publicKey,
           instruction: newInstruction.publicKey,
@@ -897,7 +894,7 @@ describe('instruction account', () => {
         await program.methods
           .createInstructionAccount(accountsData)
           .accounts({
-            authority: program.provider.wallet.publicKey,
+            authority: provider.wallet.publicKey,
             workspace: newWorkspace.publicKey,
             application: newApplication.publicKey,
             instruction: newInstruction.publicKey,
@@ -906,10 +903,10 @@ describe('instruction account', () => {
           .signers([newAccount])
           .rpc();
       } catch (err) {
-        error = err as ProgramError;
+        error = err as AnchorError;
       }
       // assert
-      assert.equal(error?.code, 6027);
+      assert.equal(error?.error.errorCode.number, 6027);
     });
 
     it('should fail when user is not a collaborator', async () => {
@@ -922,7 +919,7 @@ describe('instruction account', () => {
         modifier: null,
         space: null,
       };
-      let error: ProgramError | null = null;
+      let error: AnchorError | null = null;
       // act
       try {
         await program.methods
@@ -937,17 +934,17 @@ describe('instruction account', () => {
           .signers([newUser, newAccount])
           .preInstructions([
             SystemProgram.transfer({
-              fromPubkey: program.provider.wallet.publicKey,
+              fromPubkey: provider.wallet.publicKey,
               toPubkey: newUser.publicKey,
               lamports: LAMPORTS_PER_SOL,
             }),
           ])
           .rpc();
       } catch (err) {
-        error = err as ProgramError;
+        error = err as AnchorError;
       }
       // assert
-      assert.equal(error?.code, 3012);
+      assert.equal(error?.error.errorCode.number, 3012);
     });
 
     it('should fail when user is not an approved collaborator', async () => {
@@ -960,7 +957,7 @@ describe('instruction account', () => {
         space: null,
       };
       const newUser = Keypair.generate();
-      let error: ProgramError | null = null;
+      let error: AnchorError | null = null;
       // act
       const [newUserPublicKey] = await PublicKey.findProgramAddress(
         [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
@@ -978,7 +975,7 @@ describe('instruction account', () => {
         .signers([newUser])
         .preInstructions([
           SystemProgram.transfer({
-            fromPubkey: program.provider.wallet.publicKey,
+            fromPubkey: provider.wallet.publicKey,
             toPubkey: newUser.publicKey,
             lamports: LAMPORTS_PER_SOL,
           }),
@@ -1007,10 +1004,10 @@ describe('instruction account', () => {
           .signers([newUser, newAccount])
           .rpc();
       } catch (err) {
-        error = err as ProgramError;
+        error = err as AnchorError;
       }
       // assert
-      assert.equal(error?.code, 6029);
+      assert.equal(error?.error.errorCode.number, 6029);
     });
   });
 });

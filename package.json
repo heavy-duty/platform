@@ -21,7 +21,7 @@
     "@angular/platform-browser": "13.2.2",
     "@angular/platform-browser-dynamic": "13.2.2",
     "@angular/router": "13.2.2",
-    "@heavy-duty/anchor": "^0.22.1-1",
+    "@heavy-duty/anchor": "^0.24.2",
     "@materia-ui/ngx-monaco-editor": "^6.0.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { ProgramError } from '@heavy-duty/anchor';
+import { AnchorError, ProgramError } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { WalletError } from '@solana/wallet-adapter-base';
@@ -83,6 +83,8 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     } else if (error instanceof WalletError) {
       return error.name;
     } else if (error instanceof ProgramError) {
+      return error.message;
+    } else if (error instanceof AnchorError) {
       return error.message;
     } else {
       try {
