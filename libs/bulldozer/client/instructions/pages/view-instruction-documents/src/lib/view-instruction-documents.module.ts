@@ -14,6 +14,7 @@ import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
+import { RemoveByIdPipe } from './remove-by-id.pipe';
 import { ViewInstructionDocumentsComponent } from './view-instruction-documents.component';
 
 @NgModule({
@@ -40,6 +41,6 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
     ObscureAddressModule,
     HdWalletAdapterCdkModule,
   ],
-  declarations: [ViewInstructionDocumentsComponent],
+  declarations: [RemoveByIdPipe, ViewInstructionDocumentsComponent],
 })
 export class ViewInstructionDocumentsModule {}

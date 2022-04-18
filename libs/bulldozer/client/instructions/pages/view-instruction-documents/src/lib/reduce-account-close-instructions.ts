@@ -36,6 +36,32 @@ export const reduceInstructions = (
         }));
       }
     }
+    case 'clearInstructionAccountClose': {
+      const accountClose = instruction.accounts.find(
+        (account) => account.name === 'Account Close'
+      )?.pubkey;
+
+      if (accountClose === undefined) {
+        throw new Error('Malformed Clear Instruction Account Close');
+      }
+
+      const itemIndex = items.findIndex((item) => item.id === accountClose);
+
+      if (itemIndex === -1) {
+        return items.push({
+          id: accountClose,
+          isUpdating: false,
+          close: null,
+        });
+      } else {
+        return items.update(itemIndex, (item) => ({
+          ...item,
+          id: accountClose,
+          isUpdating: false,
+          close: null,
+        }));
+      }
+    }
     default:
       return items;
   }

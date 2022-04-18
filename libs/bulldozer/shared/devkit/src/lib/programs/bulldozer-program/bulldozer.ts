@@ -3073,6 +3073,97 @@ export type Bulldozer = {
       args: [];
     },
     {
+      name: 'clearInstructionAccountClose';
+      accounts: [
+        {
+          name: 'authority';
+          isMut: false;
+          isSigner: true;
+        },
+        {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'instruction';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'account';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'accountClose';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'instruction_account_close';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'InstructionAccount';
+                path: 'account';
+              }
+            ];
+          };
+        },
+        {
+          name: 'user';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'user';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                path: 'authority';
+              }
+            ];
+          };
+        },
+        {
+          name: 'collaborator';
+          isMut: false;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'collaborator';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'User';
+                path: 'user';
+              }
+            ];
+          };
+        }
+      ];
+      args: [];
+    },
+    {
       name: 'setInstructionAccountPayer';
       accounts: [
         {
@@ -8080,6 +8171,97 @@ export const IDL: Bulldozer = {
         },
         {
           name: 'close',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'account',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'accountClose',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'instruction_account_close',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'InstructionAccount',
+                path: 'account',
+              },
+            ],
+          },
+        },
+        {
+          name: 'user',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'user',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                path: 'authority',
+              },
+            ],
+          },
+        },
+        {
+          name: 'collaborator',
+          isMut: false,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'collaborator',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'User',
+                path: 'user',
+              },
+            ],
+          },
+        },
+      ],
+      args: [],
+    },
+    {
+      name: 'clearInstructionAccountClose',
+      accounts: [
+        {
+          name: 'authority',
+          isMut: false,
+          isSigner: true,
+        },
+        {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'instruction',
           isMut: false,
           isSigner: false,
         },

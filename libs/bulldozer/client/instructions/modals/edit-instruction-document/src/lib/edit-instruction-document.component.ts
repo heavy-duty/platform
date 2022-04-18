@@ -133,7 +133,7 @@ import { Collection, InstructionAccount } from './types';
       >
         <mat-label>Close</mat-label>
         <mat-select formControlName="close">
-          <mat-option> None </mat-option>
+          <mat-option [value]="null"> None </mat-option>
           <mat-option
             *ngFor="let account of data?.accounts"
             [value]="account.id"
@@ -205,17 +205,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
       name: new FormControl(this.data?.document?.name ?? '', {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(
-        this.data?.document?.modifier !== null
-          ? this.data?.document?.modifier
-          : null
-      ),
-      collection: new FormControl(this.data?.document?.collection || null, {
+      modifier: new FormControl(this.data?.document?.modifier ?? null),
+      collection: new FormControl(this.data?.document?.collection ?? null, {
         validators: [Validators.required],
       }),
-      space: new FormControl(this.data?.document?.space),
-      payer: new FormControl(this.data?.document?.payer),
-      close: new FormControl(this.data?.document?.close),
+      space: new FormControl(this.data?.document?.space ?? null),
+      payer: new FormControl(this.data?.document?.payer ?? null),
+      close: new FormControl(this.data?.document?.close ?? null),
     });
   }
 

@@ -1,3 +1,4 @@
+export * from './clear-instruction-account-close';
 export * from './create-instruction-account';
 export * from './delete-instruction-account';
 export * from './set-instruction-account-close';

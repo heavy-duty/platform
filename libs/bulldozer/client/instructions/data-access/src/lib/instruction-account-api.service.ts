@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   BULLDOZER_PROGRAM_ID,
+  clearInstructionAccountClose,
   createInstructionAccount,
   createInstructionAccountDocument,
   CreateInstructionAccountParams,
@@ -286,13 +287,20 @@ export class InstructionAccountApiService {
       );
     }
 
-    if (modifier === 1 && close !== null) {
+    if (modifier === 1) {
       instructions.push(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
           first(),
           concatMap((apiEndpoint) => {
             if (apiEndpoint === null) {
               return throwError(() => 'API endpoint missing');
+            }
+
+            if (close === null) {
+              return clearInstructionAccountClose(apiEndpoint, {
+                ...params,
+                instructionAccountId: params.instructionAccountId,
+              });
             }
 
             return setInstructionAccountClose(apiEndpoint, {

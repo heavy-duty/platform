@@ -35,6 +35,13 @@ export interface SetInstructionAccountCloseParams {
   close: string;
 }
 
+export interface ClearInstructionAccountCloseParams {
+  authority: string;
+  workspaceId: string;
+  instructionId: string;
+  instructionAccountId: string;
+}
+
 export interface SetInstructionAccountPayerParams {
   authority: string;
   workspaceId: string;

@@ -140,24 +140,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             class="py-4 px-4 mb-4 bd-bg-image-11 bg-bd-black shadow relative"
             *ngIf="workspace !== null"
           >
-            <div class="flex justify-between items-center mb-2">
-              <h3 class="mb-0 hd-highlight-title uppercase text-sm">
-                Active workspace
-              </h3>
-              <div *hdWalletAdapter="let publicKey = publicKey">
-                <button
-                  *ngIf="publicKey !== null"
-                  mat-fab-button
-                  bdAddWorkspace
-                  (newWorkspace)="
-                    onCreateWorkspace(publicKey.toBase58(), $event)
-                  "
-                  (importWorkspace)="onImportWorkspace($event)"
-                >
-                  <mat-icon class="text-md">add</mat-icon>
-                </button>
-              </div>
-            </div>
+            <h3 class="mb-2 hd-highlight-title uppercase text-sm">
+              Active workspace
+            </h3>
             <div
               class="flex items-center px-4 py-2 bg-black bg-opacity-40 rounded-md mb-2"
             >
@@ -204,11 +189,23 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
             </div>
           </div>
 
-          <div class="py-2 pl-2 flex items-center gap-2">
+          <div
+            class="py-2 pl-2 flex items-center gap-2"
+            *hdWalletAdapter="let publicKey = publicKey"
+          >
             <figure class="w-8">
               <img src="assets/images/logo.png" class="w-full" />
             </figure>
             <span class="text-center font-bold m-0">BULLDOZER</span>
+            <button
+              *ngIf="publicKey !== null"
+              mat-fab-button
+              bdAddWorkspace
+              (newWorkspace)="onCreateWorkspace(publicKey.toBase58(), $event)"
+              (importWorkspace)="onImportWorkspace($event)"
+            >
+              <mat-icon class="text-md">add</mat-icon>
+            </button>
           </div>
         </div>
       </div>
