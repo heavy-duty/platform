@@ -24,7 +24,6 @@ import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { Keypair } from '@solana/web3.js';
 import { distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
@@ -343,7 +342,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                       $event.to
                     )
                   "
-                  [disabled]="(connected$ | ngrxPush) === false"
                 >
                   <mat-icon>add</mat-icon>
                 </button>
@@ -391,10 +389,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                           relation.to.id
                         )
                       "
-                      [disabled]="
-                        (connected$ | ngrxPush) === false ||
-                        (relation | bdItemChanging)
-                      "
+                      [disabled]="relation | bdItemChanging"
                     >
                       <mat-icon>delete</mat-icon>
                     </button>
@@ -459,7 +454,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 export class ViewInstructionDocumentsComponent implements OnInit {
   @HostBinding('class') class = 'block p-8 pt-5 h-full';
   instructionBody: string | null = null;
-  readonly connected$ = this._walletStore.connected$;
   readonly collections$ =
     this._viewInstructionDocumentsCollectionsStore.collections$.pipe(
       map(
@@ -497,7 +491,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 
   constructor(
     private readonly _route: ActivatedRoute,
-    private readonly _walletStore: WalletStore,
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionAccountApiService: InstructionAccountApiService,

@@ -4,6 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
 import { CodeEditorModule } from '@bulldozer-client/code-editor';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionCodeEditorComponent } from './view-instruction-code-editor.component';
 
@@ -21,6 +22,7 @@ import { ViewInstructionCodeEditorComponent } from './view-instruction-code-edit
     MatIconModule,
     ReactiveComponentModule,
     CodeEditorModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ViewInstructionCodeEditorComponent],
 })

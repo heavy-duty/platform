@@ -11,18 +11,26 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
-import { List } from 'immutable';
+import { List, Set } from 'immutable';
 import * as JSZip from 'jszip';
 import {
   formatApplication,
   formatCollection,
   formatCollection2,
   formatInstruction,
+  formatInstruction2,
   formatName,
 } from './formatters';
 import {
+  CollectionAttributeItemView,
+  CollectionItemView,
+  FormattedName,
   generateCode,
   getTemplateByType,
+  InstructionAccountItemView,
+  InstructionAccountRelationItemView,
+  InstructionArgumentItemView,
+  InstructionViewItem,
   registerHandleBarsHelpers,
   WorkspaceMetadata,
 } from './utils';
@@ -62,23 +70,36 @@ export const generateInstructionCode = (
   );
 };
 
-interface CollectionItemView {
-  name: string;
-}
+export const generateInstructionCode2 = (
+  instruction: InstructionViewItem,
+  instructionArguments: List<InstructionArgumentItemView>,
+  instructionAccounts: List<InstructionAccountItemView>,
+  instructionRelations: List<InstructionAccountRelationItemView>,
+  collections: List<CollectionItemView>
+) => {
+  const formattedInstruction = formatInstruction2(
+    instruction,
+    instructionArguments,
+    instructionAccounts,
+    instructionRelations,
+    collections
+  );
+  const formattedCollections = formattedInstruction.accounts.reduce(
+    (collections, account) =>
+      account.collection !== undefined
+        ? collections.add(account.collection)
+        : collections,
+    Set<FormattedName>()
+  );
 
-interface CollectionAttributeItemView {
-  name: string;
-  kind: {
-    id: number;
-    name: string;
-    size: number;
-  };
-  modifier: {
-    id: number;
-    name: string;
-    size: number;
-  } | null;
-}
+  return generateCode(
+    {
+      instruction: formattedInstruction,
+      collections: formattedCollections,
+    },
+    getTemplateByType('instructions')
+  );
+};
 
 export const generateCollectionCode2 = (
   collection: CollectionItemView,

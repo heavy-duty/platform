@@ -1,13 +1,8 @@
 import { Injectable } from '@angular/core';
-import {
-  InstructionAccountsStore,
-  InstructionRelationApiService,
-} from '@bulldozer-client/instructions-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, map, of, pipe, withLatestFrom } from 'rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { map } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
@@ -97,10 +92,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
     private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
     private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
     private readonly _viewInstructionDocumentsRelationsStore: ViewInstructionDocumentsRelationsStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _notificationStore: NotificationStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,
-    private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
     private readonly _viewInstructionDocumentsCollectionsReferencesStore: ViewInstructionDocumentsCollectionsReferencesStore,
     private readonly _viewInstructionDocumentsClosesReferencesStore: ViewInstructionDocumentsClosesReferencesStore
@@ -144,94 +136,4 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
       )
     );
   }
-
-  readonly createInstructionRelation = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    instructionId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          {
-            workspaceId,
-            applicationId,
-            instructionId,
-            fromAccountId,
-            toAccountId,
-          },
-          authority,
-        ]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
-
-          return this._instructionRelationApiService
-            .create({
-              fromAccountId,
-              toAccountId,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              instructionId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Create relation request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
-  );
-
-  readonly deleteInstructionRelation = this.effect<{
-    workspaceId: string;
-    instructionId: string;
-    fromAccountId: string;
-    toAccountId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          { workspaceId, instructionId, fromAccountId, toAccountId },
-          authority,
-        ]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
-
-          return this._instructionRelationApiService
-            .delete({
-              authority: authority.toBase58(),
-              workspaceId,
-              instructionId,
-              fromAccountId,
-              toAccountId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Delete relation request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
-  );
 }

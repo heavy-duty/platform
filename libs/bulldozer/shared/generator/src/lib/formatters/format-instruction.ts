@@ -7,7 +7,16 @@ import {
   InstructionRelation,
   Relation,
 } from '@heavy-duty/bulldozer-devkit';
-import { capitalize, FormattedName } from '../utils';
+import { List } from 'immutable';
+import {
+  capitalize,
+  CollectionItemView,
+  FormattedName,
+  InstructionAccountItemView,
+  InstructionAccountRelationItemView,
+  InstructionArgumentItemView,
+  InstructionViewItem,
+} from '../utils';
 import { formatName } from './format-name';
 
 const getArgumentKindName = (id: number, name: string, size: number) => {
@@ -211,6 +220,94 @@ export const formatInstruction = (
   arguments: formatInstructionArguments(instruction.id, instructionArguments),
   accounts: formatInstructionAccounts(
     instruction.id,
+    instructionAccounts,
+    instructionRelations,
+    collections
+  ),
+});
+
+/// new version
+
+const formatInstructionAccounts2 = (
+  instructionAccounts: List<InstructionAccountItemView>,
+  instructionRelations: List<InstructionAccountRelationItemView>,
+  collections: List<CollectionItemView>
+) => {
+  return instructionAccounts.map((instructionAccount) => {
+    const collection = collections.find(
+      ({ id }) => id === instructionAccount.collection
+    );
+    const close = instructionAccounts.find(
+      ({ id }) => id === instructionAccount.close
+    );
+    const payer = instructionAccounts.find(
+      ({ id }) => id === instructionAccount.payer
+    );
+
+    return {
+      id: instructionAccount.id,
+      name: formatName(instructionAccount.name),
+      collection:
+        collection !== undefined ? formatName(collection.name) : undefined,
+      close: close !== undefined ? formatName(close.name) : undefined,
+      payer: payer !== undefined ? formatName(payer.name) : undefined,
+      space: instructionAccount.space,
+      kind: instructionAccount.kind,
+      modifier: instructionAccount.modifier,
+      relations: instructionRelations
+        .filter(
+          (instructionRelation) =>
+            instructionRelation.from === instructionAccount.id
+        )
+        .map((instructionRelation) => {
+          const toAccount = instructionAccounts.find(
+            ({ id }) => id === instructionRelation.to
+          );
+
+          if (toAccount === undefined) {
+            return null;
+          }
+
+          return formatName(toAccount.name);
+        })
+        .filter(
+          (instructionRelation): instructionRelation is FormattedName =>
+            instructionRelation !== null
+        ),
+    };
+  });
+};
+
+export const formatInstructionArguments2 = (
+  instructionArguments: List<InstructionArgumentItemView>
+) =>
+  instructionArguments.map((argument) => ({
+    name: formatName(argument.name),
+    kind: {
+      ...argument.kind,
+      name: getArgumentKindName(
+        argument.kind.id,
+        argument.kind.name,
+        argument.kind.size
+      ),
+    },
+    modifier: argument.modifier,
+  }));
+
+export const formatInstruction2 = (
+  instruction: InstructionViewItem,
+  instructionArguments: List<InstructionArgumentItemView>,
+  instructionAccounts: List<InstructionAccountItemView>,
+  instructionRelations: List<InstructionAccountRelationItemView>,
+  collections: List<CollectionItemView>
+) => ({
+  name: formatName(instruction.name),
+  handler: instruction.body.split('\n'),
+  initializesAccount: instructionAccounts.some(
+    (account) => account.modifier?.id === 0
+  ),
+  arguments: formatInstructionArguments2(instructionArguments),
+  accounts: formatInstructionAccounts2(
     instructionAccounts,
     instructionRelations,
     collections

@@ -7,16 +7,32 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
+  InstructionAccountClosesStore,
+  InstructionAccountCollectionsStore,
+  InstructionAccountPayersStore,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
+  InstructionApiService,
   InstructionArgumentQueryStore,
   InstructionArgumentsStore,
   InstructionRelationQueryStore,
   InstructionRelationsStore,
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { InstructionBodyDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
+import { ViewInstructionCodeEditorAccountsStore } from './view-instruction-code-editor-accounts.store';
+import { ViewInstructionCodeEditorArgumentsStore } from './view-instruction-code-editor-arguments.store';
+import { ViewInstructionCodeEditorClosesReferencesStore } from './view-instruction-code-editor-close-references.store';
+import { ViewInstructionCodeEditorCollectionsReferencesStore } from './view-instruction-code-editor-collections-references.store';
+import { ViewInstructionCodeEditorCollectionsStore } from './view-instruction-code-editor-collections.store';
+import { ViewInstructionCodeEditorInstructionStore } from './view-instruction-code-editor-instruction.store';
+import { ViewInstructionCodeEditorPayersReferencesStore } from './view-instruction-code-editor-payers-references.store';
+import { ViewInstructionCodeEditorRelationsStore } from './view-instruction-code-editor-relations.store';
 import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.store';
 
 @Component({
@@ -38,23 +54,38 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
           class="flex-1 w-full mb-2"
           customClass="h-full"
           [template]="(contextCode$ | ngrxPush) ?? null"
-          [options]="(contextEditorOptions$ | ngrxPush) ?? null"
+          [options]="{
+            language: 'rust',
+            automaticLayout: true,
+            fontSize: 16,
+            wordWrap: 'on',
+            theme: 'vs-dark',
+            readOnly: true
+          }"
         ></bd-code-editor>
 
         <bd-code-editor
           class="flex-1 w-full"
           customClass="h-full"
           [template]="(handleCode$ | ngrxPush) ?? null"
-          [options]="(handleEditorOptions$ | ngrxPush) ?? null"
+          [options]="{
+            language: 'rust',
+            automaticLayout: true,
+            fontSize: 16,
+            wordWrap: 'on',
+            theme: 'vs-dark',
+            readOnly: false
+          }"
           (codeChange)="instructionBody = $event"
         ></bd-code-editor>
 
         <div class="w-full h-4 pr-4">
-          <ng-container *ngIf="connected$ | ngrxPush">
+          <ng-container *hdWalletAdapter="let publicKey = publicKey">
             <p
               *ngIf="
+                publicKey !== null &&
                 instructionBody !== null &&
-                instruction.data.body !== instructionBody
+                instruction.body !== instructionBody
               "
               class="ml-2 mb-0 text-right"
             >
@@ -64,10 +95,11 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
                 class="text-accent underline"
                 (click)="
                   onUpdateInstructionBody(
-                    instruction.data.workspace,
-                    instruction.data.application,
+                    publicKey.toBase58(),
+                    instruction.workspaceId,
+                    instruction.applicationId,
                     instruction.id,
-                    instructionBody
+                    { body: instructionBody }
                   )
                 "
               >
@@ -102,6 +134,10 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
+    InstructionAccountPayersStore,
+    InstructionAccountClosesStore,
+    InstructionAccountCollectionsStore,
+    InstructionStore,
     InstructionArgumentsStore,
     InstructionArgumentQueryStore,
     InstructionAccountsStore,
@@ -110,47 +146,121 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
     InstructionRelationQueryStore,
     CollectionsStore,
     ViewInstructionCodeEditorStore,
+    ViewInstructionCodeEditorInstructionStore,
+    ViewInstructionCodeEditorAccountsStore,
+    ViewInstructionCodeEditorRelationsStore,
+    ViewInstructionCodeEditorCollectionsStore,
+    ViewInstructionCodeEditorPayersReferencesStore,
+    ViewInstructionCodeEditorCollectionsReferencesStore,
+    ViewInstructionCodeEditorClosesReferencesStore,
+    ViewInstructionCodeEditorArgumentsStore,
   ],
 })
 export class ViewInstructionCodeEditorComponent implements OnInit {
   @HostBinding('class') class = 'flex flex-col p-8 pt-5 h-full';
   instructionBody: string | null = null;
 
-  readonly connected$ = this._walletStore.connected$;
   readonly contextCode$ = this._viewInstructionCodeEditorStore.contextCode$;
-  readonly contextEditorOptions$ =
-    this._viewInstructionCodeEditorStore.contextEditorOptions$;
-  readonly handleEditorOptions$ =
-    this._viewInstructionCodeEditorStore.handleEditorOptions$;
   readonly handleCode$ = this._viewInstructionCodeEditorStore.handleCode$;
-  readonly instruction$ = this._instructionStore.instruction$;
+  readonly instruction$ =
+    this._viewInstructionCodeEditorInstructionStore.instruction$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly instructionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('instructionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
     private readonly _route: ActivatedRoute,
     private readonly _walletStore: WalletStore,
-    private readonly _instructionStore: InstructionStore,
-    private readonly _viewInstructionCodeEditorStore: ViewInstructionCodeEditorStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionApiService: InstructionApiService,
+    private readonly _viewInstructionCodeEditorStore: ViewInstructionCodeEditorStore,
+    private readonly _viewInstructionCodeEditorInstructionStore: ViewInstructionCodeEditorInstructionStore,
+    private readonly _viewInstructionCodeEditorArgumentsStore: ViewInstructionCodeEditorArgumentsStore,
+    private readonly _viewInstructionCodeEditorAccountsStore: ViewInstructionCodeEditorAccountsStore,
+    private readonly _viewInstructionCodeEditorRelationsStore: ViewInstructionCodeEditorRelationsStore,
+    private readonly _viewInstructionCodeEditorCollectionsStore: ViewInstructionCodeEditorCollectionsStore,
+    private readonly _viewInstructionCodeEditorPayersReferencesStore: ViewInstructionCodeEditorPayersReferencesStore,
+    private readonly _viewInstructionCodeEditorCollectionsReferencesStore: ViewInstructionCodeEditorCollectionsReferencesStore,
+    private readonly _viewInstructionCodeEditorClosesReferencesStore: ViewInstructionCodeEditorClosesReferencesStore
   ) {}
 
   ngOnInit() {
-    this._viewInstructionCodeEditorStore.setInstructionId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
-      )
+    this._viewInstructionCodeEditorAccountsStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorRelationsStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorPayersReferencesStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorCollectionsReferencesStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorClosesReferencesStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorCollectionsStore.setApplicationId(
+      this.applicationId$
+    );
+    this._viewInstructionCodeEditorInstructionStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionCodeEditorArgumentsStore.setInstructionId(
+      this.instructionId$
     );
   }
 
   onUpdateInstructionBody(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string,
-    instructionBody: string
+    instructionBodyDto: InstructionBodyDto
   ) {
-    this._viewInstructionCodeEditorStore.updateInstructionBody({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionBody,
-    });
+    this._instructionApiService
+      .updateBody({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+        instructionBodyDto,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent(
+            'Update instruction body request sent'
+          );
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }
