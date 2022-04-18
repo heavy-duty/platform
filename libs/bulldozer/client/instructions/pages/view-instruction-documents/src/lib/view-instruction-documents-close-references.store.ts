@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-access';
+import { InstructionAccountClosesStore } from '@bulldozer-client/instructions-data-access';
 import {
   HdBroadcasterSocketStore,
   TransactionStatus,
@@ -7,53 +7,47 @@ import {
 import {
   Document,
   flattenInstructions,
-  InstructionAccount,
+  InstructionAccountClose,
   InstructionStatus,
 } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { TransactionSignature } from '@solana/web3.js';
 import { List } from 'immutable';
 import { EMPTY, switchMap, tap } from 'rxjs';
 import { v4 as uuid } from 'uuid';
-import { reduceInstructions } from './reduce-account-instructions';
-import { InstructionAccountItemView } from './types';
+import { reduceInstructions } from './reduce-account-close-instructions';
+import { InstructionAccountCloseItemView } from './types';
 
 const documentToView = (
-  instructionAccount: Document<InstructionAccount>
-): InstructionAccountItemView => {
+  instructionAccountClose: Document<InstructionAccountClose>
+): InstructionAccountCloseItemView => {
   return {
-    id: instructionAccount.id,
-    name: instructionAccount.name,
-    isCreating: false,
+    id: instructionAccountClose.id,
+    close: instructionAccountClose.data.close,
     isUpdating: false,
-    isDeleting: false,
-    kind: instructionAccount.data.kind,
-    modifier: instructionAccount.data.modifier,
-    instructionId: instructionAccount.data.instruction,
-    applicationId: instructionAccount.data.application,
-    workspaceId: instructionAccount.data.workspace,
-    space: instructionAccount.data.space,
-    close: instructionAccount.data.close,
-    collection: instructionAccount.data.collection,
-    payer: instructionAccount.data.payer,
   };
 };
 
 interface ViewModel {
   instructionId: string | null;
+  instructionAccountCloseIds: List<string> | null;
   transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   instructionId: null,
+  instructionAccountCloseIds: null,
   transactions: List(),
 };
 
 @Injectable()
-export class ViewInstructionDocumentsAccountsStore extends ComponentStore<ViewModel> {
+export class ViewInstructionDocumentsClosesReferencesStore extends ComponentStore<ViewModel> {
   private readonly _instructionId$ = this.select(
     ({ instructionId }) => instructionId
+  );
+  private readonly _instructionAccountCloseIds$ = this.select(
+    ({ instructionAccountCloseIds }) => instructionAccountCloseIds
   );
   private readonly _topicName$ = this.select(
     this._instructionId$.pipe(isNotNullOrUndefined),
@@ -74,16 +68,16 @@ export class ViewInstructionDocumentsAccountsStore extends ComponentStore<ViewMo
         )
   );
   readonly accounts$ = this.select(
-    this._instructionAccountsStore.instructionAccounts$,
+    this._instructionAccountClosesStore.instructionAccountCloses$,
     this._instructionStatuses$,
-    (instructionAccounts, instructionStatuses) => {
-      if (instructionAccounts === null) {
+    (instructionAccountCloses, instructionStatuses) => {
+      if (instructionAccountCloses === null) {
         return null;
       }
 
       return instructionStatuses.reduce(
         reduceInstructions,
-        instructionAccounts.map(documentToView)
+        instructionAccountCloses.map(documentToView)
       );
     },
     { debounce: true }
@@ -91,16 +85,12 @@ export class ViewInstructionDocumentsAccountsStore extends ComponentStore<ViewMo
 
   constructor(
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
-    private readonly _instructionAccountsStore: InstructionAccountsStore
+    private readonly _instructionAccountClosesStore: InstructionAccountClosesStore
   ) {
     super(initialState);
 
-    this._instructionAccountsStore.setFilters(
-      this.select(
-        this._instructionId$.pipe(isNotNullOrUndefined),
-        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
-        (instructionId) => ({ instruction: instructionId })
-      )
+    this._instructionAccountClosesStore.setInstructionAccountCloseIds(
+      this._instructionAccountCloseIds$
     );
     this._registerTopic(
       this.select(
@@ -134,6 +124,13 @@ export class ViewInstructionDocumentsAccountsStore extends ComponentStore<ViewMo
     (state, instructionId) => ({
       ...state,
       instructionId,
+    })
+  );
+
+  readonly setInstructionAccountCloseIds = this.updater<List<string> | null>(
+    (state, instructionAccountCloseIds) => ({
+      ...state,
+      instructionAccountCloseIds,
     })
   );
 

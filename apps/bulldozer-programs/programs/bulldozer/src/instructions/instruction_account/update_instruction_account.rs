@@ -86,11 +86,11 @@ pub fn handle(
   ctx.accounts.account.set_space(arguments.space);
   ctx.accounts.account.bump_timestamp()?;
   match (ctx.accounts.account_payer.payer, arguments.modifier) {
-    (None, Some(0)) => {}
+    (_, Some(0)) => {}
     _ => ctx.accounts.account_payer.set(None),
   };
   match (ctx.accounts.account_close.close, arguments.modifier) {
-    (None, Some(1)) => {}
+    (_, Some(1)) => {}
     _ => ctx.accounts.account_close.set(None),
   };
   Ok(())

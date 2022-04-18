@@ -115,6 +115,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                     onUpdateInstructionAccount(
                       publicKey.toBase58(),
                       signer.workspaceId,
+                      signer.applicationId,
                       signer.instructionId,
                       signer.id,
                       $event
@@ -274,6 +275,7 @@ export class ViewInstructionSignersComponent implements OnInit {
   onUpdateInstructionAccount(
     authority: string,
     workspaceId: string,
+    applicationId: string,
     instructionId: string,
     instructionAccountId: string,
     instructionAccountDto: InstructionAccountDto
@@ -282,6 +284,7 @@ export class ViewInstructionSignersComponent implements OnInit {
       .update({
         authority,
         workspaceId,
+        applicationId,
         instructionId,
         instructionAccountDto,
         instructionAccountId,

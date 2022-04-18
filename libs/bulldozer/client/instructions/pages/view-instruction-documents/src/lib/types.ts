@@ -14,19 +14,37 @@ export interface InstructionAccountItemView {
   kind: {
     id: number;
     name: string;
-    collection: string | null;
   };
   modifier: {
     id: number;
     name: string;
-    payer: string | null;
-    space: number | null;
-    close: string | null;
   } | null;
+  space: number | null;
   isCreating: boolean;
   isUpdating: boolean;
   isDeleting: boolean;
   instructionId: string;
   applicationId: string;
   workspaceId: string;
+  collection: string | null;
+  close: string | null;
+  payer: string | null;
+}
+
+export interface InstructionAccountPayerItemView {
+  id: string;
+  payer: string | null;
+  isUpdating: boolean;
+}
+
+export interface InstructionAccountCollectionItemView {
+  id: string;
+  collection: string | null;
+  isUpdating: boolean;
+}
+
+export interface InstructionAccountCloseItemView {
+  id: string;
+  close: string | null;
+  isUpdating: boolean;
 }

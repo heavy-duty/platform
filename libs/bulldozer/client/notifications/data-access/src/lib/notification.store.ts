@@ -85,7 +85,7 @@ export class NotificationStore extends ComponentStore<ViewModel> {
     } else if (error instanceof ProgramError) {
       return error.message;
     } else if (error instanceof AnchorError) {
-      return error.message;
+      return error.error.errorMessage;
     } else {
       try {
         console.error(error);

@@ -1,13 +1,10 @@
-import { PublicKey } from '@solana/web3.js';
-
 type EncodedAccountKind = {
-  [key: string]: { id: number; collection: PublicKey | null };
+  [key: string]: { id: number };
 };
 
 interface DecodedAccountKind {
   id: number;
   name: string;
-  collection: string | null;
 }
 
 export const decodeAccountKind = (
@@ -17,6 +14,5 @@ export const decodeAccountKind = (
   return {
     id: accountKind[accountKindName].id,
     name: accountKindName,
-    collection: accountKind[accountKindName].collection?.toBase58() || null,
   };
 };

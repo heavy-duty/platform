@@ -11,6 +11,9 @@ import {
 } from '@bulldozer-client/collections-data-access';
 import {
   InstructionAccountApiService,
+  InstructionAccountClosesStore,
+  InstructionAccountCollectionsStore,
+  InstructionAccountPayersStore,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
   InstructionRelationQueryStore,
@@ -24,7 +27,10 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { Keypair } from '@solana/web3.js';
 import { distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
+import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
+import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
 import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
+import { ViewInstructionDocumentsPayersReferencesStore } from './view-instruction-documents-payers-references.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
 
 @Component({
@@ -117,16 +123,17 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   [instructionDocument]="{
                     name: instructionDocument.name,
                     kind: instructionDocument.kind.id,
-                    space: instructionDocument.modifier?.space ?? null,
-                    payer: instructionDocument.modifier?.payer ?? null,
-                    collection: instructionDocument.kind.collection ?? null,
+                    space: instructionDocument.space,
+                    payer: instructionDocument.payer?.id ?? null,
+                    collection: instructionDocument.collection?.id ?? null,
                     modifier: instructionDocument.modifier?.id ?? null,
-                    close: instructionDocument.modifier?.close ?? null
+                    close: instructionDocument.close?.id ?? null
                   }"
                   (editInstructionDocument)="
                     onUpdateInstructionDocument(
                       publicKey.toBase58(),
                       instructionDocument.workspaceId,
+                      instructionDocument.applicationId,
                       instructionDocument.instructionId,
                       instructionDocument.id,
                       $event
@@ -172,10 +179,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   'text-blue-500': instructionDocument.modifier?.id === 0,
                   'text-purple-500':
                     instructionDocument.modifier?.id === 1 &&
-                    instructionDocument.modifier?.close === null,
+                    instructionDocument.close === null,
                   'text-yellow-700':
                     instructionDocument.modifier?.id === 1 &&
-                    instructionDocument.modifier?.close !== null
+                    instructionDocument.close !== null
                 }"
               >
                 description
@@ -220,14 +227,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                 >
                   <ng-container *ngSwitchCase="0"> create </ng-container>
                   <ng-container *ngSwitchCase="1">
-                    <ng-container
-                      *ngIf="instructionDocument.modifier.close === null"
-                    >
+                    <ng-container *ngIf="instructionDocument.close === null">
                       update
                     </ng-container>
-                    <ng-container
-                      *ngIf="instructionDocument.modifier.close !== null"
-                    >
+                    <ng-container *ngIf="instructionDocument.close !== null">
                       delete
                     </ng-container>
                   </ng-container>
@@ -268,7 +271,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
                 <br />
 
-                ({{ instructionDocument.modifier.space }} bytes)
+                ({{ instructionDocument.space }} bytes)
               </p>
 
               <p
@@ -276,7 +279,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                 *ngIf="
                   instructionDocument.modifier !== null &&
                   instructionDocument.modifier.id === 1 &&
-                  instructionDocument.modifier.close !== null
+                  instructionDocument.close !== null
                 "
               >
                 Rent sent to:
@@ -295,7 +298,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                     instructionDocument.kind.id === 0 ? 'documents' : 'signers'
                   ]"
                 >
-                  {{ instructionDocument.close }}
+                  {{ instructionDocument.close.name }}
                 </a>
               </p>
             </div>
@@ -412,6 +415,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     InstructionAccountsStore,
+    InstructionAccountPayersStore,
+    InstructionAccountClosesStore,
+    InstructionAccountCollectionsStore,
     InstructionAccountQueryStore,
     InstructionRelationsStore,
     InstructionRelationQueryStore,
@@ -420,6 +426,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
     ViewInstructionDocumentsStore,
     ViewInstructionDocumentsCollectionsStore,
     ViewInstructionDocumentsAccountsStore,
+    ViewInstructionDocumentsPayersReferencesStore,
+    ViewInstructionDocumentsClosesReferencesStore,
+    ViewInstructionDocumentsCollectionsReferencesStore,
   ],
 })
 export class ViewInstructionDocumentsComponent implements OnInit {
@@ -456,15 +465,31 @@ export class ViewInstructionDocumentsComponent implements OnInit {
     private readonly _instructionAccountsStore: InstructionAccountsStore,
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
-    private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore
+    private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
+    private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
+    private readonly _viewInstructionDocumentsCollectionsReferencesStore: ViewInstructionDocumentsCollectionsReferencesStore,
+    private readonly _viewInstructionDocumentsClosesReferencesStore: ViewInstructionDocumentsClosesReferencesStore
   ) {}
 
   ngOnInit() {
     this._viewInstructionDocumentsAccountsStore.setInstructionId(
       this.instructionId$
     );
+    this._viewInstructionDocumentsPayersReferencesStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionDocumentsCollectionsReferencesStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionDocumentsClosesReferencesStore.setInstructionId(
+      this.instructionId$
+    );
     this._viewInstructionDocumentsCollectionsStore.setApplicationId(
       this.applicationId$
+    );
+
+    this._viewInstructionDocumentsStore.documents$.subscribe((a) =>
+      console.log(a)
     );
   }
 
@@ -476,6 +501,8 @@ export class ViewInstructionDocumentsComponent implements OnInit {
     instructionAccountDto: InstructionAccountDto
   ) {
     const instructionAccountKeypair = Keypair.generate();
+
+    console.log(instructionAccountDto);
 
     this._instructionAccountApiService
       .create(instructionAccountKeypair, {
@@ -511,14 +538,18 @@ export class ViewInstructionDocumentsComponent implements OnInit {
   onUpdateInstructionDocument(
     authority: string,
     workspaceId: string,
+    applicationId: string,
     instructionId: string,
     instructionAccountId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
+    console.log(instructionAccountDto);
+
     this._instructionAccountApiService
       .update({
         authority,
         workspaceId,
+        applicationId,
         instructionId,
         instructionAccountDto,
         instructionAccountId,

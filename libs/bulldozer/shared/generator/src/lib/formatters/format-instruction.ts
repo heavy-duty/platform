@@ -94,7 +94,8 @@ const getInstructionAccountPayer = (
   instructionAccount: Document<InstructionAccount>,
   instructionAccounts: Document<InstructionAccount>[]
 ) => {
-  if (!instructionAccount.data.modifier?.payer) {
+  return null;
+  /* if (!instructionAccount.data.modifier?.payer) {
     return null;
   }
 
@@ -109,14 +110,15 @@ const getInstructionAccountPayer = (
   return {
     ...payerAccount,
     name: formatName(payerAccount.name),
-  };
+  }; */
 };
 
 const getInstructionAccountCollection = (
   instructionAccount: Document<InstructionAccount>,
   collections: Document<Collection>[]
 ) => {
-  if (!instructionAccount.data.kind.collection) {
+  return null;
+  /* if (!instructionAccount.data.kind.collection) {
     return null;
   }
 
@@ -131,14 +133,15 @@ const getInstructionAccountCollection = (
   return {
     ...collectionAccount,
     name: formatName(collectionAccount.name),
-  };
+  }; */
 };
 
 const getInstructionAccountClose = (
   instructionAccount: Document<InstructionAccount>,
   instructionAccounts: Document<InstructionAccount>[]
 ) => {
-  if (!instructionAccount.data.modifier?.close) {
+  return null;
+  /* if (!instructionAccount.data.modifier?.close) {
     return null;
   }
 
@@ -153,7 +156,7 @@ const getInstructionAccountClose = (
   return {
     ...closeAccount,
     name: formatName(closeAccount.name),
-  };
+  }; */
 };
 
 const formatInstructionAccounts = (
@@ -189,7 +192,7 @@ const formatInstructionAccounts = (
           instructionAccounts,
           instructionRelations
         ),
-        space: instructionAccount.data.modifier?.space,
+        space: instructionAccount.data.space,
       },
     }));
 

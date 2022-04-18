@@ -167,18 +167,30 @@ export interface InstructionAccount {
   workspace: string;
   application: string;
   instruction: string;
+  space: number | null;
   kind: {
     id: number;
     name: string;
-    collection: string | null;
   };
   modifier: {
     id: number;
     name: string;
-    space: number | null;
-    payer: string | null;
-    close: string | null;
   } | null;
+  collection: string | null;
+  close: string | null;
+  payer: string | null;
+}
+
+export interface InstructionAccountCollection {
+  collection: string | null;
+}
+
+export interface InstructionAccountClose {
+  close: string | null;
+}
+
+export interface InstructionAccountPayer {
+  payer: string | null;
 }
 
 export interface InstructionRelation {

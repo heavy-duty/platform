@@ -1,23 +1,21 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
 import { getBulldozerProgram } from '../../programs';
-import { UpdateInstructionAccountParams } from './types';
+import { SetInstructionAccountCollectionParams } from './types';
 
-export const updateInstructionAccount = (
+export const setInstructionAccountCollection = (
   endpoint: string,
-  params: UpdateInstructionAccountParams
+  params: SetInstructionAccountCollectionParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateInstructionAccount({
-          name: params.instructionAccountDto.name,
-          modifier: params.instructionAccountDto.modifier,
-          space: params.instructionAccountDto.space,
-        })
+        .methods.setInstructionAccountCollection()
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),
+          application: new PublicKey(params.applicationId),
+          collection: new PublicKey(params.collectionId),
           instruction: new PublicKey(params.instructionId),
           account: new PublicKey(params.instructionAccountId),
         })

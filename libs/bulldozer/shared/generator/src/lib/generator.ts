@@ -44,18 +44,19 @@ export const generateInstructionCode = (
     instructionRelations,
     collections
   );
-  const formattedCollections = formattedInstruction.accounts.reduce(
+  /* const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.data.collection && account.data.collection.name !== null
         ? collections.set(account.data.collection.id, account.data.collection)
         : collections,
     new Map([])
-  );
+  ); */
 
   return generateCode(
     {
       instruction: formattedInstruction,
-      collections: Array.from(formattedCollections.values()),
+      collections: [],
+      // collections: Array.from(formattedCollections.values()),
     },
     getTemplateByType('instructions')
   );
