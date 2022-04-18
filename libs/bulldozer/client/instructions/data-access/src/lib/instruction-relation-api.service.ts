@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   createInstructionRelation,
@@ -25,7 +24,6 @@ import {
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -33,8 +31,7 @@ import {
 export class InstructionRelationApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -116,12 +113,10 @@ export class InstructionRelationApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -145,12 +140,10 @@ export class InstructionRelationApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

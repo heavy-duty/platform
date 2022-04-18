@@ -13,6 +13,7 @@ import { ViewInstructionDocumentsClosesReferencesStore } from './view-instructio
 import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
 import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
 import { ViewInstructionDocumentsPayersReferencesStore } from './view-instruction-documents-payers-references.store';
+import { ViewInstructionDocumentsRelationsStore } from './view-instruction-documents-relations.store';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface ViewModel {}
@@ -27,21 +28,22 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
     this._viewInstructionDocumentsPayersReferencesStore.accounts$,
     this._viewInstructionDocumentsCollectionsReferencesStore.accounts$,
     this._viewInstructionDocumentsClosesReferencesStore.accounts$,
+    this._viewInstructionDocumentsRelationsStore.accounts$,
     (
       instructionAccounts,
       collections,
       payers,
       collectionsReferences,
-      closes
+      closes,
+      relations
     ) => {
-      console.log({ payers });
-
       if (
         instructionAccounts === null ||
         collections === null ||
         payers === null ||
         collectionsReferences === null ||
-        closes === null
+        closes === null ||
+        relations === null
       ) {
         return null;
       }
@@ -74,6 +76,18 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
               collections.find(
                 (collection) => collectionId === collection.id
               ) ?? null,
+            relations: relations
+              .filter((relation) => relation.from === instructionAccount.id)
+              .map((relation) => {
+                return {
+                  ...relation,
+                  to:
+                    instructionAccounts.find(
+                      (instructionAccount) =>
+                        relation.to === instructionAccount.id
+                    ) ?? null,
+                };
+              }),
           };
         });
     }
@@ -82,6 +96,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
     private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
+    private readonly _viewInstructionDocumentsRelationsStore: ViewInstructionDocumentsRelationsStore,
     private readonly _walletStore: WalletStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionAccountsStore: InstructionAccountsStore,

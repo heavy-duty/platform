@@ -13,10 +13,7 @@ import {
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
-  InstructionStatus,
-  WorkspaceInstructionsStore,
-} from '@bulldozer-client/workspaces-data-access';
+import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import {
   Collection,
   Document,
@@ -30,17 +27,7 @@ import { generateInstructionCode } from '@heavy-duty/generator';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  filter,
-  map,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, map, of, pipe, withLatestFrom } from 'rxjs';
 
 const COMMON_EDITOR_OPTIONS: CodeEditorOptions = {
   language: 'rust',
@@ -160,9 +147,9 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         map((instruction) => ({ instruction }))
       )
     );
-    this._instructionRelationsStore.setInstructionRelationIds(
+    /* this._instructionRelationsStore.setInstructionRelationIds(
       this._instructionRelationQueryStore.instructionRelationIds$
-    );
+    ); */
     /* this._collectionsStore.setCollectionIds(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) => [
@@ -183,7 +170,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         ])
       )
     ); */
-    this._handleInstruction(
+    /* this._handleInstruction(
       this.instructionId$.pipe(
         isNotNullOrUndefined,
         switchMap((instructionId) =>
@@ -198,7 +185,7 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
     /* this._handleCollectionUpdate(
       this._instructionAccountsStore.instructionAccounts$.pipe(
         map((instructionAccounts) =>
@@ -290,22 +277,22 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
     })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
-        /*         case 'createInstruction':
+                case 'createInstruction':
         case 'updateInstruction':
         case 'updateInstructionBody':
         case 'deleteInstruction': {
           this._instructionStore.dispatch(instructionStatus);
           break;
-        } */
-        /* case 'createInstructionAccount':
+        }
+        case 'createInstructionAccount':
         case 'updateInstructionAccount':
         case 'deleteInstructionAccount': {
           this._instructionAccountsStore.dispatch(instructionStatus);
           break;
-        } */
+        }
         case 'createInstructionRelation':
         case 'deleteInstructionRelation': {
           this._instructionRelationsStore.dispatch(instructionStatus);
@@ -314,8 +301,8 @@ export class ViewInstructionCodeEditorStore extends ComponentStore<ViewModel> {
         default:
           break;
       }
-    })
-  );
+    }) 
+  );*/
 
   /* private readonly _handleCollectionUpdate = this.effect<InstructionStatus>(
     tap((instructionStatus) => {

@@ -8,11 +8,13 @@ import {
 import { MatDialog } from '@angular/material/dialog';
 import {} from '@bulldozer-client/instructions-data-access';
 import { InstructionRelationDto } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { EditInstructionRelationComponent } from './edit-instruction-relation.component';
+import { InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionRelation]' })
 export class EditInstructionRelationDirective {
-  @Input() instructionAccounts: any[] | null = null;
+  @Input() instructionAccounts: List<InstructionAccount> | null = null;
   @Input() from?: string;
   @Output() editInstructionRelation =
     new EventEmitter<InstructionRelationDto>();
@@ -25,7 +27,7 @@ export class EditInstructionRelationDirective {
       .open<
         EditInstructionRelationComponent,
         {
-          accounts: any[];
+          accounts: List<InstructionAccount>;
           from: string;
         },
         InstructionRelationDto

@@ -48,3 +48,15 @@ export interface InstructionAccountCloseItemView {
   close: string | null;
   isUpdating: boolean;
 }
+
+export interface InstructionRelationItemView {
+  id: string;
+  isCreating: boolean;
+  isUpdating: boolean;
+  isDeleting: boolean;
+  instructionId: string;
+  applicationId: string;
+  workspaceId: string;
+  to: string;
+  from: string;
+}

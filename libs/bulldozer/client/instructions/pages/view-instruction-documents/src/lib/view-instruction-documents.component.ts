@@ -16,6 +16,7 @@ import {
   InstructionAccountPayersStore,
   InstructionAccountQueryStore,
   InstructionAccountsStore,
+  InstructionRelationApiService,
   InstructionRelationQueryStore,
   InstructionRelationsStore,
 } from '@bulldozer-client/instructions-data-access';
@@ -31,6 +32,7 @@ import { ViewInstructionDocumentsClosesReferencesStore } from './view-instructio
 import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
 import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
 import { ViewInstructionDocumentsPayersReferencesStore } from './view-instruction-documents-payers-references.store';
+import { ViewInstructionDocumentsRelationsStore } from './view-instruction-documents-relations.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
 
 @Component({
@@ -79,7 +81,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
       </ng-container>
     </header>
 
-    <main *ngrxLet="documents$; let documents">
+    <main *ngrxLet="documents$; let documents" class="pb-20">
       <div
         *ngIf="documents && documents.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
@@ -316,48 +318,56 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
             </div>
           </header>
 
-          <section class="p-4">
+          <section class="p-4" *hdWalletAdapter="let publicKey = publicKey">
             <div class="flex justify-start items-center">
               <p class="text-lg uppercase m-0">relation</p>
-              <!-- <button
-                mat-icon-button
-                bdEditInstructionRelation
-                [instructionAccounts]="
-                  (instructionAccounts$ | ngrxPush) ?? null
-                "
-                [from]="instructionDocument.id"
-                (editInstructionRelation)="
-                  onCreateInstructionRelation(
-                    instructionDocument.workspace,
-                    instructionDocument.application,
-                    instructionDocument.instruction,
-                    $event.from,
-                    $event.to
-                  )
-                "
-                [disabled]="(connected$ | ngrxPush) === false"
+
+              <ng-container
+                *ngrxLet="instructionAccounts$; let instructionAccounts"
               >
-                <mat-icon>add</mat-icon>
-              </button> -->
+                <button
+                  *ngIf="publicKey !== null && instructionAccounts !== null"
+                  mat-icon-button
+                  bdEditInstructionRelation
+                  [instructionAccounts]="
+                    instructionAccounts | bdRemoveById: instructionDocument.id
+                  "
+                  [from]="instructionDocument.id"
+                  (editInstructionRelation)="
+                    onCreateInstructionRelation(
+                      publicKey.toBase58(),
+                      instructionDocument.workspaceId,
+                      instructionDocument.applicationId,
+                      instructionDocument.instructionId,
+                      $event.from,
+                      $event.to
+                    )
+                  "
+                  [disabled]="(connected$ | ngrxPush) === false"
+                >
+                  <mat-icon>add</mat-icon>
+                </button>
+              </ng-container>
             </div>
 
-            <!-- <div class="flex justify-start flex-wrap gap-4">
+            <div class="flex justify-start flex-wrap gap-4">
               <div
                 *ngFor="let relation of instructionDocument.relations"
                 class="relative"
               >
                 <div
                   class="flex justify-between items-center gap-2 bd-bg-black px-8 py-2"
+                  *ngIf="relation.to !== null"
                 >
                   <div class="w-48">
                     <h3
                       class="uppercase font-bold m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
                       [matTooltip]="
-                        relation.extras.to.name
+                        relation.to.name
                           | bdItemUpdatingMessage: relation:'Relation to'
                       "
                     >
-                      {{ relation.extras.to.name }}
+                      {{ relation.to.name }}
                     </h3>
 
                     <p class="text-xs font-thin m-0">
@@ -367,16 +377,18 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
                   <div class="w-10">
                     <button
+                      *ngIf="publicKey !== null"
                       mat-icon-button
                       [attr.aria-label]="
-                        'Delete relation to ' + relation.extras.to.name
+                        'Delete relation to ' + relation.to.name
                       "
                       (click)="
                         onDeleteInstructionRelation(
-                          relation.workspace,
-                          relation.instruction,
+                          publicKey.toBase58(),
+                          relation.workspaceId,
+                          relation.instructionId,
                           relation.from,
-                          relation.to
+                          relation.to.id
                         )
                       "
                       [disabled]="
@@ -413,7 +425,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   <div class="w-full h-px bg-gray-600  -rotate-12"></div>
                 </div>
               </div>
-            </div> -->
+            </div>
           </section>
         </mat-card>
       </div>
@@ -441,6 +453,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
     ViewInstructionDocumentsPayersReferencesStore,
     ViewInstructionDocumentsClosesReferencesStore,
     ViewInstructionDocumentsCollectionsReferencesStore,
+    ViewInstructionDocumentsRelationsStore,
   ],
 })
 export class ViewInstructionDocumentsComponent implements OnInit {
@@ -465,7 +478,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
           ) ?? null
       )
     );
-
   readonly documents$ = this._viewInstructionDocumentsStore.documents$;
   readonly workspaceId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('workspaceId')),
@@ -489,8 +501,10 @@ export class ViewInstructionDocumentsComponent implements OnInit {
     private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
     private readonly _notificationStore: NotificationStore,
     private readonly _instructionAccountApiService: InstructionAccountApiService,
+    private readonly _instructionRelationApiService: InstructionRelationApiService,
     private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
     private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
+    private readonly _viewInstructionDocumentsRelationsStore: ViewInstructionDocumentsRelationsStore,
     private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
     private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
     private readonly _viewInstructionDocumentsCollectionsReferencesStore: ViewInstructionDocumentsCollectionsReferencesStore,
@@ -499,6 +513,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 
   ngOnInit() {
     this._viewInstructionDocumentsAccountsStore.setInstructionId(
+      this.instructionId$
+    );
+    this._viewInstructionDocumentsRelationsStore.setInstructionId(
       this.instructionId$
     );
     this._viewInstructionDocumentsPayersReferencesStore.setInstructionId(
@@ -563,8 +580,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
     instructionAccountId: string,
     instructionAccountDto: InstructionAccountDto
   ) {
-    console.log(instructionAccountDto);
-
     this._instructionAccountApiService
       .update({
         authority,
@@ -633,33 +648,81 @@ export class ViewInstructionDocumentsComponent implements OnInit {
       });
   }
 
-  /* onCreateInstructionRelation(
+  onCreateInstructionRelation(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string,
     fromAccountId: string,
     toAccountId: string
   ) {
-    this._viewInstructionDocumentsStore.createInstructionRelation({
-      workspaceId,
-      applicationId,
-      instructionId,
-      fromAccountId,
-      toAccountId,
-    });
+    this._instructionRelationApiService
+      .create({
+        fromAccountId,
+        toAccountId,
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Create relation request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:accounts`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
   onDeleteInstructionRelation(
+    authority: string,
     workspaceId: string,
     instructionId: string,
     fromAccountId: string,
     toAccountId: string
   ) {
-    this._viewInstructionDocumentsStore.deleteInstructionRelation({
-      workspaceId,
-      instructionId,
-      fromAccountId,
-      toAccountId,
-    });
-  } */
+    this._instructionRelationApiService
+      .delete({
+        authority,
+        workspaceId,
+        instructionId,
+        fromAccountId,
+        toAccountId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete relation request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `instructions:${instructionId}:accounts`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
+  }
 }

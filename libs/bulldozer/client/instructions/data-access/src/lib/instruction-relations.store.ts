@@ -1,32 +1,33 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { InstructionRelation, Relation } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import {
+  InstructionRelation,
+  InstructionRelationFilters,
+  Relation,
+} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { List, Map } from 'immutable';
+import { EMPTY, switchMap } from 'rxjs';
 import { InstructionRelationApiService } from './instruction-relation-api.service';
-import { ItemView } from './types';
-
-export type InstructionRelationItemView = ItemView<
-  Relation<InstructionRelation>
->;
 
 interface ViewModel {
   loading: boolean;
-  instructionRelationIds: string[] | null;
-  instructionRelationsMap: Map<string, InstructionRelationItemView>;
+  filters: InstructionRelationFilters | null;
+  instructionRelationIds: List<string> | null;
+  instructionRelationsMap: Map<string, Relation<InstructionRelation>> | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
+  filters: null,
   instructionRelationIds: null,
-  instructionRelationsMap: new Map<string, InstructionRelationItemView>(),
+  instructionRelationsMap: null,
 };
 
 @Injectable()
 export class InstructionRelationsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
+  readonly filters$ = this.select(({ filters }) => filters);
   readonly instructionRelationIds$ = this.select(
     ({ instructionRelationIds }) => instructionRelationIds
   );
@@ -36,10 +37,11 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
   readonly instructionRelations$ = this.select(
     this.instructionRelationsMap$,
     (instructionRelationsMap) =>
-      Array.from(
-        instructionRelationsMap,
-        ([, instructionRelation]) => instructionRelation
-      )
+      instructionRelationsMap === null
+        ? null
+        : instructionRelationsMap
+            .toList()
+            .sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
   );
 
   constructor(
@@ -49,74 +51,51 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._loadInstructionRelations(this.instructionRelationIds$);
+    this._loadInstructionRelationIds(this.filters$);
   }
 
-  private readonly _setInstructionRelation =
-    this.updater<InstructionRelationItemView>(
-      (state, newInstructionRelation) => {
-        const instructionRelationsMap = new Map(state.instructionRelationsMap);
-        instructionRelationsMap.set(
-          newInstructionRelation.document.id,
-          newInstructionRelation
-        );
-
-        return {
-          ...state,
-          instructionRelationsMap,
-        };
-      }
-    );
-
-  private readonly _patchStatus = this.updater<{
-    instructionRelationId: string;
-    statuses: {
-      isCreating?: boolean;
-      isUpdating?: boolean;
-      isDeleting?: boolean;
-    };
-  }>((state, { instructionRelationId, statuses }) => {
-    const instructionRelationsMap = new Map(state.instructionRelationsMap);
-    const instructionRelation = instructionRelationsMap.get(
-      instructionRelationId
-    );
-
-    if (instructionRelation === undefined) {
-      return state;
-    }
-
-    return {
+  readonly setFilters = this.updater<InstructionRelationFilters | null>(
+    (state, filters) => ({
       ...state,
-      instructionRelationsMap: instructionRelationsMap.set(
-        instructionRelationId,
-        {
-          ...instructionRelation,
-          ...statuses,
-        }
-      ),
-    };
-  });
-
-  private readonly _removeInstructionRelation = this.updater<string>(
-    (state, instructionRelationId) => {
-      const instructionRelationsMap = new Map(state.instructionRelationsMap);
-      instructionRelationsMap.delete(instructionRelationId);
-      return {
-        ...state,
-        instructionRelationsMap,
-      };
-    }
+      filters,
+      instructionRelationIds: null,
+      instructionRelationsMap: null,
+    })
   );
 
-  private readonly _loadInstructionRelations = this.effect<string[] | null>(
+  private readonly _loadInstructionRelationIds =
+    this.effect<InstructionRelationFilters | null>(
+      switchMap((filters) => {
+        if (filters === null) {
+          return EMPTY;
+        }
+
+        this.patchState({
+          loading: true,
+          instructionRelationsMap: null,
+        });
+
+        return this._instructionRelationApiService.findIds(filters).pipe(
+          tapResponse(
+            (instructionRelationIds) => {
+              this.patchState({
+                instructionRelationIds: List(instructionRelationIds),
+              });
+            },
+            (error) => this._notificationStore.setError(error)
+          )
+        );
+      })
+    );
+
+  private readonly _loadInstructionRelations = this.effect<List<string> | null>(
     switchMap((instructionRelationIds) => {
       if (instructionRelationIds === null) {
         return EMPTY;
       }
 
-      this.patchState({ loading: true });
-
       return this._instructionRelationApiService
-        .findByIds(instructionRelationIds)
+        .findByIds(instructionRelationIds.toArray())
         .pipe(
           tapResponse(
             (instructionRelations) => {
@@ -131,86 +110,17 @@ export class InstructionRelationsStore extends ComponentStore<ViewModel> {
                   )
                   .reduce(
                     (instructionRelationsMap, instructionRelation) =>
-                      instructionRelationsMap.set(instructionRelation.id, {
-                        document: instructionRelation,
-                        isCreating: false,
-                        isUpdating: false,
-                        isDeleting: false,
-                      }),
-                    new Map<string, InstructionRelationItemView>()
+                      instructionRelationsMap.set(
+                        instructionRelation.id,
+                        instructionRelation
+                      ),
+                    Map<string, Relation<InstructionRelation>>()
                   ),
               });
             },
             (error) => this._notificationStore.setError({ error })
           )
         );
-    })
-  );
-
-  readonly setInstructionRelationIds = this.updater<string[] | null>(
-    (state, instructionRelationIds) => ({
-      ...state,
-      instructionRelationIds,
-    })
-  );
-
-  readonly dispatch = this.effect<InstructionStatus>(
-    concatMap((instructionRelationStatus) => {
-      const instructionRelationAccountMeta =
-        instructionRelationStatus.accounts.find(
-          (account) => account.name === 'Relation'
-        );
-
-      if (instructionRelationAccountMeta === undefined) {
-        return EMPTY;
-      }
-
-      switch (instructionRelationStatus.name) {
-        case 'createInstructionRelation': {
-          if (instructionRelationStatus.status === 'finalized') {
-            this._patchStatus({
-              instructionRelationId: instructionRelationAccountMeta.pubkey,
-              statuses: {
-                isCreating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._instructionRelationApiService
-            .findById(instructionRelationAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (instructionRelation) =>
-                  this._setInstructionRelation({
-                    document: instructionRelation,
-                    isCreating: true,
-                    isUpdating: false,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'deleteInstructionRelation': {
-          if (instructionRelationStatus.status === 'confirmed') {
-            this._patchStatus({
-              instructionRelationId: instructionRelationAccountMeta.pubkey,
-              statuses: { isDeleting: true },
-            });
-          } else {
-            this._removeInstructionRelation(
-              instructionRelationAccountMeta.pubkey
-            );
-          }
-
-          return EMPTY;
-        }
-        default:
-          return EMPTY;
-      }
     })
   );
 }
