@@ -201,6 +201,10 @@ pub mod bulldozer {
     instructions::set_instruction_account_close::handle(ctx)
   }
 
+  pub fn clear_instruction_account_close(ctx: Context<ClearInstructionAccountClose>) -> Result<()> {
+    instructions::clear_instruction_account_close::handle(ctx)
+  }
+
   #[access_control(instructions::set_instruction_account_payer::validate(&ctx))]
   pub fn set_instruction_account_payer(ctx: Context<SetInstructionAccountPayer>) -> Result<()> {
     instructions::set_instruction_account_payer::handle(ctx)

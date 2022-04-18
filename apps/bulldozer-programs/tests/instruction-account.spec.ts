@@ -533,6 +533,65 @@ describe('instruction account', () => {
         assert.equal(account.space, null);
         assert.equal(instructionAccountClose.close, null);
       });
+
+      it('should remove close when clearing', async () => {
+        // arrange
+        const accountsData = {
+          name: 'data',
+          kind: 0,
+          modifier: 1,
+          space: null,
+        };
+        // act
+        await program.methods
+          .updateInstructionAccount(accountsData)
+          .accounts({
+            authority: provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount.publicKey,
+          })
+          .postInstructions([
+            await program.methods
+              .setInstructionAccountClose()
+              .accounts({
+                authority: provider.wallet.publicKey,
+                workspace: workspace.publicKey,
+                instruction: instruction.publicKey,
+                close: instructionCloseAccount.publicKey,
+                account: instructionAccount.publicKey,
+              })
+              .instruction(),
+          ])
+          .rpc();
+        await program.methods
+          .clearInstructionAccountClose()
+          .accounts({
+            authority: provider.wallet.publicKey,
+            workspace: workspace.publicKey,
+            instruction: instruction.publicKey,
+            account: instructionAccount.publicKey,
+          })
+          .rpc();
+        // assert
+        const account = await program.account.instructionAccount.fetch(
+          instructionAccount.publicKey
+        );
+        const instructionAccountClosePublicKey =
+          await PublicKey.createProgramAddress(
+            [
+              Buffer.from('instruction_account_close', 'utf8'),
+              instructionAccount.publicKey.toBuffer(),
+              Buffer.from([account.bumps.close]),
+            ],
+            program.programId
+          );
+        const instructionAccountClose =
+          await program.account.instructionAccountClose.fetch(
+            instructionAccountClosePublicKey
+          );
+        assert.equal(instructionAccountClose.close, null);
+      });
     });
   });
 
