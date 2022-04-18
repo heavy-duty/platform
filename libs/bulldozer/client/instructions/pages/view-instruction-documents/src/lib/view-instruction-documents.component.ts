@@ -55,8 +55,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   applicationId !== null &&
                   instructionId !== null
                 "
-                mat-mini-fab
-                color="accent"
+                class="underline text-accent"
                 bdEditInstructionDocument
                 [collections]="(collections$ | ngrxPush) ?? null"
                 [instructionAccounts]="
@@ -72,7 +71,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   )
                 "
               >
-                <mat-icon>add</mat-icon>
+                New document
               </button>
             </ng-container>
           </ng-container>

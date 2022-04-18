@@ -39,7 +39,7 @@ import { AppComponent } from './app.component';
         },
       ],
       {
-        initialNavigation: 'enabledBlocking',
+        initialNavigation: 'enabledNonBlocking',
         paramsInheritanceStrategy: 'always',
       }
     ),

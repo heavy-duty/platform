@@ -22,15 +22,15 @@ import { ViewCollectionStore } from './view-collection.store';
   template: `
     <ng-container *ngrxLet="collection$; let collection">
       <aside class="w-80 flex flex-col flex-shrink-0">
-        <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+        <header class="py-5 px-7 mb-0 w-full">
           <ng-container *ngIf="collection !== null; else notFound">
-            <p class="mb-0 text-xl uppercase">{{ collection.name }}</p>
+            <p class="mb-0 text-2xl uppercase bd-font">{{ collection.name }}</p>
             <p class="text-xs m-0">
               Visualize all the details about this collection.
             </p>
           </ng-container>
           <ng-template #notFound>
-            <p class="mb-0 text-xl uppercase">not found</p>
+            <p class="mb-0 text-2xl uppercase bd-font">not found</p>
             <p class="text-xs m-0">
               The collection you're trying to visualize is not available.
             </p>
@@ -50,7 +50,7 @@ import { ViewCollectionStore } from './view-collection.store';
               >
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -61,8 +61,7 @@ import { ViewCollectionStore } from './view-collection.store';
                       'attributes'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -85,7 +84,7 @@ import { ViewCollectionStore } from './view-collection.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -96,8 +95,7 @@ import { ViewCollectionStore } from './view-collection.store';
                       'code-viewer'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -125,12 +123,11 @@ import { ViewCollectionStore } from './view-collection.store';
 
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
-            class="sticky bottom-0 bd-bg-image-11 py-5 px-7 w-full flex justify-center items-center gap-2 bd-box-shadow-bg-white"
+            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 shadow relative"
             *ngIf="publicKey !== null && collection !== null"
           >
             <button
-              mat-raised-button
-              class="text-black rounded-none"
+              class="bd-button w-24"
               color="accent"
               bdEditCollection
               [collection]="collection"
@@ -148,8 +145,7 @@ import { ViewCollectionStore } from './view-collection.store';
               Edit
             </button>
             <button
-              mat-raised-button
-              class="text-black rounded-none"
+              class="bd-button w-24"
               color="warn"
               (click)="
                 onDeleteCollection(
@@ -165,12 +161,12 @@ import { ViewCollectionStore } from './view-collection.store';
             </button>
 
             <div
-              class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
             >
               <div class="w-full h-px bg-gray-600 rotate-45"></div>
             </div>
             <div
-              class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
             >
               <div class="w-full h-px bg-gray-600"></div>
             </div>
@@ -179,7 +175,11 @@ import { ViewCollectionStore } from './view-collection.store';
       </aside>
     </ng-container>
 
-    <div class="flex-1">
+    <figure class="w-7 ml-6 mr-4 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
       <router-outlet></router-outlet>
     </div>
   `,

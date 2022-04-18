@@ -50,8 +50,8 @@ import { TabStore } from '@bulldozer-client/core-data-access';
       </ul>
     </aside>
 
-    <figure class="w-7 ml-6 mr-4">
-      <img src="assets/images/pipe.png" />
+    <figure class="w-7 ml-6 mr-4 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">

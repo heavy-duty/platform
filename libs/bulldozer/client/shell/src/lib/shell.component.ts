@@ -148,7 +148,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
                 <div
                   class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
                 >
-                  <div class="w-full h-px bg-gray-600"></div>
+                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
                 </div>
                 <div
                   class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
@@ -306,15 +306,6 @@ export class ShellComponent extends ComponentStore<object> {
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
-
-    // TEMPORAL, FOR DEMONSTRATIVE PROPOSES ONLY
-    const buttonAudio = new Audio('assets/sounds/button_click.mp3');
-    document.addEventListener('click', function (e: any) {
-      if (e.target?.nodeName === 'BUTTON') {
-        buttonAudio.play();
-      }
-    });
-    // TEMPORAL TEMPORAL TEMPORAL
   }
 
   private readonly _redirectUnauthorized = this.effect<boolean>(

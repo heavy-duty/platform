@@ -36,8 +36,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                   applicationId !== null &&
                   collectionId !== null
                 "
-                mat-mini-fab
-                color="accent"
+                class="underline text-accent"
                 bdEditCollectionAttribute
                 (editCollectionAttribute)="
                   onCreateCollectionAttribute(
@@ -49,7 +48,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                   )
                 "
               >
-                <mat-icon>add</mat-icon>
+                New attribute
               </button>
             </ng-container>
           </ng-container>

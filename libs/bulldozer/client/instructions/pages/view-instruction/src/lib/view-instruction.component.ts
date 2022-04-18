@@ -32,7 +32,7 @@ import { ViewInstructionStore } from './view-instruction.store';
             </p>
           </ng-container>
           <ng-template #notFound>
-            <p class="mb-0 text-xl uppercase">not found</p>
+            <p class="mb-0 text-2xl uppercase bd-font">not found</p>
             <p class="text-xs m-0">
               The instruction you're trying to visualize is not available.
             </p>
@@ -249,8 +249,8 @@ import { ViewInstructionStore } from './view-instruction.store';
       </aside>
     </ng-container>
 
-    <figure class="w-7 ml-6 mr-4">
-      <img src="assets/images/pipe.png" />
+    <figure class="w-7 ml-6 mr-4 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">

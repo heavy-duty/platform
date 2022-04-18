@@ -84,7 +84,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
         <div
           class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
         >
-          <div class="w-full h-px bg-gray-600"></div>
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
         </div>
         <div
           class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
@@ -113,7 +113,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
   ],
 })
 export class ViewInstructionCodeEditorComponent implements OnInit {
-  @HostBinding('class') class = 'flex flex-col px-8 pt-8 pb-4 h-full';
+  @HostBinding('class') class = 'flex flex-col p-8 pt-5 h-full';
   instructionBody: string | null = null;
 
   readonly connected$ = this._walletStore.connected$;

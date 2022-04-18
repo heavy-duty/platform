@@ -41,8 +41,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                   applicationId !== null &&
                   instructionId !== null
                 "
-                mat-mini-fab
-                color="accent"
+                class="underline text-accent"
                 bdEditInstructionSigner
                 (editInstructionSigner)="
                   onCreateInstructionAccount(
@@ -54,7 +53,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                   )
                 "
               >
-                <mat-icon>add</mat-icon>
+                New signer
               </button>
             </ng-container>
           </ng-container>
@@ -198,7 +197,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
   ],
 })
 export class ViewInstructionSignersComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
   readonly workspaceId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('workspaceId')),
     isNotNullOrUndefined,

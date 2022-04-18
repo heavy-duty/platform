@@ -21,7 +21,10 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
     </header>
 
     <main class="flex-1">
-      <div class="h-full" *ngIf="code$ | ngrxPush as code">
+      <div
+        class="py-7 px-5 h-full bd-bg-image-14 flex justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8"
+        *ngIf="code$ | ngrxPush as code"
+      >
         <bd-code-editor
           class="flex-1 h-full"
           customClass="h-full"
@@ -52,7 +55,7 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
         <div
           class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
         >
-          <div class="w-full h-px bg-gray-600"></div>
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
         </div>
       </div>
     </main>

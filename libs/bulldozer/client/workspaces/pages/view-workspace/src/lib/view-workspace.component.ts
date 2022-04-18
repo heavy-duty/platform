@@ -2,14 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostBinding,
-  OnInit,
+  OnInit
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   WorkspaceApiService,
-  WorkspaceStore,
+  WorkspaceStore
 } from '@bulldozer-client/workspaces-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
@@ -114,8 +114,8 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         </ng-container>
       </aside>
 
-      <figure class="w-7 ml-6 mr-4">
-        <img src="assets/images/pipe.png" />
+      <figure class="w-7 ml-6 mr-4 mt-2">
+        <img src="assets/images/pipe.png" alt="pipe"/>
       </figure>
 
       <div class="flex-1 overflow-y-auto">

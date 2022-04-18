@@ -62,7 +62,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
             <div
               class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
             >
-              <div class="w-full h-px bg-gray-600"></div>
+              <div class="w-full h-px bg-gray-600 rotate-12"></div>
             </div>
           </footer>
         </div>
