@@ -17,12 +17,10 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 @Component({
   selector: 'bd-view-collection-attributes',
   template: `
-    <header
-      class="mb-8 border-b-2 border-yellow-500 flex items-center justify-between"
-    >
+    <header class="mb-8">
       <div>
-        <h1 class="text-2xl uppercase mb-1">Attributes</h1>
-        <p class="text-sm font-thin mb-2">
+        <h1 class="text-4xl uppercase mb-1 bd-font">Attributes</h1>
+        <p class="text-sm font-thin mb-0">
           The attributes of all the elements that compose a collection
         </p>
       </div>
@@ -72,7 +70,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
             let collectionAttribute of collectionAttributes;
             let i = index
           "
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
+          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
             <div class="flex-1 flex items-center gap-2">
@@ -237,7 +235,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
   ],
 })
 export class ViewCollectionAttributesComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
 
   readonly collectionAttributes$ =
     this._viewCollectionAttributesStore.collectionAttributes$;

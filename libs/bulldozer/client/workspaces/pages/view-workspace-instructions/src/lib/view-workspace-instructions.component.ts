@@ -7,7 +7,7 @@ import { interval, map, startWith } from 'rxjs';
   template: `
     <header class="mb-8">
       <h1 class="text-4xl uppercase mb-1 bd-font">Instructions</h1>
-      <p class="text-sm font-thin mb-2">
+      <p class="text-sm font-thin mb-0">
         List of the last instructions executed for this workspace.
       </p>
     </header>

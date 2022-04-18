@@ -20,46 +20,42 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 @Component({
   selector: 'bd-view-instruction-arguments',
   template: `
-    <header
-      class="mb-8 border-b-2 border-yellow-500 flex items-center justify-between"
-    >
+    <header class="mb-8">
       <div>
-        <h1 class="text-2xl uppercase mb-1">Arguments</h1>
-        <p class="text-sm font-thin mb-2">
+        <h1 class="text-4xl uppercase mb-1 bd-font">Arguments</h1>
+        <p class="text-sm font-thin mb-0">
           The arguments are the input parameters of your instruction.
         </p>
-      </div>
-
-      <ng-container *hdWalletAdapter="let publicKey = publicKey">
-        <ng-container *ngrxLet="workspaceId$; let workspaceId">
-          <ng-container *ngrxLet="applicationId$; let applicationId">
-            <ng-container *ngrxLet="instructionId$; let instructionId">
-              <button
-                *ngIf="
-                  publicKey !== null &&
-                  workspaceId !== null &&
-                  applicationId !== null &&
-                  instructionId !== null
-                "
-                mat-mini-fab
-                color="accent"
-                bdEditInstructionArgument
-                (editInstructionArgument)="
-                  onCreateInstructionArgument(
-                    publicKey.toBase58(),
-                    workspaceId,
-                    applicationId,
-                    instructionId,
-                    $event
-                  )
-                "
-              >
-                <mat-icon>add</mat-icon>
-              </button>
+        <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <ng-container *ngrxLet="workspaceId$; let workspaceId">
+            <ng-container *ngrxLet="applicationId$; let applicationId">
+              <ng-container *ngrxLet="instructionId$; let instructionId">
+                <button
+                  *ngIf="
+                    publicKey !== null &&
+                    workspaceId !== null &&
+                    applicationId !== null &&
+                    instructionId !== null
+                  "
+                  class="underline text-accent"
+                  bdEditInstructionArgument
+                  (editInstructionArgument)="
+                    onCreateInstructionArgument(
+                      publicKey.toBase58(),
+                      workspaceId,
+                      applicationId,
+                      instructionId,
+                      $event
+                    )
+                  "
+                >
+                  New argument
+                </button>
+              </ng-container>
             </ng-container>
           </ng-container>
         </ng-container>
-      </ng-container>
+      </div>
     </header>
 
     <main>
@@ -87,7 +83,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                       let i = index;
                       trackBy: identify
                     "
-                    class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
+                    class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
                   >
                     <aside
                       class="flex items-center bd-bg-black px-4 py-1 gap-1"
@@ -307,7 +303,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
   providers: [InstructionArgumentsStore, ViewInstructionArgumentsStore],
 })
 export class ViewInstructionArgumentsComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
   readonly workspaceId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('workspaceId')),
     isNotNullOrUndefined,

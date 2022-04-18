@@ -13,8 +13,8 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
 @Component({
   selector: 'bd-view-collection-code',
   template: `
-    <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="text-2xl uppercase mb-1">Code Viewer</h1>
+    <header class="mb-8">
+      <h1 class="text-4xl uppercase mb-1 bd-font">Code Viewer</h1>
       <p class="text-sm font-thin mb-2">
         The code editor allows you to customize a collection.
       </p>
@@ -23,7 +23,7 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
     <main class="flex-1">
       <div class="h-full" *ngIf="code$ | ngrxPush as code">
         <bd-code-editor
-          class="flex-1"
+          class="flex-1 h-full"
           customClass="h-full"
           [template]="code"
           [options]="{
@@ -34,6 +34,26 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
             fontSize: 16
           }"
         ></bd-code-editor>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+        >
+          <div class="w-full h-px bg-gray-600"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+        >
+          <div class="w-full h-px bg-gray-600"></div>
+        </div>
       </div>
     </main>
   `,
@@ -47,8 +67,7 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
   ],
 })
 export class ViewCollectionCodeComponent implements OnInit {
-  @HostBinding('class') class =
-    'flex flex-col p-8 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'flex flex-col p-8 pt-5 h-full';
 
   readonly code$ = this._viewCollectionCodeStore.code$;
   readonly collectionId$ = this._route.paramMap.pipe(

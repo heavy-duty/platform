@@ -22,34 +22,34 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 @Component({
   selector: 'bd-view-instruction-code-editor',
   template: `
-    <header class="mb-8 border-b-2 border-yellow-500">
-      <h1 class="text-2xl uppercase mb-1">Code Editor</h1>
-      <p class="text-sm font-thin mb-2">
+    <header class="mb-8">
+      <h1 class="text-4xl uppercase mb-1 bd-font">Code Editor</h1>
+      <p class="text-sm font-thin mb-0">
         The code editor allows you to customize an instruction.
       </p>
     </header>
 
     <main class="flex-1">
       <div
-        class="h-full flex flex-col gap-1"
+        class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bd-bg-image-14 justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8"
         *ngIf="instruction$ | ngrxPush as instruction"
       >
         <bd-code-editor
-          class="flex-1"
+          class="flex-1 w-full mb-2"
           customClass="h-full"
           [template]="(contextCode$ | ngrxPush) ?? null"
           [options]="(contextEditorOptions$ | ngrxPush) ?? null"
         ></bd-code-editor>
 
         <bd-code-editor
-          class="flex-1"
+          class="flex-1 w-full"
           customClass="h-full"
           [template]="(handleCode$ | ngrxPush) ?? null"
           [options]="(handleEditorOptions$ | ngrxPush) ?? null"
           (codeChange)="instructionBody = $event"
         ></bd-code-editor>
 
-        <div class="w-full h-4">
+        <div class="w-full h-4 pr-4">
           <ng-container *ngIf="connected$ | ngrxPush">
             <p
               *ngIf="
@@ -76,6 +76,26 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
             </p>
           </ng-container>
         </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+        >
+          <div class="w-full h-px bg-gray-600"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+        >
+          <div class="w-full h-px bg-gray-600"></div>
+        </div>
       </div>
     </main>
   `,
@@ -93,8 +113,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
   ],
 })
 export class ViewInstructionCodeEditorComponent implements OnInit {
-  @HostBinding('class') class =
-    'flex flex-col px-8 pt-8 pb-4 bg-white bg-opacity-5 h-full';
+  @HostBinding('class') class = 'flex flex-col px-8 pt-8 pb-4 h-full';
   instructionBody: string | null = null;
 
   readonly connected$ = this._walletStore.connected$;

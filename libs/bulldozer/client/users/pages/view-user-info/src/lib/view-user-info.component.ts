@@ -14,7 +14,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
   template: `
     <header class="mb-8">
       <h1 class="text-4xl uppercase mb-1 bd-font">User Info</h1>
-      <p class="text-sm font-thin mb-2">User account info.</p>
+      <p class="text-sm font-thin mb-0">User account info.</p>
     </header>
 
     <ng-container *hdWalletAdapter="let publicKey = publicKey">

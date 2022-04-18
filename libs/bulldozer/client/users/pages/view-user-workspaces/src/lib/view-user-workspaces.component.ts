@@ -17,7 +17,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
   template: `
     <header class="mb-8">
       <h1 class="text-4xl uppercase mb-1 bd-font">Workspaces</h1>
-      <p class="text-sm font-thin mb-2">List of all your workspaces.</p>
+      <p class="text-sm font-thin mb-0">List of all your workspaces.</p>
     </header>
 
     <ng-container *ngIf="workspaces$ | ngrxPush as workspaces">
@@ -104,7 +104,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                 </p>
               </div>
               <div
-                class="py-2 px-5 w-32 h-12 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
+                class="py-2 px-5 w-32 h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
               >
                 <button
                   class="bd-button"

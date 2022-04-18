@@ -1,5 +1,7 @@
-@import './constants/colors.scss';
-@import './constants/fonts.scss';
+@import './core/colors.scss';
+@import './core/fonts.scss';
+@import './core/scrollbar.scss';
+@import './core/backgrounds.scss';
 
 // utilities (TO DO: move to antoher folder)
 @mixin snackbar-span {
@@ -114,78 +116,6 @@ input[readonly] {
   background-color: #242424;
 }
 
-.bd-bg-image-1,
-.bd-bg-image-2,
-.bd-bg-image-3,
-.bd-bg-image-4,
-.bd-bg-image-5,
-.bd-bg-image-6,
-.bd-bg-image-7,
-.bd-bg-image-8,
-.bd-bg-image-9,
-.bd-bg-image-10,
-.bd-bg-image-11,
-.bd-bg-image-12,
-.bd-bg-image-13 {
-  background-size: cover;
-}
-
-.bd-bg-image-1 {
-  background-image: url('../assets/images/backgrounds/workspace.png');
-}
-
-.bd-bg-image-2 {
-  background-image: url('../assets/images/backgrounds/budget.png');
-}
-
-.bd-bg-image-3 {
-  background-image: url('../assets/images/backgrounds/attributes.png');
-}
-
-.bd-bg-image-4 {
-  background-image: url('../assets/images/backgrounds/arguments.png');
-}
-
-.bd-bg-image-5 {
-  background-image: url('../assets/images/backgrounds/documents.png');
-}
-
-.bd-bg-image-6 {
-  background-image: url('../assets/images/backgrounds/signers.png');
-}
-
-.bd-bg-image-7 {
-  background-image: url('../assets/images/backgrounds/wood.png');
-}
-
-.bd-bg-image-8 {
-  background-image: url('../assets/images/backgrounds/wood_sign.png');
-}
-
-.bd-bg-image-9 {
-  background-image: url('../assets/images/backgrounds/user_profile.png');
-}
-
-.bd-bg-image-10 {
-  background-image: url('../assets/images/backgrounds/tabs.png');
-}
-
-.bd-bg-image-11 {
-  background-image: url('../assets/images/backgrounds/button_base.png');
-}
-
-.bd-bg-image-12 {
-  background-image: url('../assets/images/backgrounds/sidebar.png');
-}
-
-.bd-bg-image-13 {
-  background-image: url('../assets/images/backgrounds/list_element.png');
-}
-
-.bd-bg-image-7 > .mat-dialog-container {
-  background: transparent !important;
-}
-
 .bd-box-shadow-bg-red {
   box-shadow: 0px 0px 20px 3px red;
 }
@@ -200,10 +130,6 @@ input[readonly] {
 
 .bd-box-shadow-bg-white {
   box-shadow: 0px 1px 2px -1px white;
-}
-
-.bd-box-shadow-gray {
-  box-shadow: -0px -2px 2px #444, inset 0px 5px 4px #444;
 }
 
 .bd-button {

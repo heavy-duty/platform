@@ -21,7 +21,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
   selector: 'bd-view-workspace',
   template: `
     <ng-container *ngrxLet="workspace$; let workspace">
-      <aside class="w-80 flex flex-col flex-shrink-0">
+      <aside class="w-80 flex flex-col">
         <header class="py-5 px-7 mb-0 w-full">
           <ng-container *ngIf="workspace !== null; else notFound">
             <p class="mb-0 text-2xl uppercase bd-font">{{ workspace.name }}</p>
@@ -82,7 +82,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
             *ngIf="publicKey !== null && workspace !== null"
-            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 bd-box-shadow-gray shadow relative"
+            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 shadow relative"
           >
             <button
               class="bd-button w-24"

@@ -22,9 +22,11 @@ import { ViewInstructionStore } from './view-instruction.store';
   template: `
     <ng-container *ngrxLet="instruction$; let instruction">
       <aside class="w-80 flex flex-col flex-shrink-0">
-        <header class="py-5 px-7 border-b mb-0 w-full hd-border-gray">
+        <header class="py-5 px-7 mb-0 w-full">
           <ng-container *ngIf="instruction !== null; else notFound">
-            <p class="mb-0 text-xl uppercase">{{ instruction.name }}</p>
+            <p class="mb-0 text-2xl uppercase bd-font">
+              {{ instruction.name }}
+            </p>
             <p class="text-xs m-0">
               Visualize all the details about this instruction.
             </p>
@@ -50,7 +52,7 @@ import { ViewInstructionStore } from './view-instruction.store';
               >
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -61,8 +63,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                       'arguments'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -85,7 +86,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -96,8 +97,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                       'documents'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -120,7 +120,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -131,8 +131,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                       'signers'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -155,7 +154,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 border-l-4 py-5 px-7"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -166,8 +165,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                       'code-editor'
                     ]"
                     [routerLinkActive]="[
-                      'bg-white',
-                      'bg-opacity-5',
+                      'bd-box-shadow-bg-white',
                       'border-primary'
                     ]"
                     [ngClass]="{
@@ -200,13 +198,12 @@ import { ViewInstructionStore } from './view-instruction.store';
           "
         >
           <footer
-            class="sticky bottom-0 bd-bg-black py-5 px-7 w-full flex justify-center items-center gap-2 border-t border-white border-opacity-10 shadow-inner"
+            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 shadow relative"
             *ngIf="publicKey !== null && instruction !== null"
           >
             <ng-container>
               <button
-                mat-stroked-button
-                color="accent"
+                class="bd-button w-24"
                 bdEditInstruction
                 [instruction]="instruction"
                 (editInstruction)="
@@ -223,8 +220,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 Edit
               </button>
               <button
-                mat-stroked-button
-                color="warn"
+                class="bd-button w-24"
                 (click)="
                   onDeleteInstruction(
                     publicKey.toBase58(),
@@ -237,13 +233,27 @@ import { ViewInstructionStore } from './view-instruction.store';
               >
                 Delete
               </button>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-45"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+              >
+                <div class="w-full h-px bg-gray-600"></div>
+              </div>
             </ng-container>
           </footer>
         </ng-container>
       </aside>
     </ng-container>
 
-    <div class="flex-1">
+    <figure class="w-7 ml-6 mr-4">
+      <img src="assets/images/pipe.png" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
       <router-outlet></router-outlet>
     </div>
   `,

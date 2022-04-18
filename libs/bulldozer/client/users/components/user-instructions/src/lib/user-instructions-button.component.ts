@@ -128,10 +128,7 @@ import { interval, map, startWith } from 'rxjs';
           </main>
 
           <footer class="py-2 flex justify-center">
-            <button
-              bdUserInstructionsBottomSheet
-              class="text-underline text-accent"
-            >
+            <button bdUserInstructionsBottomSheet class="underline text-accent">
               See more
             </button>
           </footer>

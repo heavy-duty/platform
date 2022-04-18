@@ -23,7 +23,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
       <mat-sidenav-container class="h-screen-layout w-full bg-transparent">
         <mat-sidenav
           #navigation
-          class="w-60 bd-bg-image-12"
+          class="w-72 bd-bg-image-12"
           fixedInViewport
           [attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
           [mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
@@ -49,7 +49,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
               </div>
 
               <bd-tab-list
-                class="flex-grow"
+                class="flex-grow overflow-x-auto overflow-y-hidden"
                 [tabs]="(tabs$ | ngrxPush) ?? null"
                 [selectedTab]="(selectedTab$ | ngrxPush) ?? null"
                 (closeTab)="onCloseTab($event)"
@@ -80,19 +80,19 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
         <mat-sidenav
           #settings
-          class="bd-h-inherit w-80 bd-bg-image-7"
+          class="bd-h-inherit w-80 bd-bg-image-7 px-4"
           fixedInViewport
           position="end"
           [mode]="'over'"
           [opened]="false"
         >
-          <header class="px-7 py-8 border-b hd-border-gray">
-            <h1 class="m-0 uppercase">Settings</h1>
+          <header class="mt-8 mb-4 border-b hd-border-gray">
+            <h1 class="m-0 uppercase bd-font">Settings</h1>
           </header>
 
           <main class="flex flex-col">
             <section
-              class="px-7 py-8 border-b hd-border-gray"
+              class="bottom-0 py-6 px-4 mb-8 bd-bg-image-11 relative mat-elevation-z4"
               *hdWalletAdapter="
                 let wallet = wallet;
                 let wallets = wallets;
@@ -100,11 +100,13 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
                 let selectWallet = selectWallet
               "
             >
-              <h2 class="m-0 hd-highlight-title uppercase">Wallet</h2>
+              <h2 class="m-0 mb-4 hd-highlight-title text-base uppercase">
+                Wallet
+              </h2>
 
               <ng-container *ngIf="publicKey !== null && wallet !== null">
                 <p
-                  class="flex items-center gap-2 px-2 bg-black bg-opacity-10 rounded-md"
+                  class="flex items-center gap-2 px-2 bg-black bg-opacity-40 rounded-md"
                 >
                   <hd-wallet-icon
                     class="flex-shrink-0"
@@ -125,25 +127,38 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
                   </button>
                 </p>
 
-                <div class="flex justify-between gap-2">
+                <div class="flex justify-between">
                   <button
-                    class="flex-1"
-                    mat-stroked-button
-                    color="accent"
+                    class="flex-1 bd-button"
                     hdWalletModalButton
                     [wallets]="wallets"
                     (selectWallet)="selectWallet($event)"
                   >
                     Change wallet
                   </button>
-                  <button
-                    class="flex-1"
-                    mat-stroked-button
-                    color="warn"
-                    hdWalletDisconnectButton
-                  >
+                  <button class="flex-1 bd-button" hdWalletDisconnectButton>
                     Disconnect
                   </button>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
                 </div>
               </ng-container>
             </section>
@@ -291,6 +306,15 @@ export class ShellComponent extends ComponentStore<object> {
     this._handleNetworkChanges(this._hdSolanaConfigStore.selectedNetwork$);
     this._redirectUnauthorized(this._walletStore.connected$);
     this._notificationStore.setError(this._walletStore.error$);
+
+    // TEMPORAL, FOR DEMONSTRATIVE PROPOSES ONLY
+    const buttonAudio = new Audio('assets/sounds/button_click.mp3');
+    document.addEventListener('click', function (e: any) {
+      if (e.target?.nodeName === 'BUTTON') {
+        buttonAudio.play();
+      }
+    });
+    // TEMPORAL TEMPORAL TEMPORAL
   }
 
   private readonly _redirectUnauthorized = this.effect<boolean>(

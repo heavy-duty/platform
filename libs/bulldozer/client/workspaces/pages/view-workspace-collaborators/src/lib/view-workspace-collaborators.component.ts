@@ -39,9 +39,7 @@ interface ViewModel {
       <p>Filter by collaborator status</p>
 
       <div class="flex gap-4">
-        <div
-          class="px-8 py-3 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow relative"
-        >
+        <div class="px-8 py-3 w-60 h-16 bd-bg-image-11 shadow relative">
           <mat-form-field class="bg-bd-black">
             <mat-select
               [value]="status$ | ngrxPush"
@@ -86,7 +84,7 @@ interface ViewModel {
           "
         >
           <div
-            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center relative"
+            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 shadow flex justify-center items-center relative"
             *hdWalletAdapter="let publicKey = publicKey"
           >
             <ng-container *ngIf="publicKey !== null">
@@ -150,7 +148,7 @@ interface ViewModel {
           trackBy: identify
         "
       >
-        <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
+        <aside class="flex items-center bd-bg-black px-4 py-2 gap-1">
           <div class="flex-1 flex items-center gap-2">
             <mat-progress-spinner
               *ngIf="collaborator | bdItemChanging"
@@ -167,20 +165,122 @@ interface ViewModel {
             "
           >
             <ng-container *ngIf="publicKey !== null">
-              <button
-                mat-icon-button
-                (click)="
-                  onUpdateCollaborator(
-                    publicKey.toBase58(),
-                    collaborator.workspaceId,
-                    collaborator.id,
-                    { status: 2 }
-                  )
-                "
-                [disabled]="!connected || (collaborator | bdItemChanging)"
+              <div
+                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
+                *ngIf="collaborator.status.id === 1"
               >
-                <mat-icon>delete</mat-icon>
-              </button>
+                <button
+                  class="bd-button"
+                  (click)="
+                    onUpdateCollaborator(
+                      publicKey.toBase58(),
+                      collaborator.workspaceId,
+                      collaborator.id,
+                      { status: 2 }
+                    )
+                  "
+                  [disabled]="!connected || (collaborator | bdItemChanging)"
+                >
+                  Revoke
+                </button>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+              </div>
+              <div
+                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
+                *ngIf="collaborator.status.id === 0"
+              >
+                <button
+                  class="bd-button"
+                  (click)="
+                    onUpdateCollaborator(
+                      publicKey.toBase58(),
+                      collaborator.workspaceId,
+                      collaborator.id,
+                      { status: 1 }
+                    )
+                  "
+                  [disabled]="!connected || (collaborator | bdItemChanging)"
+                >
+                  Approve
+                </button>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+              </div>
+              <div
+                class="py-4 px-7 w-28 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
+                *ngIf="collaborator.status.id === 2"
+              >
+                <button
+                  class="bd-button"
+                  (click)="
+                    onUpdateCollaborator(
+                      publicKey.toBase58(),
+                      collaborator.workspaceId,
+                      collaborator.id,
+                      { status: 1 }
+                    )
+                  "
+                  [disabled]="!connected || (collaborator | bdItemChanging)"
+                >
+                  Grant
+                </button>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+              </div>
+              <div
+                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
+                *ngIf="collaborator.status.id === 0"
+              >
+                <button
+                  class="bd-button"
+                  (click)="
+                    onUpdateCollaborator(
+                      publicKey.toBase58(),
+                      collaborator.workspaceId,
+                      collaborator.id,
+                      { status: 2 }
+                    )
+                  "
+                  [disabled]="!connected || (collaborator | bdItemChanging)"
+                >
+                  Reject
+                </button>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+              </div>
             </ng-container>
           </div>
         </aside>
@@ -277,7 +377,7 @@ export class ViewWorkspaceCollaboratorsComponent
   extends ComponentStore<ViewModel>
   implements OnInit
 {
-  @HostBinding('class') class = 'block py-5 px-7 h-full w-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
   readonly workspaceId$ = this._route.paramMap.pipe(
     map((paramMap) => paramMap.get('workspaceId')),
     isNotNullOrUndefined,

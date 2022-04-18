@@ -21,12 +21,10 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 @Component({
   selector: 'bd-view-instruction-signers',
   template: `
-    <header
-      class="mb-8 border-b-2 border-yellow-500 flex items-center justify-between"
-    >
+    <header class="mb-8">
       <div>
-        <h1 class="text-2xl uppercase mb-1">Signers</h1>
-        <p class="text-sm font-thin mb-2">
+        <h1 class="text-4xl uppercase mb-1 bd-font">Signers</h1>
+        <p class="text-sm font-thin mb-0">
           The signers are all the signatures required to execute the
           instruction.
         </p>
@@ -71,7 +69,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
       >
         <mat-card
           *ngFor="let signer of signers; let i = index"
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0"
+          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
           <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
             <div class="flex-1 flex items-center gap-2">

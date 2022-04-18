@@ -32,7 +32,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
     <ng-container *ngrxLet="workspace$; let workspace">
       <div class="flex flex-col h-screen">
         <div
-          class="flex items-center justify-center border-b hd-border-gray"
+          class="flex items-center justify-center"
           *ngrxLet="user$; let user"
         >
           <div class="w-36 mt-5 pb-3" *ngIf="user === null">
@@ -102,7 +102,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
         </div>
 
         <div
-          class="flex-grow border-b hd-border-gray overflow-auto"
+          class="flex-grow overflow-auto"
           *hdWalletAdapter="
             let publicKey = publicKey;
             let connected = connected
@@ -135,51 +135,80 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
           </ng-container>
         </div>
 
-        <div class="w-full pl-4 flex flex-col gap-2">
-          <ng-container *ngIf="workspace !== null">
-            <h3 class="mt-4 mb-0 hd-highlight-title uppercase">
-              Active workspace
-            </h3>
-            <div class="flex items-center">
+        <div class="w-full px-4 flex flex-col gap-2 ">
+          <div
+            class="py-4 px-4 mb-4 bd-bg-image-11 bg-bd-black shadow relative"
+            *ngIf="workspace !== null"
+          >
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="mb-0 hd-highlight-title uppercase text-sm">
+                Active workspace
+              </h3>
+              <div *hdWalletAdapter="let publicKey = publicKey">
+                <button
+                  *ngIf="publicKey !== null"
+                  mat-fab-button
+                  bdAddWorkspace
+                  (newWorkspace)="
+                    onCreateWorkspace(publicKey.toBase58(), $event)
+                  "
+                  (importWorkspace)="onImportWorkspace($event)"
+                >
+                  <mat-icon class="text-md">add</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div
+              class="flex items-center px-4 py-2 bg-black bg-opacity-40 rounded-md mb-2"
+            >
               <span
                 class="flex-grow overflow-hidden whitespace-nowrap overflow-ellipsis"
               >
                 {{ workspace.name }}
               </span>
               <button
-                mat-icon-button
+                mat-fab-button
+                class="mr-2"
                 (click)="onDownloadWorkspace(workspace.id)"
                 aria-label="Download workspace"
               >
                 <mat-icon inline>download</mat-icon>
               </button>
               <a
-                mat-icon-button
+                mat-fab-button
                 aria-label="View workspace details"
                 [routerLink]="['/workspaces', workspace.id]"
               >
                 <mat-icon inline>open_in_new</mat-icon>
               </a>
             </div>
-          </ng-container>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
+          </div>
 
-          <div class="py-2 flex justify-around items-center gap-2">
+          <div class="py-2 pl-2 flex items-center gap-2">
             <figure class="w-8">
               <img src="assets/images/logo.png" class="w-full" />
             </figure>
             <span class="text-center font-bold m-0">BULLDOZER</span>
-
-            <div *hdWalletAdapter="let publicKey = publicKey">
-              <button
-                *ngIf="publicKey !== null"
-                mat-icon-button
-                bdAddWorkspace
-                (newWorkspace)="onCreateWorkspace(publicKey.toBase58(), $event)"
-                (importWorkspace)="onImportWorkspace($event)"
-              >
-                <mat-icon>add</mat-icon>
-              </button>
-            </div>
           </div>
         </div>
       </div>

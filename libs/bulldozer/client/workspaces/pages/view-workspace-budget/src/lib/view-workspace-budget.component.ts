@@ -10,7 +10,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
   template: `
     <header class="mb-8">
       <h1 class="text-4xl uppercase mb-1 bd-font">budget</h1>
-      <p class="text-sm font-thin mb-2">
+      <p class="text-sm font-thin mb-0">
         List of the budgets for this workspaces.
       </p>
     </header>
@@ -44,7 +44,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
           </section>
 
           <footer
-            class="py-2 px-5 w-60 h-12 bd-bg-image-11 bd-box-shadow-gray shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
+            class="py-2 px-5 w-60 h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
           >
             <button
               class="bd-button w-24"
@@ -73,7 +73,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
   providers: [BudgetStore, ViewWorkspaceBudgetStore],
 })
 export class ViewWorkspaceBudgetComponent implements OnInit {
-  @HostBinding('class') class = 'block p-8 pt-5  h-full';
+  @HostBinding('class') class = 'block p-8 pt-5 h-full';
 
   readonly budget$ = this._budgetStore.budget$;
   readonly budgetMinimumBalanceForRentExemption$ =
