@@ -2,14 +2,14 @@ import {
   ChangeDetectionStrategy,
   Component,
   HostBinding,
-  OnInit
+  OnInit,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TabStore } from '@bulldozer-client/core-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import {
   WorkspaceApiService,
-  WorkspaceStore
+  WorkspaceStore,
 } from '@bulldozer-client/workspaces-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
@@ -64,7 +64,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
               </a>
             </li>
 
-            <li>
+            <!-- <li>
               <a
                 class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
                 [routerLink]="['/workspaces', workspaceId, 'instructions']"
@@ -75,7 +75,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
                   Visualize all the ongoing instructions.
                 </span>
               </a>
-            </li>
+            </li> -->
           </ul>
         </ng-container>
 
@@ -115,7 +115,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
       </aside>
 
       <figure class="w-7 ml-6 mr-4 mt-2">
-        <img src="assets/images/pipe.png" alt="pipe"/>
+        <img src="assets/images/pipe.png" alt="pipe" />
       </figure>
 
       <div class="flex-1 overflow-y-auto">
