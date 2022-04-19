@@ -23,12 +23,12 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
             <figure class="w-full">
               <img src="assets/images/logo.png" class="w-full" />
             </figure>
-            <p class="mb-1 font-bold bd-font text-base">BULLDOZER</p>
+            <p class="mb-1 bd-font text-base">BULLDOZER</p>
           </div>
         </div>
         <div class="flex-grow w-full flex justify-center items-center">
           <div class="content w-96 -mt-28">
-            <h1 class="font-bold bd-font ">WELCOME</h1>
+            <h1 class="bd-font ">WELCOME</h1>
             <p>
               Bulldozer is a open source low code platform to build Solana
               programs. It gives developers the ability to manage their
