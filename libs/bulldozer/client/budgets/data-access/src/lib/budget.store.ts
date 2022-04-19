@@ -5,17 +5,8 @@ import {
   Document,
   findBudgetAddress,
 } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  concatMap,
-  EMPTY,
-  of,
-  pipe,
-  startWith,
-  switchMap,
-  withLatestFrom,
-} from 'rxjs';
+import { concatMap, EMPTY, switchMap } from 'rxjs';
 import { BudgetApiService } from './budget-api.service';
 import { BudgetEventService } from './budget-event.service';
 
@@ -40,8 +31,7 @@ export class BudgetStore extends ComponentStore<ViewModel> {
   constructor(
     private readonly _budgetApiService: BudgetApiService,
     private readonly _budgetEventService: BudgetEventService,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore
+    private readonly _notificationStore: NotificationStore
   ) {
     super(initialState);
 
@@ -49,27 +39,25 @@ export class BudgetStore extends ComponentStore<ViewModel> {
     this._loadBudgetId(this.workspaceId$);
   }
 
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
   private readonly _loadBudget = this.effect<string | null>(
     switchMap((budgetId) => {
       if (budgetId === null) {
         return EMPTY;
       }
 
-      return this._budgetApiService
-        .findById(budgetId)
-        .pipe(
-          concatMap((budget) =>
-            this._budgetEventService
-              .budgetChanges(budgetId)
-              .pipe(startWith(budget))
-          )
+      return this._budgetApiService.findById(budgetId).pipe(
+        tapResponse(
+          (budget) => this.patchState({ budget }),
+          (error) => this._notificationStore.setError({ error })
         )
-        .pipe(
-          tapResponse(
-            (budget) => this.patchState({ budget }),
-            (error) => this._notificationStore.setError({ error })
-          )
-        );
+      );
     })
   );
 
@@ -87,42 +75,5 @@ export class BudgetStore extends ComponentStore<ViewModel> {
         )
       );
     })
-  );
-
-  readonly setWorkspaceId = this.updater<string | null>(
-    (state, workspaceId) => ({
-      ...state,
-      workspaceId,
-    })
-  );
-
-  readonly depositToBudget = this.effect<{
-    budgetId: string;
-    lamports: number;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ budgetId, lamports }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._budgetApiService
-          .depositToBudget({
-            authority: authority.toBase58(),
-            budgetId,
-            lamports,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent('Create budget request sent'),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
   );
 }

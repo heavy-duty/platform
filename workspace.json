@@ -17,6 +17,7 @@
     "bulldozer-client-auth-utils-auth-interceptor": "libs/bulldozer/client/auth/utils/auth-interceptor",
     "bulldozer-client-budgets-data-access": "libs/bulldozer/client/budgets/data-access",
     "bulldozer-client-budgets-modals-deposit-to-budget": "libs/bulldozer/client/budgets/modals/deposit-to-budget",
+    "bulldozer-client-budgets-modals-withdraw-from-budget": "libs/bulldozer/client/budgets/modals/withdraw-from-budget",
     "bulldozer-client-collaborators-data-access": "libs/bulldozer/client/collaborators/data-access",
     "bulldozer-client-collections-components-collection-explorer": "libs/bulldozer/client/collections/components/collection-explorer",
     "bulldozer-client-collections-data-access": "libs/bulldozer/client/collections/data-access",

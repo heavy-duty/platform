@@ -16,6 +16,8 @@ export const createBudgetDocument = (
       authority: decodedAccount.authority.toBase58(),
       workspace: decodedAccount.workspace.toBase58(),
       bump: decodedAccount.bump,
+      totalValueLocked: decodedAccount.totalValueLocked,
+      totalDeposited: decodedAccount.totalDeposited,
     },
     createdAt: decodedAccount.createdAt,
     updatedAt: decodedAccount.updatedAt,

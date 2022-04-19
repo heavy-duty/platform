@@ -59,6 +59,8 @@ export interface Budget {
   authority: string;
   workspace: string;
   bump: number;
+  totalValueLocked: BN;
+  totalDeposited: BN;
 }
 
 export interface Collaborator {
@@ -96,6 +98,14 @@ export interface Workspace {
 
 export interface WorkspaceDto {
   name: string;
+}
+
+export interface DepositToBudgetDto {
+  amount: BN;
+}
+
+export interface WithdrawFromBudgetDto {
+  amount: BN;
 }
 
 export interface Application {

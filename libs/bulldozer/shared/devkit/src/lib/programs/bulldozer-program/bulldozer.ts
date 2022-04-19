@@ -293,6 +293,97 @@ export type Bulldozer = {
       ];
     },
     {
+      name: 'depositToBudget';
+      accounts: [
+        {
+          name: 'systemProgram';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
+        }
+      ];
+      args: [
+        {
+          name: 'arguments';
+          type: {
+            defined: 'DepositToBudgetArguments';
+          };
+        }
+      ];
+    },
+    {
+      name: 'withdrawFromBudget';
+      accounts: [
+        {
+          name: 'authority';
+          isMut: true;
+          isSigner: true;
+        },
+        {
+          name: 'workspace';
+          isMut: false;
+          isSigner: false;
+        },
+        {
+          name: 'budget';
+          isMut: true;
+          isSigner: false;
+          pda: {
+            seeds: [
+              {
+                kind: 'const';
+                type: 'string';
+                value: 'budget';
+              },
+              {
+                kind: 'account';
+                type: 'publicKey';
+                account: 'Workspace';
+                path: 'workspace';
+              }
+            ];
+          };
+        }
+      ];
+      args: [
+        {
+          name: 'arguments';
+          type: {
+            defined: 'WithdrawFromBudgetArguments';
+          };
+        }
+      ];
+    },
+    {
       name: 'deleteWorkspace';
       accounts: [
         {
@@ -3852,6 +3943,14 @@ export type Bulldozer = {
             type: 'u8';
           },
           {
+            name: 'totalDeposited';
+            type: 'u64';
+          },
+          {
+            name: 'totalValueLocked';
+            type: 'u64';
+          },
+          {
             name: 'createdAt';
             type: 'i64';
           }
@@ -4731,6 +4830,18 @@ export type Bulldozer = {
       };
     },
     {
+      name: 'DepositToBudgetArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'amount';
+            type: 'u64';
+          }
+        ];
+      };
+    },
+    {
       name: 'UpdateWorkspaceArguments';
       type: {
         kind: 'struct';
@@ -4738,6 +4849,18 @@ export type Bulldozer = {
           {
             name: 'name';
             type: 'string';
+          }
+        ];
+      };
+    },
+    {
+      name: 'WithdrawFromBudgetArguments';
+      type: {
+        kind: 'struct';
+        fields: [
+          {
+            name: 'amount';
+            type: 'u64';
           }
         ];
       };
@@ -5169,6 +5292,16 @@ export type Bulldozer = {
       code: 6048;
       name: 'OnlyMutAccountsCanHaveClose';
       msg: 'Only mut accounts can have a close';
+    },
+    {
+      code: 6049;
+      name: 'ArithmeticError';
+      msg: 'Arithmetic Error';
+    },
+    {
+      code: 6050;
+      name: 'UnauthorizedWithdraw';
+      msg: 'Unauthorized Withdraw';
     }
   ];
 };
@@ -5463,6 +5596,97 @@ export const IDL: Bulldozer = {
           name: 'arguments',
           type: {
             defined: 'UpdateWorkspaceArguments',
+          },
+        },
+      ],
+    },
+    {
+      name: 'depositToBudget',
+      accounts: [
+        {
+          name: 'systemProgram',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
+      ],
+      args: [
+        {
+          name: 'arguments',
+          type: {
+            defined: 'DepositToBudgetArguments',
+          },
+        },
+      ],
+    },
+    {
+      name: 'withdrawFromBudget',
+      accounts: [
+        {
+          name: 'authority',
+          isMut: true,
+          isSigner: true,
+        },
+        {
+          name: 'workspace',
+          isMut: false,
+          isSigner: false,
+        },
+        {
+          name: 'budget',
+          isMut: true,
+          isSigner: false,
+          pda: {
+            seeds: [
+              {
+                kind: 'const',
+                type: 'string',
+                value: 'budget',
+              },
+              {
+                kind: 'account',
+                type: 'publicKey',
+                account: 'Workspace',
+                path: 'workspace',
+              },
+            ],
+          },
+        },
+      ],
+      args: [
+        {
+          name: 'arguments',
+          type: {
+            defined: 'WithdrawFromBudgetArguments',
           },
         },
       ],
@@ -9027,6 +9251,14 @@ export const IDL: Bulldozer = {
             type: 'u8',
           },
           {
+            name: 'totalDeposited',
+            type: 'u64',
+          },
+          {
+            name: 'totalValueLocked',
+            type: 'u64',
+          },
+          {
             name: 'createdAt',
             type: 'i64',
           },
@@ -9906,6 +10138,18 @@ export const IDL: Bulldozer = {
       },
     },
     {
+      name: 'DepositToBudgetArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'amount',
+            type: 'u64',
+          },
+        ],
+      },
+    },
+    {
       name: 'UpdateWorkspaceArguments',
       type: {
         kind: 'struct',
@@ -9913,6 +10157,18 @@ export const IDL: Bulldozer = {
           {
             name: 'name',
             type: 'string',
+          },
+        ],
+      },
+    },
+    {
+      name: 'WithdrawFromBudgetArguments',
+      type: {
+        kind: 'struct',
+        fields: [
+          {
+            name: 'amount',
+            type: 'u64',
           },
         ],
       },
@@ -10344,6 +10600,16 @@ export const IDL: Bulldozer = {
       code: 6048,
       name: 'OnlyMutAccountsCanHaveClose',
       msg: 'Only mut accounts can have a close',
+    },
+    {
+      code: 6049,
+      name: 'ArithmeticError',
+      msg: 'Arithmetic Error',
+    },
+    {
+      code: 6050,
+      name: 'UnauthorizedWithdraw',
+      msg: 'Unauthorized Withdraw',
     },
   ],
 };
