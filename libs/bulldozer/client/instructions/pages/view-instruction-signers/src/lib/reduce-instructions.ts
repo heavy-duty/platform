@@ -5,22 +5,12 @@ import {
 import { List } from 'immutable';
 import { InstructionAccountItemView } from './types';
 
-const decodeAccountKind = (
-  id: number,
-  collection: string | null
-):
-  | { id: number; name: string }
-  | { id: number; name: string; collection: string } => {
+const decodeAccountKind = (id: number): { id: number; name: string } => {
   switch (id) {
     case 0: {
-      if (collection === null) {
-        throw Error('Collection is required for documents');
-      }
-
       return {
         id,
         name: 'document',
-        collection,
       };
     }
     case 1:
@@ -34,33 +24,22 @@ const decodeAccountKind = (
 };
 
 const decodeAccountModifier = (
-  id: number,
-  extensions: {
-    space: number | null;
-    payer: string | null;
-    close: string | null;
-  }
-):
-  | { id: number; name: string; space: number; payer: string }
-  | { id: number; name: string; close: string | null } => {
+  id: number
+): {
+  id: number;
+  name: string;
+} => {
   switch (id) {
     case 0: {
-      if (extensions.space === null || extensions.payer === null) {
-        throw Error('Space and payer are required for init');
-      }
-
       return {
         id,
         name: 'init',
-        space: extensions.space,
-        payer: extensions.payer,
       };
     }
     case 1:
       return {
         id,
         name: 'mut',
-        close: 'close' in extensions ? extensions.close : null,
       };
     default:
       throw Error('Invalid kind id');
@@ -81,29 +60,13 @@ export const reduceInstructions = (
           arguments: InstructionAccountDto;
         };
         const name = data.arguments.name;
-        const kind = decodeAccountKind(
-          data.arguments.kind,
-          data.arguments.collection
-        );
-        let modifier:
-          | {
-              id: number;
-              name: string;
-              space: number;
-              payer: string;
-            }
-          | {
-              id: number;
-              name: string;
-              close: string | null;
-            }
-          | null = null;
+        const kind = decodeAccountKind(data.arguments.kind);
+        let modifier: {
+          id: number;
+          name: string;
+        } | null = null;
         if (data.arguments.modifier !== null) {
-          modifier = decodeAccountModifier(data.arguments.modifier, {
-            close: data.arguments.close,
-            payer: data.arguments.payer,
-            space: data.arguments.space,
-          });
+          modifier = decodeAccountModifier(data.arguments.modifier);
         }
 
         const workspaceId = instruction.accounts.find(
@@ -187,29 +150,12 @@ export const reduceInstructions = (
           arguments: InstructionAccountDto;
         };
         const name = data.arguments.name;
-        const kind = decodeAccountKind(
-          data.arguments.kind,
-          data.arguments.collection
-        );
-        let modifier:
-          | {
-              id: number;
-              name: string;
-              space: number;
-              payer: string;
-            }
-          | {
-              id: number;
-              name: string;
-              close: string | null;
-            }
-          | null = null;
+        let modifier: {
+          id: number;
+          name: string;
+        } | null = null;
         if (data.arguments.modifier !== null) {
-          modifier = decodeAccountModifier(data.arguments.modifier, {
-            close: data.arguments.close,
-            payer: data.arguments.payer,
-            space: data.arguments.space,
-          });
+          modifier = decodeAccountModifier(data.arguments.modifier);
         }
 
         return items.map((item) => {
@@ -225,7 +171,6 @@ export const reduceInstructions = (
           return {
             ...item,
             name,
-            kind,
             modifier,
             isUpdating: true,
           };
