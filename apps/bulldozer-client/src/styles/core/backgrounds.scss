@@ -11,8 +11,13 @@
 .bd-bg-image-11,
 .bd-bg-image-12,
 .bd-bg-image-13,
-.bd-bg-image-14 {
+.bd-bg-image-14,
+.bd-bg-image-15 {
   background-size: cover;
+}
+
+.bd-bg-image-0 {
+  background-image: url('../../assets/images/backgrounds/bricks.png');
 }
 
 .bd-bg-image-1 {
@@ -69,4 +74,8 @@
 
 .bd-bg-image-14 {
   background-image: url('../../assets/images/backgrounds/code.png');
+}
+
+.bd-bg-image-15 {
+  background-image: url('../../assets/images/backgrounds/bulldozer.png');
 }

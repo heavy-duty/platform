@@ -28,9 +28,6 @@ body {
   --success-color: $success-bgcolor;
   --warning-color: $warning-bgcolor;
   --error-color: $error-bgcolor;
-  background-image: url('../assets/images/backgrounds/bricks.png');
-  background-size: contain;
-  background-repeat: repeat;
 }
 
 .smooth-transition * {
@@ -70,15 +67,6 @@ input[readonly] {
   height: inherit !important;
 }
 
-.bd-custom-monaco-editor {
-  height: calc(100vh - 96px) !important;
-}
-
-.bd-custom-monaco-editor-splitted {
-  display: block;
-  height: calc(50vh - 57px) !important;
-}
-
 .bd-border-bottom {
   border-bottom: 2px solid gray;
 }
@@ -92,20 +80,6 @@ input[readonly] {
 .hd-side-right,
 .bd-bg-black {
   color: white;
-}
-
-.hd-scroll-mt-8 {
-  margin-top: -2rem;
-}
-
-.hd-view-profile-height {
-  height: calc(100vh - 126px);
-}
-
-.hd-workspace-explorer-height {
-  height: calc(100% - 234px);
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 .border-b-1 {

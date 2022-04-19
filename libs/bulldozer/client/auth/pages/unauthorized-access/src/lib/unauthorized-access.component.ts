@@ -13,46 +13,71 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   selector: 'bd-unauthorized-access',
   template: `
     <main class="flex h-screen">
-      <div class="bd-bg-black w-1/2 h-screen flex justify-end items-center">
-        <div class="content mr-16 hd-scroll-mt-8">
-          <figure class="mb-4 w-32">
-            <img src="assets/images/logo.png" class="w-full" />
-          </figure>
-          <h2 class="mb-1 font-bold">BULLDOZER</h2>
-          <p class="mb-7">Connect your wallet to start building</p>
-          <hd-wallet-multi-button
-            class="text-white"
-            color="primary"
-          ></hd-wallet-multi-button>
+      <div
+        class="bd-bg-black w-1/2 h-screen flex flex-col justify-end items-center bg-contain bg-repeat bd-bg-image-0"
+      >
+        <div class="w-full">
+          <div
+            class="ml-5 mt-5 box-border w-24 flex flex-col justify-center items-center"
+          >
+            <figure class="w-full">
+              <img src="assets/images/logo.png" class="w-full" />
+            </figure>
+            <p class="mb-1 font-bold bd-font text-base">BULLDOZER</p>
+          </div>
         </div>
-      </div>
-      <div class="hd-side-right w-1/2 h-screen flex justify-start items-center">
-        <div class="content ml-16 w-96 hd-scroll-mt-8">
-          <h2 class="font-bold">WELCOME</h2>
-          <p>
-            Bulldozer is a open source low code platform to build Solana
-            programs. It gives developers the ability to manage their program’s
-            ecosystem through a UI, hiding all the gory details.
-          </p>
-          <div class="flex mt-6">
-            <figure class="w-8 mr-4">
-              <a href="https://github.com/heavy-duty/platform" target="_blank">
-                <img src="assets/images/social/github.png" class="w-full" />
-              </a>
-            </figure>
-            <figure class="w-8 mr-4">
-              <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
-                <img src="assets/images/social/discord.png" class="w-full" />
-              </a>
-            </figure>
-            <figure class="w-8 mr-4">
-              <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
-                <img src="assets/images/social/twitter.png" class="w-full" />
-              </a>
-            </figure>
+        <div class="flex-grow w-full flex justify-center items-center">
+          <div class="content w-96 -mt-28">
+            <h1 class="font-bold bd-font ">WELCOME</h1>
+            <p>
+              Bulldozer is a open source low code platform to build Solana
+              programs. It gives developers the ability to manage their
+              program’s ecosystem through a UI, hiding all the gory details.
+            </p>
+            <div class="flex mt-6 mb-10">
+              <figure class="w-8 mr-4">
+                <a
+                  href="https://github.com/heavy-duty/platform"
+                  target="_blank"
+                >
+                  <img src="assets/images/social/github.png" class="w-full" />
+                </a>
+              </figure>
+              <figure class="w-8 mr-4">
+                <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
+                  <img src="assets/images/social/discord.png" class="w-full" />
+                </a>
+              </figure>
+              <figure class="w-8 mr-4">
+                <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
+                  <img src="assets/images/social/twitter.png" class="w-full" />
+                </a>
+              </figure>
+            </div>
+            <div
+              class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            >
+              <hd-wallet-multi-button
+                class="text-white"
+                color="primary"
+              ></hd-wallet-multi-button>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-45"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+              >
+                <div class="w-full h-px bg-gray-600"></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+      <div
+        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-image-15"
+      ></div>
     </main>
   `,
   styles: [],
