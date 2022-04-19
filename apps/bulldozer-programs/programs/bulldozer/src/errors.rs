@@ -100,4 +100,8 @@ pub enum ErrorCode {
   OnlyInitAccountsCanHavePayer,
   #[msg("Only mut accounts can have a close")]
   OnlyMutAccountsCanHaveClose,
+  #[msg("Arithmetic Error")]
+  ArithmeticError,
+  #[msg("Unauthorized Withdraw")]
+  UnauthorizedWithdraw,
 }

@@ -1,16 +1,16 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { defer, from, Observable } from 'rxjs';
 import { getBulldozerProgram } from '../../programs';
-import { DepositToBudgetParams } from './types';
+import { WithdrawFromBudgetParams } from './types';
 
-export const depositToBudget = (
+export const withdrawFromBudget = (
   endpoint: string,
-  params: DepositToBudgetParams
+  params: WithdrawFromBudgetParams
 ): Observable<TransactionInstruction> => {
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.depositToBudget(params.depositToBudgetDto)
+        .methods.withdrawFromBudget(params.withdrawFromBudgetDto)
         .accounts({
           workspace: new PublicKey(params.workspaceId),
           authority: new PublicKey(params.authority),

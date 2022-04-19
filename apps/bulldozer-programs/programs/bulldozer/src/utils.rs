@@ -1,12 +1,19 @@
+use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
-pub fn fund_rent_for_account<'info>(
-  payer: AccountInfo<'info>,
-  receiver: AccountInfo<'info>,
-  rent: u64,
+pub fn transfer_lamports<'info>(
+  from: AccountInfo<'info>,
+  to: AccountInfo<'info>,
+  lamports: u64,
 ) -> Result<()> {
-  **payer.try_borrow_mut_lamports()? -= rent;
-  **receiver.try_borrow_mut_lamports()? += rent;
+  **from.try_borrow_mut_lamports()? = from
+    .try_lamports()?
+    .checked_sub(lamports)
+    .ok_or(ErrorCode::ArithmeticError)?;
+  **to.try_borrow_mut_lamports()? = to
+    .try_lamports()?
+    .checked_add(lamports)
+    .ok_or(ErrorCode::ArithmeticError)?;
   Ok(())
 }
 

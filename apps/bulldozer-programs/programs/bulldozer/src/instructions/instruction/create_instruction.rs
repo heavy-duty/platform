@@ -4,7 +4,7 @@ use crate::collections::{
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::fund_rent_for_account;
+use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -106,12 +106,12 @@ pub fn handle(
   arguments: CreateInstructionArguments,
 ) -> Result<()> {
   msg!("Create instruction");
-  fund_rent_for_account(
+  transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.instruction.to_account_info().lamports.borrow(),
   )?;
-  fund_rent_for_account(
+  transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx

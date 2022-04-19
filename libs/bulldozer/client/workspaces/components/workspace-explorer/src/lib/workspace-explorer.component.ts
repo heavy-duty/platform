@@ -151,14 +151,14 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               >
                 {{ workspace.name }}
               </span>
-              <button
+              <!-- <button
                 mat-fab-button
                 class="mr-2"
                 (click)="onDownloadWorkspace(workspace.id)"
                 aria-label="Download workspace"
               >
                 <mat-icon inline>download</mat-icon>
-              </button>
+              </button> -->
               <a
                 mat-fab-button
                 aria-label="View workspace details"

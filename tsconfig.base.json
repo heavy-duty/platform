@@ -242,6 +242,9 @@
       "@bulldozer-client/view-workspace-instructions": [
         "libs/bulldozer/client/workspaces/pages/view-workspace-instructions/src/index.ts"
       ],
+      "@bulldozer-client/withdraw-from-budget": [
+        "libs/bulldozer/client/budgets/modals/withdraw-from-budget/src/index.ts"
+      ],
       "@bulldozer-client/workspace-explorer": [
         "libs/bulldozer/client/workspaces/components/workspace-explorer/src/index.ts"
       ],

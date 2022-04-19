@@ -40,6 +40,20 @@ pub mod bulldozer {
     instructions::update_workspace::handle(ctx, arguments)
   }
 
+  pub fn deposit_to_budget(
+    ctx: Context<DepositToBudget>,
+    arguments: DepositToBudgetArguments,
+  ) -> Result<()> {
+    instructions::deposit_to_budget::handle(ctx, arguments)
+  }
+
+  pub fn withdraw_from_budget(
+    ctx: Context<WithdrawFromBudget>,
+    arguments: WithdrawFromBudgetArguments,
+  ) -> Result<()> {
+    instructions::withdraw_from_budget::handle(ctx, arguments)
+  }
+
   pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> Result<()> {
     instructions::delete_workspace::handle(ctx)
   }
