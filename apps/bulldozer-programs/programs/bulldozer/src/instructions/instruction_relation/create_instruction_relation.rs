@@ -4,7 +4,7 @@ use crate::collections::{
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::{has_enough_funds, transfer_lamports};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -108,7 +108,7 @@ pub fn validate(ctx: &Context<CreateInstructionRelation>) -> Result<bool> {
 
 pub fn handle(ctx: Context<CreateInstructionRelation>) -> Result<()> {
   msg!("Create instruction relation");
-  fund_rent_for_account(
+  transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.relation.to_account_info().lamports.borrow(),
