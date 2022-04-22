@@ -24,9 +24,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
             class="flex flex-col gap-4 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           >
             <div class="flex gap-4">
-              <section
-                class="flex-1 px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
-              >
+              <bd-card class="flex-1">
                 <div class="flex items-center gap-2 ">
                   <figure
                     class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden"
@@ -74,30 +72,8 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     </p>
                   </div>
                 </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-6"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600"></div>
-                </div>
-              </section>
-              <section
-                class="flex flex-col justify-center px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
-              >
+              </bd-card>
+              <bd-card class="flex flex-col justify-center">
                 <button
                   class="bd-button w-28"
                   bdEditUser
@@ -114,32 +90,9 @@ import { ViewUserInfoStore } from './view-user-info.store';
                 >
                   Delete
                 </button>
-
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-90"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 "></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
-                </div>
-              </section>
+              </bd-card>
             </div>
-            <section
-              class="flex-1 px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
-            >
+            <bd-card>
               <dl class="flex justify-between gap-5">
                 <div class="flex-1">
                   <dt class="mb-2">Name:</dt>
@@ -174,27 +127,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                   </dd>
                 </div>
               </dl>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
-              >
-                <div class="w-full h-px bg-gray-600 rotate-12"></div>
-              </div>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
-              >
-                <div class="w-full h-px bg-gray-600 rotate-90"></div>
-              </div>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
-              >
-                <div class="w-full h-px bg-gray-600 rotate-45"></div>
-              </div>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
-              >
-                <div class="w-full h-px bg-gray-600"></div>
-              </div>
-            </section>
+            </bd-card>
           </div>
         </ng-container>
 

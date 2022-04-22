@@ -37,6 +37,9 @@
       "@bulldozer-client/auth-interceptor": [
         "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
       ],
+      "@bulldozer-client/bd-card": [
+        "libs/bulldozer/client/shared/components/card/src/index.ts"
+      ],
       "@bulldozer-client/budget-details": [
         "libs/bulldozer/client/budgets/components/budget-details/src/index.ts"
       ],

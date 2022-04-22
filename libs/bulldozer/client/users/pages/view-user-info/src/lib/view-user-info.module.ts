@@ -7,6 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditUserModule } from '@bulldozer-client/edit-user';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
@@ -34,6 +35,7 @@ import { ViewUserInfoComponent } from './view-user-info.component';
     ItemUpdatingModule,
     ObscureAddressModule,
     HdWalletAdapterCdkModule,
+    CardModule,
   ],
   declarations: [ViewUserInfoComponent],
 })
