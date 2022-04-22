@@ -4,30 +4,28 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
   selector: 'bd-add-workspace',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Add workspace</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Add workspace</h2>
 
-    <div class="flex flex-col gap-2">
-      <button
-        class="w-full flex items-center gap-8 px-2 py-4 bg-white bg-opacity-5 border-l-4 border-transparent hover:border-primary transition duration-300 ease-out hover:ease-in"
-        (click)="onNewWorkspace()"
-      >
-        <mat-icon>add</mat-icon>
-        <div class="flex flex-col">
-          <p class="m-0 font-bold uppercase text-lg text-left">New</p>
-          <p class="m-0 text-xs text-left">Create a new workspace</p>
-        </div>
+    <div
+      class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 bg-bd-black shadow relative"
+    >
+      <button class="bd-button w-full" (click)="onNewWorkspace()">
+        Create
+      </button>
+      <button class="bd-button w-full" (click)="onImportWorkspace()">
+        Import
       </button>
 
-      <button
-        class="w-full flex items-center gap-8 px-2 py-4 bg-white bg-opacity-5 border-l-4 border-transparent hover:border-primary transition duration-300 ease-out hover:ease-in"
-        (click)="onImportWorkspace()"
+      <div
+        class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
       >
-        <mat-icon>upload</mat-icon>
-        <div class="flex flex-col">
-          <p class="m-0 font-bold uppercase text-lg text-left">Import</p>
-          <p class="m-0 text-xs text-left">Import a workspace</p>
-        </div>
-      </button>
+        <div class="w-full h-px bg-gray-600 rotate-45"></div>
+      </div>
+      <div
+        class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+      >
+        <div class="w-full h-px bg-gray-600"></div>
+      </div>
     </div>
 
     <button
