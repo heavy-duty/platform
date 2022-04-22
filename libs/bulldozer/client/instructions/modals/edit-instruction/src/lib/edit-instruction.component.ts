@@ -44,14 +44,26 @@ import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
         >
       </mat-form-field>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        {{ instruction ? 'Save' : 'Create' }}
-      </button>
+        <button
+          class="bd-button w-11/12"
+          [disabled]="submitted && form.invalid"
+        >
+          {{ instruction ? 'Save' : 'Create' }}
+        </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
     </form>
 
     <button
