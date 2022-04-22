@@ -56,11 +56,21 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
             </div>
             <div
               class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+              *hdWalletAdapter="
+                let wallet = wallet;
+                let wallets = wallets;
+                let publicKey = publicKey;
+                let selectWallet = selectWallet
+              "
             >
-              <hd-wallet-multi-button
-                class="text-white"
-                color="primary"
-              ></hd-wallet-multi-button>
+              <button
+                class="flex-1 bd-button"
+                hdWalletModalButton
+                [wallets]="wallets"
+                (selectWallet)="selectWallet($event)"
+              >
+                Change wallet
+              </button>
               <div
                 class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
               >
