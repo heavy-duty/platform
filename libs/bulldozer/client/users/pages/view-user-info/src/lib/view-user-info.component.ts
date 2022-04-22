@@ -20,44 +20,30 @@ import { ViewUserInfoStore } from './view-user-info.store';
     <ng-container *hdWalletAdapter="let publicKey = publicKey">
       <div class="flex gap-6 flex-wrap" *ngIf="publicKey !== null">
         <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
-          <mat-card
-            class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
+          <div
+            class="flex flex-col gap-4 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           >
-            <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-              <div class="flex-1 flex items-center gap-2">
-                <mat-progress-spinner
-                  *ngIf="user | bdItemChanging"
-                  diameter="16"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
-              </div>
-              <button
-                mat-icon-button
-                bdEditUser
-                [user]="user"
-                (editUser)="onUpdateUser(user.authority, user.id, $event)"
-                [disabled]="user | bdItemChanging"
+            <div class="flex gap-4">
+              <section
+                class="flex-1 px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
               >
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                (click)="onDeleteUser(user.authority, user.id)"
-                [disabled]="user | bdItemChanging"
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </aside>
-
-            <div class="px-8 mt-4 pb-8">
-              <main>
-                <div class="flex items-center gap-4 mb-6">
-                  <figure class="w-20 h-20 rounded-full overflow-hidden">
+                <div class="flex items-center gap-2 ">
+                  <figure
+                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden"
+                    [ngClass]="{ 'bg-bd-black': !!(user | bdItemChanging) }"
+                  >
                     <img
                       [src]="user.thumbnailUrl"
+                      *ngIf="!(user | bdItemChanging)"
                       class="w-full"
                       onerror="this.src='assets/images/default-profile.png';"
                     />
+
+                    <mat-progress-spinner
+                      *ngIf="user | bdItemChanging"
+                      diameter="48"
+                      mode="indeterminate"
+                    ></mat-progress-spinner>
                   </figure>
                   <div>
                     <h1 class="flex items-center justify-start gap-2 mb-0">
@@ -88,43 +74,128 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     </p>
                   </div>
                 </div>
-                <dl class="flex justify-between gap-5">
-                  <div class="flex-1">
-                    <dt class="mb-2">Name:</dt>
-                    <dd
-                      class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
-                    >
-                      <span
-                        class="overflow-hidden whitespace-nowrap overflow-ellipsis"
-                      >
-                        {{ user.name }}
-                      </span>
-                    </dd>
-                  </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-6"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600"></div>
+                </div>
+              </section>
+              <section
+                class="flex flex-col justify-center px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
+              >
+                <button
+                  class="bd-button w-28"
+                  bdEditUser
+                  [user]="user"
+                  (editUser)="onUpdateUser(user.authority, user.id, $event)"
+                  [disabled]="user | bdItemChanging"
+                >
+                  Edit
+                </button>
+                <button
+                  class="bd-button w-28"
+                  (click)="onDeleteUser(user.authority, user.id)"
+                  [disabled]="user | bdItemChanging"
+                >
+                  Delete
+                </button>
 
-                  <div class="flex-1">
-                    <dt class="mb-2">Authority:</dt>
-                    <dd
-                      class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
-                    >
-                      <span
-                        class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
-                      >
-                        {{ user.authority }}
-                      </span>
-
-                      <button
-                        mat-icon-button
-                        [cdkCopyToClipboard]="user.authority"
-                      >
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                    </dd>
-                  </div>
-                </dl>
-              </main>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-90"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 "></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                </div>
+              </section>
             </div>
-          </mat-card>
+            <section
+              class="flex-1 px-6 py-4 bd-bg-image-11 bg-bd-black relative shadow rounded"
+            >
+              <dl class="flex justify-between gap-5">
+                <div class="flex-1">
+                  <dt class="mb-2">Name:</dt>
+                  <dd
+                    class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+                  >
+                    <span
+                      class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                    >
+                      {{ user.name }}
+                    </span>
+                  </dd>
+                </div>
+
+                <div class="flex-1">
+                  <dt class="mb-2">Authority:</dt>
+                  <dd
+                    class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+                  >
+                    <span
+                      class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                    >
+                      {{ user.authority | obscureAddress: '.':[09, 35] }}
+                    </span>
+
+                    <button
+                      mat-icon-button
+                      [cdkCopyToClipboard]="user.authority"
+                    >
+                      <mat-icon>content_copy</mat-icon>
+                    </button>
+                  </dd>
+                </div>
+              </dl>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-12"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-90"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-45"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
+              >
+                <div class="w-full h-px bg-gray-600"></div>
+              </div>
+            </section>
+          </div>
         </ng-container>
 
         <ng-template #userNotDefined>
@@ -135,8 +206,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
               <ng-container *ngrxLet="userId$; let userId">
                 <button
                   *ngIf="publicKey !== null && userId !== null"
-                  mat-raised-button
-                  color="primary"
+                  class="bd-button"
                   bdEditUser
                   (editUser)="
                     onCreateUser(publicKey.toBase58(), userId, $event)
