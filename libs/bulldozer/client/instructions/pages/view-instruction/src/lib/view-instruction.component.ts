@@ -21,8 +21,8 @@ import { ViewInstructionStore } from './view-instruction.store';
   selector: 'bd-view-instruction',
   template: `
     <ng-container *ngrxLet="instruction$; let instruction">
-      <aside class="w-80 flex flex-col flex-shrink-0">
-        <header class="py-5 px-7 mb-0 w-full">
+      <aside class="w-80 flex flex-col flex-shrink-0 py-5 px-5 ml-2">
+        <header class="mb-7 w-full">
           <ng-container *ngIf="instruction !== null; else notFound">
             <p class="mb-0 text-2xl uppercase bd-font">
               {{ instruction.name }}
@@ -43,7 +43,7 @@ import { ViewInstructionStore } from './view-instruction.store';
           <ng-container *ngrxLet="applicationId$; let applicationId">
             <ng-container *ngrxLet="instructionId$; let instructionId">
               <ul
-                class="flex-1"
+                class="flex-1 overflow-y-auto"
                 *ngIf="
                   workspaceId !== null &&
                   applicationId !== null &&
@@ -52,7 +52,7 @@ import { ViewInstructionStore } from './view-instruction.store';
               >
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -86,7 +86,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -120,7 +120,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -154,7 +154,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 w-72 m-auto mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -198,12 +198,12 @@ import { ViewInstructionStore } from './view-instruction.store';
           "
         >
           <footer
-            class="bottom-0 py-4 px-7 w-60 h-16 flex justify-center items-center m-auto mb-8 left-4 bd-bg-image-11 shadow relative"
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
             *ngIf="publicKey !== null && instruction !== null"
           >
             <ng-container>
               <button
-                class="bd-button w-24"
+                class="bd-button w-28"
                 bdEditInstruction
                 [instruction]="instruction"
                 (editInstruction)="
@@ -220,7 +220,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 Edit
               </button>
               <button
-                class="bd-button w-24"
+                class="bd-button w-28"
                 (click)="
                   onDeleteInstruction(
                     publicKey.toBase58(),
@@ -249,7 +249,7 @@ import { ViewInstructionStore } from './view-instruction.store';
       </aside>
     </ng-container>
 
-    <figure class="w-7 ml-6 mr-4 mt-2">
+    <figure class="w-14 mt-2">
       <img src="assets/images/pipe.png" alt="pipe" />
     </figure>
 
