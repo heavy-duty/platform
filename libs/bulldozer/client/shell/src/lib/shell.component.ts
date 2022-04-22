@@ -36,7 +36,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
         </mat-sidenav>
 
         <mat-sidenav-content>
-          <div class="flex flex-col h-screen  bg-bd-black bg-opacity-60">
+          <div class="flex flex-col h-screen  bg-bd-black bg-opacity-40">
             <div class="flex items-center gap-2  ">
               <div class="px-4" *ngIf="isHandset$ | async">
                 <button
