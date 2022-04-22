@@ -69,7 +69,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
                 [wallets]="wallets"
                 (selectWallet)="selectWallet($event)"
               >
-                Change wallet
+                Start Building
               </button>
               <div
                 class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
