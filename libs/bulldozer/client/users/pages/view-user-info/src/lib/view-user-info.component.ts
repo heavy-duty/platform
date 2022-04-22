@@ -21,28 +21,30 @@ import { ViewUserInfoStore } from './view-user-info.store';
       <div class="flex gap-6 flex-wrap" *ngIf="publicKey !== null">
         <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
           <div
-            class="flex flex-col gap-4 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
+            class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           >
-            <div class="flex gap-4">
+            <div class="flex gap-2">
               <bd-card class="flex-1">
                 <div class="flex items-center gap-2 ">
                   <figure
                     class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden"
-                    [ngClass]="{ 'bg-bd-black': !!(user | bdItemChanging) }"
+                    *ngIf="!(user | bdItemChanging)"
                   >
                     <img
                       [src]="user.thumbnailUrl"
-                      *ngIf="!(user | bdItemChanging)"
                       class="w-full"
                       onerror="this.src='assets/images/default-profile.png';"
                     />
-
+                  </figure>
+                  <div
+                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
+                    *ngIf="user | bdItemChanging"
+                  >
                     <mat-progress-spinner
-                      *ngIf="user | bdItemChanging"
                       diameter="48"
                       mode="indeterminate"
                     ></mat-progress-spinner>
-                  </figure>
+                  </div>
                   <div>
                     <h1 class="flex items-center justify-start gap-2 mb-0">
                       <span

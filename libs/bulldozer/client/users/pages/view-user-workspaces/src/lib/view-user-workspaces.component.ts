@@ -25,121 +25,126 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
         *ngIf="workspaces && workspaces.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
       >
-        <mat-card
+        <div
+          class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="let workspace of workspaces; let i = index"
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
-          <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <div class="flex-1 flex items-center gap-2">
-              <ng-container *ngIf="workspace | bdItemChanging">
-                <mat-progress-spinner
-                  diameter="20"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
+          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+            <div class="flex gap-2">
+              <bd-card class="flex-1">
+                <div class="flex items-center gap-2 ">
+                  <figure
+                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
+                    *ngIf="!(workspace | bdItemChanging)"
+                  >
+                    <img
+                      src="assets/icons/view-profile-icon.png"
+                      onerror="this.src='assets/images/default-profile.png';"
+                    />
+                  </figure>
+                  <div
+                    *ngIf="workspace | bdItemChanging"
+                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
+                  >
+                    <mat-progress-spinner
+                      diameter="48"
+                      mode="indeterminate"
+                    ></mat-progress-spinner>
 
-                <p class="m-0 text-xs text-white text-opacity-60">
-                  <ng-container *ngIf="workspace.isCreating">
-                    Creating...
-                  </ng-container>
-                  <ng-container *ngIf="workspace.isUpdating">
-                    Updating...
-                  </ng-container>
-                  <ng-container *ngIf="workspace.isDeleting">
-                    Deleting...
-                  </ng-container>
-                </p>
-              </ng-container>
-            </div>
-            <a
-              [attr.aria-label]="'View ' + workspace.name"
-              [routerLink]="['/workspaces', workspace.id]"
-              mat-icon-button
-            >
-              <mat-icon>open_in_new</mat-icon>
-            </a>
-            <div *hdWalletAdapter="let publicKey = publicKey">
-              <button
-                *ngIf="publicKey !== null"
-                mat-icon-button
-                [attr.aria-label]="'Delete ' + workspace.name"
-                (click)="onDeleteWorkspace(publicKey.toBase58(), workspace.id)"
-                [disabled]="
-                  (connected$ | ngrxPush) === false ||
-                  (workspace | bdItemChanging)
-                "
-              >
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
-          </aside>
+                    <p class="m-0 text-xs text-white text-opacity-60 absolute">
+                      <ng-container *ngIf="workspace.isCreating">
+                        Creating...
+                      </ng-container>
+                      <ng-container *ngIf="workspace.isUpdating">
+                        Updating...
+                      </ng-container>
+                      <ng-container *ngIf="workspace.isDeleting">
+                        Deleting...
+                      </ng-container>
+                    </p>
+                  </div>
+                  <div>
+                    <h2
+                      class="mb-0 text-lg font-bold flex justify-start"
+                      [matTooltip]="
+                        workspace.name
+                          | bdItemUpdatingMessage: workspace:'Workspace'
+                      "
+                      matTooltipShowDelay="500"
+                    >
+                      {{ workspace.name }}
+                    </h2>
 
-          <div class="px-8 mt-4">
-            <header class="flex items-center">
-              <div class="flex-1">
-                <h2
-                  class="mb-0 text-lg font-bold flex justify-start"
-                  [matTooltip]="
-                    workspace.name
-                      | bdItemUpdatingMessage: workspace:'Workspace'
-                  "
-                  matTooltipShowDelay="500"
+                    <p>
+                      <span
+                        class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
+                        [ngClass]="
+                          workspaceId === workspace.id
+                            ? 'bg-green-500'
+                            : 'bg-yellow-500'
+                        "
+                      ></span>
+                      <span class="font-thin">{{
+                        workspaceId === workspace.id ? 'Active' : 'Inactive'
+                      }}</span>
+                    </p>
+                  </div>
+                </div>
+              </bd-card>
+              <bd-card class="flex flex-col justify-center">
+                <a
+                  [attr.aria-label]="'View ' + workspace.name"
+                  [routerLink]="['/workspaces', workspace.id]"
+                  class="bd-button w-28"
                 >
-                  {{ workspace.name }}
-                </h2>
-
-                <p *ngIf="workspaceId$ | ngrxPush as workspaceId">
-                  <span
-                    class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"
-                    [ngClass]="
-                      workspaceId === workspace.id
-                        ? 'bg-green-500'
-                        : 'bg-yellow-500'
+                  View details
+                </a>
+                <ng-container *hdWalletAdapter="let publicKey = publicKey">
+                  <button
+                    class="bd-button w-28"
+                    *ngIf="publicKey !== null"
+                    [attr.aria-label]="'Delete ' + workspace.name"
+                    (click)="
+                      onDeleteWorkspace(publicKey.toBase58(), workspace.id)
                     "
-                  ></span>
-                  <span class="font-thin">{{
-                    workspaceId === workspace.id ? 'Active' : 'Inactive'
-                  }}</span>
-                </p>
-              </div>
-              <div
-                class="py-2 px-5 w-32 h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
-              >
+                    [disabled]="
+                      (connected$ | ngrxPush) === false ||
+                      (workspace | bdItemChanging)
+                    "
+                  >
+                    Delete
+                  </button>
+                </ng-container>
+              </bd-card>
+            </div>
+            <bd-card>
+              <dl class="flex justify-between gap-5">
+                <div class="flex-1">
+                  <dt class="mb-2">Workspace ID:</dt>
+                  <dd
+                    class="flex justify-between items-center h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+                  >
+                    <span>
+                      {{ workspace.id | obscureAddress: '.':[13, 33] }}
+                    </span>
+                    <mat-icon
+                      class="cursor-pointer"
+                      [cdkCopyToClipboard]="workspace.id"
+                      >content_copy</mat-icon
+                    >
+                  </dd>
+                </div>
                 <button
-                  class="bd-button"
+                  class="bd-button self-end mb-1"
                   (click)="onActivateWorkspace(workspace.id)"
+                  *ngIf="workspaceId !== workspace.id"
                 >
                   Activate
                 </button>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
-                </div>
-              </div>
-            </header>
-
-            <section class="mt-5">
-              <p class="mb-0 font-bold">Workspace ID:</p>
-              <div
-                class="bd-bg-black px-5 py-3 flex justify-between items-center rounded-md mt-1 mb-8"
-              >
-                <span>
-                  {{ workspace.id | obscureAddress: '.':[13, 33] }}
-                </span>
-                <mat-icon
-                  class="cursor-pointer"
-                  [cdkCopyToClipboard]="workspace.id"
-                  >content_copy</mat-icon
-                >
-              </div>
-            </section>
-          </div>
-        </mat-card>
+              </dl>
+            </bd-card>
+          </ng-container>
+        </div>
       </div>
 
       <ng-template #emptyList>
