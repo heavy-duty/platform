@@ -24,7 +24,7 @@ export const equalValidator =
 @Component({
   selector: 'bd-edit-relation',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Create relation</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Create relation</h2>
 
     <form
       [formGroup]="form"

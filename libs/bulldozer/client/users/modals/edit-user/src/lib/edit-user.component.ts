@@ -13,7 +13,7 @@ import { UserDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-user',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ user ? 'Edit' : 'Create' }} user
     </h2>
 

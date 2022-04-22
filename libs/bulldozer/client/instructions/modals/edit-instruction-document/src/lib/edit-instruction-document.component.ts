@@ -19,7 +19,7 @@ import { Collection, InstructionAccount } from './types';
 @Component({
   selector: 'bd-edit-document',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ data?.document ? 'Edit' : 'Create' }} document
     </h2>
 

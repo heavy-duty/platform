@@ -8,7 +8,7 @@ import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-instruction',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ instruction ? 'Edit' : 'Create' }} instruction
     </h2>
 

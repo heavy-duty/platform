@@ -8,7 +8,7 @@ import { ApplicationDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-application',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ application ? 'Edit' : 'Create' }} application
     </h2>
 

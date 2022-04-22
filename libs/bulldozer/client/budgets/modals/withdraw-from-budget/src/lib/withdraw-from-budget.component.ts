@@ -7,7 +7,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 @Component({
   selector: 'bd-withdraw-from-budget',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Withdraw from Budget</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Withdraw from Budget</h2>
 
     <form
       [formGroup]="form"

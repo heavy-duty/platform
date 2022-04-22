@@ -8,7 +8,7 @@ import { publicKeyValidator } from './public-key.validator';
 @Component({
   selector: 'bd-import-workspace',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Import Workspace</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Import Workspace</h2>
 
     <form
       [formGroup]="form"

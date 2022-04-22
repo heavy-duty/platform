@@ -13,7 +13,7 @@ import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-workspace',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ workspace ? 'Edit' : 'Create' }} workspace
     </h2>
 

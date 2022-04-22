@@ -7,7 +7,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 @Component({
   selector: 'bd-deposit-to-budget',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Deposit to Budget</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Deposit to Budget</h2>
 
     <form
       [formGroup]="form"

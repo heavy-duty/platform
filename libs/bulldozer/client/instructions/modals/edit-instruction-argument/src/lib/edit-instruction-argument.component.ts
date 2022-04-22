@@ -15,7 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'bd-edit-argument',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ instructionArgument ? 'Edit' : 'Create' }} argument
     </h2>
 

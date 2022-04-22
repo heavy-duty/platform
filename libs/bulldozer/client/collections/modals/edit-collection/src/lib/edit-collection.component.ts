@@ -8,7 +8,7 @@ import { CollectionDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-collection',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ collection ? 'Edit' : 'Create' }} collection
     </h2>
 

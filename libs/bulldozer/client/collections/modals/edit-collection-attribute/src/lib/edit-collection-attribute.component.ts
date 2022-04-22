@@ -15,7 +15,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'bd-edit-attribute',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ collectionAttribute ? 'Edit' : 'Create' }} attribute
     </h2>
 

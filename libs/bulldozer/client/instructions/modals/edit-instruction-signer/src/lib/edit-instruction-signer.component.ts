@@ -8,7 +8,7 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
   selector: 'bd-edit-instruction-signer',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ signer ? 'Edit' : 'Create' }} signer
     </h2>
 
