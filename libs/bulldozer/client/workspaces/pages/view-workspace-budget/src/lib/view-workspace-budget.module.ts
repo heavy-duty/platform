@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { DepositToBudgetModule } from '@bulldozer-client/deposit-to-budget';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { WithdrawFromBudgetModule } from '@bulldozer-client/withdraw-from-budget';
@@ -28,6 +29,7 @@ import { ViewWorkspaceBudgetComponent } from './view-workspace-budget.component'
     WithdrawFromBudgetModule,
     HdWalletAdapterCdkModule,
     ItemUpdatingModule,
+    CardModule,
   ],
   declarations: [FromLamportsPipe, ViewWorkspaceBudgetComponent],
 })

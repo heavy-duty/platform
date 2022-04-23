@@ -25,83 +25,66 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
     </header>
 
     <main class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
-      <mat-card
-        class="h-auto w-80 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
+      <div
+        class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
       >
-        <header
-          class="flex justify-between items-center bd-bg-black px-6 py-2 gap-4"
-        >
-          <h2 class="uppercase m-0 text-lg">solana</h2>
+        <bd-card class="flex gap-2">
+          <figure
+            class="w-14 h-14 flex justify-center items-center bg-black rounded-full mr-2"
+            *ngIf="!(budget | bdItemChanging)"
+          >
+            <img src="assets/images/solana-logo.png" class="w-1/2" />
+          </figure>
 
-          <mat-progress-spinner
+          <div
+            class="w-14 h-14 flex justify-center items-center bg-bd-black rounded-full mr-2"
             *ngIf="budget | bdItemChanging"
-            mode="indeterminate"
-            diameter="16"
-          ></mat-progress-spinner>
-        </header>
+          >
+            <mat-progress-spinner
+              mode="indeterminate"
+              diameter="32"
+            ></mat-progress-spinner>
+          </div>
 
-        <div class="px-8 mt-4">
-          <section class="flex gap-2 mb-4">
-            <figure
-              class="w-12 h-12 flex justify-center items-center bg-black rounded-full mr-2"
+          <div>
+            <p class="m-0 text-sm uppercase">Solana</p>
+            <p class="m-0 text-2xl mr-2">
+              {{ budget.totalValueLocked | bdFromLamports | number: '1.2-9' }}
+              <span class="m-0 text-sm font-thin">SOL</span>
+            </p>
+          </div>
+        </bd-card>
+        <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <bd-card class="flex justify-center" *ngIf="publicKey !== null">
+            <button
+              class="bd-button w-full"
+              bdDepositToBudget
+              (depositToBudget)="
+                onDepositToBudget(
+                  publicKey.toBase58(),
+                  budget.workspaceId,
+                  $event
+                )
+              "
             >
-              <img src="assets/images/solana-logo.png" class="w-1/2" />
-            </figure>
-
-            <div>
-              <p class="m-0 text-sm">Total budget</p>
-              <p class="m-0 text-2xl mr-2">
-                {{ budget.totalValueLocked | bdFromLamports | number: '1.2-9' }}
-                <span class="m-0 text-sm font-thin">SOL</span>
-              </p>
-            </div>
-          </section>
-
-          <ng-container *hdWalletAdapter="let publicKey = publicKey">
-            <footer
-              class="py-2 px-5 w-60 h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 mb-4 relative bg-bd-black"
-              *ngIf="publicKey !== null"
+              Deposit
+            </button>
+            <button
+              class="bd-button w-full"
+              bdWithdrawFromBudget
+              (withdrawFromBudget)="
+                onWithdrawFromBudget(
+                  publicKey.toBase58(),
+                  budget.workspaceId,
+                  $event
+                )
+              "
             >
-              <button
-                class="bd-button w-24"
-                bdDepositToBudget
-                (depositToBudget)="
-                  onDepositToBudget(
-                    publicKey.toBase58(),
-                    budget.workspaceId,
-                    $event
-                  )
-                "
-              >
-                Deposit
-              </button>
-              <button
-                class="bd-button w-24"
-                bdWithdrawFromBudget
-                (withdrawFromBudget)="
-                  onWithdrawFromBudget(
-                    publicKey.toBase58(),
-                    budget.workspaceId,
-                    $event
-                  )
-                "
-              >
-                Withdraw
-              </button>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
-              >
-                <div class="w-full h-px bg-gray-600 rotate-45"></div>
-              </div>
-              <div
-                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
-              >
-                <div class="w-full h-px bg-gray-600 rotate-12"></div>
-              </div>
-            </footer>
-          </ng-container>
-        </div>
-      </mat-card>
+              Withdraw
+            </button>
+          </bd-card>
+        </ng-container>
+      </div>
     </main>
   `,
   styles: [],
