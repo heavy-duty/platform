@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionSignerModule } from '@bulldozer-client/edit-instruction-signer';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
@@ -32,9 +33,10 @@ import { ViewInstructionSignersComponent } from './view-instruction-signers.comp
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
     ItemUpdatingModule,
     EditInstructionSignerModule,
-    HdWalletAdapterCdkModule,
+    CardModule,
   ],
   declarations: [ViewInstructionSignersComponent],
 })

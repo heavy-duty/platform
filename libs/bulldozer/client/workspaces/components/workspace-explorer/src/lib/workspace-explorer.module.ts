@@ -8,6 +8,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AddWorkspaceModule } from '@bulldozer-client/add-workspace';
 import { ApplicationExplorerModule } from '@bulldozer-client/application-explorer';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditApplicationModule } from '@bulldozer-client/edit-application';
 import { EditUserModule } from '@bulldozer-client/edit-user';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
@@ -26,6 +27,7 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     MatTooltipModule,
     MatProgressSpinnerModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
     ApplicationExplorerModule,
     ObscureAddressModule,
     EditWorkspaceModule,
@@ -33,7 +35,7 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     AddWorkspaceModule,
     EditUserModule,
     ItemUpdatingModule,
-    HdWalletAdapterCdkModule,
+    CardModule,
   ],
   declarations: [WorkspaceExplorerComponent],
   exports: [WorkspaceExplorerComponent],

@@ -77,17 +77,12 @@ input[readonly] {
   background-color: #393939;
 }
 
-.hd-side-right,
-.bd-bg-black {
+.hd-side-right {
   color: white;
 }
 
 .border-b-1 {
   border-bottom-width: 1px;
-}
-
-.bd-bg-black {
-  background-color: #242424;
 }
 
 .bd-box-shadow-bg-red {
@@ -128,6 +123,6 @@ input[readonly] {
   cursor: not-allowed;
   background-image: linear-gradient(gray, gray) !important;
   color: #e6e6e6;
-  border: 1px solid lightgrey;
+  border: 1px solid #909090;
   opacity: 0.4;
 }

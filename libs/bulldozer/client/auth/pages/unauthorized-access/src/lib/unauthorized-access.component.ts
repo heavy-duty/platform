@@ -14,7 +14,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   template: `
     <main class="flex h-screen">
       <div
-        class="bd-bg-black w-1/2 h-screen flex flex-col justify-end items-center bg-contain bg-repeat bd-bg-image-0"
+        class="bg-bd-black w-1/2 h-screen flex flex-col justify-end items-center bg-contain bg-repeat bd-bg-image-0"
       >
         <div class="w-full">
           <div

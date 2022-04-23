@@ -53,13 +53,13 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 
                     <p class="m-0 text-xs text-white text-opacity-60 absolute">
                       <ng-container *ngIf="workspace.isCreating">
-                        Creating...
+                        Creating
                       </ng-container>
                       <ng-container *ngIf="workspace.isUpdating">
-                        Updating...
+                        Updating
                       </ng-container>
                       <ng-container *ngIf="workspace.isDeleting">
-                        Deleting...
+                        Deleting
                       </ng-container>
                     </p>
                   </div>
@@ -118,14 +118,14 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
               </bd-card>
             </div>
             <bd-card>
-              <dl class="flex justify-between gap-5">
+              <dl class="flex justify-between gap-8">
                 <div class="flex-1">
                   <dt class="mb-2">Workspace ID:</dt>
                   <dd
                     class="flex justify-between items-center h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
                   >
-                    <span>
-                      {{ workspace.id | obscureAddress: '.':[13, 33] }}
+                    <span class="pr-4">
+                      {{ workspace.id | obscureAddress: '.':[09, 36] }}
                     </span>
                     <mat-icon
                       class="cursor-pointer"
@@ -135,7 +135,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                   </dd>
                 </div>
                 <button
-                  class="bd-button self-end mb-1"
+                  class="bd-button self-end mb-1 w-28"
                   (click)="onActivateWorkspace(workspace.id)"
                   *ngIf="workspaceId !== workspace.id"
                 >

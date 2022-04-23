@@ -8,7 +8,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborators.component';
@@ -33,6 +35,8 @@ import { ViewWorkspaceCollaboratorsComponent } from './view-workspace-collaborat
     ReactiveComponentModule,
     HdWalletAdapterCdkModule,
     ItemUpdatingModule,
+    CardModule,
+    ObscureAddressModule,
   ],
   declarations: [ViewWorkspaceCollaboratorsComponent],
 })

@@ -66,97 +66,45 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
         *ngIf="signers && signers.size > 0; else emptyList"
         class="flex gap-6 flex-wrap"
       >
-        <mat-card
+        <div
+          class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="let signer of signers; let i = index"
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
-          <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <div class="flex-1 flex items-center gap-2">
-              <ng-container *ngIf="signer | bdItemChanging">
-                <mat-progress-spinner
-                  diameter="20"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
-
-                <p class="m-0 text-xs text-white text-opacity-60">
-                  <ng-container *ngIf="signer.isCreating">
-                    Creating...
-                  </ng-container>
-                  <ng-container *ngIf="signer.isUpdating">
-                    Updating...
-                  </ng-container>
-                  <ng-container *ngIf="signer.isDeleting">
-                    Deleting...
-                  </ng-container>
-                </p>
-              </ng-container>
-            </div>
+          <bd-card class="flex-1 flex gap-4">
+            <figure
+              *ngIf="!(signer | bdItemChanging)"
+              class="w-16 h-16 flex justify-center items-center bg-bd-black rounded-full"
+            >
+              <img
+                src="assets/icons/instruction-signer.svg"
+                onerror="this.src='assets/images/default-profile.png';"
+              />
+            </figure>
 
             <div
-              class="flex-1 flex justify-end"
-              *hdWalletAdapter="let publicKey = publicKey"
+              *ngIf="signer | bdItemChanging"
+              class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
             >
-              <ng-container *ngIf="publicKey !== null">
-                <button
-                  [attr.aria-label]="'Update signer ' + signer.name"
-                  mat-icon-button
-                  bdEditInstructionSigner
-                  [instructionSigner]="{
-                    name: signer.name,
-                    kind: signer.kind.id,
-                    space: null,
-                    payer: null,
-                    collection: null,
-                    modifier: signer.modifier?.id ?? null,
-                    close: null
-                  }"
-                  (editInstructionSigner)="
-                    onUpdateInstructionAccount(
-                      publicKey.toBase58(),
-                      signer.workspaceId,
-                      signer.applicationId,
-                      signer.instructionId,
-                      signer.id,
-                      $event
-                    )
-                  "
-                  [disabled]="signer | bdItemChanging"
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
+              <mat-progress-spinner
+                diameter="36"
+                mode="indeterminate"
+              ></mat-progress-spinner>
 
-                <button
-                  [attr.aria-label]="'Delete signer ' + signer.name"
-                  mat-icon-button
-                  (click)="
-                    onDeleteInstructionAccount(
-                      publicKey.toBase58(),
-                      signer.workspaceId,
-                      signer.instructionId,
-                      signer.id
-                    )
-                  "
-                  [disabled]="signer | bdItemChanging"
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </ng-container>
+              <p class="m-0 text-xs text-white text-opacity-60 absolute">
+                <ng-container *ngIf="signer.isCreating">
+                  Creating
+                </ng-container>
+                <ng-container *ngIf="signer.isUpdating">
+                  Updating
+                </ng-container>
+                <ng-container *ngIf="signer.isDeleting">
+                  Deleting
+                </ng-container>
+              </p>
             </div>
-          </aside>
 
-          <div class="px-8 py-6">
-            <header class="flex gap-2">
-              <div class="w-1/5">
-                <figure
-                  class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full flex-shrink-0"
-                >
-                  <mat-icon color="accent" class="w-1/2">
-                    assignment_ind
-                  </mat-icon>
-                </figure>
-              </div>
-
-              <div class="w-4/5">
+            <div class="flex">
+              <section>
                 <h2
                   class="m-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
                   [matTooltip]="
@@ -177,10 +125,63 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                     Mutable
                   </ng-container>
                 </p>
-              </div>
-            </header>
-          </div>
-        </mat-card>
+              </section>
+            </div>
+          </bd-card>
+          <bd-card
+            class="flex"
+            *hdWalletAdapter="
+              let publicKey = publicKey;
+              let connected = connected
+            "
+          >
+            <ng-container *ngIf="publicKey !== null">
+              <button
+                class="bd-button w-32"
+                [attr.aria-label]="'Update signer ' + signer.name"
+                bdEditInstructionSigner
+                [instructionSigner]="{
+                  name: signer.name,
+                  kind: signer.kind.id,
+                  space: null,
+                  payer: null,
+                  collection: null,
+                  modifier: signer.modifier?.id ?? null,
+                  close: null
+                }"
+                (editInstructionSigner)="
+                  onUpdateInstructionAccount(
+                    publicKey.toBase58(),
+                    signer.workspaceId,
+                    signer.applicationId,
+                    signer.instructionId,
+                    signer.id,
+                    $event
+                  )
+                "
+                [disabled]="signer | bdItemChanging"
+              >
+                Edit
+              </button>
+
+              <button
+                class="bd-button w-32"
+                [attr.aria-label]="'Delete signer ' + signer.name"
+                (click)="
+                  onDeleteInstructionAccount(
+                    publicKey.toBase58(),
+                    signer.workspaceId,
+                    signer.instructionId,
+                    signer.id
+                  )
+                "
+                [disabled]="signer | bdItemChanging"
+              >
+                Delete
+              </button>
+            </ng-container>
+          </bd-card>
+        </div>
       </div>
 
       <ng-template #emptyList>

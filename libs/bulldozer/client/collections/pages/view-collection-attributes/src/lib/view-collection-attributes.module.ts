@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditCollectionAttributeModule } from '@bulldozer-client/edit-collection-attribute';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
@@ -32,9 +33,10 @@ import { ViewCollectionAttributesComponent } from './view-collection-attributes.
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
     ItemUpdatingModule,
     EditCollectionAttributeModule,
-    HdWalletAdapterCdkModule,
+    CardModule,
   ],
   declarations: [ViewCollectionAttributesComponent],
 })

@@ -141,36 +141,78 @@ interface ViewModel {
     </header>
 
     <div class="flex flex-wrap gap-4">
-      <mat-card
-        class="h-auto w-auto rounded-lg overflow-hidden bd-bg-image-1 p-0 mb-5 mat-elevation-z8"
+      <div
+        class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
         *ngFor="
           let collaborator of filteredCollaborators$ | ngrxPush;
           trackBy: identify
         "
       >
-        <aside class="flex items-center bd-bg-black px-4 py-2 gap-1">
-          <div class="flex-1 flex items-center gap-2">
-            <mat-progress-spinner
+        <div class="flex gap-2">
+          <bd-card class="flex-1 flex items-center gap-2">
+            <figure
+              class="w-20 h-20 rounded-full overflow-hidden"
+              *ngIf="!(collaborator | bdItemChanging)"
+            >
+              <img
+                [src]="collaborator.user.thumbnailUrl"
+                class="w-full"
+                onerror="this.src='assets/images/default-profile.png';"
+              />
+            </figure>
+            <div
+              class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
               *ngIf="collaborator | bdItemChanging"
-              diameter="16"
-              mode="indeterminate"
-            ></mat-progress-spinner>
-          </div>
+            >
+              <mat-progress-spinner
+                diameter="36"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+            </div>
 
-          <div
-            class="flex gap-2"
-            *hdWalletAdapter="
-              let publicKey = publicKey;
-              let connected = connected
-            "
-          >
-            <ng-container *ngIf="publicKey !== null">
-              <div
-                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
-                *ngIf="collaborator.status.id === 1"
-              >
+            <div>
+              <h1 class="flex items-center justify-start gap-2 mb-0">
+                <span
+                  class="leading-none"
+                  [matTooltip]="
+                    collaborator.user.name
+                      | bdItemUpdatingMessage: collaborator.user:'User'
+                  "
+                  matTooltipShowDelay="500"
+                >
+                  {{ collaborator.user.name }}
+                </span>
+              </h1>
+              <p class="m-0">
+                <a
+                  [href]="
+                    'https://explorer.solana.com/address/' +
+                    collaborator.user.id
+                  "
+                  target="__blank"
+                  class="text-accent underline"
+                  >@{{ collaborator.user.userName }}</a
+                >
+              </p>
+              <p class="m-0">
+                <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
+                Builder since
+                {{ collaborator.createdAt | date: 'mediumDate' }}
+              </p>
+            </div>
+          </bd-card>
+          <bd-card class="flex flex-col justify-center">
+            <div
+              class="flex gap-2"
+              *hdWalletAdapter="
+                let publicKey = publicKey;
+                let connected = connected
+              "
+            >
+              <ng-container *ngIf="publicKey !== null">
                 <button
-                  class="bd-button"
+                  *ngIf="collaborator.status.id === 1"
+                  class="bd-button w-28"
                   (click)="
                     onUpdateCollaborator(
                       publicKey.toBase58(),
@@ -183,23 +225,9 @@ interface ViewModel {
                 >
                   Revoke
                 </button>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600"></div>
-                </div>
-              </div>
-              <div
-                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
-                *ngIf="collaborator.status.id === 0"
-              >
                 <button
-                  class="bd-button"
+                  class="bd-button w-28"
+                  *ngIf="collaborator.status.id === 0"
                   (click)="
                     onUpdateCollaborator(
                       publicKey.toBase58(),
@@ -212,23 +240,9 @@ interface ViewModel {
                 >
                   Approve
                 </button>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600"></div>
-                </div>
-              </div>
-              <div
-                class="py-4 px-7 w-28 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
-                *ngIf="collaborator.status.id === 2"
-              >
                 <button
-                  class="bd-button"
+                  *ngIf="collaborator.status.id === 2"
+                  class="bd-button w-28"
                   (click)="
                     onUpdateCollaborator(
                       publicKey.toBase58(),
@@ -241,23 +255,10 @@ interface ViewModel {
                 >
                   Grant
                 </button>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
-                </div>
-              </div>
-              <div
-                class="py-4 px-7 w-32 h-10 flex justify-center items-center bd-bg-image-11 shadow relative"
-                *ngIf="collaborator.status.id === 0"
-              >
+
                 <button
-                  class="bd-button"
+                  class="bd-button w-28"
+                  *ngIf="collaborator.status.id === 0"
                   (click)="
                     onUpdateCollaborator(
                       publicKey.toBase58(),
@@ -270,99 +271,49 @@ interface ViewModel {
                 >
                   Reject
                 </button>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 left-2"
-                >
-                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
-                </div>
-                <div
-                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-4 right-2"
-                >
-                  <div class="w-full h-px bg-gray-600"></div>
-                </div>
-              </div>
-            </ng-container>
-          </div>
-        </aside>
-
-        <div class="px-8 mt-4 pb-8">
-          <main>
-            <div class="flex items-center gap-4 mb-6">
-              <figure class="w-20 h-20 rounded-full overflow-hidden">
-                <img
-                  [src]="collaborator.user.thumbnailUrl"
-                  class="w-full"
-                  onerror="this.src='assets/images/default-profile.png';"
-                />
-              </figure>
-              <div>
-                <h1 class="flex items-center justify-start gap-2 mb-0">
-                  <span
-                    class="leading-none"
-                    [matTooltip]="
-                      collaborator.user.name
-                        | bdItemUpdatingMessage: collaborator.user:'User'
-                    "
-                    matTooltipShowDelay="500"
-                  >
-                    {{ collaborator.user.name }}
-                  </span>
-                </h1>
-                <p class="m-0">
-                  <a
-                    [href]="
-                      'https://explorer.solana.com/address/' +
-                      collaborator.user.id
-                    "
-                    target="__blank"
-                    class="text-accent underline"
-                    >@{{ collaborator.user.userName }}</a
-                  >
-                </p>
-                <p class="m-0">
-                  <mat-icon class="text-sm w-4 mr-1">event</mat-icon>
-                  Builder since
-                  {{ collaborator.createdAt | date: 'mediumDate' }}
-                </p>
-              </div>
+              </ng-container>
             </div>
-            <dl class="flex justify-between gap-5">
-              <div class="flex-1">
-                <dt class="mb-2">Name:</dt>
-                <dd
-                  class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
-                >
-                  <span
-                    class="overflow-hidden whitespace-nowrap overflow-ellipsis"
-                  >
-                    {{ collaborator.user.name }}
-                  </span>
-                </dd>
-              </div>
-
-              <div class="flex-1">
-                <dt class="mb-2">Authority:</dt>
-                <dd
-                  class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
-                >
-                  <span
-                    class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
-                  >
-                    {{ collaborator.user.authority }}
-                  </span>
-
-                  <button
-                    mat-icon-button
-                    [cdkCopyToClipboard]="collaborator.user.authority"
-                  >
-                    <mat-icon>content_copy</mat-icon>
-                  </button>
-                </dd>
-              </div>
-            </dl>
-          </main>
+          </bd-card>
         </div>
-      </mat-card>
+        <bd-card>
+          <dl class="flex justify-between gap-5">
+            <div class="flex-1">
+              <dt class="mb-2">Name:</dt>
+              <dd
+                class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+              >
+                <span
+                  class="overflow-hidden whitespace-nowrap overflow-ellipsis"
+                >
+                  {{ collaborator.user.name }}
+                </span>
+              </dd>
+            </div>
+
+            <div class="flex-1">
+              <dt class="mb-2">Authority:</dt>
+              <dd
+                class="flex items-center w-64 h-10 gap-1 px-2 bg-bd-black bg-opacity-70 rounded-md"
+              >
+                <span
+                  class="w-48 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                >
+                  {{
+                    collaborator.user.authority | obscureAddress: '.':[09, 35]
+                  }}
+                </span>
+
+                <button
+                  mat-icon-button
+                  [cdkCopyToClipboard]="collaborator.user.authority"
+                >
+                  <mat-icon>content_copy</mat-icon>
+                </button>
+              </dd>
+            </div>
+          </dl>
+        </bd-card>
+      </div>
     </div>
   `,
   styles: [],

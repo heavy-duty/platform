@@ -64,109 +64,48 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
           else emptyList
         "
       >
-        <mat-card
+        <div
+          class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="
             let collectionAttribute of collectionAttributes;
             let i = index
           "
-          class="h-auto w-96 rounded-lg overflow-hidden bd-bg-image-1 p-0 mat-elevation-z8"
         >
-          <aside class="flex items-center bd-bg-black px-4 py-1 gap-1">
-            <div class="flex-1 flex items-center gap-2">
-              <ng-container *ngIf="collectionAttribute | bdItemChanging">
-                <mat-progress-spinner
-                  diameter="20"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
-
-                <p class="m-0 text-xs text-white text-opacity-60">
-                  <ng-container *ngIf="collectionAttribute.isCreating">
-                    Creating...
-                  </ng-container>
-                  <ng-container *ngIf="collectionAttribute.isUpdating">
-                    Updating...
-                  </ng-container>
-                  <ng-container *ngIf="collectionAttribute.isDeleting">
-                    Deleting...
-                  </ng-container>
-                </p>
-              </ng-container>
-            </div>
-            <div
-              class="flex flex-1 justify-end"
-              *hdWalletAdapter="
-                let publicKey = publicKey;
-                let connected = connected
-              "
+          <bd-card class="flex-1 flex gap-2 justify-between">
+            <figure
+              *ngIf="!(collectionAttribute | bdItemChanging)"
+              class="w-16 h-16 flex justify-center items-center bg-bd-black rounded-full"
             >
-              <ng-container *ngIf="publicKey !== null">
-                <button
-                  mat-icon-button
-                  bdEditCollectionAttribute
-                  [collectionAttribute]="{
-                    name: collectionAttribute.name,
-                    kind: collectionAttribute.kind.id,
-                    max:
-                      collectionAttribute.kind.id === 1
-                        ? collectionAttribute.kind.size
-                        : null,
-                    maxLength: collectionAttribute.kind.size,
-                    modifier: collectionAttribute.modifier?.id ?? null,
-                    size: collectionAttribute.modifier?.size ?? null
-                  }"
-                  (editCollectionAttribute)="
-                    onUpdateCollectionAttribute(
-                      publicKey.toBase58(),
-                      collectionAttribute.workspaceId,
-                      collectionAttribute.collectionId,
-                      collectionAttribute.id,
-                      $event
-                    )
-                  "
-                  [disabled]="
-                    !connected || (collectionAttribute | bdItemChanging)
-                  "
-                >
-                  <mat-icon>edit</mat-icon>
-                </button>
-                <button
-                  mat-icon-button
-                  (click)="
-                    onDeleteCollectionAttribute(
-                      publicKey.toBase58(),
-                      collectionAttribute.workspaceId,
-                      collectionAttribute.collectionId,
-                      collectionAttribute.id
-                    )
-                  "
-                  [disabled]="
-                    !connected || (collectionAttribute | bdItemChanging)
-                  "
-                >
-                  <mat-icon>delete</mat-icon>
-                </button>
-              </ng-container>
+              <img
+                src="assets/icons/collection-attribute.svg"
+                onerror="this.src='assets/images/default-profile.png';"
+              />
+            </figure>
+
+            <div
+              *ngIf="collectionAttribute | bdItemChanging"
+              class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
+            >
+              <mat-progress-spinner
+                diameter="36"
+                mode="indeterminate"
+              ></mat-progress-spinner>
+
+              <p class="m-0 text-xs text-white text-opacity-60 absolute">
+                <ng-container *ngIf="collectionAttribute.isCreating">
+                  Creating
+                </ng-container>
+                <ng-container *ngIf="collectionAttribute.isUpdating">
+                  Updating
+                </ng-container>
+                <ng-container *ngIf="collectionAttribute.isDeleting">
+                  Deleting
+                </ng-container>
+              </p>
             </div>
-          </aside>
 
-          <div class="px-8 mt-4">
-            <header class="flex gap-2 mb-8">
-              <figure
-                class="w-12 h-12 flex justify-center items-center bd-bg-black rounded-full mr-2"
-              >
-                <mat-icon
-                  class="w-1/2"
-                  [ngClass]="{
-                    'text-yellow-500': collectionAttribute.kind.id === 0,
-                    'text-blue-500': collectionAttribute.kind.id === 1,
-                    'text-green-500': collectionAttribute.kind.id === 2,
-                    'text-purple-500': collectionAttribute.kind.id === 3
-                  }"
-                  >list_alt</mat-icon
-                >
-              </figure>
-
-              <div>
+            <div class="flex gap-10 mt-1">
+              <section>
                 <h2
                   class="mb-0 text-lg font-bold flex items-center gap-2"
                   [matTooltip]="
@@ -178,46 +117,100 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                   {{ collectionAttribute.name }}
                 </h2>
 
-                <p class="text-sm mb-0">
-                  Type: {{ collectionAttribute.kind.name }}.
+                <p class="text-sm mb-0 capitalize">
+                  {{ collectionAttribute.kind.name }}.
                 </p>
-              </div>
-            </header>
+              </section>
+              <section class="flex flex-col gap-1">
+                <p class="text-sm font-thin m-0">
+                  <mat-icon inline>auto_awesome_motion</mat-icon>
+                  &nbsp;
+                  <ng-container
+                    *ngIf="collectionAttribute.modifier !== null"
+                    [ngSwitch]="collectionAttribute.modifier.id"
+                  >
+                    <ng-container *ngSwitchCase="0">
+                      Array of Items
+                    </ng-container>
+                    <ng-container *ngSwitchCase="1">
+                      Vector ofItems
+                    </ng-container>
+                  </ng-container>
 
-            <section class="flex gap-6 mb-4 justify-between">
-              <p class="text-sm font-thin m-0">
-                <mat-icon inline>auto_awesome_motion</mat-icon>
-                &nbsp;
-                <ng-container
-                  *ngIf="collectionAttribute.modifier !== null"
-                  [ngSwitch]="collectionAttribute.modifier.id"
+                  <ng-container *ngIf="collectionAttribute.modifier === null">
+                    Single Item
+                  </ng-container>
+                </p>
+                <p
+                  class="text-sm font-thin m-0"
+                  *ngIf="
+                    collectionAttribute.modifier !== null &&
+                    collectionAttribute.modifier.size
+                  "
                 >
-                  <ng-container *ngSwitchCase="0">
-                    Array of Items
-                  </ng-container>
-                  <ng-container *ngSwitchCase="1">
-                    Vector ofItems
-                  </ng-container>
-                </ng-container>
-
-                <ng-container *ngIf="collectionAttribute.modifier === null">
-                  Single Item
-                </ng-container>
-              </p>
-              <p
-                class="text-sm font-thin m-0"
-                *ngIf="
-                  collectionAttribute.modifier !== null &&
-                  collectionAttribute.modifier.size
+                  <mat-icon inline="">data_array</mat-icon>
+                  &nbsp; Size:
+                  {{ collectionAttribute.modifier?.size }}
+                </p>
+              </section>
+            </div>
+          </bd-card>
+          <bd-card
+            class="flex"
+            *hdWalletAdapter="
+              let publicKey = publicKey;
+              let connected = connected
+            "
+          >
+            <ng-container *ngIf="publicKey !== null">
+              <button
+                class="bd-button flex-1"
+                bdEditCollectionAttribute
+                [collectionAttribute]="{
+                  name: collectionAttribute.name,
+                  kind: collectionAttribute.kind.id,
+                  max:
+                    collectionAttribute.kind.id === 1
+                      ? collectionAttribute.kind.size
+                      : null,
+                  maxLength: collectionAttribute.kind.size,
+                  modifier: collectionAttribute.modifier?.id ?? null,
+                  size: collectionAttribute.modifier?.size ?? null
+                }"
+                (editCollectionAttribute)="
+                  onUpdateCollectionAttribute(
+                    publicKey.toBase58(),
+                    collectionAttribute.workspaceId,
+                    collectionAttribute.collectionId,
+                    collectionAttribute.id,
+                    $event
+                  )
+                "
+                [disabled]="
+                  !connected || (collectionAttribute | bdItemChanging)
                 "
               >
-                <mat-icon inline="">data_array</mat-icon>
-                &nbsp; Size:
-                {{ collectionAttribute.modifier?.size }}
-              </p>
-            </section>
-          </div>
-        </mat-card>
+                Edit
+              </button>
+              <button
+                class="bd-button flex-1"
+                (click)="
+                  onDeleteCollectionAttribute(
+                    publicKey.toBase58(),
+                    collectionAttribute.workspaceId,
+                    collectionAttribute.collectionId,
+                    collectionAttribute.id
+                  )
+                "
+                [disabled]="
+                  !connected || (collectionAttribute | bdItemChanging)
+                "
+              >
+                Delete
+              </button>
+            </ng-container>
+          </bd-card>
+        </div>
       </div>
 
       <ng-template #emptyList>

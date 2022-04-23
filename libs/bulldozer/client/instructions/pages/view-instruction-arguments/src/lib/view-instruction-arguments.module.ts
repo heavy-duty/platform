@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionArgumentModule } from '@bulldozer-client/edit-instruction-argument';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
@@ -37,6 +38,7 @@ import { ViewInstructionArgumentsComponent } from './view-instruction-arguments.
     HdBroadcasterCdkModule,
     ItemUpdatingModule,
     EditInstructionArgumentModule,
+    CardModule,
   ],
   declarations: [ViewInstructionArgumentsComponent],
 })

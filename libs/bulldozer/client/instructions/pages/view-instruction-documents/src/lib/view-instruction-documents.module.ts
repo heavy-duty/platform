@@ -8,6 +8,7 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instruction-document';
 import { EditInstructionRelationModule } from '@bulldozer-client/edit-instruction-relation';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
@@ -35,11 +36,12 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
     ItemUpdatingModule,
     EditInstructionDocumentModule,
     EditInstructionRelationModule,
     ObscureAddressModule,
-    HdWalletAdapterCdkModule,
+    CardModule,
   ],
   declarations: [RemoveByIdPipe, ViewInstructionDocumentsComponent],
 })
