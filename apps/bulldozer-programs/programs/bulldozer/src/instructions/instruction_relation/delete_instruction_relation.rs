@@ -26,7 +26,7 @@ pub struct DeleteInstructionRelation<'info> {
   pub to: Box<Account<'info, InstructionAccount>>,
   #[account(
     mut,
-    close = authority,
+    close = budget,
     seeds = [
       b"instruction_relation".as_ref(),
       from.key().as_ref(),
