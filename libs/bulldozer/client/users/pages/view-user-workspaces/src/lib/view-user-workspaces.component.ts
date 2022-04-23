@@ -34,7 +34,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
               <bd-card class="flex-1">
                 <div class="flex items-center gap-2 ">
                   <figure
-                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
+                    class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
                     *ngIf="!(workspace | bdItemChanging)"
                   >
                     <img
@@ -44,10 +44,10 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                   </figure>
                   <div
                     *ngIf="workspace | bdItemChanging"
-                    class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
+                    class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
                   >
                     <mat-progress-spinner
-                      diameter="48"
+                      diameter="36"
                       mode="indeterminate"
                     ></mat-progress-spinner>
 

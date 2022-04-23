@@ -18,7 +18,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
     </header>
 
     <ng-container *hdWalletAdapter="let publicKey = publicKey">
-      <div class="flex gap-6 flex-wrap" *ngIf="publicKey !== null">
+      <div class="flex" *ngIf="publicKey !== null">
         <ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
           <div
             class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
@@ -41,7 +41,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     *ngIf="user | bdItemChanging"
                   >
                     <mat-progress-spinner
-                      diameter="48"
+                      diameter="36"
                       mode="indeterminate"
                     ></mat-progress-spinner>
                   </div>
