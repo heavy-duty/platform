@@ -9,12 +9,13 @@ import { MatDialogRef } from '@angular/material/dialog';
     <div
       class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 bg-bd-black shadow relative"
     >
-      <button class="bd-button w-full" (click)="onNewWorkspace()">
+      <button class="bd-button flex-1" (click)="onNewWorkspace()">
         Create
       </button>
-      <button class="bd-button w-full" (click)="onImportWorkspace()">
+      <button class="bd-button flex-1" (click)="onImportWorkspace()">
         Import
       </button>
+      <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
 
       <div
         class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
@@ -27,15 +28,6 @@ import { MatDialogRef } from '@angular/material/dialog';
         <div class="w-full h-px bg-gray-600"></div>
       </div>
     </div>
-
-    <button
-      mat-icon-button
-      aria-label="Close add workspace form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
