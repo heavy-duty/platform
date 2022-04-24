@@ -29,7 +29,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
           class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="let workspace of workspaces; let i = index"
         >
-          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+          <ng-container *ngrxLet="workspaceId$; let workspaceId">
             <div class="flex gap-2">
               <bd-card class="flex-1">
                 <div class="flex items-center gap-2 ">
