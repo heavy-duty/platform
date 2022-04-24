@@ -182,6 +182,15 @@ interface ViewModel {
                 >
                   {{ collaborator.user.name }}
                 </span>
+
+                <mat-icon
+                  class="inline pl-2 text-base"
+                  *ngIf="collaborator.isAdmin"
+                  color="accent"
+                  inline
+                >
+                  admin_panel_settings
+                </mat-icon>
               </h1>
               <p class="m-0">
                 <a
