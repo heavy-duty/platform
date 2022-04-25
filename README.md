@@ -4,7 +4,7 @@ Bulldozer is a low code platform that uses abstractions that are common for deve
 
 It consists of an Anchor workspace and an Angular application, the Anchor workspace holds the content of the Bulldozer program, it's used as decentralized storage. The reason we store all the data on-chain is that we want to unlock real-time collaboration while building systems.
 
-![screenshot of bulldozer](https://user-images.githubusercontent.com/7496781/137217166-403c0780-4808-48d7-964a-49d8720c168a.png)
+![screenshot_of_bulldozer](https://user-images.githubusercontent.com/7496781/165176684-c969cec9-2665-4cd4-a99e-608abb42dba2.png)
 
 ## Running Locally
 
@@ -35,6 +35,7 @@ Now you run these commands from the root path:
 - `npx nx build bulldozer-programs`
 - `npx nx deploy bulldozer-programs`
 - `npx nx serve bulldozer-client`
+- `npx nx serve broadcaster`
 
 Those three commands will build the program, deploy it to your local validator instance and start a server at port 4200 with the client application.
 
