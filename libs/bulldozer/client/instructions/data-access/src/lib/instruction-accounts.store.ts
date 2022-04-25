@@ -94,6 +94,15 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
+      if (instructionAccountIds.size === 0) {
+        this.patchState({
+          loading: false,
+          instructionAccountsMap: Map<string, Document<InstructionAccount>>(),
+        });
+
+        return EMPTY;
+      }
+
       return this._instructionAccountApiService
         .findByIds(instructionAccountIds.toArray())
         .pipe(

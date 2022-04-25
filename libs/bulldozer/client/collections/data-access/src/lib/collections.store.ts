@@ -90,6 +90,15 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
         return EMPTY;
       }
 
+      if (collectionIds.size === 0) {
+        this.patchState({
+          loading: false,
+          collectionsMap: Map<string, Document<Collection>>(),
+        });
+
+        return EMPTY;
+      }
+
       return this._collectionApiService.findByIds(collectionIds.toArray()).pipe(
         tapResponse(
           (collections) => {
