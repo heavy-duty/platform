@@ -28,6 +28,8 @@ export interface InstructionStatus {
     isSigner: boolean;
     isWritable: boolean;
   }[];
+  confirmedAt?: number;
+  viewed?: boolean;
 }
 
 interface ViewModel {
@@ -42,8 +44,9 @@ const initialState: ViewModel = {
 
 const createInstructionStatus = (
   transactionStatus: TransactionStatus,
-  instruction: TransactionInstruction
-) => {
+  instruction: TransactionInstruction,
+  viewed = false
+): InstructionStatus | null => {
   const transactionResponse = transactionStatus.transactionResponse;
 
   if (transactionResponse === undefined) {
@@ -80,6 +83,8 @@ const createInstructionStatus = (
       name: account.name ?? 'Unknown',
       pubkey: account.pubkey.toBase58(),
     })),
+    confirmedAt: transactionStatus.confirmedAt,
+    viewed,
   };
 };
 
@@ -120,13 +125,34 @@ export class UserInstructionsStore extends ComponentStore<ViewModel> {
   ) {
     super(initialState);
 
-    this._handleTransactionStatuses(
+    /* this._handleTransactionStatuses(
       this._hdSolanaTransactionsStore.transactionStatuses$
     );
     this._handleLastTransactionStatus(
       this._hdSolanaTransactionsStore.lastTransactionStatus$
-    );
+    ); */
   }
+
+  readonly markAsViewed = this.updater((state) => {
+    const instructionStatusesMap = new Map(state.instructionStatusesMap);
+
+    instructionStatusesMap.forEach((instructionStatus, key) => {
+      if (
+        instructionStatus.status === 'finalized' &&
+        !instructionStatus.viewed
+      ) {
+        instructionStatusesMap.set(key, {
+          ...instructionStatus,
+          viewed: true,
+        });
+      }
+    });
+
+    return {
+      ...state,
+      instructionStatusesMap,
+    };
+  });
 
   private readonly _handleLastTransactionStatus =
     this.effect<TransactionStatus | null>(
@@ -158,35 +184,30 @@ export class UserInstructionsStore extends ComponentStore<ViewModel> {
 
   private readonly _handleTransactionStatuses = this.updater<
     TransactionStatus[]
-  >((state, transactionStatuses) => ({
-    ...state,
-    instructionStatusesMap: new Map(
-      transactionStatuses.reduce(
-        (
-          instructionStatuses: [string, InstructionStatus][],
-          transactionStatus: TransactionStatus
-        ) => [
-          ...instructionStatuses,
-          ...(transactionStatus.transactionResponse === undefined
-            ? []
-            : transactionStatus.transactionResponse.transaction.instructions
-                .map((instruction, index) =>
-                  instruction.programId.equals(BULLDOZER_PROGRAM_ID)
-                    ? [
-                        `${transactionStatus.signature}:${index}`,
-                        createInstructionStatus(transactionStatus, instruction),
-                      ]
-                    : null
-                )
-                .filter(
-                  (
-                    instructionStatus
-                  ): instructionStatus is [string, InstructionStatus] =>
-                    instructionStatus !== null
-                )),
-        ],
-        []
-      )
-    ),
-  }));
+  >((state, transactionStatuses) => {
+    const instructionStatusesMap = new Map(state.instructionStatusesMap);
+
+    transactionStatuses.forEach((transactionStatus) => {
+      transactionStatus.transactionResponse?.transaction.instructions.forEach(
+        (instruction, index) => {
+          const key = `${transactionStatus.signature}:${index}`;
+          const instructionStatus = instructionStatusesMap.get(key);
+          const newInstructionStatus = createInstructionStatus(
+            transactionStatus,
+            instruction,
+            instructionStatus?.viewed ?? false
+          );
+
+          if (newInstructionStatus !== null) {
+            instructionStatusesMap.set(key, newInstructionStatus);
+          }
+        }
+      );
+    });
+
+    return {
+      ...state,
+      instructionStatusesMap,
+    };
+  });
 }

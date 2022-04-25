@@ -6,8 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { EditCollectionTriggerDirective } from './edit-collection-trigger.directive';
 import { EditCollectionComponent } from './edit-collection.component';
+import { EditCollectionDirective } from './edit-collection.directive';
 
 @NgModule({
   imports: [
@@ -19,7 +19,7 @@ import { EditCollectionComponent } from './edit-collection.component';
     MatIconModule,
     MatInputModule,
   ],
-  declarations: [EditCollectionComponent, EditCollectionTriggerDirective],
-  exports: [EditCollectionTriggerDirective],
+  declarations: [EditCollectionComponent, EditCollectionDirective],
+  exports: [EditCollectionDirective],
 })
 export class EditCollectionModule {}

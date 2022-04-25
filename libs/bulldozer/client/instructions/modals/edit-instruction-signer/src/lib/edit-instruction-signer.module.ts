@@ -7,8 +7,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { EditInstructionSignerTriggerDirective } from './edit-instruction-signer-trigger.directive';
 import { EditInstructionSignerComponent } from './edit-instruction-signer.component';
+import { EditInstructionSignerDirective } from './edit-instruction-signer.directive';
 
 @NgModule({
   imports: [
@@ -23,8 +23,8 @@ import { EditInstructionSignerComponent } from './edit-instruction-signer.compon
   ],
   declarations: [
     EditInstructionSignerComponent,
-    EditInstructionSignerTriggerDirective,
+    EditInstructionSignerDirective,
   ],
-  exports: [EditInstructionSignerTriggerDirective],
+  exports: [EditInstructionSignerDirective],
 })
 export class EditInstructionSignerModule {}

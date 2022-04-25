@@ -1,293 +1,187 @@
 import { Injectable } from '@angular/core';
+import { WorkspaceStore } from '@bulldozer-client/workspaces-data-access';
 import {
-  BudgetApiService,
-  BudgetStore,
-} from '@bulldozer-client/budgets-data-access';
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
 import {
-  CollaboratorApiService,
-  CollaboratorsStore,
-  CollaboratorStore,
-} from '@bulldozer-client/collaborators-data-access';
-import { ConfigStore, TabStore } from '@bulldozer-client/core-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import {
+  Document,
+  flattenInstructions,
   InstructionStatus,
-  UserStore,
-} from '@bulldozer-client/users-data-access';
-import {
-  WorkspaceInstructionsStore,
-  WorkspaceStore,
-} from '@bulldozer-client/workspaces-data-access';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import {
-  combineLatest,
-  concatMap,
-  EMPTY,
-  filter,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+  Workspace,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+import { reduceInstructions } from './reduce-instructions';
+import { WorkspaceItemView } from './types';
+
+const documentToView = (document: Document<Workspace>): WorkspaceItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+  };
+};
 
 interface ViewModel {
   workspaceId: string | null;
-  budgetMinimumBalanceForRentExemption: number | null;
-  showRejectedCollaborators: boolean;
-  collaboratorListMode: 'pending' | 'ready';
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
-  budgetMinimumBalanceForRentExemption: null,
-  showRejectedCollaborators: false,
-  collaboratorListMode: 'ready',
+  transactions: List(),
 };
 
 @Injectable()
 export class ViewWorkspaceStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
-  readonly showRejectedCollaborators$ = this.select(
-    ({ showRejectedCollaborators }) => showRejectedCollaborators
+  private readonly _topicName$ = this.select(
+    this.workspaceId$.pipe(isNotNullOrUndefined),
+    (workspaceId) => `workspace:${workspaceId}`
   );
-  readonly collaboratorListMode$ = this.select(
-    ({ collaboratorListMode }) => collaboratorListMode
-  );
-  readonly budgetMinimumBalanceForRentExemption$ = this.select(
-    ({ budgetMinimumBalanceForRentExemption }) =>
-      budgetMinimumBalanceForRentExemption
-  );
-  readonly pendingCollaborators$ = this.select(
-    this._collaboratorsStore.collaborators$,
-    (collaborators) =>
-      collaborators
-        .filter((collaborator) => collaborator.data.status.id === 0)
-        .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
-  );
-  readonly readyCollaborators$ = this.select(
-    this._collaboratorsStore.collaborators$,
-    this.showRejectedCollaborators$,
-    (collaborators, showRejectedCollaborators) =>
-      collaborators
-        .filter(
-          (collaborator) =>
-            collaborator.data.status.id === 1 ||
-            (collaborator.data.status.id === 2 && showRejectedCollaborators)
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
         )
-        .sort((a, b) => a.createdAt.toNumber() - b.createdAt.toNumber())
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
   );
-  readonly transactionStatuses$ = this.select(
-    this.workspaceId$,
-    this._hdBroadcasterStore.transactionStatuses$,
-    (workspaceId, transactionStatuses) =>
-      transactionStatuses.filter(
-        (transactionStatus) => transactionStatus.topic === workspaceId
-      )
+  readonly workspace$ = this.select(
+    this._workspaceStore.workspace$,
+    this._instructionStatuses$,
+    (workspace, instructionStatuses) =>
+      instructionStatuses.reduce(
+        reduceInstructions,
+        workspace === null ? null : documentToView(workspace)
+      ),
+    { debounce: true }
   );
 
   constructor(
-    private readonly _tabStore: TabStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _collaboratorApiService: CollaboratorApiService,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _budgetApiService: BudgetApiService,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore,
-    private readonly _workspaceStore: WorkspaceStore,
-    private readonly _collaboratorsStore: CollaboratorsStore,
-    private readonly _collaboratorStore: CollaboratorStore,
-    private readonly _configStore: ConfigStore,
-    private readonly _userStore: UserStore,
-    private readonly _budgetStore: BudgetStore,
-    workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _workspaceStore: WorkspaceStore
   ) {
     super(initialState);
 
-    this._workspaceStore.setWorkspaceId(this.workspaceId$);
-    this._collaboratorStore.setWorkspaceId(this.workspaceId$);
-    this._collaboratorStore.setUserId(this._userStore.userId$);
-    this._collaboratorsStore.setFilters(
-      combineLatest({
-        workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
-      })
+    this._workspaceStore.setWorkspaceId(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (workspaceId) => workspaceId
+      )
     );
-    this._budgetStore.setWorkspaceId(this.workspaceId$);
-    this._loadBudgetMinimumBalanceForRentExemption();
-    this._openTab(this.workspaceId$);
-    this._activateWorkspace(this.workspaceId$);
-    this._handleInstruction(
-      this.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        switchMap((workspaceId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Workspace' && account.pubkey === workspaceId
-              )
-            )
-          )
-        )
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
       )
     );
   }
 
-  readonly setWorkspaceId = this.updater<string | null>(
-    (state, workspaceId) => ({ ...state, workspaceId })
-  );
-
-  readonly toggleShowRejectedCollaborators = this.updater((state) => ({
-    ...state,
-    showRejectedCollaborators: !state.showRejectedCollaborators,
-  }));
-
-  readonly setCollaboratorListMode = this.updater<'ready' | 'pending'>(
-    (state, collaboratorListMode) => ({
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
       ...state,
-      collaboratorListMode,
+      transactions: state.transactions.push(transaction),
     })
   );
 
-  private readonly _activateWorkspace = this.effect<string | null>(
-    tap((workspaceId) => this._configStore.setWorkspaceId(workspaceId))
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createWorkspace':
-        case 'updateWorkspace':
-        case 'deleteWorkspace': {
-          this._workspaceStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  readonly setWorkspaceId = this.updater<string | null>(
+    (state, workspaceId) => ({
+      ...state,
+      workspaceId,
+    })
+  );
+
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  private readonly _openTab = this.effect<string | null>(
-    tap((workspaceId) => {
-      if (workspaceId !== null) {
-        this._tabStore.openTab({
-          id: workspaceId,
-          kind: 'workspace',
-          url: `/workspaces/${workspaceId}`,
-        });
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
+  }>(
+    switchMap(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return EMPTY;
       }
-    })
-  );
 
-  private readonly _loadBudgetMinimumBalanceForRentExemption =
-    this.effect<void>(
-      switchMap(() =>
-        this._budgetApiService.getMinimumBalanceForRentExemption().pipe(
-          tapResponse(
-            (budgetMinimumBalanceForRentExemption) =>
-              this.patchState({ budgetMinimumBalanceForRentExemption }),
-            (error) => this._notificationStore.setError(error)
-          )
+      this.patchState({ transactions: List() });
+
+      const correlationId = uuid();
+      let subscriptionId: string;
+
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
+            event: 'subscribe',
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
+            event: 'unsubscribe',
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
+            );
+          }
         )
-      )
-    );
-
-  readonly updateCollaborator = this.effect<{
-    collaboratorId: string;
-    workspaceId: string;
-    status: number;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, collaboratorId, status }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorApiService
-          .update({
-            authority: authority.toBase58(),
-            workspaceId,
-            status,
-            collaboratorId,
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Update collaborator request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly requestCollaboratorStatus = this.effect<{
-    workspaceId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorApiService
-          .requestCollaboratorStatus({
-            authority: authority.toBase58(),
-            workspaceId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Request collaborator status request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
-
-  readonly retryCollaboratorStatusRequest = this.effect<{
-    workspaceId: string;
-    collaboratorId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, collaboratorId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collaboratorApiService
-          .retryCollaboratorStatusRequest({
-            authority: authority.toBase58(),
-            workspaceId,
-            collaboratorId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Retry collaborator status request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        );
+    })
   );
 }

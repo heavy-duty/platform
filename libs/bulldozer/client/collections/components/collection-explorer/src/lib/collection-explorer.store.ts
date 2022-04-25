@@ -1,77 +1,126 @@
 import { Injectable } from '@angular/core';
+import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
-  CollectionApiService,
-  CollectionQueryStore,
-  CollectionsStore,
-} from '@bulldozer-client/collections-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
 import {
-  combineLatest,
-  concatMap,
-  EMPTY,
-  filter,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+  Collection,
+  Document,
+  flattenInstructions,
+  InstructionStatus,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+import { reduceInstructions } from './reduce-instructions';
+import { CollectionItemView } from './types';
+
+const documentToView = (document: Document<Collection>): CollectionItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+    applicationId: document.data.application,
+    workspaceId: document.data.workspace,
+  };
+};
 
 interface ViewModel {
-  applicationId: string | null;
   workspaceId: string | null;
+  applicationId: string | null;
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
-  applicationId: null,
   workspaceId: null,
+  applicationId: null,
+  transactions: List(),
 };
 
 @Injectable()
 export class CollectionExplorerStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
   readonly applicationId$ = this.select(({ applicationId }) => applicationId);
+  private readonly _topicName$ = this.select(
+    this.applicationId$.pipe(isNotNullOrUndefined),
+    (applicationId) => `applications:${applicationId}:collections`
+  );
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
+        )
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
+  );
+  readonly collections$ = this.select(
+    this._collectionsStore.collections$,
+    this._instructionStatuses$,
+    (collections, instructionStatuses) => {
+      if (collections === null) {
+        return null;
+      }
+
+      return instructionStatuses.reduce(
+        reduceInstructions,
+        collections.map(documentToView)
+      );
+    },
+    { debounce: true }
+  );
 
   constructor(
-    private readonly _collectionApiService: CollectionApiService,
-    private readonly _collectionQueryStore: CollectionQueryStore,
-    private readonly _collectionsStore: CollectionsStore,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore,
-    workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _collectionsStore: CollectionsStore
   ) {
     super(initialState);
 
-    this._collectionQueryStore.setFilters(
-      combineLatest({
-        application: this.applicationId$.pipe(isNotNullOrUndefined),
-      })
+    this._collectionsStore.setFilters(
+      this.select(
+        this.applicationId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (applicationId) => ({ application: applicationId })
+      )
     );
-    this._collectionsStore.setCollectionIds(
-      this._collectionQueryStore.collectionIds$
-    );
-    this._handleInstruction(
-      this.applicationId$.pipe(
-        isNotNullOrUndefined,
-        switchMap((applicationId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Application' &&
-                  account.pubkey === applicationId
-              )
-            )
-          )
-        )
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
       )
     );
   }
+
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: state.transactions.push(transaction),
+    })
+  );
+
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
+  );
 
   readonly setWorkspaceId = this.updater<string | null>(
     (state, workspaceId) => ({ ...state, workspaceId })
@@ -81,129 +130,69 @@ export class CollectionExplorerStore extends ComponentStore<ViewModel> {
     (state, applicationId) => ({ ...state, applicationId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createCollection':
-        case 'updateCollection':
-        case 'deleteCollection': {
-          this._collectionsStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  readonly createCollection = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    collectionName: string;
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
   }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ collectionName, workspaceId, applicationId }, authority]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
+    switchMap(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return EMPTY;
+      }
 
-          return this._collectionApiService
-            .create({
-              collectionName,
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Create collection request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
+      this.patchState({ transactions: List() });
+
+      const correlationId = uuid();
+      let subscriptionId: string;
+
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
+            event: 'subscribe',
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
+            event: 'unsubscribe',
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
             );
-        }
-      )
-    )
-  );
-
-  readonly updateCollection = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    collectionId: string;
-    collectionName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([
-          { workspaceId, applicationId, collectionId, collectionName },
-          authority,
-        ]) => {
-          if (authority === null) {
-            return EMPTY;
           }
-
-          return this._collectionApiService
-            .update({
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationId,
-              collectionName,
-              collectionId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Update collection request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
-            );
-        }
-      )
-    )
-  );
-
-  readonly deleteCollection = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    collectionId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, collectionId, applicationId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._collectionApiService
-          .delete({
-            authority: authority.toBase58(),
-            workspaceId,
-            collectionId,
-            applicationId,
+        )
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete collection request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        );
+    })
   );
 }

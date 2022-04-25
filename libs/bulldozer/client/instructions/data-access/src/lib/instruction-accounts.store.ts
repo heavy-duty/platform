@@ -1,49 +1,33 @@
 import { Injectable } from '@angular/core';
-import { CollectionItemView } from '@bulldozer-client/collections-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import {
+  Document,
+  InstructionAccount,
+  InstructionAccountFilters,
+} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { List, Map } from 'immutable';
+import { EMPTY, switchMap } from 'rxjs';
 import { InstructionAccountApiService } from './instruction-account-api.service';
-import { InstructionRelationItemView } from './instruction-relations.store';
-import { ItemView } from './types';
-
-export type InstructionAccountItemView = ItemView<Document<InstructionAccount>>;
-
-export type InstructionDocumentRelation = InstructionRelationItemView & {
-  extras: {
-    to: InstructionAccountItemView;
-  };
-};
-
-export interface InstructionDocumentItemView {
-  isCreating: boolean;
-  isUpdating: boolean;
-  isDeleting: boolean;
-  document: Document<InstructionAccount>;
-  close: InstructionAccountItemView | null;
-  payer: InstructionAccountItemView | null;
-  collection: CollectionItemView | null;
-  relations: InstructionDocumentRelation[];
-}
 
 interface ViewModel {
   loading: boolean;
-  instructionAccountIds: string[] | null;
-  instructionAccountsMap: Map<string, InstructionAccountItemView>;
+  filters: InstructionAccountFilters | null;
+  instructionAccountIds: List<string> | null;
+  instructionAccountsMap: Map<string, Document<InstructionAccount>> | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
+  filters: null,
   instructionAccountIds: null,
-  instructionAccountsMap: new Map<string, InstructionAccountItemView>(),
+  instructionAccountsMap: null,
 };
 
 @Injectable()
 export class InstructionAccountsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
+  readonly filters$ = this.select(({ filters }) => filters);
   readonly instructionAccountIds$ = this.select(
     ({ instructionAccountIds }) => instructionAccountIds
   );
@@ -53,10 +37,11 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
   readonly instructionAccounts$ = this.select(
     this.instructionAccountsMap$,
     (instructionAccountsMap) =>
-      Array.from(
-        instructionAccountsMap,
-        ([, instructionAccount]) => instructionAccount
-      )
+      instructionAccountsMap === null
+        ? null
+        : instructionAccountsMap
+            .toList()
+            .sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
   );
 
   constructor(
@@ -66,67 +51,60 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._loadInstructionAccounts(this.instructionAccountIds$);
+    this._loadInstructionAccountIds(this.filters$);
   }
 
-  private readonly _setInstructionAccount =
-    this.updater<InstructionAccountItemView>((state, newInstructionAccount) => {
-      const instructionAccountsMap = new Map(state.instructionAccountsMap);
-      instructionAccountsMap.set(
-        newInstructionAccount.document.id,
-        newInstructionAccount
-      );
-
-      return {
-        ...state,
-        instructionAccountsMap,
-      };
-    });
-
-  private readonly _patchStatus = this.updater<{
-    instructionAccountId: string;
-    statuses: {
-      isCreating?: boolean;
-      isUpdating?: boolean;
-      isDeleting?: boolean;
-    };
-  }>((state, { instructionAccountId, statuses }) => {
-    const instructionAccountsMap = new Map(state.instructionAccountsMap);
-    const instructionAccount = instructionAccountsMap.get(instructionAccountId);
-
-    if (instructionAccount === undefined) {
-      return state;
-    }
-
-    return {
+  readonly setFilters = this.updater<InstructionAccountFilters | null>(
+    (state, filters) => ({
       ...state,
-      instructionAccountsMap: instructionAccountsMap.set(instructionAccountId, {
-        ...instructionAccount,
-        ...statuses,
-      }),
-    };
-  });
-
-  private readonly _removeInstructionAccount = this.updater<string>(
-    (state, instructionAccountId) => {
-      const instructionAccountsMap = new Map(state.instructionAccountsMap);
-      instructionAccountsMap.delete(instructionAccountId);
-      return {
-        ...state,
-        instructionAccountsMap,
-      };
-    }
+      filters,
+      instructionAccountIds: null,
+      instructionAccountsMap: null,
+    })
   );
 
-  private readonly _loadInstructionAccounts = this.effect<string[] | null>(
+  private readonly _loadInstructionAccountIds =
+    this.effect<InstructionAccountFilters | null>(
+      switchMap((filters) => {
+        if (filters === null) {
+          return EMPTY;
+        }
+
+        this.patchState({
+          loading: true,
+          instructionAccountsMap: null,
+        });
+
+        return this._instructionAccountApiService.findIds(filters).pipe(
+          tapResponse(
+            (instructionAccountIds) => {
+              this.patchState({
+                instructionAccountIds: List(instructionAccountIds),
+              });
+            },
+            (error) => this._notificationStore.setError(error)
+          )
+        );
+      })
+    );
+
+  private readonly _loadInstructionAccounts = this.effect<List<string> | null>(
     switchMap((instructionAccountIds) => {
       if (instructionAccountIds === null) {
         return EMPTY;
       }
 
-      this.patchState({ loading: true });
+      if (instructionAccountIds.size === 0) {
+        this.patchState({
+          loading: false,
+          instructionAccountsMap: Map<string, Document<InstructionAccount>>(),
+        });
+
+        return EMPTY;
+      }
 
       return this._instructionAccountApiService
-        .findByIds(instructionAccountIds)
+        .findByIds(instructionAccountIds.toArray())
         .pipe(
           tapResponse(
             (instructionAccounts) => {
@@ -141,114 +119,17 @@ export class InstructionAccountsStore extends ComponentStore<ViewModel> {
                   )
                   .reduce(
                     (instructionAccountsMap, instructionAccount) =>
-                      instructionAccountsMap.set(instructionAccount.id, {
-                        document: instructionAccount,
-                        isCreating: false,
-                        isUpdating: false,
-                        isDeleting: false,
-                      }),
-                    new Map<string, InstructionAccountItemView>()
+                      instructionAccountsMap.set(
+                        instructionAccount.id,
+                        instructionAccount
+                      ),
+                    Map<string, Document<InstructionAccount>>()
                   ),
               });
             },
             (error) => this._notificationStore.setError({ error })
           )
         );
-    })
-  );
-
-  readonly setInstructionAccountIds = this.updater<string[] | null>(
-    (state, instructionAccountIds) => ({
-      ...state,
-      instructionAccountIds,
-    })
-  );
-
-  readonly dispatch = this.effect<InstructionStatus>(
-    concatMap((instructionAccountStatus) => {
-      const instructionAccountAccountMeta =
-        instructionAccountStatus.accounts.find(
-          (account) => account.name === 'Account'
-        );
-
-      if (instructionAccountAccountMeta === undefined) {
-        return EMPTY;
-      }
-
-      switch (instructionAccountStatus.name) {
-        case 'createInstructionAccount': {
-          if (instructionAccountStatus.status === 'finalized') {
-            this._patchStatus({
-              instructionAccountId: instructionAccountAccountMeta.pubkey,
-              statuses: {
-                isCreating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._instructionAccountApiService
-            .findById(instructionAccountAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (instructionAccount) =>
-                  this._setInstructionAccount({
-                    document: instructionAccount,
-                    isCreating: true,
-                    isUpdating: false,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'updateInstructionAccount': {
-          if (instructionAccountStatus.status === 'finalized') {
-            this._patchStatus({
-              instructionAccountId: instructionAccountAccountMeta.pubkey,
-              statuses: {
-                isUpdating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._instructionAccountApiService
-            .findById(instructionAccountAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (instructionAccount) =>
-                  this._setInstructionAccount({
-                    document: instructionAccount,
-                    isCreating: false,
-                    isUpdating: true,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'deleteInstructionAccount': {
-          if (instructionAccountStatus.status === 'confirmed') {
-            this._patchStatus({
-              instructionAccountId: instructionAccountAccountMeta.pubkey,
-              statuses: { isDeleting: true },
-            });
-          } else {
-            this._removeInstructionAccount(
-              instructionAccountAccountMeta.pubkey
-            );
-          }
-
-          return EMPTY;
-        }
-        default:
-          return EMPTY;
-      }
     })
   );
 }

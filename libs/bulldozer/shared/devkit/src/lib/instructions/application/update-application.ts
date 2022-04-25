@@ -10,7 +10,7 @@ export const updateApplication = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateApplication({ name: params.applicationName })
+        .methods.updateApplication(params.applicationDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

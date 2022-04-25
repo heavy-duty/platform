@@ -6,8 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { EditApplicationTriggerDirective } from './edit-application-trigger.directive';
 import { EditApplicationComponent } from './edit-application.component';
+import { EditApplicationDirective } from './edit-application.directive';
 
 @NgModule({
   imports: [
@@ -19,7 +19,7 @@ import { EditApplicationComponent } from './edit-application.component';
     MatIconModule,
     MatInputModule,
   ],
-  declarations: [EditApplicationComponent, EditApplicationTriggerDirective],
-  exports: [EditApplicationTriggerDirective],
+  declarations: [EditApplicationComponent, EditApplicationDirective],
+  exports: [EditApplicationDirective],
 })
 export class EditApplicationModule {}

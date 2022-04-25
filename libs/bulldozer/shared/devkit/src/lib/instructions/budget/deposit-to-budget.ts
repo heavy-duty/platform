@@ -1,19 +1,21 @@
-import {
-  PublicKey,
-  SystemProgram,
-  TransactionInstruction,
-} from '@solana/web3.js';
-import { Observable, of } from 'rxjs';
+import { PublicKey, TransactionInstruction } from '@solana/web3.js';
+import { defer, from, Observable } from 'rxjs';
+import { getBulldozerProgram } from '../../programs';
 import { DepositToBudgetParams } from './types';
 
 export const depositToBudget = (
+  endpoint: string,
   params: DepositToBudgetParams
 ): Observable<TransactionInstruction> => {
-  return of(
-    SystemProgram.transfer({
-      fromPubkey: new PublicKey(params.authority),
-      toPubkey: new PublicKey(params.budgetId),
-      lamports: params.lamports,
-    })
+  return defer(() =>
+    from(
+      getBulldozerProgram(endpoint)
+        .methods.depositToBudget(params.depositToBudgetDto)
+        .accounts({
+          workspace: new PublicKey(params.workspaceId),
+          authority: new PublicKey(params.authority),
+        })
+        .instruction() as Promise<TransactionInstruction>
+    )
   );
 };

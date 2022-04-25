@@ -9,8 +9,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
-import { EditInstructionDocumentTriggerDirective } from './edit-instruction-document-trigger.directive';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
+import { EditInstructionDocumentDirective } from './edit-instruction-document.directive';
 
 @NgModule({
   imports: [
@@ -27,8 +27,8 @@ import { EditInstructionDocumentComponent } from './edit-instruction-document.co
   ],
   declarations: [
     EditInstructionDocumentComponent,
-    EditInstructionDocumentTriggerDirective,
+    EditInstructionDocumentDirective,
   ],
-  exports: [EditInstructionDocumentTriggerDirective],
+  exports: [EditInstructionDocumentDirective],
 })
 export class EditInstructionDocumentModule {}

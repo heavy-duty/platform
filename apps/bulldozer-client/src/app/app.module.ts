@@ -14,6 +14,7 @@ import {
   HdSolanaTransactionsInterceptor,
 } from '@heavy-duty/ngx-solana';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
+import { environment } from '../environments/environment';
 import { AppComponent } from './app.component';
 
 @NgModule({
@@ -37,13 +38,16 @@ import { AppComponent } from './app.component';
             ),
         },
       ],
-      { initialNavigation: 'enabledBlocking' }
+      {
+        initialNavigation: 'enabledNonBlocking',
+        paramsInheritanceStrategy: 'always',
+      }
     ),
     HdWalletAdapterModule.forRoot({
       autoConnect: true,
     }),
     HdSolanaModule.forRoot(),
-    HdBroadcasterModule.forRoot(),
+    HdBroadcasterModule.forRoot(environment.broadcasterWebsocket),
   ],
   bootstrap: [AppComponent],
   providers: [

@@ -4,7 +4,7 @@ use crate::collections::{
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
-use crate::utils::{fund_rent_for_account, has_enough_funds};
+use crate::utils::{has_enough_funds, transfer_lamports};
 use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
@@ -76,22 +76,20 @@ pub struct CreateInstructionRelation<'info> {
   pub budget: Box<Account<'info, Budget>>,
   #[account(
     mut,
-    constraint = from_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     seeds = [
       b"instruction_account_stats".as_ref(),
       from.key().as_ref()
     ],
-    bump = from.instruction_account_stats_bump
+    bump = from.bumps.stats
   )]
   pub from_stats: Box<Account<'info, InstructionAccountStats>>,
   #[account(
     mut,
-    constraint = to_stats.quantity_of_relations == 0 @ ErrorCode::CantDeleteAccountWithRelations,
     seeds = [
       b"instruction_account_stats".as_ref(),
       to.key().as_ref()
     ],
-    bump = to.instruction_account_stats_bump
+    bump = to.bumps.stats
   )]
   pub to_stats: Box<Account<'info, InstructionAccountStats>>,
 }
@@ -110,7 +108,7 @@ pub fn validate(ctx: &Context<CreateInstructionRelation>) -> Result<bool> {
 
 pub fn handle(ctx: Context<CreateInstructionRelation>) -> Result<()> {
   msg!("Create instruction relation");
-  fund_rent_for_account(
+  transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.relation.to_account_info().lamports.borrow(),

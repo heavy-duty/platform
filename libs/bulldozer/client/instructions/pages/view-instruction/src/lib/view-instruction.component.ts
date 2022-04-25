@@ -1,392 +1,396 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
 import {
-  CollectionQueryStore,
-  CollectionsStore,
-} from '@bulldozer-client/collections-data-access';
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { TabStore } from '@bulldozer-client/core-data-access';
 import {
-  InstructionAccountQueryStore,
-  InstructionAccountsStore,
-  InstructionArgumentQueryStore,
-  InstructionArgumentsStore,
-  InstructionRelationQueryStore,
-  InstructionRelationsStore,
+  InstructionApiService,
   InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
-import {
-  InstructionAccountDto,
-  InstructionArgumentDto,
-} from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
-import { ViewInstructionCodeStore } from './view-instruction-code.store';
-import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
-import { ViewInstructionSignersStore } from './view-instruction-signers.store';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionStore } from './view-instruction.store';
 
 @Component({
   selector: 'bd-view-instruction',
   template: `
-    <div class="flex w-full" *ngIf="instruction$ | ngrxPush as instruction">
-      <div
-        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
-      >
-        <header bdPageHeader>
-          <h1>
-            <span
-              [matTooltip]="
-                instruction.document.name
-                  | bdItemUpdatingMessage: instruction:'Instruction'
-              "
-              matTooltipShowDelay="500"
-              class="flex items-center justify-start gap-2"
-            >
-              {{ instruction.document.name }}
-              <mat-progress-spinner
-                *ngIf="instruction | bdItemShowSpinner"
-                diameter="16"
-                mode="indeterminate"
-              ></mat-progress-spinner>
-            </span>
-          </h1>
-          <p>Visualize all the details about this instruction.</p>
+    <ng-container *ngrxLet="instruction$; let instruction">
+      <aside class="w-80 flex flex-col flex-shrink-0 pt-5 pb-4 px-5 ml-2">
+        <header class="mb-7 w-full">
+          <ng-container *ngIf="instruction !== null; else notFound">
+            <p class="mb-0 text-2xl uppercase bd-font">
+              {{ instruction.name }}
+            </p>
+            <p class="text-xs m-0">
+              Visualize all the details about this instruction.
+            </p>
+          </ng-container>
+          <ng-template #notFound>
+            <p class="mb-0 text-2xl uppercase bd-font">not found</p>
+            <p class="text-xs m-0">
+              The instruction you're trying to visualize is not available.
+            </p>
+          </ng-template>
         </header>
 
-        <main class="flex flex-col gap-4">
-          <bd-instruction-arguments-list
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [instructionArguments]="(instructionArguments$ | ngrxPush) ?? null"
-            (createInstructionArgument)="
-              onCreateInstructionArgument(
-                instruction.document.data.workspace,
-                instruction.document.data.application,
-                instruction.document.id,
-                $event
-              )
-            "
-            (updateInstructionArgument)="
-              onUpdateInstructionArgument(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event.instructionArgumentId,
-                $event.instructionArgumentDto
-              )
-            "
-            (deleteInstructionArgument)="
-              onDeleteInstructionArgument(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event
-              )
-            "
-          ></bd-instruction-arguments-list>
-          <bd-instruction-documents-list
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [collections]="(collections$ | ngrxPush) ?? null"
-            [instructionAccounts]="(instructionAccounts$ | ngrxPush) ?? null"
-            [instructionDocuments]="(instructionDocuments$ | ngrxPush) ?? null"
-            (createInstructionDocument)="
-              onCreateInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.data.application,
-                instruction.document.id,
-                $event
-              )
-            "
-            (updateInstructionDocument)="
-              onUpdateInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event.instructionAccountId,
-                $event.instructionAccountDto
-              )
-            "
-            (deleteInstructionDocument)="
-              onDeleteInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event
-              )
-            "
-            (createInstructionRelation)="
-              onCreateInstructionRelation(
-                instruction.document.data.workspace,
-                instruction.document.data.application,
-                instruction.document.id,
-                $event.fromAccountId,
-                $event.toAccountId
-              )
-            "
-            (deleteInstructionRelation)="
-              onDeleteInstructionRelation(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event.fromAccountId,
-                $event.toAccountId
-              )
-            "
-          >
-          </bd-instruction-documents-list>
-          <bd-instruction-signers-list
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [instructionSigners]="(instructionSigners$ | ngrxPush) ?? null"
-            (createInstructionSigner)="
-              onCreateInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.data.application,
-                instruction.document.id,
-                $event
-              )
-            "
-            (updateInstructionSigner)="
-              onUpdateInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event.instructionAccountId,
-                $event.instructionAccountDto
-              )
-            "
-            (deleteInstructionSigner)="
-              onDeleteInstructionAccount(
-                instruction.document.data.workspace,
-                instruction.document.id,
-                $event
-              )
-            "
-          >
-          </bd-instruction-signers-list>
-        </main>
-      </div>
-      <div class="w-1/2">
-        <div class="bd-custom-height-content overflow-hidden">
-          <bd-code-editor
-            [customClass]="'bd-border-bottom bd-custom-monaco-editor-splitted'"
-            [template]="(contextCode$ | ngrxPush) ?? null"
-            [options]="(contextEditorOptions$ | ngrxPush) ?? null"
-          ></bd-code-editor>
-
-          <ng-container *ngIf="connected$ | ngrxPush">
-            <div
-              *ngIf="instruction.document.data.body !== instructionBody"
-              class="w-full flex justify-end"
-            >
-              <p class="ml-2 mb-0">
-                Remember to save the changes below:
-                <button
-                  mat-raised-button
-                  color="primary"
-                  (click)="
-                    onUpdateInstructionBody(
-                      instruction.document.data.workspace,
-                      instruction.document.data.application,
-                      instruction.document.id
-                    )
-                  "
-                >
-                  Save
-                </button>
-              </p>
-            </div>
+        <ng-container *ngrxLet="workspaceId$; let workspaceId">
+          <ng-container *ngrxLet="applicationId$; let applicationId">
+            <ng-container *ngrxLet="instructionId$; let instructionId">
+              <ul
+                class="flex-1 overflow-y-auto"
+                *ngIf="
+                  workspaceId !== null &&
+                  applicationId !== null &&
+                  instructionId !== null
+                "
+              >
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'instructions',
+                      instructionId,
+                      'arguments'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/instructions/' +
+                          instructionId +
+                          '/arguments'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Arguments</span>
+                    <span class="text-xs font-thin">
+                      Visualize the list of arguments.
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'instructions',
+                      instructionId,
+                      'documents'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/instructions/' +
+                          instructionId +
+                          '/documents'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Documents</span>
+                    <span class="text-xs font-thin">
+                      Visualize the list of documents.
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'instructions',
+                      instructionId,
+                      'signers'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/instructions/' +
+                          instructionId +
+                          '/signers'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Signers</span>
+                    <span class="text-xs font-thin">
+                      Visualize the list of signers.
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'instructions',
+                      instructionId,
+                      'code-editor'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/instructions/' +
+                          instructionId +
+                          '/code-editor'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Code Editor</span>
+                    <span class="text-xs font-thin">
+                      Edit instruction code.
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </ng-container>
           </ng-container>
+        </ng-container>
 
-          <bd-code-editor
-            [customClass]="'bd-custom-monaco-editor-splitted'"
-            [template]="(handleCode$ | ngrxPush) ?? null"
-            [options]="(handleEditorOptions$ | ngrxPush) ?? null"
-            (codeChange)="instructionBody = $event"
-          ></bd-code-editor>
-        </div>
-      </div>
+        <ng-container
+          *hdWalletAdapter="
+            let publicKey = publicKey;
+            let connected = connected
+          "
+        >
+          <footer
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            *ngIf="publicKey !== null && instruction !== null"
+          >
+            <ng-container>
+              <button
+                class="bd-button w-28"
+                bdEditInstruction
+                [instruction]="instruction"
+                (editInstruction)="
+                  onUpdateInstruction(
+                    publicKey.toBase58(),
+                    instruction.workspaceId,
+                    instruction.applicationId,
+                    instruction.id,
+                    $event
+                  )
+                "
+                [disabled]="!connected || (instruction | bdItemChanging)"
+              >
+                Edit
+              </button>
+              <button
+                class="bd-button w-28"
+                (click)="
+                  onDeleteInstruction(
+                    publicKey.toBase58(),
+                    instruction.workspaceId,
+                    instruction.applicationId,
+                    instruction.id
+                  )
+                "
+                [disabled]="!connected || (instruction | bdItemChanging)"
+              >
+                Delete
+              </button>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-45"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+              >
+                <div class="w-full h-px bg-gray-600"></div>
+              </div>
+            </ng-container>
+          </footer>
+        </ng-container>
+      </aside>
+    </ng-container>
+
+    <figure class="w-14 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
     </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    InstructionStore,
-    InstructionArgumentsStore,
-    InstructionArgumentQueryStore,
-    InstructionAccountsStore,
-    InstructionAccountQueryStore,
-    InstructionRelationsStore,
-    InstructionRelationQueryStore,
-    CollectionsStore,
-    CollectionQueryStore,
-    ViewInstructionStore,
-    ViewInstructionDocumentsStore,
-    ViewInstructionSignersStore,
-    ViewInstructionCodeStore,
-  ],
+  providers: [InstructionStore, ViewInstructionStore],
 })
-export class ViewInstructionComponent {
-  @HostBinding('class') class = 'block';
-  instructionBody = '';
-  readonly connected$ = this._walletStore.connected$;
-  readonly collections$ = this._collectionsStore.collections$.pipe(
-    map((collections) => collections.map(({ document }) => document))
+export class ViewInstructionComponent implements OnInit {
+  @HostBinding('class') class = 'flex h-full';
+  readonly instruction$ = this._viewInstructionStore.instruction$;
+  readonly loading$ = this._instructionStore.loading$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
   );
-  readonly instruction$ = this._instructionStore.instruction$;
-  readonly instructionArguments$ =
-    this._instructionArgumentsStore.instructionArguments$;
-  readonly instructionAccounts$ =
-    this._instructionAccountsStore.instructionAccounts$;
-  readonly instructionDocuments$ =
-    this._viewInstructionDocumentsStore.instructionDocuments$;
-  readonly instructionSigners$ =
-    this._viewInstructionSignersStore.instructionSigners$;
-  readonly contextCode$ = this._viewInstructionCodeStore.contextCode$;
-  readonly contextEditorOptions$ =
-    this._viewInstructionCodeStore.contextEditorOptions$;
-  readonly handleEditorOptions$ =
-    this._viewInstructionCodeStore.handleEditorOptions$;
-  readonly handleCode$ = this._viewInstructionCodeStore.handleCode$;
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly instructionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('instructionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
+    private readonly _router: Router,
     private readonly _route: ActivatedRoute,
+    private readonly _tabStore: TabStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _instructionApiService: InstructionApiService,
     private readonly _instructionStore: InstructionStore,
-    private readonly _instructionArgumentsStore: InstructionArgumentsStore,
-    private readonly _instructionAccountsStore: InstructionAccountsStore,
-    private readonly _collectionsStore: CollectionsStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _viewInstructionStore: ViewInstructionStore,
-    private readonly _viewInstructionCodeStore: ViewInstructionCodeStore,
-    private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
-    private readonly _viewInstructionSignersStore: ViewInstructionSignersStore
-  ) {
-    this._viewInstructionStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
-    );
-    this._viewInstructionStore.setApplicationId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
-      )
-    );
-    this._viewInstructionStore.setInstructionId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('instructionId'))
+    private readonly _viewInstructionStore: ViewInstructionStore
+  ) {}
+
+  ngOnInit() {
+    this._viewInstructionStore.setInstructionId(this.instructionId$);
+    this._tabStore.openTab(
+      combineLatest({
+        workspaceId: this.workspaceId$,
+        applicationId: this.applicationId$,
+        instructionId: this.instructionId$,
+      }).pipe(
+        map(({ instructionId, applicationId, workspaceId }) => ({
+          id: instructionId,
+          kind: 'instruction',
+          url: `/workspaces/${workspaceId}/applications/${applicationId}/instructions/${instructionId}`,
+        }))
       )
     );
   }
 
-  onUpdateInstructionBody(
+  isRouteActive(url: string) {
+    return this._router.isActive(url, {
+      paths: 'exact',
+      queryParams: 'exact',
+      fragment: 'ignored',
+      matrixParams: 'ignored',
+    });
+  }
+
+  onUpdateInstruction(
+    authority: string,
+    workspaceId: string,
+    applicationId: string,
+    instructionId: string,
+    instructionDto: InstructionDto
+  ) {
+    this._instructionApiService
+      .update({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionDto,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update instruction request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `applications:${applicationId}:instructions`,
+                  `instructions:${instructionId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
+  }
+
+  onDeleteInstruction(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     instructionId: string
   ) {
-    this._viewInstructionStore.updateInstructionBody({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionBody: this.instructionBody,
-    });
-  }
-
-  onCreateInstructionArgument(
-    workspaceId: string,
-    applicationId: string,
-    instructionId: string,
-    instructionArgumentDto: InstructionArgumentDto
-  ) {
-    this._viewInstructionStore.createInstructionArgument({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionArgumentDto,
-    });
-  }
-
-  onUpdateInstructionArgument(
-    workspaceId: string,
-    instructionId: string,
-    instructionArgumentId: string,
-    instructionArgumentDto: InstructionArgumentDto
-  ) {
-    this._viewInstructionStore.updateInstructionArgument({
-      workspaceId,
-      instructionId,
-      instructionArgumentId,
-      instructionArgumentDto,
-    });
-  }
-
-  onDeleteInstructionArgument(
-    workspaceId: string,
-    instructionId: string,
-    instructionArgumentId: string
-  ) {
-    this._viewInstructionStore.deleteInstructionArgument({
-      workspaceId,
-      instructionId,
-      instructionArgumentId,
-    });
-  }
-
-  onCreateInstructionAccount(
-    workspaceId: string,
-    applicationId: string,
-    instructionId: string,
-    instructionAccountDto: InstructionAccountDto
-  ) {
-    this._viewInstructionStore.createInstructionAccount({
-      workspaceId,
-      applicationId,
-      instructionId,
-      instructionAccountDto,
-    });
-  }
-
-  onUpdateInstructionAccount(
-    workspaceId: string,
-    instructionId: string,
-    instructionAccountId: string,
-    instructionAccountDto: InstructionAccountDto
-  ) {
-    this._viewInstructionStore.updateInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-      instructionAccountDto,
-    });
-  }
-
-  onDeleteInstructionAccount(
-    workspaceId: string,
-    instructionId: string,
-    instructionAccountId: string
-  ) {
-    this._viewInstructionStore.deleteInstructionAccount({
-      workspaceId,
-      instructionId,
-      instructionAccountId,
-    });
-  }
-
-  onCreateInstructionRelation(
-    workspaceId: string,
-    applicationId: string,
-    instructionId: string,
-    fromAccountId: string,
-    toAccountId: string
-  ) {
-    this._viewInstructionStore.createInstructionRelation({
-      workspaceId,
-      applicationId,
-      instructionId,
-      fromAccountId,
-      toAccountId,
-    });
-  }
-
-  onDeleteInstructionRelation(
-    workspaceId: string,
-    instructionId: string,
-    fromAccountId: string,
-    toAccountId: string
-  ) {
-    this._viewInstructionStore.deleteInstructionRelation({
-      workspaceId,
-      instructionId,
-      fromAccountId,
-      toAccountId,
-    });
+    this._instructionApiService
+      .delete({
+        authority,
+        workspaceId,
+        applicationId,
+        instructionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete instruction request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `applications:${applicationId}:instructions`,
+                  `instructions:${instructionId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }

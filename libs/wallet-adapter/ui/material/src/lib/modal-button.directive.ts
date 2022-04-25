@@ -19,7 +19,7 @@ export class HdWalletModalButtonDirective {
       .open<HdWalletModalComponent, { wallets: Wallet[] }, WalletName>(
         HdWalletModalComponent,
         {
-          panelClass: 'wallet-modal',
+          panelClass: ['wallet-modal', 'bd-bg-image-7'],
           maxWidth: '380px',
           maxHeight: '90vh',
           data: {

@@ -1,36 +1,43 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { Collection, Document } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import {
+  Collection,
+  CollectionFilters,
+  Document,
+} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { List, Map } from 'immutable';
+import { EMPTY, switchMap } from 'rxjs';
 import { CollectionApiService } from './collection-api.service';
-import { ItemView } from './types';
-
-export type CollectionItemView = ItemView<Document<Collection>>;
 
 interface ViewModel {
   loading: boolean;
-  collectionIds: string[] | null;
-  collectionsMap: Map<string, CollectionItemView>;
+  filters: CollectionFilters | null;
+  collectionIds: List<string> | null;
+  collectionsMap: Map<string, Document<Collection>> | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
+  filters: null,
   collectionIds: null,
-  collectionsMap: new Map<string, CollectionItemView>(),
+  collectionsMap: null,
 };
 
 @Injectable()
 export class CollectionsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
+  readonly filters$ = this.select(({ filters }) => filters);
   readonly collectionIds$ = this.select(({ collectionIds }) => collectionIds);
   readonly collectionsMap$ = this.select(
     ({ collectionsMap }) => collectionsMap
   );
   readonly collections$ = this.select(this.collectionsMap$, (collectionsMap) =>
-    Array.from(collectionsMap, ([, collection]) => collection)
+    collectionsMap === null
+      ? null
+      : collectionsMap
+          .toList()
+          .sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
   );
 
   constructor(
@@ -40,71 +47,59 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._loadCollections(this.collectionIds$);
+    this._loadCollectionIds(this.filters$);
   }
 
-  readonly setCollectionIds = this.updater<string[] | null>(
-    (state, collectionIds) => ({
+  readonly setFilters = this.updater<CollectionFilters | null>(
+    (state, filters) => ({
       ...state,
-      collectionIds,
+      filters,
+      collectionIds: null,
+      collectionsMap: null,
     })
   );
 
-  private readonly _setCollection = this.updater<CollectionItemView>(
-    (state, newCollection) => {
-      const collectionsMap = new Map(state.collectionsMap);
-      collectionsMap.set(newCollection.document.id, newCollection);
+  private readonly _loadCollectionIds = this.effect<CollectionFilters | null>(
+    switchMap((filters) => {
+      if (filters === null) {
+        return EMPTY;
+      }
 
-      return {
-        ...state,
-        collectionsMap,
-      };
-    }
+      this.patchState({
+        loading: true,
+        collectionIds: List(),
+        collectionsMap: null,
+      });
+
+      return this._collectionApiService.findIds(filters).pipe(
+        tapResponse(
+          (collectionIds) => {
+            this.patchState({
+              collectionIds: List(collectionIds),
+            });
+          },
+          (error) => this._notificationStore.setError(error)
+        )
+      );
+    })
   );
 
-  private readonly _patchStatus = this.updater<{
-    collectionId: string;
-    statuses: {
-      isCreating?: boolean;
-      isUpdating?: boolean;
-      isDeleting?: boolean;
-    };
-  }>((state, { collectionId, statuses }) => {
-    const collectionsMap = new Map(state.collectionsMap);
-    const collection = collectionsMap.get(collectionId);
-
-    if (collection === undefined) {
-      return state;
-    }
-
-    return {
-      ...state,
-      collectionsMap: collectionsMap.set(collectionId, {
-        ...collection,
-        ...statuses,
-      }),
-    };
-  });
-
-  private readonly _removeCollection = this.updater<string>(
-    (state, collectionId) => {
-      const collectionsMap = new Map(state.collectionsMap);
-      collectionsMap.delete(collectionId);
-      return {
-        ...state,
-        collectionsMap,
-      };
-    }
-  );
-
-  private readonly _loadCollections = this.effect<string[] | null>(
+  private readonly _loadCollections = this.effect<List<string> | null>(
     switchMap((collectionIds) => {
       if (collectionIds === null) {
         return EMPTY;
       }
 
-      this.patchState({ loading: true });
+      if (collectionIds.size === 0) {
+        this.patchState({
+          loading: false,
+          collectionsMap: Map<string, Document<Collection>>(),
+        });
 
-      return this._collectionApiService.findByIds(collectionIds).pipe(
+        return EMPTY;
+      }
+
+      return this._collectionApiService.findByIds(collectionIds.toArray()).pipe(
         tapResponse(
           (collections) => {
             this.patchState({
@@ -116,104 +111,14 @@ export class CollectionsStore extends ComponentStore<ViewModel> {
                 )
                 .reduce(
                   (collectionsMap, collection) =>
-                    collectionsMap.set(collection.id, {
-                      document: collection,
-                      isCreating: false,
-                      isUpdating: false,
-                      isDeleting: false,
-                    }),
-                  new Map<string, CollectionItemView>()
+                    collectionsMap.set(collection.id, collection),
+                  Map<string, Document<Collection>>()
                 ),
             });
           },
           (error) => this._notificationStore.setError({ error })
         )
       );
-    })
-  );
-
-  readonly dispatch = this.effect<InstructionStatus>(
-    concatMap((instructionStatus) => {
-      const collectionAccountMeta = instructionStatus.accounts.find(
-        (account) => account.name === 'Collection'
-      );
-
-      if (collectionAccountMeta === undefined) {
-        return EMPTY;
-      }
-
-      switch (instructionStatus.name) {
-        case 'createCollection': {
-          if (instructionStatus.status === 'finalized') {
-            this._patchStatus({
-              collectionId: collectionAccountMeta.pubkey,
-              statuses: {
-                isCreating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._collectionApiService
-            .findById(collectionAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (collection) =>
-                  this._setCollection({
-                    document: collection,
-                    isCreating: true,
-                    isUpdating: false,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'updateCollection': {
-          if (instructionStatus.status === 'finalized') {
-            this._patchStatus({
-              collectionId: collectionAccountMeta.pubkey,
-              statuses: {
-                isUpdating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._collectionApiService
-            .findById(collectionAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (collection) =>
-                  this._setCollection({
-                    document: collection,
-                    isCreating: false,
-                    isUpdating: true,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'deleteCollection': {
-          if (instructionStatus.status === 'confirmed') {
-            this._patchStatus({
-              collectionId: collectionAccountMeta.pubkey,
-              statuses: { isDeleting: true },
-            });
-          } else {
-            this._removeCollection(collectionAccountMeta.pubkey);
-          }
-
-          return EMPTY;
-        }
-        default:
-          return EMPTY;
-      }
     })
   );
 }

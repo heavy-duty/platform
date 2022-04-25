@@ -4,165 +4,319 @@ import {
   HostBinding,
   OnInit,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
-  CollectionAttributeQueryStore,
-  CollectionAttributesStore,
+  CollectionApiService,
   CollectionStore,
 } from '@bulldozer-client/collections-data-access';
-import { CollectionAttributeDto } from '@heavy-duty/bulldozer-devkit';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { map } from 'rxjs';
-import { ViewCollectionCodeStore } from './view-collection-code.store';
+import { TabStore } from '@bulldozer-client/core-data-access';
+import { NotificationStore } from '@bulldozer-client/notifications-data-access';
+import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
+import { CollectionDto } from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import { combineLatest, distinctUntilChanged, map } from 'rxjs';
 import { ViewCollectionStore } from './view-collection.store';
 
 @Component({
   selector: 'bd-view-collection',
   template: `
-    <div class="flex" *ngIf="collection$ | ngrxPush as collection">
-      <div
-        class="p-5 w-1/2 bd-custom-height-content overflow-auto flex flex-col gap-5"
-      >
-        <header bdPageHeader>
-          <h1>
-            <span
-              [matTooltip]="
-                collection.document.name
-                  | bdItemUpdatingMessage: collection:'Collection'
-              "
-              matTooltipShowDelay="500"
-              class="flex items-center justify-start gap-2"
-            >
-              {{ collection.document.name }}
-              <mat-progress-spinner
-                *ngIf="collection | bdItemShowSpinner"
-                diameter="16"
-                mode="indeterminate"
-              ></mat-progress-spinner>
-            </span>
-          </h1>
-          <p>Visualize all the details about this collection.</p>
+    <ng-container *ngrxLet="collection$; let collection">
+      <aside class="w-80 flex flex-col flex-shrink-0 pt-5 pb-4 px-5 ml-2">
+        <header class="mb-7 w-full">
+          <ng-container *ngIf="collection !== null; else notFound">
+            <p class="mb-0 text-2xl uppercase bd-font">{{ collection.name }}</p>
+            <p class="text-xs m-0">
+              Visualize all the details about this collection.
+            </p>
+          </ng-container>
+          <ng-template #notFound>
+            <p class="mb-0 text-2xl uppercase bd-font">not found</p>
+            <p class="text-xs m-0">
+              The collection you're trying to visualize is not available.
+            </p>
+          </ng-template>
         </header>
 
-        <main>
-          <bd-collection-attributes-list
-            [connected]="(connected$ | ngrxPush) ?? false"
-            [collectionAttributes]="(collectionAttributes$ | ngrxPush) ?? null"
-            (createCollectionAttribute)="
-              onCreateCollectionAttribute(
-                collection.document.data.workspace,
-                collection.document.data.application,
-                collection.document.id,
-                $event
-              )
-            "
-            (updateCollectionAttribute)="
-              onUpdateCollectionAttribute(
-                collection.document.data.workspace,
-                collection.document.id,
-                $event.collectionAttributeId,
-                $event.collectionAttributeDto
-              )
-            "
-            (deleteCollectionAttribute)="
-              onDeleteCollectionAttribute(
-                collection.document.data.workspace,
-                $event.collectionId,
-                $event.collectionAttributeId
-              )
-            "
+        <ng-container *ngrxLet="workspaceId$; let workspaceId">
+          <ng-container *ngrxLet="applicationId$; let applicationId">
+            <ng-container *ngrxLet="collectionId$; let collectionId">
+              <ul
+                class="flex-1 overflow-y-auto"
+                *ngIf="
+                  workspaceId !== null &&
+                  applicationId !== null &&
+                  collectionId !== null
+                "
+              >
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'collections',
+                      collectionId,
+                      'attributes'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/collections/' +
+                          collectionId +
+                          '/attributes'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Attributes</span>
+                    <span class="text-xs font-thin">
+                      Visualize the list of attributes
+                    </span>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 m-auto mb-6 mat-elevation-z4"
+                    [routerLink]="[
+                      '/workspaces',
+                      workspaceId,
+                      'applications',
+                      applicationId,
+                      'collections',
+                      collectionId,
+                      'code-viewer'
+                    ]"
+                    [routerLinkActive]="[
+                      'bd-box-shadow-bg-white',
+                      'border-primary'
+                    ]"
+                    [ngClass]="{
+                      'border-transparent': !isRouteActive(
+                        '/workspaces/' +
+                          workspaceId +
+                          '/applications/' +
+                          applicationId +
+                          '/collections/' +
+                          collectionId +
+                          '/code-viewer'
+                      )
+                    }"
+                  >
+                    <span class="text-lg font-bold">Code Viewer</span>
+                    <span class="text-xs font-thin">
+                      Visualize the collection source code
+                    </span>
+                  </a>
+                </li>
+              </ul>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+
+        <ng-container *hdWalletAdapter="let publicKey = publicKey">
+          <footer
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            *ngIf="publicKey !== null && collection !== null"
           >
-          </bd-collection-attributes-list>
-        </main>
-      </div>
-      <div class="w-1/2 bd-custom-height-content overflow-hidden">
-        <bd-code-editor
-          [customClass]="'bd-custom-monaco-editor'"
-          [template]="(code$ | ngrxPush) ?? null"
-          [options]="(editorOptions$ | ngrxPush) ?? null"
-        ></bd-code-editor>
-      </div>
+            <button
+              class="bd-button w-28"
+              color="accent"
+              bdEditCollection
+              [collection]="collection"
+              (editCollection)="
+                onUpdateCollection(
+                  publicKey.toBase58(),
+                  collection.workspaceId,
+                  collection.applicationId,
+                  collection.id,
+                  $event
+                )
+              "
+              [disabled]="collection | bdItemChanging"
+            >
+              Edit
+            </button>
+            <button
+              class="bd-button w-28"
+              color="warn"
+              (click)="
+                onDeleteCollection(
+                  publicKey.toBase58(),
+                  collection.workspaceId,
+                  collection.applicationId,
+                  collection.id
+                )
+              "
+              [disabled]="collection | bdItemChanging"
+            >
+              Delete
+            </button>
+
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+            >
+              <div class="w-full h-px bg-gray-600 rotate-45"></div>
+            </div>
+            <div
+              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+            >
+              <div class="w-full h-px bg-gray-600"></div>
+            </div>
+          </footer>
+        </ng-container>
+      </aside>
+    </ng-container>
+
+    <figure class="w-14 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
     </div>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    CollectionStore,
-    CollectionAttributesStore,
-    CollectionAttributeQueryStore,
-    ViewCollectionStore,
-    ViewCollectionCodeStore,
-  ],
+  providers: [CollectionStore, ViewCollectionStore],
 })
 export class ViewCollectionComponent implements OnInit {
-  @HostBinding('class') class = 'block';
-  readonly connected$ = this._walletStore.connected$;
-  readonly collection$ = this._collectionStore.collection$;
-  readonly collectionAttributes$ =
-    this._collectionAttributesStore.collectionAttributes$;
-  readonly code$ = this._viewCollectionCodeStore.code$;
-  readonly editorOptions$ = this._viewCollectionCodeStore.editorOptions$;
+  @HostBinding('class') class = 'flex h-full';
+  readonly collection$ = this._viewCollectionStore.collection$;
+  readonly loading$ = this._collectionStore.loading$;
+  readonly workspaceId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('workspaceId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly applicationId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('applicationId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
+  readonly collectionId$ = this._route.paramMap.pipe(
+    map((paramMap) => paramMap.get('collectionId')),
+    isNotNullOrUndefined,
+    distinctUntilChanged()
+  );
 
   constructor(
+    private readonly _router: Router,
     private readonly _route: ActivatedRoute,
-    private readonly _viewCollectionStore: ViewCollectionStore,
-    private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
+    private readonly _tabStore: TabStore,
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _notificationStore: NotificationStore,
+    private readonly _collectionApiService: CollectionApiService,
     private readonly _collectionStore: CollectionStore,
-    private readonly _collectionAttributesStore: CollectionAttributesStore,
-    private readonly _walletStore: WalletStore
+    private readonly _viewCollectionStore: ViewCollectionStore
   ) {}
 
   ngOnInit() {
-    this._viewCollectionStore.setWorkspaceId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('workspaceId')))
-    );
-    this._viewCollectionStore.setApplicationId(
-      this._route.paramMap.pipe(
-        map((paramMap) => paramMap.get('applicationId'))
+    this._viewCollectionStore.setCollectionId(this.collectionId$);
+    this._tabStore.openTab(
+      combineLatest({
+        workspaceId: this.workspaceId$,
+        applicationId: this.applicationId$,
+        collectionId: this.collectionId$,
+      }).pipe(
+        map(({ collectionId, applicationId, workspaceId }) => ({
+          id: collectionId,
+          kind: 'collection',
+          url: `/workspaces/${workspaceId}/applications/${applicationId}/collections/${collectionId}`,
+        }))
       )
-    );
-    this._viewCollectionStore.setCollectionId(
-      this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
     );
   }
 
-  onCreateCollectionAttribute(
+  isRouteActive(url: string) {
+    return this._router.isActive(url, {
+      paths: 'exact',
+      queryParams: 'exact',
+      fragment: 'ignored',
+      matrixParams: 'ignored',
+    });
+  }
+
+  onUpdateCollection(
+    authority: string,
     workspaceId: string,
     applicationId: string,
     collectionId: string,
-    collectionAttributeDto: CollectionAttributeDto
+    collectionDto: CollectionDto
   ) {
-    this._viewCollectionStore.createCollectionAttribute({
-      workspaceId,
-      applicationId,
-      collectionId,
-      collectionAttributeDto,
-    });
+    this._collectionApiService
+      .update({
+        authority,
+        workspaceId,
+        applicationId,
+        collectionDto,
+        collectionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Update collection request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `applications:${applicationId}:collections`,
+                  `collections:${collectionId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 
-  onUpdateCollectionAttribute(
+  onDeleteCollection(
+    authority: string,
     workspaceId: string,
-    collectionId: string,
-    collectionAttributeId: string,
-    collectionAttributeDto: CollectionAttributeDto
+    applicationId: string,
+    collectionId: string
   ) {
-    this._viewCollectionStore.updateCollectionAttribute({
-      workspaceId,
-      collectionId,
-      collectionAttributeId,
-      collectionAttributeDto,
-    });
-  }
-
-  onDeleteCollectionAttribute(
-    workspaceId: string,
-    collectionId: string,
-    collectionAttributeId: string
-  ) {
-    this._viewCollectionStore.deleteCollectionAttribute({
-      workspaceId,
-      collectionId,
-      collectionAttributeId,
-    });
+    this._collectionApiService
+      .delete({
+        authority,
+        workspaceId,
+        applicationId,
+        collectionId,
+      })
+      .subscribe({
+        next: ({ transactionSignature, transaction }) => {
+          this._notificationStore.setEvent('Delete collection request sent');
+          this._hdBroadcasterSocketStore.send(
+            JSON.stringify({
+              event: 'transaction',
+              data: {
+                transactionSignature,
+                transaction,
+                topicNames: [
+                  `authority:${authority}`,
+                  `applications:${applicationId}:collections`,
+                  `collections:${collectionId}`,
+                ],
+              },
+            })
+          );
+        },
+        error: (error) => {
+          this._notificationStore.setError(error);
+        },
+      });
   }
 }

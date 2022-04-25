@@ -1,9 +1,11 @@
+import { CollectionDto } from '../../utils';
+
 export interface CreateCollectionParams {
   authority: string;
   workspaceId: string;
   applicationId: string;
   collectionId: string;
-  collectionName: string;
+  collectionDto: CollectionDto;
 }
 
 export interface UpdateCollectionParams {
@@ -11,7 +13,7 @@ export interface UpdateCollectionParams {
   workspaceId: string;
   applicationId: string;
   collectionId: string;
-  collectionName: string;
+  collectionDto: CollectionDto;
 }
 
 export interface DeleteCollectionParams {

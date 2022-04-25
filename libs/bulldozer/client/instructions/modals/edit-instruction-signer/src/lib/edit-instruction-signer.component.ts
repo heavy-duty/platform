@@ -2,13 +2,14 @@ import { Component, HostBinding, Inject } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-instruction-signer',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
-      {{ data?.signer ? 'Edit' : 'Create' }} signer
+    <h2 mat-dialog-title class="mat-primary bd-font">
+      {{ signer ? 'Edit' : 'Create' }} signer
     </h2>
 
     <form
@@ -41,24 +42,25 @@ import { Document, InstructionAccount } from '@heavy-duty/bulldozer-devkit';
 
       <mat-checkbox formControlName="saveChanges">Save changes.</mat-checkbox>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        {{ data?.signer ? 'Save' : 'Create' }}
-      </button>
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
+        <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
+          {{ signer ? 'Save' : 'Create' }}
+        </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
     </form>
-
-    <button
-      mat-icon-button
-      aria-label="Close edit account form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   `,
 })
 export class EditInstructionSignerComponent {
@@ -77,15 +79,13 @@ export class EditInstructionSignerComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditInstructionSignerComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      signer?: Document<InstructionAccount>;
-    }
+    public signer?: InstructionAccountDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.signer?.name ?? '', {
+      name: new FormControl(this.signer?.name ?? '', {
         validators: [Validators.required],
       }),
-      saveChanges: new FormControl(this.data?.signer?.data.modifier?.id === 1),
+      saveChanges: new FormControl(this.signer?.modifier === 1),
     });
   }
 
@@ -104,9 +104,13 @@ export class EditInstructionSignerComponent {
         close: null,
       });
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

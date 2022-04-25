@@ -5,7 +5,7 @@ import { InstructionStatus } from '@bulldozer-client/users-data-access';
 import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { filter, switchMap, tap } from 'rxjs';
+import { filter, tap } from 'rxjs';
 
 interface ViewModel {
   applicationId: string | null;
@@ -27,7 +27,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._applicationStore.setApplicationId(this.applicationId$);
-    this._handleInstruction(
+    /* this._handleInstruction(
       this.applicationId$.pipe(
         isNotNullOrUndefined,
         switchMap((applicationId) =>
@@ -42,7 +42,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
           )
         )
       )
-    );
+    ); */
     this._handleApplicationDeleted(
       this.select(
         this.applicationId$.pipe(isNotNullOrUndefined),
@@ -72,7 +72,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
     (state, applicationId) => ({ ...state, applicationId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
+  /* private readonly _handleInstruction = this.effect<InstructionStatus>(
     tap((instructionStatus) => {
       switch (instructionStatus.name) {
         case 'createApplication':
@@ -85,7 +85,7 @@ export class ApplicationTabStore extends ComponentStore<ViewModel> {
           break;
       }
     })
-  );
+  ); */
 
   private readonly _handleApplicationDeleted = this.effect<{
     applicationId: string;

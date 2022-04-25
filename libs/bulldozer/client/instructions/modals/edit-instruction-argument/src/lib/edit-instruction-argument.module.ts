@@ -8,8 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { EditInstructionArgumentTriggerDirective } from './edit-instruction-argument-trigger.directive';
 import { EditInstructionArgumentComponent } from './edit-instruction-argument.component';
+import { EditInstructionArgumentDirective } from './edit-instruction-argument.directive';
 
 @NgModule({
   imports: [
@@ -25,8 +25,8 @@ import { EditInstructionArgumentComponent } from './edit-instruction-argument.co
   ],
   declarations: [
     EditInstructionArgumentComponent,
-    EditInstructionArgumentTriggerDirective,
+    EditInstructionArgumentDirective,
   ],
-  exports: [EditInstructionArgumentTriggerDirective],
+  exports: [EditInstructionArgumentDirective],
 })
 export class EditInstructionArgumentModule {}

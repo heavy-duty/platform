@@ -109,7 +109,11 @@ export class ConfigStore extends ComponentStore<ViewModel> {
     )
   );
 
-  setWorkspaceId(workspaceId: string | null) {
-    this._workspaceId.next(workspaceId);
+  setWorkspaceId(workspaceId: string) {
+    const currentWorkspaceId = this._workspaceId.getValue();
+
+    if (currentWorkspaceId !== workspaceId) {
+      this._workspaceId.next(workspaceId);
+    }
   }
 }

@@ -6,12 +6,15 @@ import {
 } from '@solana/web3.js';
 import { AccountName } from '../../utils';
 import {
+  ACCOUNT_KIND_FIELD_LABEL,
   APPLICATION_FIELD_LABEL,
   AUTHORITY_FIELD_LABEL,
   COLLECTION_FIELD_LABEL,
   FieldLabel,
   Filters,
   INSTRUCTION_FIELD_LABEL,
+  RELATION_FROM_FIELD_LABEL,
+  RELATION_TO_FIELD_LABEL,
   WORKSPACE_FIELD_LABEL,
 } from './types';
 
@@ -20,6 +23,9 @@ const LAYOUT_WORKSPACE_OFFSET = 40;
 const LAYOUT_APPLICATION_OFFSET = 72;
 const LAYOUT_COLLECTION_OFFSET = 104;
 const LAYOUT_INSTRUCTION_OFFSET = 104;
+const LAYOUT_ACCOUNT_KIND_OFFSET = 172;
+const LAYOUT_RELATION_FROM_OFFSET = 136;
+const LAYOUT_RELATION_TO_OFFSET = 168;
 
 const getOffset = (attributeName: FieldLabel) => {
   switch (attributeName) {
@@ -33,6 +39,12 @@ const getOffset = (attributeName: FieldLabel) => {
       return LAYOUT_COLLECTION_OFFSET;
     case INSTRUCTION_FIELD_LABEL:
       return LAYOUT_INSTRUCTION_OFFSET;
+    case ACCOUNT_KIND_FIELD_LABEL:
+      return LAYOUT_ACCOUNT_KIND_OFFSET;
+    case RELATION_FROM_FIELD_LABEL:
+      return LAYOUT_RELATION_FROM_OFFSET;
+    case RELATION_TO_FIELD_LABEL:
+      return LAYOUT_RELATION_TO_OFFSET;
     default:
       return 0;
   }

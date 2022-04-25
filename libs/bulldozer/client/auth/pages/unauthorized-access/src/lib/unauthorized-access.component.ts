@@ -3,7 +3,7 @@ import {
   Component,
   HostBinding,
   OnDestroy,
-  OnInit
+  OnInit,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
@@ -12,15 +12,82 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 @Component({
   selector: 'bd-unauthorized-access',
   template: `
-    <header class="mt-16 flex justify-center flex-wrap">
-      <figure class="mb-4 w-80">
-        <img src="assets/images/logo.png" class="w-full" />
-      </figure>
-      <h1 class="w-full text-center">BULLDOZER</h1>
-      <p class="w-full text-center">Connect your wallet to start building</p>
-    </header>
-    <main class="flex justify-center">
-      <hd-wallet-multi-button color="primary"></hd-wallet-multi-button>
+    <main class="flex h-screen">
+      <div
+        class="bg-bd-black w-1/2 h-screen flex flex-col justify-end items-center bg-contain bg-repeat bd-bg-image-0"
+      >
+        <div class="w-full">
+          <div
+            class="ml-5 mt-5 box-border w-24 flex flex-col justify-center items-center"
+          >
+            <figure class="w-full">
+              <img src="assets/images/logo.png" class="w-full" />
+            </figure>
+            <p class="mb-1 bd-font text-base">BULLDOZER</p>
+          </div>
+        </div>
+        <div class="flex-grow w-full flex justify-center items-center">
+          <div class="content w-96 -mt-28">
+            <h1 class="bd-font ">WELCOME</h1>
+            <p>
+              Bulldozer is a open source low code platform to build Solana
+              programs. It gives developers the ability to manage their
+              program’s ecosystem through a UI, hiding all the gory details.
+            </p>
+            <div class="flex mt-6 mb-10">
+              <figure class="w-8 mr-4">
+                <a
+                  href="https://github.com/heavy-duty/platform"
+                  target="_blank"
+                >
+                  <img src="assets/images/social/github.png" class="w-full" />
+                </a>
+              </figure>
+              <figure class="w-8 mr-4">
+                <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
+                  <img src="assets/images/social/discord.png" class="w-full" />
+                </a>
+              </figure>
+              <figure class="w-8 mr-4">
+                <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
+                  <img src="assets/images/social/twitter.png" class="w-full" />
+                </a>
+              </figure>
+            </div>
+            <div
+              class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+              *hdWalletAdapter="
+                let wallet = wallet;
+                let wallets = wallets;
+                let publicKey = publicKey;
+                let selectWallet = selectWallet
+              "
+            >
+              <button
+                class="flex-1 bd-button"
+                hdWalletModalButton
+                [wallets]="wallets"
+                (selectWallet)="selectWallet($event)"
+              >
+                Start Building
+              </button>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+              >
+                <div class="w-full h-px bg-gray-600 rotate-45"></div>
+              </div>
+              <div
+                class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+              >
+                <div class="w-full h-px bg-gray-600"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-image-15"
+      ></div>
     </main>
   `,
   styles: [],

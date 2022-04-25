@@ -10,12 +10,15 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": ["es2017", "dom"],
+    "lib": ["es2017", "ES2020.Intl", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": {
+      "@bulldozer-client/add-workspace": [
+        "libs/bulldozer/client/workspaces/modals/add-workspace/src/index.ts"
+      ],
       "@bulldozer-client/application-explorer": [
         "libs/bulldozer/client/applications/components/application-explorer/src/index.ts"
       ],
@@ -33,6 +36,9 @@
       ],
       "@bulldozer-client/auth-interceptor": [
         "libs/bulldozer/client/auth/utils/auth-interceptor/src/index.ts"
+      ],
+      "@bulldozer-client/bd-card": [
+        "libs/bulldozer/client/shared/components/card/src/index.ts"
       ],
       "@bulldozer-client/budget-details": [
         "libs/bulldozer/client/budgets/components/budget-details/src/index.ts"
@@ -103,8 +109,14 @@
       "@bulldozer-client/edit-instruction-signer": [
         "libs/bulldozer/client/instructions/modals/edit-instruction-signer/src/index.ts"
       ],
+      "@bulldozer-client/edit-user": [
+        "libs/bulldozer/client/users/modals/edit-user/src/index.ts"
+      ],
       "@bulldozer-client/edit-workspace": [
         "libs/bulldozer/client/workspaces/modals/edit-workspace/src/index.ts"
+      ],
+      "@bulldozer-client/home": [
+        "libs/bulldozer/client/core/pages/home/src/index.ts"
       ],
       "@bulldozer-client/import-workspace": [
         "libs/bulldozer/client/workspaces/modals/import-workspace/src/index.ts"
@@ -138,6 +150,9 @@
       ],
       "@bulldozer-client/my-workspaces-list": [
         "libs/bulldozer/client/workspaces/components/my-workspaces-list/src/index.ts"
+      ],
+      "@bulldozer-client/notification-snack-bar": [
+        "libs/bulldozer/client/notifications/components/snack-bar/src/index.ts"
       ],
       "@bulldozer-client/notification-store": [
         "libs/bulldozer/client/shared/stores/notification-store/src/index.ts"
@@ -188,14 +203,50 @@
       "@bulldozer-client/view-collection": [
         "libs/bulldozer/client/collections/pages/view-collection/src/index.ts"
       ],
+      "@bulldozer-client/view-collection-attributes": [
+        "libs/bulldozer/client/collections/pages/view-collection-attributes/src/index.ts"
+      ],
+      "@bulldozer-client/view-collection-code-viewer": [
+        "libs/bulldozer/client/collections/pages/view-collection-code-viewer/src/index.ts"
+      ],
       "@bulldozer-client/view-instruction": [
         "libs/bulldozer/client/instructions/pages/view-instruction/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-arguments": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-arguments/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-code-editor": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-code-editor/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-documents": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-documents/src/index.ts"
+      ],
+      "@bulldozer-client/view-instruction-signers": [
+        "libs/bulldozer/client/instructions/pages/view-instruction-signers/src/index.ts"
       ],
       "@bulldozer-client/view-profile": [
         "libs/bulldozer/client/users/pages/view-profile/src/index.ts"
       ],
+      "@bulldozer-client/view-user-info": [
+        "libs/bulldozer/client/users/pages/view-user-info/src/index.ts"
+      ],
+      "@bulldozer-client/view-user-workspaces": [
+        "libs/bulldozer/client/users/pages/view-user-workspaces/src/index.ts"
+      ],
       "@bulldozer-client/view-workspace": [
         "libs/bulldozer/client/workspaces/pages/view-workspace/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace-budget": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-budget/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace-collaborators": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/index.ts"
+      ],
+      "@bulldozer-client/view-workspace-instructions": [
+        "libs/bulldozer/client/workspaces/pages/view-workspace-instructions/src/index.ts"
+      ],
+      "@bulldozer-client/withdraw-from-budget": [
+        "libs/bulldozer/client/budgets/modals/withdraw-from-budget/src/index.ts"
       ],
       "@bulldozer-client/workspace-explorer": [
         "libs/bulldozer/client/workspaces/components/workspace-explorer/src/index.ts"

@@ -12,7 +12,7 @@ import { EditApplicationModule } from '@bulldozer-client/edit-application';
 import { InstructionExplorerModule } from '@bulldozer-client/instruction-explorer';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
-import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ApplicationExplorerComponent } from './application-explorer.component';
 
@@ -31,8 +31,8 @@ import { ApplicationExplorerComponent } from './application-explorer.component';
     InstructionExplorerModule,
     StopPropagationModule,
     EditApplicationModule,
-    WorkspaceSelectorModule,
     ItemUpdatingModule,
+    HdWalletAdapterCdkModule,
   ],
   declarations: [ApplicationExplorerComponent],
   exports: [ApplicationExplorerComponent],

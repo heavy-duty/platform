@@ -3,6 +3,7 @@ import {
   CollectionAttribute,
   Document,
 } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { capitalize } from '../utils';
 import { formatName } from './format-name';
 
@@ -50,4 +51,43 @@ export const formatCollection = (
           },
         },
       })),
+});
+
+interface CollectionItemView {
+  name: string;
+}
+
+interface CollectionAttributeItemView {
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+    size: number;
+  };
+  modifier: {
+    id: number;
+    name: string;
+    size: number;
+  } | null;
+}
+
+export const formatCollection2 = (
+  collection: CollectionItemView,
+  collectionAttributes: List<CollectionAttributeItemView>
+) => ({
+  name: formatName(collection.name),
+  attributes:
+    collectionAttributes &&
+    collectionAttributes.map((attribute) => ({
+      name: formatName(attribute.name),
+      kind: {
+        ...attribute.kind,
+        name: getAttributeKindName(
+          attribute.kind.id,
+          attribute.kind.name,
+          attribute.kind.size
+        ),
+      },
+      modifier: attribute.modifier,
+    })),
 });

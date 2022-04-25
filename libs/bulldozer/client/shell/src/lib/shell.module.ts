@@ -1,10 +1,10 @@
+import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { DarkThemeDirectiveModule } from '@bulldozer-client/dark-theme';
@@ -12,8 +12,9 @@ import { DarkThemeSwitchModule } from '@bulldozer-client/dark-theme-switch';
 import { TabListModule } from '@bulldozer-client/tab-list';
 import { UserInstructionsModule } from '@bulldozer-client/user-instructions';
 import { WorkspaceExplorerModule } from '@bulldozer-client/workspace-explorer';
-import { WorkspaceSelectorModule } from '@bulldozer-client/workspace-selector';
+import { HdSolanaCdkModule } from '@heavy-duty/ngx-solana-cdk';
 import { HdSolanaMaterialModule } from '@heavy-duty/ngx-solana-material';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ShellComponent } from './shell.component';
@@ -62,6 +63,11 @@ import { ShellComponent } from './shell.component';
                 (m) => m.ViewProfileModule
               ),
           },
+          {
+            path: '',
+            loadChildren: () =>
+              import('@bulldozer-client/home').then((m) => m.HomeModule),
+          },
         ],
       },
       {
@@ -69,18 +75,19 @@ import { ShellComponent } from './shell.component';
         redirectTo: 'workspaces',
       },
     ]),
+    ClipboardModule,
     MatButtonModule,
     MatIconModule,
     MatSidenavModule,
     MatSnackBarModule,
-    MatToolbarModule,
     ReactiveComponentModule,
     HdWalletAdapterMaterialModule,
+    HdWalletAdapterCdkModule,
     HdSolanaMaterialModule,
+    HdSolanaCdkModule,
     DarkThemeDirectiveModule,
     DarkThemeSwitchModule,
     WorkspaceExplorerModule,
-    WorkspaceSelectorModule,
     TabListModule,
     UserInstructionsModule,
   ],

@@ -1,190 +1,194 @@
 import { Injectable } from '@angular/core';
+import { ApplicationsStore } from '@bulldozer-client/applications-data-access';
 import {
-  ApplicationApiService,
-  ApplicationQueryStore,
-  ApplicationsStore,
-} from '@bulldozer-client/applications-data-access';
-import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { WorkspaceInstructionsStore } from '@bulldozer-client/workspaces-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ComponentStore, tapResponse } from '@ngrx/component-store';
+  HdBroadcasterSocketStore,
+  TransactionStatus,
+} from '@heavy-duty/broadcaster';
 import {
-  combineLatest,
-  concatMap,
-  EMPTY,
-  filter,
-  of,
-  pipe,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+  Application,
+  Document,
+  flattenInstructions,
+  InstructionStatus,
+} from '@heavy-duty/bulldozer-devkit';
+import { isNotNullOrUndefined, isTruthy } from '@heavy-duty/rxjs';
+import { ComponentStore } from '@ngrx/component-store';
+import { TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { EMPTY, switchMap, tap } from 'rxjs';
+import { v4 as uuid } from 'uuid';
+import { reduceInstructions } from './reduce-instructions';
+import { ApplicationItemView } from './types';
+
+const documentToView = (
+  document: Document<Application>
+): ApplicationItemView => {
+  return {
+    id: document.id,
+    name: document.name,
+    isCreating: false,
+    isUpdating: false,
+    isDeleting: false,
+    workspaceId: document.data.workspace,
+  };
+};
 
 interface ViewModel {
   workspaceId: string | null;
+  applicationId: string | null;
+  transactions: List<TransactionStatus>;
 }
 
 const initialState: ViewModel = {
   workspaceId: null,
+  applicationId: null,
+  transactions: List(),
 };
 
 @Injectable()
 export class ApplicationExplorerStore extends ComponentStore<ViewModel> {
   readonly workspaceId$ = this.select(({ workspaceId }) => workspaceId);
+  private readonly _topicName$ = this.select(
+    this.workspaceId$.pipe(isNotNullOrUndefined),
+    (workspaceId) => `workspaces:${workspaceId}:applications`
+  );
+  private readonly _instructionStatuses$ = this.select(
+    this.select(({ transactions }) => transactions),
+    (transactions) =>
+      transactions
+        .reduce(
+          (currentInstructions, transactionStatus) =>
+            currentInstructions.concat(flattenInstructions(transactionStatus)),
+          List<InstructionStatus>()
+        )
+        .sort(
+          (a, b) =>
+            a.transactionStatus.timestamp - b.transactionStatus.timestamp
+        )
+  );
+  readonly applications$ = this.select(
+    this._applicationsStore.applications$,
+    this._instructionStatuses$,
+    (applications, instructionStatuses) => {
+      if (applications === null) {
+        return null;
+      }
+
+      return instructionStatuses.reduce(
+        reduceInstructions,
+        applications.map(documentToView)
+      );
+    },
+    { debounce: true }
+  );
 
   constructor(
-    private readonly _applicationApiService: ApplicationApiService,
-    private readonly _applicationQueryStore: ApplicationQueryStore,
-    private readonly _applicationsStore: ApplicationsStore,
-    private readonly _notificationStore: NotificationStore,
-    private readonly _walletStore: WalletStore,
-    workspaceInstructionsStore: WorkspaceInstructionsStore
+    private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
+    private readonly _applicationsStore: ApplicationsStore
   ) {
     super(initialState);
 
-    this._applicationQueryStore.setFilters(
-      combineLatest({
-        workspace: this.workspaceId$.pipe(isNotNullOrUndefined),
-      })
+    this._applicationsStore.setFilters(
+      this.select(
+        this.workspaceId$.pipe(isNotNullOrUndefined),
+        this._hdBroadcasterSocketStore.connected$.pipe(isTruthy),
+        (workspaceId) => ({ workspace: workspaceId })
+      )
     );
-    this._applicationsStore.setApplicationIds(
-      this._applicationQueryStore.applicationIds$
-    );
-    this._handleInstruction(
-      this.workspaceId$.pipe(
-        isNotNullOrUndefined,
-        switchMap((workspaceId) =>
-          workspaceInstructionsStore.instruction$.pipe(
-            filter((instruction) =>
-              instruction.accounts.some(
-                (account) =>
-                  account.name === 'Workspace' && account.pubkey === workspaceId
-              )
-            )
-          )
-        )
+    this._registerTopic(
+      this.select(
+        this._hdBroadcasterSocketStore.connected$,
+        this._topicName$,
+        (connected, topicName) => ({
+          connected,
+          topicName,
+        })
       )
     );
   }
+
+  private readonly _addTransaction = this.updater<TransactionStatus>(
+    (state, transaction) => ({
+      ...state,
+      transactions: state.transactions.push(transaction),
+    })
+  );
+
+  private readonly _removeTransaction = this.updater<TransactionSignature>(
+    (state, signature) => ({
+      ...state,
+      transactions: state.transactions.filter(
+        (transaction) => transaction.signature !== signature
+      ),
+    })
+  );
 
   readonly setWorkspaceId = this.updater<string | null>(
     (state, workspaceId) => ({ ...state, workspaceId })
   );
 
-  private readonly _handleInstruction = this.effect<InstructionStatus>(
-    tap((instructionStatus) => {
-      switch (instructionStatus.name) {
-        case 'createApplication':
-        case 'updateApplication':
-        case 'deleteApplication': {
-          this._applicationsStore.dispatch(instructionStatus);
-          break;
-        }
-        default:
-          break;
+  private readonly _handleTransaction = this.effect<TransactionStatus>(
+    tap((transaction) => {
+      if (transaction.error !== undefined) {
+        this._removeTransaction(transaction.signature);
+      } else {
+        this._addTransaction(transaction);
       }
     })
   );
 
-  readonly createApplication = this.effect<{
-    workspaceId: string;
-    applicationName: string;
+  private readonly _registerTopic = this.effect<{
+    connected: boolean;
+    topicName: string | null;
   }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ applicationName, workspaceId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
+    switchMap(({ connected, topicName }) => {
+      if (!connected || topicName === null) {
+        return EMPTY;
+      }
 
-        return this._applicationApiService
-          .create({
-            applicationName,
-            authority: authority.toBase58(),
-            workspaceId,
-          })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Create application request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
-  );
+      this.patchState({ transactions: List() });
 
-  readonly updateApplication = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-    applicationName: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(
-        ([{ workspaceId, applicationId, applicationName }, authority]) => {
-          if (authority === null) {
-            return EMPTY;
-          }
+      const correlationId = uuid();
+      let subscriptionId: string;
 
-          return this._applicationApiService
-            .update({
-              authority: authority.toBase58(),
-              workspaceId,
-              applicationName,
-              applicationId,
-            })
-            .pipe(
-              tapResponse(
-                () =>
-                  this._notificationStore.setEvent(
-                    'Update application request sent'
-                  ),
-                (error) => this._notificationStore.setError(error)
-              )
+      return this._hdBroadcasterSocketStore
+        .multiplex(
+          () => ({
+            event: 'subscribe',
+            data: {
+              topicName,
+              correlationId,
+            },
+          }),
+          () => ({
+            event: 'unsubscribe',
+            data: { topicName, subscriptionId },
+          }),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (message: any) => {
+            if (
+              typeof message === 'object' &&
+              message !== null &&
+              'data' in message &&
+              'id' in message.data &&
+              'subscriptionId' in message.data &&
+              message.data.id === correlationId
+            ) {
+              subscriptionId = message.data.subscriptionId;
+            }
+
+            return (
+              message.data.subscriptionId === subscriptionId &&
+              message.data.topicName === topicName
             );
-        }
-      )
-    )
-  );
-
-  readonly deleteApplication = this.effect<{
-    workspaceId: string;
-    applicationId: string;
-  }>(
-    pipe(
-      concatMap((request) =>
-        of(request).pipe(withLatestFrom(this._walletStore.publicKey$))
-      ),
-      concatMap(([{ workspaceId, applicationId }, authority]) => {
-        if (authority === null) {
-          return EMPTY;
-        }
-
-        return this._applicationApiService
-          .delete({
-            authority: authority.toBase58(),
-            workspaceId,
-            applicationId,
+          }
+        )
+        .pipe(
+          tap((message) => {
+            if (message.data.transactionStatus) {
+              this._handleTransaction(message.data.transactionStatus);
+            }
           })
-          .pipe(
-            tapResponse(
-              () =>
-                this._notificationStore.setEvent(
-                  'Delete application request sent'
-                ),
-              (error) => this._notificationStore.setError(error)
-            )
-          );
-      })
-    )
+        );
+    })
   );
 }

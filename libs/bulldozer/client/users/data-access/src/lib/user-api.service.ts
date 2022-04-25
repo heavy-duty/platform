@@ -7,6 +7,8 @@ import {
   DeleteUserParams,
   Document,
   parseBulldozerError,
+  updateUser,
+  UpdateUserParams,
   User,
 } from '@heavy-duty/bulldozer-devkit';
 import {
@@ -14,7 +16,7 @@ import {
   HdSolanaConfigStore,
 } from '@heavy-duty/ngx-solana';
 import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
-import { Finality } from '@solana/web3.js';
+import { Finality, Transaction, TransactionSignature } from '@solana/web3.js';
 import {
   catchError,
   concatMap,
@@ -50,8 +52,32 @@ export class UserApiService {
       );
   }
 
+  // get users
+  findByIds(
+    userIds: string[],
+    commitment: Finality = 'finalized'
+  ): Observable<(Document<User> | null)[]> {
+    return this._hdSolanaApiService
+      .getMultipleAccounts(userIds, { commitment })
+      .pipe(
+        map((keyedAccounts) =>
+          keyedAccounts.map(
+            (keyedAccount) =>
+              keyedAccount &&
+              createUserDocument(
+                keyedAccount.accountId,
+                keyedAccount.accountInfo
+              )
+          )
+        )
+      );
+  }
+
   // create user
-  create(params: CreateUserParams) {
+  create(params: CreateUserParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -66,15 +92,52 @@ export class UserApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
+          catchError((error) => this.handleError(error))
+        )
+      )
+    );
+  }
+
+  // update user
+  update(params: UpdateUserParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionToTransaction(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return updateUser(apiEndpoint, params);
+          })
+        )
+      ),
+      concatMap((transaction) =>
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }
 
   // delete user
-  delete(params: DeleteUserParams) {
+  delete(params: DeleteUserParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -89,9 +152,13 @@ export class UserApiService {
         )
       ),
       concatMap((transaction) =>
-        this._hdSolanaApiService
-          .sendTransaction(transaction)
-          .pipe(catchError((error) => this.handleError(error)))
+        this._hdSolanaApiService.sendTransaction(transaction).pipe(
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
+          catchError((error) => this.handleError(error))
+        )
       )
     );
   }

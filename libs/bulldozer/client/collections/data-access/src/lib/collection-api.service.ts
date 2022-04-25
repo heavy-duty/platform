@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   Collection,
@@ -30,7 +29,6 @@ import {
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -38,8 +36,7 @@ import {
 export class CollectionApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -64,8 +61,26 @@ export class CollectionApiService {
       );
   }
 
+  // get collection
+  findById(
+    collectionId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<Collection> | null> {
+    return this._hdSolanaApiService
+      .getAccountInfo(collectionId, commitment)
+      .pipe(
+        map(
+          (accountInfo) =>
+            accountInfo && createCollectionDocument(collectionId, accountInfo)
+        )
+      );
+  }
+
   // get collections
-  findByIds(collectionIds: string[], commitment: Finality = 'finalized') {
+  findByIds(
+    collectionIds: string[],
+    commitment: Finality = 'finalized'
+  ): Observable<(Document<Collection> | null)[]> {
     return this._hdSolanaApiService
       .getMultipleAccounts(collectionIds, { commitment })
       .pipe(
@@ -82,25 +97,11 @@ export class CollectionApiService {
       );
   }
 
-  // get collection
-  findById(
-    collectionId: string,
-    commitment: Finality = 'finalized'
-  ): Observable<Document<Collection> | null> {
-    return this._hdSolanaApiService
-      .getAccountInfo(collectionId, commitment)
-      .pipe(
-        map(
-          (accountInfo) =>
-            accountInfo && createCollectionDocument(collectionId, accountInfo)
-        )
-      );
-  }
-
   // create collection
-  create(params: Omit<CreateCollectionParams, 'collectionId'>) {
-    const collectionKeypair = Keypair.generate();
-
+  create(
+    collectionKeypair: Keypair,
+    params: Omit<CreateCollectionParams, 'collectionId'>
+  ) {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -120,12 +121,10 @@ export class CollectionApiService {
       partiallySignTransaction(collectionKeypair),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -149,12 +148,10 @@ export class CollectionApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -178,12 +175,10 @@ export class CollectionApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

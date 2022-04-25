@@ -8,8 +8,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { Connection, TransactionSignature } from '@solana/web3.js';
+import { Connection, Transaction, TransactionSignature } from '@solana/web3.js';
+import { List } from 'immutable';
+import { v4 as uuid } from 'uuid';
 import WebSocket, { Server } from 'ws';
+import { environment } from '../../environments/environment';
+import { EventsService } from './events.service';
 
 @WebSocketGateway({
   cors: {
@@ -20,26 +24,11 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private readonly _logger = new Logger(EventsGateway.name);
   @WebSocketServer()
   private readonly _server: Server;
-  private readonly _topics = new Map<string, Set<WebSocket>>();
-  private readonly _connection = new Connection('http://localhost:8899');
+  private readonly _connection = new Connection(environment.rpcUrl, {
+    confirmTransactionInitialTimeout: 120_000, // timeout for 2 minutes ~blockhash duration
+  });
 
-  private broadcastTransaction(
-    event: string,
-    signature: TransactionSignature,
-    topic: string
-  ) {
-    this._topics.get(topic)?.forEach((client) =>
-      client.send(
-        JSON.stringify({
-          event,
-          data: {
-            signature,
-            topic,
-          },
-        })
-      )
-    );
-  }
+  constructor(private readonly _eventsService: EventsService) {}
 
   handleConnection(
     @ConnectedSocket()
@@ -49,7 +38,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Client connected. [${this._server.clients.size} clients connected]`
     );
 
-    this._topics.set('*', new Set([...(this._topics.get('*') ?? []), client]));
+    this._eventsService.dispatch({
+      type: 'CLIENT_CONNECTED',
+      payload: client,
+    });
   }
 
   handleDisconnect(
@@ -60,16 +52,9 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       `Client disconnected. [${this._server.clients.size} clients connected]`
     );
 
-    this._topics.forEach((_, topic) => {
-      const clients = [...(this._topics.get(topic) ?? [])].filter(
-        (ws) => ws !== client
-      );
-
-      if (clients.length === 0) {
-        this._topics.delete(topic);
-      } else {
-        this._topics.set(topic, new Set(clients));
-      }
+    this._eventsService.dispatch({
+      type: 'CLIENT_DISCONNECTED',
+      payload: client,
     });
   }
 
@@ -77,33 +62,51 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   onSubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topic: string
+    @MessageBody()
+    {
+      topicName,
+      correlationId,
+    }: {
+      topicName: string;
+      correlationId: string;
+    }
   ) {
-    this._logger.log(`Client subscribed to [${topic}].`);
+    this._logger.log(`Client subscribed to [${topicName}].`);
 
-    this._topics.set(
-      topic,
-      new Set([...(this._topics.get(topic) ?? []), client])
-    );
+    this._eventsService.dispatch({
+      type: 'CLIENT_SUBSCRIBED',
+      payload: {
+        client,
+        topicName,
+        subscriptionId: uuid(),
+        correlationId,
+      },
+    });
   }
 
   @SubscribeMessage('unsubscribe')
   onUnsubscribe(
     @ConnectedSocket()
     client: WebSocket,
-    @MessageBody() topic: string
-  ) {
-    this._logger.log(`Client unsubscribed from [${topic}].`);
-
-    const clients = [...(this._topics.get(topic) ?? [])].filter(
-      (ws) => ws !== client
-    );
-
-    if (clients.length === 0) {
-      this._topics.delete(topic);
-    } else {
-      this._topics.set(topic, new Set(clients));
+    @MessageBody()
+    {
+      topicName,
+      subscriptionId,
+    }: {
+      topicName: string;
+      subscriptionId: string;
     }
+  ) {
+    this._logger.log(`Client unsubscribed from [${topicName}].`);
+
+    this._eventsService.dispatch({
+      type: 'CLIENT_UNSUBSCRIBED',
+      payload: {
+        client,
+        topicName,
+        subscriptionId,
+      },
+    });
   }
 
   @SubscribeMessage('transaction')
@@ -111,38 +114,102 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody()
     {
       transactionSignature,
-      topic,
+      transaction,
+      topicNames,
     }: {
       transactionSignature: TransactionSignature;
-      topic: string;
+      transaction: Transaction;
+      topicNames: List<string>;
     }
   ) {
-    this._logger.log(`Transaction received [${transactionSignature}].`);
-
-    await this._connection.confirmTransaction(
-      transactionSignature,
-      'confirmed'
+    this._logger.log(
+      `Transaction received [${transactionSignature}]. (${topicNames.join(
+        ', '
+      )})`
     );
 
-    this._logger.log(`Transaction confirmed [${transactionSignature}].`);
+    this._eventsService.dispatch({
+      type: 'TRANSACTION_RECEIVED',
+      payload: {
+        topicNames,
+        transactionStatus: {
+          transaction,
+          signature: transactionSignature,
+          timestamp: Date.now(),
+        },
+      },
+    });
 
-    this.broadcastTransaction(
-      'transactionConfirmed',
-      transactionSignature,
-      topic
-    );
+    try {
+      await this._connection.confirmTransaction(
+        transactionSignature,
+        'confirmed'
+      );
 
-    await this._connection.confirmTransaction(
-      transactionSignature,
-      'finalized'
-    );
+      this._logger.log(
+        `Transaction confirmed [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
 
-    this._logger.log(`Transaction finalized [${transactionSignature}].`);
+      this._eventsService.dispatch({
+        type: 'TRANSACTION_CONFIRMED',
+        payload: {
+          topicNames,
+          transactionStatus: {
+            transaction,
+            signature: transactionSignature,
+            timestamp: Date.now(),
+            status: 'confirmed',
+          },
+        },
+      });
 
-    this.broadcastTransaction(
-      'transactionFinalized',
-      transactionSignature,
-      topic
-    );
+      await this._connection.confirmTransaction(
+        transactionSignature,
+        'finalized'
+      );
+
+      this._logger.log(
+        `Transaction finalized [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
+
+      this._eventsService.dispatch({
+        type: 'TRANSACTION_FINALIZED',
+        payload: {
+          topicNames,
+          transactionStatus: {
+            transaction,
+            signature: transactionSignature,
+            timestamp: Date.now(),
+            status: 'finalized',
+          },
+        },
+      });
+    } catch (error) {
+      this._logger.log(
+        `Transaction failed [${transactionSignature}]. (${topicNames.join(
+          ', '
+        )})`
+      );
+
+      this._eventsService.dispatch({
+        type: 'TRANSACTION_FAILED',
+        payload: {
+          topicNames,
+          transactionStatus: {
+            transaction,
+            signature: transactionSignature,
+            timestamp: Date.now(),
+            error: {
+              name: 'ConfirmTransactionError',
+              message: error.message,
+            },
+          },
+        },
+      });
+    }
   }
 }

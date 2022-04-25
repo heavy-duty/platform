@@ -8,16 +8,16 @@ import { ApplicationTabStore } from './application-tab.store';
   template: `
     <div
       *ngIf="application$ | ngrxPush as application"
-      class="flex items-stretch p-0"
+      class="flex items-center p-0"
     >
-      <a
+      <!-- <a
         [routerLink]="[
           '/workspaces',
           application.document.data.workspace,
           'applications',
           application.document.id
         ]"
-        class="w-40 flex justify-between gap-2 items-center pl-4 flex-grow"
+        class="w-40 h-10 flex justify-between gap-2 items-center pl-4 flex-grow"
         [matTooltip]="
           application.document.name
             | bdItemUpdatingMessage: application:'Application'
@@ -35,15 +35,15 @@ import { ApplicationTabStore } from './application-tab.store';
           mode="indeterminate"
           diameter="16"
         ></mat-progress-spinner>
-      </a>
+      </a> -->
 
-      <button
+      <!-- <button
         mat-icon-button
         [attr.aria-label]="'Close ' + application.document.name + ' tab'"
         (click)="onCloseTab(application.document.id)"
       >
         <mat-icon>close</mat-icon>
-      </button>
+      </button> -->
     </div>
   `,
   providers: [ApplicationStore, ApplicationTabStore],

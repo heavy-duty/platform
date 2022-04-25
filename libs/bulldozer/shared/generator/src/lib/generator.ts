@@ -11,16 +11,26 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
+import { List, Set } from 'immutable';
 import * as JSZip from 'jszip';
 import {
   formatApplication,
   formatCollection,
+  formatCollection2,
   formatInstruction,
+  formatInstruction2,
   formatName,
 } from './formatters';
 import {
+  CollectionAttributeItemView,
+  CollectionItemView,
+  FormattedName,
   generateCode,
   getTemplateByType,
+  InstructionAccountItemView,
+  InstructionAccountRelationItemView,
+  InstructionArgumentItemView,
+  InstructionViewItem,
   registerHandleBarsHelpers,
   WorkspaceMetadata,
 } from './utils';
@@ -42,20 +52,67 @@ export const generateInstructionCode = (
     instructionRelations,
     collections
   );
-  const formattedCollections = formattedInstruction.accounts.reduce(
+  /* const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.data.collection && account.data.collection.name !== null
         ? collections.set(account.data.collection.id, account.data.collection)
         : collections,
     new Map([])
+  ); */
+
+  return generateCode(
+    {
+      instruction: formattedInstruction,
+      collections: [],
+      // collections: Array.from(formattedCollections.values()),
+    },
+    getTemplateByType('instructions')
+  );
+};
+
+export const generateInstructionCode2 = (
+  instruction: InstructionViewItem,
+  instructionArguments: List<InstructionArgumentItemView>,
+  instructionAccounts: List<InstructionAccountItemView>,
+  instructionRelations: List<InstructionAccountRelationItemView>,
+  collections: List<CollectionItemView>
+) => {
+  const formattedInstruction = formatInstruction2(
+    instruction,
+    instructionArguments,
+    instructionAccounts,
+    instructionRelations,
+    collections
+  );
+  const formattedCollections = formattedInstruction.accounts.reduce(
+    (collections, account) =>
+      account.collection !== undefined
+        ? collections.add(account.collection)
+        : collections,
+    Set<FormattedName>()
   );
 
   return generateCode(
     {
       instruction: formattedInstruction,
-      collections: Array.from(formattedCollections.values()),
+      collections: formattedCollections,
     },
     getTemplateByType('instructions')
+  );
+};
+
+export const generateCollectionCode2 = (
+  collection: CollectionItemView,
+  collectionAttributes: List<CollectionAttributeItemView>
+) => {
+  const formattedCollection = formatCollection2(
+    collection,
+    collectionAttributes
+  );
+
+  return generateCode(
+    { collection: formattedCollection },
+    getTemplateByType('collections')
   );
 };
 

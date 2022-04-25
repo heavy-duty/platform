@@ -1,44 +1,83 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
+import { interval, map, startWith } from 'rxjs';
 
 @Component({
   selector: 'bd-user-instructions',
   template: `
     <ng-container
-      *bdUserInstructions="let instructionStatuses = instructionStatuses"
+      *bdUserInstructionsStore="let instructionStatuses = instructionStatuses"
     >
-      <mat-list
-        role="list"
-        *ngIf="
-          instructionStatuses !== null && instructionStatuses.length > 0;
-          else emptyTransactionsList
-        "
-        class="flex flex-col gap-2"
-      >
-        <mat-list-item
-          role="listitem"
-          *ngFor="let instructionStatus of instructionStatuses; let i = index"
-          class="h-12"
+      <header>
+        <h1 class="text-center text-2xl">Instructions</h1>
+      </header>
+
+      <main>
+        <mat-list
+          role="list"
+          *ngIf="
+            instructionStatuses !== null && instructionStatuses.size > 0;
+            else emptyTransactionsList
+          "
+          class="flex flex-col gap-2"
         >
-          <div
-            class="w-full h-full px-4 bg-white bg-opacity-5 flex justify-between items-center"
+          <mat-list-item
+            role="listitem"
+            *ngFor="let instructionStatus of instructionStatuses; let i = index"
           >
-            {{ instructionStatus.title }}
+            <div class="w-full h-8 flex items-center gap-4">
+              <div>
+                <mat-progress-spinner
+                  *ngIf="
+                    instructionStatus.transactionStatus.status !== 'finalized'
+                  "
+                  color="accent"
+                  diameter="16"
+                  mode="indeterminate"
+                >
+                </mat-progress-spinner>
 
-            <mat-progress-spinner
-              *ngIf="instructionStatus.status !== 'finalized'"
-              diameter="24"
-              mode="indeterminate"
-              color="primary"
-            >
-            </mat-progress-spinner>
-          </div>
-        </mat-list-item>
-      </mat-list>
+                <mat-icon
+                  *ngIf="
+                    instructionStatus.transactionStatus.status === 'finalized'
+                  "
+                  class="text-green-500"
+                  inline
+                  >check_circle</mat-icon
+                >
+              </div>
 
-      <ng-template #emptyTransactionsList>
-        <p class="text-center text-xl py-8">There's no instructions.</p>
-      </ng-template>
+              <p class="flex-1 m-0">
+                {{ instructionStatus.title }}
+              </p>
+
+              <ng-container *ngrxLet="timeNow$; let timeNow">
+                <p
+                  *ngIf="
+                    instructionStatus.transactionStatus.timestamp !== undefined
+                  "
+                  class="text-xs m-0 text-white text-opacity-50"
+                >
+                  {{
+                    timeNow - instructionStatus.transactionStatus.timestamp
+                      | bdRelativeTime: true
+                  }}
+                </p>
+              </ng-container>
+            </div>
+          </mat-list-item>
+        </mat-list>
+
+        <ng-template #emptyTransactionsList>
+          <p class="text-center text-xl py-8">There's no instructions.</p>
+        </ng-template>
+      </main>
     </ng-container>
   `,
 })
-export class UserInstructionsComponent {}
+export class UserInstructionsComponent {
+  @HostBinding('class') class = 'block py-4';
+  readonly timeNow$ = interval(60 * 1000).pipe(
+    startWith(Date.now()),
+    map(() => Date.now())
+  );
+}

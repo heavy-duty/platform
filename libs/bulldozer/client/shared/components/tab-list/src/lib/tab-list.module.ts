@@ -2,11 +2,11 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ApplicationTabModule } from '@bulldozer-client/application-tab';
-import { CollectionTabModule } from '@bulldozer-client/collection-tab';
-import { InstructionTabModule } from '@bulldozer-client/instruction-tab';
-import { ProfileTabModule } from '@bulldozer-client/profile-tab';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
-import { WorkspaceTabModule } from '@bulldozer-client/workspace-tab';
+import { ViewCollectionTabModule } from '@bulldozer-client/view-collection';
+import { ViewInstructionTabModule } from '@bulldozer-client/view-instruction';
+import { ViewProfileTabModule } from '@bulldozer-client/view-profile';
+import { ViewWorkspaceTabModule } from '@bulldozer-client/view-workspace';
 import { TabListComponent } from './tab-list.component';
 
 @NgModule({
@@ -14,12 +14,12 @@ import { TabListComponent } from './tab-list.component';
   imports: [
     CommonModule,
     MatTabsModule,
-    WorkspaceTabModule,
     ApplicationTabModule,
-    CollectionTabModule,
-    InstructionTabModule,
-    ProfileTabModule,
     StopPropagationModule,
+    ViewInstructionTabModule,
+    ViewProfileTabModule,
+    ViewWorkspaceTabModule,
+    ViewCollectionTabModule,
   ],
   exports: [TabListComponent],
 })

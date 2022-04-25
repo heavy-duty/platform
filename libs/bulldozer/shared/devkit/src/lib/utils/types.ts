@@ -23,6 +23,14 @@ export interface CollectionAttributeDto {
   maxLength: number | null;
 }
 
+export interface InstructionDto {
+  name: string;
+}
+
+export interface InstructionBodyDto {
+  body: string;
+}
+
 export interface InstructionAccountDto {
   name: string;
   kind: number;
@@ -51,6 +59,8 @@ export interface Budget {
   authority: string;
   workspace: string;
   bump: number;
+  totalValueLocked: BN;
+  totalDeposited: BN;
 }
 
 export interface Collaborator {
@@ -65,13 +75,37 @@ export interface Collaborator {
   };
 }
 
+export interface CollaboratorDto {
+  status: number;
+}
+
 export interface User {
   authority: string;
+  userName: string;
+  thumbnailUrl: string;
   bump: number;
+}
+
+export interface UserDto {
+  name: string;
+  userName: string;
+  thumbnailUrl: string;
 }
 
 export interface Workspace {
   authority: string;
+}
+
+export interface WorkspaceDto {
+  name: string;
+}
+
+export interface DepositToBudgetDto {
+  amount: BN;
+}
+
+export interface WithdrawFromBudgetDto {
+  amount: BN;
 }
 
 export interface Application {
@@ -79,10 +113,18 @@ export interface Application {
   workspace: string;
 }
 
+export interface ApplicationDto {
+  name: string;
+}
+
 export interface Collection {
   authority: string;
   workspace: string;
   application: string;
+}
+
+export interface CollectionDto {
+  name: string;
 }
 
 export interface CollectionAttribute {
@@ -135,18 +177,30 @@ export interface InstructionAccount {
   workspace: string;
   application: string;
   instruction: string;
+  space: number | null;
   kind: {
     id: number;
     name: string;
-    collection: string | null;
   };
   modifier: {
     id: number;
     name: string;
-    space: number | null;
-    payer: string | null;
-    close: string | null;
   } | null;
+  collection: string | null;
+  close: string | null;
+  payer: string | null;
+}
+
+export interface InstructionAccountCollection {
+  collection: string | null;
+}
+
+export interface InstructionAccountClose {
+  close: string | null;
+}
+
+export interface InstructionAccountPayer {
+  payer: string | null;
 }
 
 export interface InstructionRelation {

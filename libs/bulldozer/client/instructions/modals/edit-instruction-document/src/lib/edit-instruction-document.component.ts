@@ -9,18 +9,17 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { InstructionAccountItemView } from '@bulldozer-client/instructions-data-access';
-import {
-  Collection,
-  Document,
-  InstructionAccount,
-} from '@heavy-duty/bulldozer-devkit';
+import {} from '@bulldozer-client/instructions-data-access';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
+import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
+import { Collection, InstructionAccount } from './types';
 
 @Component({
   selector: 'bd-edit-document',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
+    <h2 mat-dialog-title class="mat-primary bd-font">
       {{ data?.document ? 'Edit' : 'Create' }} document
     </h2>
 
@@ -117,10 +116,10 @@ import { Subject, takeUntil } from 'rxjs';
         <mat-select formControlName="payer" required>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.document.id"
+            [value]="account.id"
           >
-            {{ account.document.name }} |
-            {{ account.document.id | obscureAddress }}
+            {{ account.name }} |
+            {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
         <mat-error *ngIf="submitted">The payer is required.</mat-error>
@@ -134,35 +133,37 @@ import { Subject, takeUntil } from 'rxjs';
       >
         <mat-label>Close</mat-label>
         <mat-select formControlName="close">
-          <mat-option> None </mat-option>
+          <mat-option [value]="null"> None </mat-option>
           <mat-option
             *ngFor="let account of data?.accounts"
-            [value]="account.document.id"
+            [value]="account.id"
           >
-            {{ account.document.name }} |
-            {{ account.document.id | obscureAddress }}
+            {{ account.name }} |
+            {{ account.id | obscureAddress }}
           </mat-option>
         </mat-select>
       </mat-form-field>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        {{ data?.document ? 'Save' : 'Create' }}
-      </button>
-    </form>
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
+        <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
+          {{ data?.document ? 'Save' : 'Create' }}
+        </button>
 
-    <button
-      mat-icon-button
-      aria-label="Close edit document form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
+    </form>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -197,27 +198,22 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
     private readonly _matDialogRef: MatDialogRef<EditInstructionDocumentComponent>,
     @Inject(MAT_DIALOG_DATA)
     public data?: {
-      document?: Document<InstructionAccount>;
-      collections: Document<Collection>[];
-      accounts: InstructionAccountItemView[];
+      document?: InstructionAccountDto;
+      collections: List<Collection>;
+      accounts: List<InstructionAccount>;
     }
   ) {
     this.form = new FormGroup({
       name: new FormControl(this.data?.document?.name ?? '', {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(
-        this.data?.document?.data.modifier !== null
-          ? this.data?.document?.data.modifier.id
-          : null
-      ),
-      collection: new FormControl(
-        this.data?.document?.data.kind.collection || null,
-        { validators: [Validators.required] }
-      ),
-      space: new FormControl(this.data?.document?.data.modifier?.space),
-      payer: new FormControl(this.data?.document?.data.modifier?.payer),
-      close: new FormControl(this.data?.document?.data.modifier?.close),
+      modifier: new FormControl(this.data?.document?.modifier ?? null),
+      collection: new FormControl(this.data?.document?.collection ?? null, {
+        validators: [Validators.required],
+      }),
+      space: new FormControl(this.data?.document?.space ?? null),
+      payer: new FormControl(this.data?.document?.payer ?? null),
+      close: new FormControl(this.data?.document?.close ?? null),
     });
   }
 
@@ -265,9 +261,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
           this.modifierControl.value === 1 ? this.closeControl.value : null,
       });
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

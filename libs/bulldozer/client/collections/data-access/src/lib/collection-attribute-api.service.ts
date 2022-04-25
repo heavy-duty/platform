@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
   CollectionAttribute,
@@ -23,14 +22,18 @@ import {
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Finality, Keypair } from '@solana/web3.js';
+import {
+  Finality,
+  Keypair,
+  Transaction,
+  TransactionSignature,
+} from '@solana/web3.js';
 import {
   catchError,
   concatMap,
   first,
   map,
   Observable,
-  tap,
   throwError,
 } from 'rxjs';
 
@@ -38,8 +41,7 @@ import {
 export class CollectionAttributeApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -56,11 +58,33 @@ export class CollectionAttributeApiService {
     return this._hdSolanaApiService
       .getProgramAccounts(BULLDOZER_PROGRAM_ID.toBase58(), {
         ...query,
+        dataSlice: {
+          offset: 0,
+          length: 0,
+        },
         commitment,
-        dataSlice: { offset: 0, length: 0 },
       })
       .pipe(
         map((programAccounts) => programAccounts.map(({ pubkey }) => pubkey))
+      );
+  }
+
+  // get collection attribute
+  findById(
+    collectionAttributeId: string,
+    commitment: Finality = 'finalized'
+  ): Observable<Document<CollectionAttribute> | null> {
+    return this._hdSolanaApiService
+      .getAccountInfo(collectionAttributeId, commitment)
+      .pipe(
+        map(
+          (accountInfo) =>
+            accountInfo &&
+            createCollectionAttributeDocument(
+              collectionAttributeId,
+              accountInfo
+            )
+        )
       );
   }
 
@@ -85,31 +109,14 @@ export class CollectionAttributeApiService {
       );
   }
 
-  // get collection attribute
-  findById(
-    collectionAttributeId: string,
-    commitment: Finality = 'finalized'
-  ): Observable<Document<CollectionAttribute> | null> {
-    return this._hdSolanaApiService
-      .getAccountInfo(collectionAttributeId, commitment)
-      .pipe(
-        map(
-          (accountInfo) =>
-            accountInfo &&
-            createCollectionAttributeDocument(
-              collectionAttributeId,
-              accountInfo
-            )
-        )
-      );
-  }
-
   // create collection attribute
   create(
+    collectionAttributeKeypair: Keypair,
     params: Omit<CreateCollectionAttributeParams, 'collectionAttributeId'>
-  ) {
-    const collectionAttributeKeypair = Keypair.generate();
-
+  ): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -130,12 +137,10 @@ export class CollectionAttributeApiService {
       partiallySignTransaction(collectionAttributeKeypair),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -143,7 +148,10 @@ export class CollectionAttributeApiService {
   }
 
   // update collection attribute
-  update(params: UpdateCollectionAttributeParams) {
+  update(params: UpdateCollectionAttributeParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -159,12 +167,10 @@ export class CollectionAttributeApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -172,7 +178,10 @@ export class CollectionAttributeApiService {
   }
 
   // delete collection attribute
-  delete(params: DeleteCollectionAttributeParams) {
+  delete(params: DeleteCollectionAttributeParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -188,12 +197,10 @@ export class CollectionAttributeApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

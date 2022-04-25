@@ -1,13 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { RouterModule } from '@angular/router';
-import { MyWorkspacesListModule } from '@bulldozer-client/my-workspaces-list';
-import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
-import { PageHeaderModule } from '@bulldozer-client/page-header';
-import { UserDetailsModule } from '@bulldozer-client/user-details';
-import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
-import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewProfileComponent } from './view-profile.component';
 
 @NgModule({
@@ -18,16 +11,28 @@ import { ViewProfileComponent } from './view-profile.component';
       {
         path: '',
         component: ViewProfileComponent,
-        pathMatch: 'full',
+        children: [
+          {
+            path: 'info',
+            loadChildren: () =>
+              import('@bulldozer-client/view-user-info').then(
+                (m) => m.ViewUserInfoModule
+              ),
+          },
+          {
+            path: 'workspaces',
+            loadChildren: () =>
+              import('@bulldozer-client/view-user-workspaces').then(
+                (m) => m.ViewUserWorkspacesModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'info',
+          },
+        ],
       },
     ]),
-    MatButtonModule,
-    ReactiveComponentModule,
-    HdWalletAdapterMaterialModule,
-    PageHeaderModule,
-    ObscureAddressModule,
-    UserDetailsModule,
-    MyWorkspacesListModule,
   ],
 })
 export class ViewProfileModule {}

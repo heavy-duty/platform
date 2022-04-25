@@ -15,6 +15,8 @@ export const createUserDocument = (
     data: {
       authority: decodedAccount.authority.toBase58(),
       bump: decodedAccount.bump,
+      userName: decodedAccount.userName,
+      thumbnailUrl: decodedAccount.thumbnailUrl,
     },
     createdAt: decodedAccount.createdAt,
     updatedAt: decodedAccount.updatedAt,

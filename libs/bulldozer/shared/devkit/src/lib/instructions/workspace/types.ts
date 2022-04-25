@@ -1,13 +1,15 @@
+import { WorkspaceDto } from '../../utils';
+
 export interface CreateWorkspaceParams {
   workspaceId: string;
   authority: string;
-  workspaceName: string;
+  workspaceDto: WorkspaceDto;
 }
 
 export interface UpdateWorkspaceParams {
   authority: string;
   workspaceId: string;
-  workspaceName: string;
+  workspaceDto: WorkspaceDto;
 }
 
 export interface DeleteWorkspaceParams {

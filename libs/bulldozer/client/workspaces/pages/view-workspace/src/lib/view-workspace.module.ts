@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatListModule } from '@angular/material/list';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
-import { BudgetDetailsModule } from '@bulldozer-client/budget-details';
-import { CollaboratorsListModule } from '@bulldozer-client/collaborators-list';
+import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
-import { PageHeaderModule } from '@bulldozer-client/page-header';
-import { WorkspaceInstructionsModule } from '@bulldozer-client/workspace-instructions';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
 
@@ -17,17 +16,46 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
   imports: [
     CommonModule,
     RouterModule.forChild([
-      { path: '', pathMatch: 'full', component: ViewWorkspaceComponent },
+      {
+        path: '',
+        component: ViewWorkspaceComponent,
+        children: [
+          {
+            path: 'budget',
+            loadChildren: () =>
+              import('@bulldozer-client/view-workspace-budget').then(
+                (m) => m.ViewWorkspaceBudgetModule
+              ),
+          },
+          {
+            path: 'collaborators',
+            loadChildren: () =>
+              import('@bulldozer-client/view-workspace-collaborators').then(
+                (m) => m.ViewWorkspaceCollaboratorsModule
+              ),
+          },
+          {
+            path: 'instructions',
+            loadChildren: () =>
+              import('@bulldozer-client/view-workspace-instructions').then(
+                (m) => m.ViewWorkspaceInstructionsModule
+              ),
+          },
+          {
+            path: '',
+            redirectTo: 'budget',
+          },
+        ],
+      },
     ]),
     MatButtonModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
+    MatListModule,
     ReactiveComponentModule,
-    PageHeaderModule,
-    BudgetDetailsModule,
-    CollaboratorsListModule,
-    WorkspaceInstructionsModule,
     ItemUpdatingModule,
+    EditWorkspaceModule,
+    HdWalletAdapterCdkModule,
   ],
 })
 export class ViewWorkspaceModule {}

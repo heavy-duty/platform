@@ -1,65 +1,88 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ConfigStore } from '@bulldozer-client/core-data-access';
-import { UserStore } from '@bulldozer-client/users-data-access';
 import {
-  WorkspaceQueryStore,
-  WorkspacesStore,
-} from '@bulldozer-client/workspaces-data-access';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { ViewProfileStore } from './view-profile.store';
+  ChangeDetectionStrategy,
+  Component,
+  HostBinding,
+  OnInit,
+} from '@angular/core';
+import { Router } from '@angular/router';
+import { TabStore } from '@bulldozer-client/core-data-access';
 
 @Component({
   selector: 'bd-view-profile',
   template: `
-    <div class="flex flex-col gap-5 p-5">
-      <header bdPageHeader>
-        <h1>Profile</h1>
-        <p>Visualize all the details about your profile.</p>
+    <aside class="w-80 flex flex-col flex-shrink-0 pt-5 pb-4 px-5 ml-2">
+      <header class="mb-7 w-full">
+        <p class="mb-0 text-2xl uppercase bd-font">Profile</p>
+        <p class="text-xs mb-0">
+          Visualize all the details about your profile and workspaces
+        </p>
       </header>
 
-      <main class="flex flex-col gap-4">
-        <bd-user-details
-          [connected]="(connected$ | ngrxPush) ?? false"
-          [user]="(user$ | ngrxPush) ?? null"
-          (createUser)="onCreateUser()"
-          (deleteUser)="onDeleteUser()"
-        ></bd-user-details>
+      <ul class="flex-1 overflow-y-auto">
+        <li>
+          <a
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+            [routerLink]="['/profile', 'info']"
+            [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
+            [ngClass]="{
+              'border-transparent': !isRouteActive('/profile/info')
+            }"
+          >
+            <span class="text-lg font-bold">User Info</span>
+            <span class="text-xs font-thin"> Visualize your user details </span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+            [routerLink]="['/profile', 'workspaces']"
+            [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
+            [ngClass]="{
+              'border-transparent': !isRouteActive('/profile/workspaces')
+            }"
+          >
+            <span class="text-lg font-bold">Workspaces</span>
+            <span class="text-xs font-thin">
+              Visualize all your workspaces
+            </span>
+          </a>
+        </li>
+      </ul>
+    </aside>
 
-        <bd-my-workspaces-list
-          *ngIf="(connected$ | ngrxPush) && (user$ | ngrxPush) !== null"
-          [workspaces]="(workspaces$ | ngrxPush) ?? null"
-          [activeWorkspaceId]="(activeWorkspaceId$ | ngrxPush) ?? null"
-          (activateWorkspace)="onActivateWorkspace($event)"
-        ></bd-my-workspaces-list>
-      </main>
+    <figure class="w-14 mt-2">
+      <img src="assets/images/pipe.png" alt="pipe" />
+    </figure>
+
+    <div class="flex-1 overflow-y-auto">
+      <router-outlet></router-outlet>
     </div>
   `,
-  providers: [WorkspacesStore, WorkspaceQueryStore, ViewProfileStore],
+  providers: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ViewProfileComponent {
-  readonly connected$ = this._walletStore.connected$;
-  readonly user$ = this._userStore.user$;
-  readonly activeWorkspaceId$ = this._configStore.workspaceId$;
-  readonly workspaces$ = this._workspacesStore.workspaces$;
+export class ViewProfileComponent implements OnInit {
+  @HostBinding('class') class = 'flex h-full';
 
   constructor(
-    private readonly _userStore: UserStore,
-    private readonly _walletStore: WalletStore,
-    private readonly _workspacesStore: WorkspacesStore,
-    private readonly _configStore: ConfigStore,
-    private readonly _viewProfileStore: ViewProfileStore
+    private readonly _tabStore: TabStore,
+    private readonly _router: Router
   ) {}
 
-  onCreateUser() {
-    this._viewProfileStore.createUser();
+  ngOnInit() {
+    this._tabStore.openTab({
+      id: 'profile',
+      kind: 'profile',
+      url: '/profile',
+    });
   }
 
-  onDeleteUser() {
-    this._viewProfileStore.deleteUser();
-  }
-
-  onActivateWorkspace(workspaceId: string) {
-    this._configStore.setWorkspaceId(workspaceId);
+  isRouteActive(url: string) {
+    return this._router.isActive(url, {
+      paths: 'exact',
+      queryParams: 'exact',
+      fragment: 'ignored',
+      matrixParams: 'ignored',
+    });
   }
 }

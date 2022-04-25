@@ -1,32 +1,33 @@
 import { Injectable } from '@angular/core';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { InstructionStatus } from '@bulldozer-client/users-data-access';
-import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
+import {
+  Document,
+  InstructionArgument,
+  InstructionArgumentFilters,
+} from '@heavy-duty/bulldozer-devkit';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { concatMap, EMPTY, switchMap } from 'rxjs';
+import { List, Map } from 'immutable';
+import { EMPTY, switchMap } from 'rxjs';
 import { InstructionArgumentApiService } from './instruction-argument-api.service';
-import { ItemView } from './types';
-
-export type InstructionArgumentItemView = ItemView<
-  Document<InstructionArgument>
->;
 
 interface ViewModel {
   loading: boolean;
-  instructionArgumentIds: string[] | null;
-  instructionArgumentsMap: Map<string, InstructionArgumentItemView>;
+  filters: InstructionArgumentFilters | null;
+  instructionArgumentIds: List<string> | null;
+  instructionArgumentsMap: Map<string, Document<InstructionArgument>> | null;
 }
 
 const initialState: ViewModel = {
   loading: false,
+  filters: null,
   instructionArgumentIds: null,
-  instructionArgumentsMap: new Map<string, InstructionArgumentItemView>(),
+  instructionArgumentsMap: null,
 };
 
 @Injectable()
 export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   readonly loading$ = this.select(({ loading }) => loading);
+  readonly filters$ = this.select(({ filters }) => filters);
   readonly instructionArgumentIds$ = this.select(
     ({ instructionArgumentIds }) => instructionArgumentIds
   );
@@ -36,10 +37,11 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
   readonly instructionArguments$ = this.select(
     this.instructionArgumentsMap$,
     (instructionArgumentsMap) =>
-      Array.from(
-        instructionArgumentsMap,
-        ([, instructionArgument]) => instructionArgument
-      )
+      instructionArgumentsMap === null
+        ? null
+        : instructionArgumentsMap
+            .toList()
+            .sort((a, b) => (b.createdAt.lt(a.createdAt) ? 1 : -1))
   );
 
   constructor(
@@ -49,74 +51,51 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
     super(initialState);
 
     this._loadInstructionArguments(this.instructionArgumentIds$);
+    this._loadInstructionArgumentIds(this.filters$);
   }
 
-  private readonly _setInstructionArgument =
-    this.updater<InstructionArgumentItemView>(
-      (state, newInstructionArgument) => {
-        const instructionArgumentsMap = new Map(state.instructionArgumentsMap);
-        instructionArgumentsMap.set(
-          newInstructionArgument.document.id,
-          newInstructionArgument
-        );
-
-        return {
-          ...state,
-          instructionArgumentsMap,
-        };
-      }
-    );
-
-  private readonly _patchStatus = this.updater<{
-    instructionArgumentId: string;
-    statuses: {
-      isCreating?: boolean;
-      isUpdating?: boolean;
-      isDeleting?: boolean;
-    };
-  }>((state, { instructionArgumentId, statuses }) => {
-    const instructionArgumentsMap = new Map(state.instructionArgumentsMap);
-    const instructionArgument = instructionArgumentsMap.get(
-      instructionArgumentId
-    );
-
-    if (instructionArgument === undefined) {
-      return state;
-    }
-
-    return {
+  readonly setFilters = this.updater<InstructionArgumentFilters | null>(
+    (state, filters) => ({
       ...state,
-      instructionArgumentsMap: instructionArgumentsMap.set(
-        instructionArgumentId,
-        {
-          ...instructionArgument,
-          ...statuses,
-        }
-      ),
-    };
-  });
-
-  private readonly _removeInstructionArgument = this.updater<string>(
-    (state, instructionArgumentId) => {
-      const instructionArgumentsMap = new Map(state.instructionArgumentsMap);
-      instructionArgumentsMap.delete(instructionArgumentId);
-      return {
-        ...state,
-        instructionArgumentsMap,
-      };
-    }
+      filters,
+      instructionArgumentIds: null,
+      instructionArgumentsMap: null,
+    })
   );
 
-  private readonly _loadInstructionArguments = this.effect<string[] | null>(
+  private readonly _loadInstructionArgumentIds =
+    this.effect<InstructionArgumentFilters | null>(
+      switchMap((filters) => {
+        if (filters === null) {
+          return EMPTY;
+        }
+
+        this.patchState({
+          loading: true,
+          instructionArgumentsMap: null,
+        });
+
+        return this._instructionArgumentApiService.findIds(filters).pipe(
+          tapResponse(
+            (instructionArgumentIds) => {
+              this.patchState({
+                instructionArgumentIds: List(instructionArgumentIds),
+              });
+            },
+            (error) => this._notificationStore.setError(error)
+          )
+        );
+      })
+    );
+
+  private readonly _loadInstructionArguments = this.effect<List<string> | null>(
     switchMap((instructionArgumentIds) => {
       if (instructionArgumentIds === null) {
         return EMPTY;
       }
 
-      this.patchState({ loading: true });
-
       return this._instructionArgumentApiService
-        .findByIds(instructionArgumentIds)
+        .findByIds(instructionArgumentIds.toArray())
         .pipe(
           tapResponse(
             (instructionArguments) => {
@@ -131,114 +110,17 @@ export class InstructionArgumentsStore extends ComponentStore<ViewModel> {
                   )
                   .reduce(
                     (instructionArgumentsMap, instructionArgument) =>
-                      instructionArgumentsMap.set(instructionArgument.id, {
-                        document: instructionArgument,
-                        isCreating: false,
-                        isUpdating: false,
-                        isDeleting: false,
-                      }),
-                    new Map<string, InstructionArgumentItemView>()
+                      instructionArgumentsMap.set(
+                        instructionArgument.id,
+                        instructionArgument
+                      ),
+                    Map<string, Document<InstructionArgument>>()
                   ),
               });
             },
             (error) => this._notificationStore.setError({ error })
           )
         );
-    })
-  );
-
-  readonly setInstructionArgumentIds = this.updater<string[] | null>(
-    (state, instructionArgumentIds) => ({
-      ...state,
-      instructionArgumentIds,
-    })
-  );
-
-  readonly dispatch = this.effect<InstructionStatus>(
-    concatMap((instructionArgumentStatus) => {
-      const instructionArgumentAccountMeta =
-        instructionArgumentStatus.accounts.find(
-          (account) => account.name === 'Argument'
-        );
-
-      if (instructionArgumentAccountMeta === undefined) {
-        return EMPTY;
-      }
-
-      switch (instructionArgumentStatus.name) {
-        case 'createInstructionArgument': {
-          if (instructionArgumentStatus.status === 'finalized') {
-            this._patchStatus({
-              instructionArgumentId: instructionArgumentAccountMeta.pubkey,
-              statuses: {
-                isCreating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._instructionArgumentApiService
-            .findById(instructionArgumentAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (instructionArgument) =>
-                  this._setInstructionArgument({
-                    document: instructionArgument,
-                    isCreating: true,
-                    isUpdating: false,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'updateInstructionArgument': {
-          if (instructionArgumentStatus.status === 'finalized') {
-            this._patchStatus({
-              instructionArgumentId: instructionArgumentAccountMeta.pubkey,
-              statuses: {
-                isUpdating: false,
-              },
-            });
-
-            return EMPTY;
-          }
-
-          return this._instructionArgumentApiService
-            .findById(instructionArgumentAccountMeta.pubkey, 'confirmed')
-            .pipe(
-              isNotNullOrUndefined,
-              tapResponse(
-                (instructionArgument) =>
-                  this._setInstructionArgument({
-                    document: instructionArgument,
-                    isCreating: false,
-                    isUpdating: true,
-                    isDeleting: false,
-                  }),
-                (error) => this._notificationStore.setError({ error })
-              )
-            );
-        }
-        case 'deleteInstructionArgument': {
-          if (instructionArgumentStatus.status === 'confirmed') {
-            this._patchStatus({
-              instructionArgumentId: instructionArgumentAccountMeta.pubkey,
-              statuses: { isDeleting: true },
-            });
-          } else {
-            this._removeInstructionArgument(
-              instructionArgumentAccountMeta.pubkey
-            );
-          }
-
-          return EMPTY;
-        }
-        default:
-          return EMPTY;
-      }
     })
   );
 }

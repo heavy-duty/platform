@@ -27,3 +27,63 @@ interface ApplicationMetadata {
 export interface WorkspaceMetadata {
   applications: ApplicationMetadata[];
 }
+
+export interface InstructionViewItem {
+  name: string;
+  body: string;
+}
+
+export interface CollectionItemView {
+  id: string;
+  name: string;
+}
+
+export interface CollectionAttributeItemView {
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+    size: number;
+  };
+  modifier: {
+    id: number;
+    name: string;
+    size: number;
+  } | null;
+}
+
+export interface InstructionAccountItemView {
+  id: string;
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+  };
+  modifier: {
+    id: number;
+    name: string;
+  } | null;
+  collection: string | null;
+  close: string | null;
+  payer: string | null;
+  space: number | null;
+}
+
+export interface InstructionAccountRelationItemView {
+  from: string;
+  to: string;
+}
+
+export interface InstructionArgumentItemView {
+  name: string;
+  kind: {
+    id: number;
+    name: string;
+    size: number;
+  };
+  modifier: {
+    id: number;
+    name: string;
+    size: number;
+  } | null;
+}

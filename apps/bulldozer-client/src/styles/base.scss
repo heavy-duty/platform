@@ -1,5 +1,7 @@
-@import './constants/colors.scss';
-@import './constants/sizes.scss';
+@import './core/colors.scss';
+@import './core/fonts.scss';
+@import './core/scrollbar.scss';
+@import './core/backgrounds.scss';
 
 // utilities (TO DO: move to antoher folder)
 @mixin snackbar-span {
@@ -65,31 +67,62 @@ input[readonly] {
   height: inherit !important;
 }
 
-.bd-custom-top-toolbar {
-  top: $toolbar-height !important;
-}
-
-.bd-custom-monaco-editor {
-  height: calc(100vh - 96px) !important;
-}
-
-.bd-custom-monaco-editor-splitted {
-  display: block;
-  height: calc(50vh - 57px) !important;
-}
-
 .bd-border-bottom {
   border-bottom: 2px solid gray;
 }
 
-.bd-custom-height-layout {
-  height: calc(
-    100vh - $toolbar-height
-  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
+// Temporal (use theme colors later)
+
+.hd-side-right {
+  background-color: #393939;
 }
 
-.bd-custom-height-content {
-  height: calc(
-    100vh - $toolbar-height - $tabs-height - 1px
-  ); // 64 (toolbar size) + 48(tabss toolbar) + 1(extra pixel ?)
+.hd-side-right {
+  color: white;
+}
+
+.border-b-1 {
+  border-bottom-width: 1px;
+}
+
+.bd-box-shadow-bg-red {
+  box-shadow: 0px 0px 20px 3px red;
+}
+
+.bd-box-shadow-bg-yellow {
+  box-shadow: 0px 0px 20px 3px yellow;
+}
+
+.bd-box-shadow-bg-green {
+  box-shadow: 0px 0px 20px 3px green;
+}
+
+.bd-box-shadow-bg-white {
+  box-shadow: 0px 1px 2px -1px white;
+}
+
+.bd-button {
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  background-image: linear-gradient(#303030, #262626);
+  border: 2px solid #212121;
+}
+
+.bd-button:hover {
+  background-image: linear-gradient(#262626, #262626);
+}
+
+.bd-button:active {
+  background-image: linear-gradient(#262626, #303030);
+}
+
+.bd-button[disabled='disabled'],
+.bd-button:disabled {
+  cursor: not-allowed;
+  background-image: linear-gradient(gray, gray) !important;
+  color: #e6e6e6;
+  border: 1px solid #909090;
+  opacity: 0.4;
 }

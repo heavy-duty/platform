@@ -1,32 +1,24 @@
 @use '@angular/material' as mat;
 @use '@angular/cdk';
-@use './components/custom-containers.scss' as containers;
-
-@import './constants/sizes.scss';
-@import './themes/default-themes.scss';
 @import '@angular/material/theming';
 
-@import 'https://fonts.googleapis.com/css?family=Material+Icons';
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400&display=swap');
+@import './themes/default-themes.scss';
+@import './core/fonts.scss';
 
 @include mat.core($fontConfig);
 
-$theme: set-light-theme($theme-primary, $theme-accent, $theme-warn);
 $darkTheme: set-dark-theme($theme-primary, $theme-accent, $theme-warn);
 
-// $bd-background-color: mat.get-color-from-palette($theme);
-
 // Theme Init
-@include angular-material-theme($theme);
-// set custom themes
-@include containers.theme($theme);
+@include angular-material-theme($darkTheme);
 // end
 
-.darkMode {
-  @include angular-material-theme($darkTheme);
-  // set custom themes
-  @include containers.theme($darkTheme);
-  // end
+.hd-border-gray {
+  border-color: #242424 !important;
+}
+
+.hd-highlight-title {
+  color: #fba807;
 }
 
 // Specific component overrides, pieces that are not in line with the general theming
@@ -134,31 +126,58 @@ mat-icon {
   max-width: unset !important;
 }
 
-.mat-fab.cdk-keyboard-focused,
-.mat-mini-fab.cdk-keyboard-focused {
-  transform: scale(1.5);
-  box-shadow: 0px 3px 5px -1px rgb(0 0 0 / 20%),
-    0px 6px 10px 0px rgb(0 0 0 / 14%), 0px 1px 18px 0px rgb(0 0 0 / 12%) !important;
-}
-
-.mat-tab-links {
-  height: $tabs-height;
-}
-
 .mat-tab-link {
-  height: $tabs-height !important;
+  height: auto !important;
 }
 
 .darkMode {
-  .mat-fab.cdk-keyboard-focused,
-  .mat-mini-fab.cdk-keyboard-focused {
-    box-shadow: 0px 3px 5px -1px rgb(255 255 255 / 20%),
-      0px 6px 10px 0px rgb(255 255 255 / 14%),
-      0px 1px 18px 0px rgb(255 255 255 / 12%) !important;
-  }
-
   .bd-custom-color .mat-accent.mat-button-disabled {
     color: #444444 !important;
     background-color: rgba(250, 250, 250, 0.42) !important;
   }
+}
+
+.mat-drawer-container {
+  height: 100vh;
+}
+
+.mat-dialog-container {
+  background: transparent !important;
+}
+
+.mat-tab-header {
+  border-color: transparent !important;
+}
+
+.mat-drawer-backdrop.mat-drawer-shown {
+  background-color: rgba(30, 30, 30, 0.7);
+}
+
+.mat-snack-bar-container {
+  display: flex !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+.mat-tab-link-container {
+  padding: 5px;
+}
+
+.mat-tab-link-container .mat-tab-link {
+  height: 40px !important;
+}
+
+.mat-tab-link-container .mat-ink-bar {
+  background-color: white !important;
+  height: 1px !important;
+  opacity: 0.3 !important;
+  box-shadow: 0px 0px 5px 1px white;
+}
+
+.mat-expansion-panel {
+  background-color: transparent !important;
+  box-shadow: none !important;
 }

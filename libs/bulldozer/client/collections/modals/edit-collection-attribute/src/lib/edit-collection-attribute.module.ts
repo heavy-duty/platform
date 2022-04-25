@@ -8,8 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { EditCollectionAttributeTriggerDirective } from './edit-collection-attribute-trigger.directive';
 import { EditCollectionAttributeComponent } from './edit-collection-attribute.component';
+import { EditCollectionAttributeDirective } from './edit-collection-attribute.directive';
 
 @NgModule({
   imports: [
@@ -25,8 +25,8 @@ import { EditCollectionAttributeComponent } from './edit-collection-attribute.co
   ],
   declarations: [
     EditCollectionAttributeComponent,
-    EditCollectionAttributeTriggerDirective,
+    EditCollectionAttributeDirective,
   ],
-  exports: [EditCollectionAttributeTriggerDirective],
+  exports: [EditCollectionAttributeDirective],
 })
 export class EditCollectionAttributeModule {}

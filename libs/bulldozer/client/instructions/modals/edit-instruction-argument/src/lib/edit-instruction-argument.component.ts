@@ -8,14 +8,15 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, InstructionArgument } from '@heavy-duty/bulldozer-devkit';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
+import { InstructionArgumentDto } from '@heavy-duty/bulldozer-devkit';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'bd-edit-argument',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
-      {{ data?.instructionArgument ? 'Edit' : 'Create' }} argument
+    <h2 mat-dialog-title class="mat-primary bd-font">
+      {{ instructionArgument ? 'Edit' : 'Create' }} argument
     </h2>
 
     <form
@@ -134,24 +135,25 @@ import { Subject, takeUntil } from 'rxjs';
         >
       </mat-form-field>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        {{ data?.instructionArgument ? 'Save' : 'Create' }}
-      </button>
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
+        <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
+          {{ instructionArgument ? 'Save' : 'Create' }}
+        </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
     </form>
-
-    <button
-      mat-icon-button
-      aria-label="Close edit argument form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   `,
 })
 export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
@@ -191,31 +193,19 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditInstructionArgumentComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      instructionArgument?: Document<InstructionArgument>;
-    }
+    public instructionArgument?: InstructionArgumentDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.instructionArgument?.name ?? '', {
+      name: new FormControl(this.instructionArgument?.name ?? '', {
         validators: [Validators.required],
       }),
-      kind: new FormControl(this.data?.instructionArgument?.data.kind.id ?? 0, {
+      kind: new FormControl(this.instructionArgument?.kind ?? 0, {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(
-        this.data?.instructionArgument?.data.modifier !== null
-          ? this.data?.instructionArgument?.data.modifier.id
-          : null
-      ),
-      size: new FormControl(
-        this.data?.instructionArgument?.data.modifier !== null
-          ? this.data?.instructionArgument?.data.modifier.size
-          : null
-      ),
-      max: new FormControl(this.data?.instructionArgument?.data.max ?? null),
-      maxLength: new FormControl(
-        this.data?.instructionArgument?.data.maxLength ?? null
-      ),
+      modifier: new FormControl(this.instructionArgument?.modifier ?? null),
+      size: new FormControl(this.instructionArgument?.size ?? null),
+      max: new FormControl(this.instructionArgument?.max ?? null),
+      maxLength: new FormControl(this.instructionArgument?.maxLength ?? null),
     });
   }
 
@@ -277,9 +267,13 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

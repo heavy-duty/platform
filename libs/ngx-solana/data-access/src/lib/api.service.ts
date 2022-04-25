@@ -12,15 +12,19 @@ import {
   SignatureStatus,
   Transaction,
   TransactionError,
+  TransactionSignature,
 } from '@solana/web3.js';
 import {
   concatMap,
   first,
+  from,
   isObservable,
   map,
+  mergeMap,
   Observable,
   of,
   throwError,
+  toArray,
 } from 'rxjs';
 import { HdSolanaConfigStore } from './config.store';
 
@@ -44,6 +48,12 @@ export type ConfirmedSignatureInfo = {
   blockTime?: number | null;
   confirmationStatus: Finality;
 };
+
+export interface TransactionStatus2 {
+  signature: TransactionSignature;
+  transactionResponse: TransactionResponse<Transaction>;
+  status: Finality;
+}
 
 @Injectable()
 export class HdSolanaApiService {
@@ -357,9 +367,39 @@ export class HdSolanaApiService {
     );
   }
 
+  getConfirmedTransactionsByAddress(
+    address: string
+  ): Observable<TransactionStatus2[]> {
+    return this.getSignaturesForAddress(address, undefined, 'confirmed').pipe(
+      concatMap((confirmedSignatureInfos) => {
+        const reallyConfirmedSignatureInfos = confirmedSignatureInfos.filter(
+          (confirmedSignatureInfo) =>
+            confirmedSignatureInfo.confirmationStatus === 'confirmed'
+        );
+
+        if (reallyConfirmedSignatureInfos.length === 0) {
+          return of([]);
+        }
+
+        return from(reallyConfirmedSignatureInfos).pipe(
+          mergeMap(({ signature }) =>
+            this.getTransaction(signature, 'confirmed').pipe(
+              map((transactionResponse) => ({
+                signature,
+                transactionResponse,
+                status: 'confirmed' as Finality,
+              }))
+            )
+          ),
+          toArray()
+        );
+      })
+    );
+  }
+
   sendTransaction(
     transaction: Transaction | Observable<Transaction>
-  ): Observable<string> {
+  ): Observable<TransactionSignature> {
     return this._hdSolanaConfigStore.apiEndpoint$.pipe(
       first(),
       concatMap((apiEndpoint) => {
@@ -369,11 +409,15 @@ export class HdSolanaApiService {
 
         return (isObservable(transaction) ? transaction : of(transaction)).pipe(
           concatMap((transaction) =>
-            this._httpClient.post<string>(apiEndpoint, transaction, {
-              headers: {
-                'solana-rpc-method': 'sendTransaction',
-              },
-            })
+            this._httpClient.post<TransactionSignature>(
+              apiEndpoint,
+              transaction,
+              {
+                headers: {
+                  'solana-rpc-method': 'sendTransaction',
+                },
+              }
+            )
           )
         );
       })

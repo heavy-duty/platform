@@ -14,8 +14,12 @@ declare_id!("EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo");
 pub mod bulldozer {
   use super::*;
 
-  pub fn create_user(ctx: Context<CreateUser>) -> Result<()> {
-    instructions::create_user::handle(ctx)
+  pub fn create_user(ctx: Context<CreateUser>, arguments: CreateUserArguments) -> Result<()> {
+    instructions::create_user::handle(ctx, arguments)
+  }
+
+  pub fn update_user(ctx: Context<UpdateUser>, arguments: UpdateUserArguments) -> Result<()> {
+    instructions::update_user::handle(ctx, arguments)
   }
 
   pub fn delete_user(ctx: Context<DeleteUser>) -> Result<()> {
@@ -34,6 +38,20 @@ pub mod bulldozer {
     arguments: UpdateWorkspaceArguments,
   ) -> Result<()> {
     instructions::update_workspace::handle(ctx, arguments)
+  }
+
+  pub fn deposit_to_budget(
+    ctx: Context<DepositToBudget>,
+    arguments: DepositToBudgetArguments,
+  ) -> Result<()> {
+    instructions::deposit_to_budget::handle(ctx, arguments)
+  }
+
+  pub fn withdraw_from_budget(
+    ctx: Context<WithdrawFromBudget>,
+    arguments: WithdrawFromBudgetArguments,
+  ) -> Result<()> {
+    instructions::withdraw_from_budget::handle(ctx, arguments)
   }
 
   pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> Result<()> {
@@ -177,12 +195,33 @@ pub mod bulldozer {
     instructions::create_instruction_account::handle(ctx, arguments)
   }
 
-  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
+  #[access_control(instructions::update_instruction_account::validate(&arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
     arguments: UpdateInstructionAccountArguments,
   ) -> Result<()> {
     instructions::update_instruction_account::handle(ctx, arguments)
+  }
+
+  #[access_control(instructions::set_instruction_account_collection::validate(&ctx))]
+  pub fn set_instruction_account_collection(
+    ctx: Context<SetInstructionAccountCollection>,
+  ) -> Result<()> {
+    instructions::set_instruction_account_collection::handle(ctx)
+  }
+
+  #[access_control(instructions::set_instruction_account_close::validate(&ctx))]
+  pub fn set_instruction_account_close(ctx: Context<SetInstructionAccountClose>) -> Result<()> {
+    instructions::set_instruction_account_close::handle(ctx)
+  }
+
+  pub fn clear_instruction_account_close(ctx: Context<ClearInstructionAccountClose>) -> Result<()> {
+    instructions::clear_instruction_account_close::handle(ctx)
+  }
+
+  #[access_control(instructions::set_instruction_account_payer::validate(&ctx))]
+  pub fn set_instruction_account_payer(ctx: Context<SetInstructionAccountPayer>) -> Result<()> {
+    instructions::set_instruction_account_payer::handle(ctx)
   }
 
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> Result<()> {

@@ -1,0 +1,28 @@
+{
+  "projectType": "library",
+  "root": "libs/bulldozer/client/notifications/components/snack-bar",
+  "sourceRoot": "libs/bulldozer/client/notifications/components/snack-bar/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/notifications/components/snack-bar"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/notifications/components/snack-bar/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/notifications/components/snack-bar/src/**/*.ts",
+          "libs/bulldozer/client/notifications/components/snack-bar/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

@@ -26,7 +26,7 @@ pub struct DeleteInstructionRelation<'info> {
   pub to: Box<Account<'info, InstructionAccount>>,
   #[account(
     mut,
-    close = authority,
+    close = budget,
     seeds = [
       b"instruction_relation".as_ref(),
       from.key().as_ref(),
@@ -68,7 +68,7 @@ pub struct DeleteInstructionRelation<'info> {
       b"instruction_account_stats".as_ref(),
       from.key().as_ref()
     ],
-    bump = from.instruction_account_stats_bump
+    bump = from.bumps.stats
   )]
   pub from_stats: Box<Account<'info, InstructionAccountStats>>,
   #[account(
@@ -77,7 +77,7 @@ pub struct DeleteInstructionRelation<'info> {
       b"instruction_account_stats".as_ref(),
       to.key().as_ref()
     ],
-    bump = to.instruction_account_stats_bump
+    bump = to.bumps.stats
   )]
   pub to_stats: Box<Account<'info, InstructionAccountStats>>,
 }

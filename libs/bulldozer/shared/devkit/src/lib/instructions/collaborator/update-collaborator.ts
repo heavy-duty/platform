@@ -10,7 +10,7 @@ export const updateCollaborator = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateCollaborator({ status: params.status })
+        .methods.updateCollaborator(params.collaboratorDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

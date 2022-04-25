@@ -11,6 +11,7 @@ import { RouterModule } from '@angular/router';
 import { EditInstructionModule } from '@bulldozer-client/edit-instruction';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { InstructionExplorerComponent } from './instruction-explorer.component';
 
@@ -26,6 +27,7 @@ import { InstructionExplorerComponent } from './instruction-explorer.component';
     MatProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
+    HdWalletAdapterCdkModule,
     StopPropagationModule,
     EditInstructionModule,
     ItemUpdatingModule,

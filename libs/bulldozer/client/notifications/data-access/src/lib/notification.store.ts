@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { ProgramError } from '@heavy-duty/anchor';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
+import { AnchorError, ProgramError } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { WalletError } from '@solana/wallet-adapter-base';
@@ -43,8 +44,13 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       switchMap((error) =>
         this._matSnackBar
-          .open(this.getErrorMessage(error), 'Close', {
-            panelClass: `error-snackbar`,
+          .openFromComponent(SnackBarComponent, {
+            duration: 10000,
+            data: {
+              title: 'Oops!!',
+              message: this.getErrorMessage(error),
+              type: 'error',
+            },
           })
           .afterDismissed()
       ),
@@ -57,9 +63,13 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       isNotNullOrUndefined,
       switchMap((event) =>
         this._matSnackBar
-          .open(event, 'Close', {
-            panelClass: `success-snackbar`,
-            duration: 2000,
+          .openFromComponent(SnackBarComponent, {
+            duration: 5000,
+            data: {
+              title: 'Hooray...',
+              message: event,
+              type: 'success',
+            },
           })
           .afterDismissed()
       ),
@@ -74,6 +84,8 @@ export class NotificationStore extends ComponentStore<ViewModel> {
       return error.name;
     } else if (error instanceof ProgramError) {
       return error.message;
+    } else if (error instanceof AnchorError) {
+      return error.error.errorMessage;
     } else {
       try {
         console.error(error);

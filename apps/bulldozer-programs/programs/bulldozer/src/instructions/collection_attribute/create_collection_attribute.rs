@@ -4,7 +4,7 @@ use crate::collections::{
 };
 use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
-use crate::utils::fund_rent_for_account;
+use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
@@ -104,7 +104,7 @@ pub fn handle(
   arguments: CreateCollectionAttributeArguments,
 ) -> Result<()> {
   msg!("Create collection attribute");
-  fund_rent_for_account(
+  transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.attribute.to_account_info().lamports.borrow(),

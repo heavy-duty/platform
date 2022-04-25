@@ -6,8 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { DepositToBudgetTriggerDirective } from './deposit-to-budget-trigger.directive';
 import { DepositToBudgetComponent } from './deposit-to-budget.component';
+import { DepositToBudgetDirective } from './deposit-to-budget.directive';
 
 @NgModule({
   imports: [
@@ -19,7 +19,7 @@ import { DepositToBudgetComponent } from './deposit-to-budget.component';
     MatIconModule,
     MatInputModule,
   ],
-  declarations: [DepositToBudgetComponent, DepositToBudgetTriggerDirective],
-  exports: [DepositToBudgetTriggerDirective],
+  declarations: [DepositToBudgetComponent, DepositToBudgetDirective],
+  exports: [DepositToBudgetDirective],
 })
-export class DepositToBudgetComponentModule {}
+export class DepositToBudgetModule {}

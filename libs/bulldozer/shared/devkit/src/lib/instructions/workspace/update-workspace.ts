@@ -10,7 +10,7 @@ export const updateWorkspace = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateWorkspace({ name: params.workspaceName })
+        .methods.updateWorkspace(params.workspaceDto)
         .accounts({
           workspace: new PublicKey(params.workspaceId),
           authority: new PublicKey(params.authority),

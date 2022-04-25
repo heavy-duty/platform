@@ -10,7 +10,7 @@ export const updateInstruction = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.updateInstruction({ name: params.instructionName })
+        .methods.updateInstruction(params.instructionDto)
         .accounts({
           authority: new PublicKey(params.authority),
           workspace: new PublicKey(params.workspaceId),

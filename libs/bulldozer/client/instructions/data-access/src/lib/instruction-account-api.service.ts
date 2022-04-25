@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HdBroadcasterStore } from '@heavy-duty/broadcaster';
 import {
   BULLDOZER_PROGRAM_ID,
+  clearInstructionAccountClose,
   createInstructionAccount,
   createInstructionAccountDocument,
   CreateInstructionAccountParams,
@@ -12,25 +12,37 @@ import {
   InstructionAccountFilters,
   instructionAccountQueryBuilder,
   parseBulldozerError,
+  setInstructionAccountClose,
+  setInstructionAccountCollection,
+  setInstructionAccountPayer,
   updateInstructionAccount,
   UpdateInstructionAccountParams,
 } from '@heavy-duty/bulldozer-devkit';
 import {
   HdSolanaApiService,
   HdSolanaConfigStore,
+  KeyedAccountInfo,
 } from '@heavy-duty/ngx-solana';
 import {
+  addInstructionsToTransaction,
   addInstructionToTransaction,
   partiallySignTransaction,
 } from '@heavy-duty/rx-solana';
-import { Finality, Keypair } from '@solana/web3.js';
+import {
+  Finality,
+  Keypair,
+  Transaction,
+  TransactionSignature,
+} from '@solana/web3.js';
 import {
   catchError,
+  combineLatest,
   concatMap,
   first,
+  forkJoin,
   map,
   Observable,
-  tap,
+  of,
   throwError,
 } from 'rxjs';
 
@@ -38,8 +50,7 @@ import {
 export class InstructionAccountApiService {
   constructor(
     private readonly _hdSolanaApiService: HdSolanaApiService,
-    private readonly _hdSolanaConfigStore: HdSolanaConfigStore,
-    private readonly _hdBroadcasterStore: HdBroadcasterStore
+    private readonly _hdSolanaConfigStore: HdSolanaConfigStore
   ) {}
 
   private handleError(error: string) {
@@ -75,11 +86,16 @@ export class InstructionAccountApiService {
     return this._hdSolanaApiService
       .getAccountInfo(instructionAccountId, commitment)
       .pipe(
-        map(
-          (accountInfo) =>
-            accountInfo &&
-            createInstructionAccountDocument(instructionAccountId, accountInfo)
-        )
+        concatMap((accountInfo) => {
+          if (accountInfo === null) {
+            return of(null);
+          }
+
+          return createInstructionAccountDocument(
+            instructionAccountId,
+            accountInfo
+          );
+        })
       );
   }
 
@@ -87,17 +103,22 @@ export class InstructionAccountApiService {
   findByIds(
     instructionAccountIds: string[],
     commitment: Finality = 'finalized'
-  ) {
+  ): Observable<Document<InstructionAccount>[]> {
     return this._hdSolanaApiService
       .getMultipleAccounts(instructionAccountIds, { commitment })
       .pipe(
-        map((keyedAccounts) =>
-          keyedAccounts.map(
-            (keyedAccount) =>
-              keyedAccount &&
-              createInstructionAccountDocument(
-                keyedAccount.accountId,
-                keyedAccount.accountInfo
+        concatMap((keyedAccounts) =>
+          forkJoin(
+            keyedAccounts
+              .filter(
+                (keyedAccount): keyedAccount is KeyedAccountInfo =>
+                  keyedAccount !== null
+              )
+              .map((keyedAccount) =>
+                createInstructionAccountDocument(
+                  keyedAccount.accountId,
+                  keyedAccount.accountInfo
+                )
               )
           )
         )
@@ -105,11 +126,35 @@ export class InstructionAccountApiService {
   }
 
   // create instruction account
-  create(params: Omit<CreateInstructionAccountParams, 'instructionAccountId'>) {
-    const instructionAccountKeypair = Keypair.generate();
+  create(
+    instructionAccountKeypair: Keypair,
+    params: Omit<CreateInstructionAccountParams, 'instructionAccountId'>
+  ): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
+    const instructions = [
+      this._hdSolanaConfigStore.apiEndpoint$.pipe(
+        first(),
+        concatMap((apiEndpoint) => {
+          if (apiEndpoint === null) {
+            return throwError(() => 'API endpoint missing');
+          }
 
-    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(
+          return createInstructionAccount(apiEndpoint, {
+            ...params,
+            instructionAccountId:
+              instructionAccountKeypair.publicKey.toBase58(),
+          });
+        })
+      ),
+    ];
+
+    const { kind, modifier, collection, close, payer } =
+      params.instructionAccountDto;
+
+    if (kind === 0 && collection !== null) {
+      instructions.push(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
           first(),
           concatMap((apiEndpoint) => {
@@ -117,23 +162,66 @@ export class InstructionAccountApiService {
               return throwError(() => 'API endpoint missing');
             }
 
-            return createInstructionAccount(apiEndpoint, {
+            return setInstructionAccountCollection(apiEndpoint, {
               ...params,
               instructionAccountId:
                 instructionAccountKeypair.publicKey.toBase58(),
+              collectionId: collection,
             });
           })
         )
-      ),
+      );
+    }
+
+    if (modifier === 0 && payer !== null) {
+      instructions.push(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return setInstructionAccountPayer(apiEndpoint, {
+              ...params,
+              instructionAccountId:
+                instructionAccountKeypair.publicKey.toBase58(),
+              payer,
+            });
+          })
+        )
+      );
+    }
+
+    if (modifier === 1 && close !== null) {
+      instructions.push(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return setInstructionAccountClose(apiEndpoint, {
+              ...params,
+              instructionAccountId:
+                instructionAccountKeypair.publicKey.toBase58(),
+              close,
+            });
+          })
+        )
+      );
+    }
+
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionsToTransaction(combineLatest(instructions)),
       partiallySignTransaction(instructionAccountKeypair),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -141,9 +229,28 @@ export class InstructionAccountApiService {
   }
 
   // update instruction account
-  update(params: UpdateInstructionAccountParams) {
-    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
-      addInstructionToTransaction(
+  update(params: UpdateInstructionAccountParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
+    const instructions = [
+      this._hdSolanaConfigStore.apiEndpoint$.pipe(
+        first(),
+        concatMap((apiEndpoint) => {
+          if (apiEndpoint === null) {
+            return throwError(() => 'API endpoint missing');
+          }
+
+          return updateInstructionAccount(apiEndpoint, params);
+        })
+      ),
+    ];
+
+    const { modifier, close, payer, kind, collection } =
+      params.instructionAccountDto;
+
+    if (kind === 0 && collection !== null) {
+      instructions.push(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
           first(),
           concatMap((apiEndpoint) => {
@@ -151,18 +258,69 @@ export class InstructionAccountApiService {
               return throwError(() => 'API endpoint missing');
             }
 
-            return updateInstructionAccount(apiEndpoint, params);
+            return setInstructionAccountCollection(apiEndpoint, {
+              ...params,
+              instructionAccountId: params.instructionAccountId,
+              collectionId: collection,
+            });
           })
         )
-      ),
+      );
+    }
+
+    if (modifier === 0 && payer !== null) {
+      instructions.push(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            return setInstructionAccountPayer(apiEndpoint, {
+              ...params,
+              instructionAccountId: params.instructionAccountId,
+              payer,
+            });
+          })
+        )
+      );
+    }
+
+    if (modifier === 1) {
+      instructions.push(
+        this._hdSolanaConfigStore.apiEndpoint$.pipe(
+          first(),
+          concatMap((apiEndpoint) => {
+            if (apiEndpoint === null) {
+              return throwError(() => 'API endpoint missing');
+            }
+
+            if (close === null) {
+              return clearInstructionAccountClose(apiEndpoint, {
+                ...params,
+                instructionAccountId: params.instructionAccountId,
+              });
+            }
+
+            return setInstructionAccountClose(apiEndpoint, {
+              ...params,
+              instructionAccountId: params.instructionAccountId,
+              close,
+            });
+          })
+        )
+      );
+    }
+
+    return this._hdSolanaApiService.createTransaction(params.authority).pipe(
+      addInstructionsToTransaction(combineLatest(instructions)),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )
@@ -170,7 +328,10 @@ export class InstructionAccountApiService {
   }
 
   // delete instruction account
-  delete(params: DeleteInstructionAccountParams) {
+  delete(params: DeleteInstructionAccountParams): Observable<{
+    transactionSignature: TransactionSignature;
+    transaction: Transaction;
+  }> {
     return this._hdSolanaApiService.createTransaction(params.authority).pipe(
       addInstructionToTransaction(
         this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -186,12 +347,10 @@ export class InstructionAccountApiService {
       ),
       concatMap((transaction) =>
         this._hdSolanaApiService.sendTransaction(transaction).pipe(
-          tap((transactionSignature) =>
-            this._hdBroadcasterStore.sendTransaction(
-              transactionSignature,
-              params.workspaceId
-            )
-          ),
+          map((transactionSignature) => ({
+            transactionSignature,
+            transaction,
+          })),
           catchError((error) => this.handleError(error))
         )
       )

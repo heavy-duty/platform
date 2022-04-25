@@ -7,13 +7,14 @@ import {
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
+import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';
 
 @Component({
   selector: 'bd-edit-workspace',
   template: `
-    <h2 mat-dialog-title class="mat-primary">
-      {{ data?.workspace ? 'Edit' : 'Create' }} workspace
+    <h2 mat-dialog-title class="mat-primary bd-font">
+      {{ workspace ? 'Edit' : 'Create' }} workspace
     </h2>
 
     <form
@@ -48,24 +49,25 @@ import { Document, Workspace } from '@heavy-duty/bulldozer-devkit';
         >
       </mat-form-field>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        {{ data?.workspace ? 'Save' : 'Create' }}
-      </button>
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
+        <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
+          {{ workspace ? 'Save' : 'Create' }}
+        </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
     </form>
-
-    <button
-      mat-icon-button
-      aria-label="Close edit workspace form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,12 +81,10 @@ export class EditWorkspaceComponent {
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<EditWorkspaceComponent>,
     @Inject(MAT_DIALOG_DATA)
-    public data?: {
-      workspace?: Document<Workspace>;
-    }
+    public workspace?: WorkspaceDto
   ) {
     this.form = new FormGroup({
-      name: new FormControl(this.data?.workspace?.name ?? '', {
+      name: new FormControl(this.workspace?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
     });
@@ -97,9 +97,13 @@ export class EditWorkspaceComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

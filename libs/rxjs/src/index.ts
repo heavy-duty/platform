@@ -4,3 +4,4 @@ export * from './lib/local-storage';
 export * from './lib/online';
 export * from './lib/repeat-with-backoff';
 export * from './lib/share-while-subscribed';
+export * from './lib/tap-effect';

@@ -8,8 +8,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
-import { EditInstructionRelationTriggerDirective } from './edit-instruction-relation-trigger.directive';
 import { EditInstructionRelationComponent } from './edit-instruction-relation.component';
+import { EditInstructionRelationDirective } from './edit-instruction-relation.directive';
 
 @NgModule({
   imports: [
@@ -25,8 +25,8 @@ import { EditInstructionRelationComponent } from './edit-instruction-relation.co
   ],
   declarations: [
     EditInstructionRelationComponent,
-    EditInstructionRelationTriggerDirective,
+    EditInstructionRelationDirective,
   ],
-  exports: [EditInstructionRelationTriggerDirective],
+  exports: [EditInstructionRelationDirective],
 })
 export class EditInstructionRelationModule {}

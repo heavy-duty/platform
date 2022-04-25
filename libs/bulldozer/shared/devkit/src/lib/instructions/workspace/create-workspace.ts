@@ -10,7 +10,7 @@ export const createWorkspace = (
   return defer(() =>
     from(
       getBulldozerProgram(endpoint)
-        .methods.createWorkspace({ name: params.workspaceName })
+        .methods.createWorkspace(params.workspaceDto)
         .accounts({
           workspace: new PublicKey(params.workspaceId),
           authority: new PublicKey(params.authority),

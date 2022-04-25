@@ -2,11 +2,12 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 
 @Component({
   selector: 'bd-deposit-to-budget',
   template: `
-    <h2 mat-dialog-title class="mat-primary">Deposit to Budget</h2>
+    <h2 mat-dialog-title class="mat-primary bd-font">Deposit to Budget</h2>
 
     <form
       [formGroup]="form"
@@ -16,45 +17,45 @@ import { MatSnackBar } from '@angular/material/snack-bar';
       <mat-form-field
         class="w-full"
         appearance="fill"
-        hintLabel="Enter the lamports."
+        hintLabel="Enter the amount."
       >
-        <mat-label>Lamports</mat-label>
+        <mat-label>Amount</mat-label>
         <input
           matInput
-          formControlName="lamports"
+          formControlName="amount"
           required
           autocomplete="off"
           maxlength="32"
         />
 
         <mat-error
-          *ngIf="submitted && this.form.get('lamports')?.hasError('required')"
-          >The lamports is mandatory.</mat-error
+          *ngIf="submitted && this.form.get('amount')?.hasError('required')"
+          >The amount is mandatory.</mat-error
         >
-        <mat-error
-          *ngIf="submitted && this.form.get('lamports')?.hasError('min')"
+        <mat-error *ngIf="submitted && this.form.get('amount')?.hasError('min')"
           >Minimum of 1 lamport.</mat-error
         >
       </mat-form-field>
 
-      <button
-        mat-stroked-button
-        color="primary"
-        class="w-full"
-        [disabled]="submitted && form.invalid"
+      <div
+        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
-        Deposit
-      </button>
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
+        <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
+          Deposit
+        </button>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-45"></div>
+        </div>
+        <div
+          class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 right-2"
+        >
+          <div class="w-full h-px bg-gray-600 rotate-12"></div>
+        </div>
+      </div>
     </form>
-
-    <button
-      mat-icon-button
-      aria-label="Close deposit to budget form"
-      class="w-8 h-8 leading-none absolute top-0 right-0"
-      mat-dialog-close
-    >
-      <mat-icon>close</mat-icon>
-    </button>
   `,
   styles: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -69,8 +70,8 @@ export class DepositToBudgetComponent {
     private readonly _matDialogRef: MatDialogRef<DepositToBudgetComponent>
   ) {
     this.form = new FormGroup({
-      lamports: new FormControl(null, {
-        validators: [Validators.required, Validators.min(1)],
+      amount: new FormControl(null, {
+        validators: [Validators.required, Validators.min(0)],
       }),
     });
   }
@@ -82,9 +83,13 @@ export class DepositToBudgetComponent {
     if (this.form.valid) {
       this._matDialogRef.close(this.form.value);
     } else {
-      this._matSnackBar.open('Invalid information', 'close', {
-        panelClass: 'warning-snackbar',
+      this._matSnackBar.openFromComponent(SnackBarComponent, {
         duration: 5000,
+        data: {
+          title: 'Heey...',
+          message: 'Invalid Information',
+          type: 'warning',
+        },
       });
     }
   }

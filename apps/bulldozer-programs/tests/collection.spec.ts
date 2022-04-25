@@ -1,4 +1,4 @@
-import { Program, ProgramError, Provider } from '@heavy-duty/anchor';
+import { AnchorError, AnchorProvider, Program } from '@heavy-duty/anchor';
 import {
   Keypair,
   LAMPORTS_PER_SOL,
@@ -10,11 +10,8 @@ import { Bulldozer, IDL } from '../target/types/bulldozer';
 import { BULLDOZER_PROGRAM_ID } from './utils';
 
 describe('collection', () => {
-  const program = new Program<Bulldozer>(
-    IDL,
-    BULLDOZER_PROGRAM_ID,
-    Provider.env()
-  );
+  const provider = AnchorProvider.env();
+  const program = new Program<Bulldozer>(IDL, BULLDOZER_PROGRAM_ID, provider);
   const collection = Keypair.generate();
   const application = Keypair.generate();
   const workspace = Keypair.generate();
@@ -22,6 +19,12 @@ describe('collection', () => {
   const workspaceName = 'my-workspace';
   let budgetPublicKey: PublicKey;
   let applicationStatsPublicKey: PublicKey;
+  const userUserName = 'user-name-1';
+  const userName = 'User Name 1';
+  const userThumbnailUrl = 'https://img/1.com';
+  const newUserUserName = 'user-name-2';
+  const newUserName = 'User Name 2';
+  const newUserThumbnailUrl = 'https://img/2.com';
 
   before(async () => {
     [budgetPublicKey] = await PublicKey.findProgramAddress(
@@ -38,9 +41,13 @@ describe('collection', () => {
 
     try {
       await program.methods
-        .createUser()
+        .createUser({
+          name: userName,
+          thumbnailUrl: userThumbnailUrl,
+          userName: userUserName,
+        })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
         })
         .rpc();
     } catch (error) {}
@@ -48,13 +55,13 @@ describe('collection', () => {
     await program.methods
       .createWorkspace({ name: workspaceName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
       })
       .signers([workspace])
       .postInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: budgetPublicKey,
           lamports: LAMPORTS_PER_SOL,
         }),
@@ -63,7 +70,7 @@ describe('collection', () => {
     await program.methods
       .createApplication({ name: applicationName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
       })
@@ -81,7 +88,7 @@ describe('collection', () => {
         collection: collection.publicKey,
         application: application.publicKey,
         workspace: workspace.publicKey,
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
       })
       .signers([collection])
       .rpc();
@@ -91,7 +98,7 @@ describe('collection', () => {
     );
     const applicationStatsAccount =
       await program.account.applicationStats.fetch(applicationStatsPublicKey);
-    assert.ok(account.authority.equals(program.provider.wallet.publicKey));
+    assert.ok(account.authority.equals(provider.wallet.publicKey));
     assert.ok(account.workspace.equals(workspace.publicKey));
     assert.ok(account.application.equals(application.publicKey));
     assert.equal(account.name, collectionName);
@@ -106,7 +113,7 @@ describe('collection', () => {
     await program.methods
       .updateCollection({ name: collectionName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         collection: collection.publicKey,
@@ -125,7 +132,7 @@ describe('collection', () => {
     await program.methods
       .deleteCollection()
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: workspace.publicKey,
         application: application.publicKey,
         collection: collection.publicKey,
@@ -154,13 +161,13 @@ describe('collection', () => {
       max: null,
       maxLength: null,
     };
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     try {
       await program.methods
         .createCollection({ name: collectionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           collection: collection.publicKey,
@@ -170,7 +177,7 @@ describe('collection', () => {
       await program.methods
         .createCollectionAttribute(argumentsData)
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           collection: collection.publicKey,
@@ -181,17 +188,17 @@ describe('collection', () => {
       await program.methods
         .deleteCollection()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           collection: collection.publicKey,
         })
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6013);
+    assert.equal(error?.error.errorCode.number, 6013);
   });
 
   it('should fail when providing wrong "application" to delete', async () => {
@@ -200,13 +207,13 @@ describe('collection', () => {
     const newApplicationName = 'sample';
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     try {
       await program.methods
         .createApplication({ name: newApplicationName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: newApplication.publicKey,
         })
@@ -215,7 +222,7 @@ describe('collection', () => {
       await program.methods
         .createCollection({ name: newCollectionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: newApplication.publicKey,
           collection: newCollection.publicKey,
@@ -225,17 +232,17 @@ describe('collection', () => {
       await program.methods
         .deleteCollection()
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: workspace.publicKey,
           application: application.publicKey,
           collection: newCollection.publicKey,
         })
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6035);
+    assert.equal(error?.error.errorCode.number, 6035);
   });
 
   it('should fail when workspace has insufficient funds', async () => {
@@ -250,18 +257,18 @@ describe('collection', () => {
       [Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
       program.programId
     );
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     await program.methods
       .createWorkspace({ name: newWorkspaceName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
       })
       .signers([newWorkspace])
       .postInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: newBudgetPublicKey,
           lamports:
             (await program.provider.connection.getMinimumBalanceForRentExemption(
@@ -276,7 +283,7 @@ describe('collection', () => {
     await program.methods
       .createApplication({ name: newApplicationName })
       .accounts({
-        authority: program.provider.wallet.publicKey,
+        authority: provider.wallet.publicKey,
         workspace: newWorkspace.publicKey,
         application: newApplication.publicKey,
       })
@@ -286,7 +293,7 @@ describe('collection', () => {
       await program.methods
         .createCollection({ name: newCollectionName })
         .accounts({
-          authority: program.provider.wallet.publicKey,
+          authority: provider.wallet.publicKey,
           workspace: newWorkspace.publicKey,
           application: newApplication.publicKey,
           collection: newCollection.publicKey,
@@ -294,10 +301,10 @@ describe('collection', () => {
         .signers([newCollection])
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6027);
+    assert.equal(error?.error.errorCode.number, 6027);
   });
 
   it('should fail when user is not a collaborator', async () => {
@@ -305,7 +312,7 @@ describe('collection', () => {
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
     const newUser = Keypair.generate();
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     try {
       await program.methods
@@ -319,17 +326,17 @@ describe('collection', () => {
         .signers([newUser, newCollection])
         .preInstructions([
           SystemProgram.transfer({
-            fromPubkey: program.provider.wallet.publicKey,
+            fromPubkey: provider.wallet.publicKey,
             toPubkey: newUser.publicKey,
             lamports: LAMPORTS_PER_SOL,
           }),
         ])
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 3012);
+    assert.equal(error?.error.errorCode.number, 3012);
   });
 
   it('should fail when user is not an approved collaborator', async () => {
@@ -337,21 +344,25 @@ describe('collection', () => {
     const newCollection = Keypair.generate();
     const newCollectionName = 'sample';
     const newUser = Keypair.generate();
-    let error: ProgramError | null = null;
+    let error: AnchorError | null = null;
     // act
     const [newUserPublicKey] = await PublicKey.findProgramAddress(
       [Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
       program.programId
     );
     await program.methods
-      .createUser()
+      .createUser({
+        name: newUserName,
+        thumbnailUrl: newUserThumbnailUrl,
+        userName: newUserUserName,
+      })
       .accounts({
         authority: newUser.publicKey,
       })
       .signers([newUser])
       .preInstructions([
         SystemProgram.transfer({
-          fromPubkey: program.provider.wallet.publicKey,
+          fromPubkey: provider.wallet.publicKey,
           toPubkey: newUser.publicKey,
           lamports: LAMPORTS_PER_SOL,
         }),
@@ -379,9 +390,9 @@ describe('collection', () => {
         .signers([newUser, newCollection])
         .rpc();
     } catch (err) {
-      error = err as ProgramError;
+      error = err as AnchorError;
     }
     // assert
-    assert.equal(error?.code, 6029);
+    assert.equal(error?.error.errorCode.number, 6029);
   });
 });
