@@ -105,7 +105,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 
             <div class="flex">
               <section>
-                <h2
+                <p
                   class="m-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
                   [matTooltip]="
                     signer.name | bdItemUpdatingMessage: signer:'Signer'
@@ -113,7 +113,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
                   matTooltipShowDelay="500"
                 >
                   {{ signer.name }}
-                </h2>
+                </p>
 
                 <p class="m-0">
                   <ng-container *ngIf="signer.modifier === null">

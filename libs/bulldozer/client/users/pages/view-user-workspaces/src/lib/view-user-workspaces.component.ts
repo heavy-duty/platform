@@ -64,7 +64,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                     </p>
                   </div>
                   <div>
-                    <h2
+                    <p
                       class="mb-0 text-lg font-bold flex justify-start"
                       [matTooltip]="
                         workspace.name
@@ -73,8 +73,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                       matTooltipShowDelay="500"
                     >
                       {{ workspace.name }}
-                    </h2>
-
+                    </p>
                     <p>
                       <span
                         class="w-2 h-2 rounded-full mr-2 mt-1 inline-block"

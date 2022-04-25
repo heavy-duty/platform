@@ -125,7 +125,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
                 <div class="flex-1 flex gap-8 justify-between">
                   <div class="pr-4">
-                    <h2
+                    <p
                       class="mb-0 text-lg font-bold uppercase"
                       [matTooltip]="
                         instructionDocument.name
@@ -136,7 +136,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                       matTooltipShowDelay="500"
                     >
                       {{ instructionDocument.name }}
-                    </h2>
+                    </p>
 
                     <p
                       class="text-xs mb-0"
@@ -366,15 +366,15 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                     *ngIf="relation.to !== null"
                   >
                     <div class="w-48">
-                      <h3
-                        class="uppercase font-bold m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
+                      <p
+                        class="uppercase font-bold m-0 overflow-hidden whitespace-nowrap overflow-ellipsis text-base"
                         [matTooltip]="
                           relation.to.name
                             | bdItemUpdatingMessage: relation:'Relation to'
                         "
                       >
                         {{ relation.to.name }}
-                      </h3>
+                      </p>
 
                       <p class="text-xs font-thin m-0">
                         ({{ relation.id | obscureAddress }})

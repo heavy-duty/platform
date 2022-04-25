@@ -106,7 +106,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 
             <div class="flex gap-10 mt-1">
               <section>
-                <h2
+                <p
                   class="mb-0 text-lg font-bold flex items-center gap-2"
                   [matTooltip]="
                     collectionAttribute.name
@@ -115,7 +115,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
                   matTooltipShowDelay="500"
                 >
                   {{ collectionAttribute.name }}
-                </h2>
+                </p>
 
                 <p class="text-sm mb-0 capitalize">
                   {{ collectionAttribute.kind.name }}.

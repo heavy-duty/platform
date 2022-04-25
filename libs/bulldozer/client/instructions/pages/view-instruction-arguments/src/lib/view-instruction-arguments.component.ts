@@ -122,7 +122,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 
                       <div class="flex gap-10 mt-1">
                         <section>
-                          <h2
+                          <p
                             class="mb-0 text-lg font-bold overflow-hidden whitespace-nowrap overflow-ellipsis"
                             [matTooltip]="
                               instructionArgument.name
@@ -133,7 +133,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                             matTooltipShowDelay="500"
                           >
                             {{ instructionArgument.name }}
-                          </h2>
+                          </p>
                           <p class="text-sm mb-0">
                             {{ instructionArgument.kind.name }}.
                           </p>

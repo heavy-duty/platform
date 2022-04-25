@@ -171,7 +171,7 @@ interface ViewModel {
             </div>
 
             <div>
-              <h1 class="flex items-center justify-start gap-2 mb-0">
+              <p class="flex items-center justify-start gap-2 mb-0 text-2xl">
                 <span
                   class="leading-none"
                   [matTooltip]="
@@ -191,7 +191,7 @@ interface ViewModel {
                 >
                   admin_panel_settings
                 </mat-icon>
-              </h1>
+              </p>
               <p class="m-0">
                 <a
                   [href]="

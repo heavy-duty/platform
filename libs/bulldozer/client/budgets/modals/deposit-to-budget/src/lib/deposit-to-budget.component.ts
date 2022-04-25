@@ -40,10 +40,10 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
       <div
         class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
+        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
         <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
           Deposit
         </button>
-        <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
         <div
           class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-5 left-2"
         >

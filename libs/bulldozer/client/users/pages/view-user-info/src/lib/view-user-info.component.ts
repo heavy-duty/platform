@@ -46,7 +46,9 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     ></mat-progress-spinner>
                   </div>
                   <div>
-                    <h1 class="flex items-center justify-start gap-2 mb-0">
+                    <p
+                      class="flex items-center justify-start gap-2 mb-0 text-2xl"
+                    >
                       <span
                         class="leading-none"
                         [matTooltip]="
@@ -56,7 +58,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                       >
                         {{ user.name }}
                       </span>
-                    </h1>
+                    </p>
                     <p class="m-0">
                       <a
                         [href]="
