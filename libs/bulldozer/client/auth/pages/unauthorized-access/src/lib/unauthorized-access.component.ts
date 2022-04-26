@@ -20,11 +20,13 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
           <div
             class="ml-5 mt-5 box-border w-24 flex flex-col justify-center items-center"
           >
-            <figure class="w-30">
+            <figure>
               <img
-                src="assets/images/logo.png"
-                class="w-full"
+                src="assets/images/logo.webp"
+                class="w-32 h-36"
                 alt="HeavyDuty logo"
+                width="128"
+                height="144"
               />
             </figure>
             <p class="mb-1 bd-font text-base">BULLDOZER</p>
@@ -39,33 +41,39 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
               program’s ecosystem through a UI, hiding all the gory details.
             </p>
             <div class="flex mt-6 mb-10">
-              <figure class="w-8 mr-4">
+              <figure class="mr-4">
                 <a
                   href="https://github.com/heavy-duty/platform"
                   target="_blank"
                 >
                   <img
                     src="assets/images/social/github.png"
-                    class="w-16"
+                    class="w-8 h-8"
                     alt="Github button"
+                    width="32"
+                    height="32"
                   />
                 </a>
               </figure>
-              <figure class="w-8 mr-4">
+              <figure class="mr-4">
                 <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
                   <img
                     src="assets/images/social/discord.png"
-                    class="w-16"
+                    class="w-8 h-8"
                     alt="Discord button"
+                    width="32"
+                    height="32"
                   />
                 </a>
               </figure>
-              <figure class="w-8 mr-4">
+              <figure class="mr-4">
                 <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
                   <img
                     src="assets/images/social/twitter.png"
-                    class="w-16"
+                    class="w-8 h-8"
                     alt="Twitter button"
+                    width="32"
+                    height="32"
                   />
                 </a>
               </figure>

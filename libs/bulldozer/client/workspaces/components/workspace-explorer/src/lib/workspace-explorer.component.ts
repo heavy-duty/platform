@@ -166,7 +166,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                   <figure
                     class="flex justify-center items-center w-10 h-10 rounded-full overflow-hidden bg-bd-black"
                   >
-                    <img src="assets/images/logo.png" class="w-8/12" />
+                    <img src="assets/images/logo.webp" class="w-8/12" />
                   </figure>
                 </div>
               </bd-card>

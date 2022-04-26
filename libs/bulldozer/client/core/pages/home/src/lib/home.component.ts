@@ -19,7 +19,7 @@ import { HomeStore } from './home.store';
     <ng-container *ngrxLet="user$; let user">
       <header>
         <figure class="w-32 mx-auto">
-          <img src="assets/images/logo.png" class="w-full" />
+          <img src="assets/images/logo.webp" class="w-full" />
           <figcaption class="my-1 text-center font-bold">BULLDOZER</figcaption>
         </figure>
         <h1 class="text-2xl text-center font-bold m-0">
