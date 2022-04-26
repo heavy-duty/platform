@@ -1,7 +1,7 @@
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { AuthGuard } from '@bulldozer-client/auth-guard';
 import { AuthInterceptor } from '@bulldozer-client/auth-interceptor';
@@ -21,7 +21,7 @@ import { AppComponent } from './app.component';
   declarations: [AppComponent],
   imports: [
     BrowserModule,
-    BrowserAnimationsModule,
+    NoopAnimationsModule,
     RouterModule.forRoot(
       [
         {

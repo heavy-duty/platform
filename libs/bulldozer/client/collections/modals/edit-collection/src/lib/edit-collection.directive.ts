@@ -19,7 +19,7 @@ export class EditCollectionDirective {
         EditCollectionComponent,
         {
           data: this.collection,
-          panelClass: 'bd-bg-image-7',
+          panelClass: ['bd-bg-wood', 'bg-bd-brown'],
         }
       )
       .afterClosed()

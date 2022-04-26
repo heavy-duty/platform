@@ -7,7 +7,7 @@ import { MatDialogRef } from '@angular/material/dialog';
     <h2 mat-dialog-title class="mat-primary bd-font">Add workspace</h2>
 
     <div
-      class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 bg-bd-black shadow relative"
+      class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-metal-2 bg-black shadow relative"
     >
       <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
       <button class="bd-button flex-1" (click)="onNewWorkspace()">

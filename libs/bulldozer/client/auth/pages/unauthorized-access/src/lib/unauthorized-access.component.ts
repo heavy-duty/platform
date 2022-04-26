@@ -14,7 +14,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
   template: `
     <main class="flex h-screen">
       <div
-        class="bg-bd-black w-1/2 h-screen flex flex-col justify-end items-center bg-contain bg-repeat bd-bg-image-0"
+        class="bg-bd-black w-1/2 h-screen flex flex-col justify-end items-center bd-bg-bricks"
       >
         <div class="w-full">
           <div
@@ -55,7 +55,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
               </figure>
             </div>
             <div
-              class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+              class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
               *hdWalletAdapter="
                 let wallet = wallet;
                 let wallets = wallets;

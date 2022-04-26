@@ -36,7 +36,7 @@ export class EditInstructionRelationDirective {
           accounts: this.instructionAccounts,
           from: this.from,
         },
-        panelClass: 'bd-bg-image-7',
+        panelClass: ['bd-bg-wood', 'bg-bd-brown'],
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionRelation.emit(data));

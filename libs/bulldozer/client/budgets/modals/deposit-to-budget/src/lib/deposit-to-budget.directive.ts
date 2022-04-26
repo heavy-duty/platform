@@ -11,7 +11,7 @@ export class DepositToBudgetDirective {
     this._matDialog
       .open<DepositToBudgetComponent, null, { amount: number }>(
         DepositToBudgetComponent,
-        { panelClass: 'bd-bg-image-7' }
+        { panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
       )
       .afterClosed()
       .subscribe(

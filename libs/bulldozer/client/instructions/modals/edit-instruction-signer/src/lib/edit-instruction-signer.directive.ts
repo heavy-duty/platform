@@ -21,7 +21,7 @@ export class EditInstructionSignerDirective {
         InstructionAccountDto
       >(EditInstructionSignerComponent, {
         data: this.instructionSigner,
-        panelClass: 'bd-bg-image-7',
+        panelClass: ['bd-bg-wood', 'bg-bd-brown'],
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionSigner.emit(data));

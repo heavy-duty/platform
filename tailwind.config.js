@@ -22,6 +22,7 @@ module.exports = {
         warning: 'var(--warning-color)',
         error: 'var(--error-color)',
         'bd-black': '#242424',
+        'bd-brown': '#583b2a',
       },
     },
   },

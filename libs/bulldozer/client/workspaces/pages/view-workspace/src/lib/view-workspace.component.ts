@@ -82,7 +82,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
             *ngIf="publicKey !== null && workspace !== null"
-            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
           >
             <button
               class="bd-button w-28"
