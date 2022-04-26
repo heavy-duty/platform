@@ -136,7 +136,7 @@ import { Subject, takeUntil } from 'rxjs';
       </mat-form-field>
 
       <div
-        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
+        class="py-2 px-5 w-full h-12 bd-bg-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
         <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
         <button class="bd-button flex-1" [disabled]="submitted && form.invalid">

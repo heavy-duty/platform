@@ -137,7 +137,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 
         <div class="w-full px-4 flex flex-col gap-2 ">
           <div
-            class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 mb-4 rounded mat-elevation-z8"
+            class="flex flex-col gap-2 bd-bg-metal bg-black px-4 py-5 mb-4 rounded mat-elevation-z8"
           >
             <bd-card *ngIf="workspace !== null">
               <h3 class="mb-2 hd-highlight-title uppercase text-sm">
@@ -166,7 +166,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                   <figure
                     class="flex justify-center items-center w-10 h-10 rounded-full overflow-hidden bg-bd-black"
                   >
-                    <img src="assets/images/logo.png" class="w-8/12" />
+                    <img src="assets/images/logo.webp" class="w-8/12" />
                   </figure>
                 </div>
               </bd-card>

@@ -22,7 +22,7 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
 
     <main class="flex-1">
       <div
-        class="py-7 px-5 h-full bd-bg-image-14 flex justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8"
+        class="py-7 px-5 h-full bd-bg-metal flex justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8"
         *ngIf="code$ | ngrxPush as code"
       >
         <bd-code-editor

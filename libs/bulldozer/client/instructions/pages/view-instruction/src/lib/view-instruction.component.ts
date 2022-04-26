@@ -198,7 +198,7 @@ import { ViewInstructionStore } from './view-instruction.store';
           "
         >
           <footer
-            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
             *ngIf="publicKey !== null && instruction !== null"
           >
             <ng-container>
@@ -250,7 +250,7 @@ import { ViewInstructionStore } from './view-instruction.store';
     </ng-container>
 
     <figure class="w-14 mt-2">
-      <img src="assets/images/pipe.png" alt="pipe" />
+      <img src="assets/images/pipe.webp" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">

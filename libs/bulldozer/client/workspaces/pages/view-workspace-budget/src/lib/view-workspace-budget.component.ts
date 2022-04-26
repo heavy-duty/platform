@@ -26,14 +26,14 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 
     <main class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
       <div
-        class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
+        class="flex flex-col gap-2 bd-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
       >
         <bd-card class="flex gap-2">
           <figure
             class="w-14 h-14 flex justify-center items-center bg-black rounded-full mr-2"
             *ngIf="!(budget | bdItemChanging)"
           >
-            <img src="assets/images/solana-logo.png" class="w-1/2" />
+            <img src="assets/images/solana-logo.webp" class="w-1/2" />
           </figure>
 
           <div

@@ -17,6 +17,7 @@
         "assets": [
           "apps/bulldozer-client/src/favicon.ico",
           "apps/bulldozer-client/src/assets",
+          "apps/bulldozer-client/src/robots.txt",
           {
             "glob": "**/*",
             "input": "node_modules/monaco-editor",

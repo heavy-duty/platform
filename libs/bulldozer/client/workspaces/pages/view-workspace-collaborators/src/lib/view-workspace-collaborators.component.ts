@@ -39,7 +39,7 @@ interface ViewModel {
       <p>Filter by collaborator status</p>
 
       <div class="flex gap-4">
-        <div class="px-8 py-3 w-60 h-16 bd-bg-image-11 shadow relative">
+        <div class="px-8 py-3 w-60 h-16 bd-bg-metal-2 shadow relative">
           <mat-form-field class="bg-bd-black">
             <mat-select
               [value]="status$ | ngrxPush"
@@ -84,7 +84,7 @@ interface ViewModel {
           "
         >
           <div
-            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-image-11 shadow flex justify-center items-center relative"
+            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
             *hdWalletAdapter="let publicKey = publicKey"
           >
             <ng-container *ngIf="publicKey !== null">
@@ -142,7 +142,7 @@ interface ViewModel {
 
     <div class="flex flex-wrap gap-4">
       <div
-        class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
+        class="flex flex-col gap-2 bd-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
         *ngFor="
           let collaborator of filteredCollaborators$ | ngrxPush;
           trackBy: identify

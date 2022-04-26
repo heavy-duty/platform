@@ -59,7 +59,7 @@ import { ApplicationItemView } from './types';
 
                   <mat-menu
                     #applicationOptionsMenu="matMenu"
-                    class="bd-bg-image-7"
+                    class="bd-bg-wood bg-bd-brown"
                   >
                     <!-- <a
                   mat-menu-item

@@ -48,6 +48,6 @@ impl User {
     // discriminator + authority + username
     // name + thumbnail + bump
     // created at + updated at
-    8 + 32 + 19 + 36 + 104 + 1 + 8 + 8
+    8 + 32 + 19 + 36 + 304 + 1 + 8 + 8
   }
 }

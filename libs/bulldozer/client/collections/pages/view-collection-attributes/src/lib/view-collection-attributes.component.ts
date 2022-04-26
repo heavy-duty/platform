@@ -65,7 +65,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
         "
       >
         <div
-          class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
+          class="flex flex-col gap-2 bd-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="
             let collectionAttribute of collectionAttributes;
             let i = index

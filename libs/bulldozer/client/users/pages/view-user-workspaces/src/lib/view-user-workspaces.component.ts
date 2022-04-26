@@ -26,7 +26,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
         class="flex gap-6 flex-wrap"
       >
         <div
-          class="flex flex-col gap-2 bd-bg-image-5 bg-bd-black px-4 py-5 rounded mat-elevation-z8"
+          class="flex flex-col gap-2 bd-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
           *ngFor="let workspace of workspaces; let i = index"
         >
           <ng-container *ngrxLet="workspaceId$; let workspaceId">
@@ -38,7 +38,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                     *ngIf="!(workspace | bdItemChanging)"
                   >
                     <img
-                      src="assets/icons/view-profile-icon.png"
+                      src="assets/icons/view-profile-icon.svg"
                       onerror="this.src='assets/images/default-profile.png';"
                     />
                   </figure>

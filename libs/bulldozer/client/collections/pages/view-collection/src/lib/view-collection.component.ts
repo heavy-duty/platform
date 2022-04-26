@@ -123,7 +123,7 @@ import { ViewCollectionStore } from './view-collection.store';
 
         <ng-container *hdWalletAdapter="let publicKey = publicKey">
           <footer
-            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-image-11 shadow relative"
+            class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
             *ngIf="publicKey !== null && collection !== null"
           >
             <button
@@ -176,7 +176,7 @@ import { ViewCollectionStore } from './view-collection.store';
     </ng-container>
 
     <figure class="w-14 mt-2">
-      <img src="assets/images/pipe.png" alt="pipe" />
+      <img src="assets/images/pipe.webp" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">

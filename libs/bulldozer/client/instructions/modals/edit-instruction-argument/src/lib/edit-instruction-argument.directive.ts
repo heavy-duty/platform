@@ -22,7 +22,7 @@ export class EditInstructionArgumentDirective {
         InstructionArgumentDto
       >(EditInstructionArgumentComponent, {
         data: this.instructionArgument,
-        panelClass: 'bd-bg-image-7',
+        panelClass: ['bd-bg-wood', 'bg-bd-brown'],
       })
       .afterClosed()
       .subscribe((data) => data && this.editInstructionArgument.emit(data));

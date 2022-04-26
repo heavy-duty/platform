@@ -105,7 +105,10 @@ import { CollectionItemView } from './types';
               >
                 <mat-icon>more_horiz</mat-icon>
               </button>
-              <mat-menu #collectionOptionsMenu="matMenu" class="bd-bg-image-7 ">
+              <mat-menu
+                #collectionOptionsMenu="matMenu"
+                class="bd-bg-wood bg-bd-brown"
+              >
                 <button
                   mat-menu-item
                   bdEditCollection

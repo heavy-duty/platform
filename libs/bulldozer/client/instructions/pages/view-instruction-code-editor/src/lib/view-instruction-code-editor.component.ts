@@ -47,7 +47,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 
     <main class="flex-1">
       <div
-        class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bd-bg-image-14 justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8"
+        class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bd-bg-metal justify-center items-center m-auto mb-4 relative bg-bd-black mat-elevation-z8 rounded"
         *ngIf="instruction$ | ngrxPush as instruction"
       >
         <bd-code-editor
@@ -107,26 +107,6 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
               </button>
             </p>
           </ng-container>
-        </div>
-        <div
-          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
-        >
-          <div class="w-full h-px bg-gray-600 rotate-45"></div>
-        </div>
-        <div
-          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 right-2"
-        >
-          <div class="w-full h-px bg-gray-600 rotate-12"></div>
-        </div>
-        <div
-          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 left-2"
-        >
-          <div class="w-full h-px bg-gray-600 rotate-45"></div>
-        </div>
-        <div
-          class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute bottom-2 right-2"
-        >
-          <div class="w-full h-px bg-gray-600"></div>
         </div>
       </div>
     </main>

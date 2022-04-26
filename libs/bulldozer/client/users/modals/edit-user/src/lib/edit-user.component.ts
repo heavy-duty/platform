@@ -87,10 +87,10 @@ import { UserDto } from '@heavy-duty/bulldozer-devkit';
           formControlName="thumbnailUrl"
           required
           autocomplete="off"
-          maxlength="100"
+          maxlength="300"
         />
         <mat-hint align="end"
-          >{{ this.form.get('thumbnailUrl')?.value?.length || 0 }}/100</mat-hint
+          >{{ this.form.get('thumbnailUrl')?.value?.length || 0 }}/300</mat-hint
         >
 
         <mat-error
@@ -103,12 +103,12 @@ import { UserDto } from '@heavy-duty/bulldozer-devkit';
           *ngIf="
             submitted && this.form.get('thumbnailUrl')?.hasError('maxlength')
           "
-          >Maximum length is 100.</mat-error
+          >Maximum length is 300.</mat-error
         >
       </mat-form-field>
 
       <div
-        class="py-2 px-5 w-full h-12 bd-bg-image-11 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
+        class="py-2 px-5 w-full h-12 bd-bg-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bd-black"
       >
         <button class="bd-button flex-1" mat-dialog-close>Cancel</button>
         <button class="bd-button flex-1" [disabled]="submitted && form.invalid">
@@ -149,7 +149,7 @@ export class EditUserComponent {
         validators: [Validators.required, Validators.maxLength(15)],
       }),
       thumbnailUrl: new FormControl(this.user?.thumbnailUrl ?? '', {
-        validators: [Validators.required, Validators.maxLength(100)],
+        validators: [Validators.required, Validators.maxLength(300)],
       }),
     });
   }

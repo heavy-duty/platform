@@ -80,7 +80,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
         <mat-sidenav
           #settings
-          class="bd-h-inherit w-80 bd-bg-image-7 px-4"
+          class="bd-h-inherit w-80 bd-bg-wood bg-bd-brown px-4"
           fixedInViewport
           position="end"
           [mode]="'over'"
@@ -92,7 +92,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
           <main class="flex flex-col">
             <section
-              class="bottom-0 py-6 px-4 mb-8 bd-bg-image-11 bg-bd-black relative mat-elevation-z4"
+              class="bottom-0 py-6 px-4 mb-8 bd-bg-metal-2 bg-black relative mat-elevation-z4"
               *hdWalletAdapter="
                 let wallet = wallet;
                 let wallets = wallets;

@@ -25,7 +25,7 @@ export class HdEditEndpointsModalDirective {
         { apiEndpoint: HttpEndpoint; webSocketEndpoint: WebSocketEndpoint },
         { apiEndpoint: HttpEndpoint; webSocketEndpoint: WebSocketEndpoint }
       >(HdEditEndpointsComponent, {
-        panelClass: ['edit-modal', 'bd-bg-image-7'],
+        panelClass: ['edit-modal', 'bd-bg-wood', 'bg-bd-brown'],
         maxWidth: '380px',
         maxHeight: '90vh',
         data: {
