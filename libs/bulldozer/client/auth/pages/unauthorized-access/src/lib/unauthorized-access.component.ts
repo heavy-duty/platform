@@ -20,8 +20,12 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
           <div
             class="ml-5 mt-5 box-border w-24 flex flex-col justify-center items-center"
           >
-            <figure class="w-full">
-              <img src="assets/images/logo.png" class="w-full" />
+            <figure class="w-30">
+              <img
+                src="assets/images/logo.png"
+                class="w-full"
+                alt="HeavyDuty logo"
+              />
             </figure>
             <p class="mb-1 bd-font text-base">BULLDOZER</p>
           </div>
@@ -40,17 +44,29 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
                   href="https://github.com/heavy-duty/platform"
                   target="_blank"
                 >
-                  <img src="assets/images/social/github.png" class="w-full" />
+                  <img
+                    src="assets/images/social/github.png"
+                    class="w-16"
+                    alt="Github button"
+                  />
                 </a>
               </figure>
               <figure class="w-8 mr-4">
                 <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
-                  <img src="assets/images/social/discord.png" class="w-full" />
+                  <img
+                    src="assets/images/social/discord.png"
+                    class="w-16"
+                    alt="Discord button"
+                  />
                 </a>
               </figure>
               <figure class="w-8 mr-4">
                 <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
-                  <img src="assets/images/social/twitter.png" class="w-full" />
+                  <img
+                    src="assets/images/social/twitter.png"
+                    class="w-16"
+                    alt="Twitter button"
+                  />
                 </a>
               </figure>
             </div>
