@@ -3,17 +3,16 @@ import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { RouterModule } from '@angular/router';
 import { CardModule } from '@bulldozer-client/bd-card';
 import { DepositToBudgetModule } from '@bulldozer-client/deposit-to-budget';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { WithdrawFromBudgetModule } from '@bulldozer-client/withdraw-from-budget';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { FromLamportsPipe } from './from-lamports.pipe';
 import { ViewWorkspaceBudgetComponent } from './view-workspace-budget.component';
-
 @NgModule({
   imports: [
     CommonModule,
@@ -23,7 +22,7 @@ import { ViewWorkspaceBudgetComponent } from './view-workspace-budget.component'
     MatButtonModule,
     MatCardModule,
     MatIconModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     ReactiveComponentModule,
     DepositToBudgetModule,
     WithdrawFromBudgetModule,

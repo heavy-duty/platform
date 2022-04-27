@@ -58,15 +58,9 @@ export class UserInstructionsStore2 extends ComponentStore<ViewModel> {
       return instructionStatuses
         .reduce(
           (groupedInstructionStatuses, instructionStatus) =>
-            groupedInstructionStatuses.merge(
-              Map(
-                instructionStatus.transactionStatus.transaction.instructions.map(
-                  (_, index) => [
-                    `${instructionStatus.transactionStatus.signature}:${index}`,
-                    instructionStatus,
-                  ]
-                )
-              )
+            groupedInstructionStatuses.set(
+              instructionStatus.id,
+              instructionStatus
             ),
           Map<string, InstructionStatus>()
         )

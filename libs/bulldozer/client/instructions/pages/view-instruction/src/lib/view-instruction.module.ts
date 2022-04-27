@@ -1,17 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditInstructionModule } from '@bulldozer-client/edit-instruction';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { HdBroadcasterCdkModule } from '@heavy-duty/broadcaster-cdk';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionComponent } from './view-instruction.component';
-
 @NgModule({
   declarations: [ViewInstructionComponent],
   imports: [
@@ -57,7 +56,7 @@ import { ViewInstructionComponent } from './view-instruction.component';
       },
     ]),
     MatButtonModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     MatSnackBarModule,
     MatTooltipModule,
     ReactiveComponentModule,

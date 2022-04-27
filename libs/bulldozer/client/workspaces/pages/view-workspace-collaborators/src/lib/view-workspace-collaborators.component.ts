@@ -27,7 +27,6 @@ import { ViewWorkspaceCollaboratorsStore } from './view-workspace-collaborators.
 
 interface ViewModel {
   status: number;
-  selectedCollaboratorId: string | null;
   currentCollaboratorId: string | null;
 }
 
@@ -77,18 +76,15 @@ interface ViewModel {
           </div>
         </div>
 
-        <ng-container
-          *ngIf="
-            (collaborators$ | ngrxPush) !== null &&
-            (currentCollaborator$ | ngrxPush) === null
-          "
-        >
-          <div
-            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
-            *hdWalletAdapter="let publicKey = publicKey"
+        <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+          <ng-container
+            *ngrxLet="currentCollaborator$; let currentCollaborator"
           >
-            <ng-container *ngIf="publicKey !== null">
-              <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+            <ng-container *hdWalletAdapter="let publicKey = publicKey">
+              <div
+                class="py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
+                *ngIf="publicKey !== null && currentCollaborator === null"
+              >
                 <button
                   class="bd-button"
                   (click)="
@@ -100,16 +96,28 @@ interface ViewModel {
                 >
                   Become Collaborator
                 </button>
-              </ng-container>
 
-              <ng-container
-                *ngrxLet="currentCollaborator$; let currentCollaborator"
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                </div>
+              </div>
+
+              <div
+                class="py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
+                *ngIf="
+                  publicKey !== null &&
+                  currentCollaborator !== null &&
+                  currentCollaborator.status.id === 2
+                "
               >
                 <button
-                  *ngIf="
-                    currentCollaborator !== null &&
-                    currentCollaborator.status.id === 2
-                  "
                   mat-stroked-button
                   color="accent"
                   (click)="
@@ -123,19 +131,20 @@ interface ViewModel {
                 >
                   Try again
                 </button>
-              </ng-container>
+
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                </div>
+                <div
+                  class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+                >
+                  <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                </div>
+              </div>
             </ng-container>
-            <div
-              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
-            >
-              <div class="w-full h-px bg-gray-600 rotate-45"></div>
-            </div>
-            <div
-              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
-            >
-              <div class="w-full h-px bg-gray-600 rotate-12"></div>
-            </div>
-          </div>
+          </ng-container>
         </ng-container>
       </div>
     </header>
@@ -164,10 +173,10 @@ interface ViewModel {
               class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
               *ngIf="collaborator | bdItemChanging"
             >
-              <mat-progress-spinner
-                diameter="36"
-                mode="indeterminate"
-              ></mat-progress-spinner>
+              <span
+                hdProgressSpinner
+                class="h-8 w-8 border-4 border-accent"
+              ></span>
             </div>
 
             <div>
@@ -358,12 +367,6 @@ export class ViewWorkspaceCollaboratorsComponent
     )
   );
   readonly status$ = this.select(({ status }) => status);
-  readonly currentCollaboratorId$ = this.select(
-    ({ currentCollaboratorId }) => currentCollaboratorId
-  );
-  readonly selectedCollaboratorId$ = this.select(
-    ({ selectedCollaboratorId }) => selectedCollaboratorId
-  );
   readonly collaborators$ = this.select(
     this._viewWorkspaceCollaboratorsStore.collaboratorsMap$,
     this._viewWorkspaceCollaboratorsUsersStore.usersMap$,
@@ -406,35 +409,15 @@ export class ViewWorkspaceCollaboratorsComponent
       );
     }
   );
-  readonly selectedCollaborator$ = this.select(
-    this.collaborators$,
-    this.selectedCollaboratorId$,
-    (collaborators, selectedCollaboratorId) => {
-      if (collaborators === null || selectedCollaboratorId === null) {
-        return null;
-      }
-
-      return (
-        collaborators.find(
-          (collaborator) => collaborator.id === selectedCollaboratorId
-        ) ?? null
-      );
-    }
-  );
   readonly currentCollaborator$ = this.select(
-    this.collaborators$,
-    this.currentCollaboratorId$,
-    (collaborators, currentCollaboratorId) => {
-      if (collaborators === null || currentCollaboratorId === null) {
-        return null;
-      }
-
-      return (
-        collaborators.find(
-          (collaborator) => collaborator.id === currentCollaboratorId
-        ) ?? null
-      );
-    }
+    this.collaborators$.pipe(isNotNullOrUndefined),
+    this.select(({ currentCollaboratorId }) => currentCollaboratorId).pipe(
+      isNotNullOrUndefined
+    ),
+    (collaborators, currentCollaboratorId) =>
+      collaborators.find(
+        (collaborator) => collaborator.id === currentCollaboratorId
+      ) ?? null
   );
 
   constructor(
@@ -448,7 +431,6 @@ export class ViewWorkspaceCollaboratorsComponent
   ) {
     super({
       status: 1,
-      selectedCollaboratorId: null,
       currentCollaboratorId: null,
     });
   }
@@ -457,13 +439,6 @@ export class ViewWorkspaceCollaboratorsComponent
     ...state,
     status,
   }));
-
-  private readonly _selectCollaboratorId = this.updater<string | null>(
-    (state, selectedCollaboratorId) => ({
-      ...state,
-      selectedCollaboratorId,
-    })
-  );
 
   private readonly _loadCurrentCollaboratorId = this.effect(
     switchMap(({ workspaceId, userId }) => {
@@ -484,39 +459,6 @@ export class ViewWorkspaceCollaboratorsComponent
   );
 
   ngOnInit() {
-    this._selectCollaboratorId(
-      this.select(
-        this.selectedCollaboratorId$,
-        this._viewWorkspaceCollaboratorsStore.collaboratorsMap$,
-        (selectedCollaboratorId, collaboratorsMap) => {
-          if (collaboratorsMap === null || collaboratorsMap.size === 0) {
-            return null;
-          }
-
-          if (selectedCollaboratorId === null) {
-            const firstCollaborator = collaboratorsMap
-              .sort((a, b) => a.createdAt - b.createdAt)
-              .first();
-
-            if (firstCollaborator === undefined) {
-              return null;
-            }
-
-            return firstCollaborator.id;
-          }
-
-          const selectedCollaborator = collaboratorsMap.get(
-            selectedCollaboratorId
-          );
-
-          if (selectedCollaborator === undefined) {
-            return null;
-          }
-
-          return selectedCollaborator.id;
-        }
-      )
-    );
     this._loadCurrentCollaboratorId(
       combineLatest({
         workspaceId: this.workspaceId$,
@@ -632,10 +574,6 @@ export class ViewWorkspaceCollaboratorsComponent
 
   onSetStatus(status: number) {
     this._setStatus(status);
-  }
-
-  onSelectCollaboratorId(collaboratorId: string) {
-    this._selectCollaboratorId(collaboratorId);
   }
 
   identify(_: number, collaborator: CollaboratorItemView) {

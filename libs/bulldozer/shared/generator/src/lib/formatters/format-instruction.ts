@@ -1,5 +1,4 @@
 import {
-  Collection,
   Document,
   Instruction,
   InstructionAccount,
@@ -99,12 +98,12 @@ const getInstructionAccountRelations = (
     );
 };
 
-const getInstructionAccountPayer = (
-  instructionAccount: Document<InstructionAccount>,
-  instructionAccounts: Document<InstructionAccount>[]
-) => {
-  return null;
-  /* if (!instructionAccount.data.modifier?.payer) {
+const getInstructionAccountPayer = () =>
+  /* instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[] */
+  {
+    return null;
+    /* if (!instructionAccount.data.modifier?.payer) {
     return null;
   }
 
@@ -120,14 +119,14 @@ const getInstructionAccountPayer = (
     ...payerAccount,
     name: formatName(payerAccount.name),
   }; */
-};
+  };
 
-const getInstructionAccountCollection = (
-  instructionAccount: Document<InstructionAccount>,
-  collections: Document<Collection>[]
-) => {
-  return null;
-  /* if (!instructionAccount.data.kind.collection) {
+const getInstructionAccountCollection = () =>
+  /* instructionAccount: Document<InstructionAccount>,
+  collections: Document<Collection>[] */
+  {
+    return null;
+    /* if (!instructionAccount.data.kind.collection) {
     return null;
   }
 
@@ -143,14 +142,14 @@ const getInstructionAccountCollection = (
     ...collectionAccount,
     name: formatName(collectionAccount.name),
   }; */
-};
+  };
 
-const getInstructionAccountClose = (
-  instructionAccount: Document<InstructionAccount>,
-  instructionAccounts: Document<InstructionAccount>[]
-) => {
-  return null;
-  /* if (!instructionAccount.data.modifier?.close) {
+const getInstructionAccountClose = () =>
+  /* instructionAccount: Document<InstructionAccount>,
+  instructionAccounts: Document<InstructionAccount>[] */
+  {
+    return null;
+    /* if (!instructionAccount.data.modifier?.close) {
     return null;
   }
 
@@ -166,13 +165,13 @@ const getInstructionAccountClose = (
     ...closeAccount,
     name: formatName(closeAccount.name),
   }; */
-};
+  };
 
 const formatInstructionAccounts = (
   instructionId: string,
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Relation<InstructionRelation>[],
-  collections: Document<Collection>[]
+  instructionRelations: Relation<InstructionRelation>[]
+  // collections: Document<Collection>[]
 ) =>
   instructionAccounts
     .filter(
@@ -184,18 +183,15 @@ const formatInstructionAccounts = (
       name: formatName(instructionAccount.name),
       data: {
         ...instructionAccount.data,
-        collection: getInstructionAccountCollection(
-          instructionAccount,
-          collections
-        ),
-        close: getInstructionAccountClose(
-          instructionAccount,
-          instructionAccounts
-        ),
-        payer: getInstructionAccountPayer(
-          instructionAccount,
-          instructionAccounts
-        ),
+        collection: getInstructionAccountCollection(),
+        /* instructionAccount,
+          collections */
+        close: getInstructionAccountClose(),
+        /* instructionAccount,
+          instructionAccounts */
+        payer: getInstructionAccountPayer(),
+        /* instructionAccount,
+          instructionAccounts */
         relations: getInstructionAccountRelations(
           instructionAccount,
           instructionAccounts,
@@ -209,8 +205,8 @@ export const formatInstruction = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Relation<InstructionRelation>[],
-  collections: Document<Collection>[]
+  instructionRelations: Relation<InstructionRelation>[]
+  // collections: Document<Collection>[]
 ) => ({
   name: formatName(instruction.name),
   handler: instruction.data.body.split('\n'),
@@ -221,8 +217,8 @@ export const formatInstruction = (
   accounts: formatInstructionAccounts(
     instruction.id,
     instructionAccounts,
-    instructionRelations,
-    collections
+    instructionRelations
+    // collections
   ),
 });
 

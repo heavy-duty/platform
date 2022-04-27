@@ -1,13 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { PageHeaderModule } from '@bulldozer-client/page-header';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewApplicationComponent } from './view-application.component';
-
 @NgModule({
   declarations: [ViewApplicationComponent],
   imports: [
@@ -15,7 +14,7 @@ import { ViewApplicationComponent } from './view-application.component';
     RouterModule.forChild([
       { path: '', pathMatch: 'full', component: ViewApplicationComponent },
     ]),
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
     PageHeaderModule,

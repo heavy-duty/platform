@@ -289,6 +289,12 @@
       "@heavy-duty/shared/utils/operators": [
         "libs/shared/utils/operators/src/index.ts"
       ],
+      "@heavy-duty/ui/progress-ping": [
+        "libs/heavy-duty/ui/progress-ping/src/index.ts"
+      ],
+      "@heavy-duty/ui/progress-spinner": [
+        "libs/heavy-duty/ui/progress-spinner/src/index.ts"
+      ],
       "@heavy-duty/wallet-adapter": [
         "libs/wallet-adapter/data-access/src/index.ts"
       ],

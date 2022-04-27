@@ -27,13 +27,11 @@ import { interval, map, startWith } from 'rxjs';
         >
           <div class="w-full h-8 flex items-center gap-4">
             <div>
-              <mat-progress-spinner
+              <span
+                hdProgressSpinner
                 *ngIf="instructionStatus.status !== 'finalized'"
-                color="accent"
-                diameter="16"
-                mode="indeterminate"
-              >
-              </mat-progress-spinner>
+                class="h-4 w-4 border-4 border-accent"
+              ></span>
 
               <mat-icon
                 *ngIf="instructionStatus.status === 'finalized'"

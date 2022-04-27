@@ -100,10 +100,10 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                         *ngIf="instructionArgument | bdItemChanging"
                         class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
                       >
-                        <mat-progress-spinner
-                          diameter="36"
-                          mode="indeterminate"
-                        ></mat-progress-spinner>
+                        <span
+                          hdProgressSpinner
+                          class="h-8 w-8 border-4 border-accent"
+                        ></span>
 
                         <p
                           class="m-0 text-xs text-white text-opacity-60 absolute"
@@ -263,11 +263,10 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 
       <ng-template #loadingData>
         <div class="py-8" *ngIf="loading$ | ngrxPush">
-          <mat-progress-spinner
-            class="mx-auto mb-4"
-            diameter="48"
-            mode="indeterminate"
-          ></mat-progress-spinner>
+          <span
+            hdProgressSpinner
+            class="mx-auto mb-4 h-12 w-12 border-4 border-accent"
+          ></span>
           <p class="text-center">Loading data...</p>
         </div>
       </ng-template>

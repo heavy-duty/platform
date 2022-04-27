@@ -85,10 +85,10 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
               *ngIf="signer | bdItemChanging"
               class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bd-black"
             >
-              <mat-progress-spinner
-                diameter="36"
-                mode="indeterminate"
-              ></mat-progress-spinner>
+              <span
+                hdProgressSpinner
+                class="h-8 w-8 border-4 border-accent"
+              ></span>
 
               <p class="m-0 text-xs text-white text-opacity-60 absolute">
                 <ng-container *ngIf="signer.isCreating">

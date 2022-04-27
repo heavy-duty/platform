@@ -11,7 +11,7 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
-import { List, Set } from 'immutable';
+import { List, Map } from 'immutable';
 import * as JSZip from 'jszip';
 import {
   formatApplication,
@@ -42,15 +42,15 @@ export const generateInstructionCode = (
   instruction: Document<Instruction>,
   instructionArguments: Document<InstructionArgument>[],
   instructionAccounts: Document<InstructionAccount>[],
-  instructionRelations: Relation<InstructionRelation>[],
-  collections: Document<Collection>[]
+  instructionRelations: Relation<InstructionRelation>[]
+  // collections: Document<Collection>[]
 ) => {
   const formattedInstruction = formatInstruction(
     instruction,
     instructionArguments,
     instructionAccounts,
-    instructionRelations,
-    collections
+    instructionRelations
+    // collections
   );
   /* const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
@@ -87,15 +87,15 @@ export const generateInstructionCode2 = (
   const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.collection !== undefined
-        ? collections.add(account.collection)
+        ? collections.set(account.collection.camelCase, account.collection)
         : collections,
-    Set<FormattedName>()
+    Map<string, FormattedName>()
   );
 
   return generateCode(
     {
       instruction: formattedInstruction,
-      collections: formattedCollections,
+      collections: formattedCollections.toList().toArray(),
     },
     getTemplateByType('instructions')
   );
@@ -206,8 +206,8 @@ export const generateWorkspaceMetadata = (
             ),
             instructionRelations.filter(
               ({ data }) => data.instruction === instruction.id
-            ),
-            collections
+            )
+            // collections
           ),
           name: formatName(instruction.name),
         })),

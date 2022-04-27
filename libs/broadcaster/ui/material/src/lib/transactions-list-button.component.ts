@@ -14,12 +14,6 @@ import { Component, Input } from '@angular/core';
       >
         <div class="flex justify-between items-center gap-2">
           <span> Transactions in Process ({{ transactionsInProcess }}) </span>
-          <mat-progress-spinner
-            diameter="16"
-            mode="indeterminate"
-            [color]="color"
-          >
-          </mat-progress-spinner>
         </div>
       </button>
     </ng-container>

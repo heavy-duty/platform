@@ -1,0 +1,26 @@
+{
+  "projectType": "library",
+  "root": "libs/heavy-duty/ui/progress-ping",
+  "sourceRoot": "libs/heavy-duty/ui/progress-ping/src",
+  "prefix": "hd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/heavy-duty/ui/progress-ping"],
+      "options": {
+        "jestConfig": "libs/heavy-duty/ui/progress-ping/jest.config.js",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/heavy-duty/ui/progress-ping/src/**/*.ts",
+          "libs/heavy-duty/ui/progress-ping/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

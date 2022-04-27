@@ -16,6 +16,7 @@ export interface TransactionStatus {
 }
 
 export interface InstructionStatus {
+  id: string;
   transactionStatus: TransactionStatus;
   instruction: TransactionInstruction;
   title: string;
@@ -33,7 +34,7 @@ export const flattenInstructions = (
   transactionStatus: TransactionStatus
 ): InstructionStatus[] => {
   return transactionStatus.transaction.instructions
-    .map((instruction) => {
+    .map((instruction, index) => {
       const decodedInstruction = instructionCoder.decode(
         base58.encode(
           (instruction.data as unknown as { data: Uint8Array }).data
@@ -57,6 +58,7 @@ export const flattenInstructions = (
       return {
         transactionStatus,
         instruction,
+        id: `${transactionStatus.signature}:${index}`,
         data: decodedInstruction.data,
         name: decodedInstruction.name,
         title: decodedInstruction.name
