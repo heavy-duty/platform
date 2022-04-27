@@ -23,7 +23,6 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
             <figure>
               <img
                 src="assets/images/logo.webp"
-                class="w-32 h-32"
                 alt="HeavyDuty logo"
                 width="128"
                 height="144"
@@ -110,7 +109,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
         </div>
       </div>
       <div
-        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-bulldozer"
+        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-image-15"
       ></div>
     </main>
   `,
