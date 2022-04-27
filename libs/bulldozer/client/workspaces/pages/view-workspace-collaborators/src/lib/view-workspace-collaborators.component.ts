@@ -77,65 +77,77 @@ interface ViewModel {
           </div>
         </div>
 
-        <ng-container
-          *ngIf="
-            (collaborators$ | ngrxPush) !== null &&
-            (currentCollaborator$ | ngrxPush) === null
-          "
-        >
-          <div
-            class="bottom-0 py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
-            *hdWalletAdapter="let publicKey = publicKey"
-          >
-            <ng-container *ngIf="publicKey !== null">
-              <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
-                <button
-                  class="bd-button"
-                  (click)="
-                    onRequestCollaboratorStatus(
-                      publicKey.toBase58(),
-                      workspaceId
-                    )
-                  "
+        <ng-container *ngIf="(collaborators$ | ngrxPush) !== null">
+          <ng-container *ngIf="workspaceId$ | ngrxPush as workspaceId">
+            <ng-container
+              *ngrxLet="currentCollaborator$; let currentCollaborator"
+            >
+              <ng-container *hdWalletAdapter="let publicKey = publicKey">
+                <div
+                  class="py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
+                  *ngIf="publicKey !== null && currentCollaborator === null"
                 >
-                  Become Collaborator
-                </button>
-              </ng-container>
+                  <button
+                    class="bd-button"
+                    (click)="
+                      onRequestCollaboratorStatus(
+                        publicKey.toBase58(),
+                        workspaceId
+                      )
+                    "
+                  >
+                    Become Collaborator
+                  </button>
 
-              <ng-container
-                *ngrxLet="currentCollaborator$; let currentCollaborator"
-              >
-                <button
+                  <div
+                    class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+                  >
+                    <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                  </div>
+                  <div
+                    class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+                  >
+                    <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                  </div>
+                </div>
+
+                <div
+                  class="py-4 px-7 w-60 h-16 bd-bg-metal-2 shadow flex justify-center items-center relative"
                   *ngIf="
+                    publicKey !== null &&
                     currentCollaborator !== null &&
                     currentCollaborator.status.id === 2
                   "
-                  mat-stroked-button
-                  color="accent"
-                  (click)="
-                    onRetryCollaboratorStatusRequest(
-                      publicKey.toBase58(),
-                      currentCollaborator.workspaceId,
-                      currentCollaborator.id
-                    )
-                  "
-                  [disabled]="currentCollaborator | bdItemChanging"
                 >
-                  Try again
-                </button>
+                  <button
+                    mat-stroked-button
+                    color="accent"
+                    (click)="
+                      onRetryCollaboratorStatusRequest(
+                        publicKey.toBase58(),
+                        currentCollaborator.workspaceId,
+                        currentCollaborator.id
+                      )
+                    "
+                    [disabled]="currentCollaborator | bdItemChanging"
+                  >
+                    Try again
+                  </button>
+
+                  <div
+                    class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
+                  >
+                    <div class="w-full h-px bg-gray-600 rotate-45"></div>
+                  </div>
+                  <div
+                    class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
+                  >
+                    <div class="w-full h-px bg-gray-600 rotate-12"></div>
+                  </div>
+                </div>
               </ng-container>
             </ng-container>
-            <div
-              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 left-2"
-            >
-              <div class="w-full h-px bg-gray-600 rotate-45"></div>
-            </div>
-            <div
-              class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-7 right-2"
-            >
-              <div class="w-full h-px bg-gray-600 rotate-12"></div>
-            </div>
-          </div>
+          </ng-container>
         </ng-container>
       </div>
     </header>
