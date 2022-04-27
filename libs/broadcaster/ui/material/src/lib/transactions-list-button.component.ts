@@ -14,8 +14,6 @@ import { Component, Input } from '@angular/core';
       >
         <div class="flex justify-between items-center gap-2">
           <span> Transactions in Process ({{ transactionsInProcess }}) </span>
-
-          <span hdProgressSpinner class="h-4 w-4 border-4 border-accent"></span>
         </div>
       </button>
     </ng-container>
