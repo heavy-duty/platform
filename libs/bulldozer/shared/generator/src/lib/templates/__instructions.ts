@@ -1,8 +1,8 @@
 export const __instructions = `use anchor_lang::prelude::*;
-{{#eq collections.size 1}}
+{{#eq collections.length 1}}
 use crate::collections::{{collections.[0].pascalCase}};
 {{/eq}}
-{{#gt collections.size 1}}
+{{#gt collections.length 1}}
 use crate::collections::{ {{~#each collections}}{{#if @first}}{{else}}, {{/if}}{{this.pascalCase}}{{/each~}} };
 {{/gt}}
 

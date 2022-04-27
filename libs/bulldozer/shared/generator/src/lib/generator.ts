@@ -11,7 +11,7 @@ import {
   Workspace,
 } from '@heavy-duty/bulldozer-devkit';
 import { saveAs } from 'file-saver';
-import { List, Set } from 'immutable';
+import { List, Map } from 'immutable';
 import * as JSZip from 'jszip';
 import {
   formatApplication,
@@ -87,15 +87,15 @@ export const generateInstructionCode2 = (
   const formattedCollections = formattedInstruction.accounts.reduce(
     (collections, account) =>
       account.collection !== undefined
-        ? collections.add(account.collection)
+        ? collections.set(account.collection.camelCase, account.collection)
         : collections,
-    Set<FormattedName>()
+    Map<string, FormattedName>()
   );
 
   return generateCode(
     {
       instruction: formattedInstruction,
-      collections: formattedCollections,
+      collections: formattedCollections.toList().toArray(),
     },
     getTemplateByType('instructions')
   );
