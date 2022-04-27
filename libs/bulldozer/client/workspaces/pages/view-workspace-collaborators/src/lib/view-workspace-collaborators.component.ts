@@ -164,6 +164,9 @@ interface ViewModel {
               *ngIf="!(collaborator | bdItemChanging)"
             >
               <img
+                alt=""
+                width="80"
+                height="80"
                 [src]="collaborator.user.thumbnailUrl"
                 class="w-full"
                 onerror="this.src='assets/images/default-profile.png';"
@@ -322,6 +325,7 @@ interface ViewModel {
                 </span>
 
                 <button
+                  aria-label="Copy user authority"
                   mat-icon-button
                   [cdkCopyToClipboard]="collaborator.user.authority"
                 >

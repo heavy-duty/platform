@@ -91,6 +91,9 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
                         class="w-16 h-16 flex justify-center items-center bg-bd-black rounded-full"
                       >
                         <img
+                          alt=""
+                          width="40"
+                          height="40"
                           src="assets/icons/instruction-argument.svg"
                           onerror="this.src='assets/images/default-profile.png';"
                         />

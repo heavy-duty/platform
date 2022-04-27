@@ -97,6 +97,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   *ngIf="!(instructionDocument | bdItemChanging)"
                 >
                   <img
+                    alt=""
+                    width="40"
+                    height="40"
                     src="assets/icons/instruction-document.svg"
                     onerror="this.src='assets/images/default-profile.png';"
                   />
@@ -333,6 +336,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
                   *ngrxLet="instructionAccounts$; let instructionAccounts"
                 >
                   <button
+                    aria-label="Add relation to document"
                     *ngIf="publicKey !== null && instructionAccounts !== null"
                     mat-icon-button
                     bdEditInstructionRelation

@@ -13,7 +13,7 @@ import { Tab } from '@bulldozer-client/core-data-access';
     <nav mat-tab-nav-bar class="flex gap-6 px-3 py-2">
       <div
         mat-tab-link
-        class="flex items-center justify-between p-0 bd-bg-image-10 text-white font-bold mr-4 mat-elevation-z4 "
+        class="flex items-center justify-between p-0 bd-bg-stone-3 text-white font-bold mr-4 mat-elevation-z4 "
         *ngFor="let tab of tabs"
         [active]="selectedTab === tab.id"
       >

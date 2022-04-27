@@ -32,7 +32,10 @@ import { ViewUserInfoStore } from './view-user-info.store';
                   >
                     <img
                       [src]="user.thumbnailUrl"
+                      alt=""
                       class="w-full"
+                      width="80"
+                      height="80"
                       onerror="this.src='assets/images/default-profile.png';"
                     />
                   </figure>
@@ -123,6 +126,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     </span>
 
                     <button
+                      aria-label="Copy user authority"
                       mat-icon-button
                       [cdkCopyToClipboard]="user.authority"
                     >

@@ -29,6 +29,7 @@ import { interval, map, startWith } from 'rxjs';
           <button
             type="button"
             class="relative"
+            aria-label="View app notifications"
             mat-icon-button
             [matMenuTriggerFor]="menu"
             (menuClosed)="markAsViewed()"

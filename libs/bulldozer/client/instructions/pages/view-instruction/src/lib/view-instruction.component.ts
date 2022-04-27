@@ -52,7 +52,7 @@ import { ViewInstructionStore } from './view-instruction.store';
               >
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -86,7 +86,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -120,7 +120,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -154,7 +154,7 @@ import { ViewInstructionStore } from './view-instruction.store';
                 </li>
                 <li>
                   <a
-                    class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+                    class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
                     [routerLink]="[
                       '/workspaces',
                       workspaceId,
@@ -250,7 +250,7 @@ import { ViewInstructionStore } from './view-instruction.store';
     </ng-container>
 
     <figure class="w-14 mt-2">
-      <img src="assets/images/pipe.webp" alt="pipe" />
+      <img src="assets/images/pipe.webp" width="56" height="1500" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">
