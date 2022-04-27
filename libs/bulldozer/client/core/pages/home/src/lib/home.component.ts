@@ -68,15 +68,6 @@ import { HomeStore } from './home.store';
           through a UI, hiding all the gory details.
         </p>
 
-        <div>
-          <div
-            hdProgressSpinner
-            class="w-20 h-20 border-8 border-green-500"
-          ></div>
-
-          <hd-progress-ping class="w-3 h-3 bg-yellow-500"></hd-progress-ping>
-        </div>
-
         <div class="flex mt-6 justify-center gap-4">
           <figure class="w-8">
             <a href="https://github.com/heavy-duty/platform" target="_blank">
