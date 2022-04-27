@@ -33,7 +33,13 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
             class="w-14 h-14 flex justify-center items-center bg-black rounded-full mr-2"
             *ngIf="!(budget | bdItemChanging)"
           >
-            <img src="assets/images/solana-logo.webp" class="w-1/2" />
+            <img
+              src="assets/images/solana-logo.webp"
+              class="w-1/2"
+              width="28"
+              height="24"
+              alt="Solana Logo"
+            />
           </figure>
 
           <div

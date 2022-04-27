@@ -110,7 +110,7 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
         </div>
       </div>
       <div
-        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-image-15"
+        class="hd-side-right w-1/2 h-screen flex justify-start items-center bd-bg-bulldozer"
       ></div>
     </main>
   `,

@@ -21,7 +21,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
       <ul class="flex-1 overflow-y-auto">
         <li>
           <a
-            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
             [routerLink]="['/profile', 'info']"
             [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
             [ngClass]="{
@@ -34,7 +34,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
         </li>
         <li>
           <a
-            class="flex flex-col gap-1 py-3 px-7 bd-bg-image-13 mb-6 mat-elevation-z4"
+            class="flex flex-col gap-1 py-3 px-7 bd-bg-stone-2 mb-6 mat-elevation-z4"
             [routerLink]="['/profile', 'workspaces']"
             [routerLinkActive]="['bd-box-shadow-bg-white', 'border-primary']"
             [ngClass]="{
@@ -51,7 +51,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
     </aside>
 
     <figure class="w-14 mt-2">
-      <img src="assets/images/pipe.webp" alt="pipe" />
+      <img src="assets/images/pipe.webp" width="56" height="1500" alt="pipe" />
     </figure>
 
     <div class="flex-1 overflow-y-auto">

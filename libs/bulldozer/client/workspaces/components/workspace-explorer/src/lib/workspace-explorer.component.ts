@@ -40,12 +40,15 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <img
                 alt=""
                 src="assets/images/default-profile.png"
-                class="w-full"
+                width="80"
+                height="80"
               />
               <img
                 alt=""
                 src="assets/images/important.png"
                 class="w-6 absolute right-0 bottom-0"
+                width="24"
+                height="24"
               />
             </figure>
             <ng-container *hdWalletAdapter="let publicKey = publicKey">
@@ -77,6 +80,8 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 [src]="user.thumbnailUrl"
                 class="w-full"
                 onerror="this.src='assets/images/default-profile.png';"
+                width="80"
+                height="80"
               />
             </figure>
 
@@ -115,6 +120,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                 <button
                   *ngIf="publicKey !== null"
                   mat-icon-button
+                  aria-label="Add new app"
                   bdEditApplication
                   (editApplication)="
                     onCreateApplication(
@@ -166,7 +172,13 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
                   <figure
                     class="flex justify-center items-center w-10 h-10 rounded-full overflow-hidden bg-bd-black"
                   >
-                    <img src="assets/images/logo.webp" class="w-8/12" />
+                    <img
+                      alt=""
+                      src="assets/images/logo.webp"
+                      class="w-8/12"
+                      width="26"
+                      height="34"
+                    />
                   </figure>
                 </div>
               </bd-card>

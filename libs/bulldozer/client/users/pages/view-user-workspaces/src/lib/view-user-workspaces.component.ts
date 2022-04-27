@@ -38,6 +38,7 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
                     *ngIf="!(workspace | bdItemChanging)"
                   >
                     <img
+                      alt=""
                       src="assets/icons/view-profile-icon.svg"
                       onerror="this.src='assets/images/default-profile.png';"
                     />
