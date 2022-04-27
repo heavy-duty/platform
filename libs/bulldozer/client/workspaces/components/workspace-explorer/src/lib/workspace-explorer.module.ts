@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AddWorkspaceModule } from '@bulldozer-client/add-workspace';
@@ -14,9 +13,11 @@ import { EditUserModule } from '@bulldozer-client/edit-user';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { WorkspaceExplorerComponent } from './workspace-explorer.component';
+
 @NgModule({
   imports: [
     CommonModule,
@@ -25,7 +26,7 @@ import { WorkspaceExplorerComponent } from './workspace-explorer.component';
     MatButtonModule,
     MatIconModule,
     MatTooltipModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     ReactiveComponentModule,
     HdWalletAdapterCdkModule,
     ApplicationExplorerModule,

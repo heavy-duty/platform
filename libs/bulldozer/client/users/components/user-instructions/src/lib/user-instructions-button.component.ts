@@ -28,21 +28,23 @@ import { interval, map, startWith } from 'rxjs';
         >
           <button
             type="button"
+            class="relative"
             mat-icon-button
             [matMenuTriggerFor]="menu"
             (menuClosed)="markAsViewed()"
             class="z-10"
           >
             <mat-icon>notifications</mat-icon>
+
+            <div
+              *ngIf="instructionInProcessStatuses.size > 0"
+              class="absolute z-10 top-2.5 right-2.5"
+            >
+              <hd-progress-ping
+                class="w-2.5 h-2.5 bg-red-500"
+              ></hd-progress-ping>
+            </div>
           </button>
-          <mat-progress-spinner
-            *ngIf="instructionInProcessStatuses.size > 0"
-            color="accent"
-            mode="indeterminate"
-            diameter="44"
-            class="absolute z-0 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-          >
-          </mat-progress-spinner>
         </div>
 
         <button
@@ -77,25 +79,22 @@ import { interval, map, startWith } from 'rxjs';
                 *ngFor="let instructionStatus of instructionNotViewedStatuses"
                 class="w-full h-8 flex items-center gap-4"
               >
-                <div>
-                  <mat-progress-spinner
-                    *ngIf="
-                      instructionStatus.transactionStatus.status !== 'finalized'
-                    "
-                    color="accent"
-                    diameter="16"
-                    mode="indeterminate"
-                  >
-                  </mat-progress-spinner>
-                  <mat-icon
-                    *ngIf="
-                      instructionStatus.transactionStatus.status === 'finalized'
-                    "
-                    class="text-green-500"
-                    inline
-                    >check_circle</mat-icon
-                  >
-                </div>
+                <div
+                  hdProgressSpinner
+                  *ngIf="
+                    instructionStatus.transactionStatus.status !== 'finalized'
+                  "
+                  class="h-4 w-4 border-4 border-accent"
+                ></div>
+
+                <mat-icon
+                  *ngIf="
+                    instructionStatus.transactionStatus.status === 'finalized'
+                  "
+                  class="inline-block h-4 w-4 text-green-500"
+                  inline
+                  >check_circle</mat-icon
+                >
 
                 <p
                   class="flex-1 m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"

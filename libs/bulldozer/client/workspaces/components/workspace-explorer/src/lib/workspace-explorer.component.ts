@@ -84,11 +84,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
               <span>
                 {{ user.name }}
               </span>
-              <mat-progress-spinner
+              <span
+                hdProgressSpinner
                 *ngIf="user | bdItemChanging"
-                diameter="16"
-                mode="indeterminate"
-              ></mat-progress-spinner>
+                class="h-4 w-4 border-4 border-accent"
+              ></span>
             </p>
             <p class="m-0 text-center">
               <a

@@ -36,12 +36,12 @@ import { ApplicationItemView } from './types';
                 >
                   {{ application.name }}
                 </span>
-                <mat-progress-spinner
+
+                <span
                   *ngIf="application | bdItemShowSpinner"
-                  class="flex-shrink-0"
-                  diameter="16"
-                  mode="indeterminate"
-                ></mat-progress-spinner>
+                  hdProgressSpinner
+                  class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+                ></span>
               </mat-panel-title>
 
               <ng-container *hdWalletAdapter="let publicKey = publicKey">

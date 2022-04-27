@@ -40,10 +40,10 @@ import { ViewUserInfoStore } from './view-user-info.store';
                     class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bd-black"
                     *ngIf="user | bdItemChanging"
                   >
-                    <mat-progress-spinner
-                      diameter="36"
-                      mode="indeterminate"
-                    ></mat-progress-spinner>
+                    <span
+                      hdProgressSpinner
+                      class="h-8 w-8 border-4 border-accent"
+                    ></span>
                   </div>
                   <div>
                     <p

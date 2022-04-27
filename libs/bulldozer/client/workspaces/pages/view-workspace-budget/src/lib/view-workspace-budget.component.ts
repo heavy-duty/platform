@@ -40,10 +40,10 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
             class="w-14 h-14 flex justify-center items-center bg-bd-black rounded-full mr-2"
             *ngIf="budget | bdItemChanging"
           >
-            <mat-progress-spinner
-              mode="indeterminate"
-              diameter="32"
-            ></mat-progress-spinner>
+            <span
+              hdProgressSpinner
+              class="h-8 w-8 border-4 border-accent"
+            ></span>
           </div>
 
           <div>

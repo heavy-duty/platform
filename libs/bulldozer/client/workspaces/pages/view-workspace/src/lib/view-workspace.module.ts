@@ -2,15 +2,14 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { EditWorkspaceModule } from '@bulldozer-client/edit-workspace';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
-
 @NgModule({
   declarations: [ViewWorkspaceComponent],
   imports: [
@@ -49,7 +48,7 @@ import { ViewWorkspaceComponent } from './view-workspace.component';
       },
     ]),
     MatButtonModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     MatTooltipModule,
     MatListModule,
     ReactiveComponentModule,

@@ -4,8 +4,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ProgressPingModule } from '@heavy-duty/ui/progress-ping';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { RelativeTimePipe } from './relative-time.pipe';
 import { UserInstructionsBottomSheetComponent } from './user-instructions-bottom-sheet.component';
@@ -22,7 +23,8 @@ import { UserInstructionsDirective } from './user-instructions.directive';
     MatIconModule,
     MatListModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
+    ProgressPingModule,
     MatTooltipModule,
     ReactiveComponentModule,
   ],

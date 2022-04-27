@@ -5,16 +5,15 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionSignerModule } from '@bulldozer-client/edit-instruction-signer';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
+import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionSignersComponent } from './view-instruction-signers.component';
-
 @NgModule({
   imports: [
     CommonModule,
@@ -30,7 +29,7 @@ import { ViewInstructionSignersComponent } from './view-instruction-signers.comp
     MatIconModule,
     MatListModule,
     MatMenuModule,
-    MatProgressSpinnerModule,
+    ProgressSpinnerModule,
     MatTooltipModule,
     ReactiveComponentModule,
     HdWalletAdapterCdkModule,

@@ -31,12 +31,11 @@ import { ViewInstructionStore } from './view-instruction.store';
             >
               {{ instruction.name }}
             </span>
-            <mat-progress-spinner
+            <span
+              hdProgressSpinner
               *ngIf="instruction | bdItemChanging"
-              class="flex-shrink-0"
-              mode="indeterminate"
-              diameter="16"
-            ></mat-progress-spinner>
+              class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+            ></span>
           </ng-container>
 
           <ng-template #notFound>

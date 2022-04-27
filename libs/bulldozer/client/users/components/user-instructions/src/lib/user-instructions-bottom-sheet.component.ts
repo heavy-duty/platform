@@ -32,26 +32,22 @@ import { interval, map, Observable, startWith } from 'rxjs';
               "
             >
               <div class="w-full h-8 flex items-center gap-4">
-                <div>
-                  <mat-progress-spinner
-                    *ngIf="
-                      instructionStatus.transactionStatus.status !== 'finalized'
-                    "
-                    color="accent"
-                    diameter="16"
-                    mode="indeterminate"
-                  >
-                  </mat-progress-spinner>
+                <div
+                  hdProgressSpinner
+                  *ngIf="
+                    instructionStatus.transactionStatus.status !== 'finalized'
+                  "
+                  class="inline-block h-4 w-4 border-4 border-accent"
+                ></div>
 
-                  <mat-icon
-                    *ngIf="
-                      instructionStatus.transactionStatus.status === 'finalized'
-                    "
-                    class="text-green-500"
-                    inline
-                    >check_circle</mat-icon
-                  >
-                </div>
+                <mat-icon
+                  *ngIf="
+                    instructionStatus.transactionStatus.status === 'finalized'
+                  "
+                  class="inline-block h-4 w-4 text-green-500"
+                  inline
+                  >check_circle</mat-icon
+                >
 
                 <p class="flex-1 m-0">
                   {{ instructionStatus.title }}
