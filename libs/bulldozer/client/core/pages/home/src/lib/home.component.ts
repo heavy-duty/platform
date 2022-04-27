@@ -19,7 +19,12 @@ import { HomeStore } from './home.store';
     <ng-container *ngrxLet="user$; let user">
       <header>
         <figure class="w-32 mx-auto">
-          <img src="assets/images/logo.webp" class="w-full" />
+          <img
+            src="assets/images/logo.webp"
+            alt="HeavyDuty logo"
+            width="128"
+            height="144"
+          />
           <figcaption class="my-1 text-center font-bold">BULLDOZER</figcaption>
         </figure>
         <h1 class="text-2xl text-center font-bold m-0">
@@ -71,17 +76,35 @@ import { HomeStore } from './home.store';
         <div class="flex mt-6 justify-center gap-4">
           <figure class="w-8">
             <a href="https://github.com/heavy-duty/platform" target="_blank">
-              <img src="assets/images/social/github.png" class="w-full" />
+              <img
+                src="assets/images/social/github.png"
+                class="w-8 h-8"
+                alt="Github button"
+                width="32"
+                height="32"
+              />
             </a>
           </figure>
           <figure class="w-8">
             <a href="https://discord.gg/Ej47EUAj4u" target="_blank">
-              <img src="assets/images/social/discord.png" class="w-full" />
+              <img
+                src="assets/images/social/discord.png"
+                class="w-8 h-8"
+                alt="Discord button"
+                width="32"
+                height="32"
+              />
             </a>
           </figure>
           <figure class="w-8">
             <a href="https://twitter.com/HeavyDutyBuild" target="_blank">
-              <img src="assets/images/social/twitter.png" class="w-full" />
+              <img
+                src="assets/images/social/twitter.png"
+                class="w-8 h-8"
+                alt="Twitter button"
+                width="32"
+                height="32"
+              />
             </a>
           </figure>
         </div>
