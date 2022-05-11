@@ -3,6 +3,10 @@
 @import './core/scrollbar.scss';
 @import './core/backgrounds.scss';
 
+body {
+	font-family: 'Space Grotesk';
+}
+
 .bd-button {
 	padding-left: 10px;
 	padding-right: 10px;

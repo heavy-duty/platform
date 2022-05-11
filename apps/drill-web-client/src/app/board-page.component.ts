@@ -66,9 +66,9 @@ export class ScrewedCardComponent {
 @Component({
 	selector: 'drill-board-page',
 	template: `
-		<header class="py-8">
+		<header class="py-8 bp-bg-concrete bg-black rounded">
 			<h1 class="text-center">
-				<span class="text-3xl">Bounty Board</span>
+				<span class="text-3xl bp-font">Bounty Board</span>
 
 				<br />
 
@@ -90,11 +90,11 @@ export class ScrewedCardComponent {
 			<section *ngIf="bounties$ | async as bounties">
 				<article
 					*ngFor="let bounty of bounties; trackBy: trackBy"
-					class="bp-bg-metal p-4 flex gap-4 mx-auto"
+					class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
 					style="max-width: 900px"
 				>
 					<div class="flex flex-col gap-4 flex-1">
-						<drill-screwed-card class="p-6">
+						<drill-screwed-card class="p-6 rounded">
 							<h2 class="text-2xl">{{ bounty.title }}</h2>
 							<p
 								class="h-16"
@@ -110,7 +110,7 @@ export class ScrewedCardComponent {
 							>
 						</drill-screwed-card>
 
-						<drill-screwed-card>
+						<drill-screwed-card class="rounded">
 							<a
 								class="flex items-center gap-4 px-6 py-4"
 								[href]="bounty.creator.htmlUrl"
@@ -128,7 +128,7 @@ export class ScrewedCardComponent {
 							</a>
 						</drill-screwed-card>
 
-						<drill-screwed-card *ngIf="bounty.hunter !== null">
+						<drill-screwed-card *ngIf="bounty.hunter !== null" class="rounded">
 							<a
 								class="flex items-center gap-4 px-6 py-4"
 								[href]="bounty.hunter.htmlUrl"
@@ -148,7 +148,7 @@ export class ScrewedCardComponent {
 					</div>
 
 					<div class="flex flex-col gap-4 w-2/5">
-						<drill-screwed-card class="p-6">
+						<drill-screwed-card class="p-6 rounded">
 							<p class="p-4 text-center text-3xl bp-font bp-color-primary">
 								Bounty
 							</p>
@@ -168,7 +168,7 @@ export class ScrewedCardComponent {
 			</section>
 		</main>
 
-		<footer class="px-8 py-4 flex justify-between bp-bg-metal mt-auto">
+		<footer class="px-8 py-4 flex justify-between bp-bg-metal mt-auto bg-black">
 			<div class="flex gap-2 items-center">
 				<img src="assets/images/logo.webp" class="w-10" />
 				<p class="m-0 text-xs">
