@@ -1,1 +1,1 @@
-export type Some<Type> = Type | null;
+export type Option<Type> = Type | null;

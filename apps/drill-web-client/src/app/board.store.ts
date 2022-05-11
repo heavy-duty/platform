@@ -3,12 +3,12 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
 import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 import { Board, DrillApiService } from './drill-api.service';
-import { Some } from './types';
+import { Option } from './types';
 
 interface ViewModel {
 	loading: boolean;
-	boardId: Some<number>;
-	board: Some<Board & { vault: Some<Account> }>;
+	boardId: Option<number>;
+	board: Option<Board & { vault: Option<Account> }>;
 	error: unknown;
 }
 
@@ -36,7 +36,7 @@ export class BoardStore extends ComponentStore<ViewModel> {
 		boardId,
 	}));
 
-	private readonly _loadBoard = this.effect<Some<number>>(
+	private readonly _loadBoard = this.effect<Option<number>>(
 		switchMap((boardId) => {
 			if (boardId === null) {
 				return EMPTY;

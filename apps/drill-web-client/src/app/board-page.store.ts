@@ -2,46 +2,43 @@ import { Injectable } from '@angular/core';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../environments/environment';
 import { BoardStore } from './board.store';
 import { BountiesStore } from './bounties.store';
 import { Board, Bounty } from './drill-api.service';
 import { IssuesStore } from './issues.store';
 import { RepositoryStore } from './repository.store';
-import { Some } from './types';
+import { Option } from './types';
+
+export interface UserViewModel {
+	login: string;
+	avatarUrl: string;
+	htmlUrl: string;
+}
 
 export interface BoardViewModel {
 	id: number;
 	fullName: string;
-	owner: {
-		login: string;
-		avatarUrl: string;
-	};
+	owner: UserViewModel;
 	htmlUrl: string;
-	board: Some<Board & { vault: Some<Account> }>;
+	board: Option<Board & { vault: Option<Account> }>;
 }
 
 export interface BountyViewModel {
 	id: number;
 	title: string;
 	htmlUrl: string;
-	body: string;
-	creator: {
-		login: string;
-		avatarUrl: string;
-	};
-	hunter: Some<{
-		login: string;
-		avatarUrl: string;
-	}>;
-	bounty: Some<Bounty & { vault: Some<Account> }>;
+	body: Option<string>;
+	creator: UserViewModel;
+	hunter: Option<UserViewModel>;
+	bounty: Option<Bounty & { vault: Option<Account> }>;
 }
 
 @Injectable()
 export class BoardPageStore extends ComponentStore<object> {
 	readonly githubRepository = environment.githubRepository;
-	readonly board$: Observable<BoardViewModel | null> = this.select(
+	readonly board$: Observable<Option<BoardViewModel>> = this.select(
 		this._boardStore.board$,
 		this._repositoryStore.repository$,
 		(board, repository) =>
@@ -51,14 +48,15 @@ export class BoardPageStore extends ComponentStore<object> {
 				owner: {
 					login: repository.owner.login,
 					avatarUrl: repository.owner.avatar_url,
+					htmlUrl: repository.owner.html_url,
 				},
 				htmlUrl: repository.html_url,
 				board,
 			}
 	);
-	readonly bounties$: Observable<BountyViewModel[] | null> = this.select(
+	readonly bounties$: Observable<Option<BountyViewModel[]>> = this.select(
 		this._boardStore.board$,
-		this._issuesStore.issues$,
+		this._issuesStore.issues$.pipe(tap((a) => console.log(a))),
 		this._bountiesStore.bounties$,
 		(board, issues, bounties) =>
 			issues &&
@@ -66,17 +64,19 @@ export class BoardPageStore extends ComponentStore<object> {
 				id: issue.id,
 				title: issue.title,
 				htmlUrl: issue.html_url,
-				body: issue.body ?? '',
+				body: issue.body,
 				state: issue.state,
 				creator: {
 					login: issue.user.login,
 					avatarUrl: issue.user.avatar_url,
+					htmlUrl: issue.user.html_url,
 				},
 				hunter:
 					issue.assignee !== null
 						? {
 								login: issue.assignee.login,
 								avatarUrl: issue.assignee.avatar_url,
+								htmlUrl: issue.assignee.html_url,
 						  }
 						: null,
 				bounty:

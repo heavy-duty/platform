@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '../environments/environment';
-import { Some } from './types';
+import { Option } from './types';
 
 export interface User {
 	login: string;
 	avatar_url: string;
+	html_url: string;
 }
 
 export interface Issue {
@@ -13,9 +14,9 @@ export interface Issue {
 	number: number;
 	title: string;
 	html_url: string;
-	body: Some<string>;
+	body: Option<string>;
 	state: 'open' | 'close';
-	assignee: Some<User>;
+	assignee: Option<User>;
 	user: User;
 }
 

@@ -3,13 +3,13 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
 import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 import { Bounty, DrillApiService } from './drill-api.service';
-import { Some } from './types';
+import { Option } from './types';
 
 interface ViewModel {
 	loading: boolean;
-	boardId: Some<number>;
-	bountyIds: Some<number[]>;
-	bounties: Some<Some<Bounty & { vault: Some<Account> }>[] | null>;
+	boardId: Option<number>;
+	bountyIds: Option<number[]>;
+	bounties: Option<Option<Bounty & { vault: Option<Account> }>[] | null>;
 	error: unknown;
 }
 

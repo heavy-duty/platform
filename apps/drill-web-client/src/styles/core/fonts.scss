@@ -1,0 +1,15 @@
+@import 'https://fonts.googleapis.com/css?family=Material+Icons&display=swap';
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400&display=swap');
+
+@font-face {
+	font-family: 'CaptureIt';
+	src: local('../../assets/fonts/CaptureIt.ttf'),
+		local('../../assets/fonts/CaptureIt.ttf'),
+		url(https://bulldozer.heavyduty.builders/assets/fonts/CaptureIt.ttf)
+			format('woff2');
+	font-display: swap;
+}
+
+.bp-font {
+	font-family: 'CaptureIt' !important;
+}

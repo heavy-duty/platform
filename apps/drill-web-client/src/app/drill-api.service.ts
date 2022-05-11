@@ -5,7 +5,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, defer, from, map, Observable, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import { DrillProgramPoc, IDL } from './drill_program_poc';
-import { Some } from './types';
+import { Option } from './types';
 
 export interface Board {
 	id: number;
@@ -21,11 +21,11 @@ export interface Bounty {
 	publicKey: PublicKey;
 	boardId: number;
 	bountyBump: number;
-	bountyHunter: Some<string>;
+	bountyHunter: Option<string>;
 	id: number;
 	bountyVaultBump: number;
-	claimedAt: Some<Date>;
-	closedAt: Some<Date>;
+	claimedAt: Option<Date>;
+	closedAt: Option<Date>;
 	isClaimed: boolean;
 	isClosed: boolean;
 }
@@ -106,7 +106,7 @@ export class DrillApiService {
 		);
 	}
 
-	getBoard(boardId: number): Observable<Some<Board>> {
+	getBoard(boardId: number): Observable<Option<Board>> {
 		return this.getBoardPublicKey(boardId).pipe(
 			concatMap((boardPublicKey) =>
 				defer(() =>
@@ -129,7 +129,7 @@ export class DrillApiService {
 		);
 	}
 
-	getBoardVault(boardId: number): Observable<Some<Account>> {
+	getBoardVault(boardId: number): Observable<Option<Account>> {
 		return this.getBoardVaultPublicKey(boardId).pipe(
 			concatMap((boardVaultPublicKey) =>
 				defer(() =>
@@ -139,7 +139,7 @@ export class DrillApiService {
 		);
 	}
 
-	getBounty(boardId: number, bountyId: number): Observable<Some<Bounty>> {
+	getBounty(boardId: number, bountyId: number): Observable<Option<Bounty>> {
 		return this.getBountyPublicKey(boardId, bountyId).pipe(
 			concatMap((bountyPublicKey) =>
 				defer(() =>
@@ -169,7 +169,10 @@ export class DrillApiService {
 		);
 	}
 
-	getBountyVault(boardId: number, bountyId: number): Observable<Some<Account>> {
+	getBountyVault(
+		boardId: number,
+		bountyId: number
+	): Observable<Option<Account>> {
 		return this.getBountyVaultPublicKey(boardId, bountyId).pipe(
 			concatMap((bountyVaultPublicKey) =>
 				defer(() =>

@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { EMPTY, finalize, switchMap } from 'rxjs';
 import { GithubApiService, Issue } from './github-api.service';
-import { Some } from './types';
+import { Option } from './types';
 
 interface ViewModel {
 	loading: boolean;
-	githubRepository: Some<string>;
-	issues: Some<Issue[]>;
+	githubRepository: Option<string>;
+	issues: Option<Issue[]>;
 	error: unknown;
 }
 
@@ -38,7 +38,7 @@ export class IssuesStore extends ComponentStore<ViewModel> {
 		})
 	);
 
-	private readonly _loadIssues = this.effect<Some<string>>(
+	private readonly _loadIssues = this.effect<Option<string>>(
 		switchMap((githubRepository) => {
 			if (githubRepository === null) {
 				return EMPTY;

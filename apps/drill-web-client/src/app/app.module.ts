@@ -5,12 +5,22 @@ import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
 import { AuthGuard } from './auth.guard';
 import { HttpTokenInterceptor } from './auth.interceptor';
-import { BoardPageComponent } from './board-page.component';
+import {
+	BoardPageComponent,
+	RotateDirective,
+	ScrewedCardComponent,
+} from './board-page.component';
 import { LoginPageComponent } from './login-page.component';
 import { UnauthorizedPageComponent } from './unauthorized-page.component';
 
 @NgModule({
-	declarations: [AppComponent, BoardPageComponent, UnauthorizedPageComponent],
+	declarations: [
+		AppComponent,
+		BoardPageComponent,
+		ScrewedCardComponent,
+		UnauthorizedPageComponent,
+		RotateDirective,
+	],
 	imports: [
 		BrowserModule,
 		RouterModule.forRoot([

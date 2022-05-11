@@ -1,0 +1,30 @@
+@import './core/colors.scss';
+@import './core/fonts.scss';
+@import './core/scrollbar.scss';
+@import './core/backgrounds.scss';
+
+.bd-button {
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	background-image: linear-gradient(#212121, #171717);
+	border: 2px solid #212121;
+}
+
+.bd-button:hover {
+	background-image: linear-gradient(#171717, #171717);
+}
+
+.bd-button:active {
+	background-image: linear-gradient(#171717, #212121);
+}
+
+.bd-button[disabled='disabled'],
+.bd-button:disabled {
+	cursor: not-allowed;
+	background-image: linear-gradient(gray, gray) !important;
+	color: #e6e6e6;
+	border: 1px solid #909090;
+	opacity: 0.4;
+}
