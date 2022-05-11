@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { EMPTY, finalize, switchMap } from 'rxjs';
-import { GithubApiService, Repository } from './github-api.service';
-import { Option } from './types';
+import { GithubApiService, Repository } from '../services/github-api.service';
+import { Option } from '../types';
 
 interface ViewModel {
 	loading: boolean;

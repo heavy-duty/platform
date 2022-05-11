@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
 import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
-import { Board, DrillApiService } from './drill-api.service';
-import { Option } from './types';
+import { Board, DrillApiService } from '../services/drill-api.service';
+import { Option } from '../types';
 
 interface ViewModel {
 	loading: boolean;

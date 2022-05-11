@@ -4,9 +4,9 @@ import { AnchorProvider, BN, Program } from '@heavy-duty/anchor';
 import { Account, getAccount } from '@solana/spl-token';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, defer, from, map, Observable, of } from 'rxjs';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
+import { Option } from '../types';
 import { DrillProgramPoc, IDL } from './drill_program_poc';
-import { Option } from './types';
 
 export interface Board {
 	id: number;

@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '../environments/environment';
-import { Option } from './types';
+import { environment } from '../../environments/environment';
+import { Option } from '../types';
 
 export interface User {
 	login: string;

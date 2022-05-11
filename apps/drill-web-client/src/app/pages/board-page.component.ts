@@ -7,12 +7,12 @@ import {
 	OnInit,
 	Renderer2,
 } from '@angular/core';
+import { DrillApiService } from '../services/drill-api.service';
+import { BoardStore } from '../stores/board.store';
+import { BountiesStore } from '../stores/bounties.store';
+import { IssuesStore } from '../stores/issues.store';
+import { RepositoryStore } from '../stores/repository.store';
 import { BoardPageStore, BountyViewModel } from './board-page.store';
-import { BoardStore } from './board.store';
-import { BountiesStore } from './bounties.store';
-import { DrillApiService } from './drill-api.service';
-import { IssuesStore } from './issues.store';
-import { RepositoryStore } from './repository.store';
 
 @Directive({ selector: '[drillRotate]' })
 export class RotateDirective implements OnInit {

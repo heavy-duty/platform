@@ -3,15 +3,15 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
-import { AuthGuard } from './auth.guard';
-import { HttpTokenInterceptor } from './auth.interceptor';
 import {
 	BoardPageComponent,
 	RotateDirective,
 	ScrewedCardComponent,
-} from './board-page.component';
-import { LoginPageComponent } from './login-page.component';
-import { UnauthorizedPageComponent } from './unauthorized-page.component';
+} from './pages/board-page.component';
+import { LoginPageComponent } from './pages/login-page.component';
+import { UnauthorizedPageComponent } from './pages/unauthorized-page.component';
+import { AuthGuard } from './services/auth.guard';
+import { HttpTokenInterceptor } from './services/auth.interceptor';
 
 @NgModule({
 	declarations: [
