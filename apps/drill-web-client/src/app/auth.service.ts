@@ -6,42 +6,41 @@ import { environment } from '../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-	private readonly TOKEN = 'token';
-	private readonly baseUrl = `${environment.gatewayUrl}/authenticate`;
-	private isLogged = false;
-	private token: string | null = null;
+	private readonly _baseUrl = environment.gatewayUrl;
+	private _isLogged = false;
+	private _token: string | null = null;
 
 	constructor(private httpClient: HttpClient, private router: Router) {}
 
 	login(code: string) {
 		return this.httpClient
-			.get<{ token: string }>(`${this.baseUrl}/${code}`)
+			.get<{ token: string }>(`${this._baseUrl}/authenticate/${code}`)
 			.pipe(
 				tap(({ token }) => {
-					localStorage.setItem(this.TOKEN, token);
-					this.isLogged = true;
+					localStorage.setItem('token', token);
+					this._isLogged = true;
 				})
 			);
 	}
 
 	isLoggedIn() {
-		if (!this.isLogged) {
-			this.isLogged = !!this.getToken();
+		if (!this._isLogged) {
+			this._isLogged = !!this.getToken();
 		}
-		return this.isLogged;
+		return this._isLogged;
 	}
 
 	getToken() {
-		if (!this.token) {
-			this.token = localStorage.getItem(this.TOKEN);
+		if (!this._token) {
+			this._token = localStorage.getItem('token');
 		}
-		return this.token;
+		return this._token;
 	}
 
 	logout(): void {
-		this.isLogged = false;
-		this.token = null;
-		localStorage.removeItem(this.TOKEN);
+		this._isLogged = false;
+		this._token = null;
+		localStorage.removeItem('token');
 		this.router.navigate(['unauthorized']);
 	}
 }

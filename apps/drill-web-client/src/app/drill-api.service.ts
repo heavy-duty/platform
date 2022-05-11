@@ -1,3 +1,4 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AnchorProvider, BN, Program } from '@heavy-duty/anchor';
 import { Account, getAccount } from '@solana/spl-token';
@@ -32,6 +33,7 @@ export interface Bounty {
 
 @Injectable({ providedIn: 'root' })
 export class DrillApiService {
+	private readonly _baseUrl = environment.gatewayUrl;
 	private readonly _connection = new Connection(environment.rpcEndpoint);
 	private readonly _program = new Program<DrillProgramPoc>(
 		IDL,
@@ -42,6 +44,8 @@ export class DrillApiService {
 			AnchorProvider.defaultOptions()
 		)
 	);
+
+	constructor(private readonly _httpClient: HttpClient) {}
 
 	private getBoardPublicKey(boardId: number) {
 		return defer(() =>
@@ -179,6 +183,15 @@ export class DrillApiService {
 					from(getAccount(this._connection, bountyVaultPublicKey))
 				).pipe(catchError(() => of(null)))
 			)
+		);
+	}
+
+	claimBounty(boardId: number, bountyId: number) {
+		return this._httpClient.post(
+			`${this._baseUrl}/claim-bounty/${boardId}/${bountyId}`,
+			{
+				userVault: '4SCQPhgJhy1E8uDvpE2CthcnofyD2Q2GWp8nGGAE8Q7r',
+			}
 		);
 	}
 }

@@ -37,7 +37,10 @@ export class GithubApiService {
 		return this.httpClient.get<Issue[]>(
 			`${this._baseUrl}/repos/${githubRepository}/issues`,
 			{
-				params: { labels: 'drill:bounty:enabled' },
+				params: {
+					labels: 'drill:bounty:enabled',
+					state: 'all',
+				},
 			}
 		);
 	}

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
-import { map, Observable, tap } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { environment } from '../environments/environment';
 import { BoardStore } from './board.store';
 import { BountiesStore } from './bounties.store';
@@ -56,7 +56,7 @@ export class BoardPageStore extends ComponentStore<object> {
 	);
 	readonly bounties$: Observable<Option<BountyViewModel[]>> = this.select(
 		this._boardStore.board$,
-		this._issuesStore.issues$.pipe(tap((a) => console.log(a))),
+		this._issuesStore.issues$,
 		this._bountiesStore.bounties$,
 		(board, issues, bounties) =>
 			issues &&
