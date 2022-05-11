@@ -72,6 +72,8 @@
     "bulldozer-programs": "apps/bulldozer-programs",
     "bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
     "bulldozer-shared-generator": "libs/bulldozer/shared/generator",
+    "drill-web-client": "apps/drill-web-client",
+    "drill-web-client-e2e": "apps/drill-web-client-e2e",
     "heavy-duty-ui-progress-ping": "libs/heavy-duty/ui/progress-ping",
     "heavy-duty-ui-progress-spinner": "libs/heavy-duty/ui/progress-spinner",
     "ngx-solana-data-access": "libs/ngx-solana/data-access",
