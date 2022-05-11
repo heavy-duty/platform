@@ -1,17 +1,38 @@
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { AppComponent } from './app.component';
+import { AuthGuard } from './auth.guard';
+import { HttpTokenInterceptor } from './auth.interceptor';
+import { BoardPageComponent } from './board-page.component';
+import { LoginPageComponent } from './login-page.component';
+import { UnauthorizedPageComponent } from './unauthorized-page.component';
 
 @NgModule({
-  declarations: [AppComponent],
-  imports: [
-    BrowserModule,
-    RouterModule.forRoot([], { initialNavigation: 'enabledBlocking' }),
-    HttpClientModule,
-  ],
-  providers: [],
-  bootstrap: [AppComponent],
+	declarations: [AppComponent, BoardPageComponent, UnauthorizedPageComponent],
+	imports: [
+		BrowserModule,
+		RouterModule.forRoot([
+			{
+				path: '',
+				component: BoardPageComponent,
+				canActivate: [AuthGuard],
+			},
+			{
+				path: 'unauthorized',
+				component: UnauthorizedPageComponent,
+			},
+			{
+				path: 'login',
+				component: LoginPageComponent,
+			},
+		]),
+		HttpClientModule,
+	],
+	bootstrap: [AppComponent],
+	providers: [
+		{ provide: HTTP_INTERCEPTORS, useClass: HttpTokenInterceptor, multi: true },
+	],
 })
 export class AppModule {}
