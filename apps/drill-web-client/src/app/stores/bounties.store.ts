@@ -3,6 +3,7 @@ import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
 import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 import { Bounty, DrillApiService } from '../services/drill-api.service';
+import { NotificationService } from '../services/notification.service';
 import { Option } from '../types';
 
 interface ViewModel {
@@ -28,7 +29,10 @@ export class BountiesStore extends ComponentStore<ViewModel> {
 	readonly bounties$ = this.select(({ bounties }) => bounties);
 	readonly loading$ = this.select(({ loading }) => loading);
 
-	constructor(private readonly _drillApiService: DrillApiService) {
+	constructor(
+		private readonly _drillApiService: DrillApiService,
+		private readonly _notificationService: NotificationService
+	) {
 		super(initialState);
 
 		this._loadBounties(
@@ -84,7 +88,10 @@ export class BountiesStore extends ComponentStore<ViewModel> {
 									bounty && { ...bounty, vault: bountyVaults[index] }
 							),
 						}),
-					(error) => this.patchState({ error })
+					(error) => {
+						this.patchState({ error });
+						this._notificationService.notifyError(error);
+					}
 				),
 				finalize(() => this.patchState({ loading: false }))
 			);

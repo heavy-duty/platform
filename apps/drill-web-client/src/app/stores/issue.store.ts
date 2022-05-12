@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { EMPTY, finalize, switchMap } from 'rxjs';
 import { GithubApiService, Issue } from '../services/github-api.service';
+import { NotificationService } from '../services/notification.service';
 import { Option } from '../types';
 
 interface ViewModel {
@@ -29,7 +30,10 @@ export class IssueStore extends ComponentStore<ViewModel> {
 	readonly issue$ = this.select(({ issue }) => issue);
 	readonly loading$ = this.select(({ loading }) => loading);
 
-	constructor(private readonly _githubApiService: GithubApiService) {
+	constructor(
+		private readonly _githubApiService: GithubApiService,
+		private readonly _notificationService: NotificationService
+	) {
 		super(initialState);
 
 		this._loadRepository(
@@ -76,7 +80,10 @@ export class IssueStore extends ComponentStore<ViewModel> {
 				.pipe(
 					tapResponse(
 						(issue) => this.patchState({ issue }),
-						(error) => this.patchState({ error })
+						(error) => {
+							this.patchState({ error });
+							this._notificationService.notifyError(error);
+						}
 					),
 					finalize(() => this.patchState({ loading: false }))
 				);

@@ -1,7 +1,6 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AnchorError, ProgramError } from '@heavy-duty/anchor';
-import { WalletError } from '@solana/wallet-adapter-base';
 import { SnackBarComponent } from '../components/snack-bar.component';
 
 @Injectable({ providedIn: 'root' })
@@ -20,8 +19,8 @@ export class NotificationService {
 	}
 
 	notifySuccess(message: string) {
-		console.log('alooo');
 		this._matSnackBar.openFromComponent(SnackBarComponent, {
+			duration: 5000,
 			data: {
 				title: 'Hooray...',
 				message,
@@ -33,12 +32,10 @@ export class NotificationService {
 	private getErrorMessage(error: unknown) {
 		if (typeof error === 'string') {
 			return error;
-		} else if (error instanceof WalletError) {
+		} else if (error instanceof Error) {
 			return error.name;
-		} else if (error instanceof ProgramError) {
-			return error.message;
-		} else if (error instanceof AnchorError) {
-			return error.error.errorMessage;
+		} else if (error instanceof HttpErrorResponse) {
+			return error.error.error;
 		} else {
 			try {
 				console.error(error);

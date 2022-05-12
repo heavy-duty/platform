@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { DrillApiService } from '../services/drill-api.service';
+import { NotificationService } from '../services/notification.service';
 import { BoardMintStore } from '../stores/board-mint.store';
 import { BoardStore } from '../stores/board.store';
 import { BountiesStore } from '../stores/bounties.store';
@@ -67,7 +68,7 @@ import { BoardPageStore, BountyViewModel } from './board-page.store';
 								[loading]="false"
 								[exists]="true"
 								[boardId]="bounty.bounty?.boardId ?? null"
-								[bountyId]="bounty.id"
+								[bountyId]="bounty.bounty?.id ?? null"
 								(claimBounty)="onClaimBounty($event.boardId, $event.bountyId)"
 							>
 							</drill-bounty-claim>
@@ -117,7 +118,8 @@ export class BoardPageComponent {
 
 	constructor(
 		private readonly _drillApiService: DrillApiService,
-		private readonly _boardPageStore: BoardPageStore
+		private readonly _boardPageStore: BoardPageStore,
+		private readonly _notificationService: NotificationService
 	) {}
 
 	trackBy(_: number, bounty: BountyViewModel): number {
@@ -125,6 +127,9 @@ export class BoardPageComponent {
 	}
 
 	onClaimBounty(boardId: number, bountyId: number) {
-		this._drillApiService.claimBounty(boardId, bountyId).subscribe();
+		this._drillApiService.claimBounty(boardId, bountyId).subscribe({
+			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
+			error: (error) => this._notificationService.notifyError(error),
+		});
 	}
 }

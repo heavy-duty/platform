@@ -71,7 +71,5 @@ export class SnackBarComponent {
 	constructor(
 		@Inject(MAT_SNACK_BAR_DATA)
 		public data: SnackBarData
-	) {
-		console.log('¡aloooooo');
-	}
+	) {}
 }

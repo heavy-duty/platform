@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { DrillApiService } from '../services/drill-api.service';
+import { NotificationService } from '../services/notification.service';
 import { BoardMintStore } from '../stores/board-mint.store';
 import { BoardStore } from '../stores/board.store';
 import { BountyStore } from '../stores/bounty.store';
@@ -99,10 +100,14 @@ export class BountyPageComponent {
 		private readonly _bountyStore: BountyStore,
 		private readonly _boardMintStore: BoardMintStore,
 		private readonly _drillApiService: DrillApiService,
-		private readonly _bountyPageStore: BountyPageStore
+		private readonly _bountyPageStore: BountyPageStore,
+		private readonly _notificationService: NotificationService
 	) {}
 
 	onClaimBounty(boardId: number, bountyId: number) {
-		this._drillApiService.claimBounty(boardId, bountyId).subscribe();
+		this._drillApiService.claimBounty(boardId, bountyId).subscribe({
+			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
+			error: (error) => this._notificationService.notifyError(error),
+		});
 	}
 }

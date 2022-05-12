@@ -5,12 +5,14 @@ import {
 	Controller,
 	Get,
 	Headers,
+	HttpException,
+	HttpStatus,
 	OnModuleInit,
 	Param,
 	Post,
 } from '@nestjs/common';
 import { PublicKey } from '@solana/web3.js';
-import { concatMap, defer, from, map } from 'rxjs';
+import { catchError, concatMap, defer, from, map, throwError } from 'rxjs';
 import {
 	getProgram,
 	getProvider,
@@ -80,6 +82,20 @@ export class AppController implements OnModuleInit {
 									boardAuthority: this._provider.wallet.publicKey,
 								})
 								.rpc()
+						).pipe(
+							catchError((error) => {
+								console.log(error.error);
+								return throwError(
+									() =>
+										new HttpException(
+											{
+												status: HttpStatus.INTERNAL_SERVER_ERROR,
+												error: error.error.errorCode.code,
+											},
+											HttpStatus.INTERNAL_SERVER_ERROR
+										)
+								);
+							})
 						)
 					)
 				)
