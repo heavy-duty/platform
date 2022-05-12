@@ -62,7 +62,9 @@ import { BountyPageStore } from './bounty-page.store';
 					[loading]="(loadingBounty$ | ngrxPush) ?? true"
 					[boardId]="bounty?.boardId ?? null"
 					[bountyId]="bounty?.id ?? null"
-					(claimBounty)="onClaimBounty($event.boardId, $event.bountyId)"
+					(claimBounty)="
+						onClaimBounty($event.boardId, $event.bountyId, $event.userVault)
+					"
 				>
 				</drill-bounty-claim>
 
@@ -104,8 +106,8 @@ export class BountyPageComponent {
 		private readonly _notificationService: NotificationService
 	) {}
 
-	onClaimBounty(boardId: number, bountyId: number) {
-		this._drillApiService.claimBounty(boardId, bountyId).subscribe({
+	onClaimBounty(boardId: number, bountyId: number, userVault: string) {
+		this._drillApiService.claimBounty(boardId, bountyId, userVault).subscribe({
 			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
 			error: (error) => this._notificationService.notifyError(error),
 		});

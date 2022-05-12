@@ -4,7 +4,7 @@ import { Option } from '../types';
 @Component({
 	selector: 'drill-bounty-user',
 	template: `
-		<drill-screwed-card class="rounded">
+		<drill-screwed-card class="bg-black rounded">
 			<ng-container *ngIf="!loading; else loadingTemplate">
 				<ng-container *ngIf="exists; else notFoundTemplate">
 					<a

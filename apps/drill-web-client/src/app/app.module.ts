@@ -1,11 +1,14 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { ReactiveFormsModule } from '@angular/forms';
+import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserModule } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { AppComponent } from './app.component';
+import { BountyClaimModalComponent } from './components/bounty-claim-modal.component';
 import { BountyClaimComponent } from './components/bounty-claim.component';
 import { BountyInformationComponent } from './components/bounty-information.component';
 import { BountyStatusComponent } from './components/bounty-status.component';
@@ -17,6 +20,7 @@ import {
 	SnackBarComponent,
 	SnackBarPoleComponent,
 } from './components/snack-bar.component';
+import { BountyClaimTriggerDirective } from './directives/bounty-claim-trigger.directive';
 import { ProgressSpinnerDirective } from './directives/progress-spinner.directive';
 import { RotateDirective } from './directives/rotate.directive';
 import { BoardPageComponent } from './pages/board-page.component';
@@ -41,6 +45,8 @@ import { ShellComponent } from './shell.component';
 		BountyUserComponent,
 		BountyTotalComponent,
 		BountyClaimComponent,
+		BountyClaimModalComponent,
+		BountyClaimTriggerDirective,
 		BountyStatusComponent,
 		SnackBarClassPipe,
 		SnackBarComponent,
@@ -80,6 +86,8 @@ import { ShellComponent } from './shell.component';
 			},
 		]),
 		HttpClientModule,
+		ReactiveFormsModule,
+		MatDialogModule,
 		MatSnackBarModule,
 		ReactiveComponentModule,
 	],

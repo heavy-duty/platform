@@ -4,12 +4,13 @@ import { Option } from '../types';
 @Component({
 	selector: 'drill-bounty-claim',
 	template: `
-		<drill-screwed-card class="px-6 py-4">
+		<drill-screwed-card class="bg-black px-6 py-4 rounded">
 			<ng-container *ngIf="!loading; else loadingTemplate">
 				<ng-container *ngIf="exists; else notFoundTemplate">
 					<button
 						class="bg-black h-full w-full py-2 bd-button uppercase"
-						(click)="onClaimBounty(boardId, bountyId)"
+						drillBountyClaimTrigger
+						(claimBounty)="onClaimBounty(boardId, bountyId, $event)"
 						[disabled]="boardId === null || bountyId === null"
 					>
 						claim
@@ -40,13 +41,18 @@ export class BountyClaimComponent {
 	@Output() claimBounty = new EventEmitter<{
 		boardId: number;
 		bountyId: number;
+		userVault: string;
 	}>();
 
-	onClaimBounty(boardId: Option<number>, bountyId: Option<number>) {
+	onClaimBounty(
+		boardId: Option<number>,
+		bountyId: Option<number>,
+		userVault: string
+	) {
 		if (boardId === null || bountyId === null) {
 			throw new Error('Missing fields');
 		}
 
-		this.claimBounty.emit({ boardId, bountyId });
+		this.claimBounty.emit({ boardId, bountyId, userVault });
 	}
 }

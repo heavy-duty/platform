@@ -69,7 +69,13 @@ import { BoardPageStore, BountyViewModel } from './board-page.store';
 								[exists]="true"
 								[boardId]="bounty.bounty?.boardId ?? null"
 								[bountyId]="bounty.bounty?.id ?? null"
-								(claimBounty)="onClaimBounty($event.boardId, $event.bountyId)"
+								(claimBounty)="
+									onClaimBounty(
+										$event.boardId,
+										$event.bountyId,
+										$event.userVault
+									)
+								"
 							>
 							</drill-bounty-claim>
 
@@ -126,8 +132,8 @@ export class BoardPageComponent {
 		return bounty.id;
 	}
 
-	onClaimBounty(boardId: number, bountyId: number) {
-		this._drillApiService.claimBounty(boardId, bountyId).subscribe({
+	onClaimBounty(boardId: number, bountyId: number, userVault: string) {
+		this._drillApiService.claimBounty(boardId, bountyId, userVault).subscribe({
 			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
 			error: (error) => this._notificationService.notifyError(error),
 		});

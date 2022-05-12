@@ -192,12 +192,10 @@ export class DrillApiService {
 		);
 	}
 
-	claimBounty(boardId: number, bountyId: number) {
+	claimBounty(boardId: number, bountyId: number, userVault: string) {
 		return this._httpClient.post(
 			`${this._baseUrl}/claim-bounty/${boardId}/${bountyId}`,
-			{
-				userVault: '4SCQPhgJhy1E8uDvpE2CthcnofyD2Q2GWp8nGGAE8Q7r',
-			}
+			{ userVault }
 		);
 	}
 }
