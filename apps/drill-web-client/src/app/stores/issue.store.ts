@@ -5,7 +5,7 @@ import { GithubApiService, Issue } from '../services/github-api.service';
 import { Option } from '../types';
 
 interface ViewModel {
-	loading: boolean;
+	loading: Option<boolean>;
 	githubRepository: Option<string>;
 	issueNumber: Option<number>;
 	issue: Option<Issue>;
@@ -13,7 +13,7 @@ interface ViewModel {
 }
 
 const initialState = {
-	loading: false,
+	loading: null,
 	issueNumber: null,
 	githubRepository: null,
 	issue: null,
@@ -27,6 +27,7 @@ export class IssueStore extends ComponentStore<ViewModel> {
 	);
 	readonly issueNumber$ = this.select(({ issueNumber }) => issueNumber);
 	readonly issue$ = this.select(({ issue }) => issue);
+	readonly loading$ = this.select(({ loading }) => loading);
 
 	constructor(private readonly _githubApiService: GithubApiService) {
 		super(initialState);

@@ -5,14 +5,14 @@ import { GithubApiService, Repository } from '../services/github-api.service';
 import { Option } from '../types';
 
 interface ViewModel {
-	loading: boolean;
+	loading: Option<boolean>;
 	githubRepository: Option<string>;
 	repository: Option<Repository>;
 	error: unknown;
 }
 
 const initialState = {
-	loading: false,
+	loading: null,
 	githubRepository: null,
 	repository: null,
 	error: null,
@@ -24,6 +24,7 @@ export class RepositoryStore extends ComponentStore<ViewModel> {
 		({ githubRepository }) => githubRepository
 	);
 	readonly repository$ = this.select(({ repository }) => repository);
+	readonly loading$ = this.select(({ loading }) => loading);
 
 	constructor(private readonly _githubApiService: GithubApiService) {
 		super(initialState);

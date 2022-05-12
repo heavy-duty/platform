@@ -1,20 +1,21 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
-import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
+import { EMPTY, forkJoin, switchMap } from 'rxjs';
 import { Bounty, DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
 
 interface ViewModel {
-	loading: boolean;
+	loading: Option<boolean>;
 	boardId: Option<number>;
 	bountyId: Option<number>;
-	bounty: Option<Bounty & { vault: Option<Account> }>;
+	bounty: Option<Bounty>;
+	bountyVault: Option<Account>;
 	error: unknown;
 }
 
 const initialState = {
-	loading: false,
+	loading: null,
 	boardId: null,
 	bountyId: null,
 	bounty: null,
@@ -24,9 +25,11 @@ const initialState = {
 
 @Injectable()
 export class BountyStore extends ComponentStore<ViewModel> {
+	readonly loading$ = this.select(({ loading }) => loading);
 	readonly boardId$ = this.select(({ boardId }) => boardId);
 	readonly bountyId$ = this.select(({ bountyId }) => bountyId);
 	readonly bounty$ = this.select(({ bounty }) => bounty);
+	readonly bountyVault$ = this.select(({ bountyVault }) => bountyVault);
 
 	constructor(private readonly _drillApiService: DrillApiService) {
 		super(initialState);
@@ -71,14 +74,16 @@ export class BountyStore extends ComponentStore<ViewModel> {
 				tapResponse(
 					({ bounty, bountyVault }) =>
 						this.patchState({
-							bounty: bounty && { ...bounty, vault: bountyVault },
+							bounty,
+							bountyVault,
+							loading: false,
 						}),
 					(error) =>
 						this.patchState({
 							error,
+							loading: false,
 						})
-				),
-				finalize(() => this.patchState({ loading: false }))
+				)
 			);
 		})
 	);

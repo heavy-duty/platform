@@ -6,7 +6,7 @@ import { Board, DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
 
 interface ViewModel {
-	loading: boolean;
+	loading: Option<boolean>;
 	boardId: Option<number>;
 	board: Option<Board & { vault: Option<Account> }>;
 	error: unknown;
@@ -24,6 +24,7 @@ const initialState = {
 export class BoardStore extends ComponentStore<ViewModel> {
 	readonly boardId$ = this.select(({ boardId }) => boardId);
 	readonly board$ = this.select(({ board }) => board);
+	readonly loading$ = this.select(({ loading }) => loading);
 
 	constructor(private readonly _drillApiService: DrillApiService) {
 		super(initialState);

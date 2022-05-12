@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
-import { Account } from '@solana/spl-token';
-import { map, Observable, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Bounty } from '../services/drill-api.service';
 import { BoardMintStore } from '../stores/board-mint.store';
@@ -26,9 +25,7 @@ export interface BountyViewModel {
 	body: Option<string>;
 	creator: UserViewModel;
 	hunter: Option<UserViewModel>;
-	bounty: Option<
-		Bounty & { vault: Option<Account> } & { uiAmount: Option<number> }
-	>;
+	bounty: Option<Bounty>;
 }
 
 @Injectable()
@@ -41,40 +38,25 @@ export class BountyPageStore extends ComponentStore<object> {
 			return bountyId !== null ? parseInt(bountyId) : null;
 		})
 	);
-	readonly bounty$: Observable<Option<BountyViewModel>> = this.select(
+	readonly bountyTotal$ = this.select(
+		this._bountyStore.bountyVault$,
 		this._boardMintStore.boardMint$,
-		this._issueStore.issue$,
-		this._bountyStore.bounty$.pipe(tap(console.log)),
-		(boardMint, issue, bounty) =>
-			issue &&
-			bounty && {
-				id: issue.id,
-				title: issue.title,
-				htmlUrl: issue.html_url,
-				body: issue.body,
-				state: issue.state,
-				creator: {
-					login: issue.user.login,
-					avatarUrl: issue.user.avatar_url,
-					htmlUrl: issue.user.html_url,
-				},
-				hunter:
-					issue.assignee !== null
-						? {
-								login: issue.assignee.login,
-								avatarUrl: issue.assignee.avatar_url,
-								htmlUrl: issue.assignee.html_url,
-						  }
-						: null,
-				boardMint,
-				bounty: {
-					...bounty,
-					uiAmount:
-						bounty.vault !== null && boardMint !== null
-							? Number(bounty.vault.amount) / Math.pow(10, boardMint.decimals)
-							: null,
-				},
+		(bountyVault, boardMint) => {
+			if (bountyVault === null || boardMint === null) {
+				return null;
 			}
+
+			return Number(bountyVault.amount) / Math.pow(10, boardMint.decimals);
+		}
+	);
+	readonly loadingTotal$ = this.select(
+		this._boardMintStore.loading$,
+		this._bountyStore.loading$,
+		(boardMintLoading, bountyLoading) =>
+			boardMintLoading === null ||
+			bountyLoading === null ||
+			boardMintLoading ||
+			bountyLoading
 	);
 
 	constructor(

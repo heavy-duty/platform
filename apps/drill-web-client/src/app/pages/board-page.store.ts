@@ -39,16 +39,18 @@ export class BoardPageStore extends ComponentStore<object> {
 		this._issuesStore.issues$,
 		this._bountiesStore.bounties$,
 		(board, boardMint, issues, bounties) =>
+			board &&
+			boardMint &&
 			issues &&
 			bounties &&
 			issues
 				.map((issue) => {
 					const bounty =
-						bounties?.find(
+						bounties.find(
 							(bounty) =>
 								bounty &&
 								bounty.id === issue.number &&
-								bounty.boardId === board?.id
+								bounty.boardId === board.id
 						) ?? null;
 
 					if (bounty === null) {
@@ -86,6 +88,21 @@ export class BoardPageStore extends ComponentStore<object> {
 					} as BountyViewModel;
 				})
 				.filter((bounty): bounty is BountyViewModel => bounty !== null)
+	);
+	readonly loading$ = this.select(
+		this._boardMintStore.loading$,
+		this._boardStore.loading$,
+		this._issuesStore.loading$,
+		this._bountiesStore.loading$,
+		(boardMintLoading, bountyLoading, issuesLoading, bountiesLoading) =>
+			boardMintLoading === null ||
+			bountyLoading === null ||
+			issuesLoading === null ||
+			bountiesLoading === null ||
+			boardMintLoading ||
+			bountyLoading ||
+			issuesLoading ||
+			bountiesLoading
 	);
 
 	constructor(

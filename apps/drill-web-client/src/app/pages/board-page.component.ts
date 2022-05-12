@@ -10,109 +10,97 @@ import { BoardPageStore, BountyViewModel } from './board-page.store';
 @Component({
 	selector: 'drill-board-page',
 	template: `
-		<ng-container *ngIf="bounties$ | async as bounties">
-			<section *ngIf="bounties.length > 0; else emptyBoard">
-				<article
-					*ngFor="let bounty of bounties; trackBy: trackBy"
-					class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
-					style="max-width: 900px"
+		<ng-container *ngIf="(loading$ | ngrxPush) === false; else loadingTemplate">
+			<ng-container *ngrxLet="bounties$; let bounties">
+				<section
+					*ngIf="
+						bounties !== null && bounties.length > 0;
+						else emptyBoardTemplate
+					"
 				>
-					<div class="flex flex-col gap-4 flex-1">
-						<drill-screwed-card class="p-6 rounded">
-							<h2 class="text-2xl">{{ bounty.title }}</h2>
-							<p
-								class="h-16"
-								[ngClass]="{ 'italic text-gray-400': bounty.body === null }"
+					<article
+						*ngFor="let bounty of bounties; trackBy: trackBy"
+						class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
+						style="max-width: 900px"
+					>
+						<div class="flex flex-col gap-4 flex-1">
+							<drill-bounty-information
+								[exists]="true"
+								[loading]="false"
+								[bountyId]="bounty.bounty?.id ?? null"
+								[htmlUrl]="bounty.htmlUrl"
+								[body]="bounty.body"
+								[title]="bounty.title"
 							>
-								<ng-container *ngIf="bounty.body !== null; else noneBody">
-									{{ bounty.body }}
-								</ng-container>
-								<ng-template #noneBody> No description provided. </ng-template>
-							</p>
+							</drill-bounty-information>
 
-							<div class="flex gap-4">
-								<a
-									*ngIf="bounty.bounty !== null"
-									[routerLink]="['/bounty', bounty.bounty.id]"
-									class="underline"
-								>
-									View details
-								</a>
-								<a [href]="bounty.htmlUrl" class="underline">View in GitHub</a>
-							</div>
-						</drill-screwed-card>
-
-						<drill-screwed-card class="rounded">
-							<a
-								class="flex items-center gap-4 px-6 py-4"
-								[href]="bounty.creator.htmlUrl"
-								target="_blank"
+							<drill-bounty-user
+								[loading]="false"
+								[exists]="true"
+								[avatarUrl]="bounty.creator.avatarUrl"
+								[userName]="bounty.creator.login"
+								[htmlUrl]="bounty.creator.htmlUrl"
 							>
-								<img
-									class="w-8 h-8 rounded-full"
-									[src]="bounty.creator.avatarUrl"
-								/>
+							</drill-bounty-user>
 
-								<div>
-									<p class="text-lg">@{{ bounty.creator.login }}</p>
-									<p class="text-xs uppercase bp-color-primary">Creator</p>
-								</div>
-							</a>
-						</drill-screwed-card>
-
-						<drill-screwed-card *ngIf="bounty.hunter !== null" class="rounded">
-							<a
-								class="flex items-center gap-4 px-6 py-4"
-								[href]="bounty.hunter.htmlUrl"
-								target="_blank"
+							<drill-bounty-user
+								*ngIf="bounty.hunter !== null"
+								[loading]="false"
+								[exists]="true"
+								[avatarUrl]="bounty.hunter.avatarUrl"
+								[userName]="bounty.hunter.login"
+								[htmlUrl]="bounty.hunter.htmlUrl"
+								type="hunter"
 							>
-								<img
-									class="w-8 h-8 rounded-full"
-									[src]="bounty.hunter.avatarUrl"
-								/>
+							</drill-bounty-user>
+						</div>
 
-								<div>
-									<p class="text-lg">@{{ bounty.hunter.login }}</p>
-									<p class="text-xs uppercase bp-color-primary">Hunter</p>
-								</div>
-							</a>
-						</drill-screwed-card>
-					</div>
-
-					<div class="flex flex-col gap-4 w-2/5">
-						<drill-screwed-card class="p-6 rounded">
-							<p class="p-4 text-center text-3xl bp-font bp-color-primary">
-								Bounty
-							</p>
-
-							<p class="p-4 bg-black bg-opacity-25 text-2xl text-center">
-								{{ bounty.bounty?.uiAmount | number: '0.2-12' }}
-							</p>
-						</drill-screwed-card>
-
-						<drill-screwed-card
-							class="px-6 py-4"
-							*ngIf="bounty.bounty !== null"
-						>
-							<button
-								class="bg-black h-full w-full py-2 bd-button"
-								(click)="onClaimBounty(bounty.bounty.boardId, bounty.bounty.id)"
+						<div class="flex flex-col gap-4 w-2/5">
+							<drill-bounty-total
+								[loading]="false"
+								[exists]="true"
+								[total]="bounty.bounty?.uiAmount ?? null"
 							>
-								CLAIM
-							</button>
-						</drill-screwed-card>
-					</div>
-				</article>
-			</section>
+							</drill-bounty-total>
 
-			<ng-template #emptyBoard>
-				<section class="py-4">
-					<p class="text-center text-xl">
-						There's no bounties available at this time.
-					</p>
+							<drill-bounty-claim
+								[loading]="false"
+								[exists]="true"
+								[boardId]="bounty.bounty?.boardId ?? null"
+								[bountyId]="bounty.id"
+								(claimBounty)="onClaimBounty($event.boardId, $event.bountyId)"
+							>
+							</drill-bounty-claim>
+
+							<drill-bounty-status
+								[loading]="false"
+								[exists]="true"
+								[isClosed]="bounty.bounty?.isClosed ?? null"
+							>
+							</drill-bounty-status>
+						</div>
+					</article>
 				</section>
-			</ng-template>
+			</ng-container>
 		</ng-container>
+
+		<ng-template #emptyBoardTemplate>
+			<section class="py-8">
+				<p class="text-center text-xl">
+					There's no bounties available at this time.
+				</p>
+			</section>
+		</ng-template>
+
+		<ng-template #loadingTemplate>
+			<section class="flex justify-center items-center gap-4 py-8">
+				<span
+					class="inline-block h-8 w-8 border-4 border-accent"
+					drillProgressSpinner
+				></span>
+				<p>Loading...</p>
+			</section>
+		</ng-template>
 	`,
 	providers: [
 		RepositoryStore,
@@ -125,6 +113,7 @@ import { BoardPageStore, BountyViewModel } from './board-page.store';
 })
 export class BoardPageComponent {
 	readonly bounties$ = this._boardPageStore.bounties$;
+	readonly loading$ = this._boardPageStore.loading$;
 
 	constructor(
 		private readonly _drillApiService: DrillApiService,

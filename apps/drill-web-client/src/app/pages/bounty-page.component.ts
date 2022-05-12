@@ -11,100 +11,67 @@ import { BountyPageStore } from './bounty-page.store';
 	selector: 'drill-bounty-page',
 	template: `
 		<div
-			*ngIf="bounty$ | async as bounty"
 			class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
 			style="max-width: 900px"
 		>
-			<div class="flex flex-col gap-4 flex-1">
-				<drill-screwed-card class="p-6 rounded">
-					<h2 class="text-2xl">{{ bounty.title }}</h2>
-					<p
-						class="h-16"
-						[ngClass]="{ 'italic text-gray-400': bounty.body === null }"
-					>
-						<ng-container *ngIf="bounty.body !== null; else noneBody">
-							{{ bounty.body }}
-						</ng-container>
-						<ng-template #noneBody> No description provided. </ng-template>
-					</p>
+			<div class="flex flex-col gap-4 flex-1" *ngrxLet="issue$; let issue">
+				<drill-bounty-information
+					[loading]="(loadingIssue$ | ngrxPush) ?? true"
+					[exists]="issue !== null"
+					[bountyId]="issue?.number ?? null"
+					[htmlUrl]="issue?.html_url ?? null"
+					[body]="issue?.body ?? null"
+					[title]="issue?.title ?? null"
+				>
+				</drill-bounty-information>
 
-					<div class="flex gap-4">
-						<a
-							*ngIf="bounty.bounty !== null"
-							[routerLink]="['/bounty', bounty.bounty.id]"
-							class="underline"
-						>
-							View details
-						</a>
-						<a [href]="bounty.htmlUrl" class="underline">View in GitHub</a>
-					</div>
-				</drill-screwed-card>
+				<drill-bounty-user
+					[loading]="(loadingIssue$ | ngrxPush) ?? true"
+					[exists]="issue !== null"
+					[avatarUrl]="issue?.user?.avatar_url ?? null"
+					[userName]="issue?.user?.login ?? null"
+					[htmlUrl]="issue?.user?.html_url ?? null"
+				>
+				</drill-bounty-user>
 
-				<drill-screwed-card class="rounded">
-					<a
-						class="flex items-center gap-4 px-6 py-4"
-						[href]="bounty.creator.htmlUrl"
-						target="_blank"
-					>
-						<img
-							class="w-8 h-8 rounded-full"
-							[src]="bounty.creator.avatarUrl"
-						/>
-
-						<div>
-							<p class="text-lg">@{{ bounty.creator.login }}</p>
-							<p class="text-xs uppercase bp-color-primary">Creator</p>
-						</div>
-					</a>
-				</drill-screwed-card>
-
-				<drill-screwed-card *ngIf="bounty.hunter !== null" class="rounded">
-					<a
-						class="flex items-center gap-4 px-6 py-4"
-						[href]="bounty.hunter.htmlUrl"
-						target="_blank"
-					>
-						<img class="w-8 h-8 rounded-full" [src]="bounty.hunter.avatarUrl" />
-
-						<div>
-							<p class="text-lg">@{{ bounty.hunter.login }}</p>
-							<p class="text-xs uppercase bp-color-primary">Hunter</p>
-						</div>
-					</a>
-				</drill-screwed-card>
+				<drill-bounty-user
+					*ngIf="issue?.assignee !== undefined"
+					[loading]="(loadingIssue$ | ngrxPush) ?? true"
+					[exists]="true"
+					[avatarUrl]="issue?.assignee?.avatar_url ?? null"
+					[userName]="issue?.assignee?.login ?? null"
+					[htmlUrl]="issue?.assignee?.html_url ?? null"
+					type="hunter"
+				>
+				</drill-bounty-user>
 			</div>
 
 			<div class="flex flex-col gap-4 w-2/5">
-				<drill-screwed-card class="p-6 rounded">
-					<p class="p-4 text-center text-3xl bp-font bp-color-primary">
-						Bounty
-					</p>
+				<drill-bounty-total
+					*ngrxLet="bountyTotal$; let bountyTotal"
+					[loading]="(loadingTotal$ | ngrxPush) ?? true"
+					[exists]="bountyTotal !== null"
+					[total]="bountyTotal"
+				>
+				</drill-bounty-total>
 
-					<p class="p-4 bg-black bg-opacity-25 text-2xl text-center">
-						{{ bounty.bounty?.uiAmount | number: '0.2-12' }}
-					</p>
-				</drill-screwed-card>
+				<drill-bounty-claim
+					*ngrxLet="bounty$; let bounty"
+					[exists]="bounty !== null"
+					[loading]="(loadingBounty$ | ngrxPush) ?? true"
+					[boardId]="bounty?.boardId ?? null"
+					[bountyId]="bounty?.id ?? null"
+					(claimBounty)="onClaimBounty($event.boardId, $event.bountyId)"
+				>
+				</drill-bounty-claim>
 
-				<drill-screwed-card class="px-6 py-4" *ngIf="bounty.bounty !== null">
-					<button
-						class="bg-black h-full w-full py-2 bd-button uppercase"
-						(click)="onClaimBounty(bounty.bounty.boardId, bounty.bounty.id)"
-					>
-						claim
-					</button>
-				</drill-screwed-card>
-
-				<drill-screwed-card class="px-6 py-4" *ngIf="bounty.bounty !== null">
-					<p
-						class="text-center uppercase text-2xl bp-font text-red-500"
-						[ngClass]="{
-							'text-red-500': bounty.bounty.isClosed,
-							'text-green-500': !bounty.bounty.isClosed
-						}"
-					>
-						{{ bounty.bounty.isClosed ? 'closed' : 'open' }}
-					</p>
-				</drill-screwed-card>
+				<drill-bounty-status
+					*ngrxLet="bounty$; let bounty"
+					[exists]="bounty !== null"
+					[loading]="(loadingBounty$ | ngrxPush) ?? true"
+					[isClosed]="bounty?.isClosed ?? null"
+				>
+				</drill-bounty-status>
 			</div>
 		</div>
 	`,
@@ -118,9 +85,19 @@ import { BountyPageStore } from './bounty-page.store';
 	],
 })
 export class BountyPageComponent {
-	readonly bounty$ = this._bountyPageStore.bounty$;
+	readonly bounty$ = this._bountyStore.bounty$;
+	readonly issue$ = this._issueStore.issue$;
+	readonly loadingIssue$ = this._issueStore.loading$;
+	readonly bountyVault$ = this._bountyStore.bountyVault$;
+	readonly boardMint$ = this._boardMintStore.boardMint$;
+	readonly bountyTotal$ = this._bountyPageStore.bountyTotal$;
+	readonly loadingTotal$ = this._bountyPageStore.loadingTotal$;
+	readonly loadingBounty$ = this._bountyStore.loading$;
 
 	constructor(
+		private readonly _issueStore: IssueStore,
+		private readonly _bountyStore: BountyStore,
+		private readonly _boardMintStore: BoardMintStore,
 		private readonly _drillApiService: DrillApiService,
 		private readonly _bountyPageStore: BountyPageStore
 	) {}

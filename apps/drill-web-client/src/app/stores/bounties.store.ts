@@ -6,7 +6,7 @@ import { Bounty, DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
 
 interface ViewModel {
-	loading: boolean;
+	loading: Option<boolean>;
 	boardId: Option<number>;
 	bountyIds: Option<number[]>;
 	bounties: Option<Option<Bounty & { vault: Option<Account> }>[] | null>;
@@ -14,7 +14,7 @@ interface ViewModel {
 }
 
 const initialState = {
-	loading: false,
+	loading: null,
 	boardId: null,
 	bountyIds: null,
 	bounties: null,
@@ -26,6 +26,7 @@ export class BountiesStore extends ComponentStore<ViewModel> {
 	readonly boardId$ = this.select(({ boardId }) => boardId);
 	readonly bountyIds$ = this.select(({ bountyIds }) => bountyIds);
 	readonly bounties$ = this.select(({ bounties }) => bounties);
+	readonly loading$ = this.select(({ loading }) => loading);
 
 	constructor(private readonly _drillApiService: DrillApiService) {
 		super(initialState);
