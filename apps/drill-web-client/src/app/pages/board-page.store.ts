@@ -4,7 +4,8 @@ import { ComponentStore } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
 import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Board, Bounty } from '../services/drill-api.service';
+import { Bounty } from '../services/drill-api.service';
+import { BoardMintStore } from '../stores/board-mint.store';
 import { BoardStore } from '../stores/board.store';
 import { BountiesStore } from '../stores/bounties.store';
 import { IssuesStore } from '../stores/issues.store';
@@ -15,14 +16,6 @@ export interface UserViewModel {
 	login: string;
 	avatarUrl: string;
 	htmlUrl: string;
-}
-
-export interface BoardViewModel {
-	id: number;
-	fullName: string;
-	owner: UserViewModel;
-	htmlUrl: string;
-	board: Option<Board & { vault: Option<Account> }>;
 }
 
 export interface BountyViewModel {
@@ -40,28 +33,12 @@ export interface BountyViewModel {
 @Injectable()
 export class BoardPageStore extends ComponentStore<object> {
 	readonly githubRepository = environment.githubRepository;
-	readonly board$: Observable<Option<BoardViewModel>> = this.select(
-		this._boardStore.board$,
-		this._repositoryStore.repository$,
-		(board, repository) =>
-			repository && {
-				id: repository.id,
-				fullName: repository.full_name,
-				owner: {
-					login: repository.owner.login,
-					avatarUrl: repository.owner.avatar_url,
-					htmlUrl: repository.owner.html_url,
-				},
-				htmlUrl: repository.html_url,
-				board,
-			}
-	);
 	readonly bounties$: Observable<Option<BountyViewModel[]>> = this.select(
 		this._boardStore.board$,
-		this._boardStore.mint$,
+		this._boardMintStore.boardMint$,
 		this._issuesStore.issues$,
 		this._bountiesStore.bounties$,
-		(board, mint, issues, bounties) =>
+		(board, boardMint, issues, bounties) =>
 			issues &&
 			issues.map((issue) => {
 				const bounty =
@@ -91,15 +68,15 @@ export class BoardPageStore extends ComponentStore<object> {
 									htmlUrl: issue.assignee.html_url,
 							  }
 							: null,
-					mint,
+					boardMint,
 					bounty:
 						bounty !== null
 							? {
 									...bounty,
 									uiAmount:
-										bounty.vault !== null && mint !== null
+										bounty.vault !== null && boardMint !== null
 											? Number(bounty.vault.amount) /
-											  Math.pow(10, mint.decimals)
+											  Math.pow(10, boardMint.decimals)
 											: null,
 							  }
 							: null,
@@ -111,6 +88,7 @@ export class BoardPageStore extends ComponentStore<object> {
 		private readonly _repositoryStore: RepositoryStore,
 		private readonly _issuesStore: IssuesStore,
 		private readonly _boardStore: BoardStore,
+		private readonly _boardMintStore: BoardMintStore,
 		private readonly _bountiesStore: BountiesStore
 	) {
 		super();
@@ -121,6 +99,12 @@ export class BoardPageStore extends ComponentStore<object> {
 			this._repositoryStore.repository$.pipe(
 				isNotNullOrUndefined,
 				map((repository) => repository.id)
+			)
+		);
+		this._boardMintStore.setMintId(
+			this._boardStore.board$.pipe(
+				isNotNullOrUndefined,
+				map((board) => board.acceptedMint)
 			)
 		);
 		this._bountiesStore.setBoardId(

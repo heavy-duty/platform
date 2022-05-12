@@ -45,6 +45,12 @@ export class GithubApiService {
 		);
 	}
 
+	getIssue(githubRepository: string, issueNumber: number) {
+		return this.httpClient.get<Issue>(
+			`${this._baseUrl}/repos/${githubRepository}/issues/${issueNumber}`
+		);
+	}
+
 	getRepoFromBoard(githubRepository: string) {
 		return this.httpClient.get<Repository>(
 			`${this._baseUrl}/repos/${githubRepository}`
