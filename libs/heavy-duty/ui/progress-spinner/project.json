@@ -1,26 +1,25 @@
 {
-  "projectType": "library",
-  "root": "libs/heavy-duty/ui/progress-spinner",
-  "sourceRoot": "libs/heavy-duty/ui/progress-spinner/src",
-  "prefix": "hd",
-  "targets": {
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/heavy-duty/ui/progress-spinner"],
-      "options": {
-        "jestConfig": "libs/heavy-duty/ui/progress-spinner/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/heavy-duty/ui/progress-spinner/src/**/*.ts",
-          "libs/heavy-duty/ui/progress-spinner/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"projectType": "library",
+	"sourceRoot": "libs/heavy-duty/ui/progress-spinner/src",
+	"prefix": "hd",
+	"targets": {
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/heavy-duty/ui/progress-spinner"],
+			"options": {
+				"jestConfig": "libs/heavy-duty/ui/progress-spinner/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/heavy-duty/ui/progress-spinner/src/**/*.ts",
+					"libs/heavy-duty/ui/progress-spinner/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

@@ -1,6 +1,5 @@
 {
 	"projectType": "application",
-	"root": "apps/drill-web-client",
 	"sourceRoot": "apps/drill-web-client/src",
 	"prefix": "drill",
 	"targets": {
@@ -88,7 +87,7 @@
 			"executor": "@nrwl/jest:jest",
 			"outputs": ["coverage/apps/drill-web-client"],
 			"options": {
-				"jestConfig": "apps/drill-web-client/jest.config.js",
+				"jestConfig": "apps/drill-web-client/jest.config.ts",
 				"passWithNoTests": true
 			}
 		}

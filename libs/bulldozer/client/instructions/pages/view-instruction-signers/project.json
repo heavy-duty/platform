@@ -1,28 +1,27 @@
 {
-  "projectType": "library",
-  "root": "libs/bulldozer/client/instructions/pages/view-instruction-signers",
-  "sourceRoot": "libs/bulldozer/client/instructions/pages/view-instruction-signers/src",
-  "prefix": "bd",
-  "targets": {
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/bulldozer/client/instructions/pages/view-instruction-signers"
-      ],
-      "options": {
-        "jestConfig": "libs/bulldozer/client/instructions/pages/view-instruction-signers/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/bulldozer/client/instructions/pages/view-instruction-signers/src/**/*.ts",
-          "libs/bulldozer/client/instructions/pages/view-instruction-signers/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"projectType": "library",
+	"sourceRoot": "libs/bulldozer/client/instructions/pages/view-instruction-signers/src",
+	"prefix": "bd",
+	"targets": {
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": [
+				"coverage/libs/bulldozer/client/instructions/pages/view-instruction-signers"
+			],
+			"options": {
+				"jestConfig": "libs/bulldozer/client/instructions/pages/view-instruction-signers/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/bulldozer/client/instructions/pages/view-instruction-signers/src/**/*.ts",
+					"libs/bulldozer/client/instructions/pages/view-instruction-signers/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

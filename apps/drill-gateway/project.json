@@ -1,5 +1,4 @@
 {
-	"root": "apps/drill-gateway",
 	"sourceRoot": "apps/drill-gateway/src",
 	"projectType": "application",
 	"targets": {
@@ -43,7 +42,7 @@
 			"executor": "@nrwl/jest:jest",
 			"outputs": ["coverage/apps/drill-gateway"],
 			"options": {
-				"jestConfig": "apps/drill-gateway/jest.config.js",
+				"jestConfig": "apps/drill-gateway/jest.config.ts",
 				"passWithNoTests": true
 			}
 		}
