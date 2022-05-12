@@ -63,7 +63,6 @@
     "@danmt/nx-anchor": "0.0.6",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
-    "@ngneat/tailwind": "^7.0.3",
     "@nrwl/cli": "14.1.5",
     "@nrwl/cypress": "14.1.5",
     "@nrwl/eslint-plugin-nx": "14.1.5",
@@ -114,4 +113,3 @@
     ]
   }
 }
-
