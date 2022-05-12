@@ -58,10 +58,7 @@ export class BoardStore extends ComponentStore<ViewModel> {
 						this.patchState({
 							board: board && { ...board, vault: boardVault },
 						}),
-					(error) =>
-						this.patchState({
-							error,
-						})
+					(error) => this.patchState({ error })
 				),
 				finalize(() => this.patchState({ loading: false }))
 			);

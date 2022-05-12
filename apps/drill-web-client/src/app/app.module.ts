@@ -1,6 +1,8 @@
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserModule } from '@angular/platform-browser';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { AppComponent } from './app.component';
@@ -10,6 +12,11 @@ import { BountyStatusComponent } from './components/bounty-status.component';
 import { BountyTotalComponent } from './components/bounty-total.components';
 import { BountyUserComponent } from './components/bounty-user.component';
 import { ScrewedCardComponent } from './components/screwed-card.component';
+import {
+	SnackBarClassPipe,
+	SnackBarComponent,
+	SnackBarPoleComponent,
+} from './components/snack-bar.component';
 import { ProgressSpinnerDirective } from './directives/progress-spinner.directive';
 import { RotateDirective } from './directives/rotate.directive';
 import { BoardPageComponent } from './pages/board-page.component';
@@ -35,9 +42,13 @@ import { ShellComponent } from './shell.component';
 		BountyTotalComponent,
 		BountyClaimComponent,
 		BountyStatusComponent,
+		SnackBarClassPipe,
+		SnackBarComponent,
+		SnackBarPoleComponent,
 	],
 	imports: [
 		BrowserModule,
+		NoopAnimationsModule,
 		RouterModule.forRoot([
 			{
 				path: '',
@@ -69,6 +80,7 @@ import { ShellComponent } from './shell.component';
 			},
 		]),
 		HttpClientModule,
+		MatSnackBarModule,
 		ReactiveComponentModule,
 	],
 	bootstrap: [AppComponent],

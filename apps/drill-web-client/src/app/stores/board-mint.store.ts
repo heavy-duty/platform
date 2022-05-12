@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Mint } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
-import { EMPTY, switchMap } from 'rxjs';
+import { EMPTY, finalize, switchMap } from 'rxjs';
 import { DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
 
@@ -51,9 +51,10 @@ export class BoardMintStore extends ComponentStore<ViewModel> {
 
 			return this._drillApiService.getMint(mintId).pipe(
 				tapResponse(
-					(boardMint) => this.patchState({ boardMint, loading: false }),
-					(error) => this.patchState({ error, loading: false })
-				)
+					(boardMint) => this.patchState({ boardMint }),
+					(error) => this.patchState({ error })
+				),
+				finalize(() => this.patchState({ loading: false }))
 			);
 		})
 	);

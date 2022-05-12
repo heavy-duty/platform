@@ -21,7 +21,8 @@
 				"scripts": [],
 				"customWebpackConfig": {
 					"path": "apps/drill-web-client/webpack.config.js"
-				}
+				},
+				"buildLibsFromSource": false
 			},
 			"configurations": {
 				"production": {

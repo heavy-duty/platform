@@ -54,10 +54,7 @@ export class RepositoryStore extends ComponentStore<ViewModel> {
 			return this._githubApiService.getRepoFromBoard(githubRepository).pipe(
 				tapResponse(
 					(repository) => this.patchState({ repository }),
-					(error) =>
-						this.patchState({
-							error,
-						})
+					(error) => this.patchState({ error })
 				),
 				finalize(() => this.patchState({ loading: false }))
 			);

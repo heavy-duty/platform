@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
-import { EMPTY, forkJoin, switchMap } from 'rxjs';
+import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 import { Bounty, DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
 
@@ -72,18 +72,10 @@ export class BountyStore extends ComponentStore<ViewModel> {
 				bountyVault: this._drillApiService.getBountyVault(boardId, bountyId),
 			}).pipe(
 				tapResponse(
-					({ bounty, bountyVault }) =>
-						this.patchState({
-							bounty,
-							bountyVault,
-							loading: false,
-						}),
-					(error) =>
-						this.patchState({
-							error,
-							loading: false,
-						})
-				)
+					({ bounty, bountyVault }) => this.patchState({ bounty, bountyVault }),
+					(error) => this.patchState({ error })
+				),
+				finalize(() => this.patchState({ loading: false }))
 			);
 		})
 	);

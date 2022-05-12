@@ -84,10 +84,7 @@ export class BountiesStore extends ComponentStore<ViewModel> {
 									bounty && { ...bounty, vault: bountyVaults[index] }
 							),
 						}),
-					(error) =>
-						this.patchState({
-							error,
-						})
+					(error) => this.patchState({ error })
 				),
 				finalize(() => this.patchState({ loading: false }))
 			);

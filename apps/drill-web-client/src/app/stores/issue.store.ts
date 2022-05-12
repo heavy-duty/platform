@@ -76,10 +76,7 @@ export class IssueStore extends ComponentStore<ViewModel> {
 				.pipe(
 					tapResponse(
 						(issue) => this.patchState({ issue }),
-						(error) =>
-							this.patchState({
-								error,
-							})
+						(error) => this.patchState({ error })
 					),
 					finalize(() => this.patchState({ loading: false }))
 				);

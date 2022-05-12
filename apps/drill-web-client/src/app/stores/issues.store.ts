@@ -54,10 +54,7 @@ export class IssuesStore extends ComponentStore<ViewModel> {
 			return this._githubApiService.listIssuesWithBounty(githubRepository).pipe(
 				tapResponse(
 					(issues) => this.patchState({ issues }),
-					(error) =>
-						this.patchState({
-							error,
-						})
+					(error) => this.patchState({ error })
 				),
 				finalize(() => this.patchState({ loading: false }))
 			);
