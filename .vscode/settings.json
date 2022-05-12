@@ -1,22 +1,24 @@
 {
-  "conventionalCommits.scopes": [
-    "core",
-    "bulldozer-programs",
-    "bulldozer-client",
-    "editor",
-    "wallet-adapter",
-    "ngx-solana",
-    "ngx-websocket",
-    "broadcaster",
-    "heavy-duty-ui"
-  ],
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.organizeImports": true
-  },
-  "[rust]": {
-    "editor.defaultFormatter": "rust-lang.rust"
-  },
-  "cSpell.words": ["sidenav"]
+	"conventionalCommits.scopes": [
+		"core",
+		"bulldozer-programs",
+		"bulldozer-client",
+		"editor",
+		"wallet-adapter",
+		"ngx-solana",
+		"ngx-websocket",
+		"broadcaster",
+		"heavy-duty-ui",
+		"drill"
+	],
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": true
+	},
+	"[rust]": {
+		"editor.defaultFormatter": "rust-lang.rust"
+	},
+	"editor.tabSize": 2,
+	"cSpell.words": ["sidenav"]
 }

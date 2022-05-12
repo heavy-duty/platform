@@ -1,42 +1,41 @@
 {
-  "projectType": "library",
-  "root": "libs/wallet-adapter/data-access",
-  "sourceRoot": "libs/wallet-adapter/data-access/src",
-  "prefix": "hd",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:package",
-      "outputs": ["dist/libs/wallet-adapter/data-access"],
-      "options": {
-        "project": "libs/wallet-adapter/data-access/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/wallet-adapter/data-access/tsconfig.lib.prod.json"
-        },
-        "development": {
-          "tsConfig": "libs/wallet-adapter/data-access/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/wallet-adapter/data-access"],
-      "options": {
-        "jestConfig": "libs/wallet-adapter/data-access/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/wallet-adapter/data-access/src/**/*.ts",
-          "libs/wallet-adapter/data-access/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"projectType": "library",
+	"sourceRoot": "libs/wallet-adapter/data-access/src",
+	"prefix": "hd",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/wallet-adapter/data-access"],
+			"options": {
+				"project": "libs/wallet-adapter/data-access/ng-package.json"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/wallet-adapter/data-access/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/wallet-adapter/data-access/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/wallet-adapter/data-access"],
+			"options": {
+				"jestConfig": "libs/wallet-adapter/data-access/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/wallet-adapter/data-access/src/**/*.ts",
+					"libs/wallet-adapter/data-access/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

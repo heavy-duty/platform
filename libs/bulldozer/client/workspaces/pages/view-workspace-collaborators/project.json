@@ -1,28 +1,27 @@
 {
-  "projectType": "library",
-  "root": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators",
-  "sourceRoot": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src",
-  "prefix": "bd",
-  "targets": {
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/bulldozer/client/workspaces/pages/view-workspace-collaborators"
-      ],
-      "options": {
-        "jestConfig": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/**/*.ts",
-          "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"projectType": "library",
+	"sourceRoot": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src",
+	"prefix": "bd",
+	"targets": {
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": [
+				"coverage/libs/bulldozer/client/workspaces/pages/view-workspace-collaborators"
+			],
+			"options": {
+				"jestConfig": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/**/*.ts",
+					"libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

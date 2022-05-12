@@ -1,28 +1,27 @@
 {
-  "root": "apps/bulldozer-programs",
-  "projectType": "application",
-  "targets": {
-    "build": {
-      "executor": "@danmt/nx-anchor:build",
-      "options": {
-        "projectPath": "apps/bulldozer-programs",
-        "monitor": true
-      }
-    },
-    "test": {
-      "executor": "@danmt/nx-anchor:test",
-      "options": {
-        "projectPath": "apps/bulldozer-programs",
-        "monitor": true
-      }
-    },
-    "deploy": {
-      "executor": "@danmt/nx-anchor:deploy",
-      "options": {
-        "projectPath": "apps/bulldozer-programs",
-        "monitor": true
-      }
-    }
-  },
-  "tags": []
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@danmt/nx-anchor:build",
+			"options": {
+				"projectPath": "apps/bulldozer-programs",
+				"monitor": true
+			}
+		},
+		"test": {
+			"executor": "@danmt/nx-anchor:test",
+			"options": {
+				"projectPath": "apps/bulldozer-programs",
+				"monitor": true
+			}
+		},
+		"deploy": {
+			"executor": "@danmt/nx-anchor:deploy",
+			"options": {
+				"projectPath": "apps/bulldozer-programs",
+				"monitor": true
+			}
+		}
+	},
+	"tags": []
 }

@@ -1,42 +1,41 @@
 {
-  "projectType": "library",
-  "root": "libs/broadcaster/ui/material",
-  "sourceRoot": "libs/broadcaster/ui/material/src",
-  "prefix": "hd",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:package",
-      "outputs": ["dist/libs/broadcaster/ui/material"],
-      "options": {
-        "project": "libs/broadcaster/ui/material/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/broadcaster/ui/material/tsconfig.lib.prod.json"
-        },
-        "development": {
-          "tsConfig": "libs/broadcaster/ui/material/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/broadcaster/ui/material"],
-      "options": {
-        "jestConfig": "libs/broadcaster/ui/material/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/broadcaster/ui/material/src/**/*.ts",
-          "libs/broadcaster/ui/material/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"projectType": "library",
+	"sourceRoot": "libs/broadcaster/ui/material/src",
+	"prefix": "hd",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/broadcaster/ui/material"],
+			"options": {
+				"project": "libs/broadcaster/ui/material/ng-package.json"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/broadcaster/ui/material/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/broadcaster/ui/material/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/broadcaster/ui/material"],
+			"options": {
+				"jestConfig": "libs/broadcaster/ui/material/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/broadcaster/ui/material/src/**/*.ts",
+					"libs/broadcaster/ui/material/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

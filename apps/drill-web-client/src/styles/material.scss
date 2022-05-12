@@ -1,0 +1,16 @@
+@use '@angular/material' as mat;
+@use '@angular/cdk';
+@import '@angular/material/theming';
+
+@import './themes/default-themes.scss';
+
+@include mat.core($fontConfig);
+
+.mat-snack-bar-container {
+	display: flex !important;
+	justify-content: center !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	background-color: transparent !important;
+	box-shadow: none !important;
+}
