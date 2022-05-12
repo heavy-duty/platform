@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ComponentStore, tapResponse } from '@ngrx/component-store';
-import { Account } from '@solana/spl-token';
+import { Account, Mint } from '@solana/spl-token';
 import { EMPTY, finalize, forkJoin, switchMap } from 'rxjs';
 import { Board, DrillApiService } from '../services/drill-api.service';
 import { Option } from '../types';
@@ -9,6 +9,7 @@ interface ViewModel {
 	loading: boolean;
 	boardId: Option<number>;
 	board: Option<Board & { vault: Option<Account> }>;
+	mint: Option<Mint>;
 	error: unknown;
 }
 
@@ -17,6 +18,7 @@ const initialState = {
 	boardId: null,
 	board: null,
 	boardVault: null,
+	mint: null,
 	error: null,
 };
 
@@ -24,11 +26,13 @@ const initialState = {
 export class BoardStore extends ComponentStore<ViewModel> {
 	readonly boardId$ = this.select(({ boardId }) => boardId);
 	readonly board$ = this.select(({ board }) => board);
+	readonly mint$ = this.select(({ mint }) => mint);
 
 	constructor(private readonly _drillApiService: DrillApiService) {
 		super(initialState);
 
 		this._loadBoard(this.boardId$);
+		this._loadBoardMint(this.board$);
 	}
 
 	readonly setBoardId = this.updater<number>((state, boardId) => ({
@@ -63,6 +67,21 @@ export class BoardStore extends ComponentStore<ViewModel> {
 						})
 				),
 				finalize(() => this.patchState({ loading: false }))
+			);
+		})
+	);
+
+	private readonly _loadBoardMint = this.effect<Board | null>(
+		switchMap((board) => {
+			if (board === null) {
+				return EMPTY;
+			}
+
+			return this._drillApiService.getMint(board.acceptedMint).pipe(
+				tapResponse(
+					(mint) => this.patchState({ mint }),
+					(error) => this.patchState({ error })
+				)
 			);
 		})
 	);

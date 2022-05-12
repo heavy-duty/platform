@@ -32,7 +32,9 @@ export interface BountyViewModel {
 	body: Option<string>;
 	creator: UserViewModel;
 	hunter: Option<UserViewModel>;
-	bounty: Option<Bounty & { vault: Option<Account> }>;
+	bounty: Option<
+		Bounty & { vault: Option<Account> } & { uiAmount: Option<number> }
+	>;
 }
 
 @Injectable()
@@ -56,37 +58,53 @@ export class BoardPageStore extends ComponentStore<object> {
 	);
 	readonly bounties$: Observable<Option<BountyViewModel[]>> = this.select(
 		this._boardStore.board$,
+		this._boardStore.mint$,
 		this._issuesStore.issues$,
 		this._bountiesStore.bounties$,
-		(board, issues, bounties) =>
+		(board, mint, issues, bounties) =>
 			issues &&
-			issues.map((issue) => ({
-				id: issue.id,
-				title: issue.title,
-				htmlUrl: issue.html_url,
-				body: issue.body,
-				state: issue.state,
-				creator: {
-					login: issue.user.login,
-					avatarUrl: issue.user.avatar_url,
-					htmlUrl: issue.user.html_url,
-				},
-				hunter:
-					issue.assignee !== null
-						? {
-								login: issue.assignee.login,
-								avatarUrl: issue.assignee.avatar_url,
-								htmlUrl: issue.assignee.html_url,
-						  }
-						: null,
-				bounty:
+			issues.map((issue) => {
+				const bounty =
 					bounties?.find(
 						(bounty) =>
 							bounty &&
 							bounty.id === issue.number &&
 							bounty.boardId === board?.id
-					) ?? null,
-			}))
+					) ?? null;
+
+				return {
+					id: issue.id,
+					title: issue.title,
+					htmlUrl: issue.html_url,
+					body: issue.body,
+					state: issue.state,
+					creator: {
+						login: issue.user.login,
+						avatarUrl: issue.user.avatar_url,
+						htmlUrl: issue.user.html_url,
+					},
+					hunter:
+						issue.assignee !== null
+							? {
+									login: issue.assignee.login,
+									avatarUrl: issue.assignee.avatar_url,
+									htmlUrl: issue.assignee.html_url,
+							  }
+							: null,
+					mint,
+					bounty:
+						bounty !== null
+							? {
+									...bounty,
+									uiAmount:
+										bounty.vault !== null && mint !== null
+											? Number(bounty.vault.amount) /
+											  Math.pow(10, mint.decimals)
+											: null,
+							  }
+							: null,
+				};
+			})
 	);
 
 	constructor(

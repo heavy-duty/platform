@@ -161,7 +161,7 @@ export class ScrewedCardComponent {
 								</p>
 
 								<p class="p-4 bg-black bg-opacity-25 text-2xl text-center">
-									{{ bounty.bounty?.vault?.amount }}
+									{{ bounty.bounty?.uiAmount | number: '0.2-12' }}
 								</p>
 							</drill-screwed-card>
 

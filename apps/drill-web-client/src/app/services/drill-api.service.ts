@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AnchorProvider, BN, Program } from '@heavy-duty/anchor';
-import { Account, getAccount } from '@solana/spl-token';
+import { Account, getAccount, getMint } from '@solana/spl-token';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, defer, from, map, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -183,6 +183,12 @@ export class DrillApiService {
 					from(getAccount(this._connection, bountyVaultPublicKey))
 				).pipe(catchError(() => of(null)))
 			)
+		);
+	}
+
+	getMint(mint: PublicKey) {
+		return defer(() => from(getMint(this._connection, mint))).pipe(
+			catchError(() => of(null))
 		);
 	}
 
