@@ -5,7 +5,6 @@
 export const environment = {
 	production: false,
 	githubApi: 'https://api.github.com',
-	boardId: 484552371,
 	programId: '2fg324Gf51Nrp1jzxXETvJmXPEiHz9ybNY1r575MtijW',
 	rpcEndpoint: 'https://api.devnet.solana.com',
 	githubRepository: 'danmt/drill-poc-test',

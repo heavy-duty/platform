@@ -40,48 +40,52 @@ export class BoardPageStore extends ComponentStore<object> {
 		this._bountiesStore.bounties$,
 		(board, boardMint, issues, bounties) =>
 			issues &&
-			issues.map((issue) => {
-				const bounty =
-					bounties?.find(
-						(bounty) =>
-							bounty &&
-							bounty.id === issue.number &&
-							bounty.boardId === board?.id
-					) ?? null;
+			bounties &&
+			issues
+				.map((issue) => {
+					const bounty =
+						bounties?.find(
+							(bounty) =>
+								bounty &&
+								bounty.id === issue.number &&
+								bounty.boardId === board?.id
+						) ?? null;
 
-				return {
-					id: issue.id,
-					title: issue.title,
-					htmlUrl: issue.html_url,
-					body: issue.body,
-					state: issue.state,
-					creator: {
-						login: issue.user.login,
-						avatarUrl: issue.user.avatar_url,
-						htmlUrl: issue.user.html_url,
-					},
-					hunter:
-						issue.assignee !== null
-							? {
-									login: issue.assignee.login,
-									avatarUrl: issue.assignee.avatar_url,
-									htmlUrl: issue.assignee.html_url,
-							  }
-							: null,
-					boardMint,
-					bounty:
-						bounty !== null
-							? {
-									...bounty,
-									uiAmount:
-										bounty.vault !== null && boardMint !== null
-											? Number(bounty.vault.amount) /
-											  Math.pow(10, boardMint.decimals)
-											: null,
-							  }
-							: null,
-				};
-			})
+					if (bounty === null) {
+						return null;
+					}
+
+					return {
+						id: issue.id,
+						title: issue.title,
+						htmlUrl: issue.html_url,
+						body: issue.body,
+						state: issue.state,
+						creator: {
+							login: issue.user.login,
+							avatarUrl: issue.user.avatar_url,
+							htmlUrl: issue.user.html_url,
+						},
+						hunter:
+							issue.assignee !== null
+								? {
+										login: issue.assignee.login,
+										avatarUrl: issue.assignee.avatar_url,
+										htmlUrl: issue.assignee.html_url,
+								  }
+								: null,
+						boardMint,
+						bounty: {
+							...bounty,
+							uiAmount:
+								bounty.vault !== null && boardMint !== null
+									? Number(bounty.vault.amount) /
+									  Math.pow(10, boardMint.decimals)
+									: null,
+						},
+					} as BountyViewModel;
+				})
+				.filter((bounty): bounty is BountyViewModel => bounty !== null)
 	);
 
 	constructor(

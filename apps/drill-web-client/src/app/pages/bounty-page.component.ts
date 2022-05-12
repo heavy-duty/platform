@@ -87,11 +87,23 @@ import { BountyPageStore } from './bounty-page.store';
 
 				<drill-screwed-card class="px-6 py-4" *ngIf="bounty.bounty !== null">
 					<button
-						class="bg-black h-full w-full py-2 bd-button"
+						class="bg-black h-full w-full py-2 bd-button uppercase"
 						(click)="onClaimBounty(bounty.bounty.boardId, bounty.bounty.id)"
 					>
-						CLAIM
+						claim
 					</button>
+				</drill-screwed-card>
+
+				<drill-screwed-card class="px-6 py-4" *ngIf="bounty.bounty !== null">
+					<p
+						class="text-center uppercase text-2xl bp-font text-red-500"
+						[ngClass]="{
+							'text-red-500': bounty.bounty.isClosed,
+							'text-green-500': !bounty.bounty.isClosed
+						}"
+					>
+						{{ bounty.bounty.isClosed ? 'closed' : 'open' }}
+					</p>
 				</drill-screwed-card>
 			</div>
 		</div>

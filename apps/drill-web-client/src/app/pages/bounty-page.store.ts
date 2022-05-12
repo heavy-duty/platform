@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { Account } from '@solana/spl-token';
-import { map, Observable } from 'rxjs';
+import { map, Observable, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Bounty } from '../services/drill-api.service';
 import { BoardMintStore } from '../stores/board-mint.store';
@@ -44,9 +44,10 @@ export class BountyPageStore extends ComponentStore<object> {
 	readonly bounty$: Observable<Option<BountyViewModel>> = this.select(
 		this._boardMintStore.boardMint$,
 		this._issueStore.issue$,
-		this._bountyStore.bounty$,
+		this._bountyStore.bounty$.pipe(tap(console.log)),
 		(boardMint, issue, bounty) =>
-			issue && {
+			issue &&
+			bounty && {
 				id: issue.id,
 				title: issue.title,
 				htmlUrl: issue.html_url,
@@ -66,17 +67,13 @@ export class BountyPageStore extends ComponentStore<object> {
 						  }
 						: null,
 				boardMint,
-				bounty:
-					bounty !== null
-						? {
-								...bounty,
-								uiAmount:
-									bounty.vault !== null && boardMint !== null
-										? Number(bounty.vault.amount) /
-										  Math.pow(10, boardMint.decimals)
-										: null,
-						  }
-						: null,
+				bounty: {
+					...bounty,
+					uiAmount:
+						bounty.vault !== null && boardMint !== null
+							? Number(bounty.vault.amount) / Math.pow(10, boardMint.decimals)
+							: null,
+				},
 			}
 	);
 
