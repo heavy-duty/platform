@@ -1,7 +1,7 @@
 import { Program } from '@heavy-duty/anchor';
 import { Octokit } from '@octokit/rest';
 import { getBoard, getBoardVault } from '../state';
-import { Drill } from '../utils/drill_program_poc';
+import { Drill } from '../utils/drill';
 
 interface BoardDataInfo {
   owner: string;

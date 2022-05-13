@@ -1,7 +1,7 @@
 import { AnchorProvider, BN, Program } from '@heavy-duty/anchor';
 import { Octokit } from '@octokit/rest';
 import { PublicKey } from '@solana/web3.js';
-import { Drill } from '../utils/drill_program_poc';
+import { Drill } from '../utils/drill';
 
 interface BoardData {
   owner: string;

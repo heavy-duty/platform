@@ -1,7 +1,7 @@
 import { BN, Program } from '@heavy-duty/anchor';
 import { getAccount } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
-import { Drill } from '../utils/drill_program_poc';
+import { Drill } from '../utils/drill';
 
 export const getBoardVault = async (
   program: Program<Drill>,

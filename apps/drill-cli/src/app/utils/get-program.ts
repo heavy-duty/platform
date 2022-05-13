@@ -1,6 +1,6 @@
 import { AnchorProvider, Program } from '@heavy-duty/anchor';
 import { config } from 'dotenv';
-import { Drill, IDL } from './drill_program_poc';
+import { Drill, IDL } from './drill';
 
 export const getProgram = (provider: AnchorProvider): Program<Drill> => {
   config();

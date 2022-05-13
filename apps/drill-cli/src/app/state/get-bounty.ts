@@ -1,6 +1,6 @@
 import { BN, Program } from '@heavy-duty/anchor';
 import { PublicKey } from '@solana/web3.js';
-import { Drill } from '../utils/drill_program_poc';
+import { Drill } from '../utils/drill';
 
 export interface Bounty {
   publicKey: PublicKey;
