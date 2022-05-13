@@ -1,0 +1,15 @@
+[features]
+seeds = true
+
+[programs.localnet]
+drill = "ARp7sigi8EAfyi5omv7jKZTy9NJaQz7Bh6dt4urzFjWt"
+
+[registry]
+url = "https://anchor.projectserum.com"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/*.spec.ts --parallel"
