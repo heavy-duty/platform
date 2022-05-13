@@ -1,4 +1,4 @@
-name: Bulldozer Platform ci
+name: Heavy Duty Platform CI
 on: pull_request
 
 jobs:
@@ -33,13 +33,13 @@ jobs:
         name: 🛠️ Getting affected projects
         shell: bash
         # Here we use the `npx nx print-affected` command to get all the affected projects in a single string
-        # then using grep, we count (using the -c flag) the occurrences of 'bulldozer-program' string in the above result
-        # if we get 0, it means the bulldozer-program does not changed, otherwise it changed and we will install Anchor
+        # then using grep, we count (using the -c flag) the occurrences of '*-programs' string in the above result
+        # if we get 0, it means the no program changed, otherwise at least one changed and we will install Anchor
         run: |
-          echo "::set-output name=bulldozer-program-affected::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c 'bulldozer-programs')"
+          echo "::set-output name=occurrences::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c '*-programs')"
       - id: install-anchor
         name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
-        if: steps.get-affected-projects.outputs.bulldozer-program-affected != 0
+        if: steps.get-affected-projects.outputs.occurrences != 0
         run: |
           echo "Installing Rust >>"
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
