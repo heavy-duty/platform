@@ -1,4 +1,4 @@
-name: Bulldozer Platform ci
+name: Heavy Duty Platform CI
 on: pull_request
 
 jobs:
@@ -7,9 +7,9 @@ jobs:
     strategy:
       matrix:
         node: [17.6.0]
-        solana: [1.8.14, 1.9.9]
-        anchor: [0.22.1]
-        os: [ubuntu-20.04]
+        solana: [1.9.21, 1.10.13]
+        anchor: [0.24.2]
+        os: [ubuntu-22.04]
     steps:
       - id: config-repo
         name: Pre config - 🧰 Checkout repo
@@ -33,13 +33,13 @@ jobs:
         name: 🛠️ Getting affected projects
         shell: bash
         # Here we use the `npx nx print-affected` command to get all the affected projects in a single string
-        # then using grep, we count (using the -c flag) the occurrences of 'bulldozer-program' string in the above result
-        # if we get 0, it means the bulldozer-program does not changed, otherwise it changed and we will install Anchor
+        # then using grep, we count (using the -c flag) the occurrences of '*-programs' string in the above result
+        # if we get 0, it means the no program changed, otherwise at least one changed and we will install Anchor
         run: |
-          echo "::set-output name=bulldozer-program-affected::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c 'bulldozer-programs')"
+          echo "::set-output name=occurrences::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c programs)"
       - id: install-anchor
         name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
-        if: steps.get-affected-projects.outputs.bulldozer-program-affected != 0
+        if: steps.get-affected-projects.outputs.occurrences != 0
         run: |
           echo "Installing Rust >>"
           curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
@@ -47,9 +47,9 @@ jobs:
           rustup component add rustfmt
           echo "Installing Solana >> "
           sh -c "$(curl -sSfL https://release.solana.com/v${{ matrix.solana }}/install)"
-          echo "-- adding new solana key file"
+          echo "-- adding new solana key file to $HOME/.config/solana/id.json"
           export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
-          solana-keygen new -o $HOME/.config/solana/id.json
+          RUST_BACKTRACE=1 solana-keygen new --no-bip39-passphrase -o $HOME/.config/solana/id.json
           echo "Installing Serum >> "
           npm i -g @project-serum/anchor@${{ matrix.anchor }}
           npm i -g @project-serum/anchor-cli@${{ matrix.anchor }}

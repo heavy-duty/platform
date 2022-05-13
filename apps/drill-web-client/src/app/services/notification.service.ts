@@ -33,7 +33,7 @@ export class NotificationService {
 		if (typeof error === 'string') {
 			return error;
 		} else if (error instanceof Error) {
-			return error.name;
+			return error.message;
 		} else if (error instanceof HttpErrorResponse) {
 			return error.error.error;
 		} else {

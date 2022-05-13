@@ -15,6 +15,7 @@ pub mod bulldozer {
   use super::*;
 
   pub fn create_user(ctx: Context<CreateUser>, arguments: CreateUserArguments) -> Result<()> {
+    msg!("testing nx affected");
     instructions::create_user::handle(ctx, arguments)
   }
 

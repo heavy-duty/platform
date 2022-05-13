@@ -1,9 +1,9 @@
 export const environment = {
 	production: true,
 	githubApi: 'https://api.github.com',
-	programId: '2fg324Gf51Nrp1jzxXETvJmXPEiHz9ybNY1r575MtijW',
+	programId: 'ARp7sigi8EAfyi5omv7jKZTy9NJaQz7Bh6dt4urzFjWt',
 	rpcEndpoint: 'https://api.devnet.solana.com',
-	githubRepository: 'danmt/drill-poc-test',
+	githubRepository: 'danmt/drill-test-2',
 	redirectUri: 'http://localhost:4200/login',
 	githubOAuth: 'https://github.com/login/oauth/authorize',
 	clientId: 'Iv1.9c36914b7e824485',
