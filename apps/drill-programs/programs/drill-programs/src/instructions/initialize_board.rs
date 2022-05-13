@@ -10,7 +10,7 @@ pub struct InitializeBoard<'info> {
   #[account(
         init,
         payer = authority,
-        space = 200,
+        space = Board::space(),
         seeds = [
             b"board".as_ref(), 
             &board_id.to_le_bytes(),

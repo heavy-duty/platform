@@ -4,13 +4,11 @@ use anchor_lang::prelude::*;
 pub struct Bounty {
   pub board_id: u32,
   pub bounty_id: u32,
-  pub bounty_bump: u8,
-  pub bounty_vault_bump: u8,
   pub bounty_hunter: Option<String>,
   pub closed_at: Option<i64>,
   pub is_closed: bool,
-  pub claimed_at: Option<i64>,
-  pub is_claimed: bool,
+  pub bounty_bump: u8,
+  pub bounty_vault_bump: u8,
 }
 
 impl Bounty {
@@ -28,8 +26,6 @@ impl Bounty {
     self.bounty_hunter = None;
     self.closed_at = None;
     self.is_closed = false;
-    self.claimed_at = None;
-    self.is_claimed = false;
   }
 
   pub fn close(&mut self, bounty_hunter: Option<String>) -> Result<()> {
@@ -39,13 +35,14 @@ impl Bounty {
     Ok(())
   }
 
-  pub fn claim(&mut self) -> Result<()> {
-    self.is_claimed = true;
-    self.claimed_at = Some(Clock::get()?.unix_timestamp);
-    Ok(())
-  }
-
   pub fn set_bounty_hunter(&mut self, bounty_hunter: String) -> () {
     self.bounty_hunter = Some(bounty_hunter);
+  }
+
+  pub fn space() -> usize {
+    // discriminator + boardId + bountyId + bountyHunter
+    // closedAt + isClosed + boutyBump + bountyVaultBump
+    (8 + 4 + 4 + (80 + 4) + 16 + 1 + 1 + 1) * 2
+    // Times two to make sure there's room for change
   }
 }

@@ -18,7 +18,7 @@ pub struct InitializeBounty<'info> {
     #[account(
         init,
         payer = authority,
-        space = 200,
+        space = Bounty::space(),
         seeds = [
             b"bounty".as_ref(), 
             board.key().as_ref(), 

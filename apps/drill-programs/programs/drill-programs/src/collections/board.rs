@@ -31,4 +31,11 @@ impl Board {
   pub fn set_authority(&mut self, authority: Pubkey) -> () {
     self.authority = authority;
   }
+
+  pub fn space() -> usize {
+    // discriminator + authority + boardId + acceptedMint
+    // lockTime + board bump + board vault bump
+    (8 + 32 + 4 + 32 + 16 + 1 + 1) * 2
+    // Times two to make sure there's room for change
+  }
 }

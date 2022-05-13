@@ -25,7 +25,6 @@ pub struct SetBountyHunter<'info> {
             &bounty_id.to_le_bytes(),
         ],
         bump = bounty.bounty_bump,
-        constraint = !bounty.is_claimed
     )]
     pub bounty: Box<Account<'info, Bounty>>,
     pub authority: Signer<'info>,

@@ -27,7 +27,6 @@ pub struct SendBounty<'info> {
         ],
         bump = bounty.bounty_bump,
         constraint = bounty.is_closed,
-        constraint = !bounty.is_claimed,
         constraint = bounty.bounty_hunter == Some(bounty_hunter)
     )]
     pub bounty: Box<Account<'info, Bounty>>,
@@ -101,6 +100,5 @@ pub fn handle(
     },
     signer,
   ))?;
-  ctx.accounts.bounty.claim()?;
   Ok(())
 }
