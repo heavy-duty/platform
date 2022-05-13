@@ -36,7 +36,7 @@ jobs:
         # then using grep, we count (using the -c flag) the occurrences of '*-programs' string in the above result
         # if we get 0, it means the no program changed, otherwise at least one changed and we will install Anchor
         run: |
-          echo "::set-output name=occurrences::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c '*-programs')"
+          echo "::set-output name=occurrences::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c programs)"
       - id: install-anchor
         name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
         if: steps.get-affected-projects.outputs.occurrences != 0
