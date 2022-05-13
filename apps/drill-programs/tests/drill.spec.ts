@@ -165,11 +165,10 @@ describe('drill', () => {
 		await program.methods
 			.sendBounty(boardId, bountyId, user2Name)
 			.accounts({
-				authority: user2Keypair.publicKey,
+				authority: user1Keypair.publicKey,
 				userVault: user2AssociatedTokenAccount,
-				boardAuthority: user1Keypair.publicKey,
 			})
-			.signers([user2Keypair])
+			.signers([user1Keypair])
 			.rpc();
 		// assert
 		const bountyAccount = await program.account.bounty.fetchNullable(
@@ -256,11 +255,10 @@ describe('drill', () => {
 			await program.methods
 				.sendBounty(boardId, bountyId, user2Name)
 				.accounts({
-					authority: user2Keypair.publicKey,
+					authority: user1Keypair.publicKey,
 					userVault: user2AssociatedTokenAccount,
-					boardAuthority: user1Keypair.publicKey,
 				})
-				.signers([user2Keypair])
+				.signers([user1Keypair])
 				.rpc();
 		} catch (err) {
 			error = err;

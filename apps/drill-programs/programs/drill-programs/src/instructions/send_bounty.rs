@@ -19,7 +19,7 @@ pub struct SendBounty<'info> {
     pub board: Box<Account<'info, Board>>,
     #[account(
         mut,
-        close = board_authority,
+        close = authority,
         seeds = [
             b"bounty".as_ref(), 
             board.key().as_ref(),
@@ -46,9 +46,8 @@ pub struct SendBounty<'info> {
     pub user_vault: Box<Account<'info, TokenAccount>>,
     #[account(
         mut,
-        constraint = board_authority.key() == board.authority,
+        constraint = authority.key() == board.authority,
     )]
-    pub board_authority: SystemAccount<'info>,
     pub authority: Signer<'info>,
     pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
@@ -95,7 +94,7 @@ pub fn handle(
     ctx.accounts.token_program.to_account_info(),
     CloseAccount {
       account: ctx.accounts.bounty_vault.to_account_info(),
-      destination: ctx.accounts.board_authority.to_account_info(),
+      destination: ctx.accounts.authority.to_account_info(),
       authority: ctx.accounts.board.to_account_info(),
     },
     signer,

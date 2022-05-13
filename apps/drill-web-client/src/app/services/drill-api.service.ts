@@ -6,7 +6,7 @@ import { Connection, PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, defer, from, map, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Option } from '../types';
-import { DrillProgramPoc, IDL } from './drill_program_poc';
+import { Drill, IDL } from './drill';
 
 export interface Board {
 	id: number;
@@ -25,9 +25,7 @@ export interface Bounty {
 	bountyHunter: Option<string>;
 	id: number;
 	bountyVaultBump: number;
-	claimedAt: Option<Date>;
 	closedAt: Option<Date>;
-	isClaimed: boolean;
 	isClosed: boolean;
 }
 
@@ -35,7 +33,7 @@ export interface Bounty {
 export class DrillApiService {
 	private readonly _baseUrl = environment.gatewayUrl;
 	private readonly _connection = new Connection(environment.rpcEndpoint);
-	private readonly _program = new Program<DrillProgramPoc>(
+	private readonly _program = new Program<Drill>(
 		IDL,
 		environment.programId,
 		new AnchorProvider(
@@ -158,13 +156,10 @@ export class DrillApiService {
 								bountyBump: bountyAccount.bountyBump,
 								bountyHunter: bountyAccount.bountyHunter,
 								bountyVaultBump: bountyAccount.bountyVaultBump,
-								claimedAt: bountyAccount.claimedAt
-									? new Date(bountyAccount.claimedAt.toNumber() * 1000)
-									: null,
+
 								closedAt: bountyAccount.closedAt
 									? new Date(bountyAccount.closedAt.toNumber() * 1000)
 									: null,
-								isClaimed: bountyAccount.isClaimed,
 								isClosed: bountyAccount.isClosed,
 							}
 					)

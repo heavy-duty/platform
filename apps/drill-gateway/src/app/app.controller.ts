@@ -19,13 +19,13 @@ import {
 	getSolanaConfig,
 	SolanaConfig,
 } from './utils';
-import { DrillProgramPoc } from './utils/drill_program_poc';
+import { Drill } from './utils/drill';
 
 @Controller()
 export class AppController implements OnModuleInit {
 	private _config: SolanaConfig;
 	private _provider: AnchorProvider;
-	private _program: Program<DrillProgramPoc>;
+	private _program: Program<Drill>;
 
 	constructor(private readonly _httpService: HttpService) {}
 
@@ -79,7 +79,6 @@ export class AppController implements OnModuleInit {
 								.accounts({
 									authority: this._provider.wallet.publicKey,
 									userVault: new PublicKey(userVault),
-									boardAuthority: this._provider.wallet.publicKey,
 								})
 								.rpc()
 						).pipe(
