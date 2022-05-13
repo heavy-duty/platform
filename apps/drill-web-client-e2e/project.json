@@ -1,0 +1,27 @@
+{
+	"sourceRoot": "apps/drill-web-client-e2e/src",
+	"projectType": "application",
+	"targets": {
+		"e2e": {
+			"executor": "@nrwl/cypress:cypress",
+			"options": {
+				"cypressConfig": "apps/drill-web-client-e2e/cypress.json",
+				"devServerTarget": "drill-web-client:serve:development"
+			},
+			"configurations": {
+				"production": {
+					"devServerTarget": "drill-web-client:serve:production"
+				}
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["apps/drill-web-client-e2e/**/*.{js,ts}"]
+			}
+		}
+	},
+	"tags": [],
+	"implicitDependencies": ["drill-web-client"]
+}

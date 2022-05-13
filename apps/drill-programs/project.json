@@ -1,0 +1,27 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@danmt/nx-anchor:build",
+			"options": {
+				"projectPath": "apps/drill-programs",
+				"monitor": true
+			}
+		},
+		"test": {
+			"executor": "@danmt/nx-anchor:test",
+			"options": {
+				"projectPath": "apps/drill-programs",
+				"monitor": true
+			}
+		},
+		"deploy": {
+			"executor": "@danmt/nx-anchor:deploy",
+			"options": {
+				"projectPath": "apps/drill-programs",
+				"monitor": true
+			}
+		}
+	}
+}

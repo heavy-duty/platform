@@ -1,0 +1,74 @@
+name: Heavy Duty Platform CI
+on: pull_request
+
+jobs:
+  ci:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        node: [17.6.0]
+        solana: [1.9.21, 1.10.13]
+        anchor: [0.24.2]
+        os: [ubuntu-22.04]
+    steps:
+      - id: config-repo
+        name: Pre config - 🧰 Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - id: config-node
+        name: Pre config - 🧰 Setting up Node ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node }}
+
+      - id: install-npm-packages
+        name: 📦 Git fetch for affected commands and installing npm packages
+        run: |
+          git fetch --no-tags --prune --depth=2 origin master
+          npm ci
+
+      - id: get-affected-projects
+        name: 🛠️ Getting affected projects
+        shell: bash
+        # Here we use the `npx nx print-affected` command to get all the affected projects in a single string
+        # then using grep, we count (using the -c flag) the occurrences of '*-programs' string in the above result
+        # if we get 0, it means the no program changed, otherwise at least one changed and we will install Anchor
+        run: |
+          echo "::set-output name=occurrences::$(echo $(npx nx print-affected --select=projects --base=origin/master) | grep -c programs)"
+      - id: install-anchor
+        name: 🛠️ Setting up Anchor, Rust, Solana and others related dependencies
+        if: steps.get-affected-projects.outputs.occurrences != 0
+        run: |
+          echo "Installing Rust >>"
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup component add rustfmt
+          echo "Installing Solana >> "
+          sh -c "$(curl -sSfL https://release.solana.com/v${{ matrix.solana }}/install)"
+          echo "-- adding new solana key file to $HOME/.config/solana/id.json"
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          RUST_BACKTRACE=1 solana-keygen new --no-bip39-passphrase -o $HOME/.config/solana/id.json
+          echo "Installing Serum >> "
+          npm i -g @project-serum/anchor@${{ matrix.anchor }}
+          npm i -g @project-serum/anchor-cli@${{ matrix.anchor }}
+          echo "Installing others dependencies >>"
+          npm i -g typescript
+          npm install -g mocha
+          npm install -g ts-mocha
+      - id: linting-projects
+        name: 🔦 Linting Bulldozer Platform projects
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npx nx affected --target=lint --base=origin/master
+      - id: testing-projects
+        name: 🧪 Testing Bulldozer Platform projects
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npx nx affected --target=test --base=origin/master
+      - id: building-projects
+        name: 🏗️ Building Bulldozer Platform projects
+        run: |
+          export PATH="$HOME/.local/share/solana/install/active_release/bin:$PATH"
+          npx nx affected --target=build --base=origin/master

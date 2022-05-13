@@ -1,39 +1,38 @@
 {
-  "root": "libs/bulldozer/shared/devkit",
-  "sourceRoot": "libs/bulldozer/shared/devkit/src",
-  "projectType": "library",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/js:tsc",
-      "outputs": ["{options.outputPath}"],
-      "options": {
-        "outputPath": "dist/libs/bulldozer/shared/devkit",
-        "main": "libs/bulldozer/shared/devkit/src/index.ts",
-        "tsConfig": "libs/bulldozer/shared/devkit/tsconfig.lib.json",
-        "assets": ["libs/bulldozer/shared/devkit/*.md"]
-      },
-      "dependsOn": [
-        {
-          "target": "build",
-          "projects": "dependencies"
-        }
-      ]
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
-      "options": {
-        "lintFilePatterns": ["libs/bulldozer/shared/devkit/**/*.ts"]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/bulldozer/shared/devkit"],
-      "options": {
-        "jestConfig": "libs/bulldozer/shared/devkit/jest.config.js",
-        "passWithNoTests": true
-      }
-    }
-  },
-  "tags": []
+	"sourceRoot": "libs/bulldozer/shared/devkit/src",
+	"projectType": "library",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/js:tsc",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/libs/bulldozer/shared/devkit",
+				"main": "libs/bulldozer/shared/devkit/src/index.ts",
+				"tsConfig": "libs/bulldozer/shared/devkit/tsconfig.lib.json",
+				"assets": ["libs/bulldozer/shared/devkit/*.md"]
+			},
+			"dependsOn": [
+				{
+					"target": "build",
+					"projects": "dependencies"
+				}
+			]
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["libs/bulldozer/shared/devkit/**/*.ts"]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/bulldozer/shared/devkit"],
+			"options": {
+				"jestConfig": "libs/bulldozer/shared/devkit/jest.config.ts",
+				"passWithNoTests": true
+			}
+		}
+	},
+	"tags": []
 }
