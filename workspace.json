@@ -72,6 +72,7 @@
 		"bulldozer-programs": "apps/bulldozer-programs",
 		"bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
 		"bulldozer-shared-generator": "libs/bulldozer/shared/generator",
+		"drill-cli": "apps/drill-cli",
 		"drill-gateway": "apps/drill-gateway",
 		"drill-github-app": "apps/drill-github-app",
 		"drill-programs": "apps/drill-programs",
