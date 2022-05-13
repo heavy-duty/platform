@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         node: [17.6.0]
-        solana: [1.9.21, 1.10.8]
+        solana: [1.9.21, 1.10]
         anchor: [0.24.2]
         os: [ubuntu-22.04]
     steps:
