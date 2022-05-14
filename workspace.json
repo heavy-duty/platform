@@ -73,6 +73,7 @@
 		"bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
 		"bulldozer-shared-generator": "libs/bulldozer/shared/generator",
 		"drill-gateway": "apps/drill-gateway",
+		"drill-github-app": "apps/drill-github-app",
 		"drill-programs": "apps/drill-programs",
 		"drill-web-client": "apps/drill-web-client",
 		"drill-web-client-e2e": "apps/drill-web-client-e2e",
