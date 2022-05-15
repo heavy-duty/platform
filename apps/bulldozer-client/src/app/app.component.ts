@@ -18,7 +18,6 @@ export class AppComponent implements OnInit {
 	constructor(private readonly _walletStore: WalletStore) {}
 
 	ngOnInit() {
-		console.log('testing nx affected');
 		this._walletStore.setAdapters([
 			new PhantomWalletAdapter(),
 			new SolletWalletAdapter({ network: WalletAdapterNetwork.Devnet }),

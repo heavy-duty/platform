@@ -1,4 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Mint } from '@solana/spl-token';
+import { PublicKey } from '@solana/web3.js';
 import { Option } from '../types';
 
 @Component({
@@ -10,6 +12,7 @@ import { Option } from '../types';
 					<button
 						class="bg-black h-full w-full py-2 bd-button uppercase"
 						drillBountyClaimTrigger
+						[acceptedMint]="acceptedMint?.address ?? null"
 						(claimBounty)="onClaimBounty(boardId, bountyId, $event)"
 						[disabled]="boardId === null || bountyId === null"
 					>
@@ -36,18 +39,19 @@ import { Option } from '../types';
 export class BountyClaimComponent {
 	@Input() boardId: Option<number> = null;
 	@Input() bountyId: Option<number> = null;
+	@Input() acceptedMint: Option<Mint> = null;
 	@Input() loading = false;
 	@Input() exists = false;
 	@Output() claimBounty = new EventEmitter<{
 		boardId: number;
 		bountyId: number;
-		userVault: string;
+		userVault: PublicKey;
 	}>();
 
 	onClaimBounty(
 		boardId: Option<number>,
 		bountyId: Option<number>,
-		userVault: string
+		userVault: PublicKey
 	) {
 		if (boardId === null || bountyId === null) {
 			throw new Error('Missing fields');
