@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PublicKey } from '@solana/web3.js';
 import { DrillApiService } from '../services/drill-api.service';
 import { NotificationService } from '../services/notification.service';
 import { BoardMintStore } from '../stores/board-mint.store';
@@ -62,6 +63,7 @@ import { BountyPageStore } from './bounty-page.store';
 					[loading]="(loadingBounty$ | ngrxPush) ?? true"
 					[boardId]="bounty?.boardId ?? null"
 					[bountyId]="bounty?.id ?? null"
+					[acceptedMint]="(boardMint$ | ngrxPush) ?? null"
 					(claimBounty)="
 						onClaimBounty($event.boardId, $event.bountyId, $event.userVault)
 					"
@@ -106,7 +108,7 @@ export class BountyPageComponent {
 		private readonly _notificationService: NotificationService
 	) {}
 
-	onClaimBounty(boardId: number, bountyId: number, userVault: string) {
+	onClaimBounty(boardId: number, bountyId: number, userVault: PublicKey) {
 		this._drillApiService.claimBounty(boardId, bountyId, userVault).subscribe({
 			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
 			error: (error) => this._notificationService.notifyError(error),

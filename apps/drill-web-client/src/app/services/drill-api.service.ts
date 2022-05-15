@@ -1,7 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AnchorProvider, BN, Program } from '@heavy-duty/anchor';
-import { Account, getAccount, getMint } from '@solana/spl-token';
+import {
+	Account,
+	getAccount,
+	getAssociatedTokenAddress,
+	getMint,
+} from '@solana/spl-token';
 import { Connection, PublicKey } from '@solana/web3.js';
 import { catchError, concatMap, defer, from, map, Observable, of } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -187,10 +192,22 @@ export class DrillApiService {
 		);
 	}
 
-	claimBounty(boardId: number, bountyId: number, userVault: string) {
+	getAssociatedTokenAccount(publicKey: PublicKey, mint: PublicKey) {
+		return defer(async () => {
+			const address = await getAssociatedTokenAddress(mint, publicKey);
+
+			try {
+				return await getAccount(this._connection, address);
+			} catch (err) {
+				return null;
+			}
+		});
+	}
+
+	claimBounty(boardId: number, bountyId: number, userVault: PublicKey) {
 		return this._httpClient.post(
 			`${this._baseUrl}/claim-bounty/${boardId}/${bountyId}`,
-			{ userVault }
+			{ userVault: userVault.toBase58() }
 		);
 	}
 }

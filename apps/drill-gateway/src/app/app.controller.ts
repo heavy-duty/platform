@@ -82,8 +82,8 @@ export class AppController implements OnModuleInit {
 								})
 								.rpc()
 						).pipe(
+							map((signature) => ({ signature })),
 							catchError((error) => {
-								console.log(error.error);
 								return throwError(
 									() =>
 										new HttpException(

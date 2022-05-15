@@ -70,7 +70,6 @@ export class ViewProfileComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		console.log('testing nx affected');
 		this._tabStore.openTab({
 			id: 'profile',
 			kind: 'profile',
