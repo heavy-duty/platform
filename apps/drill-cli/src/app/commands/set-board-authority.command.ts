@@ -11,7 +11,7 @@ export interface GetBoardCommandOptions {
 @Command({
 	name: 'set-board-authority',
 	description: 'Set a new board authority',
-	arguments: '<username/repo/bountyId>',
+	arguments: '<username/repo> <pubkey-new-authority>',
 })
 export class SetBoardAuthorityCommand implements CommandRunner {
 	async run(params: string[], options?: GetBoardCommandOptions) {
