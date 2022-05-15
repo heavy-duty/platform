@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { PublicKey } from '@solana/web3.js';
 import { DrillApiService } from '../services/drill-api.service';
 import { NotificationService } from '../services/notification.service';
 import { BoardMintStore } from '../stores/board-mint.store';
@@ -132,7 +133,7 @@ export class BoardPageComponent {
 		return bounty.id;
 	}
 
-	onClaimBounty(boardId: number, bountyId: number, userVault: string) {
+	onClaimBounty(boardId: number, bountyId: number, userVault: PublicKey) {
 		this._drillApiService.claimBounty(boardId, bountyId, userVault).subscribe({
 			next: () => this._notificationService.notifySuccess('Bounty Claimed!!!'),
 			error: (error) => this._notificationService.notifyError(error),

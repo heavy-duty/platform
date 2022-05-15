@@ -29,6 +29,17 @@ export class NotificationService {
 		});
 	}
 
+	notifyWarning(message: string) {
+		this._matSnackBar.openFromComponent(SnackBarComponent, {
+			duration: 5000,
+			data: {
+				title: 'Huh...',
+				message,
+				type: 'warning',
+			},
+		});
+	}
+
 	private getErrorMessage(error: unknown) {
 		if (typeof error === 'string') {
 			return error;

@@ -1,14 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import {
 	AbstractControl,
+	AsyncValidatorFn,
 	FormControl,
 	FormGroup,
 	ValidationErrors,
 	ValidatorFn,
 	Validators,
 } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Account } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
+import { map, Observable } from 'rxjs';
+import { DrillApiService } from '../services/drill-api.service';
+import { NotificationService } from '../services/notification.service';
+import { Option } from '../types';
 
 export function publicKeyValidator(): ValidatorFn {
 	return (control: AbstractControl): ValidationErrors | null => {
@@ -22,6 +28,23 @@ export function publicKeyValidator(): ValidatorFn {
 
 		return error ? { publicKey: true } : null;
 	};
+}
+
+export class AssociatedTokenAccountValidator {
+	static createValidator(
+		drillApiService: DrillApiService,
+		mint: PublicKey
+	): AsyncValidatorFn {
+		return (control: AbstractControl): Observable<Option<ValidationErrors>> => {
+			return drillApiService
+				.getAssociatedTokenAccount(new PublicKey(control.value), mint)
+				.pipe(
+					map((result: Option<Account>) =>
+						result === null ? { associatedTokenAccount: true } : null
+					)
+				);
+		};
+	}
 }
 
 @Component({
@@ -43,11 +66,12 @@ export function publicKeyValidator(): ValidatorFn {
 						<input
 							type="text"
 							formControlName="userVault"
-							class="rounded bg-bd-black w-full"
+							class="rounded bg-bd-black w-full py-1 px-2"
 						/>
-						<div class="form-control-errors text-xs h-4 text-red-400">
+						<div class="form-control-message h-4">
 							<p
 								*ngIf="submitted && form.get('userVault')?.hasError('required')"
+								class="text-xs text-red-500"
 							>
 								Address is required.
 							</p>
@@ -55,8 +79,29 @@ export function publicKeyValidator(): ValidatorFn {
 								*ngIf="
 									submitted && form.get('userVault')?.hasError('publicKey')
 								"
+								class="text-xs text-red-500"
 							>
-								Make sure to enter a public key.
+								Wrong format for public key.
+							</p>
+							<p
+								*ngIf="
+									submitted &&
+									form.get('userVault')?.hasError('associatedTokenAccount')
+								"
+								class="text-xs text-red-500"
+							>
+								Missing required token account.
+							</p>
+
+							<p
+								*ngIf="form.get('userVault')?.pending"
+								class="text-xs text-green-500 flex items-center gap-1"
+							>
+								<span
+									class="inline-block h-2 w-2 border-2 border-accent"
+									drillProgressSpinner
+								></span>
+								<span>Fetching token account...</span>
 							</p>
 						</div>
 					</div>
@@ -71,6 +116,7 @@ export function publicKeyValidator(): ValidatorFn {
 						</button>
 						<button
 							class="flex-1 bg-black py-2 bd-button uppercase text-sm"
+							[disabled]="form.get('userVault')?.pending"
 							type="submit"
 						>
 							Submit
@@ -82,7 +128,7 @@ export function publicKeyValidator(): ValidatorFn {
 	`,
 	styles: [
 		`
-			.form-control-errors > p + p {
+			.form-control-message > p + p {
 				display: none;
 			}
 		`,
@@ -91,11 +137,22 @@ export function publicKeyValidator(): ValidatorFn {
 export class BountyClaimModalComponent {
 	submitted = false;
 	readonly form = new FormGroup({
-		userVault: new FormControl('', [Validators.required, publicKeyValidator()]),
+		userVault: new FormControl('', {
+			validators: [Validators.required, publicKeyValidator()],
+			asyncValidators: [
+				AssociatedTokenAccountValidator.createValidator(
+					this._drillApiService,
+					this.data.acceptedMint
+				),
+			],
+		}),
 	});
 
 	constructor(
-		private readonly _matDialogRef: MatDialogRef<BountyClaimModalComponent>
+		private readonly _matDialogRef: MatDialogRef<BountyClaimModalComponent>,
+		private readonly _drillApiService: DrillApiService,
+		private readonly _notificationService: NotificationService,
+		@Inject(MAT_DIALOG_DATA) public data: { acceptedMint: PublicKey }
 	) {}
 
 	onClose() {
@@ -106,6 +163,7 @@ export class BountyClaimModalComponent {
 		this.submitted = true;
 
 		if (this.form.invalid) {
+			this._notificationService.notifyWarning('Invalid receiver address.');
 			return;
 		}
 
