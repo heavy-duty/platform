@@ -2,19 +2,13 @@ import { Command, CommandRunner } from 'nest-commander';
 import { setBoardAuthority } from '../actions/set-board-authority';
 import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 
-export interface GetBoardCommandOptions {
-	repo?: string;
-	lockTime?: string;
-	acceptedMint?: string;
-}
-
 @Command({
 	name: 'set-board-authority',
 	description: 'Set a new board authority',
 	arguments: '<username/repo> <pubkey-new-authority>',
 })
 export class SetBoardAuthorityCommand implements CommandRunner {
-	async run(params: string[], options?: GetBoardCommandOptions) {
+	async run(params: string[]) {
 		const [owner, repoName] = params[0].split('/');
 		const newAuthority = params[1];
 

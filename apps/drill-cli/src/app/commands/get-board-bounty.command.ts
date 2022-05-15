@@ -2,19 +2,13 @@ import { Command, CommandRunner } from 'nest-commander';
 import { getBoardBounty } from '../actions/get-board-bounty';
 import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 
-export interface GetBoardCommandOptions {
-	repo?: string;
-	lockTime?: string;
-	acceptedMint?: string;
-}
-
 @Command({
 	name: 'get-bounty',
 	description: 'Get board bounty',
 	arguments: '<username/repo/bountyId>',
 })
 export class GetBoardBountyCommand implements CommandRunner {
-	async run(params: string[], options?: GetBoardCommandOptions) {
+	async run(params: string[]) {
 		const [owner, repoName, bountyId] = params[0].split('/');
 
 		const config = await getSolanaConfig();
