@@ -31,9 +31,8 @@ export class GetCollectionCommand implements CommandRunner {
 		log(`Collection Authority: ${collection.authority.toBase58()}`);
 		log(`Collection Workspace: ${collection.workspace.toBase58()}`);
 		log(`Collection Application: ${collection.application.toBase58()}`);
-		log(`Collection Body: \n${collection.body}\n`);
 		log(`Collection Created At: ${collection.createdAt}`);
 		log(`Collection Updated At: ${collection.updatedAt}`);
-		log(`Collection Stats: ${collection.quantityOfAttributes} attributes(s).`);
+		log(`Collection Stats: ${collection.quantityOfAttributes} attribute(s).`);
 	}
 }
