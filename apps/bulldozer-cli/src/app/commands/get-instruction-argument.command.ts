@@ -29,33 +29,21 @@ export class GetInstructionArgumentCommand implements CommandRunner {
 			}
 
 			log(`Instruction Argument "${instructionArgument.name}"`);
+			log(`Public Key: ${instructionArgument.publicKey.toBase58()}`);
+			log(`Authority: ${instructionArgument.authority.toBase58()}`);
+			log(`Workspace: ${instructionArgument.workspace.toBase58()}`);
+			log(`Application: ${instructionArgument.application.toBase58()}`);
+			log(`Instruction: ${instructionArgument.instruction.toBase58()}`);
+			log(`Kind: ${JSON.stringify(instructionArgument.kind)}`);
 			log(
-				`Instruction Argument Public Key: ${instructionArgument.publicKey.toBase58()}`
-			);
-			log(
-				`Instruction Argument Authority: ${instructionArgument.authority.toBase58()}`
-			);
-			log(
-				`Instruction Argument Workspace: ${instructionArgument.workspace.toBase58()}`
-			);
-			log(
-				`Instruction Argument Application: ${instructionArgument.application.toBase58()}`
-			);
-			log(
-				`Instruction Argument Instruction: ${instructionArgument.instruction.toBase58()}`
-			);
-			log(
-				`Instruction Argument Kind: ${JSON.stringify(instructionArgument.kind)}`
-			);
-			log(
-				`Instruction Argument Modifier: ${
+				`Modifier: ${
 					instructionArgument.modifier !== null
 						? JSON.stringify(instructionArgument.modifier)
 						: null
 				}`
 			);
-			log(`Instruction Argument Created At: ${instructionArgument.createdAt}`);
-			log(`Instruction Argument Updated At: ${instructionArgument.updatedAt}`);
+			log(`Created At: ${instructionArgument.createdAt}`);
+			log(`Updated At: ${instructionArgument.updatedAt}`);
 		} catch (error) {
 			console.error(error);
 		}

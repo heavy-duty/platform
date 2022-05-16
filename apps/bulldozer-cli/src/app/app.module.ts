@@ -12,6 +12,7 @@ import { GetInstructionAccountCommand } from './commands/get-instruction-account
 import { GetInstructionArgumentCommand } from './commands/get-instruction-argument.command';
 import { GetInstructionRelationCommand } from './commands/get-instruction-relation.command';
 import { GetInstructionCommand } from './commands/get-instruction.command';
+import { GetWorkspaceCommand } from './commands/get-workspace.command';
 
 @Module({
 	imports: [],
@@ -22,6 +23,7 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 		DeployWorkspaceCommand,
 		BuildAppCommand,
 		BuildWorkspaceCommand,
+		GetWorkspaceCommand,
 		GetApplicationCommand,
 		GetCollectionCommand,
 		GetCollectionAttributeCommand,

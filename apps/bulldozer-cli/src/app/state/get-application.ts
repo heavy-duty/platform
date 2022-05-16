@@ -5,7 +5,6 @@ import { Bulldozer } from '../utils/bulldozer';
 export interface Application {
 	publicKey: PublicKey;
 	name: string;
-	body: string;
 	authority: PublicKey;
 	workspace: PublicKey;
 	quantityOfCollections: number;
@@ -46,7 +45,6 @@ export const getApplication = async (
 	return {
 		publicKey: applicationPublicKey,
 		name: application.name,
-		body: application.body,
 		authority: application.authority,
 		workspace: application.workspace,
 		quantityOfCollections: applicationStats.quantityOfCollections,

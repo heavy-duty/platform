@@ -29,15 +29,15 @@ export class GetInstructionCommand implements CommandRunner {
 			}
 
 			log(`Instruction "${instruction.name}"`);
-			log(`Instruction Public Key: ${instruction.publicKey.toBase58()}`);
-			log(`Instruction Authority: ${instruction.authority.toBase58()}`);
-			log(`Instruction Workspace: ${instruction.workspace.toBase58()}`);
-			log(`Instruction Application: ${instruction.application.toBase58()}`);
-			log(`Instruction Body: \n${instruction.body}\n`);
-			log(`Instruction Created At: ${instruction.createdAt}`);
-			log(`Instruction Updated At: ${instruction.updatedAt}`);
+			log(`Public Key: ${instruction.publicKey.toBase58()}`);
+			log(`Authority: ${instruction.authority.toBase58()}`);
+			log(`Workspace: ${instruction.workspace.toBase58()}`);
+			log(`Application: ${instruction.application.toBase58()}`);
+			log(`Body: \n${instruction.body}\n`);
+			log(`Created At: ${instruction.createdAt}`);
+			log(`Updated At: ${instruction.updatedAt}`);
 			log(
-				`Instruction Stats: ${instruction.quantityOfArguments} argument(s) and ${instruction.quantityOfAccounts} account(s).`
+				`Stats: ${instruction.quantityOfArguments} argument(s) and ${instruction.quantityOfAccounts} account(s).`
 			);
 		} catch (error) {
 			console.error(error);

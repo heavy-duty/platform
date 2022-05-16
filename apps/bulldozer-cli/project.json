@@ -98,6 +98,17 @@
 				"envFile": "apps/bulldozer-cli/.env"
 			}
 		},
+		"get-workspace": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
 		"get-application": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {

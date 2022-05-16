@@ -33,13 +33,13 @@ export class GetCollectionCommand implements CommandRunner {
 			}
 
 			log(`Collection "${collection.name}"`);
-			log(`Collection Public Key: ${collection.publicKey.toBase58()}`);
-			log(`Collection Authority: ${collection.authority.toBase58()}`);
-			log(`Collection Workspace: ${collection.workspace.toBase58()}`);
-			log(`Collection Application: ${collection.application.toBase58()}`);
-			log(`Collection Created At: ${collection.createdAt}`);
-			log(`Collection Updated At: ${collection.updatedAt}`);
-			log(`Collection Stats: ${collection.quantityOfAttributes} attribute(s).`);
+			log(`Public Key: ${collection.publicKey.toBase58()}`);
+			log(`Authority: ${collection.authority.toBase58()}`);
+			log(`Workspace: ${collection.workspace.toBase58()}`);
+			log(`Application: ${collection.application.toBase58()}`);
+			log(`Created At: ${collection.createdAt}`);
+			log(`Updated At: ${collection.updatedAt}`);
+			log(`Stats: ${collection.quantityOfAttributes} attribute(s).`);
 		} catch (error) {
 			console.error(error);
 		}

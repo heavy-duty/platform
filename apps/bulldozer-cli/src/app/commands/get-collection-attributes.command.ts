@@ -30,33 +30,21 @@ export class GetCollectionAttributeCommand implements CommandRunner {
 			}
 
 			log(`Collection Attribute "${collectionAttribute.name}"`);
+			log(`Public Key: ${collectionAttribute.publicKey.toBase58()}`);
+			log(`Authority: ${collectionAttribute.authority.toBase58()}`);
+			log(`Workspace: ${collectionAttribute.workspace.toBase58()}`);
+			log(`Application: ${collectionAttribute.application.toBase58()}`);
+			log(`Collection: ${collectionAttribute.collection.toBase58()}`);
+			log(`Kind: ${JSON.stringify(collectionAttribute.kind)}`);
 			log(
-				`Collection Attribute Public Key: ${collectionAttribute.publicKey.toBase58()}`
-			);
-			log(
-				`Collection Attribute Authority: ${collectionAttribute.authority.toBase58()}`
-			);
-			log(
-				`Collection Attribute Workspace: ${collectionAttribute.workspace.toBase58()}`
-			);
-			log(
-				`Collection Attribute Application: ${collectionAttribute.application.toBase58()}`
-			);
-			log(
-				`Collection Attribute Collection: ${collectionAttribute.collection.toBase58()}`
-			);
-			log(
-				`Collection Attribute Kind: ${JSON.stringify(collectionAttribute.kind)}`
-			);
-			log(
-				`Collection Attribute Modifier: ${
+				`Modifier: ${
 					collectionAttribute.modifier !== null
 						? JSON.stringify(collectionAttribute.modifier)
 						: null
 				}`
 			);
-			log(`Collection Attribute Created At: ${collectionAttribute.createdAt}`);
-			log(`Collection Attribute Updated At: ${collectionAttribute.updatedAt}`);
+			log(`Created At: ${collectionAttribute.createdAt}`);
+			log(`Updated At: ${collectionAttribute.updatedAt}`);
 		} catch (error) {
 			console.error(error);
 		}
