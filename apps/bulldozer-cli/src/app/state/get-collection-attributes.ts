@@ -15,7 +15,7 @@ export const getCollectionAttributes = async (
 ): Promise<CollectionAttribute[]> => {
 	const query = collectionAttributeQueryBuilder().where(filters).build();
 
-	const collectionArgumentIds =
+	const collectionAttributeIds =
 		await program.provider.connection.getProgramAccounts(program.programId, {
 			...query,
 			dataSlice: {
@@ -25,7 +25,7 @@ export const getCollectionAttributes = async (
 		});
 
 	return Promise.all(
-		collectionArgumentIds.map(({ pubkey }) =>
+		collectionAttributeIds.map(({ pubkey }) =>
 			getCollectionAttribute(program, pubkey)
 		)
 	);
