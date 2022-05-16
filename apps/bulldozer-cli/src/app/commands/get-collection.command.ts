@@ -40,11 +40,8 @@ export class GetCollectionCommand implements CommandRunner {
 			log(`Collection Created At: ${collection.createdAt}`);
 			log(`Collection Updated At: ${collection.updatedAt}`);
 			log(`Collection Stats: ${collection.quantityOfAttributes} attribute(s).`);
-		} catch (e) {
-			if (e.message) {
-				console.log('Something went wrong: ', e.message);
-			}
-			console.log('Something went wrong');
+		} catch (error) {
+			console.error(error);
 		}
 	}
 }

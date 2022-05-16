@@ -57,11 +57,8 @@ export class GetCollectionAttributeCommand implements CommandRunner {
 			);
 			log(`Collection Attribute Created At: ${collectionAttribute.createdAt}`);
 			log(`Collection Attribute Updated At: ${collectionAttribute.updatedAt}`);
-		} catch (e) {
-			if (e.message) {
-				console.log('Something went wrong: ', e.message);
-			}
-			console.log('Something went wrong');
+		} catch (error) {
+			console.error(error);
 		}
 	}
 }

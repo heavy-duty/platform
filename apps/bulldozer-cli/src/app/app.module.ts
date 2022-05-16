@@ -9,6 +9,7 @@ import { GetCollectionAttributeCommand } from './commands/get-collection-attribu
 import { GetCollectionCommand } from './commands/get-collection.command';
 import { GetInstructionAccountCommand } from './commands/get-instruction-account.command';
 import { GetInstructionArgumentCommand } from './commands/get-instruction-argument.command';
+import { GetInstructionRelationCommand } from './commands/get-instruction-relation.command';
 import { GetInstructionCommand } from './commands/get-instruction.command';
 
 @Module({
@@ -25,6 +26,7 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 		GetInstructionCommand,
 		GetInstructionArgumentCommand,
 		GetInstructionAccountCommand,
+		GetInstructionRelationCommand,
 	],
 })
 export class AppModule {}
