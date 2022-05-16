@@ -3,7 +3,8 @@ import { BuildAppCommand } from './commands/build-app.command';
 import { BuildWorkspaceCommand } from './commands/build-workspace.command';
 import { DeployAppCommand } from './commands/deploy-app.command';
 import { DeployWorkspaceCommand } from './commands/deploy-workspace.command';
-import { GenerateAppCommand } from './commands/generate-app.command';
+import { GenerateApplicationCommand } from './commands/generate-application.command';
+import { GenerateInstructionCommand } from './commands/generate-instruction.command';
 import { GenerateWorkspaceCommand } from './commands/generate-workspace.command';
 import { GetApplicationCommand } from './commands/get-application.command';
 import { GetCollectionAttributeCommand } from './commands/get-collection-attributes.command';
@@ -17,7 +18,8 @@ import { GetWorkspaceCommand } from './commands/get-workspace.command';
 @Module({
 	imports: [],
 	providers: [
-		GenerateAppCommand,
+		GenerateInstructionCommand,
+		GenerateApplicationCommand,
 		GenerateWorkspaceCommand,
 		DeployAppCommand,
 		DeployWorkspaceCommand,

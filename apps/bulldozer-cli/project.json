@@ -76,12 +76,23 @@
 				"envFile": "apps/bulldozer-cli/.env"
 			}
 		},
-		"generate-app": {
+		"generate-instruction": {
 			"executor": "@nrwl/workspace:run-commands",
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-app {args.workspaceId} {args.applicationId}"
+					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"generate-application": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js generate-application {args.workspaceId} {args.applicationId}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
