@@ -39,6 +39,7 @@
 		"@solana/wallet-adapter-wallets": "0.15.5",
 		"@solana/web3.js": "^1.41.4",
 		"bs58": "^5.0.0",
+		"case": "^1.6.3",
 		"chalk": "^4.1.2",
 		"dotenv": "^16.0.1",
 		"figlet": "^1.5.2",

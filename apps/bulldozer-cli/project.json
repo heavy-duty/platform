@@ -92,7 +92,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-application {args.workspaceId} {args.applicationId}"
+					"node dist/apps/bulldozer-cli/main.js generate-application {args.applicationId} {args.outFile} {args.programId}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"

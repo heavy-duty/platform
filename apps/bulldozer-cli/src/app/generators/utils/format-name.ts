@@ -1,4 +1,4 @@
-import { toCamelCase, toKebabCase, toPascalCase, toSnakeCase } from './to-case';
+import * as Case from 'case';
 
 export interface FormattedName {
 	snakeCase: string;
@@ -9,9 +9,9 @@ export interface FormattedName {
 }
 
 export const formatName = (str: string): FormattedName => ({
-	snakeCase: toSnakeCase(str),
 	normalCase: str,
-	camelCase: toCamelCase(str),
-	pascalCase: toPascalCase(str),
-	kebabCase: toKebabCase(str),
+	snakeCase: Case.snake(str),
+	camelCase: Case.camel(str),
+	pascalCase: Case.pascal(str),
+	kebabCase: Case.kebab(str),
 });
