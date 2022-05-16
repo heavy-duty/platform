@@ -5,7 +5,6 @@ import { Bulldozer } from '../utils/bulldozer';
 export interface Collection {
 	publicKey: PublicKey;
 	name: string;
-	body: string;
 	authority: PublicKey;
 	workspace: PublicKey;
 	application: PublicKey;
@@ -47,7 +46,6 @@ export const getCollection = async (
 	return {
 		publicKey: collectionPublicKey,
 		name: collectionAccount.name,
-		body: collectionAccount.body,
 		authority: collectionAccount.authority,
 		workspace: collectionAccount.workspace,
 		application: collectionAccount.application,
