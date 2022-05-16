@@ -14,8 +14,6 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 	imports: [],
 	providers: [
 		GenerateAppCommand,
-		GetInstructionCommand,
-		GetInstructionArgumentCommand,
 		GenerateWorkspaceCommand,
 		DeployAppCommand,
 		DeployWorkspaceCommand,
@@ -23,6 +21,7 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 		BuildWorkspaceCommand,
 		GetCollectionCommand,
 		GetInstructionCommand,
+		GetInstructionArgumentCommand,
 		GetInstructionAccountCommand,
 	],
 })
