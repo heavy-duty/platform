@@ -32,6 +32,17 @@
 				"buildTarget": "bulldozer-cli:build"
 			}
 		},
+		"get-instruction": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction {args.instructionId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
 		"lint": {
 			"executor": "@nrwl/linter:eslint",
 			"outputs": ["{options.outputFile}"],
