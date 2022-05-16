@@ -131,6 +131,17 @@
 				"envFile": "apps/bulldozer-cli/.env"
 			}
 		},
+		"get-instruction-account": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction-account {args.instructionAccountId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
 		"lint": {
 			"executor": "@nrwl/linter:eslint",
 			"outputs": ["{options.outputFile}"],

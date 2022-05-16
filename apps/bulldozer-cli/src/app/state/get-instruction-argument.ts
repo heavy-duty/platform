@@ -29,42 +29,42 @@ export const getInstructionArgument = async (
 	program: Program<Bulldozer>,
 	instructionArgumentPublicKey: PublicKey
 ): Promise<InstructionArgument | null> => {
-	const instructionArgumentAccount =
+	const instructionArgument =
 		await program.account.instructionArgument.fetchNullable(
 			instructionArgumentPublicKey
 		);
 
-	if (instructionArgumentAccount === null) {
+	if (instructionArgument === null) {
 		return null;
 	}
 
-	const kindName = Object.keys(instructionArgumentAccount.kind)[0];
+	const kindName = Object.keys(instructionArgument.kind)[0];
 	const modifierName =
-		instructionArgumentAccount.modifier !== null
-			? Object.keys(instructionArgumentAccount.modifier)[0]
+		instructionArgument.modifier !== null
+			? Object.keys(instructionArgument.modifier)[0]
 			: null;
 
 	return {
 		publicKey: instructionArgumentPublicKey,
-		name: instructionArgumentAccount.name,
-		authority: instructionArgumentAccount.authority,
-		workspace: instructionArgumentAccount.workspace,
-		application: instructionArgumentAccount.application,
-		instruction: instructionArgumentAccount.instruction,
+		name: instructionArgument.name,
+		authority: instructionArgument.authority,
+		workspace: instructionArgument.workspace,
+		application: instructionArgument.application,
+		instruction: instructionArgument.instruction,
 		kind: {
-			id: instructionArgumentAccount.kind[kindName].id,
+			id: instructionArgument.kind[kindName].id,
 			name: kindName,
-			size: instructionArgumentAccount.kind[kindName].size,
+			size: instructionArgument.kind[kindName].size,
 		},
 		modifier:
 			modifierName !== null
 				? {
-						id: instructionArgumentAccount.modifier[modifierName].id,
+						id: instructionArgument.modifier[modifierName].id,
 						name: modifierName,
-						size: instructionArgumentAccount.modifier[modifierName].size,
+						size: instructionArgument.modifier[modifierName].size,
 				  }
 				: null,
-		createdAt: new Date(instructionArgumentAccount.createdAt.toNumber() * 1000),
-		updatedAt: new Date(instructionArgumentAccount.updatedAt.toNumber() * 1000),
+		createdAt: new Date(instructionArgument.createdAt.toNumber() * 1000),
+		updatedAt: new Date(instructionArgument.updatedAt.toNumber() * 1000),
 	};
 };

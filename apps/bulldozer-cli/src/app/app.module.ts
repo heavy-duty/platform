@@ -6,6 +6,7 @@ import { DeployWorkspaceCommand } from './commands/deploy-workspace.command';
 import { GenerateAppCommand } from './commands/generate-app.command';
 import { GenerateWorkspaceCommand } from './commands/generate-workspace.command';
 import { GetCollectionCommand } from './commands/get-collection.command';
+import { GetInstructionAccountCommand } from './commands/get-instruction-account.command';
 import { GetInstructionArgumentCommand } from './commands/get-instruction-argument.command';
 import { GetInstructionCommand } from './commands/get-instruction.command';
 
@@ -22,6 +23,7 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 		BuildWorkspaceCommand,
 		GetCollectionCommand,
 		GetInstructionCommand,
+		GetInstructionAccountCommand,
 	],
 })
 export class AppModule {}

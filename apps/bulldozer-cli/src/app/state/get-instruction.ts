@@ -19,11 +19,11 @@ export const getInstruction = async (
 	program: Program<Bulldozer>,
 	instructionPublicKey: PublicKey
 ): Promise<Instruction | null> => {
-	const instructionAccount = await program.account.instruction.fetchNullable(
+	const instruction = await program.account.instruction.fetchNullable(
 		instructionPublicKey
 	);
 
-	if (instructionAccount === null) {
+	if (instruction === null) {
 		return null;
 	}
 
@@ -31,30 +31,29 @@ export const getInstruction = async (
 		[
 			Buffer.from('instruction_stats', 'utf8'),
 			instructionPublicKey.toBuffer(),
-			Buffer.from([instructionAccount.instructionStatsBump]),
+			Buffer.from([instruction.instructionStatsBump]),
 		],
 		program.programId
 	);
 
-	const instructionStatsAccount =
-		await program.account.instructionStats.fetchNullable(
-			instructionStatsPublicKey
-		);
+	const instructionStats = await program.account.instructionStats.fetchNullable(
+		instructionStatsPublicKey
+	);
 
-	if (instructionStatsAccount === null) {
+	if (instructionStats === null) {
 		return null;
 	}
 
 	return {
 		publicKey: instructionPublicKey,
-		name: instructionAccount.name,
-		body: instructionAccount.body,
-		authority: instructionAccount.authority,
-		workspace: instructionAccount.workspace,
-		application: instructionAccount.application,
-		quantityOfArguments: instructionStatsAccount.quantityOfArguments,
-		quantityOfAccounts: instructionStatsAccount.quantityOfAccounts,
-		createdAt: new Date(instructionAccount.createdAt.toNumber() * 1000),
-		updatedAt: new Date(instructionAccount.updatedAt.toNumber() * 1000),
+		name: instruction.name,
+		body: instruction.body,
+		authority: instruction.authority,
+		workspace: instruction.workspace,
+		application: instruction.application,
+		quantityOfArguments: instructionStats.quantityOfArguments,
+		quantityOfAccounts: instructionStats.quantityOfAccounts,
+		createdAt: new Date(instruction.createdAt.toNumber() * 1000),
+		updatedAt: new Date(instruction.updatedAt.toNumber() * 1000),
 	};
 };
