@@ -3,7 +3,7 @@ import { Command, CommandRunner } from 'nest-commander';
 @Command({
 	name: 'generate-app',
 	description:
-		' Generate the source code for a specific App in a Workspace. You need to pass two arguments, one to specify the workspace id in which you have the app you want to generate the source code. The other argument is the app id, to select the app ',
+		'Generate the source code for a specific App in a Workspace. You need to pass two arguments, one to specify the workspace id in which you have the app you want to generate the source code. The other argument is the app id, to select the app ',
 	arguments: '<workspace-id> <application-id>',
 	argsDescription: {
 		'workspace-id': 'The workspace id which you want to select',
