@@ -103,7 +103,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-collection {args.collectionId}"
+					"node dist/apps/bulldozer-cli/main.js generate-collection {args.collectionId} {args.outFile}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"

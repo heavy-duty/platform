@@ -1,5 +1,7 @@
 import { PublicKey } from '@solana/web3.js';
+import { writeFile } from 'fs/promises';
 import { Command, CommandRunner } from 'nest-commander';
+import { CollectionCodeGenerator } from '../generators/collection.generator';
 import { getCollection } from '../state';
 import { getCollectionAttributes } from '../state/get-collection-attributes';
 import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
@@ -7,15 +9,16 @@ import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 @Command({
 	name: 'generate-collection',
 	description: 'Generate the source code for a collection',
-	arguments: '<collection-id>',
+	arguments: '<collection-id> <out-file>',
 	argsDescription: {
 		'collection-id': '(public key) The collection id which you want to select',
+		'out-file': 'Path to generate the rust code',
 	},
 })
 export class GenerateCollectionCommand implements CommandRunner {
 	async run(params: string[]) {
 		try {
-			const [collectionId] = params;
+			const [collectionId, outFile] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
@@ -38,9 +41,10 @@ export class GenerateCollectionCommand implements CommandRunner {
 					  })
 					: [];
 
-			console.log({ collection, collectionAttributes });
-
-			// Generate the collection code
+			writeFile(
+				outFile,
+				CollectionCodeGenerator.generate(collection, collectionAttributes)
+			);
 		} catch (error) {
 			log(error);
 		}

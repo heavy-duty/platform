@@ -17,6 +17,7 @@ import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 	argsDescription: {
 		'instruction-id':
 			'(public key) The instruction id which you want to select',
+		'out-file': 'Path to generate the rust code',
 	},
 })
 export class GenerateInstructionCommand implements CommandRunner {
