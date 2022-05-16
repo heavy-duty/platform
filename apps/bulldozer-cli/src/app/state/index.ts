@@ -7,4 +7,5 @@ export * from './get-instruction-accounts';
 export * from './get-instruction-argument';
 export * from './get-instruction-arguments';
 export * from './get-instruction-relation';
+export * from './get-instruction-relations';
 export * from './get-workspace';

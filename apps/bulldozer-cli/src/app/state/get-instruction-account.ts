@@ -23,6 +23,7 @@ export interface InstructionAccount {
 	close: Option<InstructionAccount>;
 	payer: Option<InstructionAccount>;
 	collection: Option<Collection>;
+	space: Option<number>;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -97,6 +98,7 @@ export const getInstructionAccount = async (
 			id: instructionAccount.kind[kindName].id,
 			name: kindName,
 		},
+		space: instructionAccount.space,
 		modifier:
 			modifierName !== null
 				? {

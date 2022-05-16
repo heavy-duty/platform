@@ -81,7 +81,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId}"
+					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId} {args.outFile}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"

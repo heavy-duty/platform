@@ -20,23 +20,19 @@ export interface InstructionRelation {
 
 export const getInstructionRelation = async (
 	program: Program<Bulldozer>,
-	fromPublicKey: PublicKey,
-	toPublicKey: PublicKey
+	instructionRelationPublicKey: PublicKey
 ): Promise<InstructionRelation | null> => {
-	const [instructionRelationPublicKey] = await PublicKey.findProgramAddress(
-		[
-			Buffer.from('instruction_relation', 'utf8'),
-			fromPublicKey.toBuffer(),
-			toPublicKey.toBuffer(),
-		],
-		program.programId
-	);
 	const instructionRelation =
 		await program.account.instructionRelation.fetchNullable(
 			instructionRelationPublicKey
 		);
-	const from = await getInstructionAccount(program, fromPublicKey);
-	const to = await getInstructionAccount(program, toPublicKey);
+
+	if (instructionRelation === null) {
+		return null;
+	}
+
+	const from = await getInstructionAccount(program, instructionRelation.from);
+	const to = await getInstructionAccount(program, instructionRelation.to);
 
 	if (instructionRelation === null || from === null || to === null) {
 		return null;

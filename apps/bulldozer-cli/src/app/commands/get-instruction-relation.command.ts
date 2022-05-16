@@ -6,22 +6,21 @@ import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 @Command({
 	name: 'get-instruction-relation',
 	description: 'Get everything about a given instruction relation',
-	arguments: '<from-id> <to-id>',
+	arguments: '<instruction-relation-id>',
 })
 export class GetInstructionRelationCommand implements CommandRunner {
 	async run(params: string[]) {
 		try {
-			const [fromId, toId] = params;
+			const [instructionRelationId] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting instruction relation data: ${fromId}/${toId}`);
+			log(`Getting instruction relation data: ${instructionRelationId}`);
 
 			const instructionRelation = await getInstructionRelation(
 				program,
-				new PublicKey(fromId),
-				new PublicKey(toId)
+				new PublicKey(instructionRelationId)
 			);
 
 			if (instructionRelation === null) {
@@ -29,7 +28,7 @@ export class GetInstructionRelationCommand implements CommandRunner {
 				return;
 			}
 
-			log(`Instruction Relation "${fromId}/${toId}"`);
+			log(`Instruction Relation "${instructionRelationId}"`);
 			log(`Public Key: ${instructionRelation.publicKey.toBase58()}`);
 			log(`Authority: ${instructionRelation.authority.toBase58()}`);
 			log(`Workspace: ${instructionRelation.workspace.toBase58()}`);
