@@ -13,31 +13,38 @@ import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 })
 export class GetCollectionCommand implements CommandRunner {
 	async run(params: string[]) {
-		const [collectionId] = params;
+		try {
+			const [collectionId] = params;
 
-		const config = await getSolanaConfig();
-		const provider = await getProvider(config);
-		const program = getProgram(provider);
+			const config = await getSolanaConfig();
+			const provider = await getProvider(config);
+			const program = getProgram(provider);
 
-		log(`Getting collection data: ${collectionId}`);
+			log(`Getting collection data: ${collectionId}`);
 
-		const collection = await getCollection(
-			program,
-			new PublicKey(collectionId)
-		);
+			const collection = await getCollection(
+				program,
+				new PublicKey(collectionId)
+			);
 
-		if (collection === null) {
-			log(`Collection not found`);
-			return;
+			if (collection === null) {
+				log(`Collection not found`);
+				return;
+			}
+
+			log(`Collection "${collection.name}"`);
+			log(`Collection Public Key: ${collection.publicKey.toBase58()}`);
+			log(`Collection Authority: ${collection.authority.toBase58()}`);
+			log(`Collection Workspace: ${collection.workspace.toBase58()}`);
+			log(`Collection Application: ${collection.application.toBase58()}`);
+			log(`Collection Created At: ${collection.createdAt}`);
+			log(`Collection Updated At: ${collection.updatedAt}`);
+			log(`Collection Stats: ${collection.quantityOfAttributes} attribute(s).`);
+		} catch (e) {
+			if (e.message) {
+				console.log('Something went wrong: ', e.message);
+			}
+			console.log('Something went wrong');
 		}
-
-		log(`Collection "${collection.name}"`);
-		log(`Collection Public Key: ${collection.publicKey.toBase58()}`);
-		log(`Collection Authority: ${collection.authority.toBase58()}`);
-		log(`Collection Workspace: ${collection.workspace.toBase58()}`);
-		log(`Collection Application: ${collection.application.toBase58()}`);
-		log(`Collection Created At: ${collection.createdAt}`);
-		log(`Collection Updated At: ${collection.updatedAt}`);
-		log(`Collection Stats: ${collection.quantityOfAttributes} attribute(s).`);
 	}
 }
