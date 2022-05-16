@@ -11,6 +11,6 @@ import { Command, CommandRunner } from 'nest-commander';
 })
 export class DeployWorkspaceCommand implements CommandRunner {
 	async run(params: string[]) {
-		console.log(`Workspace ID: ${params[0]} App Id: ${params[1]}`);
+		console.log(`Workspace ID: ${params[0]}`);
 	}
 }
