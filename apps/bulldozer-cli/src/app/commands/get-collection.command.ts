@@ -26,6 +26,11 @@ export class GetCollectionCommand implements CommandRunner {
 			new PublicKey(collectionId)
 		);
 
+		if (collection === null) {
+			log(`Collection not found`);
+			return;
+		}
+
 		log(`Collection "${collection.name}"`);
 		log(`Collection Public Key: ${collection.publicKey.toBase58()}`);
 		log(`Collection Authority: ${collection.authority.toBase58()}`);

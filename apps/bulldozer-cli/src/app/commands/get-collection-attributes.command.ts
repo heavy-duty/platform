@@ -23,6 +23,11 @@ export class GetCollectionAttributeCommand implements CommandRunner {
 			new PublicKey(collectionAttributeId)
 		);
 
+		if (collectionAttribute === null) {
+			log(`Collection Attribute not found`);
+			return;
+		}
+
 		log(`Collection Attribute "${collectionAttribute.name}"`);
 		log(
 			`Collection Attribute Public Key: ${collectionAttribute.publicKey.toBase58()}`
