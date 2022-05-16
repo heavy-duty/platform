@@ -5,6 +5,7 @@ import { DeployAppCommand } from './commands/deploy-app.command';
 import { DeployWorkspaceCommand } from './commands/deploy-workspace.command';
 import { GenerateAppCommand } from './commands/generate-app.command';
 import { GenerateWorkspaceCommand } from './commands/generate-workspace.command';
+import { GetApplicationCommand } from './commands/get-application.command';
 import { GetCollectionAttributeCommand } from './commands/get-collection-attributes.command';
 import { GetCollectionCommand } from './commands/get-collection.command';
 import { GetInstructionAccountCommand } from './commands/get-instruction-account.command';
@@ -21,6 +22,7 @@ import { GetInstructionCommand } from './commands/get-instruction.command';
 		DeployWorkspaceCommand,
 		BuildAppCommand,
 		BuildWorkspaceCommand,
+		GetApplicationCommand,
 		GetCollectionCommand,
 		GetCollectionAttributeCommand,
 		GetInstructionCommand,

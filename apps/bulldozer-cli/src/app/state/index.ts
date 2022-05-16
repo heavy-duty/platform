@@ -1,3 +1,4 @@
+export * from './get-application';
 export * from './get-collection';
 export * from './get-collection-attritbute';
 export * from './get-instruction';
