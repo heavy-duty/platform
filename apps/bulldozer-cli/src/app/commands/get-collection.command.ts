@@ -1,6 +1,6 @@
 import { PublicKey } from '@solana/web3.js';
 import { Command, CommandRunner } from 'nest-commander';
-import { getCollection } from '../state/get-collection';
+import { getCollection } from '../state';
 import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 
 @Command({
