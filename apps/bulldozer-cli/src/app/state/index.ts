@@ -1,4 +1,5 @@
 export * from './get-application';
+export * from './get-applications';
 export * from './get-collection';
 export * from './get-collection-attribute';
 export * from './get-collection-attributes';

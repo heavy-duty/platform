@@ -1,3 +1,4 @@
+import * as Case from 'case';
 import * as Handlebars from 'handlebars';
 import {
 	Instruction,
@@ -7,6 +8,26 @@ import {
 } from '../state';
 import { instructionTemplate } from './templates';
 import { formatName, registerHandleBarsHelpers } from './utils';
+
+const getArgumentKindName = (id: number, name: string, size: number) => {
+	if (id === 0) {
+		return 'bool';
+	} else if (id === 1) {
+		if (size <= 256) {
+			return 'u8';
+		} else if (size > 256 && size <= 65536) {
+			return 'u16';
+		} else if (size > 65536 && size <= 4294967296) {
+			return 'u32';
+		} else {
+			throw Error('Invalid max');
+		}
+	} else if (id === 2 || id === 3) {
+		return Case.capital(name);
+	} else {
+		throw Error('Invalid kind');
+	}
+};
 
 export class InstructionCodeGenerator {
 	static generate(
@@ -25,7 +46,14 @@ export class InstructionCodeGenerator {
 			},
 			instructionArguments: instructionArguments.map((instructionArgument) => ({
 				name: formatName(instructionArgument.name),
-				kind: instructionArgument.kind,
+				kind: {
+					...instructionArgument.kind,
+					name: getArgumentKindName(
+						instructionArgument.kind.id,
+						instructionArgument.kind.name,
+						instructionArgument.kind.size
+					),
+				},
 				modifier: instructionArgument.modifier,
 			})),
 			instructionAccounts: instructionAccounts.map((instructionAccount) => ({
@@ -58,6 +86,9 @@ export class InstructionCodeGenerator {
 				.map((instructionAccount) =>
 					formatName(instructionAccount.collection.name)
 				),
+			initializesAccount: instructionAccounts.some(
+				(instructionAccount) => instructionAccount.modifier?.id === 0
+			),
 		});
 	}
 }

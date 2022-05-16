@@ -109,7 +109,7 @@ export class GenerateApplicationCommand implements CommandRunner {
 			);
 
 			if (application === null) {
-				throw new Error('Instruction not found');
+				throw new Error('Application not found');
 			}
 
 			const applicationInstructions =
