@@ -1,0 +1,228 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/bulldozer-cli/src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/node:webpack",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/bulldozer-cli",
+				"main": "apps/bulldozer-cli/src/main.ts",
+				"tsConfig": "apps/bulldozer-cli/tsconfig.app.json",
+				"assets": ["apps/bulldozer-cli/src/assets"]
+			},
+			"configurations": {
+				"production": {
+					"optimization": true,
+					"extractLicenses": true,
+					"inspect": false,
+					"fileReplacements": [
+						{
+							"replace": "apps/bulldozer-cli/src/environments/environment.ts",
+							"with": "apps/bulldozer-cli/src/environments/environment.prod.ts"
+						}
+					]
+				}
+			}
+		},
+		"serve": {
+			"executor": "@nrwl/node:node",
+			"options": {
+				"buildTarget": "bulldozer-cli:build"
+			}
+		},
+		"build-app": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js build-app {args.workspaceId} {args.applicationId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"build-workspace": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js build-workspace {args.workspaceId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"deploy-workspace": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js deploy-workspace {args.workspaceId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"deploy-app": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js deploy-app {args.workspaceId} {args.applicationId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"generate-instruction": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId} {args.outFile}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"generate-application": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js generate-application {args.applicationId} {args.outDir} {args.programId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"generate-collection": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js generate-collection {args.collectionId} {args.outFile}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"generate-workspace": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js generate-workspace {args.workspaceId} {args.outDir}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-workspace": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-application": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-application {args.applicationId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-collection": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-collection {args.collectionId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-collection-attribute": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-collection-attribute {args.collectionAttributeId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-instruction": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction {args.instructionId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-instruction-argument": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction-argument {args.instructionArgumentId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-instruction-account": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction-account {args.instructionAccountId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"get-instruction-relation": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build bulldozer-cli",
+					"node dist/apps/bulldozer-cli/main.js get-instruction-relation {args.fromId} {args.toId}"
+				],
+				"parallel": false,
+				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["apps/bulldozer-cli/**/*.ts"]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/apps/bulldozer-cli"],
+			"options": {
+				"jestConfig": "apps/bulldozer-cli/jest.config.ts",
+				"passWithNoTests": true
+			}
+		}
+	},
+	"tags": []
+}
