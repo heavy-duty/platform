@@ -16,8 +16,7 @@ import {
 } from './utils';
 
 export const createDrillGithubApp =
-	(programId: PublicKey, acceptedMint: PublicKey, cluster: string) =>
-	(app: Probot) => {
+	(programId: PublicKey, cluster: string) => (app: Probot) => {
 		// Handle bounty initialization
 		app.on('issues.labeled', async (context) => {
 			if (context.payload.label?.name !== 'drill:bounty') {
@@ -85,11 +84,13 @@ export const createDrillGithubApp =
 				})
 			);
 
+			const board = await program.account.board.fetch(boardPublicKey);
+
 			try {
 				await program.methods
 					.initializeBounty(repository.id, issue.number)
 					.accounts({
-						acceptedMint,
+						acceptedMint: board.acceptedMint,
 						authority: provider.wallet.publicKey,
 					})
 					.simulate();
@@ -123,7 +124,7 @@ export const createDrillGithubApp =
 				const signature = await program.methods
 					.initializeBounty(repository.id, issue.number)
 					.accounts({
-						acceptedMint,
+						acceptedMint: board.acceptedMint,
 						authority: provider.wallet.publicKey,
 					})
 					.rpc();
@@ -138,7 +139,7 @@ export const createDrillGithubApp =
 				// solana pay
 				const QR = await getSolanaPayQR(
 					bountyVaultPublicKey.toBase58(),
-					acceptedMint.toBase58()
+					board.acceptedMint.toBase58()
 				);
 				const imagePath = `.drill/${issue.number}.jpg`;
 				await context.octokit.repos.createOrUpdateFileContents(

@@ -6,10 +6,6 @@ import { createDrillGithubApp } from './app';
 const main = async () => {
 	config();
 
-	if (process.env.ACCEPTED_MINT === undefined) {
-		throw new Error('ACCEPTED_MINT env variable is missing.');
-	}
-
 	if (process.env.PROGRAM_ID === undefined) {
 		throw new Error('PROGRAM_ID env variable is missing.');
 	}
@@ -26,7 +22,6 @@ const main = async () => {
 	await server.load(
 		createDrillGithubApp(
 			new PublicKey(process.env.PROGRAM_ID),
-			new PublicKey(process.env.ACCEPTED_MINT),
 			process.env.CLUSTER ?? 'custom'
 		)
 	);
