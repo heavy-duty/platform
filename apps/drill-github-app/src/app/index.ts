@@ -193,7 +193,7 @@ export const createDrillGithubApp =
 							body: getBountyEnabledCommentBody(
 								boardMessageData,
 								bountyMessageData,
-								QR.base64,
+								`${repository.owner.login}/${repository.name}`,
 								getExplorerUrl(
 									'tx',
 									signature,

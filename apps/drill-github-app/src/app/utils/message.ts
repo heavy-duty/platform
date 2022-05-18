@@ -17,7 +17,7 @@ export interface BountyMessageData {
 export const getBountyEnabledCommentBody = (
 	board: BoardMessageData,
 	bounty: BountyMessageData,
-	qrBase64: string,
+	githubRepository: string,
 	explorerUrl: string,
 	boardPublicKeyUrl: string,
 	boardAuthorityUrl: string,
@@ -59,7 +59,7 @@ All about your new bounty.
 
 Use the following QR to send funds to bounty vault, please be sure what you are doing before make the transfer, this can't be undone.
 
-![Solana pay QR](https://raw.githubusercontent.com/andresmgsl/monorepo/master/${imagePath})
+![Solana pay QR](https://raw.githubusercontent.com/${githubRepository}/master/${imagePath})
 
 ### 🪙💵 **CURRENT DEPOSIT AMOUNT: ${bounty.vaultAmount}** 💵🪙
 `;
