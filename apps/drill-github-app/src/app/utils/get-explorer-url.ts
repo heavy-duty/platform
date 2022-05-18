@@ -1,17 +1,20 @@
-import { TransactionSignature } from "@solana/web3.js";
+import { TransactionSignature } from '@solana/web3.js';
 
 export const getExplorerUrl = (
-  signature: TransactionSignature,
-  cluster: string,
-  rpcEndpoint: string
+	type: string,
+	signature: TransactionSignature,
+	cluster: string,
+	rpcEndpoint: string
 ) => {
-  const explorerUrl = new URL(`https://explorer.solana.com/tx/${signature}`);
+	const explorerUrl = new URL(
+		`https://explorer.solana.com/${type}/${signature}`
+	);
 
-  explorerUrl.searchParams.append("cluster", cluster);
+	explorerUrl.searchParams.append('cluster', cluster);
 
-  if (cluster === "custom") {
-    explorerUrl.searchParams.append("customUrl", rpcEndpoint);
-  }
+	if (cluster === 'custom') {
+		explorerUrl.searchParams.append('customUrl', rpcEndpoint);
+	}
 
-  return explorerUrl.toString();
+	return explorerUrl.toString();
 };

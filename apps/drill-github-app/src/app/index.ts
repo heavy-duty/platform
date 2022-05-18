@@ -1,6 +1,7 @@
 import { BN } from '@heavy-duty/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { Probot } from 'probot';
+import { getBoard, getBounty, getBountyVault } from './state';
 import {
 	getBountyClosedCommentBody,
 	getBountyEnabledCommentBody,
@@ -11,6 +12,7 @@ import {
 	getProgram,
 	getProvider,
 	getSolanaConfig,
+	getSolanaPayQR,
 } from './utils';
 
 export const createDrillGithubApp =
@@ -43,6 +45,11 @@ export const createDrillGithubApp =
 				],
 				program.programId
 			);
+			const [bountyVaultPublicKey] = await PublicKey.findProgramAddress(
+				[Buffer.from('bounty_vault', 'utf8'), bountyPublicKey.toBuffer()],
+				program.programId
+			);
+
 			const bountyAccount = await program.account.bounty.fetchNullable(
 				bountyPublicKey
 			);
@@ -121,6 +128,55 @@ export const createDrillGithubApp =
 					})
 					.rpc();
 
+				const boardAccount = await getBoard(program, repository.id);
+				const bountyAccount = await getBounty(
+					program,
+					repository.id,
+					issue.number
+				);
+
+				// solana pay
+				const QR = await getSolanaPayQR(
+					bountyVaultPublicKey.toBase58(),
+					acceptedMint.toBase58()
+				);
+				const imagePath = `.drill/${issue.number}.jpg`;
+				await context.octokit.repos.createOrUpdateFileContents(
+					context.repo({
+						path: imagePath,
+						message: 'feat: Added solana QR image',
+						content: QR.base64,
+						committer: {
+							name: 'Drill Bot',
+							email: 'danielarturomt@gmail.com',
+						},
+						author: {
+							name: 'Drill Bot',
+							email: 'danielarturomt@gmail.com',
+						},
+					})
+				);
+
+				const bountyVault = await getBountyVault(
+					program,
+					boardAccount.id,
+					bountyAccount.id
+				);
+
+				const boardMessageData = {
+					id: bountyAccount.boardId,
+					publicKey: boardPublicKey.toBase58(),
+					lockTime: boardAccount.lockTime,
+					authority: boardAccount.authority.toBase58(),
+				};
+
+				const bountyMessageData = {
+					id: bountyAccount.id,
+					publicKey: bountyPublicKey.toBase58(),
+					vaultATA: bountyVault.address.toBase58(),
+					vaultAmount: bountyVault.amount,
+				};
+
 				return Promise.all([
 					context.octokit.issues.removeLabel(
 						context.issue({
@@ -135,11 +191,40 @@ export const createDrillGithubApp =
 					context.octokit.issues.createComment(
 						context.issue({
 							body: getBountyEnabledCommentBody(
+								boardMessageData,
+								bountyMessageData,
+								QR.base64,
 								getExplorerUrl(
+									'tx',
 									signature,
 									cluster,
 									provider.connection.rpcEndpoint
-								)
+								),
+								getExplorerUrl(
+									'address',
+									boardMessageData.publicKey,
+									cluster,
+									provider.connection.rpcEndpoint
+								),
+								getExplorerUrl(
+									'address',
+									boardMessageData.authority,
+									cluster,
+									provider.connection.rpcEndpoint
+								),
+								getExplorerUrl(
+									'address',
+									bountyMessageData.publicKey,
+									cluster,
+									provider.connection.rpcEndpoint
+								),
+								getExplorerUrl(
+									'address',
+									bountyMessageData.vaultATA,
+									cluster,
+									provider.connection.rpcEndpoint
+								),
+								imagePath
 							),
 							contentType: 'text/x-markdown',
 						})
@@ -198,6 +283,7 @@ export const createDrillGithubApp =
 				],
 				program.programId
 			);
+
 			const bountyAccount = await program.account.bounty.fetchNullable(
 				bountyPublicKey
 			);
@@ -313,6 +399,7 @@ export const createDrillGithubApp =
 						context.issue({
 							body: getBountyClosedCommentBody(
 								getExplorerUrl(
+									'tx',
 									signature,
 									cluster,
 									provider.connection.rpcEndpoint
@@ -486,6 +573,7 @@ export const createDrillGithubApp =
 						context.issue({
 							body: getBountyClosedCommentBody(
 								getExplorerUrl(
+									'tx',
 									signature,
 									cluster,
 									provider.connection.rpcEndpoint
@@ -614,6 +702,7 @@ export const createDrillGithubApp =
 						context.issue({
 							body: getBountyHunterChangedCommentBody(
 								getExplorerUrl(
+									'tx',
 									signature,
 									cluster,
 									provider.connection.rpcEndpoint
