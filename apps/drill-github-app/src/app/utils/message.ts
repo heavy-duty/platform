@@ -1,7 +1,9 @@
+import { BN } from '@heavy-duty/anchor';
+
 export interface BoardMessageData {
 	id: number;
 	publicKey: string;
-	lockTime: bigint;
+	lockTime: BN;
 	authority: string;
 }
 
