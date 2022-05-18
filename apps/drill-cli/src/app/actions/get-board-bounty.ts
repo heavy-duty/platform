@@ -6,7 +6,7 @@ import { Drill } from '../utils/drill';
 interface BoardBountyData {
 	owner: string;
 	repoName: string;
-	bountyId: string;
+	issueNumber: number;
 }
 
 export const getBoardBounty = async (
@@ -14,20 +14,16 @@ export const getBoardBounty = async (
 	boardData: BoardBountyData
 ) => {
 	const octokit = new Octokit();
-	const { owner, repoName, bountyId } = boardData;
+	const { owner, repoName, issueNumber } = boardData;
 	const repo = await octokit.rest.repos.get({ owner, repo: repoName });
 	const boardId = repo.data.id;
-	const bounty = await getBounty(program, boardId, parseInt(bountyId));
+	const bounty = await getBounty(program, boardId, issueNumber);
 
 	if (bounty === null) {
 		throw new Error('Board bounty not found');
 	}
 
-	const bountyBoardVault = await getBountyVault(
-		program,
-		boardId,
-		parseInt(bountyId)
-	);
+	const bountyBoardVault = await getBountyVault(program, boardId, issueNumber);
 
 	return {
 		boardId,

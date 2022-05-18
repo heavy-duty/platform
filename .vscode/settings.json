@@ -9,7 +9,8 @@
 		"ngx-websocket",
 		"broadcaster",
 		"heavy-duty-ui",
-		"drill"
+		"drill",
+		"bulldozer"
 	],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,
