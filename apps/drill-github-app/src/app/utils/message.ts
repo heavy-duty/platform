@@ -23,7 +23,6 @@ export const getBountyEnabledCommentBody = (
 	bountyVaultPublicKeyUrl: string,
 	imagePath: string
 ) => {
-	console.log(qrBase64);
 	const _initMessage = `
 # 💰 Drill Bounty Program 💰
 
