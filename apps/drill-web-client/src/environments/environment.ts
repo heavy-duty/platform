@@ -5,9 +5,9 @@
 export const environment = {
 	production: false,
 	githubApi: 'https://api.github.com',
-	programId: 'ARp7sigi8EAfyi5omv7jKZTy9NJaQz7Bh6dt4urzFjWt',
-	rpcEndpoint: 'http://localhost:8899',
-	githubRepository: 'danmt/drill-test-2',
+	programId: '2fg324Gf51Nrp1jzxXETvJmXPEiHz9ybNY1r575MtijW',
+	rpcEndpoint: 'https://api.devnet.solana.com',
+	githubRepository: 'danmt/kin-bounty-sample',
 	redirectUri: 'http://localhost:4200/login',
 	githubOAuth: 'https://github.com/login/oauth/authorize',
 	clientId: 'Iv1.9c36914b7e824485',
