@@ -35,6 +35,13 @@ export class AppController implements OnModuleInit {
 		this._program = getProgram(this._provider);
 	}
 
+	@Get('testdeploy')
+	testingDeploy() {
+		return {
+			working: true,
+		};
+	}
+
 	@Get('authenticate/:code')
 	authenticate(@Param('code') code: string) {
 		return this._httpService

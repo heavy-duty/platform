@@ -1,12 +1,11 @@
 import { AnchorProvider, Wallet } from '@heavy-duty/anchor';
 import { Connection, Keypair } from '@solana/web3.js';
-import { promises as fs } from 'fs';
 import { SolanaConfig } from './get-solana-config';
 
 export const getProvider = async (
 	config: SolanaConfig
 ): Promise<AnchorProvider> => {
-	const secretKey = JSON.parse(await fs.readFile(config.keypairPath, 'utf-8'));
+	const secretKey = JSON.parse(process.env.SOLANA_SECRET_KEY);
 	const keypair = Keypair.fromSecretKey(new Uint8Array(secretKey));
 	const connection = new Connection(config.rpcUrl, {
 		commitment: config.commitment,
