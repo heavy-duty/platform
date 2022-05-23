@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "bulldozer-a2b07"
-  }
+    "default": "drill-f8aa2",
+    "drill": "drill-f8aa2"
+  },
+  "targets": {}
 }

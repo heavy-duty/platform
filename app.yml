@@ -127,7 +127,7 @@ default_permissions:
 # name: My Probot App
 
 # The homepage of your GitHub App.
-url: http://localhost:4200
+url: https://drill.heavyduty.builders
 # A description of the GitHub App.
 # description: A description of my awesome app
 
