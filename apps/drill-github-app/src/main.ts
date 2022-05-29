@@ -8,16 +8,16 @@ import { getInstallServer } from './app/utils/github/get-install-server';
 const main = async () => {
 	config();
 
-	if (process.env.PROGRAM_ID === undefined) {
-		throw new Error('PROGRAM_ID env variable is missing.');
-	}
-
 	if (
 		process.env.APP_ID === undefined ||
 		process.env.GITHUB_CLIENT_SECRET === undefined
 	) {
 		await getInstallServer();
 		return;
+	}
+
+	if (process.env.PROGRAM_ID === undefined) {
+		throw new Error('PROGRAM_ID env variable is missing.');
 	}
 
 	return createNodeMiddleware(
@@ -38,17 +38,3 @@ const main = async () => {
 };
 
 export default main();
-
-// const app = server();
-
-// app.use(createNodeMiddleware);
-// app.use(getInstallServer);
-
-// middleware = middleware()
-
-// middleware.use(createNodeMiddleware);
-// middleware.use(getInstallServer)
-
-// app.use(middleware)
-
-// app.list(8000)
