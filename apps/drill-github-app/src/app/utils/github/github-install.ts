@@ -27,7 +27,7 @@ export const setupAppFactory = (
 			const pkg = setup.pkg;
 			const manifest = setup.getManifest(pkg, baseUrl);
 			const createAppUrl = setup.createAppUrl;
-			console.log('MANIFEST', setup.getManifest(pkg, baseUrl));
+
 			// Pass the manifest to be POST'd
 			res.render('setup.handlebars', { pkg, createAppUrl, manifest });
 		});

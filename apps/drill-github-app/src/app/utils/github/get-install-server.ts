@@ -21,7 +21,7 @@ export const getInstallServer = async () => {
 		'views',
 		join(__dirname, '..', '..', '..', 'apps/drill-github-app/src/views')
 	);
-	console.log('EPALE', serverOptions, probotOptions);
+
 	await server.load(setupAppFactory(undefined, undefined));
 	await server.start();
 
