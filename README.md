@@ -27,8 +27,7 @@ Copy that PublicKey and replace it in these places:
 
 - bulldozer program id in `apps/bulldozer-programs/Anchor.toml`
 - declare_id in `apps/bulldozer-programs/programs/bulldozer/src/lib.rs`
-- programId property in `apps/bulldozer-client/src/environments/environment.prod.ts`
-- programId property in `apps/bulldozer-client/src/environments/environment.ts`
+- BULLDOZER_PROGRAM_ID const in `libs/bulldozer/shared/devkit/src/lib/programs/bulldozer-program/bulldozer-program.ts`
 
 Now you run these commands from the root path:
 
