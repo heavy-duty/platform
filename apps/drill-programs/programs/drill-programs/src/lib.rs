@@ -6,7 +6,7 @@ mod instructions;
 
 use instructions::*;
 
-declare_id!("ARp7sigi8EAfyi5omv7jKZTy9NJaQz7Bh6dt4urzFjWt");
+declare_id!("DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1");
 
 #[program]
 pub mod drill {
