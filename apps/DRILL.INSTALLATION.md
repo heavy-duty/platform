@@ -91,6 +91,8 @@ _/home/user/.config/solana/cli/config.yaml_ to match the new wallet created.
 
 Create the new board. If you deploy a custom solana program, remember to update the .env file located at _apps/drill-cli_ to point to your program id, if not, you can continue without any modification using the default [drill program](https://explorer.solana.com/address/DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1?cluster=devnet):
 
+<details><summary><b>See instruction how to create a new board...</b></summary>
+
 ```bash
 >> nx run drill-cli:create-board --githubRepository <your-github-username>/<your-repository-nam> --lockTime <time-in-ms> --acceptedMint <mint-public-key>
 ```
@@ -115,6 +117,9 @@ Board Public Key: 4tL3PaLkmujSB1fZB5Z8e3TMca5pTNpjoa3WTw27NQkh
 
 ```
 
+</details>
+<br>
+
 The last step to fully configurate your repo will be the instalation of the Github app in the repository. To do this, first you have to run the following command:
 
 ```bash
@@ -132,23 +137,23 @@ After that, an .env file will be created in the root folder of the monorepo, thi
 
 Let's install the Github app!
 
-Register the app
+1. Register the app
 
-[PHOTO]
+   [PHOTO]
 
-Enter a name
+2. Enter a name you want
 
-[PHOTO]
+   [PHOTO]
 
-Select the repo or repos where you want to install the Github app
+3. Select the repo or repos where you want to install the Github app
 
-[PHOTO]
+   [PHOTO]
 
 There you go! Now you can close the _localhost:3000_ server and open the .env file located the root folder. We will use this file later.
 
 Now, it's time to deploy the _Drill-Github-App_ app in this monorepo, after that you will add some settings to the Github app you just installed.
 
-### Drill Github Gateway
+## Drill Github Gateway
 
 This is a Node app built using [Protobot](https://github.com/probot/probot). Before you start is important to understand in detail everything you need.
 
@@ -221,7 +226,7 @@ You can check all the transfer you make by running:
 
 With the Drill GithubApp already deployed and working, is time to deploy the Drill Gateway.
 
-### Drill Gateway
+## Drill Gateway
 
 This is a Node app that have two main functions, the first one is authenticate you with github, and the second its letting you claim your bounty once the issue have been done and closed. So, lets deploy the Gateway in the same way you just deployed the Drill-Github-Gateway :
 
@@ -251,7 +256,7 @@ Add the enviroment variables to the vercel environment of your app and redeploy 
 
 Done! now, is time to work in the web client.
 
-### Web client
+## Web client
 
 To deploy the web client we suggest using firebase, this because the web client is wrote in angular and firebase is really friendly with this kind of apps. But again, you can use vercel or whatever platform you want.
 
@@ -259,14 +264,7 @@ Lets login in firebase:
 
 ```bash
 >> firebase login
-
-i  Firebase optionally collects CLI usage and error reporting information to help improve our products. Data is collected in accordance with Googles privacy policy (https://policies.google.com/privacy) and is not used to identify you.
-
-? Allow Firebase to collect CLI usage and error reporting information? Yes
-i  To change your data collection preference at any time, run `firebase logout` and log in again.
-
-Visit this URL on this device to log in:
-....
+...
 
 ```
 
@@ -301,38 +299,15 @@ And deploy it using Firebase (you will need to config some things)
 
 === Hosting Setup
 
-Your public directory is the folder (relative to your project directory) that
-will contain Hosting assets to be uploaded with firebase deploy. If you
-have a build process for your assets, use your builds output directory.
-
-? What do you want to use as your public directory? dist/apps/drill-web-client
-? Configure as a single-page app (rewrite all urls to /index.html)? Yes
-? Set up automatic builds and deploys with GitHub? No
-? File dist/apps/drill-web-client/index.html already exists. Overwrite? No
-i  Skipping write of dist/apps/drill-web-client/index.html
-
-i  Writing configuration info to firebase.json...
-i  Writing project information to .firebaserc...
-
 ✔  Firebase initialization complete!
 
 
 >> firebase deploy
 
-=== Deploying to 'testin-drill'...
-
-i  deploying hosting
-i  hosting[testin-drill]: beginning deploy...
-i  hosting[testin-drill]: found 34 files in dist/apps/drill-web-client
-✔  hosting[testin-drill]: file upload complete
-i  hosting[testin-drill]: finalizing version...
-✔  hosting[testin-drill]: version finalized
-i  hosting[testin-drill]: releasing new version...
-✔  hosting[testin-drill]: release complete
+...
 
 ✔  Deploy complete!
 
-Project Console: https://console.firebase.google.com/project/testin-drill/overview
 Hosting URL: https://testin-drill.web.app
 
 ```
@@ -368,7 +343,7 @@ jobs:
     steps:
       - name: Vault Updater
         id: vault-updater
-        uses: heavy-duty/drill-vault-updater-action@v1.0.34
+        uses: heavy-duty/drill-vault-updater-action@v1.0.49
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           rpc-endpoint: ${{ secrets.RPC_ENDPOINT }}
@@ -414,40 +389,42 @@ With all stuff are already configured and running, now you can go and test the b
 
 If you have any error, please be sure you use the correct env vars in all the platforms (Vercel, Github and Firebase). Some commons errors are:
 
-1- You added a wrong Private Key in the Drill-Github-Gateway deployed on Vercel. You have to avoid use ", so instead of this
+1. You added a wrong Private Key in the Drill-Github-Gateway deployed on Vercel. You have to avoid use ", so instead of this
 
-```text
-PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n"
-```
+   ```text
+   PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n"
+   ```
 
-you should have
+   you should have
 
-```text
-PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n
-```
+   ```text
+   PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n
+   ```
 
-2- You create a new board using the CLI with a Program ID different that the used in the GITHUB or VERCEL environment variables
+2. You create a new board using the CLI with a Program ID different that the used in the GITHUB or VERCEL environment variables
 
-3- You never should end the URL with an /, neither of the URL we use o generate here have a / at the end. For example, avoid this:
+3. You never should end the URL with an /, neither of the URL we use o generate here have a / at the end. For example, avoid this:
 
-```text
-...
-	redirectUri: 'http://localhost:4200/login/',
-	githubOAuth: 'https://github.com/login/oauth/authorize/',
-	gatewayUrl: 'http://localhost:3333/',
-...
-```
+   ```text
+   ...
+   redirectUri: 'http://localhost:4200/login/',
+   githubOAuth: 'https://github.com/login/oauth/authorize/',
+   gatewayUrl: 'http://localhost:3333/',
+   ...
+   ```
 
-instead, do this:
+   instead, do this:
 
-```text
-...
-	redirectUri: 'http://localhost:4200/login',
-	githubOAuth: 'https://github.com/login/oauth/authorize',
-	gatewayUrl: 'http://localhost:3333',
-...
-```
+   ```text
+   ...
+   redirectUri: 'http://localhost:4200/login',
+   githubOAuth: 'https://github.com/login/oauth/authorize',
+   gatewayUrl: 'http://localhost:3333',
+   ...
+   ```
 
-4- Always remove the Dist folder of the app you want to deploy, NCC sometimes generate others files instead of replacing the existing ones.
+4. Always remove the Dist folder of the app you want to deploy, NCC sometimes generate others files instead of replacing the existing ones.
 
-5- If the board is not being created, be sure the repo is public, currently we don't accept private repositories
+5. If the board is not being created, be sure the repo is public, currently we don't accept private repositories
+
+6. If the drill website always redirect you to the unauthorized state, be sure you have the correc redirectUri in the environment.prod.ts and in the GithubApp Settings (Github website)
