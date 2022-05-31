@@ -1,7 +1,5 @@
 # Deploy Instructions
 
-Clone this repo and checkout to the 'andresmgsl/vercel-deploy' branch -> git@github.com:andresmgsl/platform.git
-
 These are the instructions to use and deploy all the components of Drill Ecosystem, which is composed of:
 
 - Drill CLI
