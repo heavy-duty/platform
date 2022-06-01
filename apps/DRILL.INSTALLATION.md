@@ -278,7 +278,7 @@ Now you will need to update the _environment.prod.ts_ file located at _apps/dril
 - Update the clientID with the githubClientID you already have on your .env file.
 - Update the githubRepository with the _< username >/< name >_ of your Github repository.
 - Update GatewayURL with the domain of the vercel Gateway app already deployed (check the vercel domain of the app).
-- Update the programId with the id of your program.
+- Update the programId with the id of your program. (If not using the default Drill)
 
 **NOTE**: Be sure to use all the data from the early steps, like the URL of the recent deployed gateway and the github id you got when the github app was installed.
 
@@ -293,7 +293,7 @@ Build the web client using:
 
 And deploy it using Firebase (you will need to config some things)
 
-> Select the correct deploy directory as showed above. (dist/apps/drill-web-client)
+> Select the correct deploy directory as showed above. (dist/apps/drill-web-client), and configure as a single-page app.
 
 ```bash
 >> firebase init
@@ -321,8 +321,8 @@ Now with this new Web Client URL, you have to update the _WEB_CLIENT_URL_ enviro
 
 The same way you have to go to your Github settings and update the Github app to have the Callback URL point to _< Web CLient URL >/login_. After this you need to redeploy your vercel Gateway app.
 
-In the _environment.production.ts_ update the redirectURL value with _< Web CLient URL >/login_
-and redeploy the web client.
+In the web client, look for the _environment.production.ts_ file and update the redirectURL value with _< Web CLient URL >/login_
+and redeploy it.
 
 Finally, as the last step you have to install the Github actions to keep the tool synchronized with your repo.
 
@@ -336,6 +336,7 @@ For this, you just have to add this github actions on a _main.yaml_ file under _
 
 ```yaml
 on:
+  push:
   schedule:
     - cron: '*/15 * * * *'
 
