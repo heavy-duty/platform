@@ -1,6 +1,6 @@
 import { BN } from '@heavy-duty/anchor';
 import { PublicKey } from '@solana/web3.js';
-import { Probot } from 'probot';
+import { ApplicationFunction, Probot } from 'probot';
 import { getBoard, getBounty, getBountyVault } from './state';
 import {
 	getBountyClosedCommentBody,
@@ -16,13 +16,13 @@ import {
 } from './utils';
 
 export const createDrillGithubApp =
-	(programId: PublicKey, cluster: string) => (app: Probot) => {
+	(programId: PublicKey, cluster: string): ApplicationFunction =>
+	(app: Probot) => {
 		// Handle bounty initialization
 		app.on('issues.labeled', async (context) => {
 			if (context.payload.label?.name !== 'drill:bounty') {
 				return;
 			}
-
 			const {
 				payload: { issue, repository },
 			} = context;
@@ -69,13 +69,17 @@ export const createDrillGithubApp =
 
 			// When bounty exists just sync the labels in GH
 			if (bountyAccount !== null) {
-				return context.octokit.issues.addLabels(
+				await context.octokit.issues.addLabels(
 					context.issue({
 						labels: bountyAccount.isClosed
 							? ['drill:bounty:closed']
 							: ['drill:bounty:enabled'],
 					})
 				);
+
+				return {
+					message: 'Bounty already enabled.',
+				};
 			}
 
 			await context.octokit.issues.addLabels(
@@ -95,7 +99,7 @@ export const createDrillGithubApp =
 					})
 					.simulate();
 			} catch (error) {
-				return Promise.all([
+				Promise.all([
 					context.octokit.issues.removeLabel(
 						context.issue({
 							name: 'drill:bounty:processing',
@@ -118,6 +122,10 @@ export const createDrillGithubApp =
 						})
 					),
 				]);
+				return {
+					message: 'Something when wrong while simulating initializeBounty',
+					error: getErrorMessage(error),
+				};
 			}
 
 			try {
@@ -232,7 +240,7 @@ export const createDrillGithubApp =
 					),
 				]);
 			} catch (error) {
-				return Promise.all([
+				Promise.all([
 					context.octokit.issues.removeLabel(
 						context.issue({
 							name: 'drill:bounty:processing',
@@ -254,6 +262,10 @@ export const createDrillGithubApp =
 						})
 					),
 				]);
+				return {
+					message: 'Something when wrong while initializing bounty',
+					error: getErrorMessage(error),
+				};
 			}
 		});
 

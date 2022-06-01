@@ -1,0 +1,92 @@
+<html
+	lang='en'
+	class='height-full'
+	data-color-mode='auto'
+	data-light-theme='light'
+	data-dark-theme='dark'
+>
+	<head>
+		<meta charset='UTF-8' />
+		<meta name='viewport' content='width=device-width, initial-scale=1.0' />
+		<meta http-equiv='X-UA-Compatible' content='ie=edge' />
+		<title>Setup
+			{{#if pkg.name}}{{pkg.name}}{{else}}Your App{{/if}}
+			| built with Probot</title>
+		<link rel='icon' href='/probot/static/probot-head.png' />
+		<link rel='stylesheet' href='/probot/static/primer.css' />
+	</head>
+
+	<style>
+		.bp-bg-bricks { background-image:
+		url(https://bulldozer.heavyduty.builders/bricks.10eeefe04eda7b60.webp);
+		background-repeat: repeat !important; } .bp-color-white { color:
+		#e6e6e6!important; } .bp-bg-metal { background-image:
+		url(https://bulldozer.heavyduty.builders/metal.c597070156772819.png);
+		background-repeat: repeat!important; padding: 1rem; background-color:
+		#121212;} a { color: #E69400; }
+	</style>
+	<body class='height-full bg-gray-light bp-bg-bricks bp-color-white'>
+		<div
+			class='d-flex flex-column flex-justify-center flex-items-center text-center height-full'
+		>
+			<img
+				src='https://uje2shf3sgagdhpsrnxcywlx6ovpipi2ffflftapfw4hl7ixei.arweave.net/okmpHLuRgGGd8otuLFl386r0PRop_SrLMDy24df0XIk'
+				alt='Heavy Duty Logo'
+				width='100'
+				class='mb-6'
+			/>
+			<div class='box-shadow rounded-2 p-6 bg-white bp-bg-metal'>
+				<h1>
+					Welcome to
+					{{#if pkg.name}}{{pkg.name}}{{else}}your Drill app{{/if}}
+					{{#if version}}
+						<span
+							class='Label Label--outline v-align-middle ml-2 text-gray-light'
+						>v{{pkg.version}}</span>
+					{{/if}}
+				</h1>
+
+				{{#if pkg.description}}
+					<p>{{pkg.description}}</p>
+				{{else}}
+					<p>This app was built using
+						<a href='https://github.com/probot/probot'>Probot</a>, a framework
+						for building GitHub Apps.</p>
+				{{/if}}
+
+				<div class='text-left mt-6'>
+					<h2 class='alt-h3 mb-2'>Getting Started</h2>
+
+					<p>To start building a GitHub App, you'll need to register a new app
+						on GitHub.</p>
+					<br />
+
+					<form
+						action='{{createAppUrl}}'
+						method='post'
+						target='_blank'
+						class='d-flex flex-items-center'
+					>
+						<button
+							class='btn btn-outline'
+							name='manifest'
+							id='manifest'
+							value='{{manifest}}'
+						>Create new drill instance</button>
+					</form>
+				</div>
+			</div>
+
+			<div class='mt-4'>
+				<h4 class='alt-h4 text-gray-light'>Need help?</h4>
+				<div class='d-flex flex-justify-center mt-2'>
+					<a
+						href='https://twitter.com/danm_t'
+						class='btn btn-outline mr-2'
+						target='_blank'
+					>@danm_t</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -2,7 +2,7 @@
 seeds = true
 
 [programs.localnet]
-drill = "ARp7sigi8EAfyi5omv7jKZTy9NJaQz7Bh6dt4urzFjWt"
+drill = "DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1"
 
 [registry]
 url = "https://anchor.projectserum.com"
