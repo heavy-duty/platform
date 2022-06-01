@@ -199,6 +199,8 @@ vercel deploy --prod dist/apps/drill-github-app
 
 Add all the environment variables, one by one, to the vercel environment of your app (in the website settings) and redeploy the whole app.
 
+![Vercel environment variables](../.docs/drill/assets/vercel_environment_file.png)
+
 Before redeploy, be sure to remove the last dist folder to avoid conflicts, run:
 
 ```bash
@@ -247,8 +249,6 @@ RPC_URL=https://api.devnet.solana.com
 COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56,4,82,89,57, ... ,237,44,1,247,245,68,234]
 ```
-
-![Vercel environment variables](../.docs/drill/assets/vercel_environment_file.png)
 
 Add the environment variables to the vercel environment of your app and redeploy it. (like you did before)
 
