@@ -273,12 +273,12 @@ Then, create a new project in the console, using this link -> https://console.fi
 </details>
 <br>
 
-Now you will need to update the _environment.prod.ts_ file located at _apps/drill-web-client/src/environments_ as follows:
+Go and update the _environment.prod.ts_ file located at _apps/drill-web-client/src/environments_ as follows:
 
-- Update the clientID with the githubClientID you already have on your .env file.
+- Update the clientID with the githubClientID you already have from previous steps.
 - Update the githubRepository with the _< username >/< name >_ of your Github repository.
-- Update GatewayURL with the domain of the vercel Gateway app already deployed (check the vercel domain of the app).
-- Update the programId with the id of your program. (If not using the default Drill)
+- Update GatewayURL with the domain of the vercel Gateway app already deployed (check the vercel to get the app domain).
+- If you are not using the default Drill Anchor Program, update the programId with the id of your program.
 
 **NOTE**: Be sure to use all the data from the early steps, like the URL of the recent deployed gateway and the github id you got when the github app was installed.
 
