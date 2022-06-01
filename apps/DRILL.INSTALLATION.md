@@ -256,7 +256,7 @@ Done! now, is time to work in the web client.
 
 ## Web client
 
-To deploy the web client we suggest using firebase, this because the web client is wrote in angular and firebase is really friendly with this kind of apps. But again, you can use vercel or whatever platform you want.
+To deploy the web client we suggest to use firebase, this because the web client is wrote in angular and firebase is really friendly with this kind of apps. But again, you can use vercel or whatever platform you want.
 
 <details><summary><b>See instruction how login and use firebase...</b></summary>
 
