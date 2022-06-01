@@ -336,7 +336,6 @@ For this, you just have to add this github actions on a _main.yaml_ file under _
 
 ```yaml
 on:
-  push:
   schedule:
     - cron: '*/15 * * * *'
 
