@@ -66,7 +66,7 @@ export class AssociatedTokenAccountValidator {
 						<input
 							type="text"
 							formControlName="userVault"
-							class="rounded bg-bd-black w-full py-1 px-2"
+							class="rounded bg-bp-black w-full py-1 px-2"
 						/>
 						<div class="form-control-message h-4">
 							<p
@@ -108,14 +108,14 @@ export class AssociatedTokenAccountValidator {
 
 					<div class="flex">
 						<button
-							class="flex-1 bg-black py-2 bd-button uppercase text-sm"
+							class="flex-1 bg-black py-2 bp-button uppercase text-sm"
 							(click)="onClose()"
 							type="button"
 						>
 							close
 						</button>
 						<button
-							class="flex-1 bg-black py-2 bd-button uppercase text-sm"
+							class="flex-1 bg-black py-2 bp-button uppercase text-sm"
 							[disabled]="form.get('userVault')?.pending"
 							type="submit"
 						>

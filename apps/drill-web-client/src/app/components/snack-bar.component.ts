@@ -22,11 +22,11 @@ export class SnackBarClassPipe implements PipeTransform {
 	transform(value: string | null): string[] {
 		switch (value) {
 			case 'success':
-				return ['bg-green-600', 'bd-box-shadow-bg-green'];
+				return ['bg-green-600', 'bp-box-shadow-bg-green'];
 			case 'warning':
-				return ['bg-yellow-600', 'bd-box-shadow-bg-yellow'];
+				return ['bg-yellow-600', 'bp-box-shadow-bg-yellow'];
 			case 'error':
-				return ['bg-red-600', 'bd-box-shadow-bg-red'];
+				return ['bg-red-600', 'bp-box-shadow-bg-red'];
 			default:
 				return ['bg-black-600'];
 		}

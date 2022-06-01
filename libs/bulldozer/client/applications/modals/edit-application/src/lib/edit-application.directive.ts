@@ -17,7 +17,7 @@ export class EditApplicationDirective {
 		this._matDialog
 			.open<EditApplicationComponent, ApplicationDto, ApplicationDto>(
 				EditApplicationComponent,
-				{ data: this.application, panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+				{ data: this.application, panelClass: ['bp-bg-wood', 'bg-bp-brown'] }
 			)
 			.afterClosed()
 			.subscribe((data) => data && this.editApplication.emit(data));

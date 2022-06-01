@@ -9,6 +9,8 @@ import { Option } from './utils';
 @Component({
 	selector: 'crane-root',
 	template: `
+		<button mat-raised-button color="primary">asd</button>
+
 		<div class="flex justify-between">
 			<main class="flex-1">
 				<crane-create-transaction-section

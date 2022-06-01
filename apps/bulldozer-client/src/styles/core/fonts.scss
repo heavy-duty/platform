@@ -2,14 +2,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400&display=swap');
 
 @font-face {
-  font-family: 'CaptureIt';
-  src: local('../../assets/fonts/CaptureIt.ttf'),
-    local('../../assets/fonts/CaptureIt.ttf'),
-    url(https://bulldozer.heavyduty.builders/assets/fonts/CaptureIt.ttf)
-      format('woff2');
-  font-display: swap;
+	font-family: 'CaptureIt';
+	src: local('../../assets/fonts/CaptureIt.ttf'),
+		local('../../assets/fonts/CaptureIt.ttf'),
+		url(https://bulldozer.heavyduty.builders/assets/fonts/CaptureIt.ttf)
+			format('woff2');
+	font-display: swap;
 }
 
-.bd-font {
-  font-family: 'CaptureIt' !important;
+.bp-font {
+	font-family: 'CaptureIt' !important;
 }

@@ -2,14 +2,5 @@ $success-bgcolor: #059669;
 $warning-bgcolor: #fbbf24;
 $error-bgcolor: #dc2626;
 
-$white-text-color: #e6e6e6;
+$white-text-color: white;
 $black-text-color: black;
-$primary-text-color: #ffa807;
-
-.bp-color-primary {
-	color: $primary-text-color !important;
-}
-
-.bp-color-white {
-	color: $white-text-color !important;
-}

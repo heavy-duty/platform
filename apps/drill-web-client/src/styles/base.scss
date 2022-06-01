@@ -7,7 +7,7 @@ body {
 	font-family: 'Space Grotesk';
 }
 
-.bd-button {
+.bp-button {
 	padding-left: 10px;
 	padding-right: 10px;
 	padding-top: 5px;
@@ -16,16 +16,16 @@ body {
 	border: 2px solid #212121;
 }
 
-.bd-button:hover {
+.bp-button:hover {
 	background-image: linear-gradient(#171717, #171717);
 }
 
-.bd-button:active {
+.bp-button:active {
 	background-image: linear-gradient(#171717, #212121);
 }
 
-.bd-button[disabled='disabled'],
-.bd-button:disabled {
+.bp-button[disabled='disabled'],
+.bp-button:disabled {
 	cursor: not-allowed;
 	background-image: linear-gradient(gray, gray) !important;
 	color: #e6e6e6;
