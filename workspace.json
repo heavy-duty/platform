@@ -75,6 +75,8 @@
 		"bulldozer-programs": "apps/bulldozer-programs",
 		"bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
 		"bulldozer-shared-generator": "libs/bulldozer/shared/generator",
+		"crane-web-client": "apps/crane-web-client",
+		"crane-web-client-e2e": "apps/crane-web-client-e2e",
 		"drill-cli": "apps/drill-cli",
 		"drill-gateway": "apps/drill-gateway",
 		"drill-github-app": "apps/drill-github-app",
