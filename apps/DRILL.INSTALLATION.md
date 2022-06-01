@@ -9,13 +9,13 @@ These are the instructions to use and deploy all the components of Drill Ecosyst
 - Drill Anchor Program
 - 2 Github actions
 
-You would go through all this apps and deploy each one independently. All this apps live in the same repository, under a NX monorepo. The part 1 will assume you already deployed the CLI and the Anchor program. You can easily deploy the program, just go to the drill-program folder inside app. build and deploy it as a normal anchor program (you can use NX-ANCHOR). You always can use our already deployed Drill Program DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
+You would go through all this apps and deploy each one independently. All this apps live in the same repository, under a NX monorepo. The part 1 will assume you already deployed the CLI and the Anchor program. You always can use our already deployed Drill Program DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
 
 ## Pre configuration
 
 Remember, Drill is a tool aimed to create a board with bounties in an existing Github repository, so be sure you have already the repo you want to use.
 
-Clone the official monorepo from here.
+Clone the official monorepo from [here](https://github.com/heavy-duty/platform/).
 
 Then, install all the dependencies using:
 
@@ -43,7 +43,7 @@ Commitment: confirmed
 
 ```
 
-Now, lets create a token and make an airdrop to test it. For this, you will need the spl-token cli. You can skip this staep if you already have a token you would like to use. (like [BRICK](https://explorer.solana.com/address/BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg?cluster=devnet))
+Now, lets create a token and make an airdrop to test it. For this, you will need the spl-token cli. You can skip this step if you already have a token you would like to use. (like [BRICK](https://explorer.solana.com/address/BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg?cluster=devnet))
 
 <details><summary><b>See instruction how to create a new mint...</b></summary>
 
@@ -118,7 +118,7 @@ Board Public Key: 4tL3PaLkmujSB1fZB5Z8e3TMca5pTNpjoa3WTw27NQkh
 </details>
 <br>
 
-The last step to fully configurate your repo will be the instalation of the Github app in the repository. To do this, first you have to run the following command:
+The last step to fully configure your repo will be the installation of the Github app in the repository. To do this, first you have to run the following command:
 
 ```bash
 >> nx serve drill-github-app
@@ -197,7 +197,7 @@ ncc build apps/drill-github-app/src/main.ts --license licenses.txt --minify --ou
 vercel deploy --prod dist/apps/drill-github-app
 ```
 
-Add all the enviroment variables, one by one, to the vercel environment of your app and redeploy the whole app.
+Add all the environment variables, one by one, to the vercel environment of your app and redeploy the whole app.
 
 Be sure to remove the last dist folder to avoid conflicts, run:
 
@@ -236,7 +236,7 @@ ncc build apps/drill-gateway/src/main.ts --license licenses.txt --minify --out d
 vercel deploy --prod dist/apps/drill-gateway
 ```
 
-**NOTE**: Remember, you need to replace the data with your own values as we did before. You should have something like this (we will change the Web Client URL later, so you can use somenthing like _http://localhost:4200_ for now):
+**NOTE**: Remember, you need to replace the data with your own values as we did before. You should have something like this (we will change the Web Client URL later, so you can use something like _http://localhost:4200_ for now):
 
 ```text
 PROGRAM_ID=DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
@@ -248,7 +248,7 @@ COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56,4,82,89,57, ... ,237,44,1,247,245,68,234]
 ```
 
-Add the enviroment variables to the vercel environment of your app and redeploy it.
+Add the environment variables to the vercel environment of your app and redeploy it.
 
 [PHOTO]
 
@@ -268,7 +268,7 @@ Lets login in firebase:
 
 Then, create a new project in the console, using this link -> https://console.firebase.google.com/, or directly with the firebase CLI.
 
-Now you will need to update the _environment.prod.ts_ file located at _apps/drill-web-client/src/enviroments_ as follows:
+Now you will need to update the _environment.prod.ts_ file located at _apps/drill-web-client/src/environments_ as follows:
 
 - Update the clientID with the githubClientID you already have on your .env file.
 - Update the githubRepository with the _< username >/< name >_ of your Github repository.
