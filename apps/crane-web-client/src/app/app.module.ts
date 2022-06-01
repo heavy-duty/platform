@@ -10,7 +10,12 @@ import { AppComponent } from './app.component';
 import { BlockhashStatusSectionModule } from './blockhash-status-section';
 import { ConfirmTransactionButtonModule } from './confirm-transaction-button';
 import { CreateTransactionSectionModule } from './create-transaction-section';
-import { PluginModule, SystemPlugin, TokenPlugin } from './plugins';
+import {
+	AssociatedTokenPlugin,
+	PluginModule,
+	SystemPlugin,
+	TokenPlugin,
+} from './plugins';
 import { SendTransactionButtonModule } from './send-transaction-button';
 import { SignTransactionSectionModule } from './sign-transaction-section';
 
@@ -26,7 +31,11 @@ import { SignTransactionSectionModule } from './sign-transaction-section';
 		HdWalletAdapterModule.forRoot({
 			autoConnect: true,
 		}),
-		PluginModule.forRoot([new SystemPlugin(), new TokenPlugin()]),
+		PluginModule.forRoot([
+			new SystemPlugin(),
+			new TokenPlugin(),
+			new AssociatedTokenPlugin(),
+		]),
 		CreateTransactionSectionModule,
 		SignTransactionSectionModule,
 		SendTransactionButtonModule,

@@ -9,8 +9,6 @@ import { Option } from './utils';
 @Component({
 	selector: 'crane-root',
 	template: `
-		<button mat-raised-button color="primary">asd</button>
-
 		<div class="flex justify-between">
 			<main class="flex-1">
 				<crane-create-transaction-section
@@ -82,8 +80,6 @@ export class AppComponent implements OnInit {
 	ngOnInit() {
 		this._walletStore.setAdapters([new PhantomWalletAdapter()]);
 		this._connectionStore.setEndpoint('http://localhost:8899');
-
-		this._walletStore.connect().subscribe();
 	}
 
 	onTransactionCreated(transaction: Option<Transaction>) {
