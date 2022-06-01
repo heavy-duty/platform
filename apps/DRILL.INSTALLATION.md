@@ -137,15 +137,15 @@ Let's install the Github app!
 
 1. Register the app
 
-   [PHOTO]
+   ![Drill github app website](../.docs/drill/assets/drill_install_app.png)
 
 2. Enter a name you want
 
-   [PHOTO]
+   ![Github app name input](../.docs/drill/assets/register_github_app.png)
 
 3. Select the repo or repos where you want to install the Github app
 
-   [PHOTO]
+   ![Github app select repo input](../.docs/drill/assets/install-app-in-repo.png)
 
 There you go! Now you can close the _localhost:3000_ server and open the .env file located the root folder. We will use this file later.
 
@@ -211,7 +211,7 @@ Then with the vercel url, go to the Github app settings on the Github website an
 
 Go to your Github _settings -> applications -> < your-app-name >_ , there you have to change the Webhook URL to match the Drill-Github-App you just deployed (check the vercel domain of your app).
 
-[PHOTO]
+![Github app webhook url setting](../.docs/drill/assets/github_webhook_url.png)
 
 Now, every Issue with the label **_'drill:bounty'_** will have a bounty enabled to receive funds in the Mint we previously created. Go and check your self, create a new issue and add the **_'drill:bounty'_** label.
 
@@ -248,9 +248,9 @@ COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56,4,82,89,57, ... ,237,44,1,247,245,68,234]
 ```
 
-Add the environment variables to the vercel environment of your app and redeploy it.
+![Vercel environment variables](../.docs/drill/assets/vercel_environment_file.png)
 
-[PHOTO]
+Add the environment variables to the vercel environment of your app and redeploy it. (like you did before)
 
 Done! now, is time to work in the web client.
 
@@ -383,7 +383,7 @@ PROGRAM_ID=DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
 CLUSTER=devnet
 ```
 
-[PHOTO]
+![Github action environment variables](../.docs/drill/assets/github_actions_secrets.png)
 
 Congrats, you successfully finished the Drill Ecosystem setup!
 With all stuff are already configured and running, now you can go and test the bounty program for your issues!
