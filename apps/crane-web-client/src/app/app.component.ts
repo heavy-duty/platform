@@ -9,15 +9,22 @@ import { Option } from './utils';
 @Component({
 	selector: 'crane-root',
 	template: `
-		<div class="flex justify-between">
-			<main class="flex-1">
+		<div class="flex justify-between h-screen">
+			<main class="flex-1 overflow-y-scroll">
 				<crane-create-transaction-section
 					(transactionCreated)="onTransactionCreated($event)"
 				>
 				</crane-create-transaction-section>
 			</main>
 
-			<aside class="w-80">
+			<mat-sidenav
+				#settings
+				class="bp-h-inherit w-80 bp-bg-wood bg-bp-brown px-4"
+				fixedInViewport
+				position="end"
+				mode="side"
+				[opened]="true"
+			>
 				<ng-container *ngrxLet="transaction$; let transaction">
 					<crane-blockhash-status-section
 						*ngrxLet="latestBlockhash$; let latestBlockhash"
@@ -50,7 +57,7 @@ import { Option } from './utils';
 					(transactionConfirmed)="onTransactionConfirmed()"
 				>
 				</crane-confirm-transaction-button>
-			</aside>
+			</mat-sidenav>
 		</div>
 	`,
 	styles: [],

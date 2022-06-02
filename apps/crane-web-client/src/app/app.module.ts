@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatSidenavModule } from '@angular/material/sidenav';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
@@ -25,6 +26,7 @@ import { SignTransactionSectionModule } from './sign-transaction-section';
 		BrowserModule,
 		BrowserAnimationsModule,
 		MatButtonModule,
+		MatSidenavModule,
 		ReactiveComponentModule,
 		FormlyModule.forRoot(),
 		FormlyMaterialModule,

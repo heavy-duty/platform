@@ -15,7 +15,8 @@ import { SendTransactionButtonStore } from './send-transaction-button.store';
 		<button
 			(click)="onSendTransaction()"
 			[disabled]="disabled$ | async"
-			class="px-4 py-2 border-2 border-blue-300 bg-blue-200 disabled:bg-gray-200 disabled:border-gray-300"
+			mat-raised-button
+			color="primary"
 		>
 			Send transaction
 		</button>
@@ -27,8 +28,6 @@ export class SendTransactionButtonComponent {
 	readonly disabled$ = this._sendTransactionButtonStore.disabled$;
 
 	@Input() set transaction(value: Option<Transaction>) {
-		console.log(value);
-
 		if (
 			value !== null &&
 			value.feePayer !== undefined &&

@@ -156,8 +156,6 @@ export const signTransactionMachineFactory = (config?: {
 						}
 					});
 
-					console.log({ signaturesDone: transaction?.verifySignatures() });
-
 					return transaction?.verifySignatures() ?? false;
 				},
 				'valid signer': ({ transaction }, event) => {

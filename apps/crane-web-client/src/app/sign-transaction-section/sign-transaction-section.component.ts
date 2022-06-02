@@ -94,8 +94,6 @@ export class SignTransactionSectionComponent {
 		newTransaction.lastValidBlockHeight = transaction.lastValidBlockHeight;
 		newTransaction.add(...transaction.instructions);
 
-		console.log(newTransaction);
-
 		const signTransaction$ = this._walletStore.signTransaction(newTransaction);
 
 		if (signTransaction$ === undefined) {
