@@ -86,7 +86,7 @@ export class AppComponent implements OnInit {
 
 	ngOnInit() {
 		this._walletStore.setAdapters([new PhantomWalletAdapter()]);
-		this._connectionStore.setEndpoint('http://localhost:8899');
+		this._connectionStore.setEndpoint('https://api.devnet.solana.com');
 	}
 
 	onTransactionCreated(transaction: Option<Transaction>) {
@@ -143,6 +143,7 @@ export class AppComponent implements OnInit {
 		if (transaction !== null) {
 			const newTransaction = new Transaction();
 			newTransaction.feePayer = transaction.feePayer;
+			newTransaction.recentBlockhash = transaction.recentBlockhash;
 			newTransaction.add(...transaction.instructions);
 
 			this._transaction.next(newTransaction);
