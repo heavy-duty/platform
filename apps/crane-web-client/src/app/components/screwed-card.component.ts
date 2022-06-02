@@ -3,9 +3,7 @@ import { Component, HostBinding, Input } from '@angular/core';
 @Component({
 	selector: 'crane-screwed-card',
 	template: `
-		<div>
-			<ng-content></ng-content>
-		</div>
+		<ng-content></ng-content>
 
 		<div
 			*ngFor="let screw of screws"

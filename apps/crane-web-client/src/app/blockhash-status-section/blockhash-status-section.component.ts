@@ -10,8 +10,8 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 			class="p-4"
 			*ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight"
 		>
-			<div
-				class="px-4 py-2 border-2 border-white flex justify-between items-center"
+			<crane-screwed-card
+				class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
 				*ngrxLet="percentage$; let percentage"
 			>
 				<header>
@@ -30,11 +30,8 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 						<ng-container *ngIf="percentage >= 50">
 							Blockhash is valid.
 						</ng-container>
-						<ng-container *ngIf="percentage >= 20 && percentage < 50">
+						<ng-container *ngIf="percentage > 0 && percentage < 50">
 							Blockhash is expiring.
-						</ng-container>
-						<ng-container *ngIf="percentage > 0 && percentage < 20">
-							Blockhash is about to expire.
 						</ng-container>
 						<ng-container *ngIf="percentage === 0">
 							Blockhash expired.
@@ -72,7 +69,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 						cancel
 					</mat-icon>
 				</ng-container>
-			</div>
+			</crane-screwed-card>
 		</section>
 	`,
 	providers: [BlockhashStatusSectionStore],
@@ -86,7 +83,9 @@ export class BlockhashStatusSectionComponent {
 	@Output() blockhashExpired =
 		this._blockhashStatusSectionStore.serviceState$.pipe(
 			isNotNull,
-			filter((state) => state.matches('Slot invalid') && state.changed === true)
+			filter(
+				(state) => state.matches('Blockhash invalid') && state.changed === true
+			)
 		);
 	@Output() blockhashChanged =
 		this._blockhashStatusSectionStore.latestBlockhash$.pipe(isNotNull);
@@ -96,7 +95,7 @@ export class BlockhashStatusSectionComponent {
 	) {}
 
 	loadBlockhash() {
-		this._blockhashStatusSectionStore.getSlot();
+		this._blockhashStatusSectionStore.getBlockHeight();
 	}
 
 	onBlockhashRestarted() {

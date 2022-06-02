@@ -3,19 +3,19 @@
 export interface Typegen0 {
   '@@xstate/typegen': true;
   eventsCausingActions: {
-    'Save initial slot in context': 'get-slot.Request succeeded';
-    'Update slot and gaps in context': 'updateSlot';
+    'Save initial block height in context': 'get-block-height.Request succeeded';
+    'Update block height in context': 'updateBlockHeight';
     'Mark as invalid in context': '';
     'Save latest blockhash in context': 'get-latest-blockhash.Request succeeded';
-    'Start get slot machine': 'getSlot';
-    'Start get latest blockhash machine': 'get-slot.Request succeeded';
+    'Start get block height machine': 'getBlockHeight';
+    'Start get latest blockhash machine': 'get-block-height.Request succeeded';
   };
   internalEvents: {
     '': { type: '' };
     'xstate.init': { type: 'xstate.init' };
   };
   invokeSrcNameMap: {
-    'Subscribe to slot changes': 'done.invoke.Blockhash Status Machine.Watching slot status:invocation[0]';
+    'Poll for block height': 'done.invoke.Blockhash Status Machine.Watching block height status:invocation[0]';
   };
   missingImplementations: {
     actions: never;
@@ -24,17 +24,17 @@ export interface Typegen0 {
     delays: never;
   };
   eventsCausingServices: {
-    'Subscribe to slot changes': 'get-latest-blockhash.Request succeeded';
+    'Poll for block height': 'get-latest-blockhash.Request succeeded';
   };
   eventsCausingGuards: {
-    'slot invalid': '';
+    'blockhash invalid': '';
     'is fire and forget': '';
   };
   eventsCausingDelays: {};
   matchesStates:
-    | 'Getting slot'
-    | 'Watching slot status'
-    | 'Slot invalid'
+    | 'Getting block height'
+    | 'Watching block height status'
+    | 'Blockhash invalid'
     | 'Done'
     | 'Idle'
     | 'Getting latest blockhash';

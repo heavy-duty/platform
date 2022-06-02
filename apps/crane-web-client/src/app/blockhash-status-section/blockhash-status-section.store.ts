@@ -72,7 +72,7 @@ export class BlockhashStatusSectionStore extends ComponentStore<ViewModel> {
 		})
 	);
 
-	readonly getSlot = this.effect<void>(
+	readonly getBlockHeight = this.effect<void>(
 		concatMap(() =>
 			of(null).pipe(
 				withLatestFrom(this.service$),
@@ -81,7 +81,7 @@ export class BlockhashStatusSectionStore extends ComponentStore<ViewModel> {
 						return;
 					}
 
-					service.send('getSlot');
+					service.send('getBlockHeight');
 				})
 			)
 		)

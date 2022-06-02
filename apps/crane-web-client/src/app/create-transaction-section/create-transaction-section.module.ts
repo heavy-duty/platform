@@ -10,12 +10,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatStepperModule } from '@angular/material/stepper';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { FormlyModule } from '@ngx-formly/core';
+import { ScrewedCardModule } from '../components/screwed-card.module';
+import { RotateModule } from '../directives/rotate.module';
+import { StopPropagationModule } from '../directives/stop-propagation.module';
 import { CreateTransactionSectionComponent } from './create-transaction-section.component';
 import { FormlyFieldStepperComponent } from './formly-stepper.type';
 import { InstructionAutocompleteModule } from './instruction-autocomplete.module';
-import { RotateDirective } from './rotate.directive';
-import { ScrewedCardComponent } from './screwed-card.component';
-import { StopPropagationModule } from './stop-propagation.module';
 
 @NgModule({
 	imports: [
@@ -39,13 +39,13 @@ import { StopPropagationModule } from './stop-propagation.module';
 		}),
 		InstructionAutocompleteModule,
 		StopPropagationModule,
+		RotateModule,
+		ScrewedCardModule,
 	],
 	exports: [CreateTransactionSectionComponent],
 	declarations: [
 		CreateTransactionSectionComponent,
 		FormlyFieldStepperComponent,
-		ScrewedCardComponent,
-		RotateDirective,
 	],
 })
 export class CreateTransactionSectionModule {}

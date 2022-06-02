@@ -71,7 +71,7 @@ import { TransactionFormService } from './transaction-form.service';
 						[disabled]="!form.valid"
 						type="submit"
 					>
-						claim
+						submit
 					</button>
 				</crane-screwed-card>
 			</crane-screwed-card>
