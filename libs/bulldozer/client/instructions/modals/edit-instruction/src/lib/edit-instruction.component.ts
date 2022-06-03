@@ -1,5 +1,5 @@
 import { Component, HostBinding, Inject } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -67,7 +67,7 @@ import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
 })
 export class EditInstructionComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   constructor(
@@ -76,8 +76,8 @@ export class EditInstructionComponent {
     @Inject(MAT_DIALOG_DATA)
     public instruction?: InstructionDto
   ) {
-    this.form = new FormGroup({
-      name: new FormControl(this.instruction?.name ?? '', {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl(this.instruction?.name ?? '', {
         validators: [Validators.required],
       }),
     });

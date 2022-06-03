@@ -1,25 +1,28 @@
 {
-	"projectType": "library",
-	"sourceRoot": "libs/bulldozer/client/shared/components/tab-list/src",
-	"prefix": "bd",
-	"targets": {
-		"test": {
-			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/bulldozer/client/shared/components/tab-list"],
-			"options": {
-				"jestConfig": "libs/bulldozer/client/shared/components/tab-list/jest.config.ts",
-				"passWithNoTests": true
-			}
-		},
-		"lint": {
-			"executor": "@nrwl/linter:eslint",
-			"options": {
-				"lintFilePatterns": [
-					"libs/bulldozer/client/shared/components/tab-list/src/**/*.ts",
-					"libs/bulldozer/client/shared/components/tab-list/src/**/*.html"
-				]
-			}
-		}
-	},
-	"tags": []
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/bulldozer/client/shared/components/tab-list/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/shared/components/tab-list"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/shared/components/tab-list/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/shared/components/tab-list/src/**/*.ts",
+          "libs/bulldozer/client/shared/components/tab-list/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
 }

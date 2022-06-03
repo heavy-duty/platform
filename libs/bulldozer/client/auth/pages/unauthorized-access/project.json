@@ -1,27 +1,28 @@
 {
-	"projectType": "library",
-	"sourceRoot": "libs/bulldozer/client/auth/pages/unauthorized-access/src",
-	"prefix": "bd",
-	"targets": {
-		"test": {
-			"executor": "@nrwl/jest:jest",
-			"outputs": [
-				"coverage/libs/bulldozer/client/auth/pages/unauthorized-access"
-			],
-			"options": {
-				"jestConfig": "libs/bulldozer/client/auth/pages/unauthorized-access/jest.config.ts",
-				"passWithNoTests": true
-			}
-		},
-		"lint": {
-			"executor": "@nrwl/linter:eslint",
-			"options": {
-				"lintFilePatterns": [
-					"libs/bulldozer/client/auth/pages/unauthorized-access/src/**/*.ts",
-					"libs/bulldozer/client/auth/pages/unauthorized-access/src/**/*.html"
-				]
-			}
-		}
-	},
-	"tags": []
+  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/bulldozer/client/auth/pages/unauthorized-access/src",
+  "prefix": "bd",
+  "targets": {
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/client/auth/pages/unauthorized-access"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/client/auth/pages/unauthorized-access/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/client/auth/pages/unauthorized-access/src/**/*.ts",
+          "libs/bulldozer/client/auth/pages/unauthorized-access/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
 }
