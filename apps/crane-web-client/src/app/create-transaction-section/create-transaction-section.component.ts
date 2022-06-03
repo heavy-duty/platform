@@ -33,9 +33,18 @@ import {
 				<h1 class="text-3xl">Crane Playground</h1>
 			</div>
 
-			<button (click)="onRestartTransactionForm()" class="underline">
-				Restart form
-			</button>
+			<crane-screwed-card
+				class="bg-black bp-bg-metal-2 px-8 py-2 rounded inline-block"
+			>
+				<button
+					class="bg-black h-full px-4 py-1 bp-button uppercase text-sm flex gap-2 items-center"
+					(click)="onRestartTransactionForm()"
+					craneStopPropagation
+					type="button"
+				>
+					<span>Restart <mat-icon inline>refresh</mat-icon></span>
+				</button>
+			</crane-screwed-card>
 		</header>
 
 		<section
