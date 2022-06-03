@@ -1,6 +1,6 @@
 # Deploy Instructions
 
-These are the instructions to use and deploy some of the components of Drill Ecosystem, which is composed of:
+The following instructions will give you to use and deploy some components of Drill Ecosystem, which include:
 
 - Drill CLI
 - Drill Github Gateway
@@ -9,11 +9,11 @@ These are the instructions to use and deploy some of the components of Drill Eco
 - Drill Anchor Program
 - 2 Github actions
 
-All this apps live in the same repository, under a NX monorepo. I will assume you already deployed the CLI and the Anchor program. You always can use our already deployed Drill Program -> DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
+All apps are alive in the same repository, under a NX monorepo. You can always use our official DRILL CLI, and our already deployed Drill Program -> DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
 
 ## Pre configuration
 
-Remember, Drill is a tool aimed to create a board with bounties in an existing Github repository, so be sure you have already the repo you want to use.
+Remember, Drill is a tool aiming to create a board with bounties in an existing Github repository. Be wise in choosing the repo(s) you want to use.
 
 Clone the official monorepo from [here](https://github.com/heavy-duty/platform/).
 
@@ -23,14 +23,14 @@ Then, install all the dependencies using:
 >> npm i
 ```
 
-To deploy, you can use whatever you want, but for this example, we will use:
+To deploy, you can use whatever you want. Let’s illustrate this, here we use: vercel
 
 - Vercel for the Drill's GithubApp and the Gateway.
 - Firebase for the Web Client.
 
-**NOTE**: For this guide we'll assume you already have vercel configure and logged in.
+**NOTE**: For this guide we’re assuming you already have Vercel configured and logged in.
 
-Make sure you have your solana config pointing to devnet, to verify this you can use the following command:
+Make sure you have your solana config pointing to devnet. You can verify with this command:
 
 ```bash
 >> solana config set --url https://api.devnet.solana.com
@@ -43,9 +43,9 @@ Commitment: confirmed
 
 ```
 
-Now, you need a mint for the board, so you can create one, or use an existing mint. For create a new one, you will need the spl-token cli. You can skip this step if you already have a token you would like to use. (like [BRICK](https://explorer.solana.com/address/BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg?cluster=devnet))
+Let’s keep it simple before we start. First, you need a mint for the board, you can use an existing mint or create a new one. You can skip this step if you already have a token you would like to use (like [BRICK](https://explorer.solana.com/address/BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg?cluster=devnet)). But in case you need to create a new mint, don’t forget to use the spl-token cli.
 
-<details><summary><b>See instruction how to create a new mint...</b></summary>
+<details><summary><b>See how to create a new mint instruction...</b></summary>
 
 ```bash
 >> spl-token create-token --decimals 6
@@ -67,11 +67,11 @@ Minting 500 tokens
 </details>
 <br>
 
-Just one step before start, lets create a new wallet and fund it with some SOLs, you'll need this later in the process.
+Just one more step before the beginning. We need a new wallet and fund it with some SOLs (we would need it later in the process).
 
-> Is important to create a new wallet used only for the board, so you can pass the secret key without compromising any of your wallets.
+Creating a new wallet dedicated solely to the board is very important. This way you can pass the secret key without compromising your other wallets.
 
-<details><summary><b>See instruction how to create a new wallet...</b></summary>
+<details><summary><b>See how to create a new wallet instruction...</b></summary>
 
 ```bash
 >> solana-keygen new -o /home/user/.config/solana/drill-testing-app.json
@@ -85,11 +85,11 @@ _/home/user/.config/solana/cli/config.yaml_ to match the new wallet created.
 </details>
 <br>
 
-So lets start, first we have to create a new Board, so use the Drill CLI to do it, using the next command inside the monorepo. If you deploy a custom solana program, remember to update the .env file located at _apps/drill-cli_ to point to your program id, if not, you can continue without any modification using the default [drill program](https://explorer.solana.com/address/DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1?cluster=devnet):
+Alright, we’re all set. Let’s start by creating a new Board: use the Drill CLI to do it (using the next command inside the monorepo). Note that if you deploy a custom solana program, you have to update the .env file located at apps/drill-cli to point it to your program id. If not, you can continue without any modification using the default [drill program](https://explorer.solana.com/address/DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1?cluster=devnet). Also, to avoid any troubles is important that you create the board using the the wallet you just created as the selected in your solana config.yml:
 
-**NOTE**: The CLI use your config.yaml to determine the solana configuration to use for the entire process.
+**NOTE**: The CLI uses your config.yaml to settle the solana configuration for the entire process.
 
-<details><summary><b>See instruction how to create a new board...</b></summary>
+<details><summary><b>See how to create a new board instruction...</b></summary>
 
 ```bash
 >> nx run drill-cli:create-board --githubRepository <your-github-username>/<your-repository-nam> --lockTime <time-in-ms> --acceptedMint <mint-public-key>
@@ -118,7 +118,7 @@ Board Public Key: 4tL3PaLkmujSB1fZB5Z8e3TMca5pTNpjoa3WTw27NQkh
 </details>
 <br>
 
-The last step to fully configure your repo will be the installation of the Github app in the repository. To do this, first you have to run the following command:
+The last step to fully configure your repo is to install the GithubApp in the repository. Before you do this, run the following command:
 
 ```bash
 >> nx serve drill-github-app
@@ -127,39 +127,39 @@ INFO (server): Listening on http://localhost:3000
 INFO (server): Connected
 ```
 
-The first time you run that command, it will tell you to open _localhost:3000_ and install a new Github app in the repository you use to create the board; you can choose the name you want for your Github app.
+After running the command we mentioned above, you would have to open localhost:3000 and install a new GithubApp in the repository which you use to create the board. Feel free to choose the name of your brand new GithubApp.
 
-After that, an .env file will be created in the root folder of the monorepo, this file contains some important data that we will need in the deploy process.
+Then, an .env file will be created in the root folder of the monorepo. This file contains important data that we need to deploy.
 
 **NOTE**: If you delete the .env file, you will need to execute this process again.
 
-Let's install the Github app!
+Let's get this party started! Go install the GithubApp:
 
 1. Register the app
 
    ![Drill github app website](../.docs/drill/assets/drill_install_app.png)
 
-2. Enter a name you want
+2. Name it
 
    ![Github app name input](../.docs/drill/assets/register_github_app.png)
 
-3. Select the repo or repos where you want to install the Github app
+3. Select the repo or repos where you want to install the GithubApp
 
    ![Github app select repo input](../.docs/drill/assets/install-app-in-repo.png)
 
-There you go! Now you can close the _localhost:3000_ server and open the .env file located the root folder. We will use this file later.
+There you go! Now you can close the localhost:3000 server and open the .env file located in the root folder. Keep it at hand, we’ll be using it later.
 
-Now, it's time to deploy the _Drill-Github-App_ app in this monorepo, after that you will add some settings to the Github app you just installed.
+Now, it's time to deploy the _Drill-Github-App_ in this monorepo. Don’t forget, you'll have to add some settings to the GithubApp you just installed.
 
 ## Drill Github Gateway
 
-This is a Node app built using [Protobot](https://github.com/probot/probot). Before you start is important to understand in detail everything you need.
+This is a Node app built using [Protobot](https://github.com/probot/probot).
 
-First you will need to have the Github app successfully installed in the repo(s) where you want to use the bounty program. Also you need to have the .env file already generated by our previous installation process; additionally, you have to add the _ACCEPTED_MINT_, the _RPC_URL_, the _COMMITMENT_, and the _SOLANA_SECRET_KEY_, to the .env file.
+Let’s see what we need to start. Go check that you have successfully installed the GithubApp in the repo (or repos) where you want to use the bounty program. Also, make sure that you have already generated the .env file and add ACCEPTED_MINT, the RPC_URL, the COMMITMENT, and the SOLANA_SECRET_KEY into it.
 
-**NOTE**: _SOLANA_SECRET_KEY_ is the secret key from the Solana wallet previous created for the board. Be sure to use the same key you use to create the board, if not you would have errors.
+**NOTE**: The _SOLANA_SECRET_KEY_ must be the same we used to create the board. Using another secret key would result in errors.
 
-Finally, you should have something like this: (remove all the " in the _PRIVATE_KEY_ if have any)
+Finally, you should have something like this: (remove all the " in the PRIVATE_KEY if it has any)
 
 ```env
 ACCEPTED_MINT=<PublicKey-Mint>
@@ -174,7 +174,7 @@ COMMITMENT=<solana-commitment-value>
 SOLANA_SECRET_KEY=<array-numbers-wallet-private-key>
 ```
 
-after replacing with your own data, you will have something like this:
+after replacing it with your own data, you would have something like this:
 
 ```env
 ACCEPTED_MINT=BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
@@ -189,7 +189,7 @@ COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56, ... ,205,136,237,44,1,247,245,68,234]
 ```
 
-To deploy, first you have to build it.
+To deploy, first you build it.
 
 ```bash
 ncc build apps/drill-github-app/src/main.ts --license licenses.txt --minify --out dist/apps/drill-github-app
@@ -197,38 +197,40 @@ ncc build apps/drill-github-app/src/main.ts --license licenses.txt --minify --ou
 vercel deploy --prod dist/apps/drill-github-app
 ```
 
-Add all the environment variables, one by one, to the vercel environment of your app (in the website settings) and redeploy the whole app.
+Add all the environment variables, one by one, to the Vercel environment of your app (website settings) and redeploy the whole app.
 
 ![Vercel environment variables](../.docs/drill/assets/vercel_environment_file.png)
 
-Before redeploy, be sure to remove the last dist folder to avoid conflicts, run:
+Before redeploy, be sure to remove the last dist folder to avoid conflicts by running:
 
 ```bash
 >> rm -r dist/apps/drill-github-app
 ```
 
-Then with the vercel url, go to the Github app settings on the Github website and update the webhook URL.
+With the Vercel URL, go to the GithubApp Settings on the website and update the Webhook URL.
 
-**NOTE**: Avoid ending your url with a /, it would cause you troubles.
+**NOTE**: Avoid ending your URL with a /, it would cause you troubles.
 
-Go to your Github _settings -> applications -> < your-app-name >_ , there you have to change the Webhook URL to match the Drill-Github-App you just deployed (check the vercel domain of your app).
+Go to your Github _settings -> applications -> < your-app-name >_ and change the Webhook URL to match the Drill-Github-App you just deployed (check the vercel domain of your app).
 
 ![Github app webhook url setting](../.docs/drill/assets/github_webhook_url.png)
 
-Now, every Issue with the label **_'drill:bounty'_** will have a bounty enabled to receive funds in the Mint we previously created. Go and check your self, create a new issue and add the **_'drill:bounty'_** label.
+Now, every Issue with the label **_'drill:bounty'_** will have a bounty enabled to receive funds in the Mint we previously created. Go check yourself, create a new issue, and add the 'drill:bounty' label.
 
-You can check all the transfer you make by running:
+You can check all the transfers you make by running:
 
 ```bash
 >> nx run drill-cli:get-bounty --githubRepository <github-username>/<user-repo-name> --issueNumber <number-of-issue>
 
 ```
 
-With the Drill GithubApp already deployed and working, is time to deploy the Drill Gateway.
+With the Drill GithubApp up and running, it’s time to deploy the Drill Gateway.
 
 ## Drill Gateway
 
-This is a Node app that have two main functions, the first one is authenticate you with github, and the second its letting you claim your bounty once the issue have been done and closed. So, lets deploy the Gateway in the same way you just deployed the Drill-Github-Gateway :
+Yes, you guessed it! Here we have another Node app. This one has two main functions: (1) authenticates you via Github, and (2) enables you to claim the bounty once the issue is done and closed.
+
+Now, lets deploy the Drill Gateway in the same way you just deployed the Drill-Github-Gateway :
 
 ```bash
 ncc build apps/drill-gateway/src/main.ts --license licenses.txt --minify --out dist/apps/drill-gateway
@@ -238,7 +240,7 @@ ncc build apps/drill-gateway/src/main.ts --license licenses.txt --minify --out d
 vercel deploy --prod dist/apps/drill-gateway
 ```
 
-**NOTE**: Remember, you need to replace the data with your own values as we did before. You should have something like this (we will change the Web Client URL later, so you can use something like _http://localhost:4200_ for now):
+**NOTE**: Remember that you need to replace the data with your own values as we did before. You should have something like this (we’ll change the Web Client URL later, so for now you can use something like _http://localhost:4200_):
 
 ```text
 PROGRAM_ID=DR1LL87tP9uZqPXTxGDVrVE53zrLTBei3YLKrx4ihYh1
@@ -250,15 +252,15 @@ COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56,4,82,89,57, ... ,237,44,1,247,245,68,234]
 ```
 
-Add the environment variables to the vercel environment of your app and redeploy it. (like you did before)
+Add the environment variables to the Vercel environment of your app and redeploy it (like we did a moment ago).
 
-Done! now, is time to work in the web client.
+Done! Now it’s time to work on the web client.
 
 ## Web client
 
-To deploy the web client we suggest to use firebase, this because the web client is wrote in angular and firebase is really friendly with this kind of apps. But again, you can use vercel or whatever platform you want.
+We suggest using Firebase for deployment. The web client is written in Angular and Firebase is really friendly with this kind of apps. But hey! You can use Vercel or any platform you want.
 
-<details><summary><b>See instruction how login and use firebase...</b></summary>
+<details><summary><b>See how to login and use Firebase instruction...</b></summary>
 
 Lets login in firebase:
 
@@ -273,16 +275,16 @@ Then, create a new project in the console, using this link -> https://console.fi
 </details>
 <br>
 
-Go and update the _environment.prod.ts_ file located at _apps/drill-web-client/src/environments_ as follows:
+Time to update the environment.prod.ts file located at apps/drill-web-client/src/environments:
 
-- Update the clientID with the githubClientID you already have from previous steps.
+- Change the clientID with the githubClientID you already have from previous steps.
 - Update the githubRepository with the _< username >/< name >_ of your Github repository.
-- Update GatewayURL with the domain of the vercel Gateway app already deployed (check the vercel to get the app domain).
-- If you are not using the default Drill Anchor Program, update the programId with the id of your program.
+- Use the domain of the Vercel Gateway app already deployed to update the GatewayURL (check the Vercel to get the app domain).
+- If you are not using the default Drill Anchor Program, you have to manually match the programId with the id of your program.
 
-**NOTE**: Be sure to use all the data from the early steps, like the URL of the recent deployed gateway and the github id you got when the github app was installed.
+**NOTE**: Be sure to use all the data from the early steps, like the URL of the recently deployed gateway and the Github id you got when the GithubApp was installed.
 
-Build the web client using:
+We’re all set to build the web client using:
 
 ```bash
 >> nx build drill-web-client
@@ -291,9 +293,9 @@ Build the web client using:
 
 ```
 
-And deploy it using Firebase (you will need to config some things)
+To deploy it, use Firebase (you will need to configure some things).
 
-> Select the correct deploy directory as showed above. (dist/apps/drill-web-client), and configure as a single-page app.
+Select the correct deploy directory as shown above (dist/apps/drill-web-client), and configure it as a single-page app.
 
 ```bash
 >> firebase init
@@ -319,20 +321,19 @@ Hosting URL: https://testin-drill.web.app
 
 Now with this new Web Client URL, you have to update the _WEB_CLIENT_URL_ environment variable of the Gateway vercel app.
 
-The same way you have to go to your Github settings and update the Github app to have the Callback URL point to _< Web CLient URL >/login_. After this you need to redeploy your vercel Gateway app.
+Bear with me, we're almost finished. Go to your Github Settings and update the GithubApp to have the Callback URL point to _< Web CLient URL >/login_. After this, you need to redeploy your Vercel Gateway app.
 
-In the web client, look for the _environment.production.ts_ file and update the redirectURL value with _< Web CLient URL >/login_
-and redeploy it.
+In the web client, look for the environment.production.ts file and update the redirectURL value with _< Web CLient URL >/login_ and, again, you know it, redeploy it.
 
-Finally, as the last step you have to install the Github actions to keep the tool synchronized with your repo.
+For your final step, install Github actions to keep the tool synchronized with your repo (or repos).
 
-**NOTE**: please verify that none of the URLs used in vercel, the Github app configuration or the web client environments haven`t any "/" at the end.
+**NOTE**: please verify that none of the URLs used in Vercel, neither the GithubApp configuration nor the web client environments, have any "/" at the end.
 
 ## Github actions
 
-For this, you just have to add this github actions on a _main.yaml_ file under _.github/workflows/_ directory of your Github repository.
+Don’t worry, we got you. For this, you just have to add Github actions on a _main.yaml_ file under _.github/workflows/_ directory of your Github repository.
 
-**NOTE**: you have to create this file and directory if not exists.
+**NOTE**: You might have to create this file and directory in case it doesn’t exist yet.
 
 ```yaml
 on:
@@ -373,9 +374,9 @@ jobs:
         run: echo "The result was ${{ steps.board-cleaner.result }}"
 ```
 
-Then add the corresponding secrets to your Github repo configuration (see _< repo-url >/settings/secrets/actions_) and there you go!
+Then, add the corresponding secrets to your Github repo configuration (see _< repo-url >/settings/secrets/actions_), and there you go!
 
-The corresponding values for the secrets in this example are:
+Down here you can see the repository secret’s values of the example we created:
 
 ```text
 RPC_ENDPOINT=https://api.devnet.solana.com
@@ -385,28 +386,27 @@ CLUSTER=devnet
 
 ![Github action environment variables](../.docs/drill/assets/github_actions_secrets.png)
 
-Congrats, you successfully finished the Drill Ecosystem setup!
-With all stuff are already configured and running, now you can go and test the bounty program for your issues!
+Congrats my fren! You effectively finished the Drill Ecosystem setup. With everything up and running, go have some fun and test the bounty program for your issues!
 
 ## FAQ
 
-If you have any error, please be sure you use the correct env vars in all the platforms (Vercel, Github and Firebase). Some commons errors are:
+If you have any errors, please be sure you use the correct env vars in all the platforms (Vercel, Github, and Firebase). Some commons errors are:
 
-1. You added a wrong Private Key in the Drill-Github-Gateway deployed on Vercel. You have to avoid use ", so instead of this
+1. You added a wrong Private Key in the Drill-Github-Gateway deployed on Vercel. Avoid using ", so instead of this:
 
    ```text
    PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n"
    ```
 
-   you should have
+   you should have something more like this:
 
    ```text
    PRIVATE_KEY=-----BEGIN RSA PRIVATE KEY-----\nM.....==\n-----END RSA PRIVATE KEY-----\n
    ```
 
-2. You create a new board using the CLI with a Program ID different that the used in the GITHUB or VERCEL environment variables
+2. You created a new board using the CLI with a different Program ID that the one used in the GITHUB or VERCEL environment variables
 
-3. You never should end the URL with an /, neither of the URL we use o generate here have a / at the end. For example, avoid this:
+3. You mustn't end the URL with “/”. Any of the URLs we use in the example have it at the end. For example, avoid doing things like:
 
    ```text
    ...
@@ -426,8 +426,8 @@ If you have any error, please be sure you use the correct env vars in all the pl
    ...
    ```
 
-4. Always remove the Dist folder of the app you want to deploy, NCC sometimes generate others files instead of replacing the existing ones.
+4. Always remove the Dist folder of the app you want to deploy. Sometimes, NCC generates other files instead of replacing the existing ones.
 
-5. If the board is not being created, be sure the repo is public, currently we don't accept private repositories
+5. If the board is not being created, be sure to set your repo as public. We currently do not accept private repositories.
 
-6. If the drill website always redirect you to the unauthorized state, be sure you have the correc redirectUri in the environment.prod.ts and in the GithubApp Settings (Github website)
+6. If the drill website keeps redirecting you to the unauthorized state, check if you have the correct redirectUri in the environment.prod.ts and in the GithubApp Settings (in the Github website).
