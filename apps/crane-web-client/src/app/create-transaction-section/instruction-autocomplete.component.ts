@@ -12,44 +12,51 @@ export interface InstructionOption {
 @Component({
 	selector: 'crane-instruction-autocomplete',
 	template: `
-		<form class="example-form">
-			<mat-form-field class="w-full" appearance="fill">
-				<mat-label>Choose an instruction</mat-label>
-				<input
-					type="text"
-					placeholder="Pick one"
-					aria-label="Choose an instruction"
-					matInput
-					[formControl]="searchControl"
-					[matAutocomplete]="auto"
-				/>
-				<mat-autocomplete
-					autoActiveFirstOption
-					#auto="matAutocomplete"
-					(optionSelected)="onInstructionSelected($event.option.value)"
-					[displayWith]="displayWith"
-				>
-					<mat-option
-						*ngFor="let option of filteredOptions | async"
-						[value]="option"
-					>
-						<div class="flex justify-start gap-2 items-center">
-							<img
-								class="h-5 inline-block"
-								[src]="'assets/images/' + option.namespace + '.png'"
-							/>
+		<crane-screwed-card
+			class="bg-black bp-bg-metal px-6 py-4 rounded block mb-4"
+		>
+			<crane-screwed-card
+				class="bg-black bp-bg-metal-2 px-6 py-4 rounded block"
+			>
+				<mat-form-field class="w-full mb-0" appearance="fill">
+					<mat-label>Choose an instruction</mat-label>
+					<input
+						type="text"
+						placeholder="Pick one"
+						aria-label="Choose an instruction"
+						matInput
+						[formControl]="searchControl"
+						[matAutocomplete]="auto"
+					/>
+				</mat-form-field>
+			</crane-screwed-card>
+		</crane-screwed-card>
 
-							<p>
-								<span class="uppercase text-xs">{{ option.name }} | </span>
-							</p>
-							<p>
-								{{ option.instruction.name }}
-							</p>
-						</div>
-					</mat-option>
-				</mat-autocomplete>
-			</mat-form-field>
-		</form>
+		<mat-autocomplete
+			autoActiveFirstOption
+			#auto="matAutocomplete"
+			(optionSelected)="onInstructionSelected($event.option.value)"
+			[displayWith]="displayWith"
+		>
+			<mat-option
+				*ngFor="let option of filteredOptions | async"
+				[value]="option"
+			>
+				<div class="flex justify-start gap-2 items-center">
+					<img
+						class="h-5 inline-block"
+						[src]="'assets/images/' + option.namespace + '.png'"
+					/>
+
+					<p>
+						<span class="uppercase text-xs">{{ option.name }} | </span>
+					</p>
+					<p>
+						{{ option.instruction.name }}
+					</p>
+				</div>
+			</mat-option>
+		</mat-autocomplete>
 	`,
 })
 export class InstructionAutocompleteComponent implements OnInit {
