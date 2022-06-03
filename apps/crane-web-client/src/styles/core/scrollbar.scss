@@ -1,19 +1,19 @@
 /* width */
 ::-webkit-scrollbar {
-  width: 7px;
+	width: 8px;
 }
 
 /* Track */
 ::-webkit-scrollbar-track {
-  background: rgba(24, 24, 24, 0.4);
+	background: rgba(24, 24, 24, 0.4);
 }
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #434343;
+	background: #434343;
 }
 
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #343434;
+	background: #343434;
 }

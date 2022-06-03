@@ -24,36 +24,46 @@ import { TransactionFormService } from './transaction-form.service';
 				<div class="step-placeholder" *cdkDragPlaceholder></div>
 
 				<div
-					class="w-full flex justify-between items-center cursor-move"
+					class="w-full flex justify-between items-center cursor-move mb-4 gap-4"
 					cdkDragHandle
 				>
-					<div class="flex items-center gap-2">
-						<div
-							class="flex justify-center items-center w-8 h-8 rounded-full bg-black bg-opacity-25 font-bold"
-						>
-							{{ index + 1 }}
-						</div>
-
-						<img
-							class="h-5 inline-block"
-							[src]="'assets/images/' + model[index].namespace + '.png'"
-						/>
-						<p>
-							<span class="uppercase text-xs">{{ model[index].name }} | </span>
-						</p>
-						<p>
-							<span class="text-base">{{ model[index].instruction }} </span>
-						</p>
-					</div>
-
-					<button
-						mat-icon-button
-						(click)="remove(index)"
-						craneStopPropagation
-						type="button"
+					<crane-screwed-card
+						class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex-1"
 					>
-						<mat-icon>delete</mat-icon>
-					</button>
+						<div class="flex items-center gap-2">
+							<div
+								class="flex justify-center items-center w-8 h-8 rounded-full bg-black bg-opacity-40 font-bold"
+							>
+								{{ index + 1 }}
+							</div>
+
+							<img
+								class="h-5 inline-block"
+								[src]="'assets/images/' + model[index].namespace + '.png'"
+							/>
+							<p>
+								<span class="uppercase text-sm"
+									>{{ model[index].name }} |
+								</span>
+							</p>
+							<p>
+								<span class="text-lg">{{ model[index].instruction }} </span>
+							</p>
+						</div>
+					</crane-screwed-card>
+
+					<crane-screwed-card
+						class="bg-black bp-bg-metal-2 px-8 py-4 rounded inline-block"
+					>
+						<button
+							class="bg-black h-full p-1 bp-button uppercase text-sm text-red-500"
+							(click)="remove(index)"
+							craneStopPropagation
+							type="button"
+						>
+							Delete <mat-icon inline>delete</mat-icon>
+						</button>
+					</crane-screwed-card>
 				</div>
 
 				<crane-screwed-card

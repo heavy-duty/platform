@@ -10,10 +10,9 @@ import { ConfirmTransactionButtonStore } from './confirm-transaction-button.stor
 		<button
 			(click)="onConfirmTransaction()"
 			[disabled]="disabled$ | async"
-			mat-raised-button
-			color="primary"
+			class="bg-black h-full px-6 py-2 bp-button uppercase w-full"
 		>
-			Confirm transaction
+			Confirm
 		</button>
 	`,
 	providers: [ConfirmTransactionButtonStore],

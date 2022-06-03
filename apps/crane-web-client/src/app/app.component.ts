@@ -10,7 +10,7 @@ import { Option } from './utils';
 	selector: 'crane-root',
 	template: `
 		<div class="flex justify-between h-screen">
-			<main class="flex-1 overflow-y-scroll">
+			<main class="flex-1 h-screen">
 				<crane-create-transaction-section
 					(transactionCreated)="onTransactionCreated($event)"
 				>
@@ -19,7 +19,7 @@ import { Option } from './utils';
 
 			<mat-sidenav
 				#settings
-				class="bp-h-inherit w-80 bp-bg-wood bg-bp-brown px-4"
+				class="h-screen w-80 bp-bg-wood bg-bp-brown p-4 overflow-y-scroll"
 				fixedInViewport
 				position="end"
 				mode="side"
@@ -46,17 +46,22 @@ import { Option } from './utils';
 				>
 				</crane-sign-transaction-section>
 
-				<crane-send-transaction-button
-					[transaction]="transaction$ | async"
-					(transactionSent)="onTransactionSent($event)"
+				<crane-screwed-card
+					class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-center"
 				>
-				</crane-send-transaction-button>
-
-				<crane-confirm-transaction-button
-					[signature]="signature$ | async"
-					(transactionConfirmed)="onTransactionConfirmed()"
-				>
-				</crane-confirm-transaction-button>
+					<crane-send-transaction-button
+						class="flex-1"
+						[transaction]="transaction$ | async"
+						(transactionSent)="onTransactionSent($event)"
+					>
+					</crane-send-transaction-button>
+					<crane-confirm-transaction-button
+						class="flex-1"
+						[signature]="signature$ | async"
+						(transactionConfirmed)="onTransactionConfirmed()"
+					>
+					</crane-confirm-transaction-button>
+				</crane-screwed-card>
 			</mat-sidenav>
 		</div>
 	`,
@@ -87,6 +92,8 @@ export class AppComponent implements OnInit {
 	ngOnInit() {
 		this._walletStore.setAdapters([new PhantomWalletAdapter()]);
 		this._connectionStore.setEndpoint('https://api.devnet.solana.com');
+
+		this._walletStore.connect().subscribe();
 	}
 
 	onTransactionCreated(transaction: Option<Transaction>) {

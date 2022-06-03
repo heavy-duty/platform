@@ -15,10 +15,9 @@ import { SendTransactionButtonStore } from './send-transaction-button.store';
 		<button
 			(click)="onSendTransaction()"
 			[disabled]="disabled$ | async"
-			mat-raised-button
-			color="primary"
+			class="bg-black h-full px-6 py-2 bp-button uppercase w-full"
 		>
-			Send transaction
+			Send
 		</button>
 	`,
 	providers: [SendTransactionButtonStore],

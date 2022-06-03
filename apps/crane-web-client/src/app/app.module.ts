@@ -9,6 +9,7 @@ import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AppComponent } from './app.component';
 import { BlockhashStatusSectionModule } from './blockhash-status-section';
+import { ScrewedCardModule } from './components/screwed-card.module';
 import { ConfirmTransactionButtonModule } from './confirm-transaction-button';
 import { CreateTransactionSectionModule } from './create-transaction-section';
 import {
@@ -43,6 +44,7 @@ import { SignTransactionSectionModule } from './sign-transaction-section';
 		SendTransactionButtonModule,
 		ConfirmTransactionButtonModule,
 		BlockhashStatusSectionModule,
+		ScrewedCardModule,
 	],
 	bootstrap: [AppComponent],
 })

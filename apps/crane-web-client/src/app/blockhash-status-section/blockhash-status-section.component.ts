@@ -6,12 +6,9 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 @Component({
 	selector: 'crane-blockhash-status-section',
 	template: `
-		<section
-			class="p-4"
-			*ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight"
-		>
+		<ng-container *ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight">
 			<crane-screwed-card
-				class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
+				class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
 				*ngrxLet="percentage$; let percentage"
 			>
 				<header>
@@ -70,7 +67,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 					</mat-icon>
 				</ng-container>
 			</crane-screwed-card>
-		</section>
+		</ng-container>
 	`,
 	providers: [BlockhashStatusSectionStore],
 })

@@ -3,6 +3,7 @@
 .bp-bg-stone-3,
 .bp-bg-stone-2,
 .bp-bg-stone,
+.bp-bg-stone-rotated,
 .bp-bg-bulldozer {
 	background-size: cover;
 }
@@ -31,6 +32,10 @@
 
 .bp-bg-stone {
 	background-image: url('../../assets/images/backgrounds/sidebar.webp');
+}
+
+.bp-bg-stone-rotated {
+	background-image: url('../../assets/images/backgrounds/navbar.webp');
 }
 
 .bp-bg-stone-2 {
