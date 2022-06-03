@@ -1,6 +1,9 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
-import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import {
+	PhantomWalletAdapter,
+	SolflareWalletAdapter,
+} from '@solana/wallet-adapter-wallets';
 import { Blockhash, Transaction, TransactionSignature } from '@solana/web3.js';
 import { BehaviorSubject } from 'rxjs';
 import { BlockhashStatusSectionComponent } from './blockhash-status-section/blockhash-status-section.component';
@@ -92,7 +95,10 @@ export class AppComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this._walletStore.setAdapters([new PhantomWalletAdapter()]);
+		this._walletStore.setAdapters([
+			new PhantomWalletAdapter(),
+			new SolflareWalletAdapter(),
+		]);
 		this._connectionStore.setEndpoint('https://api.devnet.solana.com');
 	}
 

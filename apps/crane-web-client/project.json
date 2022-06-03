@@ -17,7 +17,10 @@
 					"apps/crane-web-client/src/favicon.ico",
 					"apps/crane-web-client/src/assets"
 				],
-				"styles": ["apps/crane-web-client/src/styles.scss"],
+				"styles": [
+					"apps/crane-web-client/src/styles.scss",
+					"libs/wallet-adapter/ui/material/src/style.css"
+				],
 				"scripts": [],
 				"customWebpackConfig": {
 					"path": "apps/crane-web-client/webpack.config.js"

@@ -6,21 +6,48 @@ import { Option } from '../utils';
 @Component({
 	selector: 'crane-wallet-section',
 	template: `
-		<crane-screwed-card class="bg-black bp-bg-metal-2 px-6 py-4 rounded block">
-			<header class="flex justify-between items-center mb-2">
-				<h2 class="text-xl">Wallet</h2>
+		<crane-screwed-card
+			class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex flex-col gap-4"
+		>
+			<header class="flex justify-between items-center">
+				<h2 class="text-xl flex-1">Wallet</h2>
+				<button *ngIf="publicKey === null" hdWalletModalButton></button>
+
+				<ng-container *ngIf="publicKey === null">
+					<button
+						class="bg-black h-full p-1 bp-button uppercase text-xs"
+						*hdWalletAdapter="
+							let wallets = wallets;
+							let selectWallet = selectWallet
+						"
+						hdWalletModalButton
+						[wallets]="wallets"
+						[className]="['bp-bg-wood', 'bg-bp-brown']"
+						(selectWallet)="selectWallet($event)"
+					>
+						Connect <mat-icon inline>login</mat-icon>
+					</button>
+				</ng-container>
+
 				<button
+					*ngIf="publicKey !== null"
 					class="bg-black h-full p-1 bp-button uppercase text-xs"
-					*ngrxLet="transaction$; let transaction"
 					[disabled]="disabled"
 					(click)="onSignTransaction()"
 				>
 					Sign <mat-icon inline>check_circle</mat-icon>
 				</button>
+				<button
+					*ngIf="publicKey !== null"
+					class="bg-black h-full p-1 bp-button uppercase text-xs text-red-500"
+					hdWalletDisconnectButton
+				>
+					Exit <mat-icon inline>logout</mat-icon>
+				</button>
 			</header>
 
 			<p
-				class="flex items-center gap-2 px-2 bg-black bg-opacity-40 rounded-md"
+				class="flex items-center gap-2 p-2 bg-black bg-opacity-40 rounded-md"
 				*ngIf="publicKey !== null"
 			>
 				<hd-wallet-icon
