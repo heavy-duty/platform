@@ -177,3 +177,11 @@ mat-icon {
 .mat-form-field-appearance-fill .mat-form-field-flex {
 	background-color: rgba(0, 0, 0, 0.4) !important;
 }
+
+.mat-autocomplete-panel .mat-option {
+	@apply bp-bg-wood bg-bp-brown bg-opacity-60 #{!important};
+
+	&:hover {
+		@apply bp-bg-wood bg-bp-brown bg-opacity-100 #{!important};
+	}
+}
