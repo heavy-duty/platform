@@ -1,11 +1,11 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Keypair } from '@solana/web3.js';
-import { KeypairsService } from './keypairs.service';
+import { KeypairsService } from '../services/keypairs.service';
 
 @Component({
-	selector: 'crane-keypairs-list',
+	selector: 'crane-keypairs-section',
 	template: `
-		<section>
+		<crane-screwed-card class="bg-black bp-bg-metal-2 px-6 py-4 rounded block">
 			<header class="flex justify-between items-center">
 				<h2 class="text-xl">Keypairs</h2>
 				<button
@@ -54,7 +54,7 @@ import { KeypairsService } from './keypairs.service';
 					</div>
 				</li>
 			</ul>
-		</section>
+		</crane-screwed-card>
 	`,
 })
 export class KeypairsSectionComponent {

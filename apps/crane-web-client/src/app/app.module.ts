@@ -10,6 +10,7 @@ import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AppComponent } from './app.component';
 import { BlockhashStatusSectionModule } from './blockhash-status-section';
 import { ScrewedCardModule } from './components/screwed-card.module';
+import { SnackBarModule } from './components/snack-bar.module';
 import { ConfirmTransactionButtonModule } from './confirm-transaction-button';
 import { CreateTransactionSectionModule } from './create-transaction-section';
 import {
@@ -39,6 +40,7 @@ import { SignTransactionSectionModule } from './sign-transaction-section';
 			new TokenPlugin(),
 			new AssociatedTokenPlugin(),
 		]),
+		SnackBarModule,
 		CreateTransactionSectionModule,
 		SignTransactionSectionModule,
 		SendTransactionButtonModule,

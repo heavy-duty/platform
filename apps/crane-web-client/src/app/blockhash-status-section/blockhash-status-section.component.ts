@@ -8,7 +8,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 	template: `
 		<ng-container *ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight">
 			<crane-screwed-card
-				class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
+				class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
 				*ngrxLet="percentage$; let percentage"
 			>
 				<header>

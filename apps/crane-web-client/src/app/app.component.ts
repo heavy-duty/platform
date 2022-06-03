@@ -4,6 +4,7 @@ import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { Blockhash, Transaction, TransactionSignature } from '@solana/web3.js';
 import { BehaviorSubject } from 'rxjs';
 import { BlockhashStatusSectionComponent } from './blockhash-status-section/blockhash-status-section.component';
+import { NotificationService } from './services/notification.service';
 import { Option } from './utils';
 
 @Component({
@@ -25,6 +26,12 @@ import { Option } from './utils';
 				mode="side"
 				[opened]="true"
 			>
+				<crane-sign-transaction-section
+					[transaction]="transaction$ | async"
+					(transactionSigned)="onTransactionSignDone($event)"
+				>
+				</crane-sign-transaction-section>
+
 				<ng-container *ngrxLet="transaction$; let transaction">
 					<crane-blockhash-status-section
 						*ngrxLet="latestBlockhash$; let latestBlockhash"
@@ -39,12 +46,6 @@ import { Option } from './utils';
 						#blockhashStatusSection
 					></crane-blockhash-status-section>
 				</ng-container>
-
-				<crane-sign-transaction-section
-					[transaction]="transaction$ | async"
-					(transactionSigned)="onTransactionSignDone($event)"
-				>
-				</crane-sign-transaction-section>
 
 				<crane-screwed-card
 					class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-center"
@@ -86,14 +87,13 @@ export class AppComponent implements OnInit {
 
 	constructor(
 		private readonly _connectionStore: ConnectionStore,
-		private readonly _walletStore: WalletStore
+		private readonly _walletStore: WalletStore,
+		private readonly _notificationService: NotificationService
 	) {}
 
 	ngOnInit() {
 		this._walletStore.setAdapters([new PhantomWalletAdapter()]);
 		this._connectionStore.setEndpoint('https://api.devnet.solana.com');
-
-		this._walletStore.connect().subscribe();
 	}
 
 	onTransactionCreated(transaction: Option<Transaction>) {
@@ -122,7 +122,7 @@ export class AppComponent implements OnInit {
 	}
 
 	onTransactionConfirmed() {
-		console.log('confirmed');
+		this._notificationService.notifySuccess('Transaction confirmed!');
 	}
 
 	onBlockhashChanged(

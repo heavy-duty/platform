@@ -8,7 +8,8 @@ import { ReactiveComponentModule } from '@ngrx/component';
 import { ScrewedCardModule } from '../components/screwed-card.module';
 import { KeypairsSectionModule } from './keypairs-section.module';
 import { SignTransactionSectionComponent } from './sign-transaction-section.component';
-import { SignaturesProgressModule } from './signatures-progress.module';
+import { SignaturesProgressSectionModule } from './signatures-progress-section.module';
+import { WalletSectionModule } from './wallet-section.module';
 
 @NgModule({
 	imports: [
@@ -19,7 +20,8 @@ import { SignaturesProgressModule } from './signatures-progress.module';
 		ReactiveComponentModule,
 		HdWalletAdapterCdkModule,
 		KeypairsSectionModule,
-		SignaturesProgressModule,
+		WalletSectionModule,
+		SignaturesProgressSectionModule,
 		ScrewedCardModule,
 	],
 	exports: [SignTransactionSectionComponent],

@@ -1,21 +1,21 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ScrewedCardModule } from '../components/screwed-card.module';
-import { KeypairsSectionComponent } from './keypairs-section.component';
+import { WalletSectionComponent } from './wallet-section.component';
 
 @NgModule({
 	imports: [
 		CommonModule,
-		MatButtonModule,
-		MatIconModule,
 		ClipboardModule,
+		MatIconModule,
+		HdWalletAdapterCdkModule,
 		ScrewedCardModule,
 	],
-	exports: [KeypairsSectionComponent],
-	declarations: [KeypairsSectionComponent],
+	exports: [WalletSectionComponent],
+	declarations: [WalletSectionComponent],
 	providers: [],
 })
-export class KeypairsSectionModule {}
+export class WalletSectionModule {}

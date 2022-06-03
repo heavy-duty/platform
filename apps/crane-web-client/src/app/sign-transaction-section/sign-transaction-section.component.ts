@@ -8,58 +8,31 @@ import { SignTransactionSectionStore } from './sign-transaction-section.store';
 @Component({
 	selector: 'crane-sign-transaction-section',
 	template: `
-		<crane-screwed-card
-			class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded block"
-			*ngIf="publicKey$ | async as publicKey"
-		>
-			<header class="flex justify-between items-center mb-2">
-				<h2 class="text-xl">Wallet</h2>
-				<button
-					class="bg-black h-full p-1 bp-button uppercase text-xs"
-					*ngrxLet="transaction$; let transaction"
-					[disabled]="disabled$ | async"
-					(click)="onSignTransactionWithWallet(publicKey, transaction)"
-				>
-					Sign <mat-icon inline>check_circle</mat-icon>
-				</button>
-			</header>
+		<ng-container *ngrxLet="publicKey$; let publicKey">
+			<crane-wallet-section
+				class="block"
+				*ngrxLet="transaction$; let transaction"
+				[publicKey]="publicKey"
+				[wallet]="(wallet$ | ngrxPush) ?? null"
+				[disabled]="(disabled$ | ngrxPush) ?? false"
+				(signTransaction)="onSignTransactionWithWallet(publicKey, transaction)"
+			></crane-wallet-section>
+		</ng-container>
 
-			<p class="flex items-center gap-2 px-2 bg-black bg-opacity-40 rounded-md">
-				<hd-wallet-icon
-					*ngIf="wallet$ | ngrxPush as wallet"
-					class="flex-shrink-0"
-					[wallet]="wallet"
-				></hd-wallet-icon>
+		<crane-keypairs-section
+			class="block mt-4"
+			(signTransaction)="onSignTransactionWithKeypair($event)"
+			[disabled]="(disabled$ | async) ?? false"
+		></crane-keypairs-section>
 
-				<span class="overflow-hidden whitespace-nowrap overflow-ellipsis">
-					{{ publicKey.toBase58() }}
-				</span>
-
-				<button mat-icon-button [cdkCopyToClipboard]="publicKey.toBase58()">
-					<mat-icon>content_copy</mat-icon>
-				</button>
-			</p>
-		</crane-screwed-card>
-
-		<crane-screwed-card
-			class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded block"
-		>
-			<crane-keypairs-list
-				(signTransaction)="onSignTransactionWithKeypair($event)"
-				[disabled]="(disabled$ | async) ?? false"
-			></crane-keypairs-list>
-		</crane-screwed-card>
-
-		<crane-screwed-card
-			class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded block"
-			*ngIf="transaction$ | async as transaction"
-		>
-			<crane-signatures-progress
+		<ng-container *ngIf="transaction$ | async as transaction">
+			<crane-signatures-progress-section
+				class="block mt-4"
 				*ngIf="signatures$ | async as signatures"
 				[signaturesDone]="signatures.length"
 				[signaturesRequired]="transaction.signatures.length"
-			></crane-signatures-progress>
-		</crane-screwed-card>
+			></crane-signatures-progress-section>
+		</ng-container>
 	`,
 	providers: [SignTransactionSectionStore],
 })
@@ -96,9 +69,13 @@ export class SignTransactionSectionComponent {
 	) {}
 
 	onSignTransactionWithWallet(
-		publicKey: PublicKey,
+		publicKey: Option<PublicKey>,
 		transaction: Option<Transaction>
 	) {
+		if (publicKey === null) {
+			throw new Error('Wallet not connected.');
+		}
+
 		if (transaction === null) {
 			throw new Error('Transaction is invalid.');
 		}
