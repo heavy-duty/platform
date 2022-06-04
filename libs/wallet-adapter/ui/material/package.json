@@ -1,10 +1,10 @@
 {
-  "name": "@heavy-duty/wallet-adapter-material",
-  "version": "0.2.3",
-  "publishConfig": {
-    "access": "public"
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
-  }
+	"name": "@heavy-duty/wallet-adapter-material",
+	"version": "0.3.0",
+	"publishConfig": {
+		"access": "public"
+	},
+	"dependencies": {
+		"tslib": "^2.3.0"
+	}
 }
