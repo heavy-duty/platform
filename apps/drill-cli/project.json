@@ -1,106 +1,111 @@
 {
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/drill-cli/src",
-  "projectType": "application",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/node:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "options": {
-        "outputPath": "dist/apps/drill-cli",
-        "main": "apps/drill-cli/src/main.ts",
-        "tsConfig": "apps/drill-cli/tsconfig.app.json",
-        "assets": [
-          "apps/drill-cli/src/assets"
-        ]
-      },
-      "configurations": {
-        "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false,
-          "fileReplacements": [
-            {
-              "replace": "apps/drill-cli/src/environments/environment.ts",
-              "with": "apps/drill-cli/src/environments/environment.prod.ts"
-            }
-          ]
-        }
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/node:node",
-      "options": {
-        "buildTarget": "drill-cli:build"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "apps/drill-cli/**/*.ts"
-        ]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/drill-cli"
-      ],
-      "options": {
-        "jestConfig": "apps/drill-cli/jest.config.js",
-        "passWithNoTests": true
-      }
-    },
-    "create-board": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          "nx build drill-cli",
-          "node dist/apps/drill-cli/main.js create-board {args.githubRepository} {args.lockTime} {args.acceptedMint}"
-        ],
-        "parallel": false,
-        "envFile": "apps/drill-cli/.env"
-      }
-    },
-    "get-board": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          "nx build drill-cli",
-          "node dist/apps/drill-cli/main.js get-board {args.githubRepository}"
-        ],
-        "parallel": false,
-        "envFile": "apps/drill-cli/.env"
-      }
-    },
-    "get-bounty": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          "nx build drill-cli",
-          "node dist/apps/drill-cli/main.js get-bounty {args.githubRepository} {args.issueNumber}"
-        ],
-        "parallel": false,
-        "envFile": "apps/drill-cli/.env"
-      }
-    },
-    "set-board-authority": {
-      "executor": "@nrwl/workspace:run-commands",
-      "options": {
-        "commands": [
-          "nx build drill-cli",
-          "node dist/apps/drill-cli/main.js set-board-authority {args.githubRepository} {args.authority}"
-        ],
-        "parallel": false,
-        "envFile": "apps/drill-cli/.env"
-      }
-    }
-  },
-  "tags": []
+	"root": "apps/drill-cli",
+	"sourceRoot": "apps/drill-cli/src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/node:webpack",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/drill-cli",
+				"main": "apps/drill-cli/src/main.ts",
+				"tsConfig": "apps/drill-cli/tsconfig.app.json",
+				"assets": ["apps/drill-cli/src/assets"]
+			},
+			"configurations": {
+				"production": {
+					"optimization": true,
+					"extractLicenses": true,
+					"inspect": false,
+					"generatePackageJson": true,
+					"fileReplacements": [
+						{
+							"replace": "apps/drill-cli/src/environments/environment.ts",
+							"with": "apps/drill-cli/src/environments/environment.prod.ts"
+						}
+					]
+				}
+			}
+		},
+		"serve": {
+			"executor": "@nrwl/node:node",
+			"options": {
+				"buildTarget": "drill-cli:build"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["apps/drill-cli/**/*.ts"]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/apps/drill-cli"],
+			"options": {
+				"jestConfig": "apps/drill-cli/jest.config.js",
+				"passWithNoTests": true
+			}
+		},
+		"create-board": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build drill-cli",
+					"node dist/apps/drill-cli/main.js create-board {args.githubRepository} {args.lockTime} {args.acceptedMint}"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
+			}
+		},
+		"get-board": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build drill-cli",
+					"node dist/apps/drill-cli/main.js get-board {args.githubRepository}"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
+			}
+		},
+		"get-bounty": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build drill-cli",
+					"node dist/apps/drill-cli/main.js get-bounty {args.githubRepository} {args.issueNumber}"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
+			}
+		},
+		"set-board-authority": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"nx build drill-cli",
+					"node dist/apps/drill-cli/main.js set-board-authority {args.githubRepository} {args.authority}"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
+			}
+		},
+		"publish-npm": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"rm -rf dist/apps/drill-cli/",
+					"ncc build apps/drill-cli/src/main.ts --license licenses.txt --minify --out dist/apps/drill-cli",
+					"cp apps/drill-cli/package.json dist/apps/drill-cli",
+					"echo add semantic versioning",
+					"npm publish dist/apps/drill-cli"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
+			}
+		}
+	},
+	"tags": []
 }
