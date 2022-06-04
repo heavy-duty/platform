@@ -266,6 +266,7 @@
 			"@bulldozer-client/workspaces-data-access": [
 				"libs/bulldozer/client/workspaces/data-access/src/index.ts"
 			],
+			"@heavy-duty/blueprint-button": ["libs/blueprint/button/src/index.ts"],
 			"@heavy-duty/broadcaster": ["libs/broadcaster/data-access/src/index.ts"],
 			"@heavy-duty/broadcaster-cdk": ["libs/broadcaster/ui/cdk/src/index.ts"],
 			"@heavy-duty/broadcaster-material": [
@@ -297,6 +298,9 @@
 			],
 			"@heavy-duty/wallet-adapter": [
 				"libs/wallet-adapter/data-access/src/index.ts"
+			],
+			"@heavy-duty/wallet-adapter-blueprint": [
+				"libs/wallet-adapter/ui/blueprint/src/index.ts"
 			],
 			"@heavy-duty/wallet-adapter-cdk": [
 				"libs/wallet-adapter/ui/cdk/src/index.ts"

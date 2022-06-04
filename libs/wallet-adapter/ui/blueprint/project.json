@@ -1,0 +1,42 @@
+{
+	"projectType": "library",
+	"sourceRoot": "libs/wallet-adapter/ui/blueprint/src",
+	"prefix": "hd",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/wallet-adapter/ui/blueprint"],
+			"options": {
+				"project": "libs/wallet-adapter/ui/blueprint/ng-package.json",
+				"tailwindConfig": "libs/wallet-adapter/ui/blueprint/tailwind.config.js"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/wallet-adapter/ui/blueprint/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/wallet-adapter/ui/blueprint/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/wallet-adapter/ui/blueprint"],
+			"options": {
+				"jestConfig": "libs/wallet-adapter/ui/blueprint/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/wallet-adapter/ui/blueprint/**/*.ts",
+					"libs/wallet-adapter/ui/blueprint/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
+}
