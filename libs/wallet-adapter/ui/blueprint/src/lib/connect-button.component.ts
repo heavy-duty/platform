@@ -18,6 +18,7 @@ import { Wallet } from '@heavy-duty/wallet-adapter';
 			"
 			hdWalletConnectButton
 			bpButton
+			class="w-full"
 			[disabled]="connecting || !wallet || connected || disabled"
 		>
 			<ng-content></ng-content>

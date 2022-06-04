@@ -8,6 +8,7 @@ import { Wallet } from '@heavy-duty/wallet-adapter';
 			*hdWalletAdapter="let wallet = wallet; let disconnecting = disconnecting"
 			hdWalletDisconnectButton
 			bpButton
+			class="w-full"
 			[disabled]="disconnecting || !wallet"
 		>
 			<ng-content></ng-content>

@@ -15,7 +15,7 @@ import { HdWalletModalComponent } from './modal.component';
 			*hdWalletAdapter="let wallets = wallets; let selectWallet = selectWallet"
 			bpButton
 			hdWalletModalButton
-			className="w-full"
+			class="w-full"
 			panelClass="bd-bg-wood bg-bd-brown"
 			[wallets]="wallets"
 			[template]="template"
