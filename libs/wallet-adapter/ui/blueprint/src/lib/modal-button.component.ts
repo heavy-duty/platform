@@ -1,11 +1,12 @@
+import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
 	ContentChild,
 	ElementRef,
-	TemplateRef,
-	ViewChild,
 } from '@angular/core';
+import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletModalComponent } from './modal.component';
 
 @Component({
@@ -43,9 +44,14 @@ import { HdWalletModalComponent } from './modal.component';
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		CommonModule,
+		HdWalletAdapterCdkModule,
+		HdWalletModalComponent,
+		BlueprintButtonModule,
+	],
 })
 export class HdWalletModalButtonComponent {
-	@ViewChild('template') template: TemplateRef<HdWalletModalComponent> | null =
-		null;
 	@ContentChild('children') children?: ElementRef;
 }

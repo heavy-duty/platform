@@ -1,7 +1,11 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MatSelectionListChange } from '@angular/material/list';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule, MatSelectionListChange } from '@angular/material/list';
 import { Wallet } from '@heavy-duty/wallet-adapter';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 @Component({
@@ -174,6 +178,14 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		CommonModule,
+		HdWalletAdapterCdkModule,
+		MatListModule,
+		MatExpansionModule,
+		MatIconModule,
+	],
 })
 export class HdWalletModalComponent {
 	readonly installedWallets: Wallet[];

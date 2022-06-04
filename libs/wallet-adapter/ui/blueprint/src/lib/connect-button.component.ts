@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
@@ -5,7 +6,9 @@ import {
 	ElementRef,
 	Input,
 } from '@angular/core';
+import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
+import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 
 @Component({
 	selector: 'hd-wallet-connect-button',
@@ -23,7 +26,10 @@ import { Wallet } from '@heavy-duty/wallet-adapter';
 		>
 			<ng-content></ng-content>
 			<div class="button-content" *ngIf="!children">
-				<hd-wallet-icon *ngIf="wallet" [wallet]="wallet"></hd-wallet-icon>
+				<hd-wallet-icon
+					*ngIf="wallet !== null"
+					[wallet]="wallet"
+				></hd-wallet-icon>
 				{{ getMessage(connected, connecting, wallet) }}
 			</div>
 		</button>
@@ -42,6 +48,8 @@ import { Wallet } from '@heavy-duty/wallet-adapter';
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [CommonModule, HdWalletAdapterCdkModule, BlueprintButtonModule],
 })
 export class HdWalletConnectButtonComponent {
 	@ContentChild('children') children: ElementRef | null = null;
