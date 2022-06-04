@@ -1,9 +1,8 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MatExpansionModule } from '@angular/material/expansion';
 import { MatIconModule } from '@angular/material/icon';
-import { MatListModule, MatSelectionListChange } from '@angular/material/list';
+import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
@@ -14,7 +13,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 		<ng-container *ngIf="installedWallets.length > 0">
 			<header>
 				<button
-					mat-icon-button
+					bpButton
 					aria-label="Close wallet adapter selection"
 					(click)="onClose()"
 				>
@@ -23,52 +22,45 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				<h2>Connect a wallet on Solana to continue</h2>
 			</header>
 
-			<mat-selection-list
-				[multiple]="false"
-				(selectionChange)="onSelectionChange($event)"
-			>
-				<mat-list-option
-					*ngFor="let wallet of installedWallets"
-					[value]="wallet.adapter.name"
-				>
-					<hd-wallet-list-item [wallet]="wallet"></hd-wallet-list-item>
-				</mat-list-option>
-				<mat-expansion-panel
-					#expansionPanel="matExpansionPanel"
-					class="mat-elevation-z0"
-					disabled
-				>
-					<ng-template matExpansionPanelContent>
-						<mat-list-option
-							*ngFor="let wallet of otherWallets"
-							[value]="wallet.adapter.name"
+			<ul>
+				<li *ngFor="let wallet of installedWallets">
+					<button
+						class="w-full px-6 py-2 bg-white bg-opacity-0 hover:bg-opacity-5"
+						(click)="onSelectionChange(wallet.adapter.name)"
+					>
+						<hd-wallet-list-item [wallet]="wallet"></hd-wallet-list-item>
+					</button>
+				</li>
+				<ng-container *ngIf="expanded">
+					<li *ngFor="let wallet of otherWallets">
+						<button
+							class="w-full px-6 py-2 bg-white bg-opacity-0 hover:bg-opacity-5"
+							(click)="onSelectionChange(wallet.adapter.name)"
 						>
 							<hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
-						</mat-list-option>
-					</ng-template>
-				</mat-expansion-panel>
-			</mat-selection-list>
+						</button>
+					</li>
+				</ng-container>
+			</ul>
 
 			<button
 				*ngIf="otherWallets.length > 0"
 				class="toggle-expand"
-				(click)="expansionPanel.toggle()"
-				mat-button
+				bpButton
+				(click)="onToggleExpand()"
 			>
 				<span>
-					{{ expansionPanel.expanded ? 'Less options' : 'More options' }}
+					{{ expanded ? 'Less options' : 'More options' }}
 				</span>
-				<mat-icon [ngClass]="{ expanded: expansionPanel.expanded }">
-					expand_more
-				</mat-icon>
+				<mat-icon [ngClass]="{ expanded: expanded }"> expand_more </mat-icon>
 			</button>
 		</ng-container>
 
 		<ng-container *ngIf="installedWallets.length === 0">
 			<header>
 				<button
-					mat-icon-button
-					mat-dialog-close
+					bpButton
+					(click)="onClose()"
 					aria-label="Close wallet adapter selection"
 				>
 					<mat-icon>close</mat-icon>
@@ -76,51 +68,29 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				<h2>You'll need a wallet on Solana to continue</h2>
 			</header>
 
-			<button
-				(click)="onGettingStarted()"
-				color="primary"
-				mat-flat-button
-				class="getting-started"
-			>
-				Get started
-			</button>
-
-			<mat-expansion-panel
-				#expansionPanel="matExpansionPanel"
-				class="mat-elevation-z0"
-				disabled
-			>
-				<ng-template matExpansionPanelContent>
-					<mat-selection-list
-						[multiple]="false"
-						(selectionChange)="onSelectionChange($event)"
+			<ul *ngIf="expanded">
+				<li *ngFor="let wallet of otherWallets">
+					<button
+						class="w-full px-6 py-2 bg-white bg-opacity-0 hover:bg-opacity-5"
+						(click)="onSelectionChange(wallet.adapter.name)"
 					>
-						<mat-list-option
-							*ngFor="let wallet of otherWallets"
-							[value]="wallet.adapter.name"
-						>
-							<hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
-						</mat-list-option>
-					</mat-selection-list>
-				</ng-template>
-			</mat-expansion-panel>
+						<hd-wallet-list-item [wallet]="wallet"> </hd-wallet-list-item>
+					</button>
+				</li>
+			</ul>
 
 			<button
 				*ngIf="otherWallets.length > 0"
 				class="toggle-expand"
-				(click)="expansionPanel.toggle()"
-				mat-button
+				bpButton
+				(click)="onToggleExpand()"
 			>
 				<span>
 					{{
-						expansionPanel.expanded
-							? 'Hide options'
-							: 'Already have a wallet? View options'
+						expanded ? 'Hide options' : 'Already have a wallet? View options'
 					}}
 				</span>
-				<mat-icon [ngClass]="{ expanded: expansionPanel.expanded }">
-					expand_more
-				</mat-icon>
+				<mat-icon [ngClass]="{ expanded: expanded }"> expand_more </mat-icon>
 			</button>
 		</ng-container>
 	`,
@@ -182,8 +152,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 	imports: [
 		CommonModule,
 		HdWalletAdapterCdkModule,
-		MatListModule,
-		MatExpansionModule,
+		BlueprintButtonModule,
 		MatIconModule,
 	],
 })
@@ -191,6 +160,7 @@ export class HdWalletModalComponent {
 	readonly installedWallets: Wallet[];
 	readonly otherWallets: Wallet[];
 	readonly getStartedWallet: Wallet;
+	expanded = false;
 
 	constructor(
 		private readonly _dialogRef: DialogRef<WalletName, HdWalletModalComponent>,
@@ -224,8 +194,8 @@ export class HdWalletModalComponent {
 			  this.otherWallets[0];
 	}
 
-	onSelectionChange({ options }: MatSelectionListChange): void {
-		this._dialogRef.close(options[0].value);
+	onSelectionChange(walletName: WalletName): void {
+		this._dialogRef.close(walletName);
 	}
 
 	onGettingStarted(): void {
@@ -234,5 +204,9 @@ export class HdWalletModalComponent {
 
 	onClose(): void {
 		this._dialogRef.close();
+	}
+
+	onToggleExpand(): void {
+		this.expanded = !this.expanded;
 	}
 }
