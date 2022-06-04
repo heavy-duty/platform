@@ -128,24 +128,12 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 								</p>
 
 								<div class="flex justify-between">
-									<!-- 									<button
-										class="flex-1 bd-button"
-										hdWalletModalButton
-										[wallets]="wallets"
-										(selectWallet)="selectWallet($event)"
-									>
-										Change wallet
-									</button> -->
-									<div class="flex-1">
-										<hd-wallet-modal-button class="block">
-											<ng-container #children> Change wallet </ng-container>
-										</hd-wallet-modal-button>
-									</div>
-									<div class="flex-1">
-										<hd-wallet-disconnect-button class="block">
-											<ng-container #children> Disconnect </ng-container>
-										</hd-wallet-disconnect-button>
-									</div>
+									<hd-wallet-modal-button class="flex-1">
+										<ng-container #children> Change wallet </ng-container>
+									</hd-wallet-modal-button>
+									<hd-wallet-disconnect-button class="flex-1">
+										<ng-container #children> Disconnect </ng-container>
+									</hd-wallet-disconnect-button>
 								</div>
 								<div
 									class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"
