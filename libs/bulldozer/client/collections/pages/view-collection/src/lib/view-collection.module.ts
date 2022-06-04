@@ -12,44 +12,45 @@ import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewCollectionComponent } from './view-collection.component';
 @NgModule({
-  declarations: [ViewCollectionComponent],
-  imports: [
-    CommonModule,
-    RouterModule.forChild([
-      {
-        path: '',
-        component: ViewCollectionComponent,
-        children: [
-          {
-            path: 'attributes',
-            loadChildren: () =>
-              import('@bulldozer-client/view-collection-attributes').then(
-                (m) => m.ViewCollectionAttributesModule
-              ),
-          },
-          {
-            path: 'code-viewer',
-            loadChildren: () =>
-              import('@bulldozer-client/view-collection-code-viewer').then(
-                (m) => m.ViewCollectionCodeModule
-              ),
-          },
-          {
-            path: '',
-            redirectTo: 'attributes',
-          },
-        ],
-      },
-    ]),
-    MatButtonModule,
-    ProgressSpinnerModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    ReactiveComponentModule,
-    ItemUpdatingModule,
-    EditCollectionModule,
-    HdWalletAdapterCdkModule,
-    HdBroadcasterCdkModule,
-  ],
+	declarations: [ViewCollectionComponent],
+	imports: [
+		CommonModule,
+		RouterModule.forChild([
+			{
+				path: '',
+				component: ViewCollectionComponent,
+				children: [
+					{
+						path: 'attributes',
+						loadChildren: () =>
+							import('@bulldozer-client/view-collection-attributes').then(
+								(m) => m.ViewCollectionAttributesModule
+							),
+					},
+					{
+						path: 'code-viewer',
+						loadChildren: () =>
+							import('@bulldozer-client/view-collection-code-viewer').then(
+								(m) => m.ViewCollectionCodeModule
+							),
+					},
+					{
+						path: '',
+						pathMatch: 'full',
+						redirectTo: 'attributes',
+					},
+				],
+			},
+		]),
+		MatButtonModule,
+		ProgressSpinnerModule,
+		MatSnackBarModule,
+		MatTooltipModule,
+		ReactiveComponentModule,
+		ItemUpdatingModule,
+		EditCollectionModule,
+		HdWalletAdapterCdkModule,
+		HdBroadcasterCdkModule,
+	],
 })
 export class ViewCollectionModule {}

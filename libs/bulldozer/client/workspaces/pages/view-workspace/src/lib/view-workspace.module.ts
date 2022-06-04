@@ -11,50 +11,51 @@ import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewWorkspaceComponent } from './view-workspace.component';
 @NgModule({
-  declarations: [ViewWorkspaceComponent],
-  imports: [
-    CommonModule,
-    RouterModule.forChild([
-      {
-        path: '',
-        component: ViewWorkspaceComponent,
-        children: [
-          {
-            path: 'budget',
-            loadChildren: () =>
-              import('@bulldozer-client/view-workspace-budget').then(
-                (m) => m.ViewWorkspaceBudgetModule
-              ),
-          },
-          {
-            path: 'collaborators',
-            loadChildren: () =>
-              import('@bulldozer-client/view-workspace-collaborators').then(
-                (m) => m.ViewWorkspaceCollaboratorsModule
-              ),
-          },
-          {
-            path: 'instructions',
-            loadChildren: () =>
-              import('@bulldozer-client/view-workspace-instructions').then(
-                (m) => m.ViewWorkspaceInstructionsModule
-              ),
-          },
-          {
-            path: '',
-            redirectTo: 'budget',
-          },
-        ],
-      },
-    ]),
-    MatButtonModule,
-    ProgressSpinnerModule,
-    MatTooltipModule,
-    MatListModule,
-    ReactiveComponentModule,
-    ItemUpdatingModule,
-    EditWorkspaceModule,
-    HdWalletAdapterCdkModule,
-  ],
+	declarations: [ViewWorkspaceComponent],
+	imports: [
+		CommonModule,
+		RouterModule.forChild([
+			{
+				path: '',
+				component: ViewWorkspaceComponent,
+				children: [
+					{
+						path: 'budget',
+						loadChildren: () =>
+							import('@bulldozer-client/view-workspace-budget').then(
+								(m) => m.ViewWorkspaceBudgetModule
+							),
+					},
+					{
+						path: 'collaborators',
+						loadChildren: () =>
+							import('@bulldozer-client/view-workspace-collaborators').then(
+								(m) => m.ViewWorkspaceCollaboratorsModule
+							),
+					},
+					{
+						path: 'instructions',
+						loadChildren: () =>
+							import('@bulldozer-client/view-workspace-instructions').then(
+								(m) => m.ViewWorkspaceInstructionsModule
+							),
+					},
+					{
+						path: '',
+						pathMatch: 'full',
+						redirectTo: 'budget',
+					},
+				],
+			},
+		]),
+		MatButtonModule,
+		ProgressSpinnerModule,
+		MatTooltipModule,
+		MatListModule,
+		ReactiveComponentModule,
+		ItemUpdatingModule,
+		EditWorkspaceModule,
+		HdWalletAdapterCdkModule,
+	],
 })
 export class ViewWorkspaceModule {}
