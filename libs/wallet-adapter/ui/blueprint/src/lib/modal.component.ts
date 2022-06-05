@@ -1,7 +1,6 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
@@ -17,7 +16,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 					aria-label="Close wallet adapter selection"
 					(click)="onClose()"
 				>
-					<mat-icon>close</mat-icon>
+					<span class="material-icons text-base"> close </span>
 				</button>
 				<h2>Connect a wallet on Solana to continue</h2>
 			</header>
@@ -52,7 +51,12 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				<span>
 					{{ expanded ? 'Less options' : 'More options' }}
 				</span>
-				<mat-icon [ngClass]="{ expanded: expanded }"> expand_more </mat-icon>
+				<span
+					class="material-icons text-base"
+					[ngClass]="{ expanded: expanded }"
+				>
+					expand_more
+				</span>
 			</button>
 		</ng-container>
 
@@ -63,7 +67,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 					(click)="onClose()"
 					aria-label="Close wallet adapter selection"
 				>
-					<mat-icon>close</mat-icon>
+					<span class="material-icons text-base"> close </span>
 				</button>
 				<h2>You'll need a wallet on Solana to continue</h2>
 			</header>
@@ -90,7 +94,12 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 						expanded ? 'Hide options' : 'Already have a wallet? View options'
 					}}
 				</span>
-				<mat-icon [ngClass]="{ expanded: expanded }"> expand_more </mat-icon>
+				<span
+					class="material-icons text-base"
+					[ngClass]="{ expanded: expanded }"
+				>
+					expand_more
+				</span>
 			</button>
 		</ng-container>
 	`,
@@ -138,61 +147,51 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				margin: 0;
 			}
 
-			.toggle-expand mat-icon {
+			.toggle-expand .material-icons {
 				transition: 500ms cubic-bezier(0.4, 0, 0.2, 1);
 			}
 
-			.toggle-expand mat-icon.expanded {
+			.toggle-expand .material-icons.expanded {
 				transform: rotate(180deg);
 			}
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [
-		CommonModule,
-		HdWalletAdapterCdkModule,
-		BlueprintButtonModule,
-		MatIconModule,
-	],
+	imports: [CommonModule, HdWalletAdapterCdkModule, BlueprintButtonModule],
 })
 export class HdWalletModalComponent {
-	readonly installedWallets: Wallet[];
-	readonly otherWallets: Wallet[];
-	readonly getStartedWallet: Wallet;
-	expanded = false;
+	private readonly _dialogRef =
+		inject<DialogRef<WalletName, HdWalletModalComponent>>(DialogRef);
+	private readonly _data = inject<{ wallets: Wallet[] }>(DIALOG_DATA);
 
-	constructor(
-		private readonly _dialogRef: DialogRef<WalletName, HdWalletModalComponent>,
-		@Inject(DIALOG_DATA) data: { wallets: Wallet[] }
-	) {
-		this.installedWallets = data.wallets.filter(
-			(wallet) => wallet.readyState === WalletReadyState.Installed
-		);
-		this.otherWallets = [
-			...data.wallets.filter(
-				(wallet) => wallet.readyState === WalletReadyState.Loadable
-			),
-			...data.wallets.filter(
-				(wallet) => wallet.readyState === WalletReadyState.NotDetected
-			),
-		];
-		this.getStartedWallet = this.installedWallets.length
-			? this.installedWallets[0]
-			: data.wallets.find(
-					(wallet: { adapter: { name: WalletName } }) =>
-						wallet.adapter.name === 'Phantom'
-			  ) ||
-			  data.wallets.find(
-					(wallet: { adapter: { name: WalletName } }) =>
-						wallet.adapter.name === 'Torus'
-			  ) ||
-			  data.wallets.find(
-					(wallet: { readyState: WalletReadyState }) =>
-						wallet.readyState === WalletReadyState.Loadable
-			  ) ||
-			  this.otherWallets[0];
-	}
+	expanded = false;
+	readonly installedWallets = this._data.wallets.filter(
+		(wallet) => wallet.readyState === WalletReadyState.Installed
+	);
+	readonly otherWallets = [
+		...this._data.wallets.filter(
+			(wallet) => wallet.readyState === WalletReadyState.Loadable
+		),
+		...this._data.wallets.filter(
+			(wallet) => wallet.readyState === WalletReadyState.NotDetected
+		),
+	];
+	readonly getStartedWallet = this.installedWallets.length
+		? this.installedWallets[0]
+		: this._data.wallets.find(
+				(wallet: { adapter: { name: WalletName } }) =>
+					wallet.adapter.name === 'Phantom'
+		  ) ||
+		  this._data.wallets.find(
+				(wallet: { adapter: { name: WalletName } }) =>
+					wallet.adapter.name === 'Torus'
+		  ) ||
+		  this._data.wallets.find(
+				(wallet: { readyState: WalletReadyState }) =>
+					wallet.readyState === WalletReadyState.Loadable
+		  ) ||
+		  this.otherWallets[0];
 
 	onSelectionChange(walletName: WalletName): void {
 		this._dialogRef.close(walletName);

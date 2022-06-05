@@ -1,4 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { CdkMenuModule } from '@angular/cdk/menu';
 import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
@@ -6,8 +7,6 @@ import {
 	ContentChild,
 	ElementRef,
 } from '@angular/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatMenuModule } from '@angular/material/menu';
 import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
 import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletConnectButtonComponent } from './connect-button.component';
@@ -32,39 +31,51 @@ import { HdWalletModalComponent } from './modal.component';
 			></hd-wallet-connect-button>
 
 			<ng-container *ngIf="connected">
-				<button bpButton [matMenuTriggerFor]="walletMenu">
+				<button bpButton [cdkMenuTriggerFor]="walletMenu">
 					<ng-content></ng-content>
 					<div class="button-content" *ngIf="!children">
 						<hd-wallet-icon *ngIf="wallet" [wallet]="wallet"></hd-wallet-icon>
 						{{ publicKey?.toBase58() | hdObscureAddress }}
 					</div>
 				</button>
-				<mat-menu #walletMenu="matMenu">
-					<button
-						*ngIf="publicKey"
-						mat-menu-item
-						[cdkCopyToClipboard]="publicKey.toBase58()"
-					>
-						<mat-icon>content_copy</mat-icon>
-						Copy address
-					</button>
-					<button
-						mat-menu-item
-						hdWalletModalButton
-						panelClass="bd-bg-wood bg-bd-brown"
-						[wallets]="wallets"
-						[template]="template"
-						(selectWallet)="selectWallet($event)"
-					>
-						<mat-icon>sync_alt</mat-icon>
-						Connect a different wallet
-					</button>
-					<div class="w-full border-t border-white border-opacity-20"></div>
-					<button mat-menu-item hdWalletDisconnectButton>
-						<mat-icon>logout</mat-icon>
-						Disconnect
-					</button>
-				</mat-menu>
+
+				<ng-template #walletMenu>
+					<div cdkMenu class="w-64 shadow-lg">
+						<button
+							*ngIf="publicKey"
+							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							[cdkCopyToClipboard]="publicKey.toBase58()"
+							cdkMenuItem
+						>
+							<span class="material-icons"> content_copy </span>
+
+							Copy address
+						</button>
+						<button
+							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							hdWalletModalButton
+							cdkMenuItem
+							panelClass="bp-bg-wood bg-bd-brown"
+							[wallets]="wallets"
+							[template]="template"
+							(selectWallet)="selectWallet($event)"
+						>
+							<span class="material-icons"> sync_alt </span>
+
+							Connect a different wallet
+						</button>
+						<div class="w-full border-t border-white border-opacity-20"></div>
+						<button
+							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							cdkMenuItem
+							hdWalletDisconnectButton
+						>
+							<span class="material-icons"> logout </span>
+
+							Disconnect
+						</button>
+					</div>
+				</ng-template>
 			</ng-container>
 		</ng-container>
 
@@ -86,8 +97,7 @@ import { HdWalletModalComponent } from './modal.component';
 	imports: [
 		CommonModule,
 		ClipboardModule,
-		MatIconModule,
-		MatMenuModule,
+		CdkMenuModule,
 		HdWalletAdapterCdkModule,
 		HdWalletModalComponent,
 		HdWalletModalButtonComponent,
