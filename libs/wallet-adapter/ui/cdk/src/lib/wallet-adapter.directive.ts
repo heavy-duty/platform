@@ -32,6 +32,7 @@ interface Changes {
 
 @Directive({
 	selector: '[hdWalletAdapter]',
+	standalone: true,
 })
 export class HdWalletAdapterDirective extends ComponentStore<object> {
 	private _context: HdWalletAdapterContext = new HdWalletAdapterContext();

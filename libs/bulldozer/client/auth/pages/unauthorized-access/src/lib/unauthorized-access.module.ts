@@ -1,3 +1,4 @@
+import { DialogModule } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router';
@@ -13,6 +14,7 @@ import { UnauthorizedAccessComponent } from './unauthorized-access.component';
 		]),
 		HdWalletAdapterBlueprintModule,
 		HdWalletAdapterCdkModule,
+		DialogModule,
 	],
 	declarations: [UnauthorizedAccessComponent],
 	exports: [UnauthorizedAccessComponent],

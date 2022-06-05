@@ -10,7 +10,10 @@ import {
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import { WalletName } from '@solana/wallet-adapter-base';
 
-@Directive({ selector: 'button[hdWalletModalButton]' })
+@Directive({
+	selector: 'button[hdWalletModalButton]',
+	standalone: true,
+})
 export class HdWalletModalButtonDirective {
 	@Input() wallets?: Wallet[] = [];
 	@Input() template: TemplateRef<unknown> | null = null;
