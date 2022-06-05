@@ -1,9 +1,9 @@
 import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
+import { BlueprintButtonComponent } from '@heavy-duty/blueprint-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
-import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
+import { HdWalletListItemComponent } from '@heavy-duty/wallet-adapter-cdk';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 @Component({
@@ -109,10 +109,6 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				display: block;
 			}
 
-			.mat-dialog-title {
-				margin: 0;
-			}
-
 			header {
 				margin-bottom: 2.5rem;
 			}
@@ -158,7 +154,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [CommonModule, HdWalletAdapterCdkModule, BlueprintButtonModule],
+	imports: [CommonModule, HdWalletListItemComponent, BlueprintButtonComponent],
 })
 export class HdWalletModalComponent {
 	private readonly _dialogRef =

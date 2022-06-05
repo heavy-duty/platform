@@ -5,8 +5,11 @@ import {
 	ContentChild,
 	ElementRef,
 } from '@angular/core';
-import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
-import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
+import { BlueprintButtonComponent } from '@heavy-duty/blueprint-button';
+import {
+	HdWalletAdapterDirective,
+	HdWalletModalButtonDirective,
+} from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletModalComponent } from './modal.component';
 
 @Component({
@@ -47,9 +50,10 @@ import { HdWalletModalComponent } from './modal.component';
 	standalone: true,
 	imports: [
 		CommonModule,
-		HdWalletAdapterCdkModule,
+		HdWalletAdapterDirective,
+		HdWalletModalButtonDirective,
 		HdWalletModalComponent,
-		BlueprintButtonModule,
+		BlueprintButtonComponent,
 	],
 })
 export class HdWalletModalButtonComponent {

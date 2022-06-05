@@ -73,6 +73,8 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 						</div>
 
 						<div class="flex-grow overflow-hidden">
+							<hd-wallet-multi-button></hd-wallet-multi-button>
+
 							<router-outlet></router-outlet>
 						</div>
 					</div>

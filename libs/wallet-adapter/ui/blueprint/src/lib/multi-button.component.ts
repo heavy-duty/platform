@@ -7,8 +7,14 @@ import {
 	ContentChild,
 	ElementRef,
 } from '@angular/core';
-import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
-import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
+import { BlueprintButtonComponent } from '@heavy-duty/blueprint-button';
+import { BlueprintMenuItemComponent } from '@heavy-duty/blueprint-menu';
+import {
+	HdObscureAddressPipe,
+	HdWalletAdapterDirective,
+	HdWalletIconComponent,
+	HdWalletModalButtonDirective,
+} from '@heavy-duty/wallet-adapter-cdk';
 import { HdWalletConnectButtonComponent } from './connect-button.component';
 import { HdWalletModalButtonComponent } from './modal-button.component';
 import { HdWalletModalComponent } from './modal.component';
@@ -40,10 +46,11 @@ import { HdWalletModalComponent } from './modal.component';
 				</button>
 
 				<ng-template #walletMenu>
-					<div cdkMenu class="w-64 shadow-lg">
+					<div cdkMenu class="w-64 shadow-2xl">
 						<button
 							*ngIf="publicKey"
-							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							bpMenuItem
+							class="flex items-center gap-4 w-full px-4 py-2"
 							[cdkCopyToClipboard]="publicKey.toBase58()"
 							cdkMenuItem
 						>
@@ -52,7 +59,8 @@ import { HdWalletModalComponent } from './modal.component';
 							Copy address
 						</button>
 						<button
-							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							class="flex items-center gap-4 w-full px-4 py-2"
+							bpMenuItem
 							hdWalletModalButton
 							cdkMenuItem
 							panelClass="bp-bg-wood bg-bd-brown"
@@ -66,7 +74,8 @@ import { HdWalletModalComponent } from './modal.component';
 						</button>
 						<div class="w-full border-t border-white border-opacity-20"></div>
 						<button
-							class="flex items-center gap-4 w-full px-4 py-2 bp-bg-wood bg-bd-brown"
+							class="flex items-center gap-4 w-full px-4 py-2"
+							bpMenuItem
 							cdkMenuItem
 							hdWalletDisconnectButton
 						>
@@ -98,11 +107,15 @@ import { HdWalletModalComponent } from './modal.component';
 		CommonModule,
 		ClipboardModule,
 		CdkMenuModule,
-		HdWalletAdapterCdkModule,
+		HdWalletAdapterDirective,
+		HdWalletIconComponent,
+		HdWalletModalButtonDirective,
+		HdObscureAddressPipe,
 		HdWalletModalComponent,
 		HdWalletModalButtonComponent,
 		HdWalletConnectButtonComponent,
-		BlueprintButtonModule,
+		BlueprintButtonComponent,
+		BlueprintMenuItemComponent,
 	],
 })
 export class HdWalletMultiButtonComponent {

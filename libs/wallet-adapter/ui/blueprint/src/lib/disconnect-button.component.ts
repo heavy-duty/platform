@@ -6,9 +6,13 @@ import {
 	ElementRef,
 	Input,
 } from '@angular/core';
-import { BlueprintButtonModule } from '@heavy-duty/blueprint-button';
+import { BlueprintButtonComponent } from '@heavy-duty/blueprint-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
-import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
+import {
+	HdWalletAdapterDirective,
+	HdWalletDisconnectButtonDirective,
+	HdWalletIconComponent,
+} from '@heavy-duty/wallet-adapter-cdk';
 
 @Component({
 	selector: 'hd-wallet-disconnect-button',
@@ -38,7 +42,13 @@ import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [CommonModule, HdWalletAdapterCdkModule, BlueprintButtonModule],
+	imports: [
+		CommonModule,
+		HdWalletAdapterDirective,
+		HdWalletIconComponent,
+		HdWalletDisconnectButtonDirective,
+		BlueprintButtonComponent,
+	],
 })
 export class HdWalletDisconnectButtonComponent {
 	@ContentChild('children') children: ElementRef | null = null;
