@@ -80,7 +80,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 				<mat-sidenav
 					#settings
-					class="bd-h-inherit w-80 bd-bg-wood bg-bd-brown px-4"
+					class="bd-h-inherit w-80 bp-bg-wood bg-bd-brown px-4"
 					fixedInViewport
 					position="end"
 					[mode]="'over'"

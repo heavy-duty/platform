@@ -17,7 +17,7 @@ import { HdWalletModalComponent } from './modal.component';
 			bpButton
 			hdWalletModalButton
 			class="w-full"
-			panelClass="bd-bg-wood bg-bd-brown"
+			panelClass="bp-bg-wood bg-bd-brown"
 			[wallets]="wallets"
 			[template]="template"
 			(selectWallet)="selectWallet($event)"
