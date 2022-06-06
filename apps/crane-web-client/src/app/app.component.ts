@@ -57,6 +57,7 @@ import { Option } from './utils';
 						class="flex-1"
 						[transaction]="transaction$ | async"
 						(transactionSent)="onTransactionSent($event)"
+						(transactionFailed)="onTransactionFailed($event)"
 					>
 					</crane-send-transaction-button>
 					<crane-confirm-transaction-button
@@ -160,6 +161,22 @@ export class AppComponent implements OnInit {
 			newTransaction.add(...transaction.instructions);
 
 			this._transaction.next(newTransaction);
+		}
+	}
+
+	onTransactionFailed(error: unknown) {
+		if (typeof error === 'string') {
+			this._notificationService.notifyError(error);
+		} else if (error instanceof Error) {
+			console.log(error.message);
+			if (error.message.includes('failed to send transaction:')) {
+				this._notificationService.notifyError(error.message.split(': ')[2]);
+			} else {
+				this._notificationService.notifyError(error.message);
+			}
+		} else {
+			console.error(error);
+			this._notificationService.notifyError('Unknown error');
 		}
 	}
 }

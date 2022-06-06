@@ -45,6 +45,14 @@ export class SendTransactionButtonComponent {
 			),
 			map(({ context }) => context.signature ?? null)
 		);
+	@Output() transactionFailed =
+		this._sendTransactionButtonStore.serviceState$.pipe(
+			isNotNull,
+			filter(
+				(state) => state.matches('Transaction failed') && state.changed === true
+			),
+			map(({ context }) => context.error ?? null)
+		);
 
 	constructor(
 		private readonly _sendTransactionButtonStore: SendTransactionButtonStore

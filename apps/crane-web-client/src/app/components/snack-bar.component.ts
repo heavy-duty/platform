@@ -60,7 +60,9 @@ export class SnackBarPoleComponent {
 
 		<div class="absolute w-full h-24 bp-bg-image-8 top-7 p-3 pt-5">
 			<p class="m-0 text-xl">{{ data.title }}</p>
-			<p class="m-0 text-sm">{{ data.message }}</p>
+			<p class="m-0 text-sm line-clamp-2">
+				{{ data.message }}
+			</p>
 		</div>
 	`,
 	styles: [],

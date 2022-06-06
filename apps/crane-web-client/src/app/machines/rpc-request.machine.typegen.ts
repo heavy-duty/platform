@@ -3,9 +3,9 @@
 export interface Typegen0 {
   '@@xstate/typegen': true;
   eventsCausingActions: {
-    'Save error in context': 'error.platform.Rpc Request Machine.Sending Request:invocation[0]';
     'Remove response from context': 'restartMachine';
     'Save response in context': 'done.invoke.Rpc Request Machine.Sending Request:invocation[0]';
+    'Save error in context': 'error.platform.Rpc Request Machine.Sending Request:invocation[0]';
   };
   internalEvents: {
     'done.invoke.Rpc Request Machine.Sending Request:invocation[0]': {
@@ -28,9 +28,9 @@ export interface Typegen0 {
   };
   missingImplementations: {
     actions:
-      | 'Save error in context'
       | 'Remove response from context'
-      | 'Save response in context';
+      | 'Save response in context'
+      | 'Save error in context';
     services: 'Send request';
     guards:
       | 'auto start enabled'
