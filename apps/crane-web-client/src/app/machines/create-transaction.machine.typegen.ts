@@ -3,8 +3,7 @@
 export interface Typegen0 {
   '@@xstate/typegen': true;
   eventsCausingActions: {
-    'Save fee payer and instruction in context': 'createTransaction';
-    'Save transaction in context': 'createTransaction';
+    'Save fee payer, instruction and transaction in context': 'createTransaction';
   };
   internalEvents: {
     '': { type: '' };

@@ -17,7 +17,7 @@ export type CreateTransactionMachineEvent = CreateTransactionEvent;
 export const createTransactionMachineFactory = (config?: {
 	fireAndForget: boolean;
 }) => {
-	/** @xstate-layout N4IgpgJg5mDOIC5QGEBOYCGAXMACAKqhgHawYDGWAlgPbG4CyFAFlcWAHSElmW33l02SAGJEoAA41YVanXEgAHogC0AVgAsHABwBGAGwB2bRrW6ADBt0BmNdYA0IAJ6qN18xwBM5z9e3GATg1PNX1tAF9wxzRMHAIiUgo5eiZyVnYRQViwbkS+eSQQKRlkhWUEFQ0Aj099T39-HwDtc3N9RxcK-TaOXRazKyNPXTU1SKiQYhoIOAUY4XieJP5GFjZOAEkIABswBWLZfjLEC08Oav1Na09DZqr9DQ7VMLUODVbTd40qt09I6KEcVyvGSqzS6y4CRBKyywgg+2khwKoHKlSCHFs+n0fm0elMwyeFQ0dS8Pj8ngCIUManq-xA8yBUOWdDB6U4ABE6HtCgdSoVyt5tBxDMTzAY1K1DMZtO1nKo-FpDGSAoZ9JTLL46Qy8MDmSk1uwESUjvzVGYhZjsbi8TTdISVFKPO9LHVmgF3eZDONwkA */
+	/** @xstate-layout N4IgpgJg5mDOIC5QGEBOYCGAXMACAKqhgHawYDGWAlgPbG4CyFAFlcWAHSElmW33l02SAGJEoAA41YVanXEgAHogC0AVgAsHABwBGAGwB2bRrW6ADBt0BmNdYA0IAJ6qN18xwBM5z9e3GATg1PNX1tAF9wxzRMHAIiUgo5eiZyVnYRQViwbkS+eSQQKRlkhWUEFQ0Aj099T39-HwDtc3N9RxcK-TaOXRazKyNPXTU1SKiQYhoIOAUY4XieJP5GFjZOAEkIABswBWLZfjLEC08Oav1Na09DZqr9DQ7VMLUODVbTd40qt09I6KEcVyvGSqzS6y4CRBKyywgg+2khwKoHKlSCHFs+n0fm0elMwyeFQ0dS8Pj8ngCIUManq-xA8yBUOWdDB6U4ABE6HtCgdSoVyt5tBxDMTzAY1K1DMZtO1nKo-FpDGSAoZ9JTLL46Qy8MDmSk1uwESUjvzVGYhZjsbi8TTdISVFKPO9LNYwto1KrLuNwkA */
 	return createMachine(
 		{
 			context: {
@@ -29,7 +29,7 @@ export const createTransactionMachineFactory = (config?: {
 			schema: { events: {} as CreateTransactionMachineEvent },
 			on: {
 				createTransaction: {
-					actions: 'Save fee payer and instruction in context',
+					actions: 'Save fee payer, instruction and transaction in context',
 					target: '.Transaction created',
 				},
 			},
@@ -38,7 +38,6 @@ export const createTransactionMachineFactory = (config?: {
 			states: {
 				Idle: {},
 				'Transaction created': {
-					entry: 'Save transaction in context',
 					always: {
 						cond: 'is fire and forget',
 						target: 'Done',
@@ -51,17 +50,15 @@ export const createTransactionMachineFactory = (config?: {
 		},
 		{
 			actions: {
-				'Save fee payer and instruction in context': assign({
+				'Save fee payer, instruction and transaction in context': assign({
 					instructions: (_, event) => event.value.instructions,
 					feePayer: (_, event) => event.value.feePayer,
-				}),
-				'Save transaction in context': assign({
-					transaction: (context) => {
+					transaction: (_, event) => {
 						const transaction = new Transaction().add(
-							...(context.instructions ?? [])
+							...(event.value.instructions ?? [])
 						);
 
-						transaction.feePayer = context.feePayer;
+						transaction.feePayer = event.value.feePayer;
 
 						return transaction;
 					},

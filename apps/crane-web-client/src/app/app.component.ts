@@ -104,7 +104,12 @@ export class AppComponent implements OnInit {
 	}
 
 	onTransactionCreated(transaction: Option<Transaction>) {
-		this._transaction.next(transaction);
+		const newTransaction = new Transaction();
+
+		newTransaction.feePayer = transaction?.feePayer;
+		newTransaction.add(...(transaction?.instructions ?? []));
+
+		this._transaction.next(newTransaction);
 		this.blockhashStatusSection?.loadBlockhash();
 	}
 
