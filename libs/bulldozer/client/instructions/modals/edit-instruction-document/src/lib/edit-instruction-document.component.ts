@@ -6,7 +6,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {} from '@bulldozer-client/instructions-data-access';
@@ -171,26 +171,26 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   get nameControl() {
-    return this.form.get('name') as FormControl;
+    return this.form.get('name') as UntypedFormControl;
   }
   get modifierControl() {
-    return this.form.get('modifier') as FormControl;
+    return this.form.get('modifier') as UntypedFormControl;
   }
   get collectionControl() {
-    return this.form.get('collection') as FormControl;
+    return this.form.get('collection') as UntypedFormControl;
   }
   get spaceControl() {
-    return this.form.get('space') as FormControl;
+    return this.form.get('space') as UntypedFormControl;
   }
   get payerControl() {
-    return this.form.get('payer') as FormControl;
+    return this.form.get('payer') as UntypedFormControl;
   }
   get closeControl() {
-    return this.form.get('close') as FormControl;
+    return this.form.get('close') as UntypedFormControl;
   }
 
   constructor(
@@ -203,17 +203,17 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
       accounts: List<InstructionAccount>;
     }
   ) {
-    this.form = new FormGroup({
-      name: new FormControl(this.data?.document?.name ?? '', {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl(this.data?.document?.name ?? '', {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(this.data?.document?.modifier ?? null),
-      collection: new FormControl(this.data?.document?.collection ?? null, {
+      modifier: new UntypedFormControl(this.data?.document?.modifier ?? null),
+      collection: new UntypedFormControl(this.data?.document?.collection ?? null, {
         validators: [Validators.required],
       }),
-      space: new FormControl(this.data?.document?.space ?? null),
-      payer: new FormControl(this.data?.document?.payer ?? null),
-      close: new FormControl(this.data?.document?.close ?? null),
+      space: new UntypedFormControl(this.data?.document?.space ?? null),
+      payer: new UntypedFormControl(this.data?.document?.payer ?? null),
+      close: new UntypedFormControl(this.data?.document?.close ?? null),
     });
   }
 

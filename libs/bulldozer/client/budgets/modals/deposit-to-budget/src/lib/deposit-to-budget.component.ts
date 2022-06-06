@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -62,15 +62,15 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 })
 export class DepositToBudgetComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   constructor(
     private readonly _matSnackBar: MatSnackBar,
     private readonly _matDialogRef: MatDialogRef<DepositToBudgetComponent>
   ) {
-    this.form = new FormGroup({
-      amount: new FormControl(null, {
+    this.form = new UntypedFormGroup({
+      amount: new UntypedFormControl(null, {
         validators: [Validators.required, Validators.min(0)],
       }),
     });

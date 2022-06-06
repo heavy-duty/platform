@@ -1,9 +1,9 @@
 import {
-  Directive,
-  EventEmitter,
-  HostListener,
-  Input,
-  Output,
+	Directive,
+	EventEmitter,
+	HostListener,
+	Input,
+	Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { InstructionDto } from '@heavy-duty/bulldozer-devkit';
@@ -11,17 +11,17 @@ import { EditInstructionComponent } from './edit-instruction.component';
 
 @Directive({ selector: '[bdEditInstruction]' })
 export class EditInstructionDirective {
-  @Input() instruction?: InstructionDto;
-  @Output() editInstruction = new EventEmitter<InstructionDto>();
-  @HostListener('click') onClick(): void {
-    this._matDialog
-      .open<EditInstructionComponent, InstructionDto, InstructionDto>(
-        EditInstructionComponent,
-        { data: this.instruction, panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
-      )
-      .afterClosed()
-      .subscribe((data) => data && this.editInstruction.emit(data));
-  }
+	@Input() instruction?: InstructionDto;
+	@Output() editInstruction = new EventEmitter<InstructionDto>();
+	@HostListener('click') onClick(): void {
+		this._matDialog
+			.open<EditInstructionComponent, InstructionDto, InstructionDto>(
+				EditInstructionComponent,
+				{ data: this.instruction, panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+			)
+			.afterClosed()
+			.subscribe((data) => data && this.editInstruction.emit(data));
+	}
 
-  constructor(private readonly _matDialog: MatDialog) {}
+	constructor(private readonly _matDialog: MatDialog) {}
 }

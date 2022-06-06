@@ -4,18 +4,18 @@ import { ImportWorkspaceComponent } from './import-workspace.component';
 
 @Directive({ selector: '[bdImportWorkspace]' })
 export class ImportWorkspaceDirective {
-  @Output() importWorkspace = new EventEmitter<string>();
-  @HostListener('click') onClick(): void {
-    this._matDialog
-      .open<ImportWorkspaceComponent, null, { pubkey: string }>(
-        ImportWorkspaceComponent,
-        {
-          panelClass: ['bd-bg-wood', 'bg-bd-brown'],
-        }
-      )
-      .afterClosed()
-      .subscribe((data) => data && this.importWorkspace.emit(data.pubkey));
-  }
+	@Output() importWorkspace = new EventEmitter<string>();
+	@HostListener('click') onClick(): void {
+		this._matDialog
+			.open<ImportWorkspaceComponent, null, { pubkey: string }>(
+				ImportWorkspaceComponent,
+				{
+					panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+				}
+			)
+			.afterClosed()
+			.subscribe((data) => data && this.importWorkspace.emit(data.pubkey));
+	}
 
-  constructor(private readonly _matDialog: MatDialog) {}
+	constructor(private readonly _matDialog: MatDialog) {}
 }

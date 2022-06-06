@@ -1,0 +1,42 @@
+{
+	"projectType": "library",
+	"sourceRoot": "libs/blueprint/button/src",
+	"prefix": "bp",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/blueprint/button"],
+			"options": {
+				"project": "libs/blueprint/button/ng-package.json",
+				"tailwindConfig": "libs/blueprint/button/tailwind.config.js"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/blueprint/button/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/blueprint/button/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/blueprint/button"],
+			"options": {
+				"jestConfig": "libs/blueprint/button/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/blueprint/button/**/*.ts",
+					"libs/blueprint/button/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
+}

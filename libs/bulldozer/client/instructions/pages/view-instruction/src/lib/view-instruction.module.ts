@@ -12,58 +12,59 @@ import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { ViewInstructionComponent } from './view-instruction.component';
 @NgModule({
-  declarations: [ViewInstructionComponent],
-  imports: [
-    CommonModule,
-    RouterModule.forChild([
-      {
-        path: '',
-        component: ViewInstructionComponent,
-        children: [
-          {
-            path: 'arguments',
-            loadChildren: () =>
-              import('@bulldozer-client/view-instruction-arguments').then(
-                (m) => m.ViewInstructionArgumentsModule
-              ),
-          },
-          {
-            path: 'documents',
-            loadChildren: () =>
-              import('@bulldozer-client/view-instruction-documents').then(
-                (m) => m.ViewInstructionDocumentsModule
-              ),
-          },
-          {
-            path: 'signers',
-            loadChildren: () =>
-              import('@bulldozer-client/view-instruction-signers').then(
-                (m) => m.ViewInstructionSignersModule
-              ),
-          },
-          {
-            path: 'code-editor',
-            loadChildren: () =>
-              import('@bulldozer-client/view-instruction-code-editor').then(
-                (m) => m.ViewInstructionCodeEditorModule
-              ),
-          },
-          {
-            path: '',
-            redirectTo: 'arguments',
-          },
-        ],
-      },
-    ]),
-    MatButtonModule,
-    ProgressSpinnerModule,
-    MatSnackBarModule,
-    MatTooltipModule,
-    ReactiveComponentModule,
-    ItemUpdatingModule,
-    EditInstructionModule,
-    HdWalletAdapterCdkModule,
-    HdBroadcasterCdkModule,
-  ],
+	declarations: [ViewInstructionComponent],
+	imports: [
+		CommonModule,
+		RouterModule.forChild([
+			{
+				path: '',
+				component: ViewInstructionComponent,
+				children: [
+					{
+						path: 'arguments',
+						loadChildren: () =>
+							import('@bulldozer-client/view-instruction-arguments').then(
+								(m) => m.ViewInstructionArgumentsModule
+							),
+					},
+					{
+						path: 'documents',
+						loadChildren: () =>
+							import('@bulldozer-client/view-instruction-documents').then(
+								(m) => m.ViewInstructionDocumentsModule
+							),
+					},
+					{
+						path: 'signers',
+						loadChildren: () =>
+							import('@bulldozer-client/view-instruction-signers').then(
+								(m) => m.ViewInstructionSignersModule
+							),
+					},
+					{
+						path: 'code-editor',
+						loadChildren: () =>
+							import('@bulldozer-client/view-instruction-code-editor').then(
+								(m) => m.ViewInstructionCodeEditorModule
+							),
+					},
+					{
+						path: '',
+						pathMatch: 'full',
+						redirectTo: 'arguments',
+					},
+				],
+			},
+		]),
+		MatButtonModule,
+		ProgressSpinnerModule,
+		MatSnackBarModule,
+		MatTooltipModule,
+		ReactiveComponentModule,
+		ItemUpdatingModule,
+		EditInstructionModule,
+		HdWalletAdapterCdkModule,
+		HdBroadcasterCdkModule,
+	],
 })
 export class ViewInstructionModule {}

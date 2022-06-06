@@ -6,22 +6,22 @@ import { DepositToBudgetComponent } from './deposit-to-budget.component';
 
 @Directive({ selector: '[bdDepositToBudget]' })
 export class DepositToBudgetDirective {
-  @Output() depositToBudget = new EventEmitter<{ amount: BN }>();
-  @HostListener('click') onClick(): void {
-    this._matDialog
-      .open<DepositToBudgetComponent, null, { amount: number }>(
-        DepositToBudgetComponent,
-        { panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
-      )
-      .afterClosed()
-      .subscribe(
-        (data) =>
-          data &&
-          this.depositToBudget.emit({
-            amount: new BN(data.amount * LAMPORTS_PER_SOL),
-          })
-      );
-  }
+	@Output() depositToBudget = new EventEmitter<{ amount: BN }>();
+	@HostListener('click') onClick(): void {
+		this._matDialog
+			.open<DepositToBudgetComponent, null, { amount: number }>(
+				DepositToBudgetComponent,
+				{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+			)
+			.afterClosed()
+			.subscribe(
+				(data) =>
+					data &&
+					this.depositToBudget.emit({
+						amount: new BN(data.amount * LAMPORTS_PER_SOL),
+					})
+			);
+	}
 
-  constructor(private readonly _matDialog: MatDialog) {}
+	constructor(private readonly _matDialog: MatDialog) {}
 }

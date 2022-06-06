@@ -1,32 +1,43 @@
 {
-	"sourceRoot": "libs/bulldozer/shared/generator/src",
-	"projectType": "library",
-	"targets": {
-		"build": {
-			"executor": "@nrwl/js:tsc",
-			"outputs": ["{options.outputPath}"],
-			"options": {
-				"outputPath": "dist/libs/bulldozer/shared/generator",
-				"main": "libs/bulldozer/shared/generator/src/index.ts",
-				"tsConfig": "libs/bulldozer/shared/generator/tsconfig.lib.json",
-				"assets": ["libs/bulldozer/shared/generator/*.md"]
-			}
-		},
-		"lint": {
-			"executor": "@nrwl/linter:eslint",
-			"outputs": ["{options.outputFile}"],
-			"options": {
-				"lintFilePatterns": ["libs/bulldozer/shared/generator/**/*.ts"]
-			}
-		},
-		"test": {
-			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/bulldozer/shared/generator"],
-			"options": {
-				"jestConfig": "libs/bulldozer/shared/generator/jest.config.ts",
-				"passWithNoTests": true
-			}
-		}
-	},
-	"tags": []
+  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/bulldozer/shared/generator/src",
+  "projectType": "library",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/js:tsc",
+      "outputs": [
+        "{options.outputPath}"
+      ],
+      "options": {
+        "outputPath": "dist/libs/bulldozer/shared/generator",
+        "main": "libs/bulldozer/shared/generator/src/index.ts",
+        "tsConfig": "libs/bulldozer/shared/generator/tsconfig.lib.json",
+        "assets": [
+          "libs/bulldozer/shared/generator/*.md"
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "outputs": [
+        "{options.outputFile}"
+      ],
+      "options": {
+        "lintFilePatterns": [
+          "libs/bulldozer/shared/generator/**/*.ts"
+        ]
+      }
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/bulldozer/shared/generator"
+      ],
+      "options": {
+        "jestConfig": "libs/bulldozer/shared/generator/jest.config.ts",
+        "passWithNoTests": true
+      }
+    }
+  },
+  "tags": []
 }

@@ -10,7 +10,8 @@
 		"broadcaster",
 		"heavy-duty-ui",
 		"drill",
-		"bulldozer"
+		"bulldozer",
+		"blueprint"
 	],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,

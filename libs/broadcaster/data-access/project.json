@@ -1,41 +1,46 @@
 {
-	"projectType": "library",
-	"sourceRoot": "libs/broadcaster/data-access/src",
-	"prefix": "hd",
-	"targets": {
-		"build": {
-			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/broadcaster/data-access"],
-			"options": {
-				"project": "libs/broadcaster/data-access/ng-package.json"
-			},
-			"configurations": {
-				"production": {
-					"tsConfig": "libs/broadcaster/data-access/tsconfig.lib.prod.json"
-				},
-				"development": {
-					"tsConfig": "libs/broadcaster/data-access/tsconfig.lib.json"
-				}
-			},
-			"defaultConfiguration": "production"
-		},
-		"test": {
-			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/broadcaster/data-access"],
-			"options": {
-				"jestConfig": "libs/broadcaster/data-access/jest.config.ts",
-				"passWithNoTests": true
-			}
-		},
-		"lint": {
-			"executor": "@nrwl/linter:eslint",
-			"options": {
-				"lintFilePatterns": [
-					"libs/broadcaster/data-access/src/**/*.ts",
-					"libs/broadcaster/data-access/src/**/*.html"
-				]
-			}
-		}
-	},
-	"tags": []
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/broadcaster/data-access/src",
+  "prefix": "hd",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": [
+        "dist/libs/broadcaster/data-access"
+      ],
+      "options": {
+        "project": "libs/broadcaster/data-access/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/broadcaster/data-access/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/broadcaster/data-access/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": [
+        "coverage/libs/broadcaster/data-access"
+      ],
+      "options": {
+        "jestConfig": "libs/broadcaster/data-access/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": [
+          "libs/broadcaster/data-access/src/**/*.ts",
+          "libs/broadcaster/data-access/src/**/*.html"
+        ]
+      }
+    }
+  },
+  "tags": []
 }
