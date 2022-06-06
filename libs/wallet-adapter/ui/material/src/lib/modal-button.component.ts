@@ -1,12 +1,18 @@
+import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
 	ContentChild,
 	ElementRef,
 	Input,
-	TemplateRef,
-	ViewChild,
 } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogModule } from '@angular/material/dialog';
+import {
+	HdWalletAdapterDirective,
+	HdWalletIconComponent,
+} from '@heavy-duty/wallet-adapter-cdk';
+import { HdWalletModalButtonDirective } from './modal-button.directive';
 import { HdWalletModalComponent } from './modal.component';
 import { ButtonColor } from './types';
 
@@ -19,16 +25,11 @@ import { ButtonColor } from './types';
 			[color]="color"
 			hdWalletModalButton
 			[wallets]="wallets"
-			[template]="template"
 			(selectWallet)="selectWallet($event)"
 		>
 			<ng-content></ng-content>
 			<ng-container *ngIf="!children">Select Wallet</ng-container>
 		</button>
-
-		<ng-template #template>
-			<hd-wallet-modal></hd-wallet-modal>
-		</ng-template>
 	`,
 	styles: [
 		`
@@ -44,10 +45,18 @@ import { ButtonColor } from './types';
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		CommonModule,
+		HdWalletAdapterDirective,
+		HdWalletIconComponent,
+		HdWalletModalButtonDirective,
+		HdWalletModalComponent,
+		MatButtonModule,
+		MatDialogModule,
+	],
 })
 export class HdWalletModalButtonComponent {
-	@ViewChild('template') template: TemplateRef<HdWalletModalComponent> | null =
-		null;
 	@ContentChild('children') children: ElementRef | null = null;
 	@Input() color: ButtonColor = 'primary';
 }

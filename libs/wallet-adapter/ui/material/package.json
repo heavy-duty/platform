@@ -1,6 +1,6 @@
 {
 	"name": "@heavy-duty/wallet-adapter-material",
-	"version": "0.3.0",
+	"version": "0.3.0-beta.0",
 	"publishConfig": {
 		"access": "public"
 	},

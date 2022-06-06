@@ -1,7 +1,12 @@
-import { DialogRef, DIALOG_DATA } from '@angular/cdk/dialog';
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
-import { MatSelectionListChange } from '@angular/material/list';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
 import { Wallet } from '@heavy-duty/wallet-adapter';
+import { HdWalletListItemComponent } from '@heavy-duty/wallet-adapter-cdk';
 import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 @Component({
@@ -21,7 +26,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 			<mat-selection-list
 				[multiple]="false"
-				(selectionChange)="onSelectionChange($event)"
+				(selectionChange)="onSelectionChange($event.options[0].value)"
 			>
 				<mat-list-option
 					*ngFor="let wallet of installedWallets"
@@ -89,7 +94,7 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 				<ng-template matExpansionPanelContent>
 					<mat-selection-list
 						[multiple]="false"
-						(selectionChange)="onSelectionChange($event)"
+						(selectionChange)="onSelectionChange($event.options[0].value)"
 					>
 						<mat-list-option
 							*ngFor="let wallet of otherWallets"
@@ -174,46 +179,51 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 		`,
 	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [
+		CommonModule,
+		HdWalletListItemComponent,
+		MatButtonModule,
+		MatIconModule,
+		MatListModule,
+		MatExpansionModule,
+	],
 })
 export class HdWalletModalComponent {
-	readonly installedWallets: Wallet[];
-	readonly otherWallets: Wallet[];
-	readonly getStartedWallet: Wallet;
+	private readonly _dialogRef =
+		inject<MatDialogRef<HdWalletModalComponent, WalletName>>(MatDialogRef);
+	private readonly _data = inject<{ wallets: Wallet[] }>(MAT_DIALOG_DATA);
 
-	constructor(
-		private readonly _dialogRef: DialogRef<WalletName, HdWalletModalComponent>,
-		@Inject(DIALOG_DATA) data: { wallets: Wallet[] }
-	) {
-		this.installedWallets = data.wallets.filter(
-			(wallet) => wallet.readyState === WalletReadyState.Installed
-		);
-		this.otherWallets = [
-			...data.wallets.filter(
-				(wallet) => wallet.readyState === WalletReadyState.Loadable
-			),
-			...data.wallets.filter(
-				(wallet) => wallet.readyState === WalletReadyState.NotDetected
-			),
-		];
-		this.getStartedWallet = this.installedWallets.length
-			? this.installedWallets[0]
-			: data.wallets.find(
-					(wallet: { adapter: { name: WalletName } }) =>
-						wallet.adapter.name === 'Phantom'
-			  ) ||
-			  data.wallets.find(
-					(wallet: { adapter: { name: WalletName } }) =>
-						wallet.adapter.name === 'Torus'
-			  ) ||
-			  data.wallets.find(
-					(wallet: { readyState: WalletReadyState }) =>
-						wallet.readyState === WalletReadyState.Loadable
-			  ) ||
-			  this.otherWallets[0];
-	}
+	expanded = false;
+	readonly installedWallets = this._data.wallets.filter(
+		(wallet) => wallet.readyState === WalletReadyState.Installed
+	);
+	readonly otherWallets = [
+		...this._data.wallets.filter(
+			(wallet) => wallet.readyState === WalletReadyState.Loadable
+		),
+		...this._data.wallets.filter(
+			(wallet) => wallet.readyState === WalletReadyState.NotDetected
+		),
+	];
+	readonly getStartedWallet = this.installedWallets.length
+		? this.installedWallets[0]
+		: this._data.wallets.find(
+				(wallet: { adapter: { name: WalletName } }) =>
+					wallet.adapter.name === 'Phantom'
+		  ) ||
+		  this._data.wallets.find(
+				(wallet: { adapter: { name: WalletName } }) =>
+					wallet.adapter.name === 'Torus'
+		  ) ||
+		  this._data.wallets.find(
+				(wallet: { readyState: WalletReadyState }) =>
+					wallet.readyState === WalletReadyState.Loadable
+		  ) ||
+		  this.otherWallets[0];
 
-	onSelectionChange({ options }: MatSelectionListChange): void {
-		this._dialogRef.close(options[0].value);
+	onSelectionChange(walletName: WalletName): void {
+		this._dialogRef.close(walletName);
 	}
 
 	onGettingStarted(): void {
@@ -222,5 +232,9 @@ export class HdWalletModalComponent {
 
 	onClose(): void {
 		this._dialogRef.close();
+	}
+
+	onToggleExpand(): void {
+		this.expanded = !this.expanded;
 	}
 }
