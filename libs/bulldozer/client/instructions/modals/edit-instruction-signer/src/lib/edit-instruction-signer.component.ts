@@ -1,5 +1,5 @@
 import { Component, HostBinding, Inject } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -65,14 +65,14 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 })
 export class EditInstructionSignerComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   get nameControl() {
-    return this.form.get('name') as FormControl;
+    return this.form.get('name') as UntypedFormControl;
   }
   get saveChangesControl() {
-    return this.form.get('saveChanges') as FormControl;
+    return this.form.get('saveChanges') as UntypedFormControl;
   }
 
   constructor(
@@ -81,11 +81,11 @@ export class EditInstructionSignerComponent {
     @Inject(MAT_DIALOG_DATA)
     public signer?: InstructionAccountDto
   ) {
-    this.form = new FormGroup({
-      name: new FormControl(this.signer?.name ?? '', {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl(this.signer?.name ?? '', {
         validators: [Validators.required],
       }),
-      saveChanges: new FormControl(this.signer?.modifier === 1),
+      saveChanges: new UntypedFormControl(this.signer?.modifier === 1),
     });
   }
 

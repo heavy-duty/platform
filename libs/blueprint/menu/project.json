@@ -1,0 +1,42 @@
+{
+	"projectType": "library",
+	"sourceRoot": "libs/blueprint/menu/src",
+	"prefix": "bp",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/blueprint/menu"],
+			"options": {
+				"project": "libs/blueprint/menu/ng-package.json",
+				"tailwindConfig": "libs/blueprint/menu/tailwind.config.js"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/blueprint/menu/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/blueprint/menu/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/blueprint/menu"],
+			"options": {
+				"jestConfig": "libs/blueprint/menu/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/blueprint/menu/**/*.ts",
+					"libs/blueprint/menu/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
+}

@@ -4,7 +4,7 @@ import {
   HostBinding,
   Inject,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -132,7 +132,7 @@ import { UserDto } from '@heavy-duty/bulldozer-devkit';
 })
 export class EditUserComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   constructor(
@@ -141,14 +141,14 @@ export class EditUserComponent {
     @Inject(MAT_DIALOG_DATA)
     public user?: UserDto
   ) {
-    this.form = new FormGroup({
-      name: new FormControl(this.user?.name ?? '', {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl(this.user?.name ?? '', {
         validators: [Validators.required, Validators.maxLength(32)],
       }),
-      userName: new FormControl(this.user?.userName ?? '', {
+      userName: new UntypedFormControl(this.user?.userName ?? '', {
         validators: [Validators.required, Validators.maxLength(15)],
       }),
-      thumbnailUrl: new FormControl(this.user?.thumbnailUrl ?? '', {
+      thumbnailUrl: new UntypedFormControl(this.user?.thumbnailUrl ?? '', {
         validators: [Validators.required, Validators.maxLength(300)],
       }),
     });

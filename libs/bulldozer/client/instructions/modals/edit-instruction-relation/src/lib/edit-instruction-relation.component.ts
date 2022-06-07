@@ -1,7 +1,7 @@
 import { Component, HostBinding, Inject } from '@angular/core';
 import {
-  FormControl,
-  FormGroup,
+  UntypedFormControl,
+  UntypedFormGroup,
   ValidatorFn,
   Validators,
 } from '@angular/forms';
@@ -78,7 +78,7 @@ export const equalValidator =
 })
 export class EditInstructionRelationComponent {
   @HostBinding('class') class = 'block w-72 relative';
-  readonly form: FormGroup;
+  readonly form: UntypedFormGroup;
   submitted = false;
 
   constructor(
@@ -90,12 +90,12 @@ export class EditInstructionRelationComponent {
       from: string;
     }
   ) {
-    this.form = new FormGroup(
+    this.form = new UntypedFormGroup(
       {
-        from: new FormControl(this.data.from, {
+        from: new UntypedFormControl(this.data.from, {
           validators: [Validators.required],
         }),
-        to: new FormControl(null, { validators: [Validators.required] }),
+        to: new UntypedFormControl(null, { validators: [Validators.required] }),
       },
       {
         validators: [equalValidator('from', 'to')],

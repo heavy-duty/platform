@@ -2,8 +2,8 @@ import { Component, Inject } from '@angular/core';
 import {
 	AbstractControl,
 	AsyncValidatorFn,
-	FormControl,
-	FormGroup,
+	UntypedFormControl,
+	UntypedFormGroup,
 	ValidationErrors,
 	ValidatorFn,
 	Validators,
@@ -136,8 +136,8 @@ export class AssociatedTokenAccountValidator {
 })
 export class BountyClaimModalComponent {
 	submitted = false;
-	readonly form = new FormGroup({
-		userVault: new FormControl('', {
+	readonly form = new UntypedFormGroup({
+		userVault: new UntypedFormControl('', {
 			validators: [Validators.required, publicKeyValidator()],
 			asyncValidators: [
 				AssociatedTokenAccountValidator.createValidator(

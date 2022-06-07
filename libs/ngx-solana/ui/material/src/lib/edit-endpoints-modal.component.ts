@@ -4,7 +4,7 @@ import {
   HostBinding,
   Inject,
 } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { HttpEndpoint } from '@heavy-duty/ngx-solana';
 import { httpEndpoint, webSocketEndpoint } from '@heavy-duty/ngx-solana-cdk';
@@ -75,10 +75,10 @@ import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 export class HdEditEndpointsComponent {
   @HostBinding('class') class = 'block';
   submitted = false;
-  form: FormGroup;
+  form: UntypedFormGroup;
 
   constructor(
-    private readonly _formBuilder: FormBuilder,
+    private readonly _formBuilder: UntypedFormBuilder,
     private readonly _matDialogRef: MatDialogRef<
       HdEditEndpointsComponent,
       {

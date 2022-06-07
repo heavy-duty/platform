@@ -18,7 +18,11 @@ module.exports = {
 				warning: 'var(--warning-color)',
 				error: 'var(--error-color)',
 				'bd-black': '#242424',
-				'bd-brown': '#583b2a',
+				'bd-brown': {
+					light: '#825941',
+					DEFAULT: '#583b2a',
+					dark: '#302118',
+				},
 			},
 		},
 	},

@@ -5,7 +5,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -160,33 +160,33 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
   @HostBinding('class') class = 'block w-72 relative';
   private readonly _destroy = new Subject();
   readonly destroy$ = this._destroy.asObservable();
-  readonly form = new FormGroup({
-    name: new FormControl('', { validators: [Validators.required] }),
-    kind: new FormControl(0, { validators: [Validators.required] }),
-    modifier: new FormControl(null),
-    size: new FormControl(null),
-    max: new FormControl(null),
-    maxLength: new FormControl(null),
+  readonly form = new UntypedFormGroup({
+    name: new UntypedFormControl('', { validators: [Validators.required] }),
+    kind: new UntypedFormControl(0, { validators: [Validators.required] }),
+    modifier: new UntypedFormControl(null),
+    size: new UntypedFormControl(null),
+    max: new UntypedFormControl(null),
+    maxLength: new UntypedFormControl(null),
   });
   submitted = false;
 
   get nameControl() {
-    return this.form.get('name') as FormControl;
+    return this.form.get('name') as UntypedFormControl;
   }
   get kindControl() {
-    return this.form.get('kind') as FormControl;
+    return this.form.get('kind') as UntypedFormControl;
   }
   get modifierControl() {
-    return this.form.get('modifier') as FormControl;
+    return this.form.get('modifier') as UntypedFormControl;
   }
   get sizeControl() {
-    return this.form.get('size') as FormControl;
+    return this.form.get('size') as UntypedFormControl;
   }
   get maxControl() {
-    return this.form.get('max') as FormControl;
+    return this.form.get('max') as UntypedFormControl;
   }
   get maxLengthControl() {
-    return this.form.get('maxLength') as FormControl;
+    return this.form.get('maxLength') as UntypedFormControl;
   }
 
   constructor(
@@ -195,17 +195,17 @@ export class EditInstructionArgumentComponent implements OnInit, OnDestroy {
     @Inject(MAT_DIALOG_DATA)
     public instructionArgument?: InstructionArgumentDto
   ) {
-    this.form = new FormGroup({
-      name: new FormControl(this.instructionArgument?.name ?? '', {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl(this.instructionArgument?.name ?? '', {
         validators: [Validators.required],
       }),
-      kind: new FormControl(this.instructionArgument?.kind ?? 0, {
+      kind: new UntypedFormControl(this.instructionArgument?.kind ?? 0, {
         validators: [Validators.required],
       }),
-      modifier: new FormControl(this.instructionArgument?.modifier ?? null),
-      size: new FormControl(this.instructionArgument?.size ?? null),
-      max: new FormControl(this.instructionArgument?.max ?? null),
-      maxLength: new FormControl(this.instructionArgument?.maxLength ?? null),
+      modifier: new UntypedFormControl(this.instructionArgument?.modifier ?? null),
+      size: new UntypedFormControl(this.instructionArgument?.size ?? null),
+      max: new UntypedFormControl(this.instructionArgument?.max ?? null),
+      maxLength: new UntypedFormControl(this.instructionArgument?.maxLength ?? null),
     });
   }
 

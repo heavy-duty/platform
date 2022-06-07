@@ -9,45 +9,45 @@ import { AddWorkspaceComponent } from './add-workspace.component';
 
 @Directive({ selector: '[bdAddWorkspace]' })
 export class AddWorkspaceDirective {
-  @Output() newWorkspace = new EventEmitter<WorkspaceDto>();
-  @Output() importWorkspace = new EventEmitter<string>();
-  @HostListener('click') onClick(): void {
-    this._matDialog
-      .open<AddWorkspaceComponent, null, 'new' | 'import' | null>(
-        AddWorkspaceComponent,
-        {
-          panelClass: ['bd-bg-wood', 'bg-bd-brown'],
-        }
-      )
-      .afterClosed()
-      .pipe(
-        isNotNullOrUndefined,
-        concatMap((data) => {
-          if (data === 'new') {
-            return this._matDialog
-              .open<EditWorkspaceComponent, undefined, WorkspaceDto>(
-                EditWorkspaceComponent,
-                { panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
-              )
-              .afterClosed()
-              .pipe(tap((data) => data && this.newWorkspace.emit(data)));
-          } else if (data === 'import') {
-            return this._matDialog
-              .open<ImportWorkspaceComponent, null, { pubkey: string }>(
-                ImportWorkspaceComponent,
-                { panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
-              )
-              .afterClosed()
-              .pipe(
-                tap((data) => data && this.importWorkspace.emit(data.pubkey))
-              );
-          } else {
-            return EMPTY;
-          }
-        })
-      )
-      .subscribe();
-  }
+	@Output() newWorkspace = new EventEmitter<WorkspaceDto>();
+	@Output() importWorkspace = new EventEmitter<string>();
+	@HostListener('click') onClick(): void {
+		this._matDialog
+			.open<AddWorkspaceComponent, null, 'new' | 'import' | null>(
+				AddWorkspaceComponent,
+				{
+					panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+				}
+			)
+			.afterClosed()
+			.pipe(
+				isNotNullOrUndefined,
+				concatMap((data) => {
+					if (data === 'new') {
+						return this._matDialog
+							.open<EditWorkspaceComponent, undefined, WorkspaceDto>(
+								EditWorkspaceComponent,
+								{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+							)
+							.afterClosed()
+							.pipe(tap((data) => data && this.newWorkspace.emit(data)));
+					} else if (data === 'import') {
+						return this._matDialog
+							.open<ImportWorkspaceComponent, null, { pubkey: string }>(
+								ImportWorkspaceComponent,
+								{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+							)
+							.afterClosed()
+							.pipe(
+								tap((data) => data && this.importWorkspace.emit(data.pubkey))
+							);
+					} else {
+						return EMPTY;
+					}
+				})
+			)
+			.subscribe();
+	}
 
-  constructor(private readonly _matDialog: MatDialog) {}
+	constructor(private readonly _matDialog: MatDialog) {}
 }

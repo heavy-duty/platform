@@ -8,18 +8,18 @@ import { UserInstructionsBottomSheetComponent } from './user-instructions-bottom
 
 @Directive({ selector: 'button[bdUserInstructionsBottomSheet]' })
 export class UserInstructionsBottomSheetDirective {
-  @HostListener('click') onClick() {
-    this._matBottomSheet.open<
-      UserInstructionsBottomSheetComponent,
-      Observable<List<InstructionStatus> | null>
-    >(UserInstructionsBottomSheetComponent, {
-      data: this._userInstructionsStore.groupedInstructionStatuses$,
-      panelClass: ['bd-bg-wood', 'bg-bd-brown'],
-    });
-  }
+	@HostListener('click') onClick() {
+		this._matBottomSheet.open<
+			UserInstructionsBottomSheetComponent,
+			Observable<List<InstructionStatus> | null>
+		>(UserInstructionsBottomSheetComponent, {
+			data: this._userInstructionsStore.groupedInstructionStatuses$,
+			panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+		});
+	}
 
-  constructor(
-    private readonly _matBottomSheet: MatBottomSheet,
-    private readonly _userInstructionsStore: UserInstructionsStore2
-  ) {}
+	constructor(
+		private readonly _matBottomSheet: MatBottomSheet,
+		private readonly _userInstructionsStore: UserInstructionsStore2
+	) {}
 }

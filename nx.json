@@ -27,9 +27,6 @@
 			}
 		]
 	},
-	"cli": {
-		"defaultCollection": "@nrwl/angular"
-	},
 	"generators": {
 		"@nrwl/angular:application": {
 			"style": "scss",
@@ -56,5 +53,9 @@
 			"style": "css"
 		}
 	},
-	"defaultProject": "bulldozer-client"
+	"defaultProject": "bulldozer-client",
+	"$schema": "./node_modules/nx/schemas/nx-schema.json",
+	"cli": {
+		"defaultCollection": "@nrwl/angular"
+	}
 }

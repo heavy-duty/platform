@@ -6,22 +6,22 @@ import { WithdrawFromBudgetComponent } from './withdraw-from-budget.component';
 
 @Directive({ selector: '[bdWithdrawFromBudget]' })
 export class WithdrawFromBudgetDirective {
-  @Output() withdrawFromBudget = new EventEmitter<{ amount: BN }>();
-  @HostListener('click') onClick(): void {
-    this._matDialog
-      .open<WithdrawFromBudgetComponent, null, { amount: number }>(
-        WithdrawFromBudgetComponent,
-        { panelClass: ['bd-bg-wood', 'bg-bd-brown'] }
-      )
-      .afterClosed()
-      .subscribe(
-        (data) =>
-          data &&
-          this.withdrawFromBudget.emit({
-            amount: new BN(data.amount * LAMPORTS_PER_SOL),
-          })
-      );
-  }
+	@Output() withdrawFromBudget = new EventEmitter<{ amount: BN }>();
+	@HostListener('click') onClick(): void {
+		this._matDialog
+			.open<WithdrawFromBudgetComponent, null, { amount: number }>(
+				WithdrawFromBudgetComponent,
+				{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+			)
+			.afterClosed()
+			.subscribe(
+				(data) =>
+					data &&
+					this.withdrawFromBudget.emit({
+						amount: new BN(data.amount * LAMPORTS_PER_SOL),
+					})
+			);
+	}
 
-  constructor(private readonly _matDialog: MatDialog) {}
+	constructor(private readonly _matDialog: MatDialog) {}
 }

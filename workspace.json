@@ -1,6 +1,8 @@
 {
 	"version": 2,
 	"projects": {
+		"blueprint-button": "libs/blueprint/button",
+		"blueprint-menu": "libs/blueprint/menu",
 		"broadcaster": "apps/broadcaster",
 		"broadcaster-data-access": "libs/broadcaster/data-access",
 		"broadcaster-ui-cdk": "libs/broadcaster/ui/cdk",
@@ -88,7 +90,9 @@
 		"rx-solana": "libs/rx-solana",
 		"rxjs": "libs/rxjs",
 		"wallet-adapter-data-access": "libs/wallet-adapter/data-access",
+		"wallet-adapter-ui-blueprint": "libs/wallet-adapter/ui/blueprint",
 		"wallet-adapter-ui-cdk": "libs/wallet-adapter/ui/cdk",
 		"wallet-adapter-ui-material": "libs/wallet-adapter/ui/material"
-	}
+	},
+	"$schema": "./node_modules/nx/schemas/workspace-schema.json"
 }
