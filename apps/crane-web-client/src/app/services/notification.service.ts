@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../components/snack-bar.component';
 import { getErrorMessage } from '../utils';
 
 @Injectable()
 export class NotificationService {
-	constructor(private readonly _matSnackBar: MatSnackBar) {}
+	private readonly _matSnackBar = inject(MatSnackBar);
 
 	notifyError(error: unknown) {
 		this._matSnackBar.openFromComponent(SnackBarComponent, {

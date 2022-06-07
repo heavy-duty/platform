@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { FieldType, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
@@ -127,11 +127,7 @@ import { TransactionFormService } from './transaction-form.service';
 	],
 })
 export class FormlyFieldStepperComponent extends FieldType {
-	constructor(
-		private readonly _transactionFormService: TransactionFormService
-	) {
-		super();
-	}
+	private readonly _transactionFormService = inject(TransactionFormService);
 
 	isValid(field: FormlyFieldConfig): boolean {
 		if (field.key) {

@@ -3,6 +3,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	EventEmitter,
+	inject,
 	OnInit,
 	Output,
 } from '@angular/core';
@@ -77,6 +78,8 @@ export interface InstructionOption {
 	],
 })
 export class InstructionAutocompleteComponent implements OnInit {
+	private readonly _pluginsService = inject(PluginsService);
+
 	searchControl = new FormControl();
 	options = this._pluginsService.plugins.reduce(
 		(options: InstructionOption[], plugin) => [
@@ -93,8 +96,6 @@ export class InstructionAutocompleteComponent implements OnInit {
 	filteredOptions: Observable<InstructionOption[]> | null = null;
 
 	@Output() instructionSelected = new EventEmitter<InstructionOption>();
-
-	constructor(private readonly _pluginsService: PluginsService) {}
 
 	ngOnInit() {
 		this.filteredOptions = this.searchControl.valueChanges.pipe(

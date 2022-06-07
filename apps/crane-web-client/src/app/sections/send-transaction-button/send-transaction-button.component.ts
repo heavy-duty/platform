@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
+	inject,
 	Input,
 	Output,
 } from '@angular/core';
@@ -29,6 +30,10 @@ import { SendTransactionButtonStore } from './send-transaction-button.store';
 	imports: [CommonModule, BlueprintButtonComponent],
 })
 export class SendTransactionButtonComponent {
+	private readonly _sendTransactionButtonStore = inject(
+		SendTransactionButtonStore
+	);
+
 	readonly disabled$ = this._sendTransactionButtonStore.disabled$;
 
 	@Input() set transaction(value: Option<Transaction>) {
@@ -58,10 +63,6 @@ export class SendTransactionButtonComponent {
 			),
 			map(({ context }) => context.error ?? null)
 		);
-
-	constructor(
-		private readonly _sendTransactionButtonStore: SendTransactionButtonStore
-	) {}
 
 	onSendTransaction() {
 		this._sendTransactionButtonStore.sendTransaction();

@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
+	inject,
 	Input,
 	Output,
 } from '@angular/core';
@@ -56,6 +57,11 @@ import { WalletSectionComponent } from './wallet-section.component';
 	],
 })
 export class SignTransactionSectionComponent {
+	private readonly _walletStore = inject(WalletStore);
+	private readonly _signTransactionSectionStore = inject(
+		SignTransactionSectionStore
+	);
+
 	readonly publicKey$ = this._walletStore.publicKey$;
 	readonly wallet$ = this._walletStore.wallet$;
 	readonly transaction$ = this._signTransactionSectionStore.transaction$;
@@ -81,11 +87,6 @@ export class SignTransactionSectionComponent {
 			),
 			map(({ context: { transaction } }) => transaction ?? null)
 		);
-
-	constructor(
-		private readonly _walletStore: WalletStore,
-		private readonly _signTransactionSectionStore: SignTransactionSectionStore
-	) {}
 
 	onSignTransactionWithWallet(
 		publicKey: Option<PublicKey>,

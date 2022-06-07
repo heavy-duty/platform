@@ -4,6 +4,7 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	EventEmitter,
+	inject,
 	Input,
 	Output,
 } from '@angular/core';
@@ -76,12 +77,11 @@ import { KeypairsSectionStore } from './keypairs-section.store';
 	providers: [KeypairsSectionStore],
 })
 export class KeypairsSectionComponent {
+	private readonly _keypairsSectionStore = inject(KeypairsSectionStore);
 	@Input() disabled = false;
 	@Output() signTransaction = new EventEmitter<Keypair>();
 
 	readonly keypairs$ = this._keypairsSectionStore.keypairs$;
-
-	constructor(private readonly _keypairsSectionStore: KeypairsSectionStore) {}
 
 	onNewKeypair() {
 		this._keypairsSectionStore.generateKeypair();

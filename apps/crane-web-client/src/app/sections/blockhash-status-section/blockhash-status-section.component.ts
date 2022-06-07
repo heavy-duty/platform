@@ -1,5 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Output } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	inject,
+	Output,
+} from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
@@ -86,6 +91,10 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 	standalone: true,
 })
 export class BlockhashStatusSectionComponent {
+	private readonly _blockhashStatusSectionStore = inject(
+		BlockhashStatusSectionStore
+	);
+
 	readonly percentage$ = this._blockhashStatusSectionStore.percentage$;
 	readonly isValid$ = this._blockhashStatusSectionStore.isValid$;
 	readonly lastValidBlockHeight$ =
@@ -100,10 +109,6 @@ export class BlockhashStatusSectionComponent {
 		);
 	@Output() blockhashChanged =
 		this._blockhashStatusSectionStore.latestBlockhash$.pipe(isNotNull);
-
-	constructor(
-		private readonly _blockhashStatusSectionStore: BlockhashStatusSectionStore
-	) {}
 
 	loadBlockhash() {
 		this._blockhashStatusSectionStore.getBlockHeight();

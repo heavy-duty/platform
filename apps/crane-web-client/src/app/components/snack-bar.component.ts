@@ -3,14 +3,13 @@ import {
 	ChangeDetectionStrategy,
 	Component,
 	HostBinding,
-	Inject,
-	Input,
+	inject, Input,
 	Pipe,
-	PipeTransform,
+	PipeTransform
 } from '@angular/core';
 import {
 	MatSnackBarModule,
-	MAT_SNACK_BAR_DATA,
+	MAT_SNACK_BAR_DATA
 } from '@angular/material/snack-bar';
 
 export interface SnackBarData {
@@ -82,8 +81,5 @@ export class SnackBarPoleComponent {
 export class SnackBarComponent {
 	@HostBinding('class') class = 'block relative w-64';
 
-	constructor(
-		@Inject(MAT_SNACK_BAR_DATA)
-		public data: SnackBarData
-	) {}
+	public readonly data: SnackBarData = inject(MAT_SNACK_BAR_DATA);
 }

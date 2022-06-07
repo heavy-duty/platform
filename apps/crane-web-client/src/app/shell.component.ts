@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
+	inject,
 	OnInit,
 	ViewChild,
 } from '@angular/core';
@@ -104,6 +105,10 @@ import { Option } from './utils';
 	providers: [ConnectionStore, WalletStore, NotificationService],
 })
 export class ShellComponent implements OnInit {
+	private readonly _connectionStore = inject(ConnectionStore);
+	private readonly _walletStore = inject(WalletStore);
+	private readonly _notificationService = inject(NotificationService);
+
 	@ViewChild('blockhashStatusSection')
 	blockhashStatusSection: Option<BlockhashStatusSectionComponent> = null;
 	private readonly _transaction = new BehaviorSubject<Option<Transaction>>(
@@ -118,12 +123,6 @@ export class ShellComponent implements OnInit {
 	readonly transaction$ = this._transaction.asObservable();
 	readonly latestBlockhash$ = this._latestBlockhash.asObservable();
 	readonly signature$ = this._signature.asObservable();
-
-	constructor(
-		private readonly _connectionStore: ConnectionStore,
-		private readonly _walletStore: WalletStore,
-		private readonly _notificationService: NotificationService
-	) {}
 
 	ngOnInit() {
 		this._walletStore.setAdapters([

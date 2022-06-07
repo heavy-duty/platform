@@ -4,6 +4,7 @@ import {
 	Component,
 	HostBinding,
 	importProvidersFrom,
+	inject,
 	Output,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -108,6 +109,13 @@ importProvidersFrom;
 	],
 })
 export class CreateTransactionSectionComponent {
+	private readonly _walletStore = inject(WalletStore);
+	private readonly _pluginsService = inject(PluginsService);
+	private readonly _transactionFormService = inject(TransactionFormService);
+	private readonly _createTransactionSectionStore = inject(
+		CreateTransactionSectionStore
+	);
+
 	@HostBinding('class') class = 'relative';
 	readonly transactionForm$ = this._transactionFormService.transactionForm$;
 	readonly disabled$ = this._createTransactionSectionStore.disabled$;
@@ -119,13 +127,6 @@ export class CreateTransactionSectionComponent {
 			filter((state) => state?.matches('Transaction created') ?? false),
 			map(({ context: { transaction } }) => transaction ?? null)
 		);
-
-	constructor(
-		private readonly _walletStore: WalletStore,
-		private readonly _pluginsService: PluginsService,
-		private readonly _transactionFormService: TransactionFormService,
-		private readonly _createTransactionSectionStore: CreateTransactionSectionStore
-	) {}
 
 	onBuildTransaction(
 		authority: Option<PublicKey>,

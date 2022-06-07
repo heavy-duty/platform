@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
 	Component,
+	inject,
 	Input,
 	Output,
 } from '@angular/core';
@@ -29,6 +30,10 @@ import { ConfirmTransactionButtonStore } from './confirm-transaction-button.stor
 	imports: [CommonModule, BlueprintButtonComponent],
 })
 export class ConfirmTransactionButtonComponent {
+	private readonly _confirmTransactionButtonStore = inject(
+		ConfirmTransactionButtonStore
+	);
+
 	readonly disabled$ = this._confirmTransactionButtonStore.disabled$;
 
 	@Input() set signature(value: TransactionSignature | null) {
@@ -45,10 +50,6 @@ export class ConfirmTransactionButtonComponent {
 					state.matches('Transaction confirmed') && state.changed === true
 			)
 		);
-
-	constructor(
-		private readonly _confirmTransactionButtonStore: ConfirmTransactionButtonStore
-	) {}
 
 	onConfirmTransaction() {
 		this._confirmTransactionButtonStore.confirmTransaction();
