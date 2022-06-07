@@ -8,7 +8,7 @@ import {
 	MatSnackBarModule,
 	MAT_SNACK_BAR_DATA,
 } from '@angular/material/snack-bar';
-import { SnackBarPoleComponent } from './snack-bar-pole.component';
+import { BlueprintSnackBarPoleComponent } from './snack-bar-pole.component';
 
 export interface SnackBarData {
 	title: string;
@@ -34,9 +34,9 @@ export interface SnackBarData {
 	styles: [],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [MatSnackBarModule, SnackBarPoleComponent],
+	imports: [MatSnackBarModule, BlueprintSnackBarPoleComponent],
 })
-export class SnackBarComponent {
+export class BlueprintSnackBarComponent {
 	@HostBinding('class') class = 'block relative w-64';
 
 	// The alert/announcement widget should be part of Angular CDK.

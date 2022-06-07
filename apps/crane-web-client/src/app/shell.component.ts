@@ -9,6 +9,7 @@ import {
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
+import { BlueprintSnackBarService } from '@heavy-duty/blueprint-snack-bar';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import { ReactiveComponentModule } from '@ngrx/component';
 import {
@@ -24,8 +25,7 @@ import {
 	SendTransactionButtonComponent,
 	SignTransactionSectionComponent,
 } from './sections';
-import { NotificationService } from './services';
-import { Option } from './utils';
+import { getErrorMessage, Option } from './utils';
 
 @Component({
 	selector: 'crane-shell',
@@ -102,12 +102,12 @@ import { Option } from './utils';
 		BlockhashStatusSectionComponent,
 		BlueprintScrewCardComponent,
 	],
-	providers: [ConnectionStore, WalletStore, NotificationService],
+	providers: [ConnectionStore, WalletStore, BlueprintSnackBarService],
 })
 export class ShellComponent implements OnInit {
 	private readonly _connectionStore = inject(ConnectionStore);
 	private readonly _walletStore = inject(WalletStore);
-	private readonly _notificationService = inject(NotificationService);
+	private readonly _snackbarService = inject(BlueprintSnackBarService);
 
 	@ViewChild('blockhashStatusSection')
 	blockhashStatusSection: Option<BlockhashStatusSectionComponent> = null;
@@ -125,8 +125,6 @@ export class ShellComponent implements OnInit {
 	readonly signature$ = this._signature.asObservable();
 
 	ngOnInit() {
-		this._notificationService.notifySuccess('asd');
-
 		this._walletStore.setAdapters([
 			new PhantomWalletAdapter(),
 			new SolflareWalletAdapter(),
@@ -165,7 +163,7 @@ export class ShellComponent implements OnInit {
 	}
 
 	onTransactionConfirmed() {
-		this._notificationService.notifySuccess('Transaction confirmed!');
+		this._snackbarService.notifySuccess('Transaction confirmed!');
 	}
 
 	onBlockhashChanged(
@@ -201,17 +199,6 @@ export class ShellComponent implements OnInit {
 	}
 
 	onTransactionFailed(error: unknown) {
-		if (typeof error === 'string') {
-			this._notificationService.notifyError(error);
-		} else if (error instanceof Error) {
-			if (error.message.includes('failed to send transaction:')) {
-				this._notificationService.notifyError(error.message.split(': ')[2]);
-			} else {
-				this._notificationService.notifyError(error.message);
-			}
-		} else {
-			console.error(error);
-			this._notificationService.notifyError('Unknown error');
-		}
+		this._snackbarService.notifyError(getErrorMessage(error));
 	}
 }

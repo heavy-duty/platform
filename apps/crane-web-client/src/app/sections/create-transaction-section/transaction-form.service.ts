@@ -172,7 +172,7 @@ export type TransactionFormModel = {
 export class TransactionFormService {
 	private readonly _instructions = new BehaviorSubject<InstructionOption[]>([]);
 	private readonly _fields = new BehaviorSubject<FormlyFieldConfig>({
-		type: 'stepper',
+		type: 'transaction',
 		fieldGroup: [],
 	});
 	private readonly _model = new BehaviorSubject<TransactionFormModel>({});
@@ -276,7 +276,7 @@ export class TransactionFormService {
 
 	restart() {
 		this._fields.next({
-			type: 'stepper',
+			type: 'transaction',
 			fieldGroup: [],
 		});
 		this._instructions.next([]);

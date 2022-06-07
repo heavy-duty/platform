@@ -1,31 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, Directive, HostListener, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { FieldType, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { StopPropagationDirective } from '../../directives';
 import { TransactionFormService } from './transaction-form.service';
 
+@Directive({
+	selector: '[craneStopPropagation]',
+	standalone: true,
+})
+export class StopPropagationDirective {
+	@HostListener('click', ['$event']) onClick(event: Event) {
+		event.stopPropagation();
+	}
+}
+
 @Component({
-	selector: 'crane-formly-field-stepper',
+	selector: 'crane-formly-field-transaction',
 	template: `
 		<div
-			class="flex flex-col gap-4 stepper"
+			class="flex flex-col gap-4 transaction"
 			(cdkDropListDropped)="drop($event)"
 			cdkDropList
 		>
 			<bp-screw-card
 				*ngFor="
-					let step of field.fieldGroup;
+					let instruction of field.fieldGroup;
 					let index = index;
 					let last = last
 				"
-				class="bg-black bg-bp-metal px-6 py-4 rounded step"
+				class="bg-black bg-bp-metal px-6 py-4 rounded instruction"
 				cdkDrag
 			>
-				<div *cdkDragPlaceholder class="step-placeholder"></div>
+				<div *cdkDragPlaceholder class="instruction-placeholder"></div>
 
 				<div
 					class="w-full flex justify-between items-center cursor-move mb-4 gap-4"
@@ -71,9 +80,9 @@ import { TransactionFormService } from './transaction-form.service';
 				</div>
 
 				<bp-screw-card
-					class="bg-black bg-bp-metal-2 px-6 pt-4 pb-8 rounded step w-full block"
+					class="bg-black bg-bp-metal-2 px-6 pt-4 pb-8 rounded instruction w-full block"
 				>
-					<formly-field [field]="step"></formly-field>
+					<formly-field [field]="instruction"></formly-field>
 				</bp-screw-card>
 
 				<bp-screw-card
@@ -104,11 +113,12 @@ import { TransactionFormService } from './transaction-form.service';
 				transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 			}
 
-			.stepper.cdk-drop-list-dragging .step:not(.cdk-drag-placeholder) {
+			.transaction.cdk-drop-list-dragging
+				.instruction:not(.cdk-drag-placeholder) {
 				transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
 			}
 
-			.step-placeholder {
+			.instruction-placeholder {
 				background: #ccc;
 				border: dotted 3px #999;
 				min-height: 60px;
@@ -126,7 +136,7 @@ import { TransactionFormService } from './transaction-form.service';
 		MatIconModule,
 	],
 })
-export class FormlyFieldStepperComponent extends FieldType {
+export class FormlyFieldTransactionComponent extends FieldType {
 	private readonly _transactionFormService = inject(TransactionFormService);
 
 	isValid(field: FormlyFieldConfig): boolean {

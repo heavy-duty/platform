@@ -5,7 +5,7 @@ import {
 	HostBinding,
 	Input,
 } from '@angular/core';
-import { SnackBarClassPipe } from './snack-bar-class.pipe';
+import { BlueprintSnackBarClassPipe } from './snack-bar-class.pipe';
 
 @Component({
 	selector: 'bp-snack-bar-pole',
@@ -20,9 +20,9 @@ import { SnackBarClassPipe } from './snack-bar-class.pipe';
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [CommonModule, SnackBarClassPipe],
+	imports: [CommonModule, BlueprintSnackBarClassPipe],
 })
-export class SnackBarPoleComponent {
+export class BlueprintSnackBarPoleComponent {
 	@HostBinding('class') class = 'flex flex-col items-center px-4';
 	@Input() type: string | null = null;
 }

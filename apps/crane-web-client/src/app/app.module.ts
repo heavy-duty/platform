@@ -12,7 +12,7 @@ import {
 	SystemPlugin,
 	TokenPlugin,
 } from './plugins';
-import { FormlyFieldStepperComponent } from './sections';
+import { FormlyFieldTransactionComponent } from './sections';
 
 @NgModule({
 	declarations: [AppComponent],
@@ -30,8 +30,8 @@ import { FormlyFieldStepperComponent } from './sections';
 		FormlyModule.forRoot({
 			types: [
 				{
-					name: 'stepper',
-					component: FormlyFieldStepperComponent,
+					name: 'transaction',
+					component: FormlyFieldTransactionComponent,
 				},
 			],
 		}),

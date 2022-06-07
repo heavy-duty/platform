@@ -5,7 +5,7 @@ import { Pipe, PipeTransform } from '@angular/core';
 	pure: true,
 	standalone: true,
 })
-export class SnackBarClassPipe implements PipeTransform {
+export class BlueprintSnackBarClassPipe implements PipeTransform {
 	transform(value: string | null): string[] {
 		switch (value) {
 			case 'success':
