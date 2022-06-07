@@ -19,13 +19,13 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
 	selector: 'bd-edit-argument',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">
+		<h2 class="mat-primary bp-font" mat-dialog-title>
 			{{ instructionArgument ? 'Edit' : 'Create' }} argument
 		</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onEditArgument()"
 		>
 			<mat-form-field
@@ -76,11 +76,11 @@ import { Subject, takeUntil } from 'rxjs';
 			>
 				<mat-label>Max</mat-label>
 				<input
+					type="number"
 					matInput
 					formControlName="max"
 					required
 					autocomplete="off"
-					type="number"
 				/>
 				<mat-error *ngIf="submitted && maxControl.hasError('required')"
 					>The max is mandatory.</mat-error
@@ -95,11 +95,11 @@ import { Subject, takeUntil } from 'rxjs';
 			>
 				<mat-label>Max Length</mat-label>
 				<input
+					type="number"
 					matInput
 					formControlName="maxLength"
 					required
 					autocomplete="off"
-					type="number"
 				/>
 				<mat-error *ngIf="submitted && maxLengthControl.hasError('required')"
 					>The max length is mandatory.</mat-error
@@ -124,12 +124,12 @@ import { Subject, takeUntil } from 'rxjs';
 			>
 				<mat-label>Size</mat-label>
 				<input
+					type="number"
 					matInput
 					formControlName="size"
 					required
 					autocomplete="off"
 					min="1"
-					type="number"
 				/>
 				<mat-error *ngIf="submitted && sizeControl.hasError('required')"
 					>The size is mandatory.</mat-error

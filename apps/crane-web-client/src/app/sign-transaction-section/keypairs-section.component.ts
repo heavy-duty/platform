@@ -29,8 +29,8 @@ import { KeypairsService } from '../services/keypairs.service';
 						</span>
 
 						<button
-							mat-icon-button
 							[cdkCopyToClipboard]="keypair.publicKey.toBase58()"
+							mat-icon-button
 						>
 							<mat-icon>content_copy</mat-icon>
 						</button>

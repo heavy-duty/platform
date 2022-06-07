@@ -42,7 +42,6 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 									instructionId !== null
 								"
 								class="underline text-accent"
-								bdEditInstructionSigner
 								(editInstructionSigner)="
 									onCreateInstructionAccount(
 										publicKey.toBase58(),
@@ -52,6 +51,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 										$event
 									)
 								"
+								bdEditInstructionSigner
 							>
 								New signer
 							</button>
@@ -67,8 +67,8 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 				class="flex gap-6 flex-wrap"
 			>
 				<div
-					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 					*ngFor="let signer of signers; let i = index"
+					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				>
 					<bd-card class="flex-1 flex gap-4">
 						<figure
@@ -89,8 +89,8 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 							class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 						>
 							<span
-								hdProgressSpinner
 								class="h-8 w-8 border-4 border-accent"
+								hdProgressSpinner
 							></span>
 
 							<p class="m-0 text-xs text-white text-opacity-60 absolute">
@@ -132,17 +132,16 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 						</div>
 					</bd-card>
 					<bd-card
-						class="flex"
 						*hdWalletAdapter="
 							let publicKey = publicKey;
 							let connected = connected
 						"
+						class="flex"
 					>
 						<ng-container *ngIf="publicKey !== null">
 							<button
 								class="bp-button w-32"
 								[attr.aria-label]="'Update signer ' + signer.name"
-								bdEditInstructionSigner
 								[instructionSigner]="{
 									name: signer.name,
 									kind: signer.kind.id,
@@ -152,6 +151,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 									modifier: signer.modifier?.id ?? null,
 									close: null
 								}"
+								[disabled]="signer | bdItemChanging"
 								(editInstructionSigner)="
 									onUpdateInstructionAccount(
 										publicKey.toBase58(),
@@ -162,7 +162,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 										$event
 									)
 								"
-								[disabled]="signer | bdItemChanging"
+								bdEditInstructionSigner
 							>
 								Edit
 							</button>
@@ -170,6 +170,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 							<button
 								class="bp-button w-32"
 								[attr.aria-label]="'Delete signer ' + signer.name"
+								[disabled]="signer | bdItemChanging"
 								(click)="
 									onDeleteInstructionAccount(
 										publicKey.toBase58(),
@@ -178,7 +179,6 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 										signer.id
 									)
 								"
-								[disabled]="signer | bdItemChanging"
 							>
 								Delete
 							</button>

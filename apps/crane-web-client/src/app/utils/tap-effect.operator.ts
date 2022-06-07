@@ -24,51 +24,51 @@ import { MonoTypeOperatorFunction, noop, tap } from 'rxjs';
  * ```
  */
 export function tapEffect<TValue>(
-  effectFn: (
-    value: TValue
-  ) =>
-    | ((cleanUpParams: {
-        prev: TValue | undefined;
-        complete: boolean;
-        error: boolean;
-      }) => void)
-    | void
+	effectFn: (
+		value: TValue
+	) =>
+		| ((cleanUpParams: {
+				prev: TValue | undefined;
+				complete: boolean;
+				error: boolean;
+		  }) => void)
+		| void
 ): MonoTypeOperatorFunction<TValue> {
-  let cleanupFn: (cleanUpParams: {
-    prev: TValue | undefined;
-    complete: boolean;
-    error: boolean;
-  }) => void = noop;
-  let firstRun = false;
-  let prev: TValue | undefined = undefined;
+	let cleanupFn: (cleanUpParams: {
+		prev: TValue | undefined;
+		complete: boolean;
+		error: boolean;
+	}) => void = noop;
+	let firstRun = false;
+	let prev: TValue | undefined = undefined;
 
-  const teardown = (error: boolean) => {
-    return () => {
-      if (cleanupFn) {
-        cleanupFn({ prev, complete: true, error });
-      }
-    };
-  };
+	const teardown = (error: boolean) => {
+		return () => {
+			if (cleanupFn) {
+				cleanupFn({ prev, complete: true, error });
+			}
+		};
+	};
 
-  return tap<TValue>({
-    next: (value: TValue) => {
-      if (cleanupFn && firstRun) {
-        cleanupFn({ prev, complete: false, error: false });
-      }
+	return tap<TValue>({
+		next: (value: TValue) => {
+			if (cleanupFn && firstRun) {
+				cleanupFn({ prev, complete: false, error: false });
+			}
 
-      const cleanUpOrVoid = effectFn(value);
-      if (cleanUpOrVoid) {
-        cleanupFn = cleanUpOrVoid;
-      }
+			const cleanUpOrVoid = effectFn(value);
+			if (cleanUpOrVoid) {
+				cleanupFn = cleanUpOrVoid;
+			}
 
-      prev = value;
+			prev = value;
 
-      if (!firstRun) {
-        firstRun = true;
-      }
-    },
-    complete: teardown(false),
-    unsubscribe: teardown(false),
-    error: teardown(true),
-  });
+			if (!firstRun) {
+				firstRun = true;
+			}
+		},
+		complete: teardown(false),
+		unsubscribe: teardown(false),
+		error: teardown(true),
+	});
 }

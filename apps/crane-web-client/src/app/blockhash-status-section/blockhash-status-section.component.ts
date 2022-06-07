@@ -8,8 +8,8 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 	template: `
 		<ng-container *ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight">
 			<crane-screwed-card
-				class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
 				*ngrxLet="percentage$; let percentage"
+				class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-between items-center"
 			>
 				<header>
 					<h2>Blockhash Status</h2>
@@ -34,8 +34,8 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 							Blockhash expired.
 						</ng-container>
 						<button
-							(click)="onBlockhashRestarted()"
 							class="underline text-gray-400"
+							(click)="onBlockhashRestarted()"
 							style="font-size: 0.5rem"
 						>
 							(Reload)
@@ -54,10 +54,10 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 				>
 					<div *ngIf="percentage > 0" class="-scale-x-100">
 						<mat-progress-spinner
+							[value]="percentage"
 							diameter="24"
 							color="primary"
 							mode="determinate"
-							[value]="percentage"
 						>
 						</mat-progress-spinner>
 					</div>

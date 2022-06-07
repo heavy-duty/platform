@@ -32,10 +32,10 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 		<ng-container *ngrxLet="workspace$; let workspace">
 			<div class="flex flex-col h-screen">
 				<div
-					class="flex items-center justify-center"
 					*ngrxLet="user$; let user"
+					class="flex items-center justify-center"
 				>
-					<div class="w-36 mt-5 pb-3" *ngIf="user === null">
+					<div *ngIf="user === null" class="w-36 mt-5 pb-3">
 						<figure class="w-20 h-20 m-auto mb-2 relative">
 							<img
 								alt=""
@@ -44,9 +44,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 								height="80"
 							/>
 							<img
+								class="w-6 absolute right-0 bottom-0"
 								alt=""
 								src="assets/images/important.png"
-								class="w-6 absolute right-0 bottom-0"
 								width="24"
 								height="24"
 							/>
@@ -54,11 +54,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 						<ng-container *hdWalletAdapter="let publicKey = publicKey">
 							<ng-container *ngrxLet="userId$; let userId">
 								<button
-									bdEditUser
+									*ngIf="publicKey !== null && userId !== null"
 									(editUser)="
 										onCreateUser(publicKey.toBase58(), userId, $event)
 									"
-									*ngIf="publicKey !== null && userId !== null"
+									bdEditUser
 								>
 									Click here to a create new user
 								</button>
@@ -68,17 +68,17 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 					<!-- Move to components -->
 
 					<a
-						class="w-36 mt-5 pb-3"
 						*ngIf="user !== null"
+						class="w-36 mt-5 pb-3"
 						[routerLink]="['/profile', 'info']"
 					>
 						<figure
 							class="w-20 h-20 mb-2 mx-auto rounded-full overflow-hidden bg-black bg-opacity-10"
 						>
 							<img
-								alt=""
-								[src]="user.thumbnailUrl"
 								class="w-full"
+								[src]="user.thumbnailUrl"
+								alt=""
 								onerror="this.src='assets/images/default-profile.png';"
 								width="80"
 								height="80"
@@ -90,16 +90,16 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 								{{ user.name }}
 							</span>
 							<span
-								hdProgressSpinner
 								*ngIf="user | bdItemChanging"
 								class="h-4 w-4 border-4 border-accent"
+								hdProgressSpinner
 							></span>
 						</p>
 						<p class="m-0 text-center">
 							<a
+								class="text-accent underline"
 								[href]="'https://explorer.solana.com/address/' + user.id"
 								target="__blank"
-								class="text-accent underline"
 								>@{{ user.userName }}</a
 							>
 						</p>
@@ -107,11 +107,11 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 				</div>
 
 				<div
-					class="flex-grow overflow-auto"
 					*hdWalletAdapter="
 						let publicKey = publicKey;
 						let connected = connected
 					"
+					class="flex-grow overflow-auto"
 				>
 					<ng-container *ngIf="workspace !== null">
 						<h3 class="ml-4 mt-4 mb-0 flex justify-between items-center">
@@ -119,9 +119,6 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 							<div *hdWalletAdapter="let publicKey = publicKey">
 								<button
 									*ngIf="publicKey !== null"
-									mat-icon-button
-									aria-label="Add new app"
-									bdEditApplication
 									(editApplication)="
 										onCreateApplication(
 											publicKey.toBase58(),
@@ -129,6 +126,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 											$event
 										)
 									"
+									mat-icon-button
+									aria-label="Add new app"
+									bdEditApplication
 								>
 									<mat-icon>add</mat-icon>
 								</button>
@@ -158,9 +158,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 									{{ workspace.name }}
 								</span>
 								<a
+									[routerLink]="['/workspaces', workspace.id]"
 									mat-fab-button
 									aria-label="View workspace details"
-									[routerLink]="['/workspaces', workspace.id]"
 								>
 									<mat-icon inline>open_in_new</mat-icon>
 								</a>
@@ -173,9 +173,9 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 										class="flex justify-center items-center w-10 h-10 rounded-full overflow-hidden bg-bp-black"
 									>
 										<img
+											class="w-8/12"
 											alt=""
 											src="assets/images/logo.webp"
-											class="w-8/12"
 											width="26"
 											height="34"
 										/>
@@ -183,17 +183,17 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 								</div>
 							</bd-card>
 							<bd-card
-								class="flex-1 flex items-center"
 								*hdWalletAdapter="let publicKey = publicKey"
+								class="flex-1 flex items-center"
 							>
 								<button
-									class="bp-button w-full"
 									*ngIf="publicKey !== null"
-									bdAddWorkspace
+									class="bp-button w-full"
 									(newWorkspace)="
 										onCreateWorkspace(publicKey.toBase58(), $event)
 									"
 									(importWorkspace)="onImportWorkspace($event)"
+									bdAddWorkspace
 								>
 									Build
 								</button>

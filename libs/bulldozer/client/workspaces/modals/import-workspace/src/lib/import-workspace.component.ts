@@ -12,11 +12,11 @@ import { publicKeyValidator } from './public-key.validator';
 @Component({
 	selector: 'bd-import-workspace',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">Import Workspace</h2>
+		<h2 class="mat-primary bp-font" mat-dialog-title>Import Workspace</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onImportWorkspace()"
 		>
 			<mat-form-field

@@ -15,8 +15,8 @@ import { ViewCollectionStore } from './view-collection.store';
 				class="w-40 h-12 flex items-center"
 			>
 				<a
-					[routerLink]="url"
 					class="w-full h-full flex justify-between gap-2 items-center pl-4 flex-grow"
+					[routerLink]="url"
 				>
 					<ng-container
 						*ngIf="collection$ | ngrxPush as collection; else notFound"
@@ -32,9 +32,9 @@ import { ViewCollectionStore } from './view-collection.store';
 						</span>
 
 						<span
-							hdProgressSpinner
 							*ngIf="collection | bdItemChanging"
 							class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+							hdProgressSpinner
 						></span>
 					</ng-container>
 
@@ -49,9 +49,9 @@ import { ViewCollectionStore } from './view-collection.store';
 			</ng-template>
 
 			<button
-				mat-icon-button
 				[attr.aria-label]="'Close ' + collectionId + ' tab'"
 				(click)="onCloseTab(collectionId)"
+				mat-icon-button
 			>
 				<mat-icon>close</mat-icon>
 			</button>

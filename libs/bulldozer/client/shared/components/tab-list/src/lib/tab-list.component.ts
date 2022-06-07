@@ -10,12 +10,12 @@ import { Tab } from '@bulldozer-client/core-data-access';
 @Component({
 	selector: 'bd-tab-list',
 	template: `
-		<nav mat-tab-nav-bar class="flex gap-6 px-3 py-2">
+		<nav class="flex gap-6 px-3 py-2" mat-tab-nav-bar>
 			<div
-				mat-tab-link
-				class="flex items-center justify-between p-0 bp-bg-stone-3 text-white font-bold mr-4 mat-elevation-z4 "
 				*ngFor="let tab of tabs"
+				class="flex items-center justify-between p-0 bp-bg-stone-3 text-white font-bold mr-4 mat-elevation-z4 "
 				[active]="selectedTab === tab.id"
+				mat-tab-link
 			>
 				<ng-container [ngSwitch]="tab.kind">
 					<bd-view-workspace-tab

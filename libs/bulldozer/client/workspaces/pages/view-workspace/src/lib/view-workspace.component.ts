@@ -38,7 +38,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 				</header>
 
 				<ng-container *ngrxLet="workspaceId$; let workspaceId">
-					<ul class="flex-1 overflow-y-auto" *ngIf="workspaceId !== null">
+					<ul *ngIf="workspaceId !== null" class="flex-1 overflow-y-auto">
 						<li>
 							<a
 								class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
@@ -86,11 +86,11 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 					>
 						<button
 							class="bp-button w-28"
-							bdEditWorkspace
 							[workspace]="workspace"
 							(editWorkspace)="
 								onUpdateWorkspace(publicKey.toBase58(), workspace.id, $event)
 							"
+							bdEditWorkspace
 						>
 							Edit
 						</button>

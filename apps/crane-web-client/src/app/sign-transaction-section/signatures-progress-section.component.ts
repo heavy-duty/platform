@@ -5,16 +5,16 @@ import { Option } from '../utils';
 	selector: 'crane-signatures-progress-section',
 	template: `
 		<crane-screwed-card
-			class="bg-black bp-bg-metal-2 px-6 py-4 rounded block"
 			*ngIf="signaturesDone !== null && signaturesRequired !== null"
+			class="bg-black bp-bg-metal-2 px-6 py-4 rounded block"
 		>
 			<p>Signatures required:</p>
 
 			<mat-progress-bar
 				class="example-margin"
+				[value]="signaturesProgress"
 				color="primary"
 				mode="determinate"
-				[value]="signaturesProgress"
 			>
 			</mat-progress-bar>
 

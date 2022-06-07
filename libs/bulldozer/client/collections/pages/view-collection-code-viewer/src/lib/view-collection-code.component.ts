@@ -22,12 +22,11 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
 
 		<main class="flex-1">
 			<div
-				class="py-7 px-5 h-full bp-bg-metal flex justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8"
 				*ngIf="code$ | ngrxPush as code"
+				class="py-7 px-5 h-full bp-bg-metal flex justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8"
 			>
 				<bd-code-editor
 					class="flex-1 h-full"
-					customClass="h-full"
 					[template]="code"
 					[options]="{
 						theme: 'vs-dark',
@@ -36,6 +35,7 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
 						readOnly: true,
 						fontSize: 16
 					}"
+					customClass="h-full"
 				></bd-code-editor>
 				<div
 					class="w-2.5 h-2.5 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute top-2 left-2"

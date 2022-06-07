@@ -47,12 +47,11 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 
 		<main class="flex-1">
 			<div
-				class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bp-bg-metal justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8 rounded"
 				*ngIf="instruction$ | ngrxPush as instruction"
+				class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bp-bg-metal justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8 rounded"
 			>
 				<bd-code-editor
 					class="flex-1 w-full mb-2"
-					customClass="h-full"
 					[template]="(contextCode$ | ngrxPush) ?? null"
 					[options]="{
 						language: 'rust',
@@ -62,11 +61,11 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 						theme: 'vs-dark',
 						readOnly: true
 					}"
+					customClass="h-full"
 				></bd-code-editor>
 
 				<bd-code-editor
 					class="flex-1 w-full"
-					customClass="h-full"
 					[template]="(handleCode$ | ngrxPush) ?? null"
 					[options]="{
 						language: 'rust',
@@ -77,6 +76,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 						readOnly: false
 					}"
 					(codeChange)="instructionBody = $event"
+					customClass="h-full"
 				></bd-code-editor>
 
 				<div class="w-full h-4 pr-4">

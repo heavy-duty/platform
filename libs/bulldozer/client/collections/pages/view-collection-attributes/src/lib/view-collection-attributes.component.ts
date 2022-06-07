@@ -37,7 +37,6 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 									collectionId !== null
 								"
 								class="underline text-accent"
-								bdEditCollectionAttribute
 								(editCollectionAttribute)="
 									onCreateCollectionAttribute(
 										publicKey.toBase58(),
@@ -47,6 +46,7 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 										$event
 									)
 								"
+								bdEditCollectionAttribute
 							>
 								New attribute
 							</button>
@@ -58,18 +58,18 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 
 		<main *ngrxLet="collectionAttributes$; let collectionAttributes">
 			<div
-				class="flex gap-6 flex-wrap"
 				*ngIf="
 					collectionAttributes && collectionAttributes.size > 0;
 					else emptyList
 				"
+				class="flex gap-6 flex-wrap"
 			>
 				<div
-					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 					*ngFor="
 						let collectionAttribute of collectionAttributes;
 						let i = index
 					"
+					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				>
 					<bd-card class="flex-1 flex gap-2 justify-between">
 						<figure
@@ -90,8 +90,8 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 							class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 						>
 							<span
-								hdProgressSpinner
 								class="h-8 w-8 border-4 border-accent"
+								hdProgressSpinner
 							></span>
 
 							<p class="m-0 text-xs text-white text-opacity-60 absolute">
@@ -145,11 +145,11 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 									</ng-container>
 								</p>
 								<p
-									class="text-sm font-thin m-0"
 									*ngIf="
 										collectionAttribute.modifier !== null &&
 										collectionAttribute.modifier.size
 									"
+									class="text-sm font-thin m-0"
 								>
 									<mat-icon inline="">data_array</mat-icon>
 									&nbsp; Size:
@@ -159,16 +159,15 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 						</div>
 					</bd-card>
 					<bd-card
-						class="flex"
 						*hdWalletAdapter="
 							let publicKey = publicKey;
 							let connected = connected
 						"
+						class="flex"
 					>
 						<ng-container *ngIf="publicKey !== null">
 							<button
 								class="bp-button flex-1"
-								bdEditCollectionAttribute
 								[collectionAttribute]="{
 									name: collectionAttribute.name,
 									kind: collectionAttribute.kind.id,
@@ -180,6 +179,9 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 									modifier: collectionAttribute.modifier?.id ?? null,
 									size: collectionAttribute.modifier?.size ?? null
 								}"
+								[disabled]="
+									!connected || (collectionAttribute | bdItemChanging)
+								"
 								(editCollectionAttribute)="
 									onUpdateCollectionAttribute(
 										publicKey.toBase58(),
@@ -189,14 +191,15 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 										$event
 									)
 								"
-								[disabled]="
-									!connected || (collectionAttribute | bdItemChanging)
-								"
+								bdEditCollectionAttribute
 							>
 								Edit
 							</button>
 							<button
 								class="bp-button flex-1"
+								[disabled]="
+									!connected || (collectionAttribute | bdItemChanging)
+								"
 								(click)="
 									onDeleteCollectionAttribute(
 										publicKey.toBase58(),
@@ -204,9 +207,6 @@ import { ViewCollectionAttributesStore } from './view-collection-attributes.stor
 										collectionAttribute.collectionId,
 										collectionAttribute.id
 									)
-								"
-								[disabled]="
-									!connected || (collectionAttribute | bdItemChanging)
 								"
 							>
 								Delete

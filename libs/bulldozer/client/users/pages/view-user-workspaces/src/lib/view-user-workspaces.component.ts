@@ -26,16 +26,16 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 				class="flex gap-6 flex-wrap"
 			>
 				<div
-					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 					*ngFor="let workspace of workspaces; let i = index"
+					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				>
 					<ng-container *ngrxLet="workspaceId$; let workspaceId">
 						<div class="flex gap-2">
 							<bd-card class="flex-1">
 								<div class="flex items-center gap-2 ">
 									<figure
-										class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 										*ngIf="!(workspace | bdItemChanging)"
+										class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 									>
 										<img
 											alt=""
@@ -48,8 +48,8 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 										class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 									>
 										<span
-											hdProgressSpinner
 											class="h-8 w-8 border-4 border-accent"
+											hdProgressSpinner
 										></span>
 
 										<p class="m-0 text-xs text-white text-opacity-60 absolute">
@@ -93,23 +93,23 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 							</bd-card>
 							<bd-card class="flex flex-col justify-center">
 								<a
+									class="bp-button w-28"
 									[attr.aria-label]="'View ' + workspace.name"
 									[routerLink]="['/workspaces', workspace.id]"
-									class="bp-button w-28"
 								>
 									View details
 								</a>
 								<ng-container *hdWalletAdapter="let publicKey = publicKey">
 									<button
-										class="bp-button w-28"
 										*ngIf="publicKey !== null"
+										class="bp-button w-28"
 										[attr.aria-label]="'Delete ' + workspace.name"
-										(click)="
-											onDeleteWorkspace(publicKey.toBase58(), workspace.id)
-										"
 										[disabled]="
 											(connected$ | ngrxPush) === false ||
 											(workspace | bdItemChanging)
+										"
+										(click)="
+											onDeleteWorkspace(publicKey.toBase58(), workspace.id)
 										"
 									>
 										Delete
@@ -135,9 +135,9 @@ import { ViewUserWorkspacesStore } from './view-user-workspaces.store';
 									</dd>
 								</div>
 								<button
+									*ngIf="workspaceId !== workspace.id"
 									class="bp-button self-end mb-1 w-28"
 									(click)="onActivateWorkspace(workspace.id)"
-									*ngIf="workspaceId !== workspace.id"
 								>
 									Activate
 								</button>

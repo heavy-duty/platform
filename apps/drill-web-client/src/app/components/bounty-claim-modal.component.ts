@@ -57,16 +57,16 @@ export class AssociatedTokenAccountValidator {
 		<main>
 			<drill-screwed-card class="bg-gray-800 px-6 py-4 rounded">
 				<form
+					class="flex flex-col gap-2 w-64"
 					[formGroup]="form"
 					(ngSubmit)="onSubmit()"
-					class="flex flex-col gap-2 w-64"
 				>
 					<div class="form-control flex flex-col gap-1">
 						<label class="block text-sm">Address *</label>
 						<input
+							class="rounded bg-bp-black w-full py-1 px-2"
 							type="text"
 							formControlName="userVault"
-							class="rounded bg-bp-black w-full py-1 px-2"
 						/>
 						<div class="form-control-message h-4">
 							<p

@@ -10,8 +10,8 @@ import { SignTransactionSectionStore } from './sign-transaction-section.store';
 	template: `
 		<ng-container *ngrxLet="publicKey$; let publicKey">
 			<crane-wallet-section
-				class="block"
 				*ngrxLet="transaction$; let transaction"
+				class="block"
 				[publicKey]="publicKey"
 				[wallet]="(wallet$ | ngrxPush) ?? null"
 				[disabled]="(disabled$ | ngrxPush) ?? false"
@@ -21,14 +21,14 @@ import { SignTransactionSectionStore } from './sign-transaction-section.store';
 
 		<crane-keypairs-section
 			class="block mt-4"
-			(signTransaction)="onSignTransactionWithKeypair($event)"
 			[disabled]="(disabled$ | async) ?? false"
+			(signTransaction)="onSignTransactionWithKeypair($event)"
 		></crane-keypairs-section>
 
 		<ng-container *ngIf="transaction$ | async as transaction">
 			<crane-signatures-progress-section
-				class="block mt-4"
 				*ngIf="signatures$ | async as signatures"
+				class="block mt-4"
 				[signaturesDone]="signatures.length"
 				[signaturesRequired]="transaction.signatures.length"
 			></crane-signatures-progress-section>

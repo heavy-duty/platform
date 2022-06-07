@@ -43,12 +43,12 @@ import { ViewInstructionStore } from './view-instruction.store';
 					<ng-container *ngrxLet="applicationId$; let applicationId">
 						<ng-container *ngrxLet="instructionId$; let instructionId">
 							<ul
-								class="flex-1 overflow-y-auto"
 								*ngIf="
 									workspaceId !== null &&
 									applicationId !== null &&
 									instructionId !== null
 								"
+								class="flex-1 overflow-y-auto"
 							>
 								<li>
 									<a
@@ -198,14 +198,14 @@ import { ViewInstructionStore } from './view-instruction.store';
 					"
 				>
 					<footer
-						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
 						*ngIf="publicKey !== null && instruction !== null"
+						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
 					>
 						<ng-container>
 							<button
 								class="bp-button w-28"
-								bdEditInstruction
 								[instruction]="instruction"
+								[disabled]="!connected || (instruction | bdItemChanging)"
 								(editInstruction)="
 									onUpdateInstruction(
 										publicKey.toBase58(),
@@ -215,12 +215,13 @@ import { ViewInstructionStore } from './view-instruction.store';
 										$event
 									)
 								"
-								[disabled]="!connected || (instruction | bdItemChanging)"
+								bdEditInstruction
 							>
 								Edit
 							</button>
 							<button
 								class="bp-button w-28"
+								[disabled]="!connected || (instruction | bdItemChanging)"
 								(click)="
 									onDeleteInstruction(
 										publicKey.toBase58(),
@@ -229,7 +230,6 @@ import { ViewInstructionStore } from './view-instruction.store';
 										instruction.id
 									)
 								"
-								[disabled]="!connected || (instruction | bdItemChanging)"
 							>
 								Delete
 							</button>

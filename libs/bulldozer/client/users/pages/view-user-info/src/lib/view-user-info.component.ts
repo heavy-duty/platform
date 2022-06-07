@@ -18,7 +18,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
 		</header>
 
 		<ng-container *hdWalletAdapter="let publicKey = publicKey">
-			<div class="flex" *ngIf="publicKey !== null">
+			<div *ngIf="publicKey !== null" class="flex">
 				<ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
 					<div
 						class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
@@ -27,25 +27,25 @@ import { ViewUserInfoStore } from './view-user-info.store';
 							<bd-card class="flex-1">
 								<div class="flex items-center gap-2 ">
 									<figure
-										class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden"
 										*ngIf="!(user | bdItemChanging)"
+										class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden"
 									>
 										<img
+											class="w-full"
 											[src]="user.thumbnailUrl"
 											alt=""
-											class="w-full"
 											width="80"
 											height="80"
 											onerror="this.src='assets/images/default-profile.png';"
 										/>
 									</figure>
 									<div
-										class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bp-black"
 										*ngIf="user | bdItemChanging"
+										class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bp-black"
 									>
 										<span
-											hdProgressSpinner
 											class="h-8 w-8 border-4 border-accent"
+											hdProgressSpinner
 										></span>
 									</div>
 									<div>
@@ -64,11 +64,11 @@ import { ViewUserInfoStore } from './view-user-info.store';
 										</p>
 										<p class="m-0">
 											<a
+												class="text-accent underline"
 												[href]="
 													'https://explorer.solana.com/address/' + user.id
 												"
 												target="__blank"
-												class="text-accent underline"
 												>@{{ user.userName }}</a
 											>
 										</p>
@@ -83,17 +83,17 @@ import { ViewUserInfoStore } from './view-user-info.store';
 							<bd-card class="flex flex-col justify-center">
 								<button
 									class="bp-button w-28"
-									bdEditUser
 									[user]="user"
-									(editUser)="onUpdateUser(user.authority, user.id, $event)"
 									[disabled]="user | bdItemChanging"
+									(editUser)="onUpdateUser(user.authority, user.id, $event)"
+									bdEditUser
 								>
 									Edit
 								</button>
 								<button
 									class="bp-button w-28"
-									(click)="onDeleteUser(user.authority, user.id)"
 									[disabled]="user | bdItemChanging"
+									(click)="onDeleteUser(user.authority, user.id)"
 								>
 									Delete
 								</button>
@@ -126,9 +126,9 @@ import { ViewUserInfoStore } from './view-user-info.store';
 										</span>
 
 										<button
+											[cdkCopyToClipboard]="user.authority"
 											aria-label="Copy user authority"
 											mat-icon-button
-											[cdkCopyToClipboard]="user.authority"
 										>
 											<mat-icon>content_copy</mat-icon>
 										</button>
@@ -148,10 +148,10 @@ import { ViewUserInfoStore } from './view-user-info.store';
 								<button
 									*ngIf="publicKey !== null && userId !== null"
 									class="bp-button"
-									bdEditUser
 									(editUser)="
 										onCreateUser(publicKey.toBase58(), userId, $event)
 									"
+									bdEditUser
 								>
 									Create User
 								</button>

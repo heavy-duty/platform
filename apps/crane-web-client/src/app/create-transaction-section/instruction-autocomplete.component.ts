@@ -21,22 +21,22 @@ export interface InstructionOption {
 				<mat-form-field class="w-full mb-0" appearance="fill">
 					<mat-label>Choose an instruction</mat-label>
 					<input
+						[formControl]="searchControl"
+						[matAutocomplete]="auto"
 						type="text"
 						placeholder="Pick one"
 						aria-label="Choose an instruction"
 						matInput
-						[formControl]="searchControl"
-						[matAutocomplete]="auto"
 					/>
 				</mat-form-field>
 			</crane-screwed-card>
 		</crane-screwed-card>
 
 		<mat-autocomplete
-			autoActiveFirstOption
 			#auto="matAutocomplete"
-			(optionSelected)="onInstructionSelected($event.option.value)"
 			[displayWith]="displayWith"
+			(optionSelected)="onInstructionSelected($event.option.value)"
+			autoActiveFirstOption
 		>
 			<mat-option
 				*ngFor="let option of filteredOptions | async"

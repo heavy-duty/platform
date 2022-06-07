@@ -8,9 +8,9 @@ import { ConfirmTransactionButtonStore } from './confirm-transaction-button.stor
 	selector: 'crane-confirm-transaction-button',
 	template: `
 		<button
-			(click)="onConfirmTransaction()"
-			[disabled]="disabled$ | async"
 			class="bg-black h-full px-6 py-2 bp-button uppercase w-full"
+			[disabled]="disabled$ | async"
+			(click)="onConfirmTransaction()"
 		>
 			Confirm
 		</button>

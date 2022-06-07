@@ -23,13 +23,13 @@ import { Collection, InstructionAccount } from './types';
 @Component({
 	selector: 'bd-edit-document',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">
+		<h2 class="mat-primary bp-font" mat-dialog-title>
 			{{ data?.document ? 'Edit' : 'Create' }} document
 		</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onEditDocument()"
 		>
 			<mat-form-field
@@ -92,10 +92,10 @@ import { Collection, InstructionAccount } from './types';
 			>
 				<mat-label>Space</mat-label>
 				<input
+					type="number"
 					matInput
 					formControlName="space"
 					required
-					type="number"
 					min="0"
 					max="65536"
 				/>

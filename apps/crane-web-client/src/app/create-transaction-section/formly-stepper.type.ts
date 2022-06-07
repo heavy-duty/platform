@@ -8,20 +8,20 @@ import { TransactionFormService } from './transaction-form.service';
 	selector: 'crane-formly-field-stepper',
 	template: `
 		<div
-			cdkDropList
 			class="flex flex-col gap-4 stepper"
 			(cdkDropListDropped)="drop($event)"
+			cdkDropList
 		>
 			<crane-screwed-card
-				class="bg-black bp-bg-metal px-6 py-4 rounded step"
 				*ngFor="
 					let step of field.fieldGroup;
 					let index = index;
 					let last = last
 				"
+				class="bg-black bp-bg-metal px-6 py-4 rounded step"
 				cdkDrag
 			>
-				<div class="step-placeholder" *cdkDragPlaceholder></div>
+				<div *cdkDragPlaceholder class="step-placeholder"></div>
 
 				<div
 					class="w-full flex justify-between items-center cursor-move mb-4 gap-4"
@@ -58,8 +58,8 @@ import { TransactionFormService } from './transaction-form.service';
 						<button
 							class="bg-black h-full p-1 bp-button uppercase text-sm text-red-500"
 							(click)="remove(index)"
-							craneStopPropagation
 							type="button"
+							craneStopPropagation
 						>
 							Delete <mat-icon inline>delete</mat-icon>
 						</button>

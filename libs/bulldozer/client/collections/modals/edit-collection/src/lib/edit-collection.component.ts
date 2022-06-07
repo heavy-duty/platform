@@ -12,13 +12,13 @@ import { CollectionDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
 	selector: 'bd-edit-collection',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">
+		<h2 class="mat-primary bp-font" mat-dialog-title>
 			{{ collection ? 'Edit' : 'Create' }} collection
 		</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onEditCollection()"
 		>
 			<mat-form-field

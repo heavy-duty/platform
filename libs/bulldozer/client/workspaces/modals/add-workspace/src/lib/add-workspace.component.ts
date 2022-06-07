@@ -4,7 +4,7 @@ import { MatDialogRef } from '@angular/material/dialog';
 @Component({
 	selector: 'bd-add-workspace',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">Add workspace</h2>
+		<h2 class="mat-primary bp-font" mat-dialog-title>Add workspace</h2>
 
 		<div
 			class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 bg-black shadow relative"

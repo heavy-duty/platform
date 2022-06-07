@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import {
+	UntypedFormControl,
+	UntypedFormGroup,
+	Validators,
+} from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
@@ -7,11 +11,11 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 @Component({
 	selector: 'bd-deposit-to-budget',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">Deposit to Budget</h2>
+		<h2 class="mat-primary bp-font" mat-dialog-title>Deposit to Budget</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onDepositToBudget()"
 		>
 			<mat-form-field
@@ -61,20 +65,20 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DepositToBudgetComponent {
-  @HostBinding('class') class = 'block w-72 relative';
-  readonly form: UntypedFormGroup;
-  submitted = false;
+	@HostBinding('class') class = 'block w-72 relative';
+	readonly form: UntypedFormGroup;
+	submitted = false;
 
-  constructor(
-    private readonly _matSnackBar: MatSnackBar,
-    private readonly _matDialogRef: MatDialogRef<DepositToBudgetComponent>
-  ) {
-    this.form = new UntypedFormGroup({
-      amount: new UntypedFormControl(null, {
-        validators: [Validators.required, Validators.min(0)],
-      }),
-    });
-  }
+	constructor(
+		private readonly _matSnackBar: MatSnackBar,
+		private readonly _matDialogRef: MatDialogRef<DepositToBudgetComponent>
+	) {
+		this.form = new UntypedFormGroup({
+			amount: new UntypedFormControl(null, {
+				validators: [Validators.required, Validators.min(0)],
+			}),
+		});
+	}
 
 	onDepositToBudget() {
 		this.submitted = true;

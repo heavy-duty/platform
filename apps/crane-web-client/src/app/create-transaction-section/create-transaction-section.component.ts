@@ -23,9 +23,9 @@ import {
 					class="flex justify-center items-center w-10 h-10 rounded-full overflow-hidden"
 				>
 					<img
+						class="w-8/12"
 						alt=""
 						src="assets/images/logo.webp"
-						class="w-8/12"
 						width="26"
 						height="34"
 					/>
@@ -39,8 +39,8 @@ import {
 				<button
 					class="bg-black h-full px-4 py-1 bp-button uppercase text-sm flex gap-2 items-center"
 					(click)="onRestartTransactionForm()"
-					craneStopPropagation
 					type="button"
+					craneStopPropagation
 				>
 					<span>Restart <mat-icon inline>refresh</mat-icon></span>
 				</button>

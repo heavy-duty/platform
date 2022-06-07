@@ -82,8 +82,8 @@ interface ViewModel {
 					>
 						<ng-container *hdWalletAdapter="let publicKey = publicKey">
 							<div
-								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
 								*ngIf="publicKey !== null && currentCollaborator === null"
+								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
 							>
 								<button
 									class="bp-button"
@@ -110,16 +110,15 @@ interface ViewModel {
 							</div>
 
 							<div
-								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
 								*ngIf="
 									publicKey !== null &&
 									currentCollaborator !== null &&
 									currentCollaborator.status.id === 2
 								"
+								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
 							>
 								<button
-									mat-stroked-button
-									color="accent"
+									[disabled]="currentCollaborator | bdItemChanging"
 									(click)="
 										onRetryCollaboratorStatusRequest(
 											publicKey.toBase58(),
@@ -127,7 +126,8 @@ interface ViewModel {
 											currentCollaborator.id
 										)
 									"
-									[disabled]="currentCollaborator | bdItemChanging"
+									mat-stroked-button
+									color="accent"
 								>
 									Try again
 								</button>
@@ -151,34 +151,34 @@ interface ViewModel {
 
 		<div class="flex flex-wrap gap-4">
 			<div
-				class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				*ngFor="
 					let collaborator of filteredCollaborators$ | ngrxPush;
 					trackBy: identify
 				"
+				class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 			>
 				<div class="flex gap-2">
 					<bd-card class="flex-1 flex items-center gap-2">
 						<figure
-							class="w-20 h-20 rounded-full overflow-hidden"
 							*ngIf="!(collaborator | bdItemChanging)"
+							class="w-20 h-20 rounded-full overflow-hidden"
 						>
 							<img
+								class="w-full"
+								[src]="collaborator.user.thumbnailUrl"
 								alt=""
 								width="80"
 								height="80"
-								[src]="collaborator.user.thumbnailUrl"
-								class="w-full"
 								onerror="this.src='assets/images/default-profile.png';"
 							/>
 						</figure>
 						<div
-							class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bp-black"
 							*ngIf="collaborator | bdItemChanging"
+							class="flex justify-center items-center w-20 h-20 rounded-full overflow-hidden bg-bp-black"
 						>
 							<span
-								hdProgressSpinner
 								class="h-8 w-8 border-4 border-accent"
+								hdProgressSpinner
 							></span>
 						</div>
 
@@ -196,8 +196,8 @@ interface ViewModel {
 								</span>
 
 								<mat-icon
-									class="inline pl-2 text-base"
 									*ngIf="collaborator.isAdmin"
+									class="inline pl-2 text-base"
 									color="accent"
 									inline
 								>
@@ -206,12 +206,12 @@ interface ViewModel {
 							</p>
 							<p class="m-0">
 								<a
+									class="text-accent underline"
 									[href]="
 										'https://explorer.solana.com/address/' +
 										collaborator.user.id
 									"
 									target="__blank"
-									class="text-accent underline"
 									>@{{ collaborator.user.userName }}</a
 								>
 							</p>
@@ -224,16 +224,17 @@ interface ViewModel {
 					</bd-card>
 					<bd-card class="flex flex-col justify-center">
 						<div
-							class="flex gap-2"
 							*hdWalletAdapter="
 								let publicKey = publicKey;
 								let connected = connected
 							"
+							class="flex gap-2"
 						>
 							<ng-container *ngIf="publicKey !== null">
 								<button
 									*ngIf="collaborator.status.id === 1"
 									class="bp-button w-28"
+									[disabled]="!connected || (collaborator | bdItemChanging)"
 									(click)="
 										onUpdateCollaborator(
 											publicKey.toBase58(),
@@ -242,13 +243,13 @@ interface ViewModel {
 											{ status: 2 }
 										)
 									"
-									[disabled]="!connected || (collaborator | bdItemChanging)"
 								>
 									Revoke
 								</button>
 								<button
-									class="bp-button w-28"
 									*ngIf="collaborator.status.id === 0"
+									class="bp-button w-28"
+									[disabled]="!connected || (collaborator | bdItemChanging)"
 									(click)="
 										onUpdateCollaborator(
 											publicKey.toBase58(),
@@ -257,13 +258,13 @@ interface ViewModel {
 											{ status: 1 }
 										)
 									"
-									[disabled]="!connected || (collaborator | bdItemChanging)"
 								>
 									Approve
 								</button>
 								<button
 									*ngIf="collaborator.status.id === 2"
 									class="bp-button w-28"
+									[disabled]="!connected || (collaborator | bdItemChanging)"
 									(click)="
 										onUpdateCollaborator(
 											publicKey.toBase58(),
@@ -272,14 +273,14 @@ interface ViewModel {
 											{ status: 1 }
 										)
 									"
-									[disabled]="!connected || (collaborator | bdItemChanging)"
 								>
 									Grant
 								</button>
 
 								<button
-									class="bp-button w-28"
 									*ngIf="collaborator.status.id === 0"
+									class="bp-button w-28"
+									[disabled]="!connected || (collaborator | bdItemChanging)"
 									(click)="
 										onUpdateCollaborator(
 											publicKey.toBase58(),
@@ -288,7 +289,6 @@ interface ViewModel {
 											{ status: 2 }
 										)
 									"
-									[disabled]="!connected || (collaborator | bdItemChanging)"
 								>
 									Reject
 								</button>
@@ -325,9 +325,9 @@ interface ViewModel {
 								</span>
 
 								<button
+									[cdkCopyToClipboard]="collaborator.user.authority"
 									aria-label="Copy user authority"
 									mat-icon-button
-									[cdkCopyToClipboard]="collaborator.user.authority"
 								>
 									<mat-icon>content_copy</mat-icon>
 								</button>

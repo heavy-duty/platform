@@ -24,11 +24,11 @@ export const equalValidator =
 @Component({
 	selector: 'bd-edit-relation',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">Create relation</h2>
+		<h2 class="mat-primary bp-font" mat-dialog-title>Create relation</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onEditAccount()"
 		>
 			<mat-form-field

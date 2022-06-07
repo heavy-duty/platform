@@ -57,7 +57,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 									instructionId !== null
 								"
 								class="underline text-accent"
-								bdEditInstructionDocument
 								[collections]="(collections$ | ngrxPush) ?? null"
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
@@ -71,6 +70,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 										$event
 									)
 								"
+								bdEditInstructionDocument
 							>
 								New document
 							</button>
@@ -93,8 +93,8 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 						<bd-card class="flex-1">
 							<div class="flex items-center gap-4">
 								<figure
-									class="w-16 h-16 flex justify-center items-center bg-bp-black rounded-full"
 									*ngIf="!(instructionDocument | bdItemChanging)"
+									class="w-16 h-16 flex justify-center items-center bg-bp-black rounded-full"
 								>
 									<img
 										alt=""
@@ -106,12 +106,12 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								</figure>
 
 								<div
-									class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 									*ngIf="instructionDocument | bdItemChanging"
+									class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 								>
 									<span
-										hdProgressSpinner
 										class="h-8 w-8 border-4 border-accent"
+										hdProgressSpinner
 									></span>
 									<p class="m-0 text-xs text-white text-opacity-60 absolute">
 										<ng-container *ngIf="instructionDocument.isCreating">
@@ -142,8 +142,8 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 										</p>
 
 										<p
-											class="text-xs mb-0"
 											*ngIf="instructionDocument.collection"
+											class="text-xs mb-0"
 										>
 											Collection:
 											<a
@@ -190,12 +190,12 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
 									<div class="self-center">
 										<p
-											class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
 											*ngIf="
 												instructionDocument.modifier !== null &&
 												instructionDocument.modifier.id === 0 &&
 												instructionDocument.payer !== null
 											"
+											class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
 										>
 											Payed by:
 
@@ -223,12 +223,12 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 										</p>
 
 										<p
-											class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
 											*ngIf="
 												instructionDocument.modifier !== null &&
 												instructionDocument.modifier.id === 1 &&
 												instructionDocument.close !== null
 											"
+											class="text-xs m-0 overflow-hidden whitespace-nowrap overflow-ellipsis"
 										>
 											Rent sent to:
 
@@ -270,7 +270,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 										>
 											<button
 												class="bp-button w-28"
-												bdEditInstructionDocument
 												[collections]="(collections$ | ngrxPush) ?? null"
 												[instructionAccounts]="
 													instructionAccounts
@@ -286,6 +285,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 													modifier: instructionDocument.modifier?.id ?? null,
 													close: instructionDocument.close?.id ?? null
 												}"
+												[disabled]="instructionDocument | bdItemChanging"
+												[attr.aria-label]="
+													'Update document ' + instructionDocument.name
+												"
 												(editInstructionDocument)="
 													onUpdateInstructionDocument(
 														publicKey.toBase58(),
@@ -296,10 +299,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 														$event
 													)
 												"
-												[disabled]="instructionDocument | bdItemChanging"
-												[attr.aria-label]="
-													'Update document ' + instructionDocument.name
-												"
+												bdEditInstructionDocument
 											>
 												Edit
 											</button>
@@ -309,6 +309,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 												[attr.aria-label]="
 													'Delete document ' + instructionDocument.name
 												"
+												[disabled]="instructionDocument | bdItemChanging"
 												(click)="
 													onDeleteInstructionDocument(
 														publicKey.toBase58(),
@@ -317,7 +318,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 														instructionDocument.id
 													)
 												"
-												[disabled]="instructionDocument | bdItemChanging"
 											>
 												Delete
 											</button>
@@ -336,10 +336,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 									*ngrxLet="instructionAccounts$; let instructionAccounts"
 								>
 									<button
-										aria-label="Add relation to document"
 										*ngIf="publicKey !== null && instructionAccounts !== null"
-										mat-icon-button
-										bdEditInstructionRelation
 										[instructionAccounts]="
 											instructionAccounts | bdRemoveById: instructionDocument.id
 										"
@@ -354,6 +351,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 												$event.to
 											)
 										"
+										aria-label="Add relation to document"
+										mat-icon-button
+										bdEditInstructionRelation
 									>
 										<mat-icon class="text-base -mt-1">add</mat-icon>
 									</button>
@@ -366,8 +366,8 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 									class="relative"
 								>
 									<div
-										class="flex justify-between items-center gap-2 bg-bp-black bg-opacity-40 border border-bp-black rounded px-4 py-2"
 										*ngIf="relation.to !== null"
+										class="flex justify-between items-center gap-2 bg-bp-black bg-opacity-40 border border-bp-black rounded px-4 py-2"
 									>
 										<div class="w-48">
 											<p
@@ -391,6 +391,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 											[attr.aria-label]="
 												'Delete relation to ' + relation.to.name
 											"
+											[disabled]="relation | bdItemChanging"
 											(click)="
 												onDeleteInstructionRelation(
 													publicKey.toBase58(),
@@ -400,7 +401,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 													relation.to.id
 												)
 											"
-											[disabled]="relation | bdItemChanging"
 										>
 											Delete
 										</button>

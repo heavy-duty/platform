@@ -41,12 +41,12 @@ import { ViewCollectionStore } from './view-collection.store';
 					<ng-container *ngrxLet="applicationId$; let applicationId">
 						<ng-container *ngrxLet="collectionId$; let collectionId">
 							<ul
-								class="flex-1 overflow-y-auto"
 								*ngIf="
 									workspaceId !== null &&
 									applicationId !== null &&
 									collectionId !== null
 								"
+								class="flex-1 overflow-y-auto"
 							>
 								<li>
 									<a
@@ -123,14 +123,13 @@ import { ViewCollectionStore } from './view-collection.store';
 
 				<ng-container *hdWalletAdapter="let publicKey = publicKey">
 					<footer
-						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
 						*ngIf="publicKey !== null && collection !== null"
+						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
 					>
 						<button
 							class="bp-button w-28"
-							color="accent"
-							bdEditCollection
 							[collection]="collection"
+							[disabled]="collection | bdItemChanging"
 							(editCollection)="
 								onUpdateCollection(
 									publicKey.toBase58(),
@@ -140,13 +139,14 @@ import { ViewCollectionStore } from './view-collection.store';
 									$event
 								)
 							"
-							[disabled]="collection | bdItemChanging"
+							color="accent"
+							bdEditCollection
 						>
 							Edit
 						</button>
 						<button
 							class="bp-button w-28"
-							color="warn"
+							[disabled]="collection | bdItemChanging"
 							(click)="
 								onDeleteCollection(
 									publicKey.toBase58(),
@@ -155,7 +155,7 @@ import { ViewCollectionStore } from './view-collection.store';
 									collection.id
 								)
 							"
-							[disabled]="collection | bdItemChanging"
+							color="warn"
 						>
 							Delete
 						</button>

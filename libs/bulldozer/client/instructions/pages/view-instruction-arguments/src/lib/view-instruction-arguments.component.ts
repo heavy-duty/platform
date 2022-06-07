@@ -38,7 +38,6 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 										instructionId !== null
 									"
 									class="underline text-accent"
-									bdEditInstructionArgument
 									(editInstructionArgument)="
 										onCreateInstructionArgument(
 											publicKey.toBase58(),
@@ -48,6 +47,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 											$event
 										)
 									"
+									bdEditInstructionArgument
 								>
 									New argument
 								</button>
@@ -71,19 +71,19 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 								*ngrxLet="instructionArguments$; let instructionArguments"
 							>
 								<section
-									class="flex gap-6 flex-wrap"
 									*ngIf="
 										instructionArguments && instructionArguments.size > 0;
 										else emptyList
 									"
+									class="flex gap-6 flex-wrap"
 								>
 									<div
-										class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 										*ngFor="
 											let instructionArgument of instructionArguments;
 											let i = index;
 											trackBy: identify
 										"
+										class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 									>
 										<bd-card class="flex-1 flex gap-2 justify-between">
 											<figure
@@ -104,8 +104,8 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 												class="flex justify-center items-center w-16 h-16 rounded-full overflow-hidden bg-bp-black"
 											>
 												<span
-													hdProgressSpinner
 													class="h-8 w-8 border-4 border-accent"
+													hdProgressSpinner
 												></span>
 
 												<p
@@ -164,11 +164,11 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 														</ng-container>
 													</p>
 													<p
-														class="text-sm font-thin m-0"
 														*ngIf="
 															instructionArgument.modifier !== null &&
 															instructionArgument.modifier.size
 														"
+														class="text-sm font-thin m-0"
 													>
 														<mat-icon inline="">data_array</mat-icon>
 														&nbsp; Size:
@@ -178,19 +178,18 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 											</div>
 										</bd-card>
 										<bd-card
-											class="flex"
 											*hdWalletAdapter="
 												let publicKey = publicKey;
 												let connected = connected
 											"
+											class="flex"
 										>
 											<button
-												class="bp-button flex-1"
 												*ngIf="publicKey !== null"
+												class="bp-button flex-1"
 												[attr.aria-label]="
 													'Update argument ' + instructionArgument.name
 												"
-												bdEditInstructionArgument
 												[instructionArgument]="{
 													name: instructionArgument.name,
 													kind: instructionArgument.kind.id,
@@ -202,6 +201,9 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 													modifier: instructionArgument.modifier?.id ?? null,
 													size: instructionArgument.modifier?.size ?? null
 												}"
+												[disabled]="
+													!connected || (instructionArgument | bdItemChanging)
+												"
 												(editInstructionArgument)="
 													onUpdateInstructionArgument(
 														publicKey.toBase58(),
@@ -211,17 +213,18 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 														$event
 													)
 												"
-												[disabled]="
-													!connected || (instructionArgument | bdItemChanging)
-												"
+												bdEditInstructionArgument
 											>
 												Edit
 											</button>
 											<button
-												class="bp-button flex-1"
 												*ngIf="publicKey !== null"
+												class="bp-button flex-1"
 												[attr.aria-label]="
 													'Delete argument ' + instructionArgument.name
+												"
+												[disabled]="
+													!connected || (instructionArgument | bdItemChanging)
 												"
 												(click)="
 													onDeleteInstructionArgument(
@@ -230,9 +233,6 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 														instructionArgument.instructionId,
 														instructionArgument.id
 													)
-												"
-												[disabled]="
-													!connected || (instructionArgument | bdItemChanging)
 												"
 											>
 												Delete
@@ -265,10 +265,10 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 			</ng-template>
 
 			<ng-template #loadingData>
-				<div class="py-8" *ngIf="loading$ | ngrxPush">
+				<div *ngIf="loading$ | ngrxPush" class="py-8">
 					<span
-						hdProgressSpinner
 						class="mx-auto mb-4 h-12 w-12 border-4 border-accent"
+						hdProgressSpinner
 					></span>
 					<p class="text-center">Loading data...</p>
 				</div>

@@ -24,10 +24,10 @@ import { Option } from './utils';
 			<mat-sidenav
 				#settings
 				class="h-screen w-80 bp-bg-wood bg-bp-brown p-4 overflow-y-scroll"
+				[opened]="true"
 				fixedInViewport
 				position="end"
 				mode="side"
-				[opened]="true"
 			>
 				<crane-sign-transaction-section
 					[transaction]="transaction$ | async"
@@ -37,6 +37,7 @@ import { Option } from './utils';
 
 				<ng-container *ngrxLet="transaction$; let transaction">
 					<crane-blockhash-status-section
+						#blockhashStatusSection
 						*ngrxLet="latestBlockhash$; let latestBlockhash"
 						(blockhashChanged)="
 							onBlockhashChanged(
@@ -46,7 +47,6 @@ import { Option } from './utils';
 							)
 						"
 						(blockhashExpired)="onBlockhashExpired(transaction)"
-						#blockhashStatusSection
 					></crane-blockhash-status-section>
 				</ng-container>
 

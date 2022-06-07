@@ -11,11 +11,11 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 @Component({
 	selector: 'bd-withdraw-from-budget',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">Withdraw from Budget</h2>
+		<h2 class="mat-primary bp-font" mat-dialog-title>Withdraw from Budget</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onWithdrawFromBudget()"
 		>
 			<mat-form-field

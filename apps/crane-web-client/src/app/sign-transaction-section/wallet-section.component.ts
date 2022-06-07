@@ -15,15 +15,15 @@ import { Option } from '../utils';
 
 				<ng-container *ngIf="publicKey === null">
 					<button
-						class="bg-black h-full p-1 bp-button uppercase text-xs"
 						*hdWalletAdapter="
 							let wallets = wallets;
 							let selectWallet = selectWallet
 						"
-						hdWalletModalButton
+						class="bg-black h-full p-1 bp-button uppercase text-xs"
 						[wallets]="wallets"
 						[className]="['bp-bg-wood', 'bg-bp-brown']"
 						(selectWallet)="selectWallet($event)"
+						hdWalletModalButton
 					>
 						Connect <mat-icon inline>login</mat-icon>
 					</button>
@@ -47,8 +47,8 @@ import { Option } from '../utils';
 			</header>
 
 			<p
-				class="flex items-center gap-2 p-2 bg-black bg-opacity-40 rounded-md"
 				*ngIf="publicKey !== null"
+				class="flex items-center gap-2 p-2 bg-black bg-opacity-40 rounded-md"
 			>
 				<hd-wallet-icon
 					*ngIf="wallet !== null"
@@ -60,7 +60,7 @@ import { Option } from '../utils';
 					{{ publicKey.toBase58() }}
 				</span>
 
-				<button mat-icon-button [cdkCopyToClipboard]="publicKey.toBase58()">
+				<button [cdkCopyToClipboard]="publicKey.toBase58()" mat-icon-button>
 					<mat-icon>content_copy</mat-icon>
 				</button>
 			</p>

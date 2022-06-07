@@ -14,23 +14,23 @@ import { interval, map, startWith } from 'rxjs';
 
 		<main *ngrxLet="instructionStatuses$; let instructionStatuses">
 			<mat-list
-				role="list"
 				*ngIf="
 					instructionStatuses !== null && instructionStatuses.length > 0;
 					else emptyList
 				"
 				class="flex flex-col gap-2"
+				role="list"
 			>
 				<mat-list-item
-					role="listitem"
 					*ngFor="let instructionStatus of instructionStatuses; let i = index"
+					role="listitem"
 				>
 					<div class="w-full h-8 flex items-center gap-4">
 						<div>
 							<span
-								hdProgressSpinner
 								*ngIf="instructionStatus.status !== 'finalized'"
 								class="h-4 w-4 border-4 border-accent"
+								hdProgressSpinner
 							></span>
 
 							<mat-icon

@@ -12,13 +12,13 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 @Component({
 	selector: 'bd-edit-instruction-signer',
 	template: `
-		<h2 mat-dialog-title class="mat-primary bp-font">
+		<h2 class="mat-primary bp-font" mat-dialog-title>
 			{{ signer ? 'Edit' : 'Create' }} signer
 		</h2>
 
 		<form
-			[formGroup]="form"
 			class="flex flex-col gap-4"
+			[formGroup]="form"
 			(ngSubmit)="onEditSigner()"
 		>
 			<mat-form-field

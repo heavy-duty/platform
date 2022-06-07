@@ -1,7 +1,19 @@
 {
-  "singleQuote": true,
-  "trailingComma": "es5",
-  "printWidth": 80,
-  "tabWidth": 2,
-  "semi": true
+	"singleQuote": true,
+	"trailingComma": "es5",
+	"printWidth": 80,
+	"tabWidth": 2,
+	"semi": true,
+	"attributeGroups": [
+		"$ANGULAR_ELEMENT_REF",
+		"$ANGULAR_STRUCTURAL_DIRECTIVE",
+		"$ANGULAR_ANIMATION",
+		"$ANGULAR_ANIMATION_INPUT",
+		"$ID",
+		"$CLASS",
+		"$ANGULAR_TWO_WAY_BINDING",
+		"$ANGULAR_INPUT",
+		"$ANGULAR_OUTPUT",
+		"$TYPE"
+	]
 }

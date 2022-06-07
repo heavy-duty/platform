@@ -24,18 +24,18 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 			</p>
 		</header>
 
-		<main class="flex flex-wrap gap-6" *ngIf="budget$ | ngrxPush as budget">
+		<main *ngIf="budget$ | ngrxPush as budget" class="flex flex-wrap gap-6">
 			<div
 				class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 			>
 				<bd-card class="flex gap-2">
 					<figure
-						class="w-14 h-14 flex justify-center items-center bg-black rounded-full mr-2"
 						*ngIf="!(budget | bdItemChanging)"
+						class="w-14 h-14 flex justify-center items-center bg-black rounded-full mr-2"
 					>
 						<img
-							src="assets/images/solana-logo.webp"
 							class="w-1/2"
+							src="assets/images/solana-logo.webp"
 							width="28"
 							height="24"
 							alt="Solana Logo"
@@ -43,12 +43,12 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 					</figure>
 
 					<div
-						class="w-14 h-14 flex justify-center items-center bg-bp-black rounded-full mr-2"
 						*ngIf="budget | bdItemChanging"
+						class="w-14 h-14 flex justify-center items-center bg-bp-black rounded-full mr-2"
 					>
 						<span
-							hdProgressSpinner
 							class="h-8 w-8 border-4 border-accent"
+							hdProgressSpinner
 						></span>
 					</div>
 
@@ -61,10 +61,9 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 					</div>
 				</bd-card>
 				<ng-container *hdWalletAdapter="let publicKey = publicKey">
-					<bd-card class="flex justify-center" *ngIf="publicKey !== null">
+					<bd-card *ngIf="publicKey !== null" class="flex justify-center">
 						<button
 							class="bp-button w-full"
-							bdDepositToBudget
 							(depositToBudget)="
 								onDepositToBudget(
 									publicKey.toBase58(),
@@ -72,12 +71,12 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 									$event
 								)
 							"
+							bdDepositToBudget
 						>
 							Deposit
 						</button>
 						<button
 							class="bp-button w-full"
-							bdWithdrawFromBudget
 							(withdrawFromBudget)="
 								onWithdrawFromBudget(
 									publicKey.toBase58(),
@@ -85,6 +84,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 									$event
 								)
 							"
+							bdWithdrawFromBudget
 						>
 							Withdraw
 						</button>
