@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
 import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
@@ -8,29 +8,38 @@ import { ReactiveComponentModule } from '@ngrx/component';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AppComponent } from './app.component';
-import { BlockhashStatusSectionModule } from './blockhash-status-section';
-import { ScrewedCardModule } from './components/screwed-card.module';
-import { SnackBarModule } from './components/snack-bar.module';
-import { ConfirmTransactionButtonModule } from './confirm-transaction-button';
-import { CreateTransactionSectionModule } from './create-transaction-section';
+import { ScrewedCardComponent } from './components';
 import {
 	AssociatedTokenPlugin,
 	PluginModule,
 	SystemPlugin,
 	TokenPlugin,
 } from './plugins';
-import { SendTransactionButtonModule } from './send-transaction-button';
-import { SignTransactionSectionModule } from './sign-transaction-section';
+import {
+	BlockhashStatusSectionComponent,
+	ConfirmTransactionButtonComponent,
+	CreateTransactionSectionComponent,
+	FormlyFieldStepperComponent,
+	SendTransactionButtonComponent,
+	SignTransactionSectionComponent,
+} from './sections';
 
 @NgModule({
 	declarations: [AppComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
-		MatButtonModule,
 		MatSidenavModule,
+		MatSnackBarModule,
 		ReactiveComponentModule,
-		FormlyModule.forRoot(),
+		FormlyModule.forRoot({
+			types: [
+				{
+					name: 'stepper',
+					component: FormlyFieldStepperComponent,
+				},
+			],
+		}),
 		FormlyMaterialModule,
 		HdWalletAdapterModule.forRoot({
 			autoConnect: true,
@@ -40,13 +49,12 @@ import { SignTransactionSectionModule } from './sign-transaction-section';
 			new TokenPlugin(),
 			new AssociatedTokenPlugin(),
 		]),
-		SnackBarModule,
-		CreateTransactionSectionModule,
-		SignTransactionSectionModule,
-		SendTransactionButtonModule,
-		ConfirmTransactionButtonModule,
-		BlockhashStatusSectionModule,
-		ScrewedCardModule,
+		CreateTransactionSectionComponent,
+		SignTransactionSectionComponent,
+		SendTransactionButtonComponent,
+		ConfirmTransactionButtonComponent,
+		BlockhashStatusSectionComponent,
+		ScrewedCardComponent,
 	],
 	bootstrap: [AppComponent],
 })

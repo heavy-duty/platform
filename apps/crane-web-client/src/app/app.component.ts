@@ -6,8 +6,8 @@ import {
 } from '@solana/wallet-adapter-wallets';
 import { Blockhash, Transaction, TransactionSignature } from '@solana/web3.js';
 import { BehaviorSubject } from 'rxjs';
-import { BlockhashStatusSectionComponent } from './blockhash-status-section/blockhash-status-section.component';
-import { NotificationService } from './services/notification.service';
+import { BlockhashStatusSectionComponent } from './sections';
+import { NotificationService } from './services';
 import { Option } from './utils';
 
 @Component({
@@ -30,7 +30,7 @@ import { Option } from './utils';
 				mode="side"
 			>
 				<crane-sign-transaction-section
-					[transaction]="transaction$ | async"
+					[transaction]="(transaction$ | ngrxPush) ?? null"
 					(transactionSigned)="onTransactionSignDone($event)"
 				>
 				</crane-sign-transaction-section>
@@ -55,14 +55,14 @@ import { Option } from './utils';
 				>
 					<crane-send-transaction-button
 						class="flex-1"
-						[transaction]="transaction$ | async"
+						[transaction]="(transaction$ | ngrxPush) ?? null"
 						(transactionSent)="onTransactionSent($event)"
 						(transactionFailed)="onTransactionFailed($event)"
 					>
 					</crane-send-transaction-button>
 					<crane-confirm-transaction-button
 						class="flex-1"
-						[signature]="signature$ | async"
+						[signature]="(signature$ | ngrxPush) ?? null"
 						(transactionConfirmed)="onTransactionConfirmed()"
 					>
 					</crane-confirm-transaction-button>

@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import {
+	ChangeDetectionStrategy,
 	Component,
 	HostBinding,
 	Inject,
@@ -6,7 +8,10 @@ import {
 	Pipe,
 	PipeTransform,
 } from '@angular/core';
-import { MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import {
+	MatSnackBarModule,
+	MAT_SNACK_BAR_DATA,
+} from '@angular/material/snack-bar';
 
 export interface SnackBarData {
 	title: string;
@@ -17,6 +22,7 @@ export interface SnackBarData {
 @Pipe({
 	name: 'craneSnackBarClass',
 	pure: true,
+	standalone: true,
 })
 export class SnackBarClassPipe implements PipeTransform {
 	transform(value: string | null): string[] {
@@ -44,6 +50,9 @@ export class SnackBarClassPipe implements PipeTransform {
 		</div>
 		<div class="w-3 bg-gray-600 h-32"></div>
 	`,
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [CommonModule, SnackBarClassPipe],
 })
 export class SnackBarPoleComponent {
 	@HostBinding('class') class = 'flex flex-col items-center px-4';
@@ -66,6 +75,9 @@ export class SnackBarPoleComponent {
 		</div>
 	`,
 	styles: [],
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [MatSnackBarModule, SnackBarPoleComponent],
 })
 export class SnackBarComponent {
 	@HostBinding('class') class = 'block relative w-64';

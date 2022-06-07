@@ -1,4 +1,11 @@
-import { Component, HostBinding, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	HostBinding,
+	Input,
+} from '@angular/core';
+import { RotateDirective } from '../directives';
 
 @Component({
 	selector: 'crane-screwed-card',
@@ -13,6 +20,9 @@ import { Component, HostBinding, Input } from '@angular/core';
 			<div class="w-full h-px bg-gray-600" craneRotate></div>
 		</div>
 	`,
+	changeDetection: ChangeDetectionStrategy.OnPush,
+	standalone: true,
+	imports: [CommonModule, RotateDirective],
 })
 export class ScrewedCardComponent {
 	@HostBinding('class') class = 'relative';

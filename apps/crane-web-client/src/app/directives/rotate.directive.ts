@@ -1,6 +1,6 @@
 import { Directive, ElementRef, Input, OnInit, Renderer2 } from '@angular/core';
 
-@Directive({ selector: '[craneRotate]' })
+@Directive({ selector: '[craneRotate]', standalone: true })
 export class RotateDirective implements OnInit {
 	@Input() set angle(value: number) {
 		this.rotateElement(value);
