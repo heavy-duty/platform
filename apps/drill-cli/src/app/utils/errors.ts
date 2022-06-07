@@ -12,6 +12,7 @@ export interface DrillError {
 	message?: string;
 }
 
+// TODO: Refact
 export const processError = (e: DrillError) => {
 	switch (true) {
 		case e.status !== undefined && e.response !== undefined:

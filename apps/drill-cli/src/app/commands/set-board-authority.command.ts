@@ -1,6 +1,12 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { setBoardAuthority } from '../actions/set-board-authority';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+	log,
+	processError,
+} from '../utils';
 
 @Command({
 	name: 'set-board-authority',
@@ -9,23 +15,27 @@ import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 })
 export class SetBoardAuthorityCommand implements CommandRunner {
 	async run(params: string[]) {
-		const [owner, repoName] = params[0].split('/');
-		const newAuthority = params[1];
+		try {
+			const [owner, repoName] = params[0].split('/');
+			const newAuthority = params[1];
 
-		const config = await getSolanaConfig();
-		const provider = await getProvider(config);
-		const program = getProgram(provider);
+			const config = await getSolanaConfig();
+			const provider = await getProvider(config);
+			const program = getProgram(provider);
 
-		log(`Setting board authority`);
+			log(`Setting board authority`);
 
-		const { boardId } = await setBoardAuthority(program, provider, {
-			owner,
-			repoName,
-			newAuthority,
-		});
+			const { boardId } = await setBoardAuthority(program, provider, {
+				owner,
+				repoName,
+				newAuthority,
+			});
 
-		log(
-			`${newAuthority} is the new Auhority of Board "${owner}/${repoName}" (${boardId}).`
-		);
+			log(
+				`${newAuthority} is the new Authority of Board "${owner}/${repoName}" (${boardId}).`
+			);
+		} catch (e) {
+			processError(e);
+		}
 	}
 }
