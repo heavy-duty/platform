@@ -1,14 +1,9 @@
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Injectable } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
+import { ComponentStore } from '@ngrx/component-store';
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { capital } from 'case';
-import {
-	BehaviorSubject,
-	combineLatest,
-	distinctUntilChanged,
-	map,
-} from 'rxjs';
 import { IdlInstruction, IdlInstructionArgument } from '../../plugins';
 import { PublicKeyValidator } from '../../utils';
 import { InstructionOption } from './instruction-autocomplete.component';
@@ -168,118 +163,118 @@ export type TransactionFormModel = {
 	};
 };
 
-@Injectable()
-export class TransactionFormService {
-	private readonly _instructions = new BehaviorSubject<InstructionOption[]>([]);
-	private readonly _fields = new BehaviorSubject<FormlyFieldConfig>({
+interface ViewModel {
+	instructions: InstructionOption[];
+	fields: FormlyFieldConfig;
+	model: TransactionFormModel;
+}
+
+const initialState: ViewModel = {
+	instructions: [],
+	fields: {
 		type: 'transaction',
 		fieldGroup: [],
-	});
-	private readonly _model = new BehaviorSubject<TransactionFormModel>({});
-	readonly transactionForm$ = combineLatest({
-		fields: this._fields.asObservable().pipe(distinctUntilChanged()),
-		model: this._model.asObservable().pipe(distinctUntilChanged()),
-	}).pipe(
-		map(({ fields, model }) => ({
+	},
+	model: {},
+};
+
+@Injectable()
+export class TransactionFormStore extends ComponentStore<ViewModel> {
+	readonly transactionForm$ = this.select(
+		this.select(({ fields }) => fields),
+		this.select(({ model }) => model),
+		(fields, model) => ({
 			fields,
 			model,
 			form: new FormGroup({}),
-		}))
+		})
 	);
 
-	addInstruction({ instruction, name, namespace }: InstructionOption) {
-		const fields = this._fields.getValue();
-		const instructions = this._instructions.getValue();
-		const model = this._model.getValue();
+	constructor() {
+		super(initialState);
+	}
 
-		this._instructions.next([
-			...instructions,
-			{ instruction, name, namespace },
-		]);
-		this._model.next({
-			...model,
-			[`${Object.keys(model).length}`]: {
-				name,
-				namespace,
-				instruction: instruction.name,
-				args: {},
-				accounts: {},
+	readonly addInstruction = this.updater<InstructionOption>(
+		({ fields, instructions, model }, { instruction, name, namespace }) => ({
+			instructions: [...instructions, { instruction, name, namespace }],
+			model: {
+				...model,
+				[`${Object.keys(model).length}`]: {
+					name,
+					namespace,
+					instruction: instruction.name,
+					args: {},
+					accounts: {},
+				},
 			},
-		});
-		this._fields.next({
-			...fields,
-			fieldGroup: [...instructions, { instruction, name, namespace }].map(
-				({ namespace, name, instruction }, index) => ({
-					id: `${index}`,
-					key: `${index}`,
-					fieldGroup: toFormlyFields(namespace, name, instruction),
-				})
-			),
-		});
-	}
+			fields: {
+				...fields,
+				fieldGroup: [...instructions, { instruction, name, namespace }].map(
+					({ namespace, name, instruction }, index) => ({
+						id: `${index}`,
+						key: `${index}`,
+						fieldGroup: toFormlyFields(namespace, name, instruction),
+					})
+				),
+			},
+		})
+	);
 
-	removeInstruction(index: number) {
-		const fields = this._fields.getValue();
-		const model = this._model.getValue();
-		const instructions = this._instructions.getValue();
+	readonly removeInstruction = this.updater<number>(
+		({ fields, instructions, model }, index) => {
+			fields.fieldGroup?.splice(index, 1);
 
-		fields.fieldGroup?.splice(index, 1);
+			const newModel: TransactionFormModel = {};
 
-		const newModel: TransactionFormModel = {};
+			fields.fieldGroup?.forEach((field, index) => {
+				newModel[`${index}`] = model[`${field.key}`];
+			});
 
-		fields.fieldGroup?.forEach((field, index) => {
-			newModel[`${index}`] = model[`${field.key}`];
-		});
+			instructions.splice(index, 1);
 
-		instructions.splice(index, 1);
+			return {
+				instructions,
+				model: newModel,
+				fields: {
+					...fields,
+					fieldGroup: instructions.map(
+						({ namespace, name, instruction }, index) => ({
+							id: `${index}`,
+							key: `${index}`,
+							fieldGroup: toFormlyFields(namespace, name, instruction),
+						})
+					),
+				},
+			};
+		}
+	);
 
-		this._instructions.next(instructions);
-		this._model.next(newModel);
-		this._fields.next({
-			...fields,
-			fieldGroup: instructions.map(
-				({ namespace, name, instruction }, index) => ({
-					id: `${index}`,
-					key: `${index}`,
-					fieldGroup: toFormlyFields(namespace, name, instruction),
-				})
-			),
-		});
-	}
-
-	move(event: CdkDragDrop<string[]>) {
-		const fields = this._fields.getValue();
-		const instructions = this._instructions.getValue();
-		const modelAsArray = Object.values(this._model.getValue());
+	readonly move = this.updater<CdkDragDrop<string[]>>((state, event) => {
+		const instructions = [...state.instructions];
+		const modelAsArray = Object.values(state.model);
 
 		moveItemInArray(instructions, event.previousIndex, event.currentIndex);
 		moveItemInArray(modelAsArray, event.previousIndex, event.currentIndex);
 
-		this._instructions.next(instructions);
-		this._model.next(
-			modelAsArray.reduce(
+		return {
+			...state,
+			instructions,
+			model: modelAsArray.reduce(
 				(model, entry, index) => ({ ...model, [`${index}`]: entry }),
 				{}
-			)
-		);
-		this._fields.next({
-			...fields,
-			fieldGroup: instructions.map(
-				({ namespace, name, instruction }, index) => ({
-					id: `${index}`,
-					key: `${index}`,
-					fieldGroup: toFormlyFields(namespace, name, instruction),
-				})
 			),
-		});
-	}
+			fields: {
+				...state.fields,
+				fieldGroup: instructions.map(
+					({ namespace, name, instruction }, index) => ({
+						id: `${index}`,
+						key: `${index}`,
+						fieldGroup: toFormlyFields(namespace, name, instruction),
+					})
+				),
+			},
+		};
+	});
 
-	restart() {
-		this._fields.next({
-			type: 'transaction',
-			fieldGroup: [],
-		});
-		this._instructions.next([]);
-		this._model.next({});
-	}
+	readonly restart = this.updater<void>(() => initialState);
 }

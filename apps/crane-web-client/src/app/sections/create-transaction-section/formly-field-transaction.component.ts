@@ -5,7 +5,7 @@ import { Component, Directive, HostListener, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { FieldType, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { TransactionFormService } from './transaction-form.service';
+import { TransactionFormStore } from './transaction-form.store';
 
 @Directive({
 	selector: '[craneStopPropagation]',
@@ -137,7 +137,7 @@ export class StopPropagationDirective {
 	],
 })
 export class FormlyFieldTransactionComponent extends FieldType {
-	private readonly _transactionFormService = inject(TransactionFormService);
+	private readonly _transactionFormStore = inject(TransactionFormStore);
 
 	isValid(field: FormlyFieldConfig): boolean {
 		if (field.key) {
@@ -150,10 +150,10 @@ export class FormlyFieldTransactionComponent extends FieldType {
 	}
 
 	remove(index: number) {
-		this._transactionFormService.removeInstruction(index);
+		this._transactionFormStore.removeInstruction(index);
 	}
 
 	drop(event: CdkDragDrop<string[]>) {
-		this._transactionFormService.move(event);
+		this._transactionFormStore.move(event);
 	}
 }

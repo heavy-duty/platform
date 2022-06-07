@@ -25,8 +25,8 @@ import {
 } from './instruction-autocomplete.component';
 import {
 	TransactionFormModel,
-	TransactionFormService,
-} from './transaction-form.service';
+	TransactionFormStore,
+} from './transaction-form.store';
 
 importProvidersFrom;
 
@@ -89,7 +89,7 @@ importProvidersFrom;
 		</section>
 	`,
 	providers: [
-		TransactionFormService,
+		TransactionFormStore,
 		CreateTransactionSectionStore,
 		{
 			provide: MAT_FORM_FIELD_DEFAULT_OPTIONS,
@@ -111,13 +111,13 @@ importProvidersFrom;
 export class CreateTransactionSectionComponent {
 	private readonly _walletStore = inject(WalletStore);
 	private readonly _pluginsService = inject(PluginsService);
-	private readonly _transactionFormService = inject(TransactionFormService);
+	private readonly _transactionFormStore = inject(TransactionFormStore);
 	private readonly _createTransactionSectionStore = inject(
 		CreateTransactionSectionStore
 	);
 
 	@HostBinding('class') class = 'relative';
-	readonly transactionForm$ = this._transactionFormService.transactionForm$;
+	readonly transactionForm$ = this._transactionFormStore.transactionForm$;
 	readonly disabled$ = this._createTransactionSectionStore.disabled$;
 	readonly authority$ = this._walletStore.publicKey$;
 
@@ -158,10 +158,10 @@ export class CreateTransactionSectionComponent {
 	}
 
 	onInstructionSelected(instructionOption: InstructionOption) {
-		this._transactionFormService.addInstruction(instructionOption);
+		this._transactionFormStore.addInstruction(instructionOption);
 	}
 
 	onRestartTransactionForm() {
-		this._transactionFormService.restart();
+		this._transactionFormStore.restart();
 	}
 }
