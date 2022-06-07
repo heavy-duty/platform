@@ -1,6 +1,6 @@
 {
-	"name": "@andresmgsl2/drill-cli",
-	"version": "0.4.1",
+	"name": "@heavy-duty/drill-cli",
+	"version": "0.4.2",
 	"main": "index.js",
 	"bin": {
 		"drill": "index.js"

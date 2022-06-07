@@ -31,6 +31,6 @@ export class DrillLogger implements LoggerService {
 	}
 }
 
-export function log(message: string) {
+export const log = (message: string) => {
 	console.log(message);
-}
+};
