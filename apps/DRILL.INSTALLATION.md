@@ -92,12 +92,22 @@ Alright, we’re all set. Let’s start by creating a new Board: use the Drill C
 <details><summary><b>See how to create a new board instruction...</b></summary>
 
 ```bash
+>> drill create-board <your-github-username>/<your-repository-nam> <lockTime-in-ms> <mint-public-key>
+```
+
+if you don`t have the Drill CLI installed, use the local drill cli in the monorepo with the follow command:
+
+```bash
 >> nx run drill-cli:create-board --githubRepository <your-github-username>/<your-repository-nam> --lockTime <time-in-ms> --acceptedMint <mint-public-key>
 ```
 
 **NOTE**: All this data is for the example, be sure to replace it with your own data and should look something like this:
 
 ```bash
+>> drill create-board  andresmgsl/nextjs-typescript-seed 1000000  BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
+
+or
+
 >> nx run drill-cli:create-board --githubRepository andresmgsl/nextjs-typescript-seed --lockTime 1000000 --acceptedMint BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
 ...
 ```
@@ -210,6 +220,12 @@ Go to your Github _settings -> applications -> < your-app-name >_ and change the
 Now, every Issue with the label **_'drill:bounty'_** will have a bounty enabled to receive funds in the Mint we previously created. Go check yourself, create a new issue, and add the 'drill:bounty' label.
 
 You can check all the transfers you make by running:
+
+```bash
+>> drill get-bounty <github-username>/<user-repo-name> <number-of-issue>
+```
+
+if you don`t have the Drill CLI installed, use the local drill cli in the monorepo with the follow command:
 
 ```bash
 >> nx run drill-cli:get-bounty --githubRepository <github-username>/<user-repo-name> --issueNumber <number-of-issue>
