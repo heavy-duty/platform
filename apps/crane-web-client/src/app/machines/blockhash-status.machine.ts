@@ -121,7 +121,7 @@ export const blockhashStatusMachineFactory = (
 				'Update block height in context': assign({
 					currentBlockHeight: (_, event) => event.value,
 					currentGap: (context, event) =>
-						(context.lastValidBlockHeight ?? 0) - event.value,
+						context.lastValidBlockHeight ?? 0 - event.value,
 					percentage: (context, event) =>
 						Math.floor(
 							(((context.lastValidBlockHeight ?? 0) - event.value) * 100) /
@@ -130,12 +130,26 @@ export const blockhashStatusMachineFactory = (
 				}),
 				'Save latest blockhash in context': assign({
 					blockhash: (_, event) => event.data.blockhash,
-					lastValidBlockHeight: (_, event) => event.data.lastValidBlockHeight,
-					initialGap: (context, event) =>
-						event.data.lastValidBlockHeight - (context.initialBlockHeight ?? 0),
+					lastValidBlockHeight: (context, event) => {
+						// this is a hack due to https://github.com/solana-labs/solana/issues/24526
+						const realDifference = Math.floor(
+							(event.data.lastValidBlockHeight -
+								(context.initialBlockHeight ?? 0)) /
+								2
+						);
+
+						return (context.initialBlockHeight ?? 0) + realDifference;
+					},
+					initialGap: (context, event) => {
+						// divide by two cz of https://github.com/solana-labs/solana/issues/24526
+						return Math.floor(
+							(event.data.lastValidBlockHeight -
+								(context.initialBlockHeight ?? 0)) /
+								2
+						);
+					},
 					percentage: (_) => 100,
-					isValid: (context, event) =>
-						(context.initialBlockHeight ?? 0) < event.data.lastValidBlockHeight,
+					isValid: (_) => true,
 				}),
 				'Start get latest blockhash machine': assign({
 					getLatestBlockhashRef: (_) =>
