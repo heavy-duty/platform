@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { SnackBarComponent } from '../components/snack-bar.component';
+import { SnackBarComponent } from '@heavy-duty/blueprint-snack-bar';
 import { getErrorMessage } from '../utils';
 
 @Injectable()

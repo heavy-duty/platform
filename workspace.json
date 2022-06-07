@@ -4,6 +4,7 @@
 		"blueprint-button": "libs/blueprint/button",
 		"blueprint-card": "libs/blueprint/card",
 		"blueprint-menu": "libs/blueprint/menu",
+		"blueprint-snack-bar": "libs/blueprint/snack-bar",
 		"broadcaster": "apps/broadcaster",
 		"broadcaster-data-access": "libs/broadcaster/data-access",
 		"broadcaster-ui-cdk": "libs/broadcaster/ui/cdk",

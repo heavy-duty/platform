@@ -125,6 +125,8 @@ export class ShellComponent implements OnInit {
 	readonly signature$ = this._signature.asObservable();
 
 	ngOnInit() {
+		this._notificationService.notifySuccess('asd');
+
 		this._walletStore.setAdapters([
 			new PhantomWalletAdapter(),
 			new SolflareWalletAdapter(),
