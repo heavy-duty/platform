@@ -5,8 +5,8 @@
 		{
 			"files": ["*.typegen.ts"],
 			"rules": {
-				"@typescript-eslint/ban-types": false,
-				"@typescript-eslint/no-unused-vars": false
+				"@typescript-eslint/ban-types": 0,
+				"@typescript-eslint/no-unused-vars": 0
 			}
 		},
 		{
