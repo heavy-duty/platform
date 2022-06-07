@@ -1,62 +1,63 @@
 {
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "apps/drill-gateway/src",
-  "projectType": "application",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/node:webpack",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "options": {
-        "outputPath": "dist/apps/drill-gateway",
-        "main": "apps/drill-gateway/src/main.ts",
-        "tsConfig": "apps/drill-gateway/tsconfig.app.json",
-        "assets": [
-          "apps/drill-gateway/src/assets"
-        ]
-      },
-      "configurations": {
-        "production": {
-          "optimization": true,
-          "extractLicenses": true,
-          "inspect": false,
-          "fileReplacements": [
-            {
-              "replace": "apps/drill-gateway/src/environments/environment.ts",
-              "with": "apps/drill-gateway/src/environments/environment.prod.ts"
-            }
-          ]
-        }
-      }
-    },
-    "serve": {
-      "executor": "@nrwl/node:node",
-      "options": {
-        "buildTarget": "drill-gateway:build"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": [
-        "{options.outputFile}"
-      ],
-      "options": {
-        "lintFilePatterns": [
-          "apps/drill-gateway/**/*.ts"
-        ]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/apps/drill-gateway"
-      ],
-      "options": {
-        "jestConfig": "apps/drill-gateway/jest.config.ts",
-        "passWithNoTests": true
-      }
-    }
-  },
-  "tags": []
+	"sourceRoot": "apps/drill-gateway/src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/node:webpack",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/drill-gateway",
+				"main": "apps/drill-gateway/src/main.ts",
+				"tsConfig": "apps/drill-gateway/tsconfig.app.json",
+				"assets": ["apps/drill-gateway/src/assets"]
+			},
+			"configurations": {
+				"production": {
+					"optimization": true,
+					"extractLicenses": true,
+					"inspect": false,
+					"fileReplacements": [
+						{
+							"replace": "apps/drill-gateway/src/environments/environment.ts",
+							"with": "apps/drill-gateway/src/environments/environment.prod.ts"
+						}
+					]
+				}
+			}
+		},
+		"serve": {
+			"executor": "@nrwl/node:node",
+			"options": {
+				"buildTarget": "drill-gateway:build"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["apps/drill-gateway/**/*.ts"]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/apps/drill-gateway"],
+			"options": {
+				"jestConfig": "apps/drill-gateway/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"deploy": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"rm -rf dist/apps/drill-gateway",
+					"ncc build apps/drill-gateway/src/main.ts --license licenses.txt --minify --out dist/apps/drill-gateway",
+					"vercel deploy --prod dist/apps/drill-gateway"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-gateway/.env"
+			}
+		}
+	},
+	"tags": []
 }

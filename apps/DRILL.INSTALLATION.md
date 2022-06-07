@@ -23,12 +23,12 @@ Then, install all the dependencies using:
 >> npm i
 ```
 
-To deploy, you can use whatever you want. Let’s illustrate this, here we use: vercel
+To deploy, you can use whatever you want. Let’s illustrate this, here we use: Firebase and Vercel
 
-- Vercel for the Drill's GithubApp and the Gateway.
 - Firebase for the Web Client.
+- Vercel for the Drill's GithubApp and the Gateway.
 
-**NOTE**: For this guide we’re assuming you already have Vercel configured and logged in.
+**NOTE**: For this guide we’re assuming you already have Firebase and Vercel configured and logged in.
 
 Make sure you have your solana config pointing to devnet. You can verify with this command:
 
@@ -189,23 +189,15 @@ COMMITMENT=confirmed
 SOLANA_SECRET_KEY=[26,210,8,56, ... ,205,136,237,44,1,247,245,68,234]
 ```
 
-To deploy, first you build it.
+To deploy, you can use the following command.
 
 ```bash
-ncc build apps/drill-github-app/src/main.ts --license licenses.txt --minify --out dist/apps/drill-github-app
---
-vercel deploy --prod dist/apps/drill-github-app
+>> nx run drill-gateway:deploy
 ```
 
-Add all the environment variables, one by one, to the Vercel environment of your app (website settings) and redeploy the whole app.
+Add all the environment variables, one by one, to the Vercel environment of your app (website settings) and redeploy the whole app running the same command.
 
 ![Vercel environment variables](../.docs/drill/assets/vercel_environment_file.png)
-
-Before redeploy, be sure to remove the last dist folder to avoid conflicts by running:
-
-```bash
->> rm -r dist/apps/drill-github-app
-```
 
 With the Vercel URL, go to the GithubApp Settings on the website and update the Webhook URL.
 
@@ -221,7 +213,6 @@ You can check all the transfers you make by running:
 
 ```bash
 >> nx run drill-cli:get-bounty --githubRepository <github-username>/<user-repo-name> --issueNumber <number-of-issue>
-
 ```
 
 With the Drill GithubApp up and running, it’s time to deploy the Drill Gateway.
@@ -233,11 +224,7 @@ Yes, you guessed it! Here we have another Node app. This one has two main functi
 Now, lets deploy the Drill Gateway in the same way you just deployed the Drill-Github-Gateway :
 
 ```bash
-ncc build apps/drill-gateway/src/main.ts --license licenses.txt --minify --out dist/apps/drill-gateway
-```
-
-```bash
-vercel deploy --prod dist/apps/drill-gateway
+>> nx run drill-github-app:deploy
 ```
 
 **NOTE**: Remember that you need to replace the data with your own values as we did before. You should have something like this (we’ll change the Web Client URL later, so for now you can use something like _http://localhost:4200_):
@@ -259,21 +246,6 @@ Done! Now it’s time to work on the web client.
 ## Web client
 
 We suggest using Firebase for deployment. The web client is written in Angular and Firebase is really friendly with this kind of apps. But hey! You can use Vercel or any platform you want.
-
-<details><summary><b>See how to login and use Firebase instruction...</b></summary>
-
-Lets login in firebase:
-
-```bash
->> firebase login
-...
-
-```
-
-Then, create a new project in the console, using this link -> https://console.firebase.google.com/, or directly with the firebase CLI.
-
-</details>
-<br>
 
 Time to update the environment.prod.ts file located at apps/drill-web-client/src/environments:
 
@@ -321,7 +293,7 @@ Hosting URL: https://testin-drill.web.app
 
 Now with this new Web Client URL, you have to update the _WEB_CLIENT_URL_ environment variable of the Gateway vercel app.
 
-Bear with me, we're almost finished. Go to your Github Settings and update the GithubApp to have the Callback URL point to _< Web CLient URL >/login_. After this, you need to redeploy your Vercel Gateway app.
+Bear with me, we're almost finished. Go to your Github Settings and update the GithubApp to have the Callback URL point to _< Web CLient URL >/login_ (as we did with the _Webhook URL_ in early steps). After this, you need to redeploy your Vercel Gateway app.
 
 In the web client, look for the environment.production.ts file and update the redirectURL value with _< Web CLient URL >/login_ and, again, you know it, redeploy it.
 
