@@ -9,14 +9,14 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { BlueprintButtonComponent } from '@heavy-duty/blueprint-button';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { Keypair } from '@solana/web3.js';
-import { ScrewedCardComponent } from '../../components';
-import { KeypairsService } from '../../services';
+import { KeypairsSectionStore } from './keypairs-section.store';
 
 @Component({
 	selector: 'crane-keypairs-section',
 	template: `
-		<crane-screwed-card class="bg-black bg-bp-metal-2 px-6 py-4 rounded block">
+		<bp-screw-card class="bg-black bg-bp-metal-2 px-6 py-4 rounded block">
 			<header class="flex justify-between items-center">
 				<h2 class="text-xl">Keypairs</h2>
 				<button
@@ -48,7 +48,7 @@ import { KeypairsService } from '../../services';
 						<button
 							class="bg-black h-full p-1 bp-button uppercase text-xs"
 							[disabled]="disabled"
-							(click)="onSignTransaction(i)"
+							(click)="onSignTransaction(keypair)"
 						>
 							Sign <mat-icon inline>check_circle</mat-icon>
 						</button>
@@ -62,7 +62,7 @@ import { KeypairsService } from '../../services';
 					</div>
 				</li>
 			</ul>
-		</crane-screwed-card>
+		</bp-screw-card>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
@@ -71,32 +71,27 @@ import { KeypairsService } from '../../services';
 		BlueprintButtonComponent,
 		MatIconModule,
 		ClipboardModule,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 	],
+	providers: [KeypairsSectionStore],
 })
 export class KeypairsSectionComponent {
 	@Input() disabled = false;
 	@Output() signTransaction = new EventEmitter<Keypair>();
 
-	readonly keypairs$ = this._keypairsService.keypairs$;
+	readonly keypairs$ = this._keypairsSectionStore.keypairs$;
 
-	constructor(private readonly _keypairsService: KeypairsService) {}
+	constructor(private readonly _keypairsSectionStore: KeypairsSectionStore) {}
 
 	onNewKeypair() {
-		this._keypairsService.generateKeypair();
+		this._keypairsSectionStore.generateKeypair();
 	}
 
 	onRemoveKeypair(index: number) {
-		this._keypairsService.removeKeypair(index);
+		this._keypairsSectionStore.removeKeypair(index);
 	}
 
-	onSignTransaction(index: number) {
-		const keypair = this._keypairsService.getKeypair(index);
-
-		if (keypair === null) {
-			throw new Error('Invalid signer.');
-		}
-
+	onSignTransaction(keypair: Keypair) {
 		this.signTransaction.emit(keypair);
 	}
 }

@@ -1,37 +1,32 @@
 import { NgModule } from '@angular/core';
-import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { RouterModule } from '@angular/router';
 import { HdWalletAdapterModule } from '@heavy-duty/wallet-adapter';
-import { ReactiveComponentModule } from '@ngrx/component';
 import { FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { AppComponent } from './app.component';
-import { ScrewedCardComponent } from './components';
 import {
 	AssociatedTokenPlugin,
 	PluginModule,
 	SystemPlugin,
 	TokenPlugin,
 } from './plugins';
-import {
-	BlockhashStatusSectionComponent,
-	ConfirmTransactionButtonComponent,
-	CreateTransactionSectionComponent,
-	FormlyFieldStepperComponent,
-	SendTransactionButtonComponent,
-	SignTransactionSectionComponent,
-} from './sections';
+import { FormlyFieldStepperComponent } from './sections';
 
 @NgModule({
 	declarations: [AppComponent],
 	imports: [
 		BrowserModule,
 		BrowserAnimationsModule,
-		MatSidenavModule,
-		MatSnackBarModule,
-		ReactiveComponentModule,
+		RouterModule.forRoot([
+			{
+				path: '',
+				pathMatch: 'full',
+				loadComponent: () =>
+					import('./shell.component').then((m) => m.ShellComponent),
+			},
+		]),
 		FormlyModule.forRoot({
 			types: [
 				{
@@ -49,12 +44,6 @@ import {
 			new TokenPlugin(),
 			new AssociatedTokenPlugin(),
 		]),
-		CreateTransactionSectionComponent,
-		SignTransactionSectionComponent,
-		SendTransactionButtonComponent,
-		ConfirmTransactionButtonComponent,
-		BlockhashStatusSectionComponent,
-		ScrewedCardComponent,
 	],
 	bootstrap: [AppComponent],
 })

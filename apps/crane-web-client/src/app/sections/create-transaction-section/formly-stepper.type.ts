@@ -3,8 +3,8 @@ import { CdkDragDrop, DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { FieldType, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
-import { ScrewedCardComponent } from '../../components';
 import { StopPropagationDirective } from '../../directives';
 import { TransactionFormService } from './transaction-form.service';
 
@@ -16,7 +16,7 @@ import { TransactionFormService } from './transaction-form.service';
 			(cdkDropListDropped)="drop($event)"
 			cdkDropList
 		>
-			<crane-screwed-card
+			<bp-screw-card
 				*ngFor="
 					let step of field.fieldGroup;
 					let index = index;
@@ -31,7 +31,7 @@ import { TransactionFormService } from './transaction-form.service';
 					class="w-full flex justify-between items-center cursor-move mb-4 gap-4"
 					cdkDragHandle
 				>
-					<crane-screwed-card
+					<bp-screw-card
 						class="bg-black bg-bp-metal-2 px-6 py-4 rounded flex-1"
 					>
 						<div class="flex items-center gap-2">
@@ -54,9 +54,9 @@ import { TransactionFormService } from './transaction-form.service';
 								<span class="text-lg">{{ model[index].instruction }} </span>
 							</p>
 						</div>
-					</crane-screwed-card>
+					</bp-screw-card>
 
-					<crane-screwed-card
+					<bp-screw-card
 						class="bg-black bg-bp-metal-2 px-8 py-4 rounded inline-block"
 					>
 						<button
@@ -67,16 +67,16 @@ import { TransactionFormService } from './transaction-form.service';
 						>
 							Delete <mat-icon inline>delete</mat-icon>
 						</button>
-					</crane-screwed-card>
+					</bp-screw-card>
 				</div>
 
-				<crane-screwed-card
+				<bp-screw-card
 					class="bg-black bg-bp-metal-2 px-6 pt-4 pb-8 rounded step w-full block"
 				>
 					<formly-field [field]="step"></formly-field>
-				</crane-screwed-card>
+				</bp-screw-card>
 
-				<crane-screwed-card
+				<bp-screw-card
 					*ngIf="last"
 					class="mt-4 bg-black bg-bp-metal-2 px-6 py-4 rounded inline-block"
 				>
@@ -87,8 +87,8 @@ import { TransactionFormService } from './transaction-form.service';
 					>
 						submit
 					</button>
-				</crane-screwed-card>
-			</crane-screwed-card>
+				</bp-screw-card>
+			</bp-screw-card>
 		</div>
 	`,
 	styles: [
@@ -121,7 +121,7 @@ import { TransactionFormService } from './transaction-form.service';
 		CommonModule,
 		DragDropModule,
 		StopPropagationDirective,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 		FormlyModule,
 		MatIconModule,
 	],

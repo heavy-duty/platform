@@ -9,7 +9,6 @@ import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { Keypair, PublicKey, Transaction } from '@solana/web3.js';
 import { filter, map } from 'rxjs';
-import { ScrewedCardComponent } from '../../components';
 import { isNotNull, Option } from '../../utils';
 import { KeypairsSectionComponent } from './keypairs-section.component';
 import { SignTransactionSectionStore } from './sign-transaction-section.store';
@@ -54,7 +53,6 @@ import { WalletSectionComponent } from './wallet-section.component';
 		KeypairsSectionComponent,
 		WalletSectionComponent,
 		SignaturesProgressSectionComponent,
-		ScrewedCardComponent,
 	],
 })
 export class SignTransactionSectionComponent {

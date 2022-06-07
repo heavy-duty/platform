@@ -1,9 +1,9 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { SnackBarComponent } from '../components/snack-bar.component';
+import { getErrorMessage } from '../utils';
 
-@Injectable({ providedIn: 'root' })
+@Injectable()
 export class NotificationService {
 	constructor(private readonly _matSnackBar: MatSnackBar) {}
 
@@ -12,7 +12,7 @@ export class NotificationService {
 			duration: 10000,
 			data: {
 				title: 'Oops!!',
-				message: this.getErrorMessage(error),
+				message: getErrorMessage(error),
 				type: 'error',
 			},
 		});
@@ -38,26 +38,5 @@ export class NotificationService {
 				type: 'warning',
 			},
 		});
-	}
-
-	private getErrorMessage(error: unknown) {
-		if (typeof error === 'string') {
-			return error;
-		} else if (error instanceof Error) {
-			if (error.message.includes('failed to send transaction:')) {
-				return error.message.split(': ')[2];
-			} else {
-				return error.message;
-			}
-		} else if (error instanceof HttpErrorResponse) {
-			return error.error.error;
-		} else {
-			try {
-				console.error(error);
-			} catch (error) {
-				throw new Error('Console not available');
-			}
-			return 'Unknown error';
-		}
 	}
 }

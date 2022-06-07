@@ -9,6 +9,7 @@ import {
 	Output,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import { HdWalletModalButtonComponent } from '@heavy-duty/wallet-adapter-blueprint';
 import {
@@ -16,13 +17,12 @@ import {
 	HdWalletIconComponent,
 } from '@heavy-duty/wallet-adapter-cdk';
 import { PublicKey } from '@solana/web3.js';
-import { ScrewedCardComponent } from '../../components';
 import { Option } from '../../utils';
 
 @Component({
 	selector: 'crane-wallet-section',
 	template: `
-		<crane-screwed-card
+		<bp-screw-card
 			class="bg-black bg-bp-metal-2 px-6 py-4 rounded flex flex-col gap-4"
 		>
 			<header class="flex justify-between items-center">
@@ -70,7 +70,7 @@ import { Option } from '../../utils';
 					<mat-icon>content_copy</mat-icon>
 				</button>
 			</p>
-		</crane-screwed-card>
+		</bp-screw-card>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
@@ -82,7 +82,7 @@ import { Option } from '../../utils';
 		HdWalletIconComponent,
 		HdWalletDisconnectButtonDirective,
 		HdWalletModalButtonComponent,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 	],
 })
 export class WalletSectionComponent {

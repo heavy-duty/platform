@@ -5,10 +5,10 @@ import {
 	HostBinding,
 	Input,
 } from '@angular/core';
-import { RotateDirective } from '../directives';
+import { RotateDirective } from './rotate.directive';
 
 @Component({
-	selector: 'crane-screwed-card',
+	selector: 'bp-screw-card',
 	template: `
 		<ng-content></ng-content>
 
@@ -17,14 +17,14 @@ import { RotateDirective } from '../directives';
 			class="w-2 h-2 rounded-full bg-gray-400 flex items-center justify-center overflow-hidden absolute"
 			[ngClass]="screw"
 		>
-			<div class="w-full h-px bg-gray-600" craneRotate></div>
+			<div class="w-full h-px bg-gray-600" bpRotate></div>
 		</div>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 	imports: [CommonModule, RotateDirective],
 })
-export class ScrewedCardComponent {
+export class BlueprintScrewCardComponent {
 	@HostBinding('class') class = 'relative';
 	@Input() screws = [
 		'top-2 left-2',

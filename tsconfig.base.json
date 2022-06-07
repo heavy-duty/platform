@@ -267,6 +267,7 @@
 				"libs/bulldozer/client/workspaces/data-access/src/index.ts"
 			],
 			"@heavy-duty/blueprint-button": ["libs/blueprint/button/src/index.ts"],
+			"@heavy-duty/blueprint-card": ["libs/blueprint/card/src/index.ts"],
 			"@heavy-duty/blueprint-menu": ["libs/blueprint/menu/src/index.ts"],
 			"@heavy-duty/broadcaster": ["libs/broadcaster/data-access/src/index.ts"],
 			"@heavy-duty/broadcaster-cdk": ["libs/broadcaster/ui/cdk/src/index.ts"],

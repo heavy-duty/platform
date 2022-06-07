@@ -9,12 +9,12 @@ import {
 import { ReactiveFormsModule } from '@angular/forms';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { WalletStore } from '@heavy-duty/wallet-adapter';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { FormlyModule } from '@ngx-formly/core';
 import { PublicKey, TransactionInstruction } from '@solana/web3.js';
 import { filter, map } from 'rxjs';
-import { ScrewedCardComponent } from '../../components';
 import { PluginsService } from '../../plugins';
 import { isNotNull, Option } from '../../utils';
 import { CreateTransactionSectionStore } from './create-transaction-section.store';
@@ -51,7 +51,7 @@ importProvidersFrom;
 				<h1 class="text-3xl">Crane Playground</h1>
 			</div>
 
-			<crane-screwed-card
+			<bp-screw-card
 				class="bg-black bg-bp-metal-2 px-8 py-2 rounded inline-block"
 			>
 				<button
@@ -61,7 +61,7 @@ importProvidersFrom;
 				>
 					<span>Restart <mat-icon inline>refresh</mat-icon></span>
 				</button>
-			</crane-screwed-card>
+			</bp-screw-card>
 		</header>
 
 		<section
@@ -103,7 +103,7 @@ importProvidersFrom;
 		ReactiveComponentModule,
 		FormlyModule,
 		InstructionAutocompleteComponent,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 		MatIconModule,
 	],
 })

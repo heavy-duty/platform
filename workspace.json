@@ -2,6 +2,7 @@
 	"version": 2,
 	"projects": {
 		"blueprint-button": "libs/blueprint/button",
+		"blueprint-card": "libs/blueprint/card",
 		"blueprint-menu": "libs/blueprint/menu",
 		"broadcaster": "apps/broadcaster",
 		"broadcaster-data-access": "libs/broadcaster/data-access",

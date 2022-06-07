@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { ScrewedCardComponent } from '../../components';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { Option } from '../../utils';
 
 @Component({
 	selector: 'crane-signatures-progress-section',
 	template: `
-		<crane-screwed-card
+		<bp-screw-card
 			*ngIf="signaturesDone !== null && signaturesRequired !== null"
 			class="bg-black bg-bp-metal-2 px-6 py-4 rounded block"
 		>
@@ -23,11 +23,11 @@ import { Option } from '../../utils';
 
 			<span>{{ signaturesDone }}</span
 			>/<span>{{ signaturesRequired }}</span>
-		</crane-screwed-card>
+		</bp-screw-card>
 	`,
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
-	imports: [CommonModule, MatProgressBarModule, ScrewedCardComponent],
+	imports: [CommonModule, MatProgressBarModule, BlueprintScrewCardComponent],
 })
 export class SignaturesProgressSectionComponent {
 	signaturesProgress: Option<number> = null;

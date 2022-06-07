@@ -10,8 +10,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { map, Observable, startWith } from 'rxjs';
-import { ScrewedCardComponent } from '../../components';
 import { IdlInstruction, PluginsService } from '../../plugins';
 
 export interface InstructionOption {
@@ -23,12 +23,8 @@ export interface InstructionOption {
 @Component({
 	selector: 'crane-instruction-autocomplete',
 	template: `
-		<crane-screwed-card
-			class="bg-black bg-bp-metal px-6 py-4 rounded block mb-4"
-		>
-			<crane-screwed-card
-				class="bg-black bg-bp-metal-2 px-6 py-4 rounded block"
-			>
+		<bp-screw-card class="bg-black bg-bp-metal px-6 py-4 rounded block mb-4">
+			<bp-screw-card class="bg-black bg-bp-metal-2 px-6 py-4 rounded block">
 				<mat-form-field class="w-full mb-0" appearance="fill">
 					<mat-label>Choose an instruction</mat-label>
 					<input
@@ -40,8 +36,8 @@ export interface InstructionOption {
 						matInput
 					/>
 				</mat-form-field>
-			</crane-screwed-card>
-		</crane-screwed-card>
+			</bp-screw-card>
+		</bp-screw-card>
 
 		<mat-autocomplete
 			#auto="matAutocomplete"
@@ -77,7 +73,7 @@ export interface InstructionOption {
 		MatAutocompleteModule,
 		MatFormFieldModule,
 		MatInputModule,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 	],
 })
 export class InstructionAutocompleteComponent implements OnInit {

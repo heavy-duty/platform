@@ -2,9 +2,9 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { filter } from 'rxjs';
-import { ScrewedCardComponent } from '../../components';
 import { isNotNull } from '../../utils';
 import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 
@@ -12,7 +12,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 	selector: 'crane-blockhash-status-section',
 	template: `
 		<ng-container *ngrxLet="lastValidBlockHeight$; let lastValidBlockHeight">
-			<crane-screwed-card
+			<bp-screw-card
 				*ngrxLet="percentage$; let percentage"
 				class="mt-4 bg-black bg-bp-metal-2 px-6 py-4 rounded flex justify-between items-center"
 			>
@@ -71,7 +71,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 						cancel
 					</mat-icon>
 				</ng-container>
-			</crane-screwed-card>
+			</bp-screw-card>
 		</ng-container>
 	`,
 	providers: [BlockhashStatusSectionStore],
@@ -81,7 +81,7 @@ import { BlockhashStatusSectionStore } from './blockhash-status-section.store';
 		MatIconModule,
 		MatProgressSpinnerModule,
 		ReactiveComponentModule,
-		ScrewedCardComponent,
+		BlueprintScrewCardComponent,
 	],
 	standalone: true,
 })
