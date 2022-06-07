@@ -21,7 +21,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 			<ul class="flex-1 overflow-y-auto">
 				<li>
 					<a
-						class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+						class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 						[routerLink]="['/profile', 'info']"
 						[routerLinkActive]="['bp-box-shadow-bg-white', 'border-primary']"
 						[ngClass]="{
@@ -34,7 +34,7 @@ import { TabStore } from '@bulldozer-client/core-data-access';
 				</li>
 				<li>
 					<a
-						class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+						class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 						[routerLink]="['/profile', 'workspaces']"
 						[routerLinkActive]="['bp-box-shadow-bg-white', 'border-primary']"
 						[ngClass]="{

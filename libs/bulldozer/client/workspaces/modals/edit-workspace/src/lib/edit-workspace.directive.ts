@@ -19,7 +19,7 @@ export class EditWorkspaceDirective {
 				EditWorkspaceComponent,
 				{
 					data: this.workspace,
-					panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+					panelClass: ['bg-bp-wood', 'bg-bd-brown'],
 				}
 			)
 			.afterClosed()

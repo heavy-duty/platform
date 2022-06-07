@@ -1,4 +1,5 @@
 import { ClipboardModule } from '@angular/cdk/clipboard';
+import { DialogModule } from '@angular/cdk/dialog';
 import { CommonModule } from '@angular/common';
 import {
 	ChangeDetectionStrategy,
@@ -9,8 +10,11 @@ import {
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { Wallet } from '@heavy-duty/wallet-adapter';
-import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
-import { HdWalletAdapterMaterialModule } from '@heavy-duty/wallet-adapter-material';
+import { HdWalletModalButtonComponent } from '@heavy-duty/wallet-adapter-blueprint';
+import {
+	HdWalletDisconnectButtonDirective,
+	HdWalletIconComponent,
+} from '@heavy-duty/wallet-adapter-cdk';
 import { PublicKey } from '@solana/web3.js';
 import { ScrewedCardComponent } from '../../components';
 import { Option } from '../../utils';
@@ -19,27 +23,17 @@ import { Option } from '../../utils';
 	selector: 'crane-wallet-section',
 	template: `
 		<crane-screwed-card
-			class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex flex-col gap-4"
+			class="bg-black bg-bp-metal-2 px-6 py-4 rounded flex flex-col gap-4"
 		>
 			<header class="flex justify-between items-center">
 				<h2 class="text-xl flex-1">Wallet</h2>
-				<button *ngIf="publicKey === null" hdWalletModalButton></button>
 
-				<ng-container *ngIf="publicKey === null">
-					<button
-						*hdWalletAdapter="
-							let wallets = wallets;
-							let selectWallet = selectWallet
-						"
-						class="bg-black h-full p-1 bp-button uppercase text-xs"
-						[wallets]="wallets"
-						[className]="['bp-bg-wood', 'bg-bp-brown']"
-						(selectWallet)="selectWallet($event)"
-						hdWalletModalButton
-					>
-						Connect <mat-icon inline>login</mat-icon>
-					</button>
-				</ng-container>
+				<hd-wallet-modal-button
+					*ngIf="publicKey === null"
+					class="h-full text-xs flex gap-1"
+				>
+					<ng-container #children> Connect </ng-container>
+				</hd-wallet-modal-button>
 
 				<button
 					*ngIf="publicKey !== null"
@@ -84,8 +78,10 @@ import { Option } from '../../utils';
 		CommonModule,
 		ClipboardModule,
 		MatIconModule,
-		HdWalletAdapterCdkModule,
-		HdWalletAdapterMaterialModule,
+		DialogModule,
+		HdWalletIconComponent,
+		HdWalletDisconnectButtonDirective,
+		HdWalletModalButtonComponent,
 		ScrewedCardComponent,
 	],
 })

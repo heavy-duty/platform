@@ -8,5 +8,5 @@ import { Component, HostBinding } from '@angular/core';
 })
 export class BlueprintMenuItemComponent {
 	@HostBinding('class') class =
-		'bp-bg-wood bg-bd-brown hover:bg-bd-brown-light active:bg-bd-brown-dark';
+		'bg-bp-wood bg-bd-brown hover:bg-bd-brown-light active:bg-bd-brown-dark';
 }

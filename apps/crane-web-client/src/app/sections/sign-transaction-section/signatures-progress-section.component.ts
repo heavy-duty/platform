@@ -9,7 +9,7 @@ import { Option } from '../../utils';
 	template: `
 		<crane-screwed-card
 			*ngIf="signaturesDone !== null && signaturesRequired !== null"
-			class="bg-black bp-bg-metal-2 px-6 py-4 rounded block"
+			class="bg-black bg-bp-metal-2 px-6 py-4 rounded block"
 		>
 			<p>Signatures required:</p>
 

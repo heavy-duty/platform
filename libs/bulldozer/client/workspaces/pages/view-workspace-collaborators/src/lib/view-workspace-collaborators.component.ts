@@ -38,7 +38,7 @@ interface ViewModel {
 			<p>Filter by collaborator status</p>
 
 			<div class="flex gap-4">
-				<div class="px-8 py-3 w-60 h-16 bp-bg-metal-2 shadow relative">
+				<div class="px-8 py-3 w-60 h-16 bg-bp-metal-2 shadow relative">
 					<mat-form-field class="bg-bp-black">
 						<mat-select
 							[value]="status$ | ngrxPush"
@@ -83,7 +83,7 @@ interface ViewModel {
 						<ng-container *hdWalletAdapter="let publicKey = publicKey">
 							<div
 								*ngIf="publicKey !== null && currentCollaborator === null"
-								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
+								class="py-4 px-7 w-60 h-16 bg-bp-metal-2 shadow flex justify-center items-center relative"
 							>
 								<button
 									class="bp-button"
@@ -115,7 +115,7 @@ interface ViewModel {
 									currentCollaborator !== null &&
 									currentCollaborator.status.id === 2
 								"
-								class="py-4 px-7 w-60 h-16 bp-bg-metal-2 shadow flex justify-center items-center relative"
+								class="py-4 px-7 w-60 h-16 bg-bp-metal-2 shadow flex justify-center items-center relative"
 							>
 								<button
 									[disabled]="currentCollaborator | bdItemChanging"
@@ -155,7 +155,7 @@ interface ViewModel {
 					let collaborator of filteredCollaborators$ | ngrxPush;
 					trackBy: identify
 				"
-				class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
+				class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 			>
 				<div class="flex gap-2">
 					<bd-card class="flex-1 flex items-center gap-2">

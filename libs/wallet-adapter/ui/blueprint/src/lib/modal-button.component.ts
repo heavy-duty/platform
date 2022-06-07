@@ -17,13 +17,13 @@ import { HdWalletModalComponent } from './modal.component';
 	template: `
 		<button
 			*hdWalletAdapter="let wallets = wallets; let selectWallet = selectWallet"
-			bpButton
-			hdWalletModalButton
 			class="w-full"
-			panelClass="bp-bg-wood bg-bd-brown"
 			[wallets]="wallets"
 			[template]="template"
 			(selectWallet)="selectWallet($event)"
+			bpButton
+			hdWalletModalButton
+			panelClass="bg-bp-wood bg-bp-brown"
 		>
 			<ng-content></ng-content>
 			<ng-container *ngIf="!children">Select Wallet</ng-container>

@@ -21,7 +21,7 @@ import { ViewUserInfoStore } from './view-user-info.store';
 			<div *ngIf="publicKey !== null" class="flex">
 				<ng-container *ngIf="user$ | ngrxPush as user; else userNotDefined">
 					<div
-						class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
+						class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 					>
 						<div class="flex gap-2">
 							<bd-card class="flex-1">

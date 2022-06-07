@@ -83,7 +83,7 @@ import { ViewInstructionArgumentsStore } from './view-instruction-arguments.stor
 											let i = index;
 											trackBy: identify
 										"
-										class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
+										class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 									>
 										<bd-card class="flex-1 flex gap-2 justify-between">
 											<figure

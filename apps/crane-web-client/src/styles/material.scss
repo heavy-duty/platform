@@ -179,9 +179,9 @@ mat-icon {
 }
 
 .mat-autocomplete-panel .mat-option {
-	@apply bp-bg-wood bg-bp-brown bg-opacity-60 #{!important};
+	@apply bg-bp-wood bg-bp-brown bg-opacity-60 #{!important};
 
 	&:hover {
-		@apply bp-bg-wood bg-bp-brown bg-opacity-100 #{!important};
+		@apply bg-bp-wood bg-bp-brown bg-opacity-100 #{!important};
 	}
 }

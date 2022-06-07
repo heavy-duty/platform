@@ -48,7 +48,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 		<main class="flex-1">
 			<div
 				*ngIf="instruction$ | ngrxPush as instruction"
-				class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bp-bg-metal justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8 rounded"
+				class="flex flex-col gap-2 h-full pt-7 pb-3 px-5 bg-bp-metal justify-center items-center m-auto mb-4 relative bg-black mat-elevation-z8 rounded"
 			>
 				<bd-code-editor
 					class="flex-1 w-full mb-2"

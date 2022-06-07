@@ -42,7 +42,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 			</mat-form-field>
 
 			<div
-				class="py-2 px-5 w-full h-12 bp-bg-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bp-black"
+				class="py-2 px-5 w-full h-12 bg-bp-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bp-black"
 			>
 				<button class="bp-button flex-1" mat-dialog-close>Cancel</button>
 				<button class="bp-button flex-1" [disabled]="submitted && form.invalid">

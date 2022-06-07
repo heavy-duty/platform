@@ -68,7 +68,7 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 			>
 				<div
 					*ngFor="let signer of signers; let i = index"
-					class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
+					class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				>
 					<bd-card class="flex-1 flex gap-4">
 						<figure

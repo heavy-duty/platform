@@ -24,11 +24,11 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 				<mat-sidenav
 					#navigation
 					class=" w-80 bd-bg-stone"
-					fixedInViewport
 					[attr.role]="(isHandset$ | ngrxPush) ? 'dialog' : 'navigation'"
 					[mode]="(isHandset$ | ngrxPush) ? 'over' : 'side'"
 					[opened]="(isHandset$ | ngrxPush) === false"
 					[disableClose]="(isHandset$ | ngrxPush) === false"
+					fixedInViewport
 				>
 					<bd-workspace-explorer
 						[workspaceId]="(workspaceId$ | ngrxPush) ?? null"
@@ -38,11 +38,11 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 				<mat-sidenav-content>
 					<div class="flex flex-col h-screen  bg-bd-black bg-opacity-40">
 						<div class="flex items-center gap-2  ">
-							<div class="px-4" *ngIf="isHandset$ | async">
+							<div *ngIf="isHandset$ | async" class="px-4">
 								<button
+									(click)="navigation.toggle()"
 									type="button"
 									mat-mini-fab
-									(click)="navigation.toggle()"
 								>
 									<mat-icon aria-label="Toggle menu">menu</mat-icon>
 								</button>
@@ -59,9 +59,9 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 								<bd-user-instructions-button></bd-user-instructions-button>
 
 								<button
+									(click)="settings.toggle()"
 									type="button"
 									mat-icon-button
-									(click)="settings.toggle()"
 								>
 									<mat-icon
 										aria-hidden="false"
@@ -82,11 +82,11 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 				<mat-sidenav
 					#settings
-					class="bd-h-inherit w-80 bp-bg-wood bg-bd-brown px-4"
-					fixedInViewport
-					position="end"
+					class="bd-h-inherit w-80 bg-bp-wood bg-bd-brown px-4"
 					[mode]="'over'"
 					[opened]="false"
+					fixedInViewport
+					position="end"
 				>
 					<header class="mt-8 mb-4 border-b hd-border-gray">
 						<h1 class="m-0 uppercase bd-font">Settings</h1>
@@ -94,13 +94,13 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 					<main class="flex flex-col">
 						<section
-							class="bottom-0 py-6 px-4 mb-8 bd-bg-metal-2 bg-black relative mat-elevation-z4"
 							*hdWalletAdapter="
 								let wallet = wallet;
 								let wallets = wallets;
 								let publicKey = publicKey;
 								let selectWallet = selectWallet
 							"
+							class="bottom-0 py-6 px-4 mb-8 bd-bg-metal-2 bg-black relative mat-elevation-z4"
 						>
 							<h2 class="m-0 mb-4 hd-highlight-title text-base uppercase">
 								Wallet
@@ -122,8 +122,8 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 									</span>
 
 									<button
-										mat-icon-button
 										[cdkCopyToClipboard]="publicKey.toBase58()"
+										mat-icon-button
 									>
 										<mat-icon>content_copy</mat-icon>
 									</button>

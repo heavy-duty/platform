@@ -22,7 +22,7 @@ import { TransactionFormService } from './transaction-form.service';
 					let index = index;
 					let last = last
 				"
-				class="bg-black bp-bg-metal px-6 py-4 rounded step"
+				class="bg-black bg-bp-metal px-6 py-4 rounded step"
 				cdkDrag
 			>
 				<div *cdkDragPlaceholder class="step-placeholder"></div>
@@ -32,7 +32,7 @@ import { TransactionFormService } from './transaction-form.service';
 					cdkDragHandle
 				>
 					<crane-screwed-card
-						class="bg-black bp-bg-metal-2 px-6 py-4 rounded flex-1"
+						class="bg-black bg-bp-metal-2 px-6 py-4 rounded flex-1"
 					>
 						<div class="flex items-center gap-2">
 							<div
@@ -57,7 +57,7 @@ import { TransactionFormService } from './transaction-form.service';
 					</crane-screwed-card>
 
 					<crane-screwed-card
-						class="bg-black bp-bg-metal-2 px-8 py-4 rounded inline-block"
+						class="bg-black bg-bp-metal-2 px-8 py-4 rounded inline-block"
 					>
 						<button
 							class="bg-black h-full p-1 bp-button uppercase text-sm text-red-500"
@@ -71,14 +71,14 @@ import { TransactionFormService } from './transaction-form.service';
 				</div>
 
 				<crane-screwed-card
-					class="bg-black bp-bg-metal-2 px-6 pt-4 pb-8 rounded step w-full block"
+					class="bg-black bg-bp-metal-2 px-6 pt-4 pb-8 rounded step w-full block"
 				>
 					<formly-field [field]="step"></formly-field>
 				</crane-screwed-card>
 
 				<crane-screwed-card
 					*ngIf="last"
-					class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded inline-block"
+					class="mt-4 bg-black bg-bp-metal-2 px-6 py-4 rounded inline-block"
 				>
 					<button
 						class="bg-black h-full px-6 py-2 bp-button uppercase"

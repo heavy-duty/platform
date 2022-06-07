@@ -33,7 +33,7 @@ importProvidersFrom;
 	selector: 'crane-create-transaction-section',
 	template: `
 		<header
-			class="flex justify-between bp-bg-stone-rotated bg-bp-black p-4 absolute w-full z-10 shadow-md"
+			class="flex justify-between bg-bp-stone-rotated bg-bp-black p-4 absolute w-full z-10 shadow-md"
 			style="height: 88px"
 		>
 			<div class="flex items-center pr-4">
@@ -52,7 +52,7 @@ importProvidersFrom;
 			</div>
 
 			<crane-screwed-card
-				class="bg-black bp-bg-metal-2 px-8 py-2 rounded inline-block"
+				class="bg-black bg-bp-metal-2 px-8 py-2 rounded inline-block"
 			>
 				<button
 					class="bg-black h-full px-4 py-1 bp-button uppercase text-sm flex gap-2 items-center"

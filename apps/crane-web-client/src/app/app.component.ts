@@ -23,7 +23,7 @@ import { Option } from './utils';
 
 			<mat-sidenav
 				#settings
-				class="h-screen w-80 bp-bg-wood bg-bp-brown p-4 overflow-y-scroll"
+				class="h-screen w-80 bg-bp-wood bg-bp-brown p-4 overflow-y-scroll"
 				[opened]="true"
 				fixedInViewport
 				position="end"
@@ -51,7 +51,7 @@ import { Option } from './utils';
 				</ng-container>
 
 				<crane-screwed-card
-					class="mt-4 bg-black bp-bg-metal-2 px-6 py-4 rounded flex justify-center"
+					class="mt-4 bg-black bg-bp-metal-2 px-6 py-4 rounded flex justify-center"
 				>
 					<crane-send-transaction-button
 						class="flex-1"

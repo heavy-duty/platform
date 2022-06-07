@@ -41,7 +41,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 					<ul *ngIf="workspaceId !== null" class="flex-1 overflow-y-auto">
 						<li>
 							<a
-								class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+								class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 								[routerLink]="['/workspaces', workspaceId, 'budget']"
 								[routerLinkActive]="['bg-opacity-5', 'bp-box-shadow-bg-white']"
 							>
@@ -53,7 +53,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 						</li>
 						<li>
 							<a
-								class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+								class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 								[routerLink]="['/workspaces', workspaceId, 'collaborators']"
 								[routerLinkActive]="['bg-opacity-5', 'bp-box-shadow-bg-white']"
 							>
@@ -66,7 +66,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 
 						<!-- <li>
               <a
-                class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+                class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
                 [routerLink]="['/workspaces', workspaceId, 'instructions']"
                 [routerLinkActive]="['bg-opacity-5', 'bp-box-shadow-bg-white']"
               >
@@ -82,7 +82,7 @@ import { ViewWorkspaceStore } from './view-workspace.store';
 				<ng-container *hdWalletAdapter="let publicKey = publicKey">
 					<footer
 						*ngIf="publicKey !== null && workspace !== null"
-						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
+						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bg-bp-metal-2 shadow relative"
 					>
 						<button
 							class="bp-button w-28"

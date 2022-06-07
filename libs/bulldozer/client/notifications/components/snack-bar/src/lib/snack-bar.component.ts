@@ -60,7 +60,7 @@ export class SnackBarPoleComponent {
 			<bd-snack-bar-pole [type]="data.type"></bd-snack-bar-pole>
 		</div>
 
-		<div class="absolute w-full h-24 bp-bg-image-8 top-7 p-3 pt-5">
+		<div class="absolute w-full h-24 bg-bp-image-8 top-7 p-3 pt-5">
 			<p class="m-0 text-xl">{{ data.title }}</p>
 			<p class="m-0 text-sm">{{ data.message }}</p>
 		</div>

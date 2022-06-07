@@ -52,7 +52,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 							>
 								<li>
 									<a
-										class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+										class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 										[routerLink]="[
 											'/workspaces',
 											workspaceId,
@@ -86,7 +86,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 								</li>
 								<li>
 									<a
-										class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+										class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 										[routerLink]="[
 											'/workspaces',
 											workspaceId,
@@ -120,7 +120,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 								</li>
 								<li>
 									<a
-										class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+										class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 										[routerLink]="[
 											'/workspaces',
 											workspaceId,
@@ -154,7 +154,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 								</li>
 								<li>
 									<a
-										class="flex flex-col gap-1 py-3 px-7 bp-bg-stone-2 mb-6 mat-elevation-z4"
+										class="flex flex-col gap-1 py-3 px-7 bg-bp-stone-2 mb-6 mat-elevation-z4"
 										[routerLink]="[
 											'/workspaces',
 											workspaceId,
@@ -199,7 +199,7 @@ import { ViewInstructionStore } from './view-instruction.store';
 				>
 					<footer
 						*ngIf="publicKey !== null && instruction !== null"
-						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bp-bg-metal-2 shadow relative"
+						class="w-full py-4 px-7 h-16 flex justify-center items-center m-auto bg-bp-metal-2 shadow relative"
 					>
 						<ng-container>
 							<button

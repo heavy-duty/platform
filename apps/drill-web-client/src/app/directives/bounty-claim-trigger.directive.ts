@@ -27,7 +27,7 @@ export class BountyClaimTriggerDirective {
 			.open<BountyClaimModalComponent, { acceptedMint: PublicKey }, string>(
 				BountyClaimModalComponent,
 				{
-					panelClass: ['bp-bg-wood', 'bg-bp-brown', 'rounded'],
+					panelClass: ['bg-bp-wood', 'bg-bp-brown', 'rounded'],
 					data: { acceptedMint },
 				}
 			)

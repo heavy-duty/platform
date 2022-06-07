@@ -29,5 +29,5 @@ import { Component, HostBinding } from '@angular/core';
 })
 export class CardComponent {
 	@HostBinding('class') class =
-		'px-6 py-4 bp-bg-metal-2 bg-black relative shadow rounded';
+		'px-6 py-4 bg-bp-metal-2 bg-black relative shadow rounded';
 }

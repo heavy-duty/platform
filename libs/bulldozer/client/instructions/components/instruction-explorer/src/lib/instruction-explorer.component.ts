@@ -33,11 +33,8 @@ import { InstructionItemView } from './types';
 										workspaceId !== null &&
 										applicationId !== null
 									"
-									mat-icon-button
 									[disabled]="!connected"
-									aria-label="Create instruction"
-									bdStopPropagation
-									bdEditInstruction
+									[disabled]="disableCreate"
 									(editInstruction)="
 										onCreateInstruction(
 											publicKey.toBase58(),
@@ -46,7 +43,10 @@ import { InstructionItemView } from './types';
 											$event
 										)
 									"
-									[disabled]="disableCreate"
+									mat-icon-button
+									aria-label="Create instruction"
+									bdStopPropagation
+									bdEditInstruction
 								>
 									<mat-icon>add</mat-icon>
 								</button>
@@ -65,7 +65,6 @@ import { InstructionItemView } from './types';
 				>
 					<a
 						class="w-full flex justify-between gap-2 items-center flex-grow m-0 pl-0"
-						matLine
 						[routerLink]="[
 							'/workspaces',
 							instruction.workspaceId,
@@ -78,6 +77,7 @@ import { InstructionItemView } from './types';
 							instruction.name
 								| bdItemUpdatingMessage: instruction:'Instruction'
 						"
+						matLine
 						matTooltipShowDelay="500"
 					>
 						<span
@@ -86,9 +86,9 @@ import { InstructionItemView } from './types';
 							{{ instruction.name }}
 						</span>
 						<span
-							hdProgressSpinner
 							*ngIf="instruction | bdItemChanging"
 							class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+							hdProgressSpinner
 						></span>
 					</a>
 
@@ -100,22 +100,21 @@ import { InstructionItemView } from './types';
 					>
 						<ng-container *ngIf="publicKey !== null">
 							<button
-								mat-icon-button
 								[attr.aria-label]="
 									'More options of ' + instruction.name + ' instruction'
 								"
 								[matMenuTriggerFor]="instructionOptionsMenu"
+								mat-icon-button
 							>
 								<mat-icon>more_horiz</mat-icon>
 							</button>
 							<mat-menu
 								#instructionOptionsMenu="matMenu"
-								class="bp-bg-wood bg-bd-brown"
+								class="bg-bp-wood bg-bd-brown"
 							>
 								<button
-									mat-menu-item
-									bdEditInstruction
 									[instruction]="instruction"
+									[disabled]="!connected || (instruction | bdItemChanging)"
 									(editInstruction)="
 										onUpdateInstruction(
 											publicKey.toBase58(),
@@ -125,13 +124,14 @@ import { InstructionItemView } from './types';
 											$event
 										)
 									"
-									[disabled]="!connected || (instruction | bdItemChanging)"
+									mat-menu-item
+									bdEditInstruction
 								>
 									<mat-icon>edit</mat-icon>
 									<span>Edit instruction</span>
 								</button>
 								<button
-									mat-menu-item
+									[disabled]="!connected || (instruction | bdItemChanging)"
 									(click)="
 										onDeleteInstruction(
 											publicKey.toBase58(),
@@ -140,7 +140,7 @@ import { InstructionItemView } from './types';
 											instruction.id
 										)
 									"
-									[disabled]="!connected || (instruction | bdItemChanging)"
+									mat-menu-item
 								>
 									<mat-icon>delete</mat-icon>
 									<span>Delete instruction</span>

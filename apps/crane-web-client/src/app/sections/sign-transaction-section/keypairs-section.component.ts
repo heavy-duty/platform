@@ -16,7 +16,7 @@ import { KeypairsService } from '../../services';
 @Component({
 	selector: 'crane-keypairs-section',
 	template: `
-		<crane-screwed-card class="bg-black bp-bg-metal-2 px-6 py-4 rounded block">
+		<crane-screwed-card class="bg-black bg-bp-metal-2 px-6 py-4 rounded block">
 			<header class="flex justify-between items-center">
 				<h2 class="text-xl">Keypairs</h2>
 				<button

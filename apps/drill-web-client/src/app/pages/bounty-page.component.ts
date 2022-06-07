@@ -13,10 +13,10 @@ import { BountyPageStore } from './bounty-page.store';
 	selector: 'drill-bounty-page',
 	template: `
 		<div
-			class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
+			class="bg-bp-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
 			style="max-width: 900px"
 		>
-			<div class="flex flex-col gap-4 flex-1" *ngrxLet="issue$; let issue">
+			<div *ngrxLet="issue$; let issue" class="flex flex-col gap-4 flex-1">
 				<drill-bounty-information
 					[loading]="(loadingIssue$ | ngrxPush) ?? true"
 					[exists]="issue !== null"

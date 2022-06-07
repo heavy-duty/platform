@@ -143,7 +143,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 
 				<div class="w-full px-4 flex flex-col gap-2 ">
 					<div
-						class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 mb-4 rounded mat-elevation-z8"
+						class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 mb-4 rounded mat-elevation-z8"
 					>
 						<bd-card *ngIf="workspace !== null">
 							<h3 class="mb-2 hd-highlight-title uppercase text-sm">

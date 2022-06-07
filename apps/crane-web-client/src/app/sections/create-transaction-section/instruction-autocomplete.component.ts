@@ -24,10 +24,10 @@ export interface InstructionOption {
 	selector: 'crane-instruction-autocomplete',
 	template: `
 		<crane-screwed-card
-			class="bg-black bp-bg-metal px-6 py-4 rounded block mb-4"
+			class="bg-black bg-bp-metal px-6 py-4 rounded block mb-4"
 		>
 			<crane-screwed-card
-				class="bg-black bp-bg-metal-2 px-6 py-4 rounded block"
+				class="bg-black bg-bp-metal-2 px-6 py-4 rounded block"
 			>
 				<mat-form-field class="w-full mb-0" appearance="fill">
 					<mat-label>Choose an instruction</mat-label>

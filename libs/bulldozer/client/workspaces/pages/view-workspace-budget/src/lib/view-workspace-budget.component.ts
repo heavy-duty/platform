@@ -26,7 +26,7 @@ import { ViewWorkspaceBudgetStore } from './view-workspace-budget.store';
 
 		<main *ngIf="budget$ | ngrxPush as budget" class="flex flex-wrap gap-6">
 			<div
-				class="flex flex-col gap-2 bp-bg-metal bg-black px-4 py-5 rounded mat-elevation-z8"
+				class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 			>
 				<bd-card class="flex gap-2">
 					<figure
