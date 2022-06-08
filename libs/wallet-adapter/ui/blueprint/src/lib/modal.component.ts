@@ -12,9 +12,10 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 		<ng-container *ngIf="installedWallets.length > 0">
 			<header>
 				<button
+					class="text-xs"
+					(click)="onClose()"
 					bpButton
 					aria-label="Close wallet adapter selection"
-					(click)="onClose()"
 				>
 					<span class="material-icons text-base"> close </span>
 				</button>
@@ -44,9 +45,9 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 			<button
 				*ngIf="otherWallets.length > 0"
-				class="toggle-expand"
-				bpButton
+				class="toggle-expand text-xs"
 				(click)="onToggleExpand()"
+				bpButton
 			>
 				<span>
 					{{ expanded ? 'Less options' : 'More options' }}
@@ -63,8 +64,8 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 		<ng-container *ngIf="installedWallets.length === 0">
 			<header>
 				<button
-					bpButton
 					(click)="onClose()"
+					bpButton
 					aria-label="Close wallet adapter selection"
 				>
 					<span class="material-icons text-base"> close </span>
@@ -85,9 +86,9 @@ import { WalletName, WalletReadyState } from '@solana/wallet-adapter-base';
 
 			<button
 				*ngIf="otherWallets.length > 0"
-				class="toggle-expand"
-				bpButton
+				class="toggle-expand text-xs"
 				(click)="onToggleExpand()"
+				bpButton
 			>
 				<span>
 					{{

@@ -17,7 +17,7 @@ export class EditInstructionDirective {
 		this._matDialog
 			.open<EditInstructionComponent, InstructionDto, InstructionDto>(
 				EditInstructionComponent,
-				{ data: this.instruction, panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+				{ data: this.instruction, panelClass: ['bg-bp-wood', 'bg-bd-brown'] }
 			)
 			.afterClosed()
 			.subscribe((data) => data && this.editInstruction.emit(data));

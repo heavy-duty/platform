@@ -22,7 +22,7 @@ import { BoardPageStore, BountyViewModel } from './board-page.store';
 				>
 					<article
 						*ngFor="let bounty of bounties; trackBy: trackBy"
-						class="bp-bg-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
+						class="bg-bp-metal bg-black p-4 flex gap-4 mx-auto mt-10 rounded"
 						style="max-width: 900px"
 					>
 						<div class="flex flex-col gap-4 flex-1">

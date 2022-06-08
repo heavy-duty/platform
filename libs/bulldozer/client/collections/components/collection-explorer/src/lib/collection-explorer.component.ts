@@ -33,11 +33,8 @@ import { CollectionItemView } from './types';
 										workspaceId !== null &&
 										applicationId !== null
 									"
-									mat-icon-button
 									[disabled]="!connected"
-									aria-label="Create collection"
-									bdStopPropagation
-									bdEditCollection
+									[disabled]="disableCreate"
 									(editCollection)="
 										onCreateCollection(
 											publicKey.toBase58(),
@@ -46,7 +43,10 @@ import { CollectionItemView } from './types';
 											$event
 										)
 									"
-									[disabled]="disableCreate"
+									mat-icon-button
+									aria-label="Create collection"
+									bdStopPropagation
+									bdEditCollection
 								>
 									<mat-icon>add</mat-icon>
 								</button>
@@ -62,7 +62,6 @@ import { CollectionItemView } from './types';
 				>
 					<a
 						class="w-full flex justify-between gap-2 items-center flex-grow m-0 pl-0"
-						matLine
 						[routerLink]="[
 							'/workspaces',
 							collection.workspaceId,
@@ -74,6 +73,7 @@ import { CollectionItemView } from './types';
 						[matTooltip]="
 							collection.name | bdItemUpdatingMessage: collection:'Collection'
 						"
+						matLine
 						matTooltipShowDelay="500"
 					>
 						<span
@@ -83,9 +83,9 @@ import { CollectionItemView } from './types';
 						</span>
 
 						<span
-							hdProgressSpinner
 							*ngIf="collection | bdItemChanging"
 							class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+							hdProgressSpinner
 						></span>
 					</a>
 
@@ -97,22 +97,21 @@ import { CollectionItemView } from './types';
 					>
 						<ng-container *ngIf="publicKey !== null">
 							<button
-								mat-icon-button
 								[attr.aria-label]="
 									'More options of ' + collection.name + ' collection'
 								"
 								[matMenuTriggerFor]="collectionOptionsMenu"
+								mat-icon-button
 							>
 								<mat-icon>more_horiz</mat-icon>
 							</button>
 							<mat-menu
 								#collectionOptionsMenu="matMenu"
-								class="bp-bg-wood bg-bd-brown"
+								class="bg-bp-wood bg-bd-brown"
 							>
 								<button
-									mat-menu-item
-									bdEditCollection
 									[collection]="collection"
+									[disabled]="!connected || (collection | bdItemChanging)"
 									(editCollection)="
 										onUpdateCollection(
 											publicKey.toBase58(),
@@ -122,13 +121,14 @@ import { CollectionItemView } from './types';
 											$event
 										)
 									"
-									[disabled]="!connected || (collection | bdItemChanging)"
+									mat-menu-item
+									bdEditCollection
 								>
 									<mat-icon>edit</mat-icon>
 									<span>Edit collection</span>
 								</button>
 								<button
-									mat-menu-item
+									[disabled]="!connected || (collection | bdItemChanging)"
 									(click)="
 										onDeleteCollection(
 											publicKey.toBase58(),
@@ -137,7 +137,7 @@ import { CollectionItemView } from './types';
 											collection.id
 										)
 									"
-									[disabled]="!connected || (collection | bdItemChanging)"
+									mat-menu-item
 								>
 									<mat-icon>delete</mat-icon>
 									<span>Delete collection</span>

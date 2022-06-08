@@ -17,7 +17,7 @@ import { Component, HostBinding, Input } from '@angular/core';
 	`,
 })
 export class ScrewedCardComponent {
-	@HostBinding('class') class = 'block bp-bg-metal-2 relative';
+	@HostBinding('class') class = 'block bg-bp-metal-2 relative';
 	@Input() screws = [
 		'top-2 left-2',
 		'top-2 right-2',

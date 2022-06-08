@@ -24,12 +24,12 @@ import { ApplicationItemView } from './types';
 					<mat-expansion-panel-header class="pl-4 pr-0">
 						<div class="flex justify-between items-center flex-grow">
 							<mat-panel-title
+								class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
 								[matTooltip]="
 									application.name
 										| bdItemUpdatingMessage: application:'Application'
 								"
 								matTooltipShowDelay="500"
-								class="w-28 flex justify-between gap-2 items-center flex-grow m-0"
 							>
 								<span
 									class="flex-grow font-bold text-left overflow-hidden whitespace-nowrap overflow-ellipsis"
@@ -39,19 +39,19 @@ import { ApplicationItemView } from './types';
 
 								<span
 									*ngIf="application | bdItemShowSpinner"
-									hdProgressSpinner
 									class="flex-shrink-0 h-4 w-4 border-4 border-accent"
+									hdProgressSpinner
 								></span>
 							</mat-panel-title>
 
 							<ng-container *hdWalletAdapter="let publicKey = publicKey">
 								<ng-container *ngIf="publicKey !== null">
 									<button
-										mat-icon-button
 										[attr.aria-label]="
 											'More options of ' + application.name + ' application'
 										"
 										[matMenuTriggerFor]="applicationOptionsMenu"
+										mat-icon-button
 										bdStopPropagation
 									>
 										<mat-icon>more_horiz</mat-icon>
@@ -59,7 +59,7 @@ import { ApplicationItemView } from './types';
 
 									<mat-menu
 										#applicationOptionsMenu="matMenu"
-										class="bp-bg-wood bg-bd-brown"
+										class="bg-bp-wood bg-bd-brown"
 									>
 										<!-- <a
                   mat-menu-item
@@ -74,9 +74,8 @@ import { ApplicationItemView } from './types';
                   <span>View application</span>
                 </a> -->
 										<button
-											mat-menu-item
-											bdEditApplication
 											[application]="application"
+											[disabled]="!connected || (application | bdItemChanging)"
 											(editApplication)="
 												onUpdateApplication(
 													publicKey.toBase58(),
@@ -85,13 +84,14 @@ import { ApplicationItemView } from './types';
 													$event
 												)
 											"
-											[disabled]="!connected || (application | bdItemChanging)"
+											mat-menu-item
+											bdEditApplication
 										>
 											<mat-icon>edit</mat-icon>
 											<span>Edit application</span>
 										</button>
 										<button
-											mat-menu-item
+											[disabled]="!connected || (application | bdItemChanging)"
 											(click)="
 												onDeleteApplication(
 													publicKey.toBase58(),
@@ -99,7 +99,7 @@ import { ApplicationItemView } from './types';
 													application.id
 												)
 											"
-											[disabled]="!connected || (application | bdItemChanging)"
+											mat-menu-item
 										>
 											<mat-icon>delete</mat-icon>
 											<span>Delete application</span>

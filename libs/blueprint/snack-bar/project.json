@@ -1,0 +1,42 @@
+{
+	"projectType": "library",
+	"sourceRoot": "libs/blueprint/snack-bar/src",
+	"prefix": "bp",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["dist/libs/blueprint/snack-bar"],
+			"options": {
+				"project": "libs/blueprint/snack-bar/ng-package.json",
+				"tailwindConfig": "libs/blueprint/snack-bar/tailwind.config.js"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/blueprint/snack-bar/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/blueprint/snack-bar/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/libs/blueprint/snack-bar"],
+			"options": {
+				"jestConfig": "libs/blueprint/snack-bar/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/blueprint/snack-bar/**/*.ts",
+					"libs/blueprint/snack-bar/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
+}

@@ -37,21 +37,21 @@ import { HdWalletModalComponent } from './modal.component';
 			></hd-wallet-connect-button>
 
 			<ng-container *ngIf="connected">
-				<button bpButton [cdkMenuTriggerFor]="walletMenu">
+				<button [cdkMenuTriggerFor]="walletMenu" bpButton>
 					<ng-content></ng-content>
-					<div class="button-content" *ngIf="!children">
+					<div *ngIf="!children" class="button-content">
 						<hd-wallet-icon *ngIf="wallet" [wallet]="wallet"></hd-wallet-icon>
 						{{ publicKey?.toBase58() | hdObscureAddress }}
 					</div>
 				</button>
 
 				<ng-template #walletMenu>
-					<div cdkMenu class="w-64 shadow-2xl">
+					<div class="w-64 shadow-2xl" cdkMenu>
 						<button
 							*ngIf="publicKey"
-							bpMenuItem
 							class="flex items-center gap-4 w-full px-4 py-2"
 							[cdkCopyToClipboard]="publicKey.toBase58()"
+							bpMenuItem
 							cdkMenuItem
 						>
 							<span class="material-icons"> content_copy </span>
@@ -60,13 +60,13 @@ import { HdWalletModalComponent } from './modal.component';
 						</button>
 						<button
 							class="flex items-center gap-4 w-full px-4 py-2"
-							bpMenuItem
-							hdWalletModalButton
-							cdkMenuItem
-							panelClass="bp-bg-wood bg-bd-brown"
 							[wallets]="wallets"
 							[template]="template"
 							(selectWallet)="selectWallet($event)"
+							bpMenuItem
+							hdWalletModalButton
+							cdkMenuItem
+							panelClass="bg-bp-wood bg-bd-brown"
 						>
 							<span class="material-icons"> sync_alt </span>
 

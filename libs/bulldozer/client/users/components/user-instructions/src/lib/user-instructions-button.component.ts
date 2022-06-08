@@ -20,20 +20,20 @@ import { interval, map, startWith } from 'rxjs';
 				"
 			>
 				<div
-					class="inline-block relative"
 					*ngIf="
 						instructionNotViewedStatuses.size === 0 ||
 						instructionInProcessStatuses.size > 0
 					"
+					class="inline-block relative"
 				>
 					<button
-						type="button"
 						class="relative"
-						aria-label="View app notifications"
-						mat-icon-button
+						class="z-10"
 						[matMenuTriggerFor]="menu"
 						(menuClosed)="markAsViewed()"
-						class="z-10"
+						type="button"
+						aria-label="View app notifications"
+						mat-icon-button
 					>
 						<mat-icon>notifications</mat-icon>
 
@@ -53,16 +53,16 @@ import { interval, map, startWith } from 'rxjs';
 						instructionNotViewedStatuses.size > 0 &&
 						instructionInProcessStatuses.size === 0
 					"
-					type="button"
 					class="rounded-full w-8 h-8 border-2 border-green-500"
 					[matMenuTriggerFor]="menu"
 					(menuClosed)="markAsViewed()"
+					type="button"
 				>
 					{{ instructionNotViewedStatuses.size }}
 				</button>
 			</ng-container>
 
-			<mat-menu #menu="matMenu" class="bp-bg-wood bg-bd-brown">
+			<mat-menu #menu="matMenu" class="bg-bp-wood bg-bd-brown">
 				<div class="w-80 h-auto px-4 py-2 flex flex-col gap-2 ">
 					<header class="py-2">
 						<h1 class="m-0 text-lg text-center font-bold">Instructions</h1>
@@ -81,11 +81,11 @@ import { interval, map, startWith } from 'rxjs';
 								class="w-full h-8 flex items-center gap-4"
 							>
 								<div
-									hdProgressSpinner
 									*ngIf="
 										instructionStatus.transactionStatus.status !== 'finalized'
 									"
 									class="h-4 w-4 border-4 border-accent"
+									hdProgressSpinner
 								></div>
 
 								<mat-icon
@@ -128,7 +128,7 @@ import { interval, map, startWith } from 'rxjs';
 					</main>
 
 					<footer class="py-2 flex justify-center">
-						<button bdUserInstructionsBottomSheet class="underline text-accent">
+						<button class="underline text-accent" bdUserInstructionsBottomSheet>
 							See more
 						</button>
 					</footer>

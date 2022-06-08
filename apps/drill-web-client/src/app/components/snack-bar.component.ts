@@ -22,11 +22,11 @@ export class SnackBarClassPipe implements PipeTransform {
 	transform(value: string | null): string[] {
 		switch (value) {
 			case 'success':
-				return ['bg-green-600', 'bd-box-shadow-bg-green'];
+				return ['bg-green-600', 'bp-box-shadow-bg-green'];
 			case 'warning':
-				return ['bg-yellow-600', 'bd-box-shadow-bg-yellow'];
+				return ['bg-yellow-600', 'bp-box-shadow-bg-yellow'];
 			case 'error':
-				return ['bg-red-600', 'bd-box-shadow-bg-red'];
+				return ['bg-red-600', 'bp-box-shadow-bg-red'];
 			default:
 				return ['bg-black-600'];
 		}
@@ -58,7 +58,7 @@ export class SnackBarPoleComponent {
 			<drill-snack-bar-pole [type]="data.type"></drill-snack-bar-pole>
 		</div>
 
-		<div class="absolute w-full h-24 bp-bg-image-8 top-7 p-3 pt-5">
+		<div class="absolute w-full h-24 bg-bp-image-8 top-7 p-3 pt-5">
 			<p class="m-0 text-xl">{{ data.title }}</p>
 			<p class="m-0 text-sm">{{ data.message }}</p>
 		</div>

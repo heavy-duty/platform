@@ -16,7 +16,7 @@ export class AddWorkspaceDirective {
 			.open<AddWorkspaceComponent, null, 'new' | 'import' | null>(
 				AddWorkspaceComponent,
 				{
-					panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+					panelClass: ['bg-bp-wood', 'bg-bd-brown'],
 				}
 			)
 			.afterClosed()
@@ -27,7 +27,7 @@ export class AddWorkspaceDirective {
 						return this._matDialog
 							.open<EditWorkspaceComponent, undefined, WorkspaceDto>(
 								EditWorkspaceComponent,
-								{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+								{ panelClass: ['bg-bp-wood', 'bg-bd-brown'] }
 							)
 							.afterClosed()
 							.pipe(tap((data) => data && this.newWorkspace.emit(data)));
@@ -35,7 +35,7 @@ export class AddWorkspaceDirective {
 						return this._matDialog
 							.open<ImportWorkspaceComponent, null, { pubkey: string }>(
 								ImportWorkspaceComponent,
-								{ panelClass: ['bp-bg-wood', 'bg-bd-brown'] }
+								{ panelClass: ['bg-bp-wood', 'bg-bd-brown'] }
 							)
 							.afterClosed()
 							.pipe(

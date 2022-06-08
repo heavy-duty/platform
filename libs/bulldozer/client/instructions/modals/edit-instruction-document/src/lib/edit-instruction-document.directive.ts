@@ -37,7 +37,7 @@ export class EditInstructionDocumentDirective {
 					collections: this.collections,
 					accounts: this.instructionAccounts,
 				},
-				panelClass: ['bp-bg-wood', 'bg-bd-brown'],
+				panelClass: ['bg-bp-wood', 'bg-bd-brown'],
 			})
 			.afterClosed()
 			.subscribe((data) => data && this.editInstructionDocument.emit(data));
