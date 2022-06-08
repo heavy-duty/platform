@@ -1,0 +1,128 @@
+@import './core/colors.scss';
+@import './core/fonts.scss';
+@import './core/scrollbar.scss';
+@import './core/backgrounds.scss';
+
+// utilities (TO DO: move to antoher folder)
+@mixin snackbar-span {
+	display: block;
+	font-size: 1.125rem;
+	font-weight: bold;
+}
+
+@mixin snackbar($background-color, $color, $span-content-text) {
+	background-color: $background-color !important;
+	color: $color !important;
+
+	.mat-simple-snackbar > span {
+		&::before {
+			@include snackbar-span;
+			content: $span-content-text; // TO DO: review
+		}
+	}
+}
+// end utilities
+
+body {
+	margin: 0;
+	--success-color: $success-bgcolor;
+	--warning-color: $warning-bgcolor;
+	--error-color: $error-bgcolor;
+}
+
+.smooth-transition * {
+	//refact
+	transition: background 0.3s;
+}
+
+.success-snackbar {
+	@include snackbar($success-bgcolor, $white-text-color, 'Hooray 🎉!');
+}
+
+.bg-success {
+	background-color: $success-bgcolor !important;
+}
+
+.warning-snackbar {
+	@include snackbar($warning-bgcolor, $black-text-color, 'Wee-oww 🚨!');
+}
+
+.bg-warning {
+	background-color: $warning-bgcolor !important;
+}
+
+.error-snackbar {
+	@include snackbar($error-bgcolor, $white-text-color, 'Upss 🚧!');
+}
+
+.bg-error {
+	background-color: $error-bgcolor !important;
+}
+
+input[readonly] {
+	pointer-events: none;
+}
+
+.bp-h-inherit {
+	height: inherit !important;
+}
+
+.bp-border-bottom {
+	border-bottom: 2px solid gray;
+}
+
+// Temporal (use theme colors later)
+
+.hd-side-right {
+	background-color: #393939;
+}
+
+.hd-side-right {
+	color: white;
+}
+
+.border-b-1 {
+	border-bottom-width: 1px;
+}
+
+.bp-box-shadow-bg-red {
+	box-shadow: 0px 0px 20px 3px red;
+}
+
+.bp-box-shadow-bg-yellow {
+	box-shadow: 0px 0px 20px 3px yellow;
+}
+
+.bp-box-shadow-bg-green {
+	box-shadow: 0px 0px 20px 3px green;
+}
+
+.bp-box-shadow-bg-white {
+	box-shadow: 0px 1px 2px -1px white;
+}
+
+.bp-button {
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	background-image: linear-gradient(#303030, #262626);
+	border: 2px solid #212121;
+}
+
+.bp-button:hover {
+	background-image: linear-gradient(#262626, #262626);
+}
+
+.bp-button:active {
+	background-image: linear-gradient(#262626, #303030);
+}
+
+.bp-button[disabled='disabled'],
+.bp-button:disabled {
+	cursor: not-allowed;
+	background-image: linear-gradient(gray, gray) !important;
+	color: #e6e6e6;
+	border: 2px solid #909090;
+	opacity: 0.4;
+}

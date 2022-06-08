@@ -1,0 +1,55 @@
+.bg-bp-image-8,
+.bg-bp-metal-2,
+.bg-bp-stone-3,
+.bg-bp-stone-2,
+.bg-bp-stone,
+.bg-bp-stone-rotated,
+.bg-bp-bulldozer {
+	background-size: cover;
+}
+
+.bg-bp-wood,
+.bg-bp-bricks,
+.bg-bp-metal {
+	background-repeat: repeat !important;
+}
+
+.bg-bp-metal {
+	background-image: url('../../assets/images/backgrounds/metal.png');
+}
+
+.bg-bp-metal-2 {
+	background-image: url('../../assets/images/backgrounds/metal-2.webp');
+}
+
+.bg-bp-bricks {
+	background-image: url('../../assets/images/backgrounds/bricks.webp');
+}
+
+.bg-bp-wood {
+	background-image: url('../../assets/images/backgrounds/wood.webp');
+}
+
+.bg-bp-stone {
+	background-image: url('../../assets/images/backgrounds/sidebar.webp');
+}
+
+.bg-bp-stone-rotated {
+	background-image: url('../../assets/images/backgrounds/navbar.webp');
+}
+
+.bg-bp-stone-2 {
+	background-image: url('../../assets/images/backgrounds/list_element.webp');
+}
+
+.bg-bp-stone-3 {
+	background-image: url('../../assets/images/backgrounds/tabs.png');
+}
+
+.bg-bp-bulldozer {
+	background-image: url('../../assets/images/backgrounds/bulldozer.webp');
+}
+
+.bg-bp-image-8 {
+	background-image: url('../../assets/images/backgrounds/wood_sign.webp');
+}

@@ -10,11 +10,11 @@ import { Option } from '../types';
 			<ng-container *ngIf="!loading; else loadingTemplate">
 				<ng-container *ngIf="exists; else notFoundTemplate">
 					<button
-						class="bg-black h-full w-full py-2 bd-button uppercase"
-						drillBountyClaimTrigger
+						class="bg-black h-full w-full py-2 bp-button uppercase"
 						[acceptedMint]="acceptedMint?.address ?? null"
-						(claimBounty)="onClaimBounty(boardId, bountyId, $event)"
 						[disabled]="boardId === null || bountyId === null"
+						(claimBounty)="onClaimBounty(boardId, bountyId, $event)"
+						drillBountyClaimTrigger
 					>
 						claim
 					</button>

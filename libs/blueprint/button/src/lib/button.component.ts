@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostBinding } from '@angular/core';
 
 @Component({
 	selector: 'button[bpButton]',
@@ -6,10 +6,6 @@ import { Component } from '@angular/core';
 	styles: [
 		`
 			:host {
-				padding-left: 10px;
-				padding-right: 10px;
-				padding-top: 5px;
-				padding-bottom: 5px;
 				background-image: linear-gradient(#303030, #262626);
 				border: 2px solid #212121;
 			}
@@ -25,4 +21,6 @@ import { Component } from '@angular/core';
 	],
 	standalone: true,
 })
-export class BlueprintButtonComponent {}
+export class BlueprintButtonComponent {
+	@HostBinding('class') class = 'bp-button uppercase px-3 py-1.5';
+}

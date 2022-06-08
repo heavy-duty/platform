@@ -1,17 +1,15 @@
 {
 	"conventionalCommits.scopes": [
 		"core",
-		"bulldozer-programs",
-		"bulldozer-client",
 		"editor",
 		"wallet-adapter",
 		"ngx-solana",
 		"ngx-websocket",
 		"broadcaster",
-		"heavy-duty-ui",
 		"drill",
 		"bulldozer",
-		"blueprint"
+		"blueprint",
+		"crane"
 	],
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,

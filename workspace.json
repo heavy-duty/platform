@@ -2,7 +2,9 @@
 	"version": 2,
 	"projects": {
 		"blueprint-button": "libs/blueprint/button",
+		"blueprint-card": "libs/blueprint/card",
 		"blueprint-menu": "libs/blueprint/menu",
+		"blueprint-snack-bar": "libs/blueprint/snack-bar",
 		"broadcaster": "apps/broadcaster",
 		"broadcaster-data-access": "libs/broadcaster/data-access",
 		"broadcaster-ui-cdk": "libs/broadcaster/ui/cdk",
@@ -75,6 +77,8 @@
 		"bulldozer-programs": "apps/bulldozer-programs",
 		"bulldozer-shared-devkit": "libs/bulldozer/shared/devkit",
 		"bulldozer-shared-generator": "libs/bulldozer/shared/generator",
+		"crane-web-client": "apps/crane-web-client",
+		"crane-web-client-e2e": "apps/crane-web-client-e2e",
 		"drill-cli": "apps/drill-cli",
 		"drill-gateway": "apps/drill-gateway",
 		"drill-github-app": "apps/drill-github-app",

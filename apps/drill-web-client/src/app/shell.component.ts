@@ -3,7 +3,7 @@ import { Component, HostBinding } from '@angular/core';
 @Component({
 	selector: 'drill-shell',
 	template: `
-		<header class="py-8 bp-bg-concrete bg-black rounded">
+		<header class="py-8 bg-bp-concrete bg-black rounded">
 			<h1 class="text-center text-3xl bp-font">Bounty Board</h1>
 			<p class="text-center">
 				Do you have what it takes? Pick a bounty and make a name for yourself.
@@ -14,9 +14,9 @@ import { Component, HostBinding } from '@angular/core';
 			<router-outlet></router-outlet>
 		</main>
 
-		<footer class="px-8 py-4 flex justify-between bp-bg-metal mt-auto bg-black">
+		<footer class="px-8 py-4 flex justify-between bg-bp-metal mt-auto bg-black">
 			<div class="flex gap-2 items-center">
-				<img src="assets/images/logo.webp" class="w-10" />
+				<img class="w-10" src="assets/images/logo.webp" />
 				<p class="m-0 text-xs">
 					<span>OSS project made by</span>
 
@@ -29,9 +29,9 @@ import { Component, HostBinding } from '@angular/core';
 					<br />
 
 					<a
+						class="bp-color-primary underline"
 						href="https://github.com/heavy-duty/platform"
 						target="_blank"
-						class="bp-color-primary underline"
 						>Check the code for yourself.</a
 					>
 				</p>
@@ -44,8 +44,8 @@ import { Component, HostBinding } from '@angular/core';
 					<figure>
 						<a href="https://github.com/heavy-duty" target="_blank">
 							<img
-								src="assets/images/social/github.png"
 								class="w-8 h-8"
+								src="assets/images/social/github.png"
 								alt="Github button"
 								width="32"
 								height="32"
@@ -55,8 +55,8 @@ import { Component, HostBinding } from '@angular/core';
 					<figure>
 						<a href="https://discord.gg/Ej47EUAj4u" target="_blank">
 							<img
-								src="assets/images/social/discord.png"
 								class="w-8 h-8"
+								src="assets/images/social/discord.png"
 								alt="Discord button"
 								width="32"
 								height="32"
@@ -66,8 +66,8 @@ import { Component, HostBinding } from '@angular/core';
 					<figure>
 						<a href="https://twitter.com/HeavyDutyBuild" target="_blank">
 							<img
-								src="assets/images/social/twitter.png"
 								class="w-8 h-8"
+								src="assets/images/social/twitter.png"
 								alt="Twitter button"
 								width="32"
 								height="32"
