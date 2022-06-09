@@ -104,12 +104,11 @@ if you don`t have the Drill CLI installed, use the local drill cli in the monore
 **NOTE**: All this data is for the example, be sure to replace it with your own data and should look something like this:
 
 ```bash
->> drill create-board  andresmgsl/nextjs-typescript-seed 1000000  BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
+>> drill create-board  andresmgsl/nextjs-typescript-seed 1 BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
 
 or
 
->> nx run drill-cli:create-board --githubRepository andresmgsl/nextjs-typescript-seed --lockTime 1000000 --acceptedMint BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
-...
+>> nx run drill-cli:create-board --githubRepository andresmgsl/nextjs-typescript-seed --lockTime 1 --acceptedMint BR1CK2GpuUqNUrS8Kk7WDXXiSMaAppKFPhkzbXxFZtVg
 ```
 
 If the repo have a board already created, you will get an error. You can check if the board was successfully created using the following command (again, replace with your own values):
@@ -121,7 +120,6 @@ Getting board data: "andresmgsl/nextjs-typescript-seed"
 
 Board: "andresmgsl/nextjs-typescript-seed" (409320044)
 Board Public Key: 4tL3PaLkmujSB1fZB5Z8e3TMca5pTNpjoa3WTw27NQkh
-...
 
 ```
 
@@ -335,7 +333,8 @@ jobs:
     steps:
       - name: Vault Updater
         id: vault-updater
-        uses: heavy-duty/drill-vault-updater-action@v1.0.49
+        uses: heavy-duty/drill-vault-updater-action@v1.0.54
+
         with:
           token: ${{secrets.GITHUB_TOKEN}}
           rpc-endpoint: ${{ secrets.RPC_ENDPOINT }}
