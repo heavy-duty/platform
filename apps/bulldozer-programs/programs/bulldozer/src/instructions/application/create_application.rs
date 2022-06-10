@@ -1,10 +1,12 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, User, Workspace, WorkspaceStats,
+  Application, ApplicationStats, Budget, Collaborator, Workspace, WorkspaceStats,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateApplicationArguments {
@@ -15,6 +17,7 @@ pub struct CreateApplicationArguments {
 #[instruction(arguments: CreateApplicationArguments)]
 pub struct CreateApplication<'info> {
   pub system_program: Program<'info, System>,
+  pub user_manager_program: Program<'info, UserManager>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -38,7 +41,8 @@ pub struct CreateApplication<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = user.bump
+    bump = user.bump,
+   seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

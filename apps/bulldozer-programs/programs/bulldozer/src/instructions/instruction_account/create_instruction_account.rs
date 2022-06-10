@@ -1,12 +1,14 @@
 use crate::collections::{
   Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountBumps,
   InstructionAccountClose, InstructionAccountCollection, InstructionAccountPayer,
-  InstructionAccountStats, InstructionStats, User, Workspace,
+  InstructionAccountStats, InstructionStats, Workspace,
 };
 use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateInstructionAccountArguments {
@@ -19,6 +21,7 @@ pub struct CreateInstructionAccountArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateInstructionAccountArguments)]
 pub struct CreateInstructionAccount<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -41,7 +44,8 @@ pub struct CreateInstructionAccount<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = user.bump
+    bump = user.bump,
+   seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

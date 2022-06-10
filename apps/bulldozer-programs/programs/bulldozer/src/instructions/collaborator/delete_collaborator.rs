@@ -1,9 +1,12 @@
-use crate::collections::{Collaborator, User, Workspace, WorkspaceStats};
+use crate::collections::{Collaborator, Workspace, WorkspaceStats};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(Accounts)]
 pub struct DeleteCollaborator<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -23,7 +26,8 @@ pub struct DeleteCollaborator<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = authority_user.bump
+    bump = authority_user.bump,
+    seeds::program = user_manager_program.key()
   )]
   pub authority_user: Box<Account<'info, User>>,
   #[account(

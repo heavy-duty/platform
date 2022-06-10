@@ -1,7 +1,9 @@
-use crate::collections::{Collaborator, User, Workspace};
+use crate::collections::{Collaborator, Workspace};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCollaboratorArguments {
@@ -11,6 +13,7 @@ pub struct UpdateCollaboratorArguments {
 #[derive(Accounts)]
 #[instruction(arguments: UpdateCollaboratorArguments)]
 pub struct UpdateCollaborator<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   #[account(mut)]
   pub collaborator: Box<Account<'info, Collaborator>>,
   pub authority: Signer<'info>,
@@ -20,7 +23,8 @@ pub struct UpdateCollaborator<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = user.bump
+    bump = user.bump,
+   seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

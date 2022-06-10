@@ -1,12 +1,15 @@
 use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Collection, CollectionStats, User, Workspace,
+  Application, ApplicationStats, Budget, Collaborator, Collection, CollectionStats, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(Accounts)]
 pub struct DeleteCollection<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(constraint = application.workspace == workspace.key() @ ErrorCode::ApplicationDoesNotBelongToWorkspace)]
@@ -43,7 +46,8 @@ pub struct DeleteCollection<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = user.bump
+    bump = user.bump,
+   seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

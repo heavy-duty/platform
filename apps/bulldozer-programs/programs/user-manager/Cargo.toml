@@ -1,19 +1,22 @@
 [package]
-name = "bulldozer"
+name = "user-manager"
 version = "0.1.0"
 description = "Created with Anchor"
-edition = "2018"
+edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "lib"]
-name = "bulldozer"
+name = "user_manager"
 
 [features]
 no-entrypoint = []
 no-idl = []
+no-log-ix-name = []
 cpi = ["no-entrypoint"]
 default = []
 
+[profile.release]
+overflow-checks = true
+
 [dependencies]
 anchor-lang = "0.24.2"
-user-manager = { path = "../user-manager", features = ["cpi"] }

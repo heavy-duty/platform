@@ -14,19 +14,6 @@ declare_id!("EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo");
 pub mod bulldozer {
   use super::*;
 
-  pub fn create_user(ctx: Context<CreateUser>, arguments: CreateUserArguments) -> Result<()> {
-    msg!("testing nx affected");
-    instructions::create_user::handle(ctx, arguments)
-  }
-
-  pub fn update_user(ctx: Context<UpdateUser>, arguments: UpdateUserArguments) -> Result<()> {
-    instructions::update_user::handle(ctx, arguments)
-  }
-
-  pub fn delete_user(ctx: Context<DeleteUser>) -> Result<()> {
-    instructions::delete_user::handle(ctx)
-  }
-
   pub fn create_workspace(
     ctx: Context<CreateWorkspace>,
     arguments: CreateWorkspaceArguments,

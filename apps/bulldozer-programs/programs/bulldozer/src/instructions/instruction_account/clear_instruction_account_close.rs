@@ -1,12 +1,15 @@
 use crate::collections::{
-  Collaborator, Instruction, InstructionAccount, InstructionAccountClose, User, Workspace,
+  Collaborator, Instruction, InstructionAccount, InstructionAccountClose, Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(Accounts)]
 pub struct ClearInstructionAccountClose<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
@@ -32,7 +35,8 @@ pub struct ClearInstructionAccountClose<'info> {
         b"user".as_ref(),
         authority.key().as_ref(),
       ],
-      bump = user.bump
+      bump = user.bump,
+      seeds::program = user_manager_program.key()
     )]
   pub user: Box<Account<'info, User>>,
   #[account(

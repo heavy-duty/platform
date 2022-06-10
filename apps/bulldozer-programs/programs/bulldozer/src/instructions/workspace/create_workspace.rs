@@ -1,6 +1,8 @@
-use crate::collections::{Budget, Collaborator, User, Workspace, WorkspaceStats};
+use crate::collections::{Budget, Collaborator, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
 use anchor_lang::prelude::*;
+use user_manager::collections::User;
+use user_manager::program::UserManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateWorkspaceArguments {
@@ -10,6 +12,7 @@ pub struct CreateWorkspaceArguments {
 #[derive(Accounts)]
 #[instruction(arguments: CreateWorkspaceArguments)]
 pub struct CreateWorkspace<'info> {
+  pub user_manager_program: Program<'info, UserManager>,
   pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
@@ -24,7 +27,8 @@ pub struct CreateWorkspace<'info> {
       b"user".as_ref(),
       authority.key().as_ref(),
     ],
-    bump = user.bump
+    bump = user.bump,
+   seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(
