@@ -14,63 +14,6 @@ declare_id!("EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo");
 pub mod bulldozer {
   use super::*;
 
-  pub fn create_workspace(
-    ctx: Context<CreateWorkspace>,
-    arguments: CreateWorkspaceArguments,
-  ) -> Result<()> {
-    instructions::create_workspace::handle(ctx, arguments)
-  }
-
-  pub fn update_workspace(
-    ctx: Context<UpdateWorkspace>,
-    arguments: UpdateWorkspaceArguments,
-  ) -> Result<()> {
-    instructions::update_workspace::handle(ctx, arguments)
-  }
-
-  pub fn deposit_to_budget(
-    ctx: Context<DepositToBudget>,
-    arguments: DepositToBudgetArguments,
-  ) -> Result<()> {
-    instructions::deposit_to_budget::handle(ctx, arguments)
-  }
-
-  pub fn withdraw_from_budget(
-    ctx: Context<WithdrawFromBudget>,
-    arguments: WithdrawFromBudgetArguments,
-  ) -> Result<()> {
-    instructions::withdraw_from_budget::handle(ctx, arguments)
-  }
-
-  pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> Result<()> {
-    instructions::delete_workspace::handle(ctx)
-  }
-
-  pub fn create_collaborator(ctx: Context<CreateCollaborator>) -> Result<()> {
-    instructions::create_collaborator::handle(ctx)
-  }
-
-  pub fn update_collaborator(
-    ctx: Context<UpdateCollaborator>,
-    arguments: UpdateCollaboratorArguments,
-  ) -> Result<()> {
-    instructions::update_collaborator::handle(ctx, arguments)
-  }
-
-  pub fn delete_collaborator(ctx: Context<DeleteCollaborator>) -> Result<()> {
-    instructions::delete_collaborator::handle(ctx)
-  }
-
-  pub fn request_collaborator_status(ctx: Context<RequestCollaboratorStatus>) -> Result<()> {
-    instructions::request_collaborator_status::handle(ctx)
-  }
-
-  pub fn retry_collaborator_status_request(
-    ctx: Context<RetryCollaboratorStatusRequest>,
-  ) -> Result<()> {
-    instructions::retry_collaborator_status_request::handle(ctx)
-  }
-
   #[access_control(instructions::create_application::validate(&ctx))]
   pub fn create_application(
     ctx: Context<CreateApplication>,

@@ -1,9 +1,10 @@
-use crate::collections::{Application, Collaborator, Collection, Workspace};
-use crate::enums::CollaboratorStatus;
+use crate::collections::{Application, Collection};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCollectionArguments {

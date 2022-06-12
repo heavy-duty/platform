@@ -9,7 +9,7 @@ pub struct WorkspaceStats {
 impl WorkspaceStats {
   pub fn initialize(&mut self) -> () {
     self.quantity_of_applications = 0;
-    self.quantity_of_collaborators = 1;
+    self.quantity_of_collaborators = 0;
   }
 
   pub fn increase_application_quantity(&mut self) -> () {
@@ -36,17 +36,26 @@ impl WorkspaceStats {
 
 #[account]
 pub struct Workspace {
+  pub id: u8,
   pub authority: Pubkey,
   pub name: String,
+  pub bump: u8,
   pub created_at: i64,
   pub updated_at: i64,
   pub workspace_stats_bump: u8,
 }
 
 impl Workspace {
-  pub fn initialize(&mut self, name: String, authority: Pubkey, workspace_stats_bump: u8) -> () {
+  pub fn initialize(
+    &mut self,
+    name: String,
+    authority: Pubkey,
+    bump: u8,
+    workspace_stats_bump: u8,
+  ) -> () {
     self.name = name;
     self.authority = authority;
+    self.bump = bump;
     self.workspace_stats_bump = workspace_stats_bump;
   }
 
@@ -67,7 +76,7 @@ impl Workspace {
 
   pub fn space() -> usize {
     // discriminator + authority + name (size 32 + 4)
-    // created_at + updated_at + workspace stats bump
-    8 + 32 + 36 + 8 + 8 + 1
+    // created_at + updated_at + bump + workspace stats bump
+    8 + 1 + 32 + 36 + 8 + 8 + 1 + 1
   }
 }

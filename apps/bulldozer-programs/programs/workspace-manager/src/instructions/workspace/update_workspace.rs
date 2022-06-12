@@ -22,7 +22,7 @@ pub struct UpdateWorkspace<'info> {
       authority.key().as_ref(),
     ],
     bump = user.bump,
-   seeds::program = user_manager_program.key()
+    seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

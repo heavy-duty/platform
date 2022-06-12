@@ -1,11 +1,11 @@
-use crate::collections::{
-  Collaborator, Instruction, InstructionAccount, InstructionAccountClose, Workspace,
-};
-use crate::enums::{AccountModifiers, CollaboratorStatus};
+use crate::collections::{Instruction, InstructionAccount, InstructionAccountClose};
+use crate::enums::AccountModifiers;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(Accounts)]
 pub struct SetInstructionAccountClose<'info> {

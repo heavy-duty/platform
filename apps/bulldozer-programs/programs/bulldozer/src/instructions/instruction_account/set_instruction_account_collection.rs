@@ -1,12 +1,13 @@
 use crate::collections::{
-  Application, Collaborator, Collection, Instruction, InstructionAccount,
-  InstructionAccountCollection, Workspace,
+  Application, Collection, Instruction, InstructionAccount, InstructionAccountCollection,
 };
-use crate::enums::{AccountKinds, CollaboratorStatus};
+use crate::enums::AccountKinds;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(Accounts)]
 pub struct SetInstructionAccountCollection<'info> {

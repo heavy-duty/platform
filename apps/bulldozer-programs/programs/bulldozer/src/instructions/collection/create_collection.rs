@@ -1,12 +1,11 @@
-use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Collection, CollectionStats, Workspace,
-};
-use crate::enums::CollaboratorStatus;
+use crate::collections::{Application, ApplicationStats, Collection, CollectionStats};
 use crate::errors::ErrorCode;
 use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Budget, Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateCollectionArguments {

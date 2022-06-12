@@ -334,6 +334,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "user-manager",
+ "workspace-manager",
 ]
 
 [[package]]
@@ -497,6 +498,15 @@ name = "feature-probe"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "835a3dc7d1ec9e75e2b5fb4ba75396837112d2060b03f7d43bc1897c7f7211da"
+
+[[package]]
+name = "gateway"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "user-manager",
+ "workspace-manager",
+]
 
 [[package]]
 name = "generic-array"
@@ -1261,6 +1271,14 @@ name = "winapi-x86_64-pc-windows-gnu"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
+
+[[package]]
+name = "workspace-manager"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "user-manager",
+]
 
 [[package]]
 name = "yansi"

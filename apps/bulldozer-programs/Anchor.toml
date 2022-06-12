@@ -2,7 +2,10 @@
 seeds = true
 
 [programs.localnet]
+workspace_manager = "HqF7vRWkmy8cgp3DRH1qK9axyuQgUhqneHP4dqZ6nqdF"
+user_manager = "AoVeQTkP3k9NoNH2yQxCaRDJ53kdC6ARVc447eFBJwTV"
 bulldozer = "EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo"
+gateway = "DuHpQ4mnb4GDP5r6ed3iBTZf3ETSPP4wTe7yTn6Ls6ZH"
 
 [registry]
 url = "https://anchor.projectserum.com"

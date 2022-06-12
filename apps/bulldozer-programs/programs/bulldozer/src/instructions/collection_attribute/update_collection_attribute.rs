@@ -1,9 +1,11 @@
-use crate::collections::{Collaborator, Collection, CollectionAttribute, Workspace};
-use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
+use crate::collections::{Collection, CollectionAttribute};
+use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateCollectionAttributeArguments {

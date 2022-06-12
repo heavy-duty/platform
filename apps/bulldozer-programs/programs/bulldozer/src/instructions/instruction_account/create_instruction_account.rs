@@ -1,14 +1,15 @@
 use crate::collections::{
-  Application, Budget, Collaborator, Instruction, InstructionAccount, InstructionAccountBumps,
-  InstructionAccountClose, InstructionAccountCollection, InstructionAccountPayer,
-  InstructionAccountStats, InstructionStats, Workspace,
+  Application, Instruction, InstructionAccount, InstructionAccountBumps, InstructionAccountClose,
+  InstructionAccountCollection, InstructionAccountPayer, InstructionAccountStats, InstructionStats,
 };
-use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
+use crate::enums::{AccountKinds, AccountModifiers};
 use crate::errors::ErrorCode;
 use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Budget, Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateInstructionAccountArguments {

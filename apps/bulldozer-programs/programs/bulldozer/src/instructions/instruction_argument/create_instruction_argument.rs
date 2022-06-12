@@ -1,12 +1,12 @@
-use crate::collections::{
-  Application, Budget, Collaborator, Instruction, InstructionArgument, InstructionStats, Workspace,
-};
-use crate::enums::{AttributeKinds, AttributeModifiers, CollaboratorStatus};
+use crate::collections::{Application, Instruction, InstructionArgument, InstructionStats};
+use crate::enums::{AttributeKinds, AttributeModifiers};
 use crate::errors::ErrorCode;
 use crate::utils::{has_enough_funds, transfer_lamports};
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Budget, Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateInstructionArgumentArguments {

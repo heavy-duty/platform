@@ -22,6 +22,15 @@ pub struct DepositToBudget<'info> {
     bump = budget.bump,
   )]
   pub budget: Box<Account<'info, Budget>>,
+  #[account(
+    mut,
+    seeds = [
+      b"budget_wallet".as_ref(),
+      budget.key().as_ref(),
+    ],
+    bump = budget.wallet_bump,
+  )]
+  pub budget_wallet: SystemAccount<'info>,
 }
 
 pub fn handle(ctx: Context<DepositToBudget>, arguments: DepositToBudgetArguments) -> Result<()> {
@@ -29,12 +38,12 @@ pub fn handle(ctx: Context<DepositToBudget>, arguments: DepositToBudgetArguments
   anchor_lang::solana_program::program::invoke(
     &anchor_lang::solana_program::system_instruction::transfer(
       &ctx.accounts.authority.key(),
-      &ctx.accounts.budget.key(),
+      &ctx.accounts.budget_wallet.key(),
       arguments.amount,
     ),
     &[
       ctx.accounts.authority.to_account_info().clone(),
-      ctx.accounts.budget.to_account_info().clone(),
+      ctx.accounts.budget_wallet.to_account_info().clone(),
       ctx.accounts.system_program.to_account_info().clone(),
     ],
   )?;

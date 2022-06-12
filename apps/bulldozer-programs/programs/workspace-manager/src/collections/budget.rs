@@ -5,18 +5,26 @@ pub struct Budget {
   pub authority: Pubkey,
   pub workspace: Pubkey,
   pub bump: u8,
+  pub wallet_bump: u8,
   pub total_deposited: u64,
   pub total_value_locked: u64,
   pub created_at: i64,
 }
 
 impl Budget {
-  pub fn initialize(&mut self, authority: Pubkey, workspace: Pubkey, bump: u8) -> () {
+  pub fn initialize(
+    &mut self,
+    authority: Pubkey,
+    workspace: Pubkey,
+    bump: u8,
+    wallet_bump: u8,
+  ) -> () {
     self.workspace = workspace;
     self.authority = authority;
     self.total_deposited = 0;
     self.total_value_locked = 0;
     self.bump = bump;
+    self.wallet_bump = wallet_bump;
   }
 
   pub fn initialize_timestamp(&mut self) -> Result<()> {
@@ -25,9 +33,9 @@ impl Budget {
   }
 
   pub fn space() -> usize {
-    // discriminator + authority + workspace + bump
+    // discriminator + authority + workspace + bump + wallet bump
     // total deposited + total value locked + created at
-    8 + 32 + 32 + 1 + 8 + 8 + 8
+    8 + 32 + 32 + 1 + 1 + 8 + 8 + 8
   }
 
   pub fn deposit(&mut self, amount: u64) -> () {

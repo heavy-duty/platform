@@ -1,9 +1,13 @@
 use crate::collections::{Collaborator, Workspace, WorkspaceStats};
 use crate::enums::CollaboratorStatus;
-use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+
+#[derive(AnchorSerialize, AnchorDeserialize)]
+pub struct CreateCollaboratorArguments {
+  pub is_admin: bool,
+}
 
 #[derive(Accounts)]
 pub struct CreateCollaborator<'info> {
@@ -11,6 +15,9 @@ pub struct CreateCollaborator<'info> {
   pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
+  #[account(
+    constraint = workspace.authority == authority.key()
+  )]
   pub workspace: Box<Account<'info, Workspace>>,
   pub user: Box<Account<'info, User>>,
   #[account(
@@ -22,25 +29,6 @@ pub struct CreateCollaborator<'info> {
     bump = workspace.workspace_stats_bump,
   )]
   pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
-  #[account(
-    seeds = [
-      b"user".as_ref(),
-      authority.key().as_ref(),
-    ],
-    bump = authority_user.bump,
-    seeds::program = user_manager_program.key()
-  )]
-  pub authority_user: Box<Account<'info, User>>,
-  #[account(
-    seeds = [
-      b"collaborator".as_ref(),
-      workspace.key().as_ref(),
-      authority_user.key().as_ref(),
-    ],
-    bump = authority_collaborator.bump,
-    constraint = authority_collaborator.is_admin @ ErrorCode::OnlyAdminCollaboratorCanUpdate,
-  )]
-  pub authority_collaborator: Box<Account<'info, Collaborator>>,
   #[account(
     init,
     payer = authority,
@@ -55,14 +43,17 @@ pub struct CreateCollaborator<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(ctx: Context<CreateCollaborator>) -> Result<()> {
+pub fn handle(
+  ctx: Context<CreateCollaborator>,
+  arguments: CreateCollaboratorArguments,
+) -> Result<()> {
   msg!("Create collaborator");
   ctx.accounts.collaborator.initialize(
     *ctx.accounts.authority.key,
     ctx.accounts.workspace.key(),
     ctx.accounts.user.key(),
     CollaboratorStatus::Approved { id: 1 },
-    false,
+    arguments.is_admin,
     *ctx.bumps.get("collaborator").unwrap(),
   );
   ctx.accounts.collaborator.initialize_timestamp()?;

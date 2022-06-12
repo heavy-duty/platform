@@ -1,11 +1,11 @@
-use crate::collections::{
-  Budget, Collaborator, Instruction, InstructionArgument, InstructionStats, Workspace,
-};
-use crate::enums::CollaboratorStatus;
+use crate::collections::{Instruction, InstructionArgument, InstructionStats};
+
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Budget, Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(Accounts)]
 pub struct DeleteInstructionArgument<'info> {

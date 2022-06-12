@@ -1,12 +1,13 @@
 use crate::collections::{
-  Collaborator, Instruction, InstructionAccount, InstructionAccountClose, InstructionAccountPayer,
-  Workspace,
+  Instruction, InstructionAccount, InstructionAccountClose, InstructionAccountPayer,
 };
-use crate::enums::{AccountModifiers, CollaboratorStatus};
+use crate::enums::AccountModifiers;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Collaborator, Workspace};
+use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateInstructionAccountArguments {

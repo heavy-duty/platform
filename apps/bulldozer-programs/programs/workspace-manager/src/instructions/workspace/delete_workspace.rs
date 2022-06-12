@@ -7,6 +7,7 @@ use user_manager::program::UserManager;
 #[derive(Accounts)]
 pub struct DeleteWorkspace<'info> {
   pub user_manager_program: Program<'info, UserManager>,
+  #[account(mut)]
   pub authority: Signer<'info>,
   #[account(
     mut,
@@ -19,7 +20,7 @@ pub struct DeleteWorkspace<'info> {
       authority.key().as_ref(),
     ],
     bump = user.bump,
-   seeds::program = user_manager_program.key()
+    seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(

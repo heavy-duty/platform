@@ -1,12 +1,12 @@
-use crate::collections::{
-  Application, ApplicationStats, Budget, Collaborator, Workspace, WorkspaceStats,
-};
-use crate::enums::CollaboratorStatus;
+use crate::collections::{Application, ApplicationStats};
 use crate::errors::ErrorCode;
 use crate::utils::transfer_lamports;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
+use workspace_manager::collections::{Budget, Collaborator, Workspace, WorkspaceStats};
+use workspace_manager::enums::CollaboratorStatus;
+use workspace_manager::program::WorkspaceManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateApplicationArguments {
@@ -18,6 +18,7 @@ pub struct CreateApplicationArguments {
 pub struct CreateApplication<'info> {
   pub system_program: Program<'info, System>,
   pub user_manager_program: Program<'info, UserManager>,
+  pub workspace_manager_program: Program<'info, WorkspaceManager>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
@@ -34,6 +35,7 @@ pub struct CreateApplication<'info> {
       workspace.key().as_ref()
     ],
     bump = workspace.workspace_stats_bump,
+    seeds::program = workspace_manager_program.key()
   )]
   pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
   #[account(
@@ -42,7 +44,7 @@ pub struct CreateApplication<'info> {
       authority.key().as_ref(),
     ],
     bump = user.bump,
-   seeds::program = user_manager_program.key()
+    seeds::program = user_manager_program.key()
   )]
   pub user: Box<Account<'info, User>>,
   #[account(
@@ -53,6 +55,7 @@ pub struct CreateApplication<'info> {
     ],
     bump = collaborator.bump,
     constraint = collaborator.status == CollaboratorStatus::Approved { id: 1 } @ ErrorCode::CollaboratorStatusNotApproved,
+    seeds::program = workspace_manager_program.key(),
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
   #[account(
@@ -62,6 +65,7 @@ pub struct CreateApplication<'info> {
       workspace.key().as_ref(),
     ],
     bump = budget.bump,
+    seeds::program = workspace_manager_program.key(),
   )]
   pub budget: Box<Account<'info, Budget>>,
   #[account(
@@ -78,7 +82,7 @@ pub struct CreateApplication<'info> {
 }
 
 pub fn validate(ctx: &Context<CreateApplication>) -> Result<bool> {
-  let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
+  /* let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
   let application_rent = **ctx.accounts.application.to_account_info().lamports.borrow();
   let application_stats_rent = **ctx
     .accounts
@@ -94,7 +98,7 @@ pub fn validate(ctx: &Context<CreateApplication>) -> Result<bool> {
 
   if budget_lamports.lt(funds_required) {
     return Err(error!(ErrorCode::BudgetHasUnsufficientFunds));
-  }
+  } */
 
   Ok(true)
 }
@@ -104,7 +108,7 @@ pub fn handle(
   arguments: CreateApplicationArguments,
 ) -> Result<()> {
   msg!("Create application");
-  transfer_lamports(
+  /* transfer_lamports(
     ctx.accounts.budget.to_account_info(),
     ctx.accounts.authority.to_account_info(),
     **ctx.accounts.application.to_account_info().lamports.borrow(),
@@ -118,7 +122,7 @@ pub fn handle(
       .to_account_info()
       .lamports
       .borrow(),
-  )?;
+  )?; */
   ctx.accounts.application.initialize(
     arguments.name,
     *ctx.accounts.authority.key,

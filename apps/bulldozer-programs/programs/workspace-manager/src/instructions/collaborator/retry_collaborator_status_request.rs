@@ -27,7 +27,7 @@ pub struct RetryCollaboratorStatusRequest<'info> {
       user.key().as_ref(),
     ],
     bump = collaborator.bump,
-    constraint = collaborator.status == CollaboratorStatus::Rejected { id: 2 } @ ErrorCode::OnlyRejectedCollaboratorStatusRequestsCanBeRetried,
+    constraint = collaborator.status == CollaboratorStatus::Rejected { id: 2 } @ ErrorCode::OnlyRejectedCollaboratorCanRetry,
   )]
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
