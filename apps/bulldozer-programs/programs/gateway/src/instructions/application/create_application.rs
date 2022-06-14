@@ -118,24 +118,9 @@ pub fn handle(ctx: Context<CreateApplication>, id: u8, name: String) -> Result<(
   ];
   let gateway_signer = &[&gateway_seeds[..]];
 
-  // Increase quantity of applications in workspace
-  workspace_manager::cpi::update_workspace(
-    CpiContext::new_with_signer(
-      ctx.accounts.workspace_manager_program.to_account_info(),
-      workspace_manager::cpi::accounts::UpdateWorkspace {
-        workspace: ctx.accounts.workspace.to_account_info(),
-        authority: ctx.accounts.gateway.to_account_info(),
-      },
-      gateway_signer,
-    ),
-    workspace_manager::instructions::UpdateWorkspaceArguments {
-      name: ctx.accounts.workspace.name.clone(),
-    },
-  )?;
-
   // Register budget spent
   workspace_manager::cpi::register_budget_spent(
-    CpiContext::new(
+    CpiContext::new_with_signer(
       ctx.accounts.workspace_manager_program.to_account_info(),
       workspace_manager::cpi::accounts::RegisterBudgetSpent {
         budget: ctx.accounts.budget.to_account_info(),
@@ -143,6 +128,7 @@ pub fn handle(ctx: Context<CreateApplication>, id: u8, name: String) -> Result<(
         authority: ctx.accounts.gateway.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
       },
+      gateway_signer,
     ),
     workspace_manager::instructions::RegisterBudgetSpentArguments {
       amount: Application::space() as u64,
