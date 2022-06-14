@@ -1,4 +1,6 @@
 import { Command, CommandRunner } from 'nest-commander';
+import { log } from '../utils';
+import { anchorDeploy } from '../utils/anchor-deploy';
 
 @Command({
 	name: 'deploy-app',
@@ -12,6 +14,17 @@ import { Command, CommandRunner } from 'nest-commander';
 })
 export class DeployAppCommand implements CommandRunner {
 	async run(params: string[]) {
-		console.log(`Workspace ID: ${params[0]} App Id: ${params[1]}`);
+		try {
+			log(`Deploying >> Workspace ID: ${params[0]} - App Id: ${params[1]}`);
+
+			const resp = await anchorDeploy();
+
+			log(resp);
+			log('lo que pasa 4');
+		} catch (e) {
+			log('An error occured while deploying, try again');
+			log('');
+			log(e);
+		}
 	}
 }

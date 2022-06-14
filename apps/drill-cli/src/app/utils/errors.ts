@@ -16,7 +16,7 @@ export interface DrillError {
 export const processError = (e: DrillError) => {
 	switch (true) {
 		case e.status !== undefined && e.response !== undefined:
-			console.log('❌❌ Status Code: ', e.status, e.response.data.message);
+			log(`❌❌ Status Code: ${e.status}  ${e.response.data.message}`);
 			log(
 				'❌❌ Repository or username not found. Please check the command input and try again!'
 			);

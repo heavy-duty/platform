@@ -17,6 +17,7 @@
 					"optimization": true,
 					"extractLicenses": true,
 					"inspect": false,
+					"generatePackageJson": true,
 					"fileReplacements": [
 						{
 							"replace": "apps/bulldozer-cli/src/environments/environment.ts",
@@ -206,6 +207,19 @@
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
+			}
+		},
+		"publish-npm": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"rm -rf dist/apps/bulldozer-cli/",
+					"ncc build apps/bulldozer-cli/src/main.ts --license licenses.txt --minify --out dist/apps/bulldozer-cli",
+					"cp apps/bulldozer-cli/package.json dist/apps/bulldozer-cli",
+					"npm publish dist/apps/bulldozer-cli"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-cli/.env"
 			}
 		},
 		"lint": {
