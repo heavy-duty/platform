@@ -46,34 +46,6 @@ pub struct Workspace {
 }
 
 impl Workspace {
-  pub fn initialize(
-    &mut self,
-    name: String,
-    authority: Pubkey,
-    bump: u8,
-    workspace_stats_bump: u8,
-  ) -> () {
-    self.name = name;
-    self.authority = authority;
-    self.bump = bump;
-    self.workspace_stats_bump = workspace_stats_bump;
-  }
-
-  pub fn rename(&mut self, name: String) -> () {
-    self.name = name;
-  }
-
-  pub fn initialize_timestamp(&mut self) -> Result<()> {
-    self.created_at = Clock::get()?.unix_timestamp;
-    self.updated_at = Clock::get()?.unix_timestamp;
-    Ok(())
-  }
-
-  pub fn bump_timestamp(&mut self) -> Result<()> {
-    self.updated_at = Clock::get()?.unix_timestamp;
-    Ok(())
-  }
-
   pub fn space() -> usize {
     // discriminator + authority + name (size 32 + 4)
     // created_at + updated_at + bump + workspace stats bump

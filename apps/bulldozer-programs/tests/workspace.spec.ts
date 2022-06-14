@@ -20,6 +20,7 @@ describe('workspace', () => {
 	const workspaceManagerProgram = anchor.workspace
 		.WorkspaceManager as Program<WorkspaceManager>;
 	const newUser = Keypair.generate();
+	const gatewayBaseKeypair = Keypair.generate();
 	const workspaceId = 1;
 	let userPublicKey: PublicKey;
 	let newUserPublicKey: PublicKey;
@@ -28,6 +29,7 @@ describe('workspace', () => {
 	let workspacePublicKey: PublicKey;
 	let workspaceStatsPublicKey: PublicKey;
 	let collaboratorPublicKey: PublicKey;
+	let gatewayPublicKey: PublicKey;
 	const userUserName = 'user-name-1';
 	const userName = 'User Name 1';
 	const userThumbnailUrl = 'https://img/1.com';
@@ -36,6 +38,10 @@ describe('workspace', () => {
 	const newUserThumbnailUrl = 'https://img/2.com';
 
 	before(async () => {
+		[gatewayPublicKey] = await PublicKey.findProgramAddress(
+			[Buffer.from('gateway', 'utf8'), gatewayBaseKeypair.publicKey.toBuffer()],
+			gatewayProgram.programId
+		);
 		[userPublicKey] = await PublicKey.findProgramAddress(
 			[Buffer.from('user', 'utf8'), provider.wallet.publicKey.toBuffer()],
 			userManagerProgram.programId
@@ -103,40 +109,35 @@ describe('workspace', () => {
 				}),
 			])
 			.rpc();
+
+		await gatewayProgram.methods
+			.createGateway()
+			.accounts({
+				authority: provider.wallet.publicKey,
+				base: gatewayBaseKeypair.publicKey,
+			})
+			.rpc();
 	});
 
 	it('should create account', async () => {
 		// arrange
 		const workspaceName = 'my-app';
-
 		const budgetWalletRent =
 			await provider.connection.getMinimumBalanceForRentExemption(0);
 		const depositTotal = LAMPORTS_PER_SOL;
 		// act
 		await gatewayProgram.methods
-			.createWorkspace(workspaceId, workspaceName)
+			.createWorkspace(workspaceId, workspaceName, new anchor.BN(depositTotal))
 			.accounts({
+				gateway: gatewayPublicKey,
 				workspaceManagerProgram: workspaceManagerProgram.programId,
 				userManagerProgram: userManagerProgram.programId,
 				authority: provider.wallet.publicKey,
 			})
-			.postInstructions([
-				await workspaceManagerProgram.methods
-					.depositToBudget({ amount: new anchor.BN(depositTotal) })
-					.accounts({
-						authority: provider.wallet.publicKey,
-						workspace: workspacePublicKey,
-					})
-					.instruction(),
-			])
 			.rpc();
 		// assert
 		const workspaceAccount =
 			await workspaceManagerProgram.account.workspace.fetch(workspacePublicKey);
-		const workspaceStatsAccount =
-			await workspaceManagerProgram.account.workspaceStats.fetch(
-				workspaceStatsPublicKey
-			);
 		const collaboratorAccount =
 			await workspaceManagerProgram.account.collaborator.fetch(
 				collaboratorPublicKey
@@ -148,19 +149,16 @@ describe('workspace', () => {
 			budgetWalletPublicKey
 		);
 		assert.isDefined(workspaceAccount);
-		assert.isTrue(workspaceAccount.authority.equals(provider.wallet.publicKey));
+		assert.isTrue(workspaceAccount.authority.equals(gatewayPublicKey));
 		assert.isTrue(workspaceAccount.createdAt.eq(workspaceAccount.updatedAt));
 		assert.equal(workspaceAccount.name, workspaceName);
-		assert.isDefined(workspaceStatsAccount);
-		assert.equal(workspaceStatsAccount.quantityOfCollaborators, 1);
 		assert.isDefined(collaboratorAccount);
 		assert.property(collaboratorAccount.status, 'approved');
 		assert.isTrue(collaboratorAccount.isAdmin);
 		assert.isDefined(budgetAccount);
 		assert.isTrue(budgetAccount.totalDeposited.eq(new anchor.BN(depositTotal)));
-		assert.isTrue(
-			budgetAccount.totalValueLocked.eq(new anchor.BN(depositTotal))
-		);
+		assert.isTrue(budgetAccount.totalAvailable.eq(new anchor.BN(depositTotal)));
+		assert.isTrue(budgetAccount.totalValueLocked.isZero());
 		assert.isDefined(budgetWalletAccount);
 		assert.equal(
 			budgetWalletAccount?.lamports,
@@ -172,10 +170,12 @@ describe('workspace', () => {
 		// arrange
 		const workspaceName = 'my-app2';
 		// act
-		await workspaceManagerProgram.methods
-			.updateWorkspace({ name: workspaceName })
+		await gatewayProgram.methods
+			.updateWorkspace(workspaceName)
 			.accounts({
+				gateway: gatewayPublicKey,
 				userManagerProgram: userManagerProgram.programId,
+				workspaceManagerProgram: workspaceManagerProgram.programId,
 				authority: provider.wallet.publicKey,
 				workspace: workspacePublicKey,
 			})
@@ -191,20 +191,27 @@ describe('workspace', () => {
 	it('should withdraw from budget', async () => {
 		// arrange
 		const amount = new anchor.BN(LAMPORTS_PER_SOL * 0.5);
+		const providerBefore = await provider.connection.getAccountInfo(
+			provider.wallet.publicKey
+		);
 		const budgetBefore = await provider.connection.getAccountInfo(
 			budgetWalletPublicKey
 		);
 		// act
-		await workspaceManagerProgram.methods
-			.withdrawFromBudget({
-				amount,
-			})
+		await gatewayProgram.methods
+			.withdrawFromBudget(amount)
 			.accounts({
+				userManagerProgram: userManagerProgram.programId,
+				workspaceManagerProgram: workspaceManagerProgram.programId,
+				gateway: gatewayPublicKey,
 				authority: provider.wallet.publicKey,
 				workspace: workspacePublicKey,
 			})
 			.rpc();
 		// assert
+		const providerAfter = await provider.connection.getAccountInfo(
+			provider.wallet.publicKey
+		);
 		const budgetAfter = await provider.connection.getAccountInfo(
 			budgetWalletPublicKey
 		);
@@ -217,7 +224,8 @@ describe('workspace', () => {
 				.eq(new anchor.BN(budgetAfter?.lamports ?? 0))
 		);
 		assert.isTrue(budget.totalDeposited.eq(new anchor.BN(LAMPORTS_PER_SOL)));
-		assert.isTrue(budget.totalValueLocked.eq(new anchor.BN(amount)));
+		assert.isTrue(budget.totalAvailable.eq(new anchor.BN(amount)));
+		assert.isAbove(providerAfter?.lamports ?? 0, providerBefore?.lamports ?? 0);
 	});
 
 	it('should fail when unauthorized user attempts to withdraw', async () => {
@@ -227,9 +235,7 @@ describe('workspace', () => {
 		// act
 		try {
 			await workspaceManagerProgram.methods
-				.withdrawFromBudget({
-					amount,
-				})
+				.withdrawFromBudget({ amount })
 				.accounts({
 					authority: newUser.publicKey,
 					workspace: workspacePublicKey,
@@ -240,7 +246,7 @@ describe('workspace', () => {
 			error = err as AnchorError;
 		}
 		// assert
-		assert.equal(error?.error.errorCode.code, 'UnauthorizedWithdraw');
+		assert.equal(error?.error.errorCode.code, 'UnauthorizedWithdrawFromBudget');
 	});
 
 	it('should delete account', async () => {
@@ -248,6 +254,7 @@ describe('workspace', () => {
 		await gatewayProgram.methods
 			.deleteWorkspace()
 			.accounts({
+				gateway: gatewayPublicKey,
 				workspaceManagerProgram: workspaceManagerProgram.programId,
 				userManagerProgram: userManagerProgram.programId,
 				authority: provider.wallet.publicKey,
@@ -258,10 +265,6 @@ describe('workspace', () => {
 		const workspaceAccount =
 			await workspaceManagerProgram.account.workspace.fetchNullable(
 				workspacePublicKey
-			);
-		const workspaceStatsAccount =
-			await workspaceManagerProgram.account.workspaceStats.fetchNullable(
-				workspaceStatsPublicKey
 			);
 		const collaboratorAccount =
 			await workspaceManagerProgram.account.collaborator.fetchNullable(
@@ -275,124 +278,12 @@ describe('workspace', () => {
 			budgetWalletPublicKey
 		);
 		assert.isNull(workspaceAccount);
-		assert.isNull(workspaceStatsAccount);
 		assert.isNull(collaboratorAccount);
 		assert.isNull(budgetAccount);
 		assert.isNull(budgetWalletAccount);
 	});
 
-	/*it('should fail when deleting workspace with applications', async () => {
-		// arrange
-		const newWorkspaceName = 'sample';
-		const newWorkspace = Keypair.generate();
-		const applicationName = 'sample';
-		const application = Keypair.generate();
-		const [newBudgetPublicKey] = await PublicKey.findProgramAddress(
-			[Buffer.from('budget', 'utf8'), newWorkspace.publicKey.toBuffer()],
-			workspaceManagerProgram.programId
-		);
-		let error: AnchorError | null = null;
-		// act
-		await workspaceManagerProgram.methods
-			.createWorkspace({
-				name: newWorkspaceName,
-			})
-			.accounts({
-				userManagerProgram: userManagerProgram.programId,
-				workspace: newWorkspace.publicKey,
-				authority: provider.wallet.publicKey,
-			})
-			.postInstructions([
-				SystemProgram.transfer({
-					fromPubkey: provider.wallet.publicKey,
-					toPubkey: newBudgetPublicKey,
-					lamports: LAMPORTS_PER_SOL,
-				}),
-				await bulldozerProgram.methods
-					.createApplication({ name: applicationName })
-					.accounts({
-						workspaceManagerProgram: workspaceManagerProgram.programId,
-						userManagerProgram: userManagerProgram.programId,
-						authority: provider.wallet.publicKey,
-						workspace: newWorkspace.publicKey,
-						application: application.publicKey,
-					})
-					.instruction(),
-			])
-			.signers([application, newWorkspace])
-			.rpc();
-		try {
-			await workspaceManagerProgram.methods
-				.deleteWorkspace()
-				.accounts({
-					userManagerProgram: userManagerProgram.programId,
-					authority: provider.wallet.publicKey,
-					workspace: newWorkspace.publicKey,
-				})
-				.rpc();
-		} catch (err) {
-			console.log(err);
-			error = err as AnchorError;
-		}
-		// assert
-		assert.equal(error?.error.errorCode.number, 6024);
-	});*/
-
-	it('should fail when deleting workspace with collaborators', async () => {
-		// arrange
-		const newWorkspaceId = 2;
-		const newWorkspaceName = 'sample';
-		const [newWorkspacePublicKey] = await PublicKey.findProgramAddress(
-			[
-				Buffer.from('workspace', 'utf8'),
-				userPublicKey.toBuffer(),
-				new Uint8Array([newWorkspaceId]),
-			],
-			workspaceManagerProgram.programId
-		);
-		let error: AnchorError | null = null;
-		// act
-		await gatewayProgram.methods
-			.createWorkspace(newWorkspaceId, newWorkspaceName)
-			.accounts({
-				workspaceManagerProgram: workspaceManagerProgram.programId,
-				userManagerProgram: userManagerProgram.programId,
-				authority: provider.wallet.publicKey,
-			})
-			.postInstructions([
-				await workspaceManagerProgram.methods
-					.createCollaborator({
-						isAdmin: false,
-					})
-					.accounts({
-						userManagerProgram: userManagerProgram.programId,
-						workspace: newWorkspacePublicKey,
-						user: newUserPublicKey,
-						authority: provider.wallet.publicKey,
-					})
-					.instruction(),
-			])
-			.rpc();
-		try {
-			await workspaceManagerProgram.methods
-				.deleteWorkspace()
-				.accounts({
-					userManagerProgram: userManagerProgram.programId,
-					authority: provider.wallet.publicKey,
-					workspace: newWorkspacePublicKey,
-				})
-				.rpc();
-		} catch (err) {
-			error = err as AnchorError;
-		}
-		// assert
-		assert.equal(
-			error?.error.errorCode.code,
-			'CantDeleteWorkspaceWithCollaborators'
-		);
-	});
-
-	it('should fail when user is not a collaborator', async () => {
+	it('should fail to update when user is not an admin collaborator', async () => {
 		// arrange
 		const newWorkspaceId = 2;
 		const newWorkspaceName = 'sample2';
@@ -404,90 +295,41 @@ describe('workspace', () => {
 			],
 			workspaceManagerProgram.programId
 		);
-		const newUser = Keypair.generate();
-		let error: AnchorError | null = null;
-		// act
-		try {
-			await workspaceManagerProgram.methods
-				.updateWorkspace({ name: newWorkspaceName })
-				.accounts({
-					userManagerProgram: userManagerProgram.programId,
-					authority: newUser.publicKey,
-					workspace: newWorkspacePublicKey,
-				})
-				.signers([newUser])
-				.preInstructions([
-					SystemProgram.transfer({
-						fromPubkey: provider.wallet.publicKey,
-						toPubkey: newUser.publicKey,
-						lamports: LAMPORTS_PER_SOL,
-					}),
-				])
-				.rpc();
-		} catch (err) {
-			error = err as AnchorError;
-		}
-		// assert
-		assert.equal(error?.error.errorCode.code, 'AccountNotInitialized');
-		assert.equal(error?.error.origin, 'user');
-	});
-
-	it('should fail when user is not an admin collaborator', async () => {
-		// arrange
-		const newWorkspaceId = 3;
-		const newWorkspaceName = 'sample';
-		const [newWorkspacePublicKey] = await PublicKey.findProgramAddress(
-			[
-				Buffer.from('workspace', 'utf8'),
-				userPublicKey.toBuffer(),
-				new Uint8Array([newWorkspaceId]),
-			],
-			workspaceManagerProgram.programId
-		);
-		const newUser = Keypair.generate();
 		let error: AnchorError | null = null;
 		// act
 		await gatewayProgram.methods
-			.createWorkspace(newWorkspaceId, newWorkspaceName)
+			.createWorkspace(
+				newWorkspaceId,
+				newWorkspaceName,
+				new anchor.BN(LAMPORTS_PER_SOL)
+			)
 			.accounts({
+				gateway: gatewayPublicKey,
 				workspaceManagerProgram: workspaceManagerProgram.programId,
 				userManagerProgram: userManagerProgram.programId,
 				authority: provider.wallet.publicKey,
 			})
-			.preInstructions([
-				SystemProgram.transfer({
-					fromPubkey: provider.wallet.publicKey,
-					toPubkey: newUser.publicKey,
-					lamports: LAMPORTS_PER_SOL,
-				}),
-				await userManagerProgram.methods
-					.createUser({
-						name: newUserName,
-						thumbnailUrl: newUserThumbnailUrl,
-						userName: newUserUserName,
-					})
-					.accounts({
-						authority: newUser.publicKey,
-					})
-					.instruction(),
-			])
 			.postInstructions([
-				await workspaceManagerProgram.methods
-					.requestCollaboratorStatus()
+				await gatewayProgram.methods
+					.createCollaborator()
 					.accounts({
+						workspace: newWorkspacePublicKey,
+						gateway: gatewayPublicKey,
+						workspaceManagerProgram: workspaceManagerProgram.programId,
 						userManagerProgram: userManagerProgram.programId,
 						authority: newUser.publicKey,
-						workspace: newWorkspacePublicKey,
 					})
 					.instruction(),
 			])
 			.signers([newUser])
 			.rpc();
 		try {
-			await workspaceManagerProgram.methods
-				.updateWorkspace({ name: newWorkspaceName })
+			await gatewayProgram.methods
+				.updateWorkspace(newWorkspaceName)
 				.accounts({
+					workspaceManagerProgram: workspaceManagerProgram.programId,
 					userManagerProgram: userManagerProgram.programId,
+					gateway: gatewayPublicKey,
 					authority: newUser.publicKey,
 					workspace: newWorkspacePublicKey,
 				})
@@ -498,5 +340,6 @@ describe('workspace', () => {
 		}
 		// assert
 		assert.equal(error?.error.errorCode.code, 'OnlyAdminCollaboratorCanUpdate');
+		assert.equal(error?.error.origin, 'collaborator');
 	});
 });

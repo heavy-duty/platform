@@ -1,4 +1,4 @@
-use crate::collections::{Workspace, WorkspaceStats};
+use crate::collections::Workspace;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
@@ -24,7 +24,7 @@ pub struct CreateWorkspace<'info> {
     bump = user.bump,
     seeds::program = user_manager_program.key()
   )]
-  pub user: Box<Account<'info, User>>,
+  pub user: Account<'info, User>,
   #[account(
     init,
     payer = authority,
@@ -36,29 +36,15 @@ pub struct CreateWorkspace<'info> {
     ],
     bump
   )]
-  pub workspace: Box<Account<'info, Workspace>>,
-  #[account(
-    init,
-    payer = authority,
-    space = WorkspaceStats::space(),
-    seeds = [
-      b"workspace_stats".as_ref(),
-      workspace.key().as_ref()
-    ],
-    bump,
-  )]
-  pub workspace_stats: Box<Account<'info, WorkspaceStats>>,
+  pub workspace: Account<'info, Workspace>,
 }
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {
   msg!("Create workspace");
-  ctx.accounts.workspace.initialize(
-    arguments.name,
-    *ctx.accounts.authority.key,
-    *ctx.bumps.get("workspace").unwrap(),
-    *ctx.bumps.get("workspace_stats").unwrap(),
-  );
-  ctx.accounts.workspace.initialize_timestamp()?;
-  ctx.accounts.workspace_stats.initialize();
+  ctx.accounts.workspace.name = arguments.name;
+  ctx.accounts.workspace.authority = *ctx.accounts.authority.key;
+  ctx.accounts.workspace.bump = *ctx.bumps.get("workspace").unwrap();
+  ctx.accounts.workspace.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.workspace.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

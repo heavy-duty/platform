@@ -27,6 +27,10 @@ pub mod workspace_manager {
         instructions::update_workspace::handle(ctx, arguments)
     }
 
+    pub fn set_workspace_authority(ctx: Context<SetWorkspaceAuthority>) -> Result<()> {
+        instructions::set_workspace_authority::handle(ctx)
+    }
+
     pub fn delete_workspace(ctx: Context<DeleteWorkspace>) -> Result<()> {
         instructions::delete_workspace::handle(ctx)
     }
@@ -49,6 +53,13 @@ pub mod workspace_manager {
         instructions::withdraw_from_budget::handle(ctx, arguments)
     }
 
+    pub fn register_budget_spent(
+        ctx: Context<RegisterBudgetSpent>,
+        arguments: RegisterBudgetSpentArguments,
+    ) -> Result<()> {
+        instructions::register_budget_spent::handle(ctx, arguments)
+    }
+
     pub fn delete_budget(ctx: Context<DeleteBudget>) -> Result<()> {
         instructions::delete_budget::handle(ctx)
     }
@@ -69,15 +80,5 @@ pub mod workspace_manager {
 
     pub fn delete_collaborator(ctx: Context<DeleteCollaborator>) -> Result<()> {
         instructions::delete_collaborator::handle(ctx)
-    }
-
-    pub fn request_collaborator_status(ctx: Context<RequestCollaboratorStatus>) -> Result<()> {
-        instructions::request_collaborator_status::handle(ctx)
-    }
-
-    pub fn retry_collaborator_status_request(
-        ctx: Context<RetryCollaboratorStatusRequest>,
-    ) -> Result<()> {
-        instructions::retry_collaborator_status_request::handle(ctx)
     }
 }

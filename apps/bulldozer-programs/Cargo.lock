@@ -185,6 +185,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b26702f315f53b6071259e15dd9d64528213b44d61de1ec926eca7715d62203"
 
 [[package]]
+name = "application-manager"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "arrayref"
 version = "0.3.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -504,6 +511,7 @@ name = "gateway"
 version = "0.1.0"
 dependencies = [
  "anchor-lang",
+ "application-manager",
  "user-manager",
  "workspace-manager",
 ]

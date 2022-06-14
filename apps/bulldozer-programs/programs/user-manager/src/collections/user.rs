@@ -12,38 +12,6 @@ pub struct User {
 }
 
 impl User {
-  pub fn initialize(
-    &mut self,
-    authority: Pubkey,
-    user_name: String,
-    name: String,
-    thumbnail_url: String,
-    bump: u8,
-  ) -> () {
-    self.authority = authority;
-    self.user_name = user_name;
-    self.name = name;
-    self.thumbnail_url = thumbnail_url;
-    self.bump = bump;
-  }
-
-  pub fn update(&mut self, user_name: String, name: String, thumbnail_url: String) -> () {
-    self.user_name = user_name;
-    self.name = name;
-    self.thumbnail_url = thumbnail_url;
-  }
-
-  pub fn initialize_timestamp(&mut self) -> Result<()> {
-    self.created_at = Clock::get()?.unix_timestamp;
-    self.updated_at = Clock::get()?.unix_timestamp;
-    Ok(())
-  }
-
-  pub fn bump_timestamp(&mut self) -> Result<()> {
-    self.updated_at = Clock::get()?.unix_timestamp;
-    Ok(())
-  }
-
   pub fn space() -> usize {
     // discriminator + authority + username
     // name + thumbnail + bump

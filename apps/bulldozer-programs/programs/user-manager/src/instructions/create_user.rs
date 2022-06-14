@@ -20,7 +20,7 @@ pub struct CreateUser<'info> {
     ],
     bump
   )]
-  pub user: Box<Account<'info, User>>,
+  pub user: Account<'info, User>,
   #[account(mut)]
   pub authority: Signer<'info>,
   pub system_program: Program<'info, System>,
@@ -28,13 +28,12 @@ pub struct CreateUser<'info> {
 
 pub fn handle(ctx: Context<CreateUser>, arguments: CreateUserArguments) -> Result<()> {
   msg!("Create user");
-  ctx.accounts.user.initialize(
-    *ctx.accounts.authority.key,
-    arguments.user_name.to_string(),
-    arguments.name.to_string(),
-    arguments.thumbnail_url.to_string(),
-    *ctx.bumps.get("user").unwrap(),
-  );
-  ctx.accounts.user.initialize_timestamp()?;
+  ctx.accounts.user.authority = ctx.accounts.authority.key();
+  ctx.accounts.user.user_name = arguments.user_name;
+  ctx.accounts.user.name = arguments.name;
+  ctx.accounts.user.thumbnail_url = arguments.thumbnail_url;
+  ctx.accounts.user.bump = *ctx.bumps.get("user").unwrap();
+  ctx.accounts.user.created_at = Clock::get()?.unix_timestamp;
+  ctx.accounts.user.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

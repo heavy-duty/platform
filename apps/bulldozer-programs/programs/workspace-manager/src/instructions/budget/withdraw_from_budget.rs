@@ -11,10 +11,13 @@ pub struct WithdrawFromBudgetArguments {
 #[instruction(arguments: WithdrawFromBudgetArguments)]
 pub struct WithdrawFromBudget<'info> {
   pub system_program: Program<'info, System>,
-  #[account(mut)]
   pub authority: Signer<'info>,
-  #[account(has_one = authority @ ErrorCode::UnauthorizedWithdraw)]
-  pub workspace: Box<Account<'info, Workspace>>,
+  #[account(mut)]
+  pub receiver: Signer<'info>,
+  #[account(
+    has_one = authority @ ErrorCode::UnauthorizedWithdrawFromBudget
+  )]
+  pub workspace: Account<'info, Workspace>,
   #[account(
     mut,
     seeds = [
@@ -23,7 +26,7 @@ pub struct WithdrawFromBudget<'info> {
     ],
     bump = budget.bump,
   )]
-  pub budget: Box<Account<'info, Budget>>,
+  pub budget: Account<'info, Budget>,
   #[account(
     mut,
     seeds = [
@@ -51,17 +54,21 @@ pub fn handle(
   anchor_lang::solana_program::program::invoke_signed(
     &anchor_lang::solana_program::system_instruction::transfer(
       &ctx.accounts.budget_wallet.key(),
-      &ctx.accounts.authority.key(),
+      &ctx.accounts.receiver.key(),
       arguments.amount,
     ),
     &[
       ctx.accounts.budget_wallet.to_account_info().clone(),
-      ctx.accounts.authority.to_account_info().clone(),
+      ctx.accounts.receiver.to_account_info().clone(),
       ctx.accounts.system_program.to_account_info().clone(),
     ],
     signer,
   )?;
-
-  ctx.accounts.budget.withdraw(arguments.amount);
+  ctx.accounts.budget.total_available = ctx
+    .accounts
+    .budget
+    .total_available
+    .checked_sub(arguments.amount)
+    .unwrap();
   Ok(())
 }

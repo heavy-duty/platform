@@ -1,14 +1,16 @@
+use crate::collections::Gateway;
 use anchor_lang::prelude::*;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
 use workspace_manager::program::WorkspaceManager;
 
 #[derive(Accounts)]
-#[instruction(id: u8, name: String)]
+#[instruction(id: u8, name: String, initial_deposit: u64)]
 pub struct CreateWorkspace<'info> {
   pub user_manager_program: Program<'info, UserManager>,
   pub workspace_manager_program: Program<'info, WorkspaceManager>,
   pub system_program: Program<'info, System>,
+  pub gateway: Account<'info, Gateway>,
   #[account(mut)]
   pub authority: Signer<'info>,
   #[account(
@@ -19,7 +21,7 @@ pub struct CreateWorkspace<'info> {
     bump = user.bump,
     seeds::program = user_manager_program.key()
   )]
-  pub user: Box<Account<'info, User>>,
+  pub user: Account<'info, User>,
   #[account(
     mut,
     seeds = [
@@ -32,17 +34,6 @@ pub struct CreateWorkspace<'info> {
   )]
   /// CHECK: workspace is created through a CPI.
   pub workspace: UncheckedAccount<'info>,
-  #[account(
-    mut,
-    seeds = [
-      b"workspace_stats".as_ref(),
-      workspace.key().as_ref()
-    ],
-    bump,
-    seeds::program = workspace_manager_program.key()
-  )]
-  /// CHECK: workspace_stats is created through a CPI.
-  pub workspace_stats: UncheckedAccount<'info>,
   #[account(
     mut,
     seeds = [
@@ -79,7 +70,12 @@ pub struct CreateWorkspace<'info> {
   pub budget_wallet: UncheckedAccount<'info>,
 }
 
-pub fn handle(ctx: Context<CreateWorkspace>, id: u8, name: String) -> Result<()> {
+pub fn handle(
+  ctx: Context<CreateWorkspace>,
+  id: u8,
+  name: String,
+  initial_deposit: u64,
+) -> Result<()> {
   msg!("Create workspace");
 
   workspace_manager::cpi::create_workspace(
@@ -89,7 +85,6 @@ pub fn handle(ctx: Context<CreateWorkspace>, id: u8, name: String) -> Result<()>
         user_manager_program: ctx.accounts.user_manager_program.to_account_info(),
         user: ctx.accounts.user.to_account_info(),
         workspace: ctx.accounts.workspace.to_account_info(),
-        workspace_stats: ctx.accounts.workspace_stats.to_account_info(),
         authority: ctx.accounts.authority.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
       },
@@ -97,23 +92,43 @@ pub fn handle(ctx: Context<CreateWorkspace>, id: u8, name: String) -> Result<()>
     workspace_manager::instructions::CreateWorkspaceArguments { id, name },
   )?;
 
+  workspace_manager::cpi::set_workspace_authority(CpiContext::new(
+    ctx.accounts.workspace_manager_program.to_account_info(),
+    workspace_manager::cpi::accounts::SetWorkspaceAuthority {
+      workspace: ctx.accounts.workspace.to_account_info(),
+      authority: ctx.accounts.authority.to_account_info(),
+      new_authority: ctx.accounts.gateway.to_account_info(),
+    },
+  ))?;
+
+  let seeds = &[
+    b"gateway".as_ref(),
+    ctx.accounts.gateway.base.as_ref(),
+    &[ctx.accounts.gateway.bump],
+  ];
+  let signer = &[&seeds[..]];
+
   workspace_manager::cpi::create_collaborator(
-    CpiContext::new(
+    CpiContext::new_with_signer(
       ctx.accounts.workspace_manager_program.to_account_info(),
       workspace_manager::cpi::accounts::CreateCollaborator {
         user_manager_program: ctx.accounts.user_manager_program.to_account_info(),
         collaborator: ctx.accounts.collaborator.to_account_info(),
         user: ctx.accounts.user.to_account_info(),
         workspace: ctx.accounts.workspace.to_account_info(),
-        workspace_stats: ctx.accounts.workspace_stats.to_account_info(),
-        authority: ctx.accounts.authority.to_account_info(),
+        authority: ctx.accounts.gateway.to_account_info(),
+        payer: ctx.accounts.authority.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
       },
+      signer,
     ),
-    workspace_manager::instructions::CreateCollaboratorArguments { is_admin: true },
+    workspace_manager::instructions::CreateCollaboratorArguments {
+      is_admin: true,
+      status: 1,
+    },
   )?;
 
-  workspace_manager::cpi::create_budget(CpiContext::new(
+  workspace_manager::cpi::create_budget(CpiContext::new_with_signer(
     ctx.accounts.workspace_manager_program.to_account_info(),
     workspace_manager::cpi::accounts::CreateBudget {
       user_manager_program: ctx.accounts.user_manager_program.to_account_info(),
@@ -121,10 +136,28 @@ pub fn handle(ctx: Context<CreateWorkspace>, id: u8, name: String) -> Result<()>
       budget_wallet: ctx.accounts.budget_wallet.to_account_info(),
       user: ctx.accounts.user.to_account_info(),
       workspace: ctx.accounts.workspace.to_account_info(),
-      authority: ctx.accounts.authority.to_account_info(),
+      authority: ctx.accounts.gateway.to_account_info(),
+      payer: ctx.accounts.authority.to_account_info(),
       system_program: ctx.accounts.system_program.to_account_info(),
     },
+    signer,
   ))?;
+
+  workspace_manager::cpi::deposit_to_budget(
+    CpiContext::new(
+      ctx.accounts.workspace_manager_program.to_account_info(),
+      workspace_manager::cpi::accounts::DepositToBudget {
+        budget: ctx.accounts.budget.to_account_info(),
+        budget_wallet: ctx.accounts.budget_wallet.to_account_info(),
+        workspace: ctx.accounts.workspace.to_account_info(),
+        authority: ctx.accounts.authority.to_account_info(),
+        system_program: ctx.accounts.system_program.to_account_info(),
+      },
+    ),
+    workspace_manager::instructions::DepositToBudgetArguments {
+      amount: initial_deposit,
+    },
+  )?;
 
   Ok(())
 }

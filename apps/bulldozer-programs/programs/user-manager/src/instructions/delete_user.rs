@@ -13,7 +13,7 @@ pub struct DeleteUser<'info> {
     ],
     bump = user.bump
   )]
-  pub user: Box<Account<'info, User>>,
+  pub user: Account<'info, User>,
   #[account(mut)]
   pub authority: Signer<'info>,
 }

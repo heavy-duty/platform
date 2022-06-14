@@ -12,7 +12,7 @@ pub struct DepositToBudget<'info> {
   pub system_program: Program<'info, System>,
   #[account(mut)]
   pub authority: Signer<'info>,
-  pub workspace: Box<Account<'info, Workspace>>,
+  pub workspace: Account<'info, Workspace>,
   #[account(
     mut,
     seeds = [
@@ -21,7 +21,7 @@ pub struct DepositToBudget<'info> {
     ],
     bump = budget.bump,
   )]
-  pub budget: Box<Account<'info, Budget>>,
+  pub budget: Account<'info, Budget>,
   #[account(
     mut,
     seeds = [
@@ -47,6 +47,17 @@ pub fn handle(ctx: Context<DepositToBudget>, arguments: DepositToBudgetArguments
       ctx.accounts.system_program.to_account_info().clone(),
     ],
   )?;
-  ctx.accounts.budget.deposit(arguments.amount);
+  ctx.accounts.budget.total_deposited = ctx
+    .accounts
+    .budget
+    .total_deposited
+    .checked_add(arguments.amount)
+    .unwrap();
+  ctx.accounts.budget.total_available = ctx
+    .accounts
+    .budget
+    .total_available
+    .checked_add(arguments.amount)
+    .unwrap();
   Ok(())
 }

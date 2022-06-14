@@ -19,17 +19,15 @@ pub struct UpdateUser<'info> {
     ],
     bump = user.bump
   )]
-  pub user: Box<Account<'info, User>>,
+  pub user: Account<'info, User>,
   pub authority: Signer<'info>,
 }
 
 pub fn handle(ctx: Context<UpdateUser>, arguments: UpdateUserArguments) -> Result<()> {
   msg!("Update user");
-  ctx.accounts.user.update(
-    arguments.user_name.to_string(),
-    arguments.name.to_string(),
-    arguments.thumbnail_url.to_string(),
-  );
-  ctx.accounts.user.bump_timestamp()?;
+  ctx.accounts.user.user_name = arguments.user_name;
+  ctx.accounts.user.name = arguments.name;
+  ctx.accounts.user.thumbnail_url = arguments.thumbnail_url;
+  ctx.accounts.user.updated_at = Clock::get()?.unix_timestamp;
   Ok(())
 }

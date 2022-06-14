@@ -22,3 +22,4 @@ overflow-checks = true
 anchor-lang = "0.24.2"
 user-manager = { path = "../user-manager", features = ["cpi"] }
 workspace-manager = { path = "../workspace-manager", features = ["cpi"] }
+application-manager = { path = "../application-manager", features = ["cpi"] }
