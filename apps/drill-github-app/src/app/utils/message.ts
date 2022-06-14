@@ -38,7 +38,7 @@ All about your board.
 
 🔢 **ID**: ${board.id}.  
 🔑 **Public Key**: [${board.publicKey}](${boardPublicKeyUrl})  
-⏱️ **Lock Time (ms)**:${board.lockTime}  
+⏱️ **Lock Time (in seconds)**:${board.lockTime}  
 🔒 **Auhtority**:[${board.authority}](${boardAuthorityUrl})
 `;
 
