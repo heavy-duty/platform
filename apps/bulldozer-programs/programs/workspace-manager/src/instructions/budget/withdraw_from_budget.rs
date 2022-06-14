@@ -48,11 +48,21 @@ pub fn validate(
     .to_account_info()
     .lamports
     .borrow();
-  let funds_required = &Budget::get_rent_exemption()?
+
+  let funds_required = Rent::get()?
+    .minimum_balance(0)
     .checked_add(arguments.amount)
     .unwrap();
 
-  if budget_lamports.lt(funds_required) {
+  msg!(
+    "wtf?? budget lamports: {0} | budget rent exemption: {1} | amount: {2} | funds required: {3}",
+    budget_lamports,
+    Rent::get()?.minimum_balance(0),
+    arguments.amount,
+    funds_required
+  );
+
+  if budget_lamports.lt(&funds_required) {
     return Err(error!(ErrorCode::BudgetHasInsufficientFunds));
   }
 

@@ -12,4 +12,8 @@ pub enum ErrorCode {
   OnlyAdminCollaboratorCanDelete,
   #[msg("Workspace provided is invalid.")]
   InvalidWorkspace,
+  #[msg("Application provided is invalid.")]
+  InvalidApplication,
+  #[msg("Collection provided is invalid.")]
+  InvalidCollection,
 }

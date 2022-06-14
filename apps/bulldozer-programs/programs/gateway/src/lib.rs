@@ -56,4 +56,16 @@ pub mod gateway {
     pub fn delete_application(ctx: Context<DeleteApplication>) -> Result<()> {
         instructions::delete_application::handle(ctx)
     }
+
+    pub fn create_collection(ctx: Context<CreateCollection>, id: u32, name: String) -> Result<()> {
+        instructions::create_collection::handle(ctx, id, name)
+    }
+
+    pub fn update_collection(ctx: Context<UpdateCollection>, name: String) -> Result<()> {
+        instructions::update_collection::handle(ctx, name)
+    }
+
+    pub fn delete_collection(ctx: Context<DeleteCollection>) -> Result<()> {
+        instructions::delete_collection::handle(ctx)
+    }
 }

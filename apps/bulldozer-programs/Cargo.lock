@@ -399,6 +399,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
+name = "collection-manager"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+]
+
+[[package]]
 name = "console_error_panic_hook"
 version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -512,6 +519,7 @@ version = "0.1.0"
 dependencies = [
  "anchor-lang",
  "application-manager",
+ "collection-manager",
  "user-manager",
  "workspace-manager",
 ]

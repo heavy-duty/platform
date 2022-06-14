@@ -165,6 +165,7 @@ describe('application', () => {
 		const budgetAfter = await provider.connection.getAccountInfo(
 			budgetWalletPublicKey
 		);
+		assert.isTrue(applicationAccount.owner.equals(workspacePublicKey));
 		assert.isTrue(applicationAccount.authority.equals(gatewayPublicKey));
 		assert.equal(applicationAccount.name, applicationName);
 		assert.isTrue(
@@ -305,7 +306,7 @@ describe('application', () => {
 			error = err as AnchorError;
 		}
 		// assert
-		assert.equal(error?.error.errorCode.code, 'InvalidWorkspace');
+		assert.equal(error?.error.errorCode.code, 'InvalidApplication');
 		assert.equal(error?.error.origin, 'application');
 	});
 

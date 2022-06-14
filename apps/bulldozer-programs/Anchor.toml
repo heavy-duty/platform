@@ -7,6 +7,7 @@ workspace_manager = "HqF7vRWkmy8cgp3DRH1qK9axyuQgUhqneHP4dqZ6nqdF"
 user_manager = "AoVeQTkP3k9NoNH2yQxCaRDJ53kdC6ARVc447eFBJwTV"
 bulldozer = "EYpJuu7FLtQAHXFY7vcCihRjAyBjb31HCGaJgo1c3fEo"
 gateway = "DuHpQ4mnb4GDP5r6ed3iBTZf3ETSPP4wTe7yTn6Ls6ZH"
+collection_manager = "472z8vQ6TBgY5cHYTJS2K1xzPbYfc4y3HTzZVrYacrWF"
 
 [registry]
 url = "https://anchor.projectserum.com"
@@ -16,4 +17,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/workspace.spec.ts --parallel"
+test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/application.spec.ts --parallel"

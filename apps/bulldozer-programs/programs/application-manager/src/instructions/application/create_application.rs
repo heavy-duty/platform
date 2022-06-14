@@ -5,7 +5,6 @@ use anchor_lang::prelude::*;
 pub struct CreateApplicationArguments {
   pub id: u32,
   pub name: String,
-  pub bump: u8,
 }
 
 #[derive(Accounts)]
@@ -37,7 +36,7 @@ pub fn handle(
   msg!("Create application");
   ctx.accounts.application.id = arguments.id;
   ctx.accounts.application.name = arguments.name;
-  ctx.accounts.application.bump = arguments.bump;
+  ctx.accounts.application.bump = *ctx.bumps.get("application").unwrap();
   ctx.accounts.application.authority = ctx.accounts.authority.key();
   ctx.accounts.application.owner = ctx.accounts.owner.key();
   ctx.accounts.application.created_at = Clock::get()?.unix_timestamp;

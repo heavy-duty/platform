@@ -34,6 +34,3 @@ pub mod application_manager {
         instructions::delete_application::handle(ctx)
     }
 }
-
-#[derive(Accounts)]
-pub struct Initialize {}

@@ -69,7 +69,7 @@ pub struct DeleteApplication<'info> {
   pub budget_wallet: SystemAccount<'info>,
   #[account(
     mut,
-    constraint = application.owner == workspace.key() @ ErrorCode::InvalidWorkspace
+    constraint = application.owner == workspace.key() @ ErrorCode::InvalidApplication
   )]
   pub application: Account<'info, Application>,
 }
