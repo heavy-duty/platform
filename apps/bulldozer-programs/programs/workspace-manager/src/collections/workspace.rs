@@ -36,7 +36,7 @@ impl WorkspaceStats {
 
 #[account]
 pub struct Workspace {
-  pub id: u8,
+  pub id: u32,
   pub authority: Pubkey,
   pub name: String,
   pub bump: u8,
@@ -49,6 +49,7 @@ impl Workspace {
   pub fn space() -> usize {
     // discriminator + authority + name (size 32 + 4)
     // created_at + updated_at + bump + workspace stats bump
-    8 + 1 + 32 + 36 + 8 + 8 + 1 + 1
+    // id
+    8 + 1 + 32 + 36 + 8 + 8 + 1 + 1 + 4
   }
 }

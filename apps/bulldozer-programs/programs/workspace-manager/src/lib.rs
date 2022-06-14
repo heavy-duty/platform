@@ -46,18 +46,12 @@ pub mod workspace_manager {
         instructions::deposit_to_budget::handle(ctx, arguments)
     }
 
+    #[access_control(instructions::withdraw_from_budget::validate(&ctx, &arguments))]
     pub fn withdraw_from_budget(
         ctx: Context<WithdrawFromBudget>,
         arguments: WithdrawFromBudgetArguments,
     ) -> Result<()> {
         instructions::withdraw_from_budget::handle(ctx, arguments)
-    }
-
-    pub fn register_budget_spent(
-        ctx: Context<RegisterBudgetSpent>,
-        arguments: RegisterBudgetSpentArguments,
-    ) -> Result<()> {
-        instructions::register_budget_spent::handle(ctx, arguments)
     }
 
     pub fn delete_budget(ctx: Context<DeleteBudget>) -> Result<()> {

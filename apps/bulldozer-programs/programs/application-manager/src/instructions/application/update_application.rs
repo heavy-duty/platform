@@ -5,8 +5,6 @@ use anchor_lang::prelude::*;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateApplicationArguments {
   pub name: String,
-  pub quantity_of_instructions: u8,
-  pub quantity_of_collections: u8,
 }
 
 #[derive(Accounts)]

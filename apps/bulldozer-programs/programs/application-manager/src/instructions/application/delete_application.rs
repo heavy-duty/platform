@@ -5,12 +5,12 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct DeleteApplication<'info> {
   #[account(mut)]
+  pub receiver: Signer<'info>,
   pub authority: Signer<'info>,
-  pub application_authority: Signer<'info>,
   #[account(
     mut,
-    close = authority,
-    constraint = application.authority == application_authority.key() @ ErrorCode::UnauthorizedApplicationDelete
+    close = receiver,
+    has_one = authority @ ErrorCode::UnauthorizedApplicationDelete
   )]
   pub application: Account<'info, Application>,
 }

@@ -38,6 +38,27 @@ pub struct WithdrawFromBudget<'info> {
   pub budget_wallet: SystemAccount<'info>,
 }
 
+pub fn validate(
+  ctx: &Context<WithdrawFromBudget>,
+  arguments: &WithdrawFromBudgetArguments,
+) -> Result<bool> {
+  let budget_lamports = **ctx
+    .accounts
+    .budget_wallet
+    .to_account_info()
+    .lamports
+    .borrow();
+  let funds_required = &Budget::get_rent_exemption()?
+    .checked_add(arguments.amount)
+    .unwrap();
+
+  if budget_lamports.lt(funds_required) {
+    return Err(error!(ErrorCode::BudgetHasInsufficientFunds));
+  }
+
+  Ok(true)
+}
+
 pub fn handle(
   ctx: Context<WithdrawFromBudget>,
   arguments: WithdrawFromBudgetArguments,
@@ -70,5 +91,6 @@ pub fn handle(
     .total_available
     .checked_sub(arguments.amount)
     .unwrap();
+
   Ok(())
 }

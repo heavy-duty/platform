@@ -18,7 +18,7 @@ pub mod gateway {
 
     pub fn create_workspace(
         ctx: Context<CreateWorkspace>,
-        id: u8,
+        id: u32,
         name: String,
         initial_deposit: u64,
     ) -> Result<()> {
@@ -41,7 +41,19 @@ pub mod gateway {
         instructions::withdraw_from_budget::handle(ctx, amount)
     }
 
-    pub fn create_application(ctx: Context<CreateApplication>, id: u8, name: String) -> Result<()> {
+    pub fn create_application(
+        ctx: Context<CreateApplication>,
+        id: u32,
+        name: String,
+    ) -> Result<()> {
         instructions::create_application::handle(ctx, id, name)
+    }
+
+    pub fn update_application(ctx: Context<UpdateApplication>, name: String) -> Result<()> {
+        instructions::update_application::handle(ctx, name)
+    }
+
+    pub fn delete_application(ctx: Context<DeleteApplication>) -> Result<()> {
+        instructions::delete_application::handle(ctx)
     }
 }

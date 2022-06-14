@@ -5,7 +5,7 @@ use user_manager::program::UserManager;
 use workspace_manager::program::WorkspaceManager;
 
 #[derive(Accounts)]
-#[instruction(id: u8, name: String, initial_deposit: u64)]
+#[instruction(id: u32, name: String, initial_deposit: u64)]
 pub struct CreateWorkspace<'info> {
   pub user_manager_program: Program<'info, UserManager>,
   pub workspace_manager_program: Program<'info, WorkspaceManager>,
@@ -27,7 +27,7 @@ pub struct CreateWorkspace<'info> {
     seeds = [
       b"workspace".as_ref(),
       user.key().as_ref(),
-      id.to_le_bytes().as_ref(),
+      &id.to_le_bytes(),
     ],
     bump,
     seeds::program = workspace_manager_program.key()
@@ -72,11 +72,11 @@ pub struct CreateWorkspace<'info> {
 
 pub fn handle(
   ctx: Context<CreateWorkspace>,
-  id: u8,
+  id: u32,
   name: String,
   initial_deposit: u64,
 ) -> Result<()> {
-  msg!("Create workspace");
+  msg!("Create workspace {}", ctx.accounts.workspace.key());
 
   workspace_manager::cpi::create_workspace(
     CpiContext::new(

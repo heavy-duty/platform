@@ -5,7 +5,7 @@ use user_manager::program::UserManager;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateWorkspaceArguments {
-  pub id: u8,
+  pub id: u32,
   pub name: String,
 }
 
@@ -32,7 +32,7 @@ pub struct CreateWorkspace<'info> {
     seeds = [
       b"workspace".as_ref(),
       user.key().as_ref(),
-      arguments.id.to_le_bytes().as_ref(),
+      &arguments.id.to_le_bytes(),
     ],
     bump
   )]
@@ -41,6 +41,7 @@ pub struct CreateWorkspace<'info> {
 
 pub fn handle(ctx: Context<CreateWorkspace>, arguments: CreateWorkspaceArguments) -> Result<()> {
   msg!("Create workspace");
+  ctx.accounts.workspace.id = arguments.id;
   ctx.accounts.workspace.name = arguments.name;
   ctx.accounts.workspace.authority = *ctx.accounts.authority.key;
   ctx.accounts.workspace.bump = *ctx.bumps.get("workspace").unwrap();

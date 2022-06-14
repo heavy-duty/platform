@@ -10,4 +10,6 @@ pub enum ErrorCode {
   OnlyAdminCollaboratorCanWithdraw,
   #[msg("Only admin collaborators can delete a workspace.")]
   OnlyAdminCollaboratorCanDelete,
+  #[msg("Workspace provided is invalid.")]
+  InvalidWorkspace,
 }

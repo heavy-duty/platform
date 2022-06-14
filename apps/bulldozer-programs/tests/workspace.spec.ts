@@ -19,17 +19,15 @@ describe('workspace', () => {
 		.UserManager as Program<UserManager>;
 	const workspaceManagerProgram = anchor.workspace
 		.WorkspaceManager as Program<WorkspaceManager>;
-	const newUser = Keypair.generate();
-	const gatewayBaseKeypair = Keypair.generate();
-	const workspaceId = 1;
 	let userPublicKey: PublicKey;
-	let newUserPublicKey: PublicKey;
 	let budgetPublicKey: PublicKey;
 	let budgetWalletPublicKey: PublicKey;
 	let workspacePublicKey: PublicKey;
-	let workspaceStatsPublicKey: PublicKey;
 	let collaboratorPublicKey: PublicKey;
 	let gatewayPublicKey: PublicKey;
+	const newUser = Keypair.generate();
+	const gatewayBaseKeypair = Keypair.generate();
+	const workspaceId = 1;
 	const userUserName = 'user-name-1';
 	const userName = 'User Name 1';
 	const userThumbnailUrl = 'https://img/1.com';
@@ -46,20 +44,12 @@ describe('workspace', () => {
 			[Buffer.from('user', 'utf8'), provider.wallet.publicKey.toBuffer()],
 			userManagerProgram.programId
 		);
-		[newUserPublicKey] = await PublicKey.findProgramAddress(
-			[Buffer.from('user', 'utf8'), newUser.publicKey.toBuffer()],
-			userManagerProgram.programId
-		);
 		[workspacePublicKey] = await PublicKey.findProgramAddress(
 			[
 				Buffer.from('workspace', 'utf8'),
 				userPublicKey.toBuffer(),
-				new Uint8Array([workspaceId]),
+				new anchor.BN(workspaceId).toArrayLike(Buffer, 'le', 4),
 			],
-			workspaceManagerProgram.programId
-		);
-		[workspaceStatsPublicKey] = await PublicKey.findProgramAddress(
-			[Buffer.from('workspace_stats', 'utf8'), workspacePublicKey.toBuffer()],
 			workspaceManagerProgram.programId
 		);
 		[collaboratorPublicKey] = await PublicKey.findProgramAddress(
@@ -247,6 +237,7 @@ describe('workspace', () => {
 		}
 		// assert
 		assert.equal(error?.error.errorCode.code, 'UnauthorizedWithdrawFromBudget');
+		assert.equal(error?.error.origin, 'workspace');
 	});
 
 	it('should delete account', async () => {
@@ -291,7 +282,7 @@ describe('workspace', () => {
 			[
 				Buffer.from('workspace', 'utf8'),
 				userPublicKey.toBuffer(),
-				new Uint8Array([newWorkspaceId]),
+				new anchor.BN(newWorkspaceId).toArrayLike(Buffer, 'le', 4),
 			],
 			workspaceManagerProgram.programId
 		);
