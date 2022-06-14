@@ -159,7 +159,7 @@ There you go! Now you can close the localhost:3000 server and open the .env file
 
 Now, it's time to deploy the _Drill-Github-App_ in this monorepo. Don’t forget, you'll have to add some settings to the GithubApp you just installed.
 
-## Drill Github Gateway
+## Drill Github Application
 
 This is a Node app built using [Protobot](https://github.com/probot/probot).
 
