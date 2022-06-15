@@ -70,7 +70,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
 								"
-								(editInstructionAccount)="
+								(editInstructionDocument)="
 									onCreateInstructionDocument(
 										publicKey.toBase58(),
 										workspaceId,
@@ -897,6 +897,10 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
+		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$.subscribe(
+			(a) => console.log(a)
+		);
+
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
 			this.instructionId$
 		);
