@@ -1,7 +1,5 @@
 import { Module } from '@nestjs/common';
-import { BuildAppCommand } from './commands/build-app.command';
 import { BuildWorkspaceCommand } from './commands/build-workspace.command';
-import { DeployAppCommand } from './commands/deploy-app.command';
 import { DeployWorkspaceCommand } from './commands/deploy-workspace.command';
 import { GenerateApplicationCommand } from './commands/generate-application.command';
 import { GenerateCollectionCommand } from './commands/generate-collection.command';
@@ -23,9 +21,7 @@ import { GetWorkspaceCommand } from './commands/get-workspace.command';
 		GenerateApplicationCommand,
 		GenerateCollectionCommand,
 		GenerateWorkspaceCommand,
-		DeployAppCommand,
 		DeployWorkspaceCommand,
-		BuildAppCommand,
 		BuildWorkspaceCommand,
 		GetWorkspaceCommand,
 		GetApplicationCommand,

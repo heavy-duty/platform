@@ -49,7 +49,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js build-workspace {args.workspaceId}"
+					"node dist/apps/bulldozer-cli/main.js build-workspace {args.workspaceId} {args.outDir}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"

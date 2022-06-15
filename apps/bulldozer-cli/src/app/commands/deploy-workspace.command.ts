@@ -1,5 +1,5 @@
 import { PublicKey } from '@solana/web3.js';
-import { Command, CommandRunner } from 'nest-commander';
+import { Command, CommandRunner, Option } from 'nest-commander';
 import { getWorkspace } from '../state';
 import {
 	anchorDeploy,
@@ -9,7 +9,10 @@ import {
 	getSolanaConfig,
 	log,
 } from '../utils';
-import { GenerateWorkspaceCommand } from './generate-workspace.command';
+import {
+	GenerateWorkspace,
+	GenerateWorkspaceCommand,
+} from './generate-workspace.command';
 
 @Command({
 	name: 'deploy-workspace',
@@ -27,21 +30,38 @@ export class DeployWorkspaceCommand implements CommandRunner {
 		private readonly _generateWorkspaceCommand: GenerateWorkspaceCommand
 	) {}
 
-	async run(params: string[]) {
+	async run(params: string[], options?: GenerateWorkspace) {
 		try {
 			const [workspaceId, outDir] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Deploying >> Workspace ID: ${workspaceId}`);
+			log(`Deploying Workspace - ID: ${workspaceId}`);
+			log('');
 
 			const workspace = await getWorkspace(program, new PublicKey(workspaceId));
-			await this._generateWorkspaceCommand.run([
-				workspace.publicKey.toBase58(),
-				`${outDir}`,
-			]);
 
+			if (workspace === null) {
+				throw new Error('Workspace not found');
+			}
+
+			if (options && options.singleApp) {
+				log(
+					`-> Single app option detected, the workspace would include only the app: ${options.singleApp}`
+				);
+				await this._generateWorkspaceCommand.run(
+					[workspace.publicKey.toBase58(), `${outDir}`],
+					options
+				);
+			} else {
+				await this._generateWorkspaceCommand.run([
+					workspace.publicKey.toBase58(),
+					`${outDir}`,
+				]);
+			}
+
+			log('');
 			const deployStatus = anchorDeploy(workspace, outDir);
 
 			if (deployStatus === CommandResponse.success) {
@@ -50,9 +70,19 @@ export class DeployWorkspaceCommand implements CommandRunner {
 				log('Something went wrong');
 			}
 		} catch (e) {
-			log('An error occured while deploying, try again');
+			log('');
+			log('An error occurred while deploying, try again');
 			log('');
 			log(e);
+			process.exit(-1);
 		}
+	}
+
+	@Option({
+		flags: '--single-app <app-id>',
+		description: 'Deploy the workspace only with a specific app.',
+	})
+	parseWorkspaceId(workspaceId: string): PublicKey {
+		return new PublicKey(workspaceId);
 	}
 }

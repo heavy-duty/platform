@@ -66,3 +66,43 @@ export const anchorDeploy = (
 
 	return CommandResponse.success;
 };
+
+export const anchorBuild = (
+	workspace: Workspace,
+	outDir: string
+): CommandResponse => {
+	const pathToWorkspace = `${outDir}/${formatName(workspace.name).snakeCase}`;
+
+	try {
+		log('⏳ Installing NPM...');
+		log('');
+		const resp = execSync(`cd ${pathToWorkspace} && npm i`, {
+			encoding: 'utf8',
+		});
+		log(resp);
+		log('Success..');
+		log('----');
+		log('');
+	} catch (e) {
+		log('Something go wrong using npm:');
+		log(e);
+		return CommandResponse.error;
+	}
+
+	try {
+		log('⏳ Building Anchor...');
+		const resp = execSync(`cd ${pathToWorkspace} && anchor build`, {
+			encoding: 'utf8',
+		});
+		log(resp);
+		log('Success..');
+		log('----');
+		log('');
+	} catch (e) {
+		log('Something go wrong building with anchor:');
+		log(e);
+		return CommandResponse.error;
+	}
+
+	return CommandResponse.success;
+};
