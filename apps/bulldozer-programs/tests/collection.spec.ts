@@ -191,10 +191,10 @@ describe('collection', () => {
 		const budgetAfter = await provider.connection.getAccountInfo(
 			budgetWalletPublicKey
 		);
-		assert.ok(collectionAccount.authority.equals(gatewayPublicKey));
-		assert.ok(collectionAccount.owner.equals(applicationPublicKey));
+		assert.isTrue(collectionAccount.authority.equals(gatewayPublicKey));
+		assert.isTrue(collectionAccount.owner.equals(applicationPublicKey));
 		assert.equal(collectionAccount.name, collectionName);
-		assert.ok(collectionAccount.createdAt.eq(collectionAccount.updatedAt));
+		assert.isTrue(collectionAccount.createdAt.eq(collectionAccount.updatedAt));
 		assert.isTrue(
 			new anchor.BN(budgetBefore?.lamports ?? 0)
 				.sub(new anchor.BN(collectionRent))
@@ -225,7 +225,7 @@ describe('collection', () => {
 				collectionPublicKey
 			);
 		assert.equal(collectionAccount.name, collectionName);
-		assert.ok(collectionAccount.createdAt.lte(collectionAccount.updatedAt));
+		assert.isTrue(collectionAccount.createdAt.lte(collectionAccount.updatedAt));
 	});
 
 	it('should delete account', async () => {

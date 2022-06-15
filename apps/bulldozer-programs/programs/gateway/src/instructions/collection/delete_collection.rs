@@ -16,7 +16,7 @@ pub struct DeleteCollection<'info> {
   pub user_manager_program: Program<'info, UserManager>,
   pub workspace_manager_program: Program<'info, WorkspaceManager>,
   pub collection_manager_program: Program<'info, CollectionManager>,
-  pub gateway: Account<'info, Gateway>,
+  pub gateway: Box<Account<'info, Gateway>>,
   #[account(
     mut,
     seeds = [
@@ -30,11 +30,11 @@ pub struct DeleteCollection<'info> {
   #[account(
     constraint = application.owner == workspace.key() @ ErrorCode::InvalidWorkspace
   )]
-  pub workspace: Account<'info, Workspace>,
+  pub workspace: Box<Account<'info, Workspace>>,
   #[account(
     constraint = collection.owner == application.key() @ ErrorCode::InvalidApplication
   )]
-  pub application: Account<'info, Application>,
+  pub application: Box<Account<'info, Application>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -43,7 +43,7 @@ pub struct DeleteCollection<'info> {
     bump = user.bump,
     seeds::program = user_manager_program.key()
   )]
-  pub user: Account<'info, User>,
+  pub user: Box<Account<'info, User>>,
   #[account(
     seeds = [
       b"collaborator".as_ref(),
@@ -54,7 +54,7 @@ pub struct DeleteCollection<'info> {
     constraint = collaborator.status == CollaboratorStatus::Approved { id: 1 } @ ErrorCode::CollaboratorStatusNotApproved,
     seeds::program = workspace_manager_program.key(),
   )]
-  pub collaborator: Account<'info, Collaborator>,
+  pub collaborator: Box<Account<'info, Collaborator>>,
   #[account(
     mut,
     seeds = [
@@ -64,7 +64,7 @@ pub struct DeleteCollection<'info> {
     bump = budget.bump,
     seeds::program = workspace_manager_program.key(),
   )]
-  pub budget: Account<'info, Budget>,
+  pub budget: Box<Account<'info, Budget>>,
   #[account(
     mut,
     seeds = [

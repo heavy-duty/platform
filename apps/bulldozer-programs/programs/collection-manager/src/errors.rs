@@ -12,4 +12,10 @@ pub enum ErrorCode {
   UnauthorizedCollectionSetAuthority,
   #[msg("You don't have permission to delete this collection.")]
   UnauthorizedCollectionDelete,
+  #[msg("You don't have permission to set the authority of this collection's attribute.")]
+  UnauthorizedCollectionAttributeSetAuthority,
+  #[msg("You don't have permission to update this collection's attribute.")]
+  UnauthorizedCollectionAttributeUpdate,
+  #[msg("You don't have permission to delete this collection's attribute.")]
+  UnauthorizedCollectionAttributeDelete,
 }

@@ -2,7 +2,7 @@ use crate::collections::Gateway;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use application_manager::collections::Application;
-use collection_manager::collections::Collection;
+use collection_manager::collections::{Collection, CollectionAttribute};
 use collection_manager::program::CollectionManager;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
@@ -11,8 +11,7 @@ use workspace_manager::enums::CollaboratorStatus;
 use workspace_manager::program::WorkspaceManager;
 
 #[derive(Accounts)]
-#[instruction(id: u32, name: String)]
-pub struct CreateCollection<'info> {
+pub struct DeleteCollectionAttribute<'info> {
   pub system_program: Program<'info, System>,
   pub user_manager_program: Program<'info, UserManager>,
   pub workspace_manager_program: Program<'info, WorkspaceManager>,
@@ -28,11 +27,18 @@ pub struct CreateCollection<'info> {
   )]
   pub gateway_wallet: SystemAccount<'info>,
   pub authority: Signer<'info>,
+  #[account(
+    constraint = application.owner == workspace.key() @ ErrorCode::InvalidWorkspace
+  )]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
-    constraint = application.owner == workspace.key() @ ErrorCode::InvalidApplication
+    constraint = collection.owner == application.key() @ ErrorCode::InvalidApplication
   )]
   pub application: Box<Account<'info, Application>>,
+  #[account(
+    constraint = collection_attribute.owner == collection.key() @ ErrorCode::InvalidCollection
+  )]
+  pub collection: Box<Account<'info, Collection>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -73,22 +79,15 @@ pub struct CreateCollection<'info> {
     seeds::program = workspace_manager_program.key(),
   )]
   pub budget_wallet: SystemAccount<'info>,
-  #[account(
-    mut,
-    seeds = [
-      b"collection".as_ref(),
-      application.key().as_ref(),
-      &id.to_le_bytes(),
-    ],
-    bump,
-    seeds::program = collection_manager_program.key(),
-  )]
-  /// CHECK: collection is created through a CPI
-  pub collection: UncheckedAccount<'info>,
+  #[account(mut)]
+  pub collection_attribute: Box<Account<'info, CollectionAttribute>>,
 }
 
-pub fn handle(ctx: Context<CreateCollection>, id: u32, name: String) -> Result<()> {
-  msg!("Create collection {}", ctx.accounts.collection.key());
+pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
+  msg!(
+    "Delete collection attribute {}",
+    ctx.accounts.collection_attribute.key()
+  );
 
   let gateway_seeds = &[
     b"gateway".as_ref(),
@@ -101,53 +100,34 @@ pub fn handle(ctx: Context<CreateCollection>, id: u32, name: String) -> Result<(
     &[ctx.accounts.gateway.wallet_bump],
   ];
 
-  // Withdraw from budget to gateway wallet
-  workspace_manager::cpi::withdraw_from_budget(
+  // Delete the collection attribute
+  collection_manager::cpi::delete_collection_attribute(CpiContext::new_with_signer(
+    ctx.accounts.collection_manager_program.to_account_info(),
+    collection_manager::cpi::accounts::DeleteCollectionAttribute {
+      collection_attribute: ctx.accounts.collection_attribute.to_account_info(),
+      receiver: ctx.accounts.gateway_wallet.to_account_info(),
+      authority: ctx.accounts.gateway.to_account_info(),
+    },
+    &[&gateway_seeds[..], &gateway_wallet_seeds[..]],
+  ))?;
+
+  // Deposit to budget from gateway wallet
+  workspace_manager::cpi::deposit_to_budget(
     CpiContext::new_with_signer(
       ctx.accounts.workspace_manager_program.to_account_info(),
-      workspace_manager::cpi::accounts::WithdrawFromBudget {
+      workspace_manager::cpi::accounts::DepositToBudget {
         budget: ctx.accounts.budget.to_account_info(),
         budget_wallet: ctx.accounts.budget_wallet.to_account_info(),
         workspace: ctx.accounts.workspace.to_account_info(),
-        authority: ctx.accounts.gateway.to_account_info(),
-        receiver: ctx.accounts.gateway_wallet.to_account_info(),
-        system_program: ctx.accounts.system_program.to_account_info(),
-      },
-      &[&gateway_seeds[..], &gateway_wallet_seeds[..]],
-    ),
-    workspace_manager::instructions::WithdrawFromBudgetArguments {
-      amount: Rent::get()?.minimum_balance(Collection::space()),
-    },
-  )?;
-
-  // Create the collection
-  collection_manager::cpi::create_collection(
-    CpiContext::new_with_signer(
-      ctx.accounts.collection_manager_program.to_account_info(),
-      collection_manager::cpi::accounts::CreateCollection {
-        collection: ctx.accounts.collection.to_account_info(),
-        owner: ctx.accounts.application.to_account_info(),
         authority: ctx.accounts.gateway_wallet.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
       },
       &[&gateway_wallet_seeds[..]],
     ),
-    collection_manager::instructions::CreateCollectionArguments {
-      id,
-      name: name.clone(),
+    workspace_manager::instructions::DepositToBudgetArguments {
+      amount: Rent::get()?.minimum_balance(CollectionAttribute::space()),
     },
   )?;
-
-  // Set collection authority to gateway
-  collection_manager::cpi::set_collection_authority(CpiContext::new_with_signer(
-    ctx.accounts.collection_manager_program.to_account_info(),
-    collection_manager::cpi::accounts::SetCollectionAuthority {
-      new_authority: ctx.accounts.gateway.to_account_info(),
-      collection: ctx.accounts.collection.to_account_info(),
-      authority: ctx.accounts.gateway_wallet.to_account_info(),
-    },
-    &[&gateway_wallet_seeds[..]],
-  ))?;
 
   Ok(())
 }

@@ -2,7 +2,7 @@ use crate::collections::Gateway;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 use application_manager::collections::Application;
-use collection_manager::collections::Collection;
+use collection_manager::collections::{Collection, CollectionAttribute};
 use collection_manager::program::CollectionManager;
 use user_manager::collections::User;
 use user_manager::program::UserManager;
@@ -11,12 +11,21 @@ use workspace_manager::enums::CollaboratorStatus;
 use workspace_manager::program::WorkspaceManager;
 
 #[derive(Accounts)]
-#[instruction(id: u32, name: String)]
-pub struct CreateCollection<'info> {
+#[instruction(
+  id: u32, 
+  name: String,
+  kind: u8,
+  modifier: Option<u8>,
+  size: Option<u32>,
+  max: Option<u32>,
+  max_length: Option<u32>,
+)]
+pub struct CreateCollectionAttribute<'info> {
   pub system_program: Program<'info, System>,
   pub user_manager_program: Program<'info, UserManager>,
   pub workspace_manager_program: Program<'info, WorkspaceManager>,
   pub collection_manager_program: Program<'info, CollectionManager>,
+  pub authority: Signer<'info>,
   pub gateway: Box<Account<'info, Gateway>>,
   #[account(
     mut,
@@ -27,12 +36,15 @@ pub struct CreateCollection<'info> {
     bump = gateway.wallet_bump,
   )]
   pub gateway_wallet: SystemAccount<'info>,
-  pub authority: Signer<'info>,
+  #[account(
+    constraint = application.owner == workspace.key() @ ErrorCode::InvalidWorkspace
+  )]
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
-    constraint = application.owner == workspace.key() @ ErrorCode::InvalidApplication
+    constraint = collection.owner == application.key() @ ErrorCode::InvalidApplication
   )]
   pub application: Box<Account<'info, Application>>,
+  pub collection: Box<Account<'info, Collection>>,
   #[account(
     seeds = [
       b"user".as_ref(),
@@ -76,19 +88,31 @@ pub struct CreateCollection<'info> {
   #[account(
     mut,
     seeds = [
-      b"collection".as_ref(),
-      application.key().as_ref(),
+      b"collection_attribute".as_ref(),
+      collection.key().as_ref(),
       &id.to_le_bytes(),
     ],
     bump,
     seeds::program = collection_manager_program.key(),
   )]
-  /// CHECK: collection is created through a CPI
-  pub collection: UncheckedAccount<'info>,
+  /// CHECK: collection_attribute is created through a CPI
+  pub collection_attribute: UncheckedAccount<'info>,
 }
 
-pub fn handle(ctx: Context<CreateCollection>, id: u32, name: String) -> Result<()> {
-  msg!("Create collection {}", ctx.accounts.collection.key());
+pub fn handle(
+  ctx: Context<CreateCollectionAttribute>, 
+  id: u32, 
+  name: String,
+  kind: u8,
+  modifier: Option<u8>,
+  size: Option<u32>,
+  max: Option<u32>,
+  max_length: Option<u32>
+) -> Result<()> {
+  msg!(
+    "Create collection attribute {}",
+    ctx.accounts.collection_attribute.key()
+  );
 
   let gateway_seeds = &[
     b"gateway".as_ref(),
@@ -116,34 +140,39 @@ pub fn handle(ctx: Context<CreateCollection>, id: u32, name: String) -> Result<(
       &[&gateway_seeds[..], &gateway_wallet_seeds[..]],
     ),
     workspace_manager::instructions::WithdrawFromBudgetArguments {
-      amount: Rent::get()?.minimum_balance(Collection::space()),
+      amount: Rent::get()?.minimum_balance(CollectionAttribute::space()),
     },
   )?;
 
-  // Create the collection
-  collection_manager::cpi::create_collection(
+  // Create the collection attribute
+  collection_manager::cpi::create_collection_attribute(
     CpiContext::new_with_signer(
       ctx.accounts.collection_manager_program.to_account_info(),
-      collection_manager::cpi::accounts::CreateCollection {
-        collection: ctx.accounts.collection.to_account_info(),
-        owner: ctx.accounts.application.to_account_info(),
+      collection_manager::cpi::accounts::CreateCollectionAttribute {
+        collection_attribute: ctx.accounts.collection_attribute.to_account_info(),
+        owner: ctx.accounts.collection.to_account_info(),
         authority: ctx.accounts.gateway_wallet.to_account_info(),
         system_program: ctx.accounts.system_program.to_account_info(),
       },
       &[&gateway_wallet_seeds[..]],
     ),
-    collection_manager::instructions::CreateCollectionArguments {
+    collection_manager::instructions::CreateCollectionAttributeArguments {
       id,
-      name: name.clone(),
+      name,
+      kind,
+      modifier,
+      size,
+      max,
+      max_length
     },
   )?;
 
   // Set collection authority to gateway
-  collection_manager::cpi::set_collection_authority(CpiContext::new_with_signer(
+  collection_manager::cpi::set_collection_attribute_authority(CpiContext::new_with_signer(
     ctx.accounts.collection_manager_program.to_account_info(),
-    collection_manager::cpi::accounts::SetCollectionAuthority {
+    collection_manager::cpi::accounts::SetCollectionAttributeAuthority {
       new_authority: ctx.accounts.gateway.to_account_info(),
-      collection: ctx.accounts.collection.to_account_info(),
+      collection_attribute: ctx.accounts.collection_attribute.to_account_info(),
       authority: ctx.accounts.gateway_wallet.to_account_info(),
     },
     &[&gateway_wallet_seeds[..]],

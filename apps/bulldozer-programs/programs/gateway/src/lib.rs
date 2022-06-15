@@ -68,4 +68,37 @@ pub mod gateway {
     pub fn delete_collection(ctx: Context<DeleteCollection>) -> Result<()> {
         instructions::delete_collection::handle(ctx)
     }
+
+    pub fn create_collection_attribute(
+        ctx: Context<CreateCollectionAttribute>,
+        id: u32,
+        name: String,
+        kind: u8,
+        modifier: Option<u8>,
+        size: Option<u32>,
+        max: Option<u32>,
+        max_length: Option<u32>,
+    ) -> Result<()> {
+        instructions::create_collection_attribute::handle(
+            ctx, id, name, kind, modifier, size, max, max_length,
+        )
+    }
+
+    pub fn update_collection_attribute(
+        ctx: Context<UpdateCollectionAttribute>,
+        name: String,
+        kind: u8,
+        modifier: Option<u8>,
+        size: Option<u32>,
+        max: Option<u32>,
+        max_length: Option<u32>,
+    ) -> Result<()> {
+        instructions::update_collection_attribute::handle(
+            ctx, name, kind, modifier, size, max, max_length,
+        )
+    }
+
+    pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
+        instructions::delete_collection_attribute::handle(ctx)
+    }
 }

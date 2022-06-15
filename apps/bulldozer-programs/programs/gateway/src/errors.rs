@@ -16,4 +16,6 @@ pub enum ErrorCode {
   InvalidApplication,
   #[msg("Collection provided is invalid.")]
   InvalidCollection,
+  #[msg("Collection attribute provided is invalid.")]
+  InvalidCollectionAttribute,
 }

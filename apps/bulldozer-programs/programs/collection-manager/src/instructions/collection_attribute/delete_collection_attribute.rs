@@ -1,68 +1,21 @@
-use crate::collections::{Collection, CollectionAttribute, CollectionStats};
+use crate::collections::CollectionAttribute;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
-use user_manager::collections::User;
-use user_manager::program::UserManager;
-use workspace_manager::collections::{Budget, Collaborator, Workspace};
-use workspace_manager::enums::CollaboratorStatus;
 
 #[derive(Accounts)]
 pub struct DeleteCollectionAttribute<'info> {
-  pub user_manager_program: Program<'info, UserManager>,
+  #[account(mut)]
+  pub receiver: Signer<'info>,
   pub authority: Signer<'info>,
-  pub workspace: Box<Account<'info, Workspace>>,
-  #[account(
-    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace
-  )]
-  pub collection: Account<'info, Collection>,
   #[account(
     mut,
-    close = budget,
-    constraint = attribute.collection == collection.key() @ ErrorCode::CollectionAttributeDoesNotBelongToCollection,
-    constraint = attribute.workspace == workspace.key() @ ErrorCode::CollectionAttributeDoesNotBelongToWorkspace,
+    close = receiver,
+    has_one = authority @ ErrorCode::UnauthorizedCollectionAttributeDelete
   )]
-  pub attribute: Account<'info, CollectionAttribute>,
-  #[account(
-    seeds = [
-      b"user".as_ref(),
-      authority.key().as_ref(),
-    ],
-    bump = user.bump,
-   seeds::program = user_manager_program.key()
-  )]
-  pub user: Box<Account<'info, User>>,
-  #[account(
-    seeds = [
-      b"collaborator".as_ref(),
-      workspace.key().as_ref(),
-      user.key().as_ref(),
-    ],
-    bump = collaborator.bump,
-    constraint = collaborator.status == CollaboratorStatus::Approved { id: 1 } @ ErrorCode::CollaboratorStatusNotApproved,
-  )]
-  pub collaborator: Box<Account<'info, Collaborator>>,
-  #[account(
-    mut,
-    seeds = [
-      b"budget".as_ref(),
-      workspace.key().as_ref(),
-    ],
-    bump = budget.bump,
-  )]
-  pub budget: Box<Account<'info, Budget>>,
-  #[account(
-    mut,
-    seeds = [
-      b"collection_stats".as_ref(),
-      collection.key().as_ref()
-    ],
-    bump = collection.collection_stats_bump
-  )]
-  pub collection_stats: Box<Account<'info, CollectionStats>>,
+  pub collection_attribute: Account<'info, CollectionAttribute>,
 }
 
-pub fn handle(ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
+pub fn handle(_ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
   msg!("Delete collection attribute");
-  ctx.accounts.collection_stats.decrease_attribute_quantity();
   Ok(())
 }

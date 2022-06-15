@@ -35,7 +35,6 @@ pub mod collection_manager {
         instructions::delete_collection::handle(ctx)
     }
 
-    /* #[access_control(instructions::create_collection_attribute::validate(&ctx, &arguments))]
     pub fn create_collection_attribute(
         ctx: Context<CreateCollectionAttribute>,
         arguments: CreateCollectionAttributeArguments,
@@ -43,7 +42,12 @@ pub mod collection_manager {
         instructions::create_collection_attribute::handle(ctx, arguments)
     }
 
-    #[access_control(instructions::update_collection_attribute::validate(&ctx, &arguments))]
+    pub fn set_collection_attribute_authority(
+        ctx: Context<SetCollectionAttributeAuthority>,
+    ) -> Result<()> {
+        instructions::set_collection_attribute_authority::handle(ctx)
+    }
+
     pub fn update_collection_attribute(
         ctx: Context<UpdateCollectionAttribute>,
         arguments: UpdateCollectionAttributeArguments,
@@ -53,5 +57,5 @@ pub mod collection_manager {
 
     pub fn delete_collection_attribute(ctx: Context<DeleteCollectionAttribute>) -> Result<()> {
         instructions::delete_collection_attribute::handle(ctx)
-    } */
+    }
 }
