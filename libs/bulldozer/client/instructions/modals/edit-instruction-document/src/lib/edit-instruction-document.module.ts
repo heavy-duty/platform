@@ -1,3 +1,4 @@
+import { DragDropModule } from '@angular/cdk/drag-drop';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -18,6 +19,7 @@ import { EditInstructionDocumentDirective } from './edit-instruction-document.di
 	imports: [
 		CommonModule,
 		ReactiveFormsModule,
+		DragDropModule,
 		MatAutocompleteModule,
 		MatButtonModule,
 		MatDialogModule,

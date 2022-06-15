@@ -57,6 +57,7 @@ export class EditInstructionDocumentDirective {
 						this.instructionAccountsCollectionsLookup,
 				},
 				panelClass: ['bg-bp-wood', 'bg-bp-brown'],
+				maxHeight: '600px',
 			})
 			.afterClosed()
 			.subscribe((data) => data && this.editInstructionDocument.emit(data));
