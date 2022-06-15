@@ -160,7 +160,7 @@ import {
 					type="text"
 					formControlName="bump"
 					matInput
-					placeholder="Select a bump"
+					placeholder="Choose a bump"
 				/>
 				<mat-autocomplete
 					#auto="matAutocomplete"
@@ -175,9 +175,11 @@ import {
 							*ngFor="let option of filteredBumpOptions"
 							[value]="option"
 						>
-							{{ option.collection?.name }}.{{
-								option.collectionAttribute?.name
-							}}
+							{{ option.account?.name }}.{{ option.collectionAttribute?.name }}
+
+							<span class="italic text-xs">
+								{{ option.collection?.name }}
+							</span>
 						</mat-option>
 					</ng-container>
 				</mat-autocomplete>
@@ -371,7 +373,8 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 				return segments.every(
 					(segment) =>
 						option.collection?.name.toLowerCase().includes(segment) ||
-						option.collectionAttribute?.name.toLowerCase().includes(segment)
+						option.collectionAttribute?.name.toLowerCase().includes(segment) ||
+						option.account.name.toLowerCase().includes(segment)
 				);
 			});
 		} else {
@@ -417,7 +420,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	) {
 		return data?.collection !== undefined &&
 			data?.collectionAttribute !== undefined
-			? `${data.collection.name}.${data.collectionAttribute.name}`
+			? `${data.account.name}.${data.collectionAttribute.name} (${data.collection.name})`
 			: '';
 	}
 }
