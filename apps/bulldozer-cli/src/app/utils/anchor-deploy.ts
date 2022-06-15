@@ -1,33 +1,68 @@
-import { PublicKey } from '@solana/web3.js';
-import { exec } from 'child_process';
-import path from 'path';
+import { execSync } from 'child_process';
+import { formatName } from '../generators/utils';
+import { Workspace } from '../state';
 import { log } from './log';
 
-export const anchorDeploy = (): Promise<string> => {
-	return new Promise((resolve, reject) => {
-		exec('ls -la', (error, stdout, stderr) => {
-			if (error) {
-				log(`error: ${error.message}`);
-				reject(error);
-			}
-			if (stderr) {
-				log(`stderr: ${stderr}`);
-				reject(stderr);
-			}
-			resolve(stdout);
-		});
-	});
-};
+export enum CommandResponse {
+	success = 0,
+	error = -1,
+}
 
-export const generateCode = (
-	outDir: string,
-	workspaceName: string,
-	workspacePubKey: PublicKey
-): string => {
-	// _generateWorkspaceCommand.run([
-	// 	workspacePubKey.toBase58(),
-	// 	`${outDir}/${formatName(workspace.name).snakeCase}/programs`,
-	// 	applicationsProgramKeypairs[index].publicKey.toBase58(),
-	// ]);
-	return path.join(outDir, 'name_of_workspace');
+export const anchorDeploy = (
+	workspace: Workspace,
+	outDir: string
+): CommandResponse => {
+	const pathToWorkspace = `${outDir}/${formatName(workspace.name).snakeCase}`;
+	log(pathToWorkspace);
+
+	try {
+		log('⏳ Installing NPM...');
+
+		const resp = execSync(`cd ${pathToWorkspace} && npm i`, {
+			encoding: 'utf8',
+		});
+		log(resp);
+		log('Success..');
+		log('----');
+		log('');
+	} catch (e) {
+		log('Something go wrong using npm:');
+		log(e);
+		return CommandResponse.error;
+	}
+
+	try {
+		log('⏳ Building Anchor...');
+		const resp = execSync(`cd ${pathToWorkspace} && anchor build`, {
+			encoding: 'utf8',
+		});
+		log(resp);
+		log('Success..');
+		log('----');
+		log('');
+	} catch (e) {
+		log('Something go wrong building with anchor:');
+		log(e);
+		return CommandResponse.error;
+	}
+
+	try {
+		log('⏳ Deploying Anchor...');
+		const resp = execSync(
+			`cd ${pathToWorkspace} && anchor deploy --provider.cluster devnet`,
+			{
+				encoding: 'utf8',
+			}
+		);
+		log(resp);
+		log('Success..');
+		log('----');
+		log('');
+	} catch (e) {
+		log('Something go wrong building with anchor:');
+		log(e);
+		return CommandResponse.error;
+	}
+
+	return CommandResponse.success;
 };
