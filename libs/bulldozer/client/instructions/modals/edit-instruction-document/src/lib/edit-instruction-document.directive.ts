@@ -9,17 +9,31 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
-import { Collection, InstructionAccount } from './types';
+import {
+	Collection,
+	CollectionAttribute,
+	InstructionAccount,
+	InstructionAccountsCollectionsLookup,
+} from './types';
 
 @Directive({ selector: '[bdEditInstructionDocument]' })
 export class EditInstructionDocumentDirective {
 	@Input() instructionDocument: InstructionAccountDto | null = null;
 	@Input() collections: List<Collection> | null = null;
+	@Input() collectionAttributes: List<CollectionAttribute> | null = null;
 	@Input() instructionAccounts: List<InstructionAccount> | null = null;
+	@Input()
+	instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup> | null =
+		null;
 	@Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
 	@HostListener('click') onClick(): void {
-		if (!this.collections || !this.instructionAccounts) {
-			return;
+		if (
+			!this.collections ||
+			!this.instructionAccounts ||
+			!this.collectionAttributes ||
+			!this.instructionAccountsCollectionsLookup
+		) {
+			throw new Error('Values missing!');
 		}
 
 		this._matDialog
@@ -28,16 +42,21 @@ export class EditInstructionDocumentDirective {
 				{
 					document: InstructionAccountDto | null;
 					collections: List<Collection>;
+					collectionAttributes: List<CollectionAttribute>;
 					accounts: List<InstructionAccount>;
+					instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup>;
 				},
 				InstructionAccountDto
 			>(EditInstructionDocumentComponent, {
 				data: {
 					document: this.instructionDocument,
 					collections: this.collections,
+					collectionAttributes: this.collectionAttributes,
 					accounts: this.instructionAccounts,
+					instructionAccountsCollectionsLookup:
+						this.instructionAccountsCollectionsLookup,
 				},
-				panelClass: ['bg-bp-wood', 'bg-bd-brown'],
+				panelClass: ['bg-bp-wood', 'bg-bp-brown'],
 			})
 			.afterClosed()
 			.subscribe((data) => data && this.editInstructionDocument.emit(data));

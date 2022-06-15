@@ -17,8 +17,13 @@ import {} from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
-import { Subject, takeUntil } from 'rxjs';
-import { Collection, InstructionAccount } from './types';
+import { map, Observable, startWith, Subject, takeUntil } from 'rxjs';
+import {
+	Collection,
+	CollectionAttribute,
+	InstructionAccount,
+	InstructionAccountsCollectionsLookup,
+} from './types';
 
 @Component({
 	selector: 'bd-edit-document',
@@ -148,6 +153,36 @@ import { Collection, InstructionAccount } from './types';
 				</mat-select>
 			</mat-form-field>
 
+			<mat-form-field class="w-full" appearance="fill">
+				<mat-label>Bump</mat-label>
+				<input
+					[matAutocomplete]="auto"
+					type="text"
+					formControlName="bump"
+					matInput
+					placeholder="Select a bump"
+				/>
+				<mat-autocomplete
+					#auto="matAutocomplete"
+					[displayWith]="displayWith"
+					autoActiveFirstOption
+				>
+					<mat-option [value]="null"> None </mat-option>
+					<ng-container
+						*ngIf="filteredBumpOptions$ | ngrxPush as filteredBumpOptions"
+					>
+						<mat-option
+							*ngFor="let option of filteredBumpOptions"
+							[value]="option"
+						>
+							{{ option.collection?.name }}.{{
+								option.collectionAttribute?.name
+							}}
+						</mat-option>
+					</ng-container>
+				</mat-autocomplete>
+			</mat-form-field>
+
 			<div
 				class="py-2 px-5 w-full h-12 bg-bp-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bp-black"
 			>
@@ -177,6 +212,58 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	readonly destroy$ = this._destroy.asObservable();
 	readonly form: UntypedFormGroup;
 	submitted = false;
+	private readonly _bumpOptions = this.data?.accounts
+		.filter((account) => account.kind.id === 0)
+		.map((account) => {
+			const collectionId = this.data?.instructionAccountsCollectionsLookup.find(
+				(collectionLooup) => collectionLooup.id === account.collection
+			)?.collection;
+
+			return {
+				account,
+				collection: this.data?.collections.find(
+					(collection) => collection.id === collectionId
+				),
+				collectionAttributes: this.data?.collectionAttributes.filter(
+					(collectionAttribute) =>
+						collectionAttribute.collectionId === collectionId
+				),
+			};
+		})
+		.reduce(
+			(list, { account, collection, collectionAttributes }) => {
+				if (collectionAttributes === undefined) {
+					return list;
+				}
+
+				return list.concat(
+					collectionAttributes
+						.filter(
+							(collectionAttribute) =>
+								collectionAttribute.kind.id === 1 &&
+								collectionAttribute.kind.size < 257
+						)
+						.map((collectionAttribute) => ({
+							account,
+							collection,
+							collectionAttribute,
+						}))
+				);
+			},
+			List<{
+				collection: Collection | undefined;
+				collectionAttribute: CollectionAttribute | undefined;
+				account: InstructionAccount;
+			}>()
+		);
+	readonly filteredBumpOptions$: Observable<
+		| List<{
+				collection: Collection | undefined;
+				collectionAttribute: CollectionAttribute | undefined;
+				account: InstructionAccount;
+		  }>
+		| undefined
+	>;
 
 	get nameControl() {
 		return this.form.get('name') as UntypedFormControl;
@@ -196,6 +283,9 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	get closeControl() {
 		return this.form.get('close') as UntypedFormControl;
 	}
+	get bumpControl() {
+		return this.form.get('bump') as UntypedFormControl;
+	}
 
 	constructor(
 		private readonly _matSnackBar: MatSnackBar,
@@ -204,7 +294,9 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 		public data?: {
 			document?: InstructionAccountDto;
 			collections: List<Collection>;
+			collectionAttributes: List<CollectionAttribute>;
 			accounts: List<InstructionAccount>;
+			instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup>;
 		}
 	) {
 		this.form = new UntypedFormGroup({
@@ -221,7 +313,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 			space: new UntypedFormControl(this.data?.document?.space ?? null),
 			payer: new UntypedFormControl(this.data?.document?.payer ?? null),
 			close: new UntypedFormControl(this.data?.document?.close ?? null),
+			bump: new UntypedFormControl(null),
 		});
+
+		this.filteredBumpOptions$ = this.bumpControl.valueChanges.pipe(
+			startWith(null),
+			map((value) => this._filter(value))
+		);
 	}
 
 	ngOnInit() {
@@ -248,6 +346,37 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	ngOnDestroy() {
 		this._destroy.next(null);
 		this._destroy.complete();
+	}
+
+	private _filter(
+		value:
+			| string
+			| {
+					collection: Collection | undefined;
+					collectionAttribute: CollectionAttribute | undefined;
+					account: InstructionAccount;
+			  }
+			| null
+	) {
+		if (value === null) {
+			return this._bumpOptions;
+		} else if (typeof value === 'string') {
+			const segments = value.toLowerCase().split(' ');
+
+			if (this._bumpOptions === undefined) {
+				return this._bumpOptions;
+			}
+
+			return this._bumpOptions.filter((option) => {
+				return segments.every(
+					(segment) =>
+						option.collection?.name.toLowerCase().includes(segment) ||
+						option.collectionAttribute?.name.toLowerCase().includes(segment)
+				);
+			});
+		} else {
+			return List([value]);
+		}
 	}
 
 	onEditDocument() {
@@ -277,5 +406,18 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 				},
 			});
 		}
+	}
+
+	displayWith(
+		data: {
+			collection: Collection | undefined;
+			collectionAttribute: CollectionAttribute | undefined;
+			account: InstructionAccount;
+		} | null
+	) {
+		return data?.collection !== undefined &&
+			data?.collectionAttribute !== undefined
+			? `${data.collection.name}.${data.collectionAttribute.name}`
+			: '';
 	}
 }

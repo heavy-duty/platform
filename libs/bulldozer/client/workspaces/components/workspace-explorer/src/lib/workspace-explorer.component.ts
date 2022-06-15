@@ -30,7 +30,7 @@ import { WorkspaceExplorerStore } from './workspace-explorer.store';
 	selector: 'bd-workspace-explorer',
 	template: `
 		<ng-container *ngrxLet="workspace$; let workspace">
-			<div class="flex flex-col h-screen">
+			<div class="flex flex-col h-screen bg-bp-stone">
 				<div
 					*ngrxLet="user$; let user"
 					class="flex items-center justify-center"

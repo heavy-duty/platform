@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import {
+	CollectionAttributesStore,
 	CollectionQueryStore,
 	CollectionsStore,
 } from '@bulldozer-client/collections-data-access';
@@ -28,6 +29,7 @@ import { Keypair } from '@solana/web3.js';
 import { distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
+import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
 import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
 import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
 import { ViewInstructionDocumentsPayersReferencesStore } from './view-instruction-documents-payers-references.store';
@@ -58,8 +60,14 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								"
 								class="underline text-accent"
 								[collections]="(collections$ | ngrxPush) ?? null"
+								[collectionAttributes]="
+									(collectionAttributes$ | ngrxPush) ?? null
+								"
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
+								"
+								[instructionAccountsCollectionsLookup]="
+									(instructionAccountsCollectionsLookup$ | ngrxPush) ?? null
 								"
 								(editInstructionDocument)="
 									onCreateInstructionDocument(
@@ -271,6 +279,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 											<button
 												class="bp-button w-28"
 												[collections]="(collections$ | ngrxPush) ?? null"
+												[collectionAttributes]="
+													(collectionAttributes$ | ngrxPush) ?? null
+												"
 												[instructionAccounts]="
 													instructionAccounts
 														| bdRemoveById: instructionDocument.id
@@ -428,6 +439,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		InstructionRelationsStore,
 		InstructionRelationQueryStore,
 		CollectionsStore,
+		CollectionAttributesStore,
 		CollectionQueryStore,
 		ViewInstructionDocumentsStore,
 		ViewInstructionDocumentsCollectionsStore,
@@ -436,6 +448,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		ViewInstructionDocumentsClosesReferencesStore,
 		ViewInstructionDocumentsCollectionsReferencesStore,
 		ViewInstructionDocumentsRelationsStore,
+		ViewInstructionDocumentsCollectionAttributesStore,
 	],
 })
 export class ViewInstructionDocumentsComponent implements OnInit {
@@ -450,6 +463,16 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 					) ?? null
 			)
 		);
+	readonly collectionAttributes$ =
+		this._viewInstructionDocumentsCollectionAttributesStore.collectionAttributes$.pipe(
+			map(
+				(collectionAttributes) =>
+					collectionAttributes?.filter(
+						(collectionAttribute) =>
+							!collectionAttribute.isCreating && !collectionAttribute.isDeleting
+					) ?? null
+			)
+		);
 	readonly instructionAccounts$ =
 		this._viewInstructionDocumentsAccountsStore.accounts$.pipe(
 			map(
@@ -459,6 +482,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 					) ?? null
 			)
 		);
+	readonly instructionAccountsCollectionsLookup$ =
+		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$;
+
 	readonly documents$ = this._viewInstructionDocumentsStore.documents$;
 	readonly workspaceId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('workspaceId')),
@@ -488,10 +514,15 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
 		private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
 		private readonly _viewInstructionDocumentsCollectionsReferencesStore: ViewInstructionDocumentsCollectionsReferencesStore,
-		private readonly _viewInstructionDocumentsClosesReferencesStore: ViewInstructionDocumentsClosesReferencesStore
+		private readonly _viewInstructionDocumentsClosesReferencesStore: ViewInstructionDocumentsClosesReferencesStore,
+		private readonly _viewInstructionDocumentsCollectionAttributesStore: ViewInstructionDocumentsCollectionAttributesStore
 	) {}
 
 	ngOnInit() {
+		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$.subscribe(
+			(a) => console.log(a)
+		);
+
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
 			this.instructionId$
 		);
@@ -508,6 +539,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 			this.instructionId$
 		);
 		this._viewInstructionDocumentsCollectionsStore.setApplicationId(
+			this.applicationId$
+		);
+		this._viewInstructionDocumentsCollectionAttributesStore.setApplicationId(
 			this.applicationId$
 		);
 	}

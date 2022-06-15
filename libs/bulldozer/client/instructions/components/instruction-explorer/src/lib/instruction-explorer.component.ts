@@ -110,7 +110,7 @@ import { InstructionItemView } from './types';
 							</button>
 							<mat-menu
 								#instructionOptionsMenu="matMenu"
-								class="bg-bp-wood bg-bd-brown"
+								class="bg-bp-wood bg-bp-brown"
 							>
 								<button
 									[instruction]="instruction"

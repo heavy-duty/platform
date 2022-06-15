@@ -11,7 +11,7 @@ export class WithdrawFromBudgetDirective {
 		this._matDialog
 			.open<WithdrawFromBudgetComponent, null, { amount: number }>(
 				WithdrawFromBudgetComponent,
-				{ panelClass: ['bg-bp-wood', 'bg-bd-brown'] }
+				{ panelClass: ['bg-bp-wood', 'bg-bp-brown'] }
 			)
 			.afterClosed()
 			.subscribe(

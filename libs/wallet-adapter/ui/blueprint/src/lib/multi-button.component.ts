@@ -66,7 +66,7 @@ import { HdWalletModalComponent } from './modal.component';
 							bpMenuItem
 							hdWalletModalButton
 							cdkMenuItem
-							panelClass="bg-bp-wood bg-bd-brown"
+							panelClass="bg-bp-wood bg-bp-brown"
 						>
 							<span class="material-icons"> sync_alt </span>
 

@@ -73,8 +73,6 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 						</div>
 
 						<div class="flex-grow overflow-hidden">
-							<hd-wallet-multi-button></hd-wallet-multi-button>
-
 							<router-outlet></router-outlet>
 						</div>
 					</div>
@@ -82,14 +80,14 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 
 				<mat-sidenav
 					#settings
-					class="bd-h-inherit w-80 bg-bp-wood bg-bd-brown px-4"
+					class="bd-h-inherit w-80 bg-bp-wood bg-bp-brown px-4"
 					[mode]="'over'"
 					[opened]="false"
 					fixedInViewport
 					position="end"
 				>
 					<header class="mt-8 mb-4 border-b hd-border-gray">
-						<h1 class="m-0 uppercase bd-font">Settings</h1>
+						<h1 class="m-0 uppercase bp-font">Settings</h1>
 					</header>
 
 					<main class="flex flex-col">
@@ -100,7 +98,7 @@ import { distinctUntilChanged, filter, pairwise, pipe, tap } from 'rxjs';
 								let publicKey = publicKey;
 								let selectWallet = selectWallet
 							"
-							class="bottom-0 py-6 px-4 mb-8 bd-bg-metal-2 bg-black relative mat-elevation-z4"
+							class="bottom-0 py-6 px-4 mb-8 bg-bp-metal-2 bg-black relative mat-elevation-z4"
 						>
 							<h2 class="m-0 mb-4 hd-highlight-title text-base uppercase">
 								Wallet

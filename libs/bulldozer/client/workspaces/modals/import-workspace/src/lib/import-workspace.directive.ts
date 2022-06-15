@@ -10,7 +10,7 @@ export class ImportWorkspaceDirective {
 			.open<ImportWorkspaceComponent, null, { pubkey: string }>(
 				ImportWorkspaceComponent,
 				{
-					panelClass: ['bg-bp-wood', 'bg-bd-brown'],
+					panelClass: ['bg-bp-wood', 'bg-bp-brown'],
 				}
 			)
 			.afterClosed()
