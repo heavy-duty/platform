@@ -48,9 +48,6 @@ export class BuildWorkspaceCommand implements CommandRunner {
 			}
 
 			if (options && options.singleApp) {
-				log(
-					`-> Single app option detected, the workspace would include only the app: ${options.singleApp}`
-				);
 				await this._generateWorkspaceCommand.run(
 					[workspace.publicKey.toBase58(), `${outDir}`],
 					options
