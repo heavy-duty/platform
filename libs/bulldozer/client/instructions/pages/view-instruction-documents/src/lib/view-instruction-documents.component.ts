@@ -480,42 +480,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
 											<button
 												class="bp-button w-28"
-												[collections]="(collections$ | ngrxPush) ?? null"
-												[collectionAttributes]="
-													(collectionAttributes$ | ngrxPush) ?? null
-												"
-												[instructionAccounts]="
-													instructionAccounts
-														| bdRemoveById: instructionDocument.id
-												"
-												[instructionDocument]="null"
-												[instructionAccountsCollectionsLookup]="
-													(instructionAccountsCollectionsLookup$ | ngrxPush) ??
-													null
-												"
-												[disabled]="instructionDocument | bdItemChanging"
-												[attr.aria-label]="
-													'Update document ' +
-													instructionDocument.name +
-													' derivation'
-												"
-												(editInstructionDocument)="
-													onUpdateInstructionDocument(
-														publicKey.toBase58(),
-														instructionDocument.workspaceId,
-														instructionDocument.applicationId,
-														instructionDocument.instructionId,
-														instructionDocument.id,
-														$event
-													)
-												"
-												bdEditInstructionDocumentDerivation
-											>
-												Derivation
-											</button>
-
-											<button
-												class="bp-button w-28"
 												[attr.aria-label]="
 													'Delete document ' + instructionDocument.name
 												"
@@ -896,7 +860,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	readonly instructionAccountsCollectionsLookup$ =
 		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$;
 
-	readonly documents$ = this._viewInstructionDocumentsStore.documents$;
+	readonly documents$ = this._viewInstructionDocumentsStore.documents$.pipe(
+		tap((a) => console.log(a))
+	);
 	readonly workspaceId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('workspaceId')),
 		isNotNullOrUndefined,
@@ -933,10 +899,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$.subscribe(
-			(a) => console.log(a)
-		);
-
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
 			this.instructionId$
 		);
@@ -963,6 +925,10 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		);
 		this._viewInstructionDocumentsCollectionAttributesStore.setApplicationId(
 			this.applicationId$
+		);
+
+		this._viewInstructionDocumentsDerivationsReferencesStore.accounts$.subscribe(
+			(a) => console.log(a)
 		);
 	}
 

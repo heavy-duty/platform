@@ -3488,6 +3488,24 @@ export type Bulldozer = {
 							}
 						];
 					};
+				}
+			];
+			args: [
+				{
+					name: 'arguments';
+					type: {
+						defined: 'SetInstructionAccountDerivationArguments';
+					};
+				}
+			];
+		},
+		{
+			name: 'addSeedToDerivation';
+			accounts: [
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
 				},
 				{
 					name: 'user';
@@ -3547,11 +3565,6 @@ export type Bulldozer = {
 		{
 			name: 'setTokenCofiguration';
 			accounts: [
-				{
-					name: 'systemProgram';
-					isMut: false;
-					isSigner: false;
-				},
 				{
 					name: 'authority';
 					isMut: false;
@@ -3621,6 +3634,17 @@ export type Bulldozer = {
 							}
 						];
 					};
+				}
+			];
+			args: [];
+		},
+		{
+			name: 'clearInstructionAccountDerivation';
+			accounts: [
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
 				},
 				{
 					name: 'mint';
@@ -5718,6 +5742,18 @@ export type Bulldozer = {
 						type: {
 							option: 'string';
 						};
+					}
+				];
+			};
+		},
+		{
+			name: 'SetInstructionAccountDerivationArguments';
+			type: {
+				kind: 'struct';
+				fields: [
+					{
+						name: 'name';
+						type: 'string';
 					}
 				];
 			};
@@ -7999,8 +8035,28 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
+								account: 'Application',
+								path: 'application.workspace',
+							},
+						],
+					},
+				},
+				{
+					name: 'budget',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'budget',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Application',
+								path: 'application.workspace',
 							},
 						],
 					},
@@ -8270,8 +8326,8 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
+								account: 'Collection',
+								path: 'collection',
 							},
 							{
 								kind: 'account',
@@ -8354,24 +8410,9 @@ export const IDL: Bulldozer = {
 					isSigner: true,
 				},
 				{
-					name: 'applicationStats',
+					name: 'attribute',
 					isMut: true,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'application_stats',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Application',
-								path: 'application',
-							},
-						],
-					},
+					isSigner: true,
 				},
 				{
 					name: 'user',
@@ -8638,7 +8679,7 @@ export const IDL: Bulldozer = {
 					isSigner: false,
 				},
 				{
-					name: 'application',
+					name: 'collection',
 					isMut: false,
 					isSigner: false,
 				},
@@ -8709,7 +8750,7 @@ export const IDL: Bulldozer = {
 					isSigner: false,
 				},
 				{
-					name: 'application',
+					name: 'collection',
 					isMut: false,
 					isSigner: false,
 				},
@@ -8719,21 +8760,20 @@ export const IDL: Bulldozer = {
 					isSigner: false,
 				},
 				{
-					name: 'applicationStats',
-					isMut: true,
+					name: 'user',
+					isMut: false,
 					isSigner: false,
 					pda: {
 						seeds: [
 							{
 								kind: 'const',
 								type: 'string',
-								value: 'application_stats',
+								value: 'user',
 							},
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'Application',
-								path: 'application',
+								path: 'authority',
 							},
 						],
 					},
@@ -8772,31 +8812,6 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								path: 'authority',
-							},
-						],
-					},
-				},
-				{
-					name: 'collaborator',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'collaborator',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
 								account: 'User',
 								path: 'user',
 							},
@@ -8819,6 +8834,26 @@ export const IDL: Bulldozer = {
 								type: 'publicKey',
 								account: 'Workspace',
 								path: 'workspace',
+							},
+						],
+					},
+				},
+				{
+					name: 'collectionStats',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collection_stats',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Collection',
+								path: 'collection',
 							},
 						],
 					},
@@ -8858,6 +8893,26 @@ export const IDL: Bulldozer = {
 					name: 'argument',
 					isMut: true,
 					isSigner: true,
+				},
+				{
+					name: 'applicationStats',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'application_stats',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Application',
+								path: 'application',
+							},
+						],
+					},
 				},
 				{
 					name: 'user',
@@ -9100,6 +9155,8 @@ export const IDL: Bulldozer = {
 						],
 					},
 				},
+			],
+			args: [
 				{
 					name: 'budget',
 					isMut: true,
@@ -9141,19 +9198,13 @@ export const IDL: Bulldozer = {
 					},
 				},
 			],
-			args: [],
 		},
 		{
 			name: 'createInstructionAccount',
 			accounts: [
 				{
-					name: 'systemProgram',
-					isMut: false,
-					isSigner: false,
-				},
-				{
 					name: 'authority',
-					isMut: true,
+					isMut: false,
 					isSigner: true,
 				},
 				{
@@ -9361,6 +9412,26 @@ export const IDL: Bulldozer = {
 						],
 					},
 				},
+				{
+					name: 'instructionStats',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_stats',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Instruction',
+								path: 'instruction',
+							},
+						],
+					},
+				},
 			],
 			args: [
 				{
@@ -9511,6 +9582,21 @@ export const IDL: Bulldozer = {
 					name: 'instruction',
 					isMut: false,
 					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_stats',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account',
+							},
+						],
+					},
 				},
 				{
 					name: 'collection',
@@ -9543,34 +9629,35 @@ export const IDL: Bulldozer = {
 					},
 				},
 				{
-					name: 'user',
-					isMut: false,
+					name: 'accountPayer',
+					isMut: true,
 					isSigner: false,
 					pda: {
 						seeds: [
 							{
 								kind: 'const',
 								type: 'string',
-								value: 'user',
+								value: 'instruction_account_payer',
 							},
 							{
 								kind: 'account',
 								type: 'publicKey',
-								path: 'authority',
+								account: 'InstructionAccount',
+								path: 'account',
 							},
 						],
 					},
 				},
 				{
-					name: 'collaborator',
-					isMut: false,
+					name: 'accountClose',
+					isMut: true,
 					isSigner: false,
 					pda: {
 						seeds: [
 							{
 								kind: 'const',
 								type: 'string',
-								value: 'collaborator',
+								value: 'instruction_account_close',
 							},
 							{
 								kind: 'account',
@@ -9581,8 +9668,8 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'User',
-								path: 'user',
+								account: 'InstructionAccount',
+								path: 'account',
 							},
 						],
 					},
@@ -9671,8 +9758,8 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
+								account: 'InstructionAccount',
+								path: 'account',
 							},
 							{
 								kind: 'account',
@@ -9696,6 +9783,330 @@ export const IDL: Bulldozer = {
 				},
 				{
 					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountClose',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_close',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account',
+							},
+						],
+					},
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountCollection',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_collection',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account',
+							},
+						],
+					},
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+			],
+			args: [],
+		},
+		{
+			name: 'setInstructionAccountPayer',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'payer',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountPayer',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_payer',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account',
+							},
+						],
+					},
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+			],
+			args: [],
+		},
+		{
+			name: 'setInstructionAccountClose',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'close',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+			],
+			args: [],
+		},
+		{
+			name: 'setInstructionAccountDerivation',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountDerivation',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_derivation',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+			],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'SetInstructionAccountDerivationArguments',
+					},
+				},
+			],
+		},
+		{
+			name: 'setTokenCofiguration',
+			accounts: [
+				{
+					name: 'systemProgram',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
 					isMut: false,
 					isSigner: false,
 				},
@@ -9804,255 +10215,6 @@ export const IDL: Bulldozer = {
 					name: 'account',
 					isMut: false,
 					isSigner: false,
-				},
-				{
-					name: 'accountPayer',
-					isMut: true,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'instruction_account_payer',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'InstructionAccount',
-								path: 'account',
-							},
-						],
-					},
-				},
-				{
-					name: 'user',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'user',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								path: 'authority',
-							},
-						],
-					},
-				},
-				{
-					name: 'collaborator',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'collaborator',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'User',
-								path: 'user',
-							},
-						],
-					},
-				},
-			],
-			args: [],
-		},
-		{
-			name: 'setInstructionAccountDerivation',
-			accounts: [
-				{
-					name: 'authority',
-					isMut: false,
-					isSigner: true,
-				},
-				{
-					name: 'workspace',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'application',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'instruction',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'account',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'accountDerivation',
-					isMut: true,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'instruction_account_derivation',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'InstructionAccount',
-								path: 'account',
-							},
-						],
-					},
-				},
-				{
-					name: 'user',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'user',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								path: 'authority',
-							},
-						],
-					},
-				},
-				{
-					name: 'collaborator',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'collaborator',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'User',
-								path: 'user',
-							},
-						],
-					},
-				},
-			],
-			args: [
-				{
-					name: 'arguments',
-					type: {
-						defined: 'SetInstructionAccountDerivationArguments',
-					},
-				},
-			],
-		},
-		{
-			name: 'setTokenCofiguration',
-			accounts: [
-				{
-					name: 'systemProgram',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'authority',
-					isMut: false,
-					isSigner: true,
-				},
-				{
-					name: 'workspace',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'application',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'instruction',
-					isMut: false,
-					isSigner: false,
-				},
-				{
-					name: 'account',
-					isMut: true,
-					isSigner: false,
-				},
-				{
-					name: 'user',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'user',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								path: 'authority',
-							},
-						],
-					},
-				},
-				{
-					name: 'collaborator',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'collaborator',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'User',
-								path: 'user',
-							},
-						],
-					},
 				},
 				{
 					name: 'mint',
@@ -10277,7 +10439,14 @@ export const IDL: Bulldozer = {
 					},
 				},
 			],
-			args: [],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'SetInstructionAccountDerivationArguments',
+					},
+				},
+			],
 		},
 		{
 			name: 'clearInstructionAccountDerivation',
@@ -10389,7 +10558,17 @@ export const IDL: Bulldozer = {
 					isSigner: false,
 				},
 				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
 					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'collection',
 					isMut: false,
 					isSigner: false,
 				},
@@ -12150,6 +12329,18 @@ export const IDL: Bulldozer = {
 						type: {
 							option: 'string',
 						},
+					},
+				],
+			},
+		},
+		{
+			name: 'SetInstructionAccountDerivationArguments',
+			type: {
+				kind: 'struct',
+				fields: [
+					{
+						name: 'name',
+						type: 'string',
 					},
 				],
 			},

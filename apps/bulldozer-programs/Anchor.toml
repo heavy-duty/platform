@@ -12,4 +12,4 @@ cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/*.spec.ts --parallel"
+test = "ts-mocha -p ./tsconfig.json -t 1000000 tests/instruction-account-derivation.spec.ts --parallel"
