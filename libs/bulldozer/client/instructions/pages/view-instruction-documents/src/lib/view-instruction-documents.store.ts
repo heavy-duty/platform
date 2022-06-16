@@ -2,7 +2,9 @@ import { Injectable } from '@angular/core';
 import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-access';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
+import { List } from 'immutable';
 import { map } from 'rxjs';
+import { InstructionAccountItemView } from './types';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
@@ -89,14 +91,23 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 								(collection) => collectionId === collection.id
 							) ?? null,
 						derivation: {
+							isUpdating: derivation?.isUpdating ?? false,
 							name: derivation?.name ?? null,
-							seedPaths:
-								derivation?.seedPaths.map(
-									(seedPath) =>
-										instructionAccounts.find(
-											(instructionAccount) => instructionAccount.id === seedPath
-										) ?? null
-								) ?? null,
+							seedPaths: List(
+								derivations
+									?.find(({ id }) => id === instructionAccount.derivation)
+									?.seedPaths.map(
+										(seedPath) =>
+											instructionAccounts.find(
+												(instructionAccount) =>
+													instructionAccount.id === seedPath
+											) ?? null
+									)
+									.filter(
+										(seedPath): seedPath is InstructionAccountItemView =>
+											seedPath !== null
+									) ?? []
+							),
 							bumpPath: derivation?.bumpPath
 								? {
 										reference:

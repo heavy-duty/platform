@@ -28,7 +28,7 @@ export class EditInstructionDocumentDerivationDirective {
 	instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup> | null =
 		null;
 	@Output() editInstructionDocumentDerivation = new EventEmitter<{
-		name: string;
+		name: string | null;
 		seedPaths: List<string>;
 		bumpPath: {
 			referenceId: string;
@@ -58,7 +58,7 @@ export class EditInstructionDocumentDerivationDirective {
 					derivation: InstructionAccountDerivation | null;
 				},
 				{
-					name: string;
+					name: string | null;
 					seedPaths: List<string>;
 					bumpPath: {
 						referenceId: string;

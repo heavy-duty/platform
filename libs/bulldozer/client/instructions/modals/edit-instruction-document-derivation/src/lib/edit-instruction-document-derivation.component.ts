@@ -9,7 +9,6 @@ import {
 	FormControl,
 	UntypedFormControl,
 	UntypedFormGroup,
-	Validators,
 } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -48,15 +47,11 @@ import {
 				<input
 					matInput
 					formControlName="name"
-					required
 					autocomplete="off"
 					maxlength="32"
 				/>
 				<mat-hint align="end">{{ nameControl.value?.length || 0 }}/32</mat-hint>
 
-				<mat-error *ngIf="submitted && nameControl.hasError('required')"
-					>The name is mandatory.</mat-error
-				>
 				<mat-error *ngIf="submitted && nameControl.hasError('maxlength')"
 					>Maximum length is 32.</mat-error
 				>
@@ -258,9 +253,7 @@ export class EditInstructionDocumentDerivationComponent {
 		);
 
 	readonly form = new UntypedFormGroup({
-		name: new UntypedFormControl(this.data?.derivation?.name ?? '', {
-			validators: [Validators.required],
-		}),
+		name: new UntypedFormControl(this.data?.derivation?.name ?? null),
 		bump: new UntypedFormControl(
 			this._bumpOptions?.find(
 				({ collectionAttribute }) =>
@@ -299,7 +292,7 @@ export class EditInstructionDocumentDerivationComponent {
 		private readonly _matDialogRef: MatDialogRef<
 			EditInstructionDocumentDerivationComponent,
 			{
-				name: string;
+				name: string | null;
 				seedPaths: List<string>;
 				bumpPath: {
 					referenceId: string;
@@ -430,7 +423,7 @@ export class EditInstructionDocumentDerivationComponent {
 			const { name, bump } = this.form.value;
 
 			this._matDialogRef.close({
-				name,
+				name: name === '' ? null : name,
 				bumpPath: bump
 					? {
 							collectionId: bump.collection.id,

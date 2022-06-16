@@ -422,12 +422,24 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 					</bd-card>
 
 					<bd-card>
-						<section *hdWalletAdapter="let publicKey = publicKey">
-							<div class="flex justify-between items-center mb-2">
+						<section
+							*hdWalletAdapter="let publicKey = publicKey"
+							class="flex flex-col gap-2"
+						>
+							<div class="flex justify-between items-center">
 								<p class="uppercase m-0">
 									Derivation
 
-									<span class="text-xs lowercase italic"> (disabled) </span>
+									<span
+										*ngIf="
+											instructionDocument.derivation.name === null &&
+											instructionDocument.derivation.bumpPath === null &&
+											instructionDocument.derivation.seedPaths.size === 0
+										"
+										class="text-xs lowercase italic"
+									>
+										(not enabled)
+									</span>
 								</p>
 
 								<ng-container
@@ -451,7 +463,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 											instructionDocument.name +
 											' derivation'
 										"
-										[disabled]="publicKey === null"
+										[disabled]="
+											publicKey === null ||
+											instructionDocument.derivation.isUpdating
+										"
 										(editInstructionDocumentDerivation)="
 											onUpdateInstructionDocumentDerivation(
 												publicKey?.toBase58() ?? null,
@@ -475,8 +490,9 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
 							<p
 								*ngIf="
-									instructionDocument.derivation.name ||
-									instructionDocument.derivation.seedPaths
+									instructionDocument.derivation.name !== null ||
+									instructionDocument.derivation.bumpPath !== null ||
+									instructionDocument.derivation.seedPaths.size !== 0
 								"
 								class="p-2 bg-black bg-opacity-40 rounded-md"
 							>
@@ -491,7 +507,14 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								</span>
 							</p>
 
-							<p class="text-xs m-0">
+							<p
+								*ngIf="
+									instructionDocument.derivation.name !== null ||
+									instructionDocument.derivation.bumpPath !== null ||
+									instructionDocument.derivation.seedPaths.size !== 0
+								"
+								class="text-xs m-0"
+							>
 								Bump:
 
 								<span
@@ -734,7 +757,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		applicationId: string,
 		instructionId: string,
 		instructionAccountId: string,
-		name: string,
+		name: string | null,
 		seedPaths: List<string>,
 		bumpPath: {
 			collectionId: string;

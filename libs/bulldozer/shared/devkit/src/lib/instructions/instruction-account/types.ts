@@ -86,7 +86,7 @@ export interface SetBumpToDerivationParams {
 }
 
 export interface SetInstructionAccountDerivationParams {
-	name: string;
+	name: string | null;
 	authority: string;
 	workspaceId: string;
 	applicationId: string;

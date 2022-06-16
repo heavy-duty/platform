@@ -5159,7 +5159,9 @@ export type Bulldozer = {
 				fields: [
 					{
 						name: 'name';
-						type: 'string';
+						type: {
+							option: 'string';
+						};
 					}
 				];
 			};
@@ -10963,7 +10965,9 @@ export const IDL: Bulldozer = {
 				fields: [
 					{
 						name: 'name',
-						type: 'string',
+						type: {
+							option: 'string',
+						},
 					},
 				],
 			},

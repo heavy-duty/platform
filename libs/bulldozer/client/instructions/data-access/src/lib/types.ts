@@ -13,7 +13,7 @@ export interface UpdateDerivationParams {
 	applicationId: string;
 	instructionId: string;
 	instructionAccountId: string;
-	name: string;
+	name: string | null;
 	seedPaths: List<string>;
 	bumpPath: {
 		referenceId: string;

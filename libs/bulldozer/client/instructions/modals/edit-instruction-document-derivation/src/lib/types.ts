@@ -1,3 +1,5 @@
+import { List } from 'immutable';
+
 export interface CollectionAttribute {
 	id: string;
 	name: string;
@@ -35,5 +37,5 @@ export interface InstructionAccountDerivation {
 			id: string;
 		} | null;
 	} | null;
-	seedPaths: (InstructionAccount | null)[] | null;
+	seedPaths: List<InstructionAccount>;
 }

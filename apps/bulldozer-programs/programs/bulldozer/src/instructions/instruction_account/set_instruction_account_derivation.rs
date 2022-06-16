@@ -8,7 +8,7 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct SetInstructionAccountDerivationArguments {
-  pub name: String,
+  pub name: Option<String>,
 }
 
 #[derive(Accounts)]
@@ -64,6 +64,6 @@ pub fn handle(
   arguments: SetInstructionAccountDerivationArguments,
 ) -> Result<()> {
   msg!("Set instruction account derivation");
-  ctx.accounts.account_derivation.set(Some(arguments.name));
+  ctx.accounts.account_derivation.set(arguments.name);
   Ok(())
 }
