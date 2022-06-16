@@ -66,9 +66,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
 								"
-								[instructionAccountsCollectionsLookup]="
-									(instructionAccountsCollectionsLookup$ | ngrxPush) ?? null
-								"
 								(editInstructionDocument)="
 									onCreateInstructionDocument(
 										publicKey.toBase58(),
@@ -313,6 +310,42 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 												bdEditInstructionDocument
 											>
 												Edit
+											</button>
+
+											<button
+												class="bp-button w-28"
+												[collections]="(collections$ | ngrxPush) ?? null"
+												[collectionAttributes]="
+													(collectionAttributes$ | ngrxPush) ?? null
+												"
+												[instructionAccounts]="
+													instructionAccounts
+														| bdRemoveById: instructionDocument.id
+												"
+												[instructionDocument]="null"
+												[instructionAccountsCollectionsLookup]="
+													(instructionAccountsCollectionsLookup$ | ngrxPush) ??
+													null
+												"
+												[disabled]="instructionDocument | bdItemChanging"
+												[attr.aria-label]="
+													'Update document ' +
+													instructionDocument.name +
+													' derivation'
+												"
+												(editInstructionDocument)="
+													onUpdateInstructionDocument(
+														publicKey.toBase58(),
+														instructionDocument.workspaceId,
+														instructionDocument.applicationId,
+														instructionDocument.instructionId,
+														instructionDocument.id,
+														$event
+													)
+												"
+												bdEditInstructionDocumentDerivation
+											>
+												Derivation
 											</button>
 
 											<button

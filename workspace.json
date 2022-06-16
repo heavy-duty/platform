@@ -40,6 +40,7 @@
 		"bulldozer-client-instructions-modals-edit-instruction": "libs/bulldozer/client/instructions/modals/edit-instruction",
 		"bulldozer-client-instructions-modals-edit-instruction-argument": "libs/bulldozer/client/instructions/modals/edit-instruction-argument",
 		"bulldozer-client-instructions-modals-edit-instruction-document": "libs/bulldozer/client/instructions/modals/edit-instruction-document",
+		"bulldozer-client-instructions-modals-edit-instruction-document-derivation": "libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation",
 		"bulldozer-client-instructions-modals-edit-instruction-relation": "libs/bulldozer/client/instructions/modals/edit-instruction-relation",
 		"bulldozer-client-instructions-modals-edit-instruction-signer": "libs/bulldozer/client/instructions/modals/edit-instruction-signer",
 		"bulldozer-client-instructions-pages-view-instruction": "libs/bulldozer/client/instructions/pages/view-instruction",

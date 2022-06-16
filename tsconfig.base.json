@@ -103,6 +103,9 @@
 			"@bulldozer-client/edit-instruction-document": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-document/src/index.ts"
 			],
+			"@bulldozer-client/edit-instruction-document-derivation": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation/src/index.ts"
+			],
 			"@bulldozer-client/edit-instruction-relation": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-relation/src/index.ts"
 			],
