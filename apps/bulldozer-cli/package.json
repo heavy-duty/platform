@@ -1,6 +1,6 @@
 {
 	"name": "@andresmgsl2/bulldozer-cli",
-	"version": "0.0.3",
+	"version": "0.0.51",
 	"main": "index.js",
 	"bin": {
 		"bulldozer": "index.js"
