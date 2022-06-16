@@ -3,6 +3,8 @@ export * from './lib/instruction-account-close-api.service';
 export * from './lib/instruction-account-closes.store';
 export * from './lib/instruction-account-collection-api.service';
 export * from './lib/instruction-account-collections.store';
+export * from './lib/instruction-account-derivation-api.service';
+export * from './lib/instruction-account-derivations.store';
 export * from './lib/instruction-account-event.service';
 export * from './lib/instruction-account-payer-api.service';
 export * from './lib/instruction-account-payers.store';

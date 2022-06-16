@@ -325,7 +325,7 @@ describe('instruction relation', () => {
 							41 // from payer account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
-							206 // from derivation account size
+							238 // from derivation account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
 							264 // to account size
@@ -343,7 +343,7 @@ describe('instruction relation', () => {
 							41 // to payer account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
-							206 // to derivation account size
+							238 // to derivation account size
 						)),
 				}),
 			])

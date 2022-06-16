@@ -14,6 +14,7 @@ import {
 	InstructionAccountApiService,
 	InstructionAccountClosesStore,
 	InstructionAccountCollectionsStore,
+	InstructionAccountDerivationsStore,
 	InstructionAccountPayersStore,
 	InstructionAccountQueryStore,
 	InstructionAccountsStore,
@@ -26,12 +27,14 @@ import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { Keypair } from '@solana/web3.js';
-import { distinctUntilChanged, map } from 'rxjs';
+import { List } from 'immutable';
+import { distinctUntilChanged, map, tap } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
 import { ViewInstructionDocumentsCollectionsReferencesStore } from './view-instruction-documents-collections-references.store';
 import { ViewInstructionDocumentsCollectionsStore } from './view-instruction-documents-collections.store';
+import { ViewInstructionDocumentsDerivationsReferencesStore } from './view-instruction-documents-derivations-references.store';
 import { ViewInstructionDocumentsPayersReferencesStore } from './view-instruction-documents-payers-references.store';
 import { ViewInstructionDocumentsRelationsStore } from './view-instruction-documents-relations.store';
 import { ViewInstructionDocumentsStore } from './view-instruction-documents.store';
@@ -314,42 +317,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 
 											<button
 												class="bp-button w-28"
-												[collections]="(collections$ | ngrxPush) ?? null"
-												[collectionAttributes]="
-													(collectionAttributes$ | ngrxPush) ?? null
-												"
-												[instructionAccounts]="
-													instructionAccounts
-														| bdRemoveById: instructionDocument.id
-												"
-												[instructionDocument]="null"
-												[instructionAccountsCollectionsLookup]="
-													(instructionAccountsCollectionsLookup$ | ngrxPush) ??
-													null
-												"
-												[disabled]="instructionDocument | bdItemChanging"
-												[attr.aria-label]="
-													'Update document ' +
-													instructionDocument.name +
-													' derivation'
-												"
-												(editInstructionDocument)="
-													onUpdateInstructionDocument(
-														publicKey.toBase58(),
-														instructionDocument.workspaceId,
-														instructionDocument.applicationId,
-														instructionDocument.instructionId,
-														instructionDocument.id,
-														$event
-													)
-												"
-												bdEditInstructionDocumentDerivation
-											>
-												Derivation
-											</button>
-
-											<button
-												class="bp-button w-28"
 												[attr.aria-label]="
 													'Delete document ' + instructionDocument.name
 												"
@@ -453,6 +420,100 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 							</div>
 						</section>
 					</bd-card>
+
+					<bd-card>
+						<section *hdWalletAdapter="let publicKey = publicKey">
+							<div class="flex justify-between items-center mb-2">
+								<p class="uppercase m-0">
+									Derivation
+
+									<span class="text-xs lowercase italic"> (disabled) </span>
+								</p>
+
+								<ng-container
+									*ngrxLet="instructionAccounts$; let instructionAccounts"
+								>
+									<button
+										class="bp-button"
+										[derivation]="instructionDocument.derivation"
+										[collections]="(collections$ | ngrxPush) ?? null"
+										[collectionAttributes]="
+											(collectionAttributes$ | ngrxPush) ?? null
+										"
+										[instructionAccounts]="instructionAccounts"
+										[instructionDocument]="null"
+										[instructionAccountsCollectionsLookup]="
+											(instructionAccountsCollectionsLookup$ | ngrxPush) ?? null
+										"
+										[disabled]="instructionDocument | bdItemChanging"
+										[attr.aria-label]="
+											'Update document ' +
+											instructionDocument.name +
+											' derivation'
+										"
+										[disabled]="publicKey === null"
+										(editInstructionDocumentDerivation)="
+											onUpdateInstructionDocumentDerivation(
+												publicKey?.toBase58() ?? null,
+												instructionDocument.workspaceId,
+												instructionDocument.applicationId,
+												instructionDocument.instructionId,
+												instructionDocument.id,
+												$event.name,
+												$event.seedPaths,
+												$event.bumpPath
+											)
+										"
+										bdEditInstructionDocumentDerivation
+									>
+										configure
+
+										<mat-icon inline>settings</mat-icon>
+									</button>
+								</ng-container>
+							</div>
+
+							<p
+								*ngIf="
+									instructionDocument.derivation.name ||
+									instructionDocument.derivation.seedPaths
+								"
+								class="p-2 bg-black bg-opacity-40 rounded-md"
+							>
+								"{{ instructionDocument.derivation.name }}"
+								<span
+									*ngFor="
+										let seedPath of instructionDocument.derivation.seedPaths
+									"
+								>
+									/
+									<span class="italic text-primary">{{ seedPath?.name }}</span>
+								</span>
+							</p>
+
+							<p class="text-xs m-0">
+								Bump:
+
+								<span
+									*ngIf="instructionDocument.derivation.bumpPath === null"
+									class="text-primary"
+								>
+									Calculated.
+								</span>
+								<span *ngIf="instructionDocument.derivation.bumpPath !== null">
+									Document
+									<span class="text-primary">
+										{{
+											instructionDocument.derivation.bumpPath.reference?.name
+										}} </span
+									>, attribute
+									<span class="text-primary">
+										{{ instructionDocument.derivation.bumpPath.path?.name }}.
+									</span>
+								</span>
+							</p>
+						</section>
+					</bd-card>
 				</div>
 			</div>
 
@@ -471,6 +532,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		InstructionAccountQueryStore,
 		InstructionRelationsStore,
 		InstructionRelationQueryStore,
+		InstructionAccountDerivationsStore,
 		CollectionsStore,
 		CollectionAttributesStore,
 		CollectionQueryStore,
@@ -480,6 +542,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		ViewInstructionDocumentsPayersReferencesStore,
 		ViewInstructionDocumentsClosesReferencesStore,
 		ViewInstructionDocumentsCollectionsReferencesStore,
+		ViewInstructionDocumentsDerivationsReferencesStore,
 		ViewInstructionDocumentsRelationsStore,
 		ViewInstructionDocumentsCollectionAttributesStore,
 	],
@@ -497,7 +560,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 			)
 		);
 	readonly collectionAttributes$ =
-		this._viewInstructionDocumentsCollectionAttributesStore.collectionAttributes$.pipe(
+		this._viewInstructionDocumentsCollectionAttributesStore.accounts$.pipe(
 			map(
 				(collectionAttributes) =>
 					collectionAttributes?.filter(
@@ -518,7 +581,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	readonly instructionAccountsCollectionsLookup$ =
 		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$;
 
-	readonly documents$ = this._viewInstructionDocumentsStore.documents$;
+	readonly documents$ = this._viewInstructionDocumentsStore.documents$.pipe(
+		tap((a) => console.log(a))
+	);
 	readonly workspaceId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('workspaceId')),
 		isNotNullOrUndefined,
@@ -547,15 +612,12 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
 		private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
 		private readonly _viewInstructionDocumentsCollectionsReferencesStore: ViewInstructionDocumentsCollectionsReferencesStore,
+		private readonly _viewInstructionDocumentsDerivationsReferencesStore: ViewInstructionDocumentsDerivationsReferencesStore,
 		private readonly _viewInstructionDocumentsClosesReferencesStore: ViewInstructionDocumentsClosesReferencesStore,
 		private readonly _viewInstructionDocumentsCollectionAttributesStore: ViewInstructionDocumentsCollectionAttributesStore
 	) {}
 
 	ngOnInit() {
-		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$.subscribe(
-			(a) => console.log(a)
-		);
-
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
 			this.instructionId$
 		);
@@ -568,6 +630,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		this._viewInstructionDocumentsCollectionsReferencesStore.setInstructionId(
 			this.instructionId$
 		);
+		this._viewInstructionDocumentsDerivationsReferencesStore.setInstructionId(
+			this.instructionId$
+		);
 		this._viewInstructionDocumentsClosesReferencesStore.setInstructionId(
 			this.instructionId$
 		);
@@ -576,6 +641,10 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		);
 		this._viewInstructionDocumentsCollectionAttributesStore.setApplicationId(
 			this.applicationId$
+		);
+
+		this._viewInstructionDocumentsDerivationsReferencesStore.accounts$.subscribe(
+			(a) => console.log(a)
 		);
 	}
 
@@ -639,6 +708,60 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 			.subscribe({
 				next: ({ transactionSignature, transaction }) => {
 					this._notificationStore.setEvent('Update document request sent');
+					this._hdBroadcasterSocketStore.send(
+						JSON.stringify({
+							event: 'transaction',
+							data: {
+								transactionSignature,
+								transaction,
+								topicNames: [
+									`authority:${authority}`,
+									`instructions:${instructionId}:accounts`,
+								],
+							},
+						})
+					);
+				},
+				error: (error) => {
+					this._notificationStore.setError(error);
+				},
+			});
+	}
+
+	onUpdateInstructionDocumentDerivation(
+		authority: string | null,
+		workspaceId: string,
+		applicationId: string,
+		instructionId: string,
+		instructionAccountId: string,
+		name: string,
+		seedPaths: List<string>,
+		bumpPath: {
+			collectionId: string;
+			referenceId: string;
+			pathId: string;
+		} | null
+	) {
+		if (authority === null) {
+			throw new Error('Connect your wallet to update derivation.');
+		}
+
+		this._instructionAccountApiService
+			.updateDerivation({
+				authority,
+				workspaceId,
+				applicationId,
+				instructionId,
+				instructionAccountId,
+				name,
+				bumpPath,
+				seedPaths,
+			})
+			.subscribe({
+				next: ({ transactionSignature, transaction }) => {
+					this._notificationStore.setEvent(
+						'Update document derivation request sent'
+					);
 					this._hdBroadcasterSocketStore.send(
 						JSON.stringify({
 							event: 'transaction',

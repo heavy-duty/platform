@@ -65,7 +65,7 @@ export class ViewInstructionDocumentsCollectionAttributesStore extends Component
 						a.transactionStatus.timestamp - b.transactionStatus.timestamp
 				)
 	);
-	readonly collectionAttributes$ = this.select(
+	readonly accounts$ = this.select(
 		this._collectionAttributesStore.collectionAttributes$,
 		this._instructionStatuses$,
 		(collectionAttributes, instructionStatuses) => {

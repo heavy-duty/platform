@@ -50,6 +50,7 @@ export interface InstructionAccountItemView {
 	collection: string | null;
 	close: string | null;
 	payer: string | null;
+	derivation: string | null;
 }
 
 export interface InstructionAccountPayerItemView {
@@ -61,6 +62,17 @@ export interface InstructionAccountPayerItemView {
 export interface InstructionAccountCollectionItemView {
 	id: string;
 	collection: string | null;
+	isUpdating: boolean;
+}
+
+export interface InstructionAccountDerivationItemView {
+	id: string;
+	name: string | null;
+	bumpPath: {
+		reference: string;
+		path: string;
+	} | null;
+	seedPaths: string[];
 	isUpdating: boolean;
 }
 

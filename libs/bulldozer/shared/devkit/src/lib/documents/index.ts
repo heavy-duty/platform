@@ -5,6 +5,7 @@ export * from './create-collection-attribute-document';
 export * from './create-collection-document';
 export * from './create-instruction-account-close-document';
 export * from './create-instruction-account-collection-document';
+export * from './create-instruction-account-derivation-document';
 export * from './create-instruction-account-document';
 export * from './create-instruction-account-payer-document';
 export * from './create-instruction-argument-document';

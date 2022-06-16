@@ -155,7 +155,6 @@ describe('instruction account derivation', () => {
 		const seedName = 'test';
 		const seedPath = {
 			reference: instructionAccount.publicKey,
-			path: collectionAttribute.publicKey,
 		};
 		const bumpPath = {
 			reference: instructionAccount.publicKey,
@@ -179,10 +178,8 @@ describe('instruction account derivation', () => {
 						workspace: workspace.publicKey,
 						application: application.publicKey,
 						instruction: instruction.publicKey,
-						collection: collection.publicKey,
 						account: instructionAccount.publicKey,
 						reference: instructionAccount.publicKey,
-						path: collectionAttribute.publicKey,
 					})
 					.instruction(),
 				await program.methods
@@ -205,6 +202,9 @@ describe('instruction account derivation', () => {
 			await program.account.instructionAccountDerivation.fetch(
 				instructionAccountDerivationPublicKey
 			);
+
+		console.log(derivationAccount);
+
 		assert.equal(derivationAccount.name, seedName);
 		assert.isNotNull(derivationAccount.bumpPath);
 		assert.isTrue(derivationAccount.bumpPath?.path.equals(bumpPath.path));
@@ -213,12 +213,7 @@ describe('instruction account derivation', () => {
 		);
 		assert.equal((derivationAccount.seedPaths as any[]).length, 1);
 		assert.isTrue(
-			(derivationAccount.seedPaths as any[])[0].reference.equals(
-				seedPath.reference
-			)
-		);
-		assert.isTrue(
-			(derivationAccount.seedPaths as any[])[0].path.equals(seedPath.path)
+			(derivationAccount.seedPaths as any[])[0].equals(seedPath.reference)
 		);
 	});
 

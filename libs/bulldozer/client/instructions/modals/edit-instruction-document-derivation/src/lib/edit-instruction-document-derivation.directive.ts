@@ -13,11 +13,13 @@ import {
 	Collection,
 	CollectionAttribute,
 	InstructionAccount,
+	InstructionAccountDerivation,
 	InstructionAccountsCollectionsLookup,
 } from './types';
 
 @Directive({ selector: '[bdEditInstructionDocumentDerivation]' })
 export class EditInstructionDocumentDerivationDirective {
+	@Input() derivation: InstructionAccountDerivation | null = null;
 	@Input() instructionDocument: InstructionAccountDto | null = null;
 	@Input() collections: List<Collection> | null = null;
 	@Input() collectionAttributes: List<CollectionAttribute> | null = null;
@@ -25,7 +27,15 @@ export class EditInstructionDocumentDerivationDirective {
 	@Input()
 	instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup> | null =
 		null;
-	@Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
+	@Output() editInstructionDocumentDerivation = new EventEmitter<{
+		name: string;
+		seedPaths: List<string>;
+		bumpPath: {
+			referenceId: string;
+			pathId: string;
+			collectionId: string;
+		} | null;
+	}>();
 	@HostListener('click') onClick(): void {
 		if (
 			!this.collections ||
@@ -45,8 +55,17 @@ export class EditInstructionDocumentDerivationDirective {
 					collectionAttributes: List<CollectionAttribute>;
 					accounts: List<InstructionAccount>;
 					instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup>;
+					derivation: InstructionAccountDerivation | null;
 				},
-				InstructionAccountDto
+				{
+					name: string;
+					seedPaths: List<string>;
+					bumpPath: {
+						referenceId: string;
+						pathId: string;
+						collectionId: string;
+					} | null;
+				}
 			>(EditInstructionDocumentDerivationComponent, {
 				data: {
 					document: this.instructionDocument,
@@ -55,12 +74,15 @@ export class EditInstructionDocumentDerivationDirective {
 					accounts: this.instructionAccounts,
 					instructionAccountsCollectionsLookup:
 						this.instructionAccountsCollectionsLookup,
+					derivation: this.derivation,
 				},
 				panelClass: ['bg-bp-wood', 'bg-bp-brown'],
 				maxHeight: '600px',
 			})
 			.afterClosed()
-			.subscribe((data) => data && this.editInstructionDocument.emit(data));
+			.subscribe(
+				(data) => data && this.editInstructionDocumentDerivation.emit(data)
+			);
 	}
 
 	constructor(private readonly _matDialog: MatDialog) {}

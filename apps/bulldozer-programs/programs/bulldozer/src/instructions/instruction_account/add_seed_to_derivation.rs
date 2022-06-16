@@ -1,6 +1,6 @@
 use crate::collections::{
-  Application, Collaborator, Collection, CollectionAttribute, Instruction, InstructionAccount,
-  InstructionAccountDerivation, User, Workspace,
+  Application, Collaborator, Instruction, InstructionAccount, InstructionAccountDerivation, User,
+  Workspace,
 };
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
@@ -20,22 +20,11 @@ pub struct AddSeedToDerivation<'info> {
   )]
   pub instruction: Box<Account<'info, Instruction>>,
   #[account(
-    constraint = collection.workspace == workspace.key() @ ErrorCode::CollectionDoesNotBelongToWorkspace,
-    constraint = collection.application == application.key() @ ErrorCode::CollectionDoesNotBelongToApplication,
-  )]
-  pub collection: Box<Account<'info, Collection>>,
-  #[account(
     constraint = account.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
     constraint = account.application == application.key() @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
     constraint = account.instruction == instruction.key() @ ErrorCode::InstructionAccountDoesNotBelongToInstruction,
   )]
   pub account: Box<Account<'info, InstructionAccount>>,
-  #[account(
-    constraint = path.workspace == workspace.key() @ ErrorCode::CollectionAttributeDoesNotBelongToWorkspace,
-    constraint = path.application == application.key() @ ErrorCode::CollectionAttributeDoesNotBelongToApplication,
-    constraint = path.collection == collection.key() @ ErrorCode::CollectionAttributeDoesNotBelongToCollection,
-  )]
-  pub path: Box<Account<'info, CollectionAttribute>>,
   #[account(
     constraint = reference.workspace == workspace.key() @ ErrorCode::InstructionAccountDoesNotBelongToWorkspace,
     constraint = reference.application == application.key() @ ErrorCode::InstructionAccountDoesNotBelongToApplication,
@@ -76,6 +65,6 @@ pub fn handle(ctx: Context<AddSeedToDerivation>) -> Result<()> {
   ctx
     .accounts
     .account_derivation
-    .add_seed(ctx.accounts.reference.key(), ctx.accounts.path.key());
+    .add_seed(ctx.accounts.reference.key());
   Ok(())
 }

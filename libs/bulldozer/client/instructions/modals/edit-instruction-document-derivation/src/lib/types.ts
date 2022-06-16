@@ -27,3 +27,13 @@ export interface InstructionAccountsCollectionsLookup {
 	id: string;
 	collection: string | null;
 }
+
+export interface InstructionAccountDerivation {
+	name: string | null;
+	bumpPath: {
+		path: {
+			id: string;
+		} | null;
+	} | null;
+	seedPaths: (InstructionAccount | null)[] | null;
+}

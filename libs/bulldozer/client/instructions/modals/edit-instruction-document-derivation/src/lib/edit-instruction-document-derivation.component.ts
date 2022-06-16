@@ -22,6 +22,7 @@ import {
 	Collection,
 	CollectionAttribute,
 	InstructionAccount,
+	InstructionAccountDerivation,
 	InstructionAccountsCollectionsLookup,
 } from './types';
 
@@ -33,9 +34,10 @@ import {
 		</h2>
 
 		<form
+			*ngrxLet="seedAccounts$; let seedAccounts"
 			class="flex flex-col gap-4"
 			[formGroup]="form"
-			(ngSubmit)="onEditDocumentDerivation()"
+			(ngSubmit)="onEditDocumentDerivation(seedAccounts)"
 		>
 			<mat-form-field
 				class="w-full"
@@ -210,9 +212,6 @@ import {
 })
 export class EditInstructionDocumentDerivationComponent {
 	@HostBinding('class') class = 'block w-72 relative';
-	readonly form: UntypedFormGroup;
-	readonly searchAccountControl = new FormControl();
-	submitted = false;
 	private readonly _bumpOptions = this.data?.accounts
 		.filter((account) => account.kind.id === 0)
 		.map((account) => {
@@ -257,6 +256,21 @@ export class EditInstructionDocumentDerivationComponent {
 				account: InstructionAccount;
 			}>()
 		);
+
+	readonly form = new UntypedFormGroup({
+		name: new UntypedFormControl(this.data?.derivation?.name ?? '', {
+			validators: [Validators.required],
+		}),
+		bump: new UntypedFormControl(
+			this._bumpOptions?.find(
+				({ collectionAttribute }) =>
+					collectionAttribute?.id === this.data?.derivation?.bumpPath?.path?.id
+			) ?? null
+		),
+	});
+	readonly searchAccountControl = new FormControl();
+	submitted = false;
+
 	readonly filteredBumpOptions$: Observable<
 		| List<{
 				collection: Collection | undefined;
@@ -282,9 +296,21 @@ export class EditInstructionDocumentDerivationComponent {
 
 	constructor(
 		private readonly _matSnackBar: MatSnackBar,
-		private readonly _matDialogRef: MatDialogRef<EditInstructionDocumentDerivationComponent>,
+		private readonly _matDialogRef: MatDialogRef<
+			EditInstructionDocumentDerivationComponent,
+			{
+				name: string;
+				seedPaths: List<string>;
+				bumpPath: {
+					referenceId: string;
+					pathId: string;
+					collectionId: string;
+				} | null;
+			}
+		>,
 		@Inject(MAT_DIALOG_DATA)
 		public data?: {
+			derivation: InstructionAccountDerivation | null;
 			document?: InstructionAccountDto;
 			collections: List<Collection>;
 			collectionAttributes: List<CollectionAttribute>;
@@ -292,13 +318,15 @@ export class EditInstructionDocumentDerivationComponent {
 			instructionAccountsCollectionsLookup: List<InstructionAccountsCollectionsLookup>;
 		}
 	) {
-		this.form = new UntypedFormGroup({
-			name: new UntypedFormControl(this.data?.document?.name ?? '', {
-				validators: [Validators.required],
-			}),
-			seeds: new UntypedFormControl(null),
-			bump: new UntypedFormControl(null),
-		});
+		if (this.data?.derivation?.seedPaths) {
+			this._seedAccounts.next(
+				List(
+					this.data?.derivation.seedPaths.filter(
+						(seedPath): seedPath is InstructionAccount => seedPath !== null
+					)
+				)
+			);
+		}
 
 		this.filteredBumpOptions$ = this.bumpControl.valueChanges.pipe(
 			startWith(null),
@@ -394,12 +422,24 @@ export class EditInstructionDocumentDerivationComponent {
 		this._seedAccounts.next(List(seedAccountsAsArray));
 	}
 
-	onEditDocumentDerivation() {
+	onEditDocumentDerivation(accounts: List<InstructionAccount>) {
 		this.submitted = true;
 		this.form.markAllAsTouched();
 
 		if (this.form.valid) {
-			console.log(this.form.value);
+			const { name, bump } = this.form.value;
+
+			this._matDialogRef.close({
+				name,
+				bumpPath: bump
+					? {
+							collectionId: bump.collection.id,
+							referenceId: bump.account.id,
+							pathId: bump.collectionAttribute.id,
+					  }
+					: null,
+				seedPaths: accounts.map((account) => account.id),
+			});
 		} else {
 			this._matSnackBar.openFromComponent(SnackBarComponent, {
 				duration: 5000,

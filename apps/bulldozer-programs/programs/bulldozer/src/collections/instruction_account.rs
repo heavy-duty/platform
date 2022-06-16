@@ -83,7 +83,7 @@ pub struct Path {
 pub struct InstructionAccountDerivation {
   pub name: Option<String>,
   pub bump_path: Option<Path>,
-  pub seed_paths: Vec<Path>,
+  pub seed_paths: Vec<Pubkey>,
 }
 
 impl InstructionAccountDerivation {
@@ -91,8 +91,8 @@ impl InstructionAccountDerivation {
     self.name = name;
   }
 
-  pub fn add_seed(&mut self, reference: Pubkey, path: Pubkey) -> () {
-    self.seed_paths.push(Path { reference, path })
+  pub fn add_seed(&mut self, reference: Pubkey) -> () {
+    self.seed_paths.push(reference)
   }
 
   pub fn set_bump(&mut self, reference: Pubkey, path: Pubkey) -> () {
@@ -107,7 +107,7 @@ impl InstructionAccountDerivation {
 
   pub fn space() -> usize {
     // discriminator + name + bump path + seed paths
-    8 + 37 + 33 + 32 * 4
+    8 + 37 + 65 + 32 * 4
   }
 }
 

@@ -19,7 +19,6 @@ export class HdSolanaApiInterceptor implements HttpInterceptor {
 		const rpcMethod = httpRequest.headers.get('solana-rpc-method');
 
 		if (rpcMethod === 'sendTransaction') {
-			console.log(httpRequest.body);
 			return [
 				httpRequest.body.serialize().toString('base64'),
 				{ encoding: 'base64' },
