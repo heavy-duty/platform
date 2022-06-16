@@ -307,7 +307,7 @@ Hosting URL: https://testin-drill.web.app
 
 Now with this new Web Client URL, you have to update the _WEB_CLIENT_URL_ environment variable of the Gateway vercel app.
 
-Bear with me, we're almost finished. Go to your Github Settings and update the GithubApp to have the Callback URL point to _< Web CLient URL >/login_ (as we did with the _Webhook URL_ in early steps). After this, you need to redeploy your Vercel Gateway app.
+Bear with me, we're almost finished. Go to your Github Settings and update the GithubApp to have the Callback URL point to **_< Web CLient URL >/login_** (as we did with the _Webhook URL_ in early steps). After this, you need to redeploy your Vercel Gateway app.
 
 In the web client, look for the environment.production.ts file and update the redirectURL value with _< Web CLient URL >/login_ and, again, you know it, redeploy it.
 

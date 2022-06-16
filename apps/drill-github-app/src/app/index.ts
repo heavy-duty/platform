@@ -52,7 +52,6 @@ export const createDrillGithubApp =
 			const bountyAccount = await program.account.bounty.fetchNullable(
 				bountyPublicKey
 			);
-
 			if (issue.labels !== undefined) {
 				await Promise.all(
 					issue.labels
@@ -66,7 +65,7 @@ export const createDrillGithubApp =
 						)
 				);
 			}
-
+			let bountyAlreadyExist = false;
 			// When bounty exists just sync the labels in GH
 			if (bountyAccount !== null) {
 				await context.octokit.issues.addLabels(
@@ -77,101 +76,133 @@ export const createDrillGithubApp =
 					})
 				);
 
-				return {
-					message: 'Bounty already enabled.',
-				};
+				bountyAlreadyExist = true;
 			}
-
-			await context.octokit.issues.addLabels(
-				context.issue({
-					labels: ['drill:bounty:processing'],
-				})
-			);
 
 			const board = await program.account.board.fetch(boardPublicKey);
+			const imagePath = `.drill/${issue.number}.jpg`;
 
-			try {
-				await program.methods
-					.initializeBounty(repository.id, issue.number)
-					.accounts({
-						acceptedMint: board.acceptedMint,
-						authority: provider.wallet.publicKey,
+			if (!bountyAlreadyExist) {
+				await context.octokit.issues.addLabels(
+					context.issue({
+						labels: ['drill:bounty:processing'],
 					})
-					.simulate();
-			} catch (error) {
-				Promise.all([
-					context.octokit.issues.removeLabel(
-						context.issue({
-							name: 'drill:bounty:processing',
+				);
+
+				try {
+					await program.methods
+						.initializeBounty(repository.id, issue.number)
+						.accounts({
+							acceptedMint: board.acceptedMint,
+							authority: provider.wallet.publicKey,
 						})
-					),
-					context.octokit.issues.addLabels(
-						context.issue({
-							labels: ['drill:bounty:failed'],
+						.simulate();
+					console.log('5');
+					await program.methods
+						.initializeBounty(repository.id, issue.number)
+						.accounts({
+							acceptedMint: board.acceptedMint,
+							authority: provider.wallet.publicKey,
 						})
-					),
-					context.octokit.issues.createComment(
-						context.issue({
-							body: getErrorCommentBody(
-								'# ⚠️ Bounty Failed',
-								(error as any).simulationResponse === null
-									? getErrorMessage(error)
-									: (error as any).simulationResponse.logs?.join('\n') ?? ''
-							),
-							contentType: 'text/x-markdown',
+						.rpc();
+
+					// solana pay
+					const QR = await getSolanaPayQR(
+						bountyVaultPublicKey.toBase58(),
+						board.acceptedMint.toBase58()
+					);
+
+					await context.octokit.repos.createOrUpdateFileContents(
+						context.repo({
+							path: imagePath,
+							message: 'feat: Added solana QR image',
+							content: QR.base64,
+							committer: {
+								name: 'Drill Bot',
+								email: 'danielarturomt@gmail.com',
+							},
+							author: {
+								name: 'Drill Bot',
+								email: 'danielarturomt@gmail.com',
+							},
 						})
-					),
-				]);
-				return {
-					message: 'Something when wrong while simulating initializeBounty',
-					error: getErrorMessage(error),
-				};
+					);
+				} catch (error) {
+					Promise.all([
+						context.octokit.issues.removeLabel(
+							context.issue({
+								name: 'drill:bounty:processing',
+							})
+						),
+						context.octokit.issues.addLabels(
+							context.issue({
+								labels: ['drill:bounty:failed'],
+							})
+						),
+						context.octokit.issues.createComment(
+							context.issue({
+								body: getErrorCommentBody(
+									'# ⚠️ Bounty Failed',
+									(error as any).simulationResponse === null
+										? getErrorMessage(error)
+										: (error as any).simulationResponse.logs?.join('\n') ?? ''
+								),
+								contentType: 'text/x-markdown',
+							})
+						),
+					]);
+					return {
+						message: 'Something when wrong while simulating initializeBounty',
+						error: getErrorMessage(error),
+					};
+				}
 			}
 
 			try {
-				const signature = await program.methods
-					.initializeBounty(repository.id, issue.number)
-					.accounts({
-						acceptedMint: board.acceptedMint,
-						authority: provider.wallet.publicKey,
-					})
-					.rpc();
-
 				const boardAccount = await getBoard(program, repository.id);
 				const bountyAccount = await getBounty(
 					program,
 					repository.id,
 					issue.number
 				);
+				let bountyVault;
 
-				// solana pay
-				const QR = await getSolanaPayQR(
-					bountyVaultPublicKey.toBase58(),
-					board.acceptedMint.toBase58()
-				);
-				const imagePath = `.drill/${issue.number}.jpg`;
-				await context.octokit.repos.createOrUpdateFileContents(
-					context.repo({
-						path: imagePath,
-						message: 'feat: Added solana QR image',
-						content: QR.base64,
-						committer: {
-							name: 'Drill Bot',
-							email: 'danielarturomt@gmail.com',
-						},
-						author: {
-							name: 'Drill Bot',
-							email: 'danielarturomt@gmail.com',
-						},
-					})
-				);
+				try {
+					bountyVault = await getBountyVault(
+						program,
+						boardAccount.id,
+						bountyAccount.id
+					);
+				} catch (e) {
+					const solanaErrorMessage =
+						'A Solana error ocurred. Sometimes the network could be offline or slow to respond. try removing the "drill:bounty:failed" and to add the "drill:bounty" tag again';
+					Promise.all([
+						context.octokit.issues.removeLabel(
+							context.issue({
+								name: 'drill:bounty:processing',
+							})
+						),
+						context.octokit.issues.addLabels(
+							context.issue({
+								labels: ['drill:bounty:failed'],
+							})
+						),
+						context.octokit.issues.createComment(
+							context.issue({
+								body: getErrorCommentBody(
+									'# ⚠️ Bounty Failed',
+									solanaErrorMessage
+								),
 
-				const bountyVault = await getBountyVault(
-					program,
-					boardAccount.id,
-					bountyAccount.id
-				);
-
+								contentType: 'text/x-markdown',
+							})
+						),
+					]);
+					return {
+						message: 'Something when wrong while initializing bounty',
+						error: solanaErrorMessage,
+					};
+				}
 				const boardMessageData = {
 					id: bountyAccount.boardId,
 					publicKey: boardPublicKey.toBase58(),
@@ -203,12 +234,6 @@ export const createDrillGithubApp =
 								boardMessageData,
 								bountyMessageData,
 								`${repository.owner.login}/${repository.name}`,
-								getExplorerUrl(
-									'tx',
-									signature,
-									cluster,
-									provider.connection.rpcEndpoint
-								),
 								getExplorerUrl(
 									'address',
 									boardMessageData.publicKey,
