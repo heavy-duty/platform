@@ -203,9 +203,6 @@ describe('instruction account derivation', () => {
 			await program.account.instructionAccountDerivation.fetch(
 				instructionAccountDerivationPublicKey
 			);
-
-		console.log(derivationAccount);
-
 		assert.equal(derivationAccount.name, seedName);
 		assert.isNotNull(derivationAccount.bumpPath);
 		assert.isTrue(derivationAccount.bumpPath?.path.equals(bumpPath.path));

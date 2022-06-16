@@ -270,6 +270,26 @@ export const reduceInstructions = (
 			} else {
 				return items;
 			}
+
+			const itemIndex = items.findIndex(
+				(item) => item.id === accountDerivation
+			);
+
+			return items.update(
+				itemIndex,
+				{
+					id: accountDerivation,
+					isUpdating: instruction.transactionStatus.status !== 'finalized',
+					name: null,
+					bumpPath: null,
+					seedPaths: [reference],
+				},
+				(item: InstructionAccountDerivationItemView) => ({
+					...item,
+					isUpdating: instruction.transactionStatus.status !== 'finalized',
+					seedPaths: [...item.seedPaths, reference],
+				})
+			);
 		}
 		default:
 			return items;
