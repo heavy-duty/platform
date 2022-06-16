@@ -163,105 +163,111 @@ import {
 				</mat-select>
 			</mat-form-field>
 
-			<mat-form-field class="w-full" appearance="fill">
-				<mat-label>Seeds</mat-label>
-				<input
-					[matAutocomplete]="seedsAutocomplete"
-					[formControl]="searchAccountControl"
-					type="text"
-					matInput
-					placeholder="Search for account"
-				/>
-				<mat-autocomplete
-					#seedsAutocomplete="matAutocomplete"
-					[displayWith]="displayWith"
-					(optionSelected)="onAccountSelected($event.option.value)"
-					autoActiveFirstOption
-				>
-					<mat-option
-						*ngFor="let option of filteredAccountOptions$ | ngrxPush"
-						[value]="option"
-					>
-						{{ option.name }}
-					</mat-option>
-				</mat-autocomplete>
-			</mat-form-field>
+			<mat-checkbox [formControl]="isDerivedControl">
+				Is this document address derived?
+			</mat-checkbox>
 
-			<ng-container *ngIf="seedAccounts$ | ngrxPush as seedAccounts">
-				<div
-					*ngIf="seedAccounts.size > 0"
-					class="flex flex-col gap-4 seeds"
-					(cdkDropListDropped)="onAccountsMoved($event)"
-					cdkDropList
-				>
-					<div
-						*ngFor="
-							let seed of seedAccounts$ | ngrxPush;
-							let index = index;
-							let last = last
-						"
-						class="px-6 py-4 rounded seed bg-black bg-bp-metal-2"
-						cdkDrag
+			<ng-container *ngIf="isDerivedControl.value">
+				<mat-form-field class="w-full" appearance="fill">
+					<mat-label>Seeds</mat-label>
+					<input
+						[matAutocomplete]="seedsAutocomplete"
+						[formControl]="searchAccountControl"
+						type="text"
+						matInput
+						placeholder="Search for account"
+					/>
+					<mat-autocomplete
+						#seedsAutocomplete="matAutocomplete"
+						[displayWith]="displayWith"
+						(optionSelected)="onAccountSelected($event.option.value)"
+						autoActiveFirstOption
 					>
-						<div *cdkDragPlaceholder class="seed-placeholder"></div>
-
-						<div
-							class="w-full flex justify-between items-center cursor-move gap-4"
-							cdkDragHandle
+						<mat-option
+							*ngFor="let option of filteredAccountOptions$ | ngrxPush"
+							[value]="option"
 						>
-							<div class="flex items-center gap-2">
-								<div
-									class="flex justify-center items-center w-8 h-8 rounded-full bg-black bg-opacity-40 font-bold"
-								>
-									{{ index + 1 }}
+							{{ option.name }}
+						</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
+
+				<ng-container *ngIf="seedAccounts$ | ngrxPush as seedAccounts">
+					<div
+						*ngIf="seedAccounts.size > 0"
+						class="flex flex-col gap-4 seeds"
+						(cdkDropListDropped)="onAccountsMoved($event)"
+						cdkDropList
+					>
+						<div
+							*ngFor="
+								let seed of seedAccounts$ | ngrxPush;
+								let index = index;
+								let last = last
+							"
+							class="px-6 py-4 rounded seed bg-black bg-bp-metal-2"
+							cdkDrag
+						>
+							<div *cdkDragPlaceholder class="seed-placeholder"></div>
+
+							<div
+								class="w-full flex justify-between items-center cursor-move gap-4"
+								cdkDragHandle
+							>
+								<div class="flex items-center gap-2">
+									<div
+										class="flex justify-center items-center w-8 h-8 rounded-full bg-black bg-opacity-40 font-bold"
+									>
+										{{ index + 1 }}
+									</div>
+
+									<p class="m-0">
+										{{ seed.name }}
+									</p>
 								</div>
 
-								<p class="m-0">
-									{{ seed.name }}
-								</p>
+								<button
+									class="bg-black h-full p-1 bp-button uppercase text-sm text-red-500"
+									[attr.aria-label]="'Remove seed number ' + index"
+									(click)="onAccountRemoved(index)"
+									type="button"
+									craneStopPropagation
+								>
+									<mat-icon inline>delete</mat-icon>
+								</button>
 							</div>
-
-							<button
-								class="bg-black h-full p-1 bp-button uppercase text-sm text-red-500"
-								[attr.aria-label]="'Remove seed number ' + index"
-								(click)="onAccountRemoved(index)"
-								type="button"
-								craneStopPropagation
-							>
-								<mat-icon inline>delete</mat-icon>
-							</button>
 						</div>
 					</div>
-				</div>
-			</ng-container>
+				</ng-container>
 
-			<mat-form-field class="w-full" appearance="fill">
-				<mat-label>Bump</mat-label>
-				<input
-					[matAutocomplete]="bumpAutocomplete"
-					type="text"
-					formControlName="bump"
-					matInput
-					placeholder="Choose a bump"
-				/>
-				<mat-autocomplete
-					#bumpAutocomplete="matAutocomplete"
-					[displayWith]="displayWith"
-					autoActiveFirstOption
-				>
-					<mat-option [value]="null"> None </mat-option>
-					<mat-option
-						*ngFor="let option of filteredBumpOptions$ | ngrxPush"
-						[value]="option"
+				<mat-form-field class="w-full" appearance="fill">
+					<mat-label>Bump</mat-label>
+					<input
+						[matAutocomplete]="bumpAutocomplete"
+						type="text"
+						formControlName="bump"
+						matInput
+						placeholder="Choose a bump"
+					/>
+					<mat-autocomplete
+						#bumpAutocomplete="matAutocomplete"
+						[displayWith]="displayWith"
+						autoActiveFirstOption
 					>
-						{{ option.account?.name }}.{{ option.collectionAttribute?.name }}
+						<mat-option [value]="null"> None </mat-option>
+						<mat-option
+							*ngFor="let option of filteredBumpOptions$ | ngrxPush"
+							[value]="option"
+						>
+							{{ option.account?.name }}.{{ option.collectionAttribute?.name }}
 
-						<span class="italic text-xs">
-							{{ option.collection?.name }}
-						</span>
-					</mat-option>
-				</mat-autocomplete>
-			</mat-form-field>
+							<span class="italic text-xs">
+								{{ option.collection?.name }}
+							</span>
+						</mat-option>
+					</mat-autocomplete>
+				</mat-form-field>
+			</ng-container>
 
 			<div
 				class="py-2 px-5 w-full h-12 bg-bp-metal-2 shadow flex justify-center items-center m-auto mt-4 relative bg-bp-black"
@@ -317,6 +323,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	readonly destroy$ = this._destroy.asObservable();
 	readonly form: UntypedFormGroup;
 	readonly searchAccountControl = new FormControl();
+	readonly isDerivedControl = new FormControl(false);
 	submitted = false;
 	private readonly _bumpOptions = this.data?.accounts
 		.filter((account) => account.kind.id === 0)
