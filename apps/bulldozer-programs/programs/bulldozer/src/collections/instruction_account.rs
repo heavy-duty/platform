@@ -74,11 +74,50 @@ impl InstructionAccountClose {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct Path {
+  pub reference: Pubkey,
+  pub path: Pubkey,
+}
+
+#[account]
+pub struct InstructionAccountDerivation {
+  pub name: Option<String>,
+  pub bump_path: Option<Path>,
+  pub seed_paths: Vec<Path>,
+}
+
+impl InstructionAccountDerivation {
+  pub fn set(&mut self, name: Option<String>) -> () {
+    self.name = name;
+  }
+
+  pub fn add_seed(&mut self, reference: Pubkey, path: Pubkey) -> () {
+    self.seed_paths.push(Path { reference, path })
+  }
+
+  pub fn set_bump(&mut self, reference: Pubkey, path: Pubkey) -> () {
+    self.bump_path = Some(Path { reference, path })
+  }
+
+  pub fn clear(&mut self) -> () {
+    self.name = None;
+    self.seed_paths = Vec::new();
+    self.bump_path = None
+  }
+
+  pub fn space() -> usize {
+    // discriminator + name + bump path + seed paths
+    8 + 37 + 33 + 32 * 4
+  }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct InstructionAccountBumps {
   pub stats: u8,
   pub collection: u8,
   pub payer: u8,
   pub close: u8,
+  pub derivation: u8,
 }
 
 #[account]

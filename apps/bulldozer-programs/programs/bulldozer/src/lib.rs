@@ -225,6 +225,27 @@ pub mod bulldozer {
     instructions::set_instruction_account_payer::handle(ctx)
   }
 
+  pub fn set_instruction_account_derivation(
+    ctx: Context<SetInstructionAccountDerivation>,
+    arguments: SetInstructionAccountDerivationArguments,
+  ) -> Result<()> {
+    instructions::set_instruction_account_derivation::handle(ctx, arguments)
+  }
+
+  pub fn add_seed_to_derivation(ctx: Context<AddSeedToDerivation>) -> Result<()> {
+    instructions::add_seed_to_derivation::handle(ctx)
+  }
+
+  pub fn set_bump_to_derivation(ctx: Context<SetBumpToDerivation>) -> Result<()> {
+    instructions::set_bump_to_derivation::handle(ctx)
+  }
+
+  pub fn clear_instruction_account_derivation(
+    ctx: Context<ClearInstructionAccountDerivation>,
+  ) -> Result<()> {
+    instructions::clear_instruction_account_derivation::handle(ctx)
+  }
+
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> Result<()> {
     instructions::delete_instruction_account::handle(ctx)
   }
