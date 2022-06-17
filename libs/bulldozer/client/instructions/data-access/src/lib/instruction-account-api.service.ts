@@ -19,6 +19,7 @@ import {
 	setInstructionAccountCollection,
 	setInstructionAccountDerivation,
 	setInstructionAccountPayer,
+	setTokenConfiguration,
 	updateInstructionAccount,
 	UpdateInstructionAccountParams,
 } from '@heavy-duty/bulldozer-devkit';
@@ -156,7 +157,7 @@ export class InstructionAccountApiService {
 			),
 		];
 
-		const { kind, modifier, collection, close, payer } =
+		const { kind, modifier, collection, close, payer, mint, tokenAuthority } =
 			params.instructionAccountDto;
 
 		if (kind === 0 && collection !== null) {
@@ -199,7 +200,7 @@ export class InstructionAccountApiService {
 			);
 		}
 
-		if (modifier === 1 && close !== null) {
+		if (kind === 0 && modifier === 1 && close !== null) {
 			instructions.push(
 				this._hdSolanaConfigStore.apiEndpoint$.pipe(
 					first(),
@@ -213,6 +214,32 @@ export class InstructionAccountApiService {
 							instructionAccountId:
 								instructionAccountKeypair.publicKey.toBase58(),
 							close,
+						});
+					})
+				)
+			);
+		}
+
+		if (
+			kind === 4 &&
+			modifier === 0 &&
+			mint !== null &&
+			tokenAuthority !== null
+		) {
+			instructions.push(
+				this._hdSolanaConfigStore.apiEndpoint$.pipe(
+					first(),
+					concatMap((apiEndpoint) => {
+						if (apiEndpoint === null) {
+							return throwError(() => 'API endpoint missing');
+						}
+
+						return setTokenConfiguration(apiEndpoint, {
+							...params,
+							instructionAccountId:
+								instructionAccountKeypair.publicKey.toBase58(),
+							mint,
+							tokenAuthority,
 						});
 					})
 				)
@@ -252,7 +279,7 @@ export class InstructionAccountApiService {
 			),
 		];
 
-		const { modifier, close, payer, kind, collection } =
+		const { modifier, close, payer, kind, collection, mint, tokenAuthority } =
 			params.instructionAccountDto;
 
 		if (kind === 0 && collection !== null) {
@@ -293,7 +320,7 @@ export class InstructionAccountApiService {
 			);
 		}
 
-		if (modifier === 1) {
+		if (kind === 0 && modifier === 1) {
 			instructions.push(
 				this._hdSolanaConfigStore.apiEndpoint$.pipe(
 					first(),
@@ -313,6 +340,31 @@ export class InstructionAccountApiService {
 							...params,
 							instructionAccountId: params.instructionAccountId,
 							close,
+						});
+					})
+				)
+			);
+		}
+
+		if (
+			kind === 4 &&
+			modifier === 0 &&
+			mint !== null &&
+			tokenAuthority !== null
+		) {
+			instructions.push(
+				this._hdSolanaConfigStore.apiEndpoint$.pipe(
+					first(),
+					concatMap((apiEndpoint) => {
+						if (apiEndpoint === null) {
+							return throwError(() => 'API endpoint missing');
+						}
+
+						return setTokenConfiguration(apiEndpoint, {
+							...params,
+							instructionAccountId: params.instructionAccountId,
+							mint,
+							tokenAuthority,
 						});
 					})
 				)

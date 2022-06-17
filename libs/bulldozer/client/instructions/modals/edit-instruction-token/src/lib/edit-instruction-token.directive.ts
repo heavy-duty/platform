@@ -6,20 +6,17 @@ import {
 	Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import {
-	InstructionAccountDto,
-	InstructionAccountModel,
-} from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { EditInstructionTokenComponent } from './edit-instruction-token.component';
 import { InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionToken]' })
 export class EditInstructionTokenDirective {
-	@Input() instructionAccount: InstructionAccountModel | null = null;
+	@Input() instructionDocument: InstructionAccountModel | null = null;
 	@Input() instructionAccounts: List<InstructionAccount> | null = null;
 
-	@Output() editInstructionToken = new EventEmitter<InstructionAccountDto>();
+	@Output() editInstructionToken = new EventEmitter<InstructionAccountModel>();
 	@HostListener('click') onClick(): void {
 		if (!this.instructionAccounts) {
 			throw new Error('Values missing!');
@@ -35,7 +32,7 @@ export class EditInstructionTokenDirective {
 				InstructionAccountModel
 			>(EditInstructionTokenComponent, {
 				data: {
-					document: this.instructionAccount,
+					document: this.instructionDocument,
 					accounts: this.instructionAccounts,
 				},
 				panelClass: ['bg-bp-wood', 'bg-bp-brown'],

@@ -7,7 +7,6 @@ import {
 	OnInit,
 } from '@angular/core';
 import {
-	FormControl,
 	UntypedFormControl,
 	UntypedFormGroup,
 	Validators,
@@ -18,7 +17,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
-import { Collection, CollectionAttribute, InstructionAccount } from './types';
+import { InstructionAccount } from './types';
 
 @Component({
 	selector: 'bd-edit-token',
@@ -85,17 +84,14 @@ import { Collection, CollectionAttribute, InstructionAccount } from './types';
 			</mat-form-field>
 
 			<mat-form-field
-				*ngIf="modifierControl.value === 1"
+				*ngIf="modifierControl.value === 0"
 				class="w-full"
 				appearance="fill"
 				hintLabel="Choose the mint."
 			>
 				<mat-label>Mint</mat-label>
 				<mat-select formControlName="mint">
-					<mat-option
-						*ngFor="let account of data?.accounts"
-						[value]="account.id"
-					>
+					<mat-option *ngFor="let account of mintAccounts" [value]="account.id">
 						{{ account.name }} |
 						{{ account.id | obscureAddress }}
 					</mat-option>
@@ -106,7 +102,7 @@ import { Collection, CollectionAttribute, InstructionAccount } from './types';
 			</mat-form-field>
 
 			<mat-form-field
-				*ngIf="modifierControl.value === 1"
+				*ngIf="modifierControl.value === 0"
 				class="w-full"
 				appearance="fill"
 				hintLabel="Choose the token authority."
@@ -180,7 +176,9 @@ export class EditInstructionTokenComponent implements OnInit, OnDestroy {
 	private readonly _destroy = new Subject();
 	readonly destroy$ = this._destroy.asObservable();
 	readonly form: UntypedFormGroup;
-	readonly searchAccountControl = new FormControl();
+	readonly mintAccounts = this.data?.accounts.filter(
+		(account) => account.kind.id === 3
+	);
 	submitted = false;
 
 	get nameControl() {
@@ -211,8 +209,6 @@ export class EditInstructionTokenComponent implements OnInit, OnDestroy {
 		@Inject(MAT_DIALOG_DATA)
 		public data?: {
 			document?: InstructionAccountModel;
-			collections: List<Collection>;
-			collectionAttributes: List<CollectionAttribute>;
 			accounts: List<InstructionAccount>;
 		}
 	) {

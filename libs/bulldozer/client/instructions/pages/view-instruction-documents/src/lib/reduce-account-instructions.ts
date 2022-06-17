@@ -275,7 +275,74 @@ export const reduceInstructions = (
 			} else {
 				return items;
 			}
-		default:
+		case 'setTokenCofiguration': {
+			const accountId = instruction.accounts.find(
+				(account) => account.name === 'Account'
+			)?.pubkey;
+			const mint = instruction.accounts.find(
+				(account) => account.name === 'Mint'
+			)?.pubkey;
+			const tokenAuthority = instruction.accounts.find(
+				(account) => account.name === 'Token Authority'
+			)?.pubkey;
+			const workspaceId = instruction.accounts.find(
+				(account) => account.name === 'Workspace'
+			)?.pubkey;
+			const applicationId = instruction.accounts.find(
+				(account) => account.name === 'Application'
+			)?.pubkey;
+			const instructionId = instruction.accounts.find(
+				(account) => account.name === 'Instruction'
+			)?.pubkey;
+
+			if (
+				accountId === undefined ||
+				mint === undefined ||
+				tokenAuthority === undefined ||
+				workspaceId === undefined ||
+				applicationId === undefined ||
+				instructionId === undefined
+			) {
+				throw new Error('Malformed Set Token Configuration');
+			}
+
+			const itemIndex = items.findIndex((item) => item.id === accountId);
+
+			return items.update(
+				itemIndex,
+				{
+					id: accountId,
+					isUpdating: instruction.transactionStatus.status !== 'finalized',
+					name: '',
+					workspaceId,
+					applicationId,
+					instructionId,
+					isCreating: false,
+					isDeleting: false,
+					close: null,
+					derivation: null,
+					collection: null,
+					kind: { id: 4, name: 'token' },
+					payer: null,
+					modifier: {
+						id: 0,
+						name: 'init',
+					},
+					space: null,
+					uncheckedExplanation: null,
+					mint,
+					tokenAuthority,
+				},
+				(item: InstructionAccountItemView) => ({
+					...item,
+					isUpdating: instruction.transactionStatus.status !== 'finalized',
+					mint,
+					tokenAuthority,
+				})
+			);
+		}
+		default: {
 			return items;
+		}
 	}
 };

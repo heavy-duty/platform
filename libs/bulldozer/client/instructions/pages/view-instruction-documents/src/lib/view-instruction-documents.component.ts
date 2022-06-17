@@ -28,7 +28,7 @@ import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { Keypair } from '@solana/web3.js';
 import { List } from 'immutable';
-import { distinctUntilChanged, map, tap } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
@@ -91,7 +91,11 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 				class="flex gap-6 flex-wrap"
 			>
 				<div
-					*ngFor="let instructionDocument of documents; let i = index"
+					*ngFor="
+						let instructionDocument of documents;
+						let i = index;
+						trackBy: trackBy
+					"
 					class="flex flex-col gap-2 bg-bp-metal bg-black px-4 py-5 rounded mat-elevation-z8"
 				>
 					<div class="flex gap-2">
@@ -146,25 +150,6 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 											{{ instructionDocument.name }}
 										</p>
 
-										<p
-											*ngIf="instructionDocument.collection"
-											class="text-xs mb-0"
-										>
-											Collection:
-											<a
-												class="underline text-accent"
-												[routerLink]="[
-													'/workspaces',
-													instructionDocument.workspaceId,
-													'applications',
-													instructionDocument.applicationId,
-													'collections',
-													instructionDocument.collection.id
-												]"
-											>
-												{{ instructionDocument.collection.name }}
-											</a>
-										</p>
 										<p class="capitalize font-bold m-0">
 											<ng-container
 												*ngIf="instructionDocument.modifier !== null"
@@ -190,6 +175,59 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 											>
 												readonly
 											</ng-container>
+										</p>
+
+										<p
+											*ngIf="instructionDocument.collection"
+											class="text-xs mb-0"
+										>
+											Collection:
+											<a
+												class="underline text-accent"
+												[routerLink]="[
+													'/workspaces',
+													instructionDocument.workspaceId,
+													'applications',
+													instructionDocument.applicationId,
+													'collections',
+													instructionDocument.collection.id
+												]"
+											>
+												{{ instructionDocument.collection.name }}
+											</a>
+										</p>
+
+										<p
+											*ngIf="instructionDocument.kind.name !== 'document'"
+											class="text-xs mb-0"
+										>
+											{{ instructionDocument.kind.name }}
+										</p>
+
+										<p
+											*ngIf="
+												instructionDocument.kind.name === 'token' &&
+												instructionDocument.mint !== null
+											"
+											class="text-xs mb-0"
+										>
+											Mint:
+											<span class="text-accent underline">
+												{{ instructionDocument.mint.name }}
+											</span>
+										</p>
+
+										<p
+											*ngIf="
+												instructionDocument.kind.name === 'token' &&
+												instructionDocument.tokenAuthority !== null
+											"
+											class="text-xs mb-0"
+										>
+											Authority:
+											<span class="text-accent underline">
+												{{ instructionDocument.tokenAuthority.name }}
+											</span>
 										</p>
 									</div>
 
@@ -273,49 +311,168 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 												publicKey !== null
 											"
 										>
-											<button
-												class="bp-button w-28"
-												[collections]="(collections$ | ngrxPush) ?? null"
-												[collectionAttributes]="
-													(collectionAttributes$ | ngrxPush) ?? null
-												"
-												[instructionAccounts]="
-													instructionAccounts
-														| bdRemoveById: instructionDocument.id
-												"
-												[instructionDocument]="{
-													name: instructionDocument.name,
-													kind: instructionDocument.kind.id,
-													space: instructionDocument.space,
-													payer: instructionDocument.payer?.id ?? null,
-													collection:
-														instructionDocument.collection?.id ?? null,
-													modifier: instructionDocument.modifier?.id ?? null,
-													close: instructionDocument.close?.id ?? null,
-													uncheckedExplanation:
-														instructionDocument.uncheckedExplanation ?? null,
-													mint: instructionDocument.mint ?? null,
-													tokenAuthority:
-														instructionDocument.tokenAuthority ?? null
-												}"
-												[disabled]="instructionDocument | bdItemChanging"
-												[attr.aria-label]="
-													'Update document ' + instructionDocument.name
-												"
-												(editInstructionDocument)="
-													onUpdateInstructionDocument(
-														publicKey.toBase58(),
-														instructionDocument.workspaceId,
-														instructionDocument.applicationId,
-														instructionDocument.instructionId,
-														instructionDocument.id,
-														$event
-													)
-												"
-												bdEditInstructionDocument
-											>
-												Edit
-											</button>
+											<ng-container [ngSwitch]="instructionDocument.kind.name">
+												<button
+													*ngSwitchCase="'document'"
+													class="bp-button w-28"
+													[collections]="(collections$ | ngrxPush) ?? null"
+													[instructionAccounts]="
+														instructionAccounts
+															| bdRemoveById: instructionDocument.id
+													"
+													[instructionDocument]="{
+														name: instructionDocument.name,
+														kind: instructionDocument.kind.id,
+														space: instructionDocument.space,
+														payer: instructionDocument.payer?.id ?? null,
+														collection:
+															instructionDocument.collection?.id ?? null,
+														modifier: instructionDocument.modifier?.id ?? null,
+														close: instructionDocument.close?.id ?? null,
+														uncheckedExplanation:
+															instructionDocument.uncheckedExplanation ?? null,
+														mint: instructionDocument.mint?.id ?? null,
+														tokenAuthority:
+															instructionDocument.tokenAuthority?.id ?? null
+													}"
+													[disabled]="instructionDocument | bdItemChanging"
+													[attr.aria-label]="
+														'Update document ' + instructionDocument.name
+													"
+													(editInstructionDocument)="
+														onUpdateInstructionDocument(
+															publicKey.toBase58(),
+															instructionDocument.workspaceId,
+															instructionDocument.applicationId,
+															instructionDocument.instructionId,
+															instructionDocument.id,
+															$event
+														)
+													"
+													bdEditInstructionDocument
+												>
+													Edit
+												</button>
+
+												<button
+													*ngSwitchCase="'unchecked'"
+													class="bp-button w-28"
+													[instructionAccounts]="
+														instructionAccounts
+															| bdRemoveById: instructionDocument.id
+													"
+													[instructionDocument]="{
+														name: instructionDocument.name,
+														kind: instructionDocument.kind.id,
+														space: instructionDocument.space,
+														payer: instructionDocument.payer?.id ?? null,
+														collection:
+															instructionDocument.collection?.id ?? null,
+														modifier: instructionDocument.modifier?.id ?? null,
+														close: instructionDocument.close?.id ?? null,
+														uncheckedExplanation:
+															instructionDocument.uncheckedExplanation ?? null,
+														mint: instructionDocument.mint?.id ?? null,
+														tokenAuthority:
+															instructionDocument.tokenAuthority?.id ?? null
+													}"
+													[disabled]="instructionDocument | bdItemChanging"
+													[attr.aria-label]="
+														'Update unchecked ' + instructionDocument.name
+													"
+													(editInstructionUnchecked)="
+														onUpdateInstructionDocument(
+															publicKey.toBase58(),
+															instructionDocument.workspaceId,
+															instructionDocument.applicationId,
+															instructionDocument.instructionId,
+															instructionDocument.id,
+															$event
+														)
+													"
+													bdEditInstructionUnchecked
+												>
+													Edit
+												</button>
+
+												<button
+													*ngSwitchCase="'token'"
+													class="bp-button w-28"
+													[instructionAccounts]="
+														instructionAccounts
+															| bdRemoveById: instructionDocument.id
+													"
+													[instructionDocument]="{
+														name: instructionDocument.name,
+														kind: instructionDocument.kind.id,
+														space: instructionDocument.space,
+														payer: instructionDocument.payer?.id ?? null,
+														collection:
+															instructionDocument.collection?.id ?? null,
+														modifier: instructionDocument.modifier?.id ?? null,
+														close: instructionDocument.close?.id ?? null,
+														uncheckedExplanation:
+															instructionDocument.uncheckedExplanation ?? null,
+														mint: instructionDocument.mint?.id ?? null,
+														tokenAuthority:
+															instructionDocument.tokenAuthority?.id ?? null
+													}"
+													[disabled]="instructionDocument | bdItemChanging"
+													[attr.aria-label]="
+														'Update token ' + instructionDocument.name
+													"
+													(editInstructionToken)="
+														onUpdateInstructionDocument(
+															publicKey.toBase58(),
+															instructionDocument.workspaceId,
+															instructionDocument.applicationId,
+															instructionDocument.instructionId,
+															instructionDocument.id,
+															$event
+														)
+													"
+													bdEditInstructionToken
+												>
+													Edit
+												</button>
+
+												<button
+													*ngSwitchCase="'mint'"
+													class="bp-button w-28"
+													[instructionDocument]="{
+														name: instructionDocument.name,
+														kind: instructionDocument.kind.id,
+														space: instructionDocument.space,
+														payer: instructionDocument.payer?.id ?? null,
+														collection:
+															instructionDocument.collection?.id ?? null,
+														modifier: instructionDocument.modifier?.id ?? null,
+														close: instructionDocument.close?.id ?? null,
+														uncheckedExplanation:
+															instructionDocument.uncheckedExplanation ?? null,
+														mint: instructionDocument.mint?.id ?? null,
+														tokenAuthority:
+															instructionDocument.tokenAuthority?.id ?? null
+													}"
+													[disabled]="instructionDocument | bdItemChanging"
+													[attr.aria-label]="
+														'Update mint ' + instructionDocument.name
+													"
+													(editInstructionMint)="
+														onUpdateInstructionDocument(
+															publicKey.toBase58(),
+															instructionDocument.workspaceId,
+															instructionDocument.applicationId,
+															instructionDocument.instructionId,
+															instructionDocument.id,
+															$event
+														)
+													"
+													bdEditInstructionMint
+												>
+													Edit
+												</button>
+											</ng-container>
 
 											<button
 												class="bp-button w-28"
@@ -606,9 +763,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	readonly instructionAccountsCollectionsLookup$ =
 		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$;
 
-	readonly documents$ = this._viewInstructionDocumentsStore.documents$.pipe(
-		tap((a) => console.log(a))
-	);
+	readonly documents$ = this._viewInstructionDocumentsStore.documents$;
 	readonly workspaceId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('workspaceId')),
 		isNotNullOrUndefined,
@@ -666,10 +821,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		);
 		this._viewInstructionDocumentsCollectionAttributesStore.setApplicationId(
 			this.applicationId$
-		);
-
-		this._viewInstructionDocumentsDerivationsReferencesStore.accounts$.subscribe(
-			(a) => console.log(a)
 		);
 	}
 
@@ -919,5 +1070,9 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 					this._notificationStore.setError(error);
 				},
 			});
+	}
+
+	trackBy(_: number, item: { id: string }): string {
+		return item.id;
 	}
 }

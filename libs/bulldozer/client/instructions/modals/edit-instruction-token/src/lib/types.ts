@@ -21,11 +21,6 @@ export interface InstructionAccount {
 		id: number;
 		name: string;
 	};
-	mint: string | null;
-	tokenAuthority: string | null;
-	payer: string | null;
-	close: string | null;
-	modifier: string | null;
 }
 
 export interface InstructionAccountsCollectionsLookup {

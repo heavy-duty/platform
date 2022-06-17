@@ -9,23 +9,18 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
-import { Collection, CollectionAttribute, InstructionAccount } from './types';
+import { Collection, InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionDocument]' })
 export class EditInstructionDocumentDirective {
 	@Input() instructionDocument: InstructionAccountModel | null = null;
 	@Input() collections: List<Collection> | null = null;
-	@Input() collectionAttributes: List<CollectionAttribute> | null = null;
 	@Input() instructionAccounts: List<InstructionAccount> | null = null;
 
 	@Output() editInstructionDocument =
 		new EventEmitter<InstructionAccountModel>();
 	@HostListener('click') onClick(): void {
-		if (
-			!this.collections ||
-			!this.instructionAccounts ||
-			!this.collectionAttributes
-		) {
+		if (!this.collections || !this.instructionAccounts) {
 			throw new Error('Values missing!');
 		}
 
@@ -35,7 +30,6 @@ export class EditInstructionDocumentDirective {
 				{
 					document: InstructionAccountModel | null;
 					collections: List<Collection>;
-					collectionAttributes: List<CollectionAttribute>;
 					accounts: List<InstructionAccount>;
 				},
 				InstructionAccountModel
@@ -43,7 +37,6 @@ export class EditInstructionDocumentDirective {
 				data: {
 					document: this.instructionDocument,
 					collections: this.collections,
-					collectionAttributes: this.collectionAttributes,
 					accounts: this.instructionAccounts,
 				},
 				panelClass: ['bg-bp-wood', 'bg-bp-brown'],

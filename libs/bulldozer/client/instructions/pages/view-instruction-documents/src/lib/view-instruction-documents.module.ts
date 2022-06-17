@@ -11,7 +11,10 @@ import { AddInstructionAccountModule } from '@bulldozer-client/add-instruction-a
 import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instruction-document';
 import { EditInstructionDocumentDerivationModule } from '@bulldozer-client/edit-instruction-document-derivation';
+import { EditInstructionMintModule } from '@bulldozer-client/edit-instruction-mint';
 import { EditInstructionRelationModule } from '@bulldozer-client/edit-instruction-relation';
+import { EditInstructionTokenModule } from '@bulldozer-client/edit-instruction-token';
+import { EditInstructionUncheckedModule } from '@bulldozer-client/edit-instruction-unchecked';
 import { ItemUpdatingModule } from '@bulldozer-client/item-updating';
 import { ObscureAddressModule } from '@bulldozer-client/obscure-address';
 import { ProgressSpinnerModule } from '@heavy-duty/ui/progress-spinner';
@@ -41,6 +44,9 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
 		HdWalletAdapterCdkModule,
 		ItemUpdatingModule,
 		EditInstructionDocumentModule,
+		EditInstructionTokenModule,
+		EditInstructionMintModule,
+		EditInstructionUncheckedModule,
 		EditInstructionDocumentDerivationModule,
 		EditInstructionRelationModule,
 		AddInstructionAccountModule,

@@ -18,7 +18,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
-import { Collection, CollectionAttribute, InstructionAccount } from './types';
+import { InstructionAccount } from './types';
 
 @Component({
 	selector: 'bd-edit-unchecked',
@@ -239,8 +239,6 @@ export class EditInstructionUncheckedComponent implements OnInit, OnDestroy {
 		@Inject(MAT_DIALOG_DATA)
 		public data?: {
 			document?: InstructionAccountModel;
-			collections: List<Collection>;
-			collectionAttributes: List<CollectionAttribute>;
 			accounts: List<InstructionAccount>;
 		}
 	) {
@@ -291,8 +289,6 @@ export class EditInstructionUncheckedComponent implements OnInit, OnDestroy {
 	onEditUnchecked() {
 		this.submitted = true;
 		this.form.markAllAsTouched();
-
-		console.log(this.form);
 
 		if (this.form.valid) {
 			this._matDialogRef.close({

@@ -40,6 +40,8 @@ export interface InstructionAccountDto {
 	payer: string | null;
 	close: string | null;
 	uncheckedExplanation: string | null;
+	tokenAuthority: string | null;
+	mint: string | null;
 }
 
 export interface InstructionAccountModel {

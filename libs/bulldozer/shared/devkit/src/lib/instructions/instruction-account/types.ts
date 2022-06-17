@@ -85,6 +85,16 @@ export interface SetBumpToDerivationParams {
 	pathId: string;
 }
 
+export interface SetTokenConfigurationParams {
+	authority: string;
+	workspaceId: string;
+	applicationId: string;
+	instructionId: string;
+	instructionAccountId: string;
+	mint: string;
+	tokenAuthority: string;
+}
+
 export interface SetInstructionAccountDerivationParams {
 	name: string | null;
 	authority: string;

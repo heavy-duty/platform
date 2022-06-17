@@ -3,7 +3,7 @@ import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-ac
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { List } from 'immutable';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { InstructionAccountItemView } from './types';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
@@ -127,6 +127,14 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 										) ?? null,
 								};
 							}),
+						tokenAuthority:
+							instructionAccounts.find(
+								({ id }) => id === instructionAccount.tokenAuthority
+							) ?? null,
+						mint:
+							instructionAccounts.find(
+								({ id }) => id === instructionAccount.mint
+							) ?? null,
 					};
 				});
 		}
@@ -150,7 +158,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 				isNotNullOrUndefined,
 				map((accounts) =>
 					accounts
-						.filter((account) => account.data.kind.id === 0)
+						.filter((account) => account.data.kind.id !== 1)
 						.map((account) => account.data.payer)
 						.filter((payer): payer is string => payer !== null)
 						.toList()
@@ -162,7 +170,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 				isNotNullOrUndefined,
 				map((accounts) =>
 					accounts
-						.filter((account) => account.data.kind.id === 0)
+						.filter((account) => account.data.kind.id !== 1)
 						.map((account) => account.data.collection)
 						.filter((collection): collection is string => collection !== null)
 						.toList()
@@ -172,9 +180,10 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 		this._viewInstructionDocumentsDerivationsReferencesStore.setInstructionAccountDerivationIds(
 			this._instructionAccountsStore.instructionAccounts$.pipe(
 				isNotNullOrUndefined,
+				tap((a) => console.log(a)),
 				map((accounts) =>
 					accounts
-						.filter((account) => account.data.kind.id === 0)
+						.filter((account) => account.data.kind.id !== 1)
 						.map((account) => account.data.derivation)
 						.filter((derivation): derivation is string => derivation !== null)
 						.toList()
@@ -186,7 +195,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 				isNotNullOrUndefined,
 				map((accounts) =>
 					accounts
-						.filter((account) => account.data.kind.id === 0)
+						.filter((account) => account.data.kind.id !== 1)
 						.map((account) => account.data.close)
 						.filter((close): close is string => close !== null)
 						.toList()

@@ -25,23 +25,40 @@ export const reduceInstructions = (
 			};
 			const name = data.arguments.name;
 
-			console.log(name, name ?? null);
-
-			return items.update(
-				itemIndex,
-				{
-					id: accountDerivation,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name,
-					bumpPath: null,
-					seedPaths: [],
-				},
-				(item: InstructionAccountDerivationItemView) => ({
-					...item,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name,
-				})
-			);
+			if (instruction.transactionStatus.status === 'confirmed') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: true,
+						name,
+						bumpPath: null,
+						seedPaths: [],
+					},
+					(item) => ({
+						...item,
+						isUpdating: true,
+						name,
+					})
+				);
+			} else if (instruction.transactionStatus.status === 'finalized') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: false,
+						name,
+						bumpPath: null,
+						seedPaths: [],
+					},
+					(item) => ({
+						...item,
+						isUpdating: false,
+					})
+				);
+			} else {
+				return items;
+			}
 		}
 		case 'clearInstructionAccountDerivation': {
 			const accountDerivation = instruction.accounts.find(
@@ -56,23 +73,42 @@ export const reduceInstructions = (
 				(item) => item.id === accountDerivation
 			);
 
-			return items.update(
-				itemIndex,
-				{
-					id: accountDerivation,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name: null,
-					bumpPath: null,
-					seedPaths: [],
-				},
-				(item: InstructionAccountDerivationItemView) => ({
-					...item,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name: null,
-					bumpPath: null,
-					seedPaths: [],
-				})
-			);
+			if (instruction.transactionStatus.status === 'confirmed') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: true,
+						name: null,
+						bumpPath: null,
+						seedPaths: [],
+					},
+					(item) => ({
+						...item,
+						isUpdating: true,
+						name: null,
+						bumpPath: null,
+						seedPaths: [],
+					})
+				);
+			} else if (instruction.transactionStatus.status === 'finalized') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: false,
+						name: null,
+						bumpPath: null,
+						seedPaths: [],
+					},
+					(item) => ({
+						...item,
+						isUpdating: false,
+					})
+				);
+			} else {
+				return items;
+			}
 		}
 		case 'setBumpToDerivation': {
 			const accountDerivation = instruction.accounts.find(
@@ -97,27 +133,53 @@ export const reduceInstructions = (
 				(item) => item.id === accountDerivation
 			);
 
-			return items.update(
-				itemIndex,
-				{
-					id: accountDerivation,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name: null,
-					bumpPath: {
-						path,
-						reference,
+			if (instruction.transactionStatus.status === 'confirmed') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: true,
+						name: null,
+						bumpPath: {
+							path,
+							reference,
+						},
+						seedPaths: [],
 					},
-					seedPaths: [],
-				},
-				(item: InstructionAccountDerivationItemView) => ({
-					...item,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					bumpPath: {
-						path,
-						reference,
+					(item) => ({
+						...item,
+						isUpdating: true,
+						bumpPath: {
+							path,
+							reference,
+						},
+					})
+				);
+			} else if (instruction.transactionStatus.status === 'finalized') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: false,
+						name: null,
+						bumpPath: {
+							path,
+							reference,
+						},
+						seedPaths: [],
 					},
-				})
-			);
+					(item) => ({
+						...item,
+						isUpdating: false,
+						bumpPath: {
+							path,
+							reference,
+						},
+					})
+				);
+			} else {
+				return items;
+			}
 		}
 		case 'addSeedToDerivation': {
 			const accountDerivation = instruction.accounts.find(
@@ -135,21 +197,41 @@ export const reduceInstructions = (
 				(item) => item.id === accountDerivation
 			);
 
-			return items.update(
-				itemIndex,
-				{
-					id: accountDerivation,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					name: null,
-					bumpPath: null,
-					seedPaths: [reference],
-				},
-				(item: InstructionAccountDerivationItemView) => ({
-					...item,
-					isUpdating: instruction.transactionStatus.status !== 'finalized',
-					seedPaths: [...item.seedPaths, reference],
-				})
-			);
+			if (instruction.transactionStatus.status === 'confirmed') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: true,
+						name: null,
+						bumpPath: null,
+						seedPaths: [reference],
+					},
+					(item) => ({
+						...item,
+						isUpdating: true,
+						seedPaths: [...item.seedPaths, reference],
+					})
+				);
+			} else if (instruction.transactionStatus.status === 'finalized') {
+				return items.update(
+					itemIndex,
+					{
+						id: accountDerivation,
+						isUpdating: false,
+						name: null,
+						bumpPath: null,
+						seedPaths: [reference],
+					},
+					(item) => ({
+						...item,
+						isUpdating: false,
+						seedPaths: [...item.seedPaths, reference],
+					})
+				);
+			} else {
+				return items;
+			}
 		}
 		default:
 			return items;
