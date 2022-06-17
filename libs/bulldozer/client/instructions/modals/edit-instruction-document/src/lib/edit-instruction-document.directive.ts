@@ -9,13 +9,12 @@ import { MatDialog } from '@angular/material/dialog';
 import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
-import { Collection, CollectionAttribute, InstructionAccount } from './types';
+import { Collection, InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionDocument]' })
 export class EditInstructionDocumentDirective {
 	@Input() instructionDocument: InstructionAccountModel | null = null;
 	@Input() collections: List<Collection> | null = null;
-	@Input() collectionAttributes: List<CollectionAttribute> | null = null;
 	@Input() instructionAccounts: List<InstructionAccount> | null = null;
 
 	@Output() editInstructionDocument =

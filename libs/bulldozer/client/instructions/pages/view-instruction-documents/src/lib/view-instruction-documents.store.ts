@@ -3,7 +3,7 @@ import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-ac
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { List } from 'immutable';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { InstructionAccountItemView } from './types';
 import { ViewInstructionDocumentsAccountConstraintsStore } from './view-instruction-documents-account-constraints.store';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
@@ -188,6 +188,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 		this._viewInstructionDocumentsDerivationsReferencesStore.setInstructionAccountDerivationIds(
 			this._instructionAccountsStore.instructionAccounts$.pipe(
 				isNotNullOrUndefined,
+				tap((a) => console.log(a)),
 				map((accounts) =>
 					accounts
 						.filter((account) => account.data.kind.id !== 1)

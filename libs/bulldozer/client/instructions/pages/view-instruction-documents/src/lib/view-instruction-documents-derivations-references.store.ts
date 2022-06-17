@@ -77,6 +77,8 @@ export class ViewInstructionDocumentsDerivationsReferencesStore extends Componen
 				return null;
 			}
 
+			console.log({ instructionAccountDerivations, instructionStatuses });
+
 			return instructionStatuses.reduce(
 				reduceInstructions,
 				instructionAccountDerivations.map(documentToView)

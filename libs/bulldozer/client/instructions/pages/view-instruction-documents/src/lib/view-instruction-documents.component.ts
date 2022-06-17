@@ -860,9 +860,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	readonly instructionAccountsCollectionsLookup$ =
 		this._viewInstructionDocumentsCollectionsReferencesStore.accounts$;
 
-	readonly documents$ = this._viewInstructionDocumentsStore.documents$.pipe(
-		tap((a) => console.log(a))
-	);
+	readonly documents$ = this._viewInstructionDocumentsStore.documents$;
 	readonly workspaceId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('workspaceId')),
 		isNotNullOrUndefined,
@@ -925,10 +923,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		);
 		this._viewInstructionDocumentsCollectionAttributesStore.setApplicationId(
 			this.applicationId$
-		);
-
-		this._viewInstructionDocumentsDerivationsReferencesStore.accounts$.subscribe(
-			(a) => console.log(a)
 		);
 	}
 

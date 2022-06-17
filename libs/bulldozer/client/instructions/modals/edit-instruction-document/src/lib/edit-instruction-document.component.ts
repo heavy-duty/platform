@@ -19,7 +19,7 @@ import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
-import { Collection, CollectionAttribute, InstructionAccount } from './types';
+import { Collection, InstructionAccount } from './types';
 
 @Component({
 	selector: 'bd-edit-document',
@@ -234,7 +234,6 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 		public data?: {
 			document?: InstructionAccountModel;
 			collections: List<Collection>;
-			collectionAttributes: List<CollectionAttribute>;
 			accounts: List<InstructionAccount>;
 		}
 	) {
