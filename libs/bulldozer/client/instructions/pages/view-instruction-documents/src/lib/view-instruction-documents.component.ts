@@ -70,7 +70,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
 								"
-								(editInstructionDocument)="
+								(editInstructionAccount)="
 									onCreateInstructionDocument(
 										publicKey.toBase58(),
 										workspaceId,

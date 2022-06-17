@@ -252,7 +252,6 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 			space: new UntypedFormControl(this.data?.document?.space ?? null),
 			payer: new UntypedFormControl(this.data?.document?.payer ?? null),
 			close: new UntypedFormControl(this.data?.document?.close ?? null),
-			bump: new UntypedFormControl(null),
 		});
 	}
 
