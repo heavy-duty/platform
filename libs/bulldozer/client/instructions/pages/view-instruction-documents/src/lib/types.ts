@@ -51,6 +51,9 @@ export interface InstructionAccountItemView {
 	close: string | null;
 	payer: string | null;
 	derivation: string | null;
+	uncheckedExplanation: string | null;
+	tokenAuthority: string | null;
+	mint: string | null;
 }
 
 export interface InstructionAccountPayerItemView {

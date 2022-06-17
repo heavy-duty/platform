@@ -53,7 +53,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 			}
 
 			return instructionAccounts
-				.filter((instructionAccount) => instructionAccount.kind.id === 0)
+				.filter((instructionAccount) => instructionAccount.kind.id !== 1)
 				.map((instructionAccount) => {
 					const payerAccountId =
 						payers.find((payer) => payer.id === instructionAccount.payer)
@@ -69,12 +69,6 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 						derivations?.find(
 							({ id }) => id === instructionAccount.derivation
 						) ?? null;
-
-					console.log({
-						derivation,
-						collectionAttributes,
-						instructionAccounts,
-					});
 
 					return {
 						...instructionAccount,

@@ -18,6 +18,21 @@ const decodeAccountKind = (id: number): { id: number; name: string } => {
 				id,
 				name: 'signer',
 			};
+		case 2:
+			return {
+				id,
+				name: 'unchecked',
+			};
+		case 3:
+			return {
+				id,
+				name: 'mint',
+			};
+		case 4:
+			return {
+				id,
+				name: 'token',
+			};
 		default:
 			throw Error('Invalid kind id');
 	}
@@ -62,6 +77,7 @@ export const reduceInstructions = (
 				const name = data.arguments.name;
 				const space = data.arguments.space;
 				const kind = decodeAccountKind(data.arguments.kind);
+				const uncheckedExplanation = data.arguments.uncheckedExplanation;
 				let modifier: {
 					id: number;
 					name: string;
@@ -127,6 +143,9 @@ export const reduceInstructions = (
 						close,
 						payer,
 						derivation,
+						uncheckedExplanation,
+						tokenAuthority: null,
+						mint: null,
 					});
 				} else {
 					return items.update(itemIndex, (item) => ({
@@ -146,6 +165,9 @@ export const reduceInstructions = (
 						close,
 						payer,
 						derivation,
+						uncheckedExplanation,
+						tokenAuthority: null,
+						mint: null,
 					}));
 				}
 			} else if (instruction.transactionStatus.status === 'finalized') {

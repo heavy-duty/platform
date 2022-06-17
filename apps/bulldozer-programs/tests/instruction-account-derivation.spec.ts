@@ -125,6 +125,7 @@ describe('instruction account derivation', () => {
 				kind: 0,
 				modifier: null,
 				space: null,
+				uncheckedExplanation: null,
 			})
 			.accounts({
 				authority: provider.wallet.publicKey,

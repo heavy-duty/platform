@@ -106,6 +106,7 @@ export class EditInstructionSignerComponent {
 				collection: null,
 				payer: null,
 				close: null,
+				uncheckedExplanation: null,
 			});
 		} else {
 			this._matSnackBar.openFromComponent(SnackBarComponent, {

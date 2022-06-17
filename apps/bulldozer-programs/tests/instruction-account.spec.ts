@@ -332,6 +332,7 @@ describe('instruction account', () => {
 					kind: 0,
 					modifier: null,
 					space: null,
+					uncheckedExplanation: null,
 				};
 				// act
 				await program.methods
@@ -508,6 +509,7 @@ describe('instruction account', () => {
 					kind: 0,
 					modifier: null,
 					space: null,
+					uncheckedExplanation: null,
 				};
 				// act
 				await program.methods
@@ -548,6 +550,7 @@ describe('instruction account', () => {
 					kind: 0,
 					modifier: 1,
 					space: null,
+					uncheckedExplanation: null,
 				};
 				// act
 				await program.methods

@@ -7,6 +7,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
+import { AddInstructionAccountModule } from '@bulldozer-client/add-instruction-account';
 import { CardModule } from '@bulldozer-client/bd-card';
 import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instruction-document';
 import { EditInstructionDocumentDerivationModule } from '@bulldozer-client/edit-instruction-document-derivation';
@@ -18,6 +19,7 @@ import { HdWalletAdapterCdkModule } from '@heavy-duty/wallet-adapter-cdk';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { RemoveByIdPipe } from './remove-by-id.pipe';
 import { ViewInstructionDocumentsComponent } from './view-instruction-documents.component';
+
 @NgModule({
 	imports: [
 		CommonModule,
@@ -41,6 +43,7 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
 		EditInstructionDocumentModule,
 		EditInstructionDocumentDerivationModule,
 		EditInstructionRelationModule,
+		AddInstructionAccountModule,
 		ObscureAddressModule,
 		CardModule,
 	],

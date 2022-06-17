@@ -39,6 +39,20 @@ export interface InstructionAccountDto {
 	space: number | null;
 	payer: string | null;
 	close: string | null;
+	uncheckedExplanation: string | null;
+}
+
+export interface InstructionAccountModel {
+	name: string;
+	kind: number;
+	modifier: number | null;
+	space: number | null;
+	collection: string | null;
+	close: string | null;
+	payer: string | null;
+	uncheckedExplanation: string | null;
+	tokenAuthority: string | null;
+	mint: string | null;
 }
 
 export interface InstructionArgumentDto {
@@ -190,6 +204,9 @@ export interface InstructionAccount {
 	close: string | null;
 	payer: string | null;
 	derivation: string | null;
+	uncheckedExplanation: string | null;
+	tokenAuthority: string | null;
+	mint: string | null;
 }
 
 export interface InstructionAccountCollection {

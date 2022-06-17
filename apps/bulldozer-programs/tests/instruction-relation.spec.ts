@@ -24,6 +24,7 @@ describe('instruction relation', () => {
 		kind: 1,
 		modifier: null,
 		space: null,
+		uncheckedExplanation: null,
 	};
 	const to = Keypair.generate();
 	const toDto = {
@@ -31,6 +32,7 @@ describe('instruction relation', () => {
 		kind: 1,
 		modifier: null,
 		space: null,
+		uncheckedExplanation: null,
 	};
 	let relationPublicKey: PublicKey;
 	let budgetPublicKey: PublicKey;
@@ -325,7 +327,7 @@ describe('instruction relation', () => {
 							41 // from payer account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
-							238 // from derivation account size
+							462 // from derivation account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
 							264 // to account size
@@ -343,7 +345,7 @@ describe('instruction relation', () => {
 							41 // to payer account size
 						)) +
 						(await provider.connection.getMinimumBalanceForRentExemption(
-							238 // to derivation account size
+							462 // to derivation account size
 						)),
 				}),
 			])

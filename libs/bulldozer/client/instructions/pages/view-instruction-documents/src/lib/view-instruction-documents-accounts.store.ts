@@ -38,6 +38,9 @@ const documentToView = (
 		collection: instructionAccount.data.collection,
 		payer: instructionAccount.data.payer,
 		derivation: instructionAccount.data.derivation,
+		uncheckedExplanation: instructionAccount.data.uncheckedExplanation,
+		mint: instructionAccount.data.mint,
+		tokenAuthority: instructionAccount.data.tokenAuthority,
 	};
 };
 

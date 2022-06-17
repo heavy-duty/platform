@@ -6,19 +6,20 @@ import {
 	Output,
 } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { EditInstructionDocumentComponent } from './edit-instruction-document.component';
 import { Collection, CollectionAttribute, InstructionAccount } from './types';
 
 @Directive({ selector: '[bdEditInstructionDocument]' })
 export class EditInstructionDocumentDirective {
-	@Input() instructionDocument: InstructionAccountDto | null = null;
+	@Input() instructionDocument: InstructionAccountModel | null = null;
 	@Input() collections: List<Collection> | null = null;
 	@Input() collectionAttributes: List<CollectionAttribute> | null = null;
 	@Input() instructionAccounts: List<InstructionAccount> | null = null;
 
-	@Output() editInstructionDocument = new EventEmitter<InstructionAccountDto>();
+	@Output() editInstructionDocument =
+		new EventEmitter<InstructionAccountModel>();
 	@HostListener('click') onClick(): void {
 		if (
 			!this.collections ||
@@ -32,12 +33,12 @@ export class EditInstructionDocumentDirective {
 			.open<
 				EditInstructionDocumentComponent,
 				{
-					document: InstructionAccountDto | null;
+					document: InstructionAccountModel | null;
 					collections: List<Collection>;
 					collectionAttributes: List<CollectionAttribute>;
 					accounts: List<InstructionAccount>;
 				},
-				InstructionAccountDto
+				InstructionAccountModel
 			>(EditInstructionDocumentComponent, {
 				data: {
 					document: this.instructionDocument,

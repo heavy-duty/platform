@@ -3474,6 +3474,97 @@ export type Bulldozer = {
 			];
 		},
 		{
+			name: 'setTokenCofiguration';
+			accounts: [
+				{
+					name: 'systemProgram';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
+				},
+				{
+					name: 'workspace';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'application';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'instruction';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'account';
+					isMut: true;
+					isSigner: false;
+				},
+				{
+					name: 'user';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'user';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								path: 'authority';
+							}
+						];
+					};
+				},
+				{
+					name: 'collaborator';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'collaborator';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'Workspace';
+								path: 'workspace';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'User';
+								path: 'user';
+							}
+						];
+					};
+				},
+				{
+					name: 'mint';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'tokenAuthority';
+					isMut: false;
+					isSigner: false;
+				}
+			];
+			args: [];
+		},
+		{
 			name: 'addSeedToDerivation';
 			accounts: [
 				{
@@ -4656,6 +4747,24 @@ export type Bulldozer = {
 						};
 					},
 					{
+						name: 'uncheckedExplanation';
+						type: {
+							option: 'string';
+						};
+					},
+					{
+						name: 'mint';
+						type: {
+							option: 'publicKey';
+						};
+					},
+					{
+						name: 'tokenAuthority';
+						type: {
+							option: 'publicKey';
+						};
+					},
+					{
 						name: 'createdAt';
 						type: 'i64';
 					},
@@ -5148,6 +5257,12 @@ export type Bulldozer = {
 						type: {
 							option: 'u16';
 						};
+					},
+					{
+						name: 'uncheckedExplanation';
+						type: {
+							option: 'string';
+						};
 					}
 				];
 			};
@@ -5185,6 +5300,12 @@ export type Bulldozer = {
 						name: 'space';
 						type: {
 							option: 'u16';
+						};
+					},
+					{
+						name: 'uncheckedExplanation';
+						type: {
+							option: 'string';
 						};
 					}
 				];
@@ -5374,6 +5495,33 @@ export type Bulldozer = {
 					},
 					{
 						name: 'Signer';
+						fields: [
+							{
+								name: 'id';
+								type: 'u8';
+							}
+						];
+					},
+					{
+						name: 'Unchecked';
+						fields: [
+							{
+								name: 'id';
+								type: 'u8';
+							}
+						];
+					},
+					{
+						name: 'Mint';
+						fields: [
+							{
+								name: 'id';
+								type: 'u8';
+							}
+						];
+					},
+					{
+						name: 'Token';
 						fields: [
 							{
 								name: 'id';
@@ -5800,6 +5948,11 @@ export type Bulldozer = {
 			code: 6051;
 			name: 'CollectionAttributeDoesNotBelongToApplication';
 			msg: 'Collection attribute does not belong to application';
+		},
+		{
+			code: 6052;
+			name: 'MissingUncheckedExplanation';
+			msg: 'Missing unchecked explanation';
 		}
 	];
 };
@@ -9280,6 +9433,97 @@ export const IDL: Bulldozer = {
 			],
 		},
 		{
+			name: 'setTokenCofiguration',
+			accounts: [
+				{
+					name: 'systemProgram',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: true,
+					isSigner: false,
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+				{
+					name: 'mint',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'tokenAuthority',
+					isMut: false,
+					isSigner: false,
+				},
+			],
+			args: [],
+		},
+		{
 			name: 'addSeedToDerivation',
 			accounts: [
 				{
@@ -10462,6 +10706,24 @@ export const IDL: Bulldozer = {
 						},
 					},
 					{
+						name: 'uncheckedExplanation',
+						type: {
+							option: 'string',
+						},
+					},
+					{
+						name: 'mint',
+						type: {
+							option: 'publicKey',
+						},
+					},
+					{
+						name: 'tokenAuthority',
+						type: {
+							option: 'publicKey',
+						},
+					},
+					{
 						name: 'createdAt',
 						type: 'i64',
 					},
@@ -10955,6 +11217,12 @@ export const IDL: Bulldozer = {
 							option: 'u16',
 						},
 					},
+					{
+						name: 'uncheckedExplanation',
+						type: {
+							option: 'string',
+						},
+					},
 				],
 			},
 		},
@@ -10991,6 +11259,12 @@ export const IDL: Bulldozer = {
 						name: 'space',
 						type: {
 							option: 'u16',
+						},
+					},
+					{
+						name: 'uncheckedExplanation',
+						type: {
+							option: 'string',
 						},
 					},
 				],
@@ -11180,6 +11454,33 @@ export const IDL: Bulldozer = {
 					},
 					{
 						name: 'Signer',
+						fields: [
+							{
+								name: 'id',
+								type: 'u8',
+							},
+						],
+					},
+					{
+						name: 'Unchecked',
+						fields: [
+							{
+								name: 'id',
+								type: 'u8',
+							},
+						],
+					},
+					{
+						name: 'Mint',
+						fields: [
+							{
+								name: 'id',
+								type: 'u8',
+							},
+						],
+					},
+					{
+						name: 'Token',
 						fields: [
 							{
 								name: 'id',
@@ -11606,6 +11907,11 @@ export const IDL: Bulldozer = {
 			code: 6051,
 			name: 'CollectionAttributeDoesNotBelongToApplication',
 			msg: 'Collection attribute does not belong to application',
+		},
+		{
+			code: 6052,
+			name: 'MissingUncheckedExplanation',
+			msg: 'Missing unchecked explanation',
 		},
 	],
 };

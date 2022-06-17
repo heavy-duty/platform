@@ -196,7 +196,7 @@ pub mod bulldozer {
     instructions::create_instruction_account::handle(ctx, arguments)
   }
 
-  #[access_control(instructions::update_instruction_account::validate(&arguments))]
+  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
     arguments: UpdateInstructionAccountArguments,

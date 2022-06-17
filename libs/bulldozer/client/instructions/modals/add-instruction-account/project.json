@@ -1,0 +1,27 @@
+{
+	"projectType": "library",
+	"sourceRoot": "libs/bulldozer/client/instructions/modals/add-instruction-account/src",
+	"prefix": "bd",
+	"targets": {
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": [
+				"coverage/libs/bulldozer/client/instructions/modals/add-instruction-account"
+			],
+			"options": {
+				"jestConfig": "libs/bulldozer/client/instructions/modals/add-instruction-account/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/bulldozer/client/instructions/modals/add-instruction-account/**/*.ts",
+					"libs/bulldozer/client/instructions/modals/add-instruction-account/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
+}

@@ -16,7 +16,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {} from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
 import { Collection, CollectionAttribute, InstructionAccount } from './types';
@@ -226,10 +226,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private readonly _matSnackBar: MatSnackBar,
-		private readonly _matDialogRef: MatDialogRef<EditInstructionDocumentComponent>,
+		private readonly _matDialogRef: MatDialogRef<
+			EditInstructionDocumentComponent,
+			InstructionAccountModel
+		>,
 		@Inject(MAT_DIALOG_DATA)
 		public data?: {
-			document?: InstructionAccountDto;
+			document?: InstructionAccountModel;
 			collections: List<Collection>;
 			collectionAttributes: List<CollectionAttribute>;
 			accounts: List<InstructionAccount>;
@@ -249,7 +252,6 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 			space: new UntypedFormControl(this.data?.document?.space ?? null),
 			payer: new UntypedFormControl(this.data?.document?.payer ?? null),
 			close: new UntypedFormControl(this.data?.document?.close ?? null),
-			bump: new UntypedFormControl(null),
 		});
 	}
 
@@ -295,6 +297,9 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 					this.modifierControl.value === 0 ? this.payerControl.value : null,
 				close:
 					this.modifierControl.value === 1 ? this.closeControl.value : null,
+				uncheckedExplanation: null,
+				mint: null,
+				tokenAuthority: null,
 			});
 		} else {
 			this._matSnackBar.openFromComponent(SnackBarComponent, {

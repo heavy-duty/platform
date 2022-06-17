@@ -63,13 +63,10 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 								"
 								class="underline text-accent"
 								[collections]="(collections$ | ngrxPush) ?? null"
-								[collectionAttributes]="
-									(collectionAttributes$ | ngrxPush) ?? null
-								"
 								[instructionAccounts]="
 									(instructionAccounts$ | ngrxPush) ?? null
 								"
-								(editInstructionDocument)="
+								(editInstructionAccount)="
 									onCreateInstructionDocument(
 										publicKey.toBase58(),
 										workspaceId,
@@ -78,7 +75,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 										$event
 									)
 								"
-								bdEditInstructionDocument
+								bdAddInstructionAccount
 							>
 								New document
 							</button>
@@ -294,7 +291,12 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 													collection:
 														instructionDocument.collection?.id ?? null,
 													modifier: instructionDocument.modifier?.id ?? null,
-													close: instructionDocument.close?.id ?? null
+													close: instructionDocument.close?.id ?? null,
+													uncheckedExplanation:
+														instructionDocument.uncheckedExplanation ?? null,
+													mint: instructionDocument.mint ?? null,
+													tokenAuthority:
+														instructionDocument.tokenAuthority ?? null
 												}"
 												[disabled]="instructionDocument | bdItemChanging"
 												[attr.aria-label]="
