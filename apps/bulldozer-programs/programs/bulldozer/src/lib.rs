@@ -232,6 +232,10 @@ pub mod bulldozer {
     instructions::set_instruction_account_derivation::handle(ctx, arguments)
   }
 
+  pub fn set_token_cofiguration(ctx: Context<SetTokenConfiguration>) -> Result<()> {
+    instructions::set_token_cofiguration::handle(ctx)
+  }
+
   pub fn add_seed_to_derivation(ctx: Context<AddSeedToDerivation>) -> Result<()> {
     instructions::add_seed_to_derivation::handle(ctx)
   }

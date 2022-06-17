@@ -8,6 +8,7 @@ pub mod set_instruction_account_close;
 pub mod set_instruction_account_collection;
 pub mod set_instruction_account_derivation;
 pub mod set_instruction_account_payer;
+pub mod set_token_cofiguration;
 pub mod update_instruction_account;
 
 pub use add_seed_to_derivation::*;
@@ -20,4 +21,5 @@ pub use set_instruction_account_close::*;
 pub use set_instruction_account_collection::*;
 pub use set_instruction_account_derivation::*;
 pub use set_instruction_account_payer::*;
+pub use set_token_cofiguration::*;
 pub use update_instruction_account::*;

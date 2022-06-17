@@ -2,7 +2,7 @@ use crate::collections::{
   Collaborator, Instruction, InstructionAccount, InstructionAccountClose, InstructionAccountPayer,
   User, Workspace,
 };
-use crate::enums::{AccountModifiers, CollaboratorStatus};
+use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -93,5 +93,12 @@ pub fn handle(
     (_, Some(1)) => {}
     _ => ctx.accounts.account_close.set(None),
   };
+  match (ctx.accounts.account.kind.clone(), arguments.modifier) {
+    (AccountKinds::Token { id: 4 }, Some(0)) => {}
+    _ => {
+      ctx.accounts.account.set_mint(None);
+      ctx.accounts.account.set_token_authority(None)
+    }
+  }
   Ok(())
 }

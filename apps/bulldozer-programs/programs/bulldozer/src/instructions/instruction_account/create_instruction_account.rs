@@ -14,6 +14,7 @@ pub struct CreateInstructionAccountArguments {
   pub kind: u8,
   pub modifier: Option<u8>,
   pub space: Option<u16>,
+  pub unchecked_explanation: Option<String>,
 }
 
 #[derive(Accounts)]
@@ -133,8 +134,15 @@ pub fn validate(
   ctx: &Context<CreateInstructionAccount>,
   arguments: &CreateInstructionAccountArguments,
 ) -> Result<bool> {
-  match (arguments.modifier, arguments.space) {
-    (Some(0), None) => Err(error!(ErrorCode::MissingSpace)),
+  match (
+    arguments.kind,
+    arguments.modifier,
+    arguments.space,
+    arguments.unchecked_explanation.clone(),
+  ) {
+    (0, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (2, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (2, _, _, None) => Err(error!(ErrorCode::MissingUncheckedExplanation)),
     _ => {
       let budget_lamports = **ctx.accounts.budget.to_account_info().lamports.borrow();
       let instruction_account_rent = **ctx.accounts.account.to_account_info().lamports.borrow();
@@ -260,6 +268,9 @@ pub fn handle(
     AccountKinds::create(arguments.kind)?,
     AccountModifiers::create(arguments.modifier)?,
     arguments.space,
+    arguments.unchecked_explanation,
+    None,
+    None,
     InstructionAccountBumps {
       stats: *ctx.bumps.get("account_stats").unwrap(),
       collection: *ctx.bumps.get("account_collection").unwrap(),
