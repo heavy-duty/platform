@@ -92,10 +92,7 @@ export class InstructionAccountConstraintsStore extends ComponentStore<ViewModel
 									),
 								});
 							},
-							(error) => {
-								console.log('im erroring out');
-								this._notificationStore.setError(error);
-							}
+							(error) => this._notificationStore.setError(error)
 						)
 					);
 			})
@@ -119,8 +116,6 @@ export class InstructionAccountConstraintsStore extends ComponentStore<ViewModel
 
 					return EMPTY;
 				}
-
-				console.log(instructionAccountConstraintIds.toArray());
 
 				return this._instructionAccountConstraintApiService
 					.findByIds(instructionAccountConstraintIds.toArray())
@@ -150,10 +145,7 @@ export class InstructionAccountConstraintsStore extends ComponentStore<ViewModel
 											),
 								});
 							},
-							(error) => {
-								console.log('im erroring out', { error });
-								this._notificationStore.setError(error);
-							}
+							(error) => this._notificationStore.setError(error)
 						)
 					);
 			})

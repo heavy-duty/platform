@@ -177,6 +177,10 @@ export class InstructionApiService {
 
 	// update instruction body
 	async updateBody(params: UpdateInstructionBodyParams): Promise<boolean> {
+		console.log(
+			'WARNING: This implementation should be turned into an observable for consistency.'
+		);
+
 		const chunkSize = 500;
 
 		const { blockhash, lastValidBlockHeight } =
@@ -186,20 +190,6 @@ export class InstructionApiService {
 		if (publicKey === null) {
 			throw new Error('Connect your wallet to send transactions.');
 		}
-
-		const a = await firstValueFrom(
-			updateInstructionBody(this.connection.rpcEndpoint, {
-				...params,
-				chunk: 0,
-				body: params.body.slice(0, chunkSize),
-			})
-		);
-
-		console.log(a, {
-			...params,
-			chunk: 0,
-			body: params.body.slice(0, chunkSize),
-		});
 
 		const transaction1 = new Transaction({
 			blockhash,
