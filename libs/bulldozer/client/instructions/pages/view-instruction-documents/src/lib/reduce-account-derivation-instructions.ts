@@ -26,21 +26,31 @@ export const reduceInstructions = (
 			const name = data.arguments.name;
 
 			if (instruction.transactionStatus.status === 'confirmed') {
-				return items.update(
-					itemIndex,
-					{
+				if (itemIndex === -1) {
+					return items.push({
 						id: accountDerivation,
 						isUpdating: true,
 						name,
 						bumpPath: null,
 						seedPaths: [],
-					},
-					(item) => ({
-						...item,
-						isUpdating: true,
-						name,
-					})
-				);
+					});
+				} else {
+					return items.update(
+						itemIndex,
+						{
+							id: accountDerivation,
+							isUpdating: true,
+							name,
+							bumpPath: null,
+							seedPaths: [],
+						},
+						(item) => ({
+							...item,
+							isUpdating: true,
+							name,
+						})
+					);
+				}
 			} else if (instruction.transactionStatus.status === 'finalized') {
 				return items.update(
 					itemIndex,
@@ -74,23 +84,33 @@ export const reduceInstructions = (
 			);
 
 			if (instruction.transactionStatus.status === 'confirmed') {
-				return items.update(
-					itemIndex,
-					{
+				if (itemIndex === -1) {
+					return items.push({
 						id: accountDerivation,
 						isUpdating: true,
 						name: null,
 						bumpPath: null,
 						seedPaths: [],
-					},
-					(item) => ({
-						...item,
-						isUpdating: true,
-						name: null,
-						bumpPath: null,
-						seedPaths: [],
-					})
-				);
+					});
+				} else {
+					return items.update(
+						itemIndex,
+						{
+							id: accountDerivation,
+							isUpdating: true,
+							name: null,
+							bumpPath: null,
+							seedPaths: [],
+						},
+						(item) => ({
+							...item,
+							isUpdating: true,
+							name: null,
+							bumpPath: null,
+							seedPaths: [],
+						})
+					);
+				}
 			} else if (instruction.transactionStatus.status === 'finalized') {
 				return items.update(
 					itemIndex,
@@ -134,9 +154,8 @@ export const reduceInstructions = (
 			);
 
 			if (instruction.transactionStatus.status === 'confirmed') {
-				return items.update(
-					itemIndex,
-					{
+				if (itemIndex === -1) {
+					return items.push({
 						id: accountDerivation,
 						isUpdating: true,
 						name: null,
@@ -145,16 +164,30 @@ export const reduceInstructions = (
 							reference,
 						},
 						seedPaths: [],
-					},
-					(item) => ({
-						...item,
-						isUpdating: true,
-						bumpPath: {
-							path,
-							reference,
+					});
+				} else {
+					return items.update(
+						itemIndex,
+						{
+							id: accountDerivation,
+							isUpdating: true,
+							name: null,
+							bumpPath: {
+								path,
+								reference,
+							},
+							seedPaths: [],
 						},
-					})
-				);
+						(item) => ({
+							...item,
+							isUpdating: true,
+							bumpPath: {
+								path,
+								reference,
+							},
+						})
+					);
+				}
 			} else if (instruction.transactionStatus.status === 'finalized') {
 				return items.update(
 					itemIndex,
@@ -171,10 +204,6 @@ export const reduceInstructions = (
 					(item) => ({
 						...item,
 						isUpdating: false,
-						bumpPath: {
-							path,
-							reference,
-						},
 					})
 				);
 			} else {
@@ -198,21 +227,31 @@ export const reduceInstructions = (
 			);
 
 			if (instruction.transactionStatus.status === 'confirmed') {
-				return items.update(
-					itemIndex,
-					{
+				if (itemIndex === -1) {
+					return items.push({
 						id: accountDerivation,
 						isUpdating: true,
 						name: null,
 						bumpPath: null,
 						seedPaths: [reference],
-					},
-					(item) => ({
-						...item,
-						isUpdating: true,
-						seedPaths: [...item.seedPaths, reference],
-					})
-				);
+					});
+				} else {
+					return items.update(
+						itemIndex,
+						{
+							id: accountDerivation,
+							isUpdating: true,
+							name: null,
+							bumpPath: null,
+							seedPaths: [reference],
+						},
+						(item) => ({
+							...item,
+							isUpdating: true,
+							seedPaths: [...item.seedPaths, reference],
+						})
+					);
+				}
 			} else if (instruction.transactionStatus.status === 'finalized') {
 				return items.update(
 					itemIndex,
@@ -226,7 +265,6 @@ export const reduceInstructions = (
 					(item) => ({
 						...item,
 						isUpdating: false,
-						seedPaths: [...item.seedPaths, reference],
 					})
 				);
 			} else {
