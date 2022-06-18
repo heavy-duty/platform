@@ -19,13 +19,15 @@ import {
 	HdSolanaConfigStore,
 	KeyedAccountInfo,
 } from '@heavy-duty/ngx-solana';
-import { addInstructionToTransaction } from '@heavy-duty/rx-solana';
-import { Finality } from '@solana/web3.js';
+import {
+	addInstructionToTransaction,
+	partiallySignTransaction,
+} from '@heavy-duty/rx-solana';
+import { Finality, Keypair } from '@solana/web3.js';
 import {
 	catchError,
 	concatMap,
 	first,
-	forkJoin,
 	map,
 	Observable,
 	throwError,
@@ -94,26 +96,30 @@ export class InstructionAccountConstraintApiService {
 		return this._hdSolanaApiService
 			.getMultipleAccounts(instructionAccountConstraintIds, { commitment })
 			.pipe(
-				concatMap((keyedAccounts) =>
-					forkJoin(
-						keyedAccounts
-							.filter(
-								(keyedAccount): keyedAccount is KeyedAccountInfo =>
-									keyedAccount !== null
+				map((keyedAccounts) =>
+					keyedAccounts
+						.filter(
+							(keyedAccount): keyedAccount is KeyedAccountInfo =>
+								keyedAccount !== null
+						)
+						.map((keyedAccount) =>
+							createInstructionAccountConstraintDocument(
+								keyedAccount.accountId,
+								keyedAccount.accountInfo
 							)
-							.map((keyedAccount) =>
-								createInstructionAccountConstraintDocument(
-									keyedAccount.accountId,
-									keyedAccount.accountInfo
-								)
-							)
-					)
+						)
 				)
 			);
 	}
 
 	// create instruction account constraint
-	create(params: CreateInstructionAccountConstraintParams) {
+	create(
+		instructionAccountConstraintKeypair: Keypair,
+		params: Omit<
+			CreateInstructionAccountConstraintParams,
+			'instructionAccountConstraintId'
+		>
+	) {
 		return this._hdSolanaApiService.createTransaction(params.authority).pipe(
 			addInstructionToTransaction(
 				this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -123,10 +129,15 @@ export class InstructionAccountConstraintApiService {
 							return throwError(() => 'API endpoint missing');
 						}
 
-						return createInstructionAccountConstraint(apiEndpoint, params);
+						return createInstructionAccountConstraint(apiEndpoint, {
+							...params,
+							instructionAccountConstraintId:
+								instructionAccountConstraintKeypair.publicKey.toBase58(),
+						});
 					})
 				)
 			),
+			partiallySignTransaction(instructionAccountConstraintKeypair),
 			concatMap((transaction) =>
 				this._hdSolanaApiService.sendTransaction(transaction).pipe(
 					map((transactionSignature) => ({

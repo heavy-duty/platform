@@ -9,6 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { AddInstructionAccountModule } from '@bulldozer-client/add-instruction-account';
 import { CardModule } from '@bulldozer-client/bd-card';
+import { EditInstructionAccountConstraintModule } from '@bulldozer-client/edit-instruction-account-constraint';
 import { EditInstructionDocumentModule } from '@bulldozer-client/edit-instruction-document';
 import { EditInstructionDocumentDerivationModule } from '@bulldozer-client/edit-instruction-document-derivation';
 import { EditInstructionMintModule } from '@bulldozer-client/edit-instruction-mint';
@@ -48,6 +49,7 @@ import { ViewInstructionDocumentsComponent } from './view-instruction-documents.
 		EditInstructionMintModule,
 		EditInstructionUncheckedModule,
 		EditInstructionDocumentDerivationModule,
+		EditInstructionAccountConstraintModule,
 		EditInstructionRelationModule,
 		AddInstructionAccountModule,
 		ObscureAddressModule,

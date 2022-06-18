@@ -131,7 +131,9 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 										) ?? null,
 								};
 							}),
-						constraints,
+						constraints: constraints.filter(
+							(constraint) => constraint.accountId === instructionAccount.id
+						),
 						tokenAuthority:
 							instructionAccounts.find(
 								({ id }) => id === instructionAccount.tokenAuthority

@@ -43,7 +43,9 @@ export const reduceInstructions = (
 				throw new Error('Malformed Create Instruction Account Constraint');
 			}
 
-			const itemIndex = items.findIndex((item) => item.id === accountId);
+			const itemIndex = items.findIndex(
+				(item) => item.id === accountConstraintId
+			);
 
 			if (
 				instruction.transactionStatus.status === undefined ||
@@ -116,7 +118,7 @@ export const reduceInstructions = (
 						},
 						(item) => ({
 							...item,
-							isCreating: true,
+							isCreating: false,
 						})
 					);
 				}
@@ -160,7 +162,9 @@ export const reduceInstructions = (
 				throw new Error('Malformed Update Instruction Account Constraint');
 			}
 
-			const itemIndex = items.findIndex((item) => item.id === accountId);
+			const itemIndex = items.findIndex(
+				(item) => item.id === accountConstraintId
+			);
 
 			if (
 				instruction.transactionStatus.status === undefined ||
@@ -223,7 +227,7 @@ export const reduceInstructions = (
 							id: accountConstraintId,
 							name,
 							body,
-							isCreating: true,
+							isCreating: false,
 							isUpdating: false,
 							isDeleting: false,
 							accountId,
@@ -233,7 +237,7 @@ export const reduceInstructions = (
 						},
 						(item) => ({
 							...item,
-							isCreating: true,
+							isCreating: false,
 						})
 					);
 				}
@@ -268,7 +272,9 @@ export const reduceInstructions = (
 				throw new Error('Malformed Update Instruction Account Constraint');
 			}
 
-			const itemIndex = items.findIndex((item) => item.id === accountId);
+			const itemIndex = items.findIndex(
+				(item) => item.id === accountConstraintId
+			);
 
 			if (
 				instruction.transactionStatus.status === undefined ||

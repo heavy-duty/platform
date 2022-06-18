@@ -58,6 +58,11 @@ export interface InstructionAccountModel {
 	mint: string | null;
 }
 
+export interface InstructionAccountConstraintModel {
+	name: string;
+	body: string;
+}
+
 export interface InstructionArgumentDto {
 	name: string;
 	kind: number;

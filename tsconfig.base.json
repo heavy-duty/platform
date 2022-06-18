@@ -100,6 +100,9 @@
 			"@bulldozer-client/edit-instruction": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction/src/index.ts"
 			],
+			"@bulldozer-client/edit-instruction-account-constraint": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-account-constraint/src/index.ts"
+			],
 			"@bulldozer-client/edit-instruction-argument": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-argument/src/index.ts"
 			],
