@@ -4908,6 +4908,10 @@ export type Bulldozer = {
 						type: 'u8';
 					},
 					{
+						name: 'body';
+						type: 'string';
+					},
+					{
 						name: 'createdAt';
 						type: 'i64';
 					},
@@ -10330,11 +10334,23 @@ export const IDL: Bulldozer = {
 					},
 				},
 			],
-			args: [],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'SetInstructionAccountDerivationArguments',
+					},
+				},
+			],
 		},
 		{
 			name: 'setBumpToDerivation',
 			accounts: [
+				{
+					name: 'systemProgram',
+					isMut: false,
+					isSigner: false,
+				},
 				{
 					name: 'authority',
 					isMut: false,
@@ -10440,6 +10456,16 @@ export const IDL: Bulldozer = {
 						],
 					},
 				},
+				{
+					name: 'mint',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'tokenAuthority',
+					isMut: false,
+					isSigner: false,
+				},
 			],
 			args: [
 				{
@@ -10475,6 +10501,11 @@ export const IDL: Bulldozer = {
 				},
 				{
 					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'reference',
 					isMut: false,
 					isSigner: false,
 				},
@@ -10576,8 +10607,38 @@ export const IDL: Bulldozer = {
 				},
 				{
 					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'path',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'reference',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountDerivation',
 					isMut: true,
 					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_derivation',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account',
+							},
+						],
+					},
 				},
 				{
 					name: 'user',
@@ -10766,19 +10827,40 @@ export const IDL: Bulldozer = {
 					isSigner: false,
 				},
 				{
-					name: 'application',
-					isMut: false,
-					isSigner: false,
-				},
-				{
 					name: 'instruction',
 					isMut: false,
 					isSigner: false,
 				},
 				{
 					name: 'account',
+					isMut: true,
+					isSigner: false,
+				},
+				{
+					name: 'account',
 					isMut: false,
 					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account.workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
 				},
 				{
 					name: 'user',
@@ -10836,11 +10918,19 @@ export const IDL: Bulldozer = {
 								type: 'string',
 								value: 'budget',
 							},
+						],
+					},
+				},
+				{
+					name: 'accountPayer',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
 							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'Workspace',
-								path: 'workspace',
+								kind: 'const',
+								type: 'string',
+								value: 'instruction_account_payer',
 							},
 						],
 					},
@@ -10864,8 +10954,13 @@ export const IDL: Bulldozer = {
 			name: 'updateInstructionAccountConstraint',
 			accounts: [
 				{
-					name: 'authority',
+					name: 'systemProgram',
 					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'authority',
+					isMut: true,
 					isSigner: true,
 				},
 				{
@@ -10897,25 +10992,6 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'const',
 								type: 'string',
-								value: 'user',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								path: 'authority',
-							},
-						],
-					},
-				},
-				{
-					name: 'collaborator',
-					isMut: false,
-					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
 								value: 'collaborator',
 							},
 							{
@@ -10929,6 +11005,26 @@ export const IDL: Bulldozer = {
 								type: 'publicKey',
 								account: 'User',
 								path: 'user',
+							},
+						],
+					},
+				},
+				{
+					name: 'budget',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'budget',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
 							},
 						],
 					},
@@ -11014,8 +11110,8 @@ export const IDL: Bulldozer = {
 							{
 								kind: 'account',
 								type: 'publicKey',
-								account: 'InstructionAccount',
-								path: 'account.workspace',
+								account: 'Workspace',
+								path: 'workspace',
 							},
 							{
 								kind: 'account',
@@ -11027,23 +11123,16 @@ export const IDL: Bulldozer = {
 					},
 				},
 				{
-					name: 'budget',
+					name: 'accountConstraint',
 					isMut: true,
 					isSigner: false,
-					pda: {
-						seeds: [
-							{
-								kind: 'const',
-								type: 'string',
-								value: 'budget',
-							},
-							{
-								kind: 'account',
-								type: 'publicKey',
-								account: 'InstructionAccount',
-								path: 'account.workspace',
-							},
-						],
+				},
+			],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'UpdateInstructionAccountConstraintArguments',
 					},
 				},
 			],
