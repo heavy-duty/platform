@@ -164,6 +164,10 @@ pub mod bulldozer {
     instructions::update_instruction_body::handle(ctx, arguments)
   }
 
+  pub fn clear_instruction_body(ctx: Context<ClearInstructionBody>) -> Result<()> {
+    instructions::clear_instruction_body::handle(ctx)
+  }
+
   pub fn delete_instruction(ctx: Context<DeleteInstruction>) -> Result<()> {
     instructions::delete_instruction::handle(ctx)
   }

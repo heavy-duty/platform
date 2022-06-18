@@ -1124,7 +1124,7 @@ describe('instruction account', () => {
 						toPubkey: newBudgetPublicKey,
 						lamports:
 							(await provider.connection.getMinimumBalanceForRentExemption(
-								2155 // instruction account size
+								2173 // instruction account size
 							)) +
 							(await provider.connection.getMinimumBalanceForRentExemption(
 								10 // instruction stats account size

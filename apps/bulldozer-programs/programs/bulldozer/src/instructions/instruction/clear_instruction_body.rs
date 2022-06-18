@@ -1,17 +1,12 @@
-use crate::collections::{Application, Collaborator, Instruction, User, Workspace};
+use crate::collections::{
+  Application, Collaborator, Instruction, InstructionChunk, User, Workspace,
+};
 use crate::enums::CollaboratorStatus;
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
-#[derive(AnchorSerialize, AnchorDeserialize)]
-pub struct UpdateInstructionBodyArguments {
-  pub chunk: u8,
-  pub body: String,
-}
-
 #[derive(Accounts)]
-#[instruction(arguments: UpdateInstructionBodyArguments)]
-pub struct UpdateInstructionBody<'info> {
+pub struct ClearInstructionBody<'info> {
   pub authority: Signer<'info>,
   pub workspace: Box<Account<'info, Workspace>>,
   #[account(
@@ -44,14 +39,29 @@ pub struct UpdateInstructionBody<'info> {
   pub collaborator: Box<Account<'info, Collaborator>>,
 }
 
-pub fn handle(
-  ctx: Context<UpdateInstructionBody>,
-  arguments: UpdateInstructionBodyArguments,
-) -> Result<()> {
-  msg!("Update instruction body");
+pub fn handle(ctx: Context<ClearInstructionBody>) -> Result<()> {
+  msg!("Clear instruction body");
 
-  let mut chunk = &mut ctx.accounts.instruction.chunks[arguments.chunk as usize];
-  chunk.data = arguments.body;
+  let mut chunks = Vec::new();
+
+  chunks.push(InstructionChunk {
+    position: 0,
+    data: "".to_string(),
+  });
+  chunks.push(InstructionChunk {
+    position: 1,
+    data: "".to_string(),
+  });
+  chunks.push(InstructionChunk {
+    position: 2,
+    data: "".to_string(),
+  });
+  chunks.push(InstructionChunk {
+    position: 3,
+    data: "".to_string(),
+  });
+
+  ctx.accounts.instruction.chunks = chunks;
 
   Ok(())
 }

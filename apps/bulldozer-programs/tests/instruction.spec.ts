@@ -100,7 +100,6 @@ describe('instruction', () => {
 			await program.account.applicationStats.fetch(applicationStatsPublicKey);
 		assert.ok(account.authority.equals(provider.wallet.publicKey));
 		assert.equal(account.name, instructionName);
-		assert.equal(account.body, '');
 		assert.ok(account.workspace.equals(workspace.publicKey));
 		assert.ok(account.application.equals(application.publicKey));
 		assert.equal(applicationStatsAccount.quantityOfInstructions, 1);
@@ -141,7 +140,7 @@ describe('instruction', () => {
     `;
 		// act
 		await program.methods
-			.updateInstructionBody({ body: instructionBody })
+			.updateInstructionBody({ chunk: 0, body: instructionBody })
 			.accounts({
 				authority: provider.wallet.publicKey,
 				workspace: workspace.publicKey,
@@ -153,7 +152,11 @@ describe('instruction', () => {
 		const account = await program.account.instruction.fetch(
 			instruction.publicKey
 		);
-		assert.equal(account.body, instructionBody);
+		const body = (account.chunks as any).reduce(
+			(chunks: string, chunk: any) => chunks + chunk.data,
+			''
+		);
+		assert.equal(body, instructionBody);
 	});
 
 	it('should delete account', async () => {
