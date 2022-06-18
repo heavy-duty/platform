@@ -257,11 +257,11 @@ Add the environment variables to the Vercel environment of your app and redeploy
 
 Done! Now it’s time to work on the web client.
 
-## Web client
+## Drill Web client
 
 We suggest using Firebase for deployment. The web client is written in Angular and Firebase is really friendly with this kind of apps. But hey! You can use Vercel or any platform you want.
 
-Time to update the environment.prod.ts file located at apps/drill-web-client/src/environments:
+Time to update the _`environment.prod.ts`_ file located at apps/drill-web-client/src/environments:
 
 - Change the clientID with the githubClientID you already have from previous steps.
 - Update the githubRepository with the _< username >/< name >_ of your Github repository.
