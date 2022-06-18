@@ -14,6 +14,8 @@ import {
 	InstructionAccountApiService,
 	InstructionAccountClosesStore,
 	InstructionAccountCollectionsStore,
+	InstructionAccountConstraintQueryStore,
+	InstructionAccountConstraintsStore,
 	InstructionAccountDerivationsStore,
 	InstructionAccountPayersStore,
 	InstructionAccountQueryStore,
@@ -29,6 +31,7 @@ import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { Keypair } from '@solana/web3.js';
 import { List } from 'immutable';
 import { distinctUntilChanged, map } from 'rxjs';
+import { ViewInstructionDocumentsAccountConstraintsStore } from './view-instruction-documents-account-constraints.store';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
@@ -497,6 +500,31 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 							</ng-container>
 						</bd-card>
 					</div>
+
+					<bd-card>
+						<section
+							*hdWalletAdapter="let publicKey = publicKey"
+							class="flex flex-col gap-2"
+						>
+							<div class="flex justify-between items-center">
+								<p class="uppercase m-0">Constraints</p>
+
+								<button class="bp-button">
+									Add
+
+									<mat-icon inline>add</mat-icon>
+								</button>
+							</div>
+
+							<article
+								*ngFor="let constraint of instructionDocument.constraints"
+							>
+								{{ constraint.name }}
+								{{ constraint.body }}
+							</article>
+						</section>
+					</bd-card>
+
 					<bd-card>
 						<section *hdWalletAdapter="let publicKey = publicKey">
 							<div class="flex justify-start items-center">
@@ -714,6 +742,8 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		InstructionAccountQueryStore,
 		InstructionRelationsStore,
 		InstructionRelationQueryStore,
+		InstructionAccountConstraintsStore,
+		InstructionAccountConstraintQueryStore,
 		InstructionAccountDerivationsStore,
 		CollectionsStore,
 		CollectionAttributesStore,
@@ -726,6 +756,7 @@ import { ViewInstructionDocumentsStore } from './view-instruction-documents.stor
 		ViewInstructionDocumentsCollectionsReferencesStore,
 		ViewInstructionDocumentsDerivationsReferencesStore,
 		ViewInstructionDocumentsRelationsStore,
+		ViewInstructionDocumentsAccountConstraintsStore,
 		ViewInstructionDocumentsCollectionAttributesStore,
 	],
 })
@@ -788,6 +819,7 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 		private readonly _instructionRelationApiService: InstructionRelationApiService,
 		private readonly _viewInstructionDocumentsStore: ViewInstructionDocumentsStore,
 		private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
+		private readonly _viewInstructionDocumentsAccountConstraintsStore: ViewInstructionDocumentsAccountConstraintsStore,
 		private readonly _viewInstructionDocumentsRelationsStore: ViewInstructionDocumentsRelationsStore,
 		private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
 		private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
@@ -798,7 +830,13 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
+		this._viewInstructionDocumentsAccountConstraintsStore.accounts$.subscribe(
+			(a) => console.log(a)
+		);
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
+			this.instructionId$
+		);
+		this._viewInstructionDocumentsAccountConstraintsStore.setInstructionId(
 			this.instructionId$
 		);
 		this._viewInstructionDocumentsRelationsStore.setInstructionId(

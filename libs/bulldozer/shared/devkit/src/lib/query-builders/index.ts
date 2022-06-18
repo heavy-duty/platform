@@ -3,6 +3,7 @@ export * from './budget-query-builder';
 export * from './collaborator-query-builder';
 export * from './collection-attribute-query-builder';
 export * from './collection-query-builder';
+export * from './instruction-account-constraint-query-builder';
 export * from './instruction-account-query-builder';
 export * from './instruction-argument-query-builder';
 export * from './instruction-query-builder';

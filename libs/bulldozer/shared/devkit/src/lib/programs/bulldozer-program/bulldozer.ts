@@ -4064,6 +4064,308 @@ export type Bulldozer = {
 			args: [];
 		},
 		{
+			name: 'createInstructionAccountConstraint';
+			accounts: [
+				{
+					name: 'systemProgram';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'authority';
+					isMut: true;
+					isSigner: true;
+				},
+				{
+					name: 'workspace';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'application';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'instruction';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'account';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'user';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'user';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								path: 'authority';
+							}
+						];
+					};
+				},
+				{
+					name: 'collaborator';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'collaborator';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'Workspace';
+								path: 'workspace';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'User';
+								path: 'user';
+							}
+						];
+					};
+				},
+				{
+					name: 'budget';
+					isMut: true;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'budget';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'Workspace';
+								path: 'workspace';
+							}
+						];
+					};
+				},
+				{
+					name: 'accountConstraint';
+					isMut: true;
+					isSigner: true;
+				}
+			];
+			args: [
+				{
+					name: 'arguments';
+					type: {
+						defined: 'CreateInstructionAccountConstraintArguments';
+					};
+				}
+			];
+		},
+		{
+			name: 'updateInstructionAccountConstraint';
+			accounts: [
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
+				},
+				{
+					name: 'workspace';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'application';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'instruction';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'account';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'user';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'user';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								path: 'authority';
+							}
+						];
+					};
+				},
+				{
+					name: 'collaborator';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'collaborator';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'Workspace';
+								path: 'workspace';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'User';
+								path: 'user';
+							}
+						];
+					};
+				},
+				{
+					name: 'accountConstraint';
+					isMut: true;
+					isSigner: false;
+				}
+			];
+			args: [
+				{
+					name: 'arguments';
+					type: {
+						defined: 'UpdateInstructionAccountConstraintArguments';
+					};
+				}
+			];
+		},
+		{
+			name: 'deleteInstructionAccountConstraint';
+			accounts: [
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
+				},
+				{
+					name: 'workspace';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'application';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'instruction';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'account';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'accountConstraint';
+					isMut: true;
+					isSigner: false;
+				},
+				{
+					name: 'user';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'user';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								path: 'authority';
+							}
+						];
+					};
+				},
+				{
+					name: 'collaborator';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'collaborator';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'InstructionAccount';
+								path: 'account.workspace';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'User';
+								path: 'user';
+							}
+						];
+					};
+				},
+				{
+					name: 'budget';
+					isMut: true;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'budget';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'InstructionAccount';
+								path: 'account.workspace';
+							}
+						];
+					};
+				}
+			];
+			args: [];
+		},
+		{
 			name: 'createInstructionRelation';
 			accounts: [
 				{
@@ -4615,6 +4917,50 @@ export type Bulldozer = {
 					{
 						name: 'collectionStatsBump';
 						type: 'u8';
+					}
+				];
+			};
+		},
+		{
+			name: 'instructionAccountConstraint';
+			type: {
+				kind: 'struct';
+				fields: [
+					{
+						name: 'authority';
+						type: 'publicKey';
+					},
+					{
+						name: 'workspace';
+						type: 'publicKey';
+					},
+					{
+						name: 'application';
+						type: 'publicKey';
+					},
+					{
+						name: 'instruction';
+						type: 'publicKey';
+					},
+					{
+						name: 'account';
+						type: 'publicKey';
+					},
+					{
+						name: 'name';
+						type: 'string';
+					},
+					{
+						name: 'body';
+						type: 'string';
+					},
+					{
+						name: 'createdAt';
+						type: 'i64';
+					},
+					{
+						name: 'updatedAt';
+						type: 'i64';
 					}
 				];
 			};
@@ -5307,6 +5653,38 @@ export type Bulldozer = {
 						type: {
 							option: 'string';
 						};
+					}
+				];
+			};
+		},
+		{
+			name: 'CreateInstructionAccountConstraintArguments';
+			type: {
+				kind: 'struct';
+				fields: [
+					{
+						name: 'name';
+						type: 'string';
+					},
+					{
+						name: 'body';
+						type: 'string';
+					}
+				];
+			};
+		},
+		{
+			name: 'UpdateInstructionAccountConstraintArguments';
+			type: {
+				kind: 'struct';
+				fields: [
+					{
+						name: 'name';
+						type: 'string';
+					},
+					{
+						name: 'body';
+						type: 'string';
 					}
 				];
 			};
@@ -10023,6 +10401,308 @@ export const IDL: Bulldozer = {
 			args: [],
 		},
 		{
+			name: 'createInstructionAccountConstraint',
+			accounts: [
+				{
+					name: 'systemProgram',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'authority',
+					isMut: true,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+				{
+					name: 'budget',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'budget',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+						],
+					},
+				},
+				{
+					name: 'accountConstraint',
+					isMut: true,
+					isSigner: true,
+				},
+			],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'CreateInstructionAccountConstraintArguments',
+					},
+				},
+			],
+		},
+		{
+			name: 'updateInstructionAccountConstraint',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+				{
+					name: 'accountConstraint',
+					isMut: true,
+					isSigner: false,
+				},
+			],
+			args: [
+				{
+					name: 'arguments',
+					type: {
+						defined: 'UpdateInstructionAccountConstraintArguments',
+					},
+				},
+			],
+		},
+		{
+			name: 'deleteInstructionAccountConstraint',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'account',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'accountConstraint',
+					isMut: true,
+					isSigner: false,
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account.workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+				{
+					name: 'budget',
+					isMut: true,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'budget',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'InstructionAccount',
+								path: 'account.workspace',
+							},
+						],
+					},
+				},
+			],
+			args: [],
+		},
+		{
 			name: 'createInstructionRelation',
 			accounts: [
 				{
@@ -10574,6 +11254,50 @@ export const IDL: Bulldozer = {
 					{
 						name: 'collectionStatsBump',
 						type: 'u8',
+					},
+				],
+			},
+		},
+		{
+			name: 'instructionAccountConstraint',
+			type: {
+				kind: 'struct',
+				fields: [
+					{
+						name: 'authority',
+						type: 'publicKey',
+					},
+					{
+						name: 'workspace',
+						type: 'publicKey',
+					},
+					{
+						name: 'application',
+						type: 'publicKey',
+					},
+					{
+						name: 'instruction',
+						type: 'publicKey',
+					},
+					{
+						name: 'account',
+						type: 'publicKey',
+					},
+					{
+						name: 'name',
+						type: 'string',
+					},
+					{
+						name: 'body',
+						type: 'string',
+					},
+					{
+						name: 'createdAt',
+						type: 'i64',
+					},
+					{
+						name: 'updatedAt',
+						type: 'i64',
 					},
 				],
 			},
@@ -11266,6 +11990,38 @@ export const IDL: Bulldozer = {
 						type: {
 							option: 'string',
 						},
+					},
+				],
+			},
+		},
+		{
+			name: 'CreateInstructionAccountConstraintArguments',
+			type: {
+				kind: 'struct',
+				fields: [
+					{
+						name: 'name',
+						type: 'string',
+					},
+					{
+						name: 'body',
+						type: 'string',
+					},
+				],
+			},
+		},
+		{
+			name: 'UpdateInstructionAccountConstraintArguments',
+			type: {
+				kind: 'struct',
+				fields: [
+					{
+						name: 'name',
+						type: 'string',
+					},
+					{
+						name: 'body',
+						type: 'string',
 					},
 				],
 			},

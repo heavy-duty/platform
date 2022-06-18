@@ -96,3 +96,16 @@ export interface InstructionRelationItemView {
 	to: string;
 	from: string;
 }
+
+export interface InstructionAccountConstraintItemView {
+	id: string;
+	accountId: string;
+	instructionId: string;
+	applicationId: string;
+	workspaceId: string;
+	isCreating: boolean;
+	isUpdating: boolean;
+	isDeleting: boolean;
+	name: string;
+	body: string;
+}

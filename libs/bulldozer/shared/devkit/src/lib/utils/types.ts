@@ -7,6 +7,7 @@ import {
 	COLLECTION_ACCOUNT_NAME,
 	COLLECTION_ATTRIBUTE_ACCOUNT_NAME,
 	INSTRUCTION_ACCOUNT_ACCOUNT_NAME,
+	INSTRUCTION_ACCOUNT_CONSTRAINT_ACCOUNT_NAME,
 	INSTRUCTION_ACCOUNT_NAME,
 	INSTRUCTION_ARGUMENT_ACCOUNT_NAME,
 	INSTRUCTION_RELATION_ACCOUNT_NAME,
@@ -225,6 +226,15 @@ export interface InstructionAccountDerivation {
 	seedPaths: string[];
 }
 
+export interface InstructionAccountConstraint {
+	authority: string;
+	workspace: string;
+	application: string;
+	instruction: string;
+	account: string;
+	body: string;
+}
+
 export interface InstructionAccountClose {
 	close: string | null;
 }
@@ -268,4 +278,5 @@ export type AccountName =
 	| typeof INSTRUCTION_ACCOUNT_NAME
 	| typeof INSTRUCTION_ARGUMENT_ACCOUNT_NAME
 	| typeof INSTRUCTION_ACCOUNT_ACCOUNT_NAME
-	| typeof INSTRUCTION_RELATION_ACCOUNT_NAME;
+	| typeof INSTRUCTION_RELATION_ACCOUNT_NAME
+	| typeof INSTRUCTION_ACCOUNT_CONSTRAINT_ACCOUNT_NAME;

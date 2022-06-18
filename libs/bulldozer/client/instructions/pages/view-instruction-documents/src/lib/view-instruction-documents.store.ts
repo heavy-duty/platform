@@ -3,8 +3,9 @@ import { InstructionAccountsStore } from '@bulldozer-client/instructions-data-ac
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { ComponentStore } from '@ngrx/component-store';
 import { List } from 'immutable';
-import { map, tap } from 'rxjs';
+import { map } from 'rxjs';
 import { InstructionAccountItemView } from './types';
+import { ViewInstructionDocumentsAccountConstraintsStore } from './view-instruction-documents-account-constraints.store';
 import { ViewInstructionDocumentsAccountsStore } from './view-instruction-documents-accounts.store';
 import { ViewInstructionDocumentsClosesReferencesStore } from './view-instruction-documents-close-references.store';
 import { ViewInstructionDocumentsCollectionAttributesStore } from './view-instruction-documents-collection-attributes.store';
@@ -30,6 +31,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 		this._viewInstructionDocumentsRelationsStore.accounts$,
 		this._viewInstructionDocumentsDerivationsReferencesStore.accounts$,
 		this._viewInstructionDocumentsCollectionAttributesStore.accounts$,
+		this._viewInstructionDocumentsAccountConstraintsStore.accounts$,
 		(
 			instructionAccounts,
 			collections,
@@ -38,7 +40,8 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 			closes,
 			relations,
 			derivations,
-			collectionAttributes
+			collectionAttributes,
+			constraints
 		) => {
 			if (
 				instructionAccounts === null ||
@@ -47,7 +50,8 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 				collectionsReferences === null ||
 				closes === null ||
 				relations === null ||
-				collectionAttributes === null
+				collectionAttributes === null ||
+				constraints === null
 			) {
 				return null;
 			}
@@ -127,6 +131,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 										) ?? null,
 								};
 							}),
+						constraints,
 						tokenAuthority:
 							instructionAccounts.find(
 								({ id }) => id === instructionAccount.tokenAuthority
@@ -143,6 +148,7 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 	constructor(
 		private readonly _viewInstructionDocumentsCollectionsStore: ViewInstructionDocumentsCollectionsStore,
 		private readonly _viewInstructionDocumentsAccountsStore: ViewInstructionDocumentsAccountsStore,
+		private readonly _viewInstructionDocumentsAccountConstraintsStore: ViewInstructionDocumentsAccountConstraintsStore,
 		private readonly _viewInstructionDocumentsRelationsStore: ViewInstructionDocumentsRelationsStore,
 		private readonly _instructionAccountsStore: InstructionAccountsStore,
 		private readonly _viewInstructionDocumentsPayersReferencesStore: ViewInstructionDocumentsPayersReferencesStore,
@@ -180,7 +186,6 @@ export class ViewInstructionDocumentsStore extends ComponentStore<ViewModel> {
 		this._viewInstructionDocumentsDerivationsReferencesStore.setInstructionAccountDerivationIds(
 			this._instructionAccountsStore.instructionAccounts$.pipe(
 				isNotNullOrUndefined,
-				tap((a) => console.log(a)),
 				map((accounts) =>
 					accounts
 						.filter((account) => account.data.kind.id !== 1)
