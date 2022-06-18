@@ -200,7 +200,7 @@ SOLANA_SECRET_KEY=[26,210,8,56, ... ,205,136,237,44,1,247,245,68,234]
 To deploy, you can use the following command.
 
 ```bash
->> nx run drill-gateway:deploy
+>> nx run drill-github-app:deploy
 ```
 
 Add all the environment variables, one by one, to the Vercel environment of your app (website settings) and redeploy the whole app running the same command.
@@ -238,7 +238,7 @@ Yes, you guessed it! Here we have another Node app. This one has two main functi
 Now, lets deploy the Drill Gateway in the same way you just deployed the Drill-Github-Gateway :
 
 ```bash
->> nx run drill-github-app:deploy
+>> nx run drill-gateway:deploy
 ```
 
 **NOTE**: Remember that you need to replace the data with your own values as we did before. You should have something like this (we’ll change the Web Client URL later, so for now you can use something like _http://localhost:4200_):
