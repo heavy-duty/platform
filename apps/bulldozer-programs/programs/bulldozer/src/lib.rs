@@ -254,6 +254,27 @@ pub mod bulldozer {
     instructions::delete_instruction_account::handle(ctx)
   }
 
+  #[access_control(instructions::create_instruction_account_constraint::validate(&ctx))]
+  pub fn create_instruction_account_constraint(
+    ctx: Context<CreateInstructionAccountConstraint>,
+    arguments: CreateInstructionAccountConstraintArguments,
+  ) -> Result<()> {
+    instructions::create_instruction_account_constraint::handle(ctx, arguments)
+  }
+
+  pub fn update_instruction_account_constraint(
+    ctx: Context<UpdateInstructionAccountConstraint>,
+    arguments: UpdateInstructionAccountConstraintArguments,
+  ) -> Result<()> {
+    instructions::update_instruction_account_constraint::handle(ctx, arguments)
+  }
+
+  pub fn delete_instruction_account_constraint(
+    ctx: Context<DeleteInstructionAccountConstraint>,
+  ) -> Result<()> {
+    instructions::delete_instruction_account_constraint::handle(ctx)
+  }
+
   #[access_control(instructions::create_instruction_relation::validate(&ctx))]
   pub fn create_instruction_relation(ctx: Context<CreateInstructionRelation>) -> Result<()> {
     instructions::create_instruction_relation::handle(ctx)
