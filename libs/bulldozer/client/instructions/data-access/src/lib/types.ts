@@ -21,3 +21,11 @@ export interface UpdateDerivationParams {
 		collectionId: string;
 	} | null;
 }
+
+export interface UpdateInstructionBodyParams {
+	authority: string;
+	workspaceId: string;
+	applicationId: string;
+	instructionId: string;
+	body: string;
+}

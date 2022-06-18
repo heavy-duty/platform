@@ -2193,6 +2193,77 @@ export type Bulldozer = {
 			];
 		},
 		{
+			name: 'clearInstructionBody';
+			accounts: [
+				{
+					name: 'authority';
+					isMut: false;
+					isSigner: true;
+				},
+				{
+					name: 'workspace';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'application';
+					isMut: false;
+					isSigner: false;
+				},
+				{
+					name: 'instruction';
+					isMut: true;
+					isSigner: false;
+				},
+				{
+					name: 'user';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'user';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								path: 'authority';
+							}
+						];
+					};
+				},
+				{
+					name: 'collaborator';
+					isMut: false;
+					isSigner: false;
+					pda: {
+						seeds: [
+							{
+								kind: 'const';
+								type: 'string';
+								value: 'collaborator';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'Workspace';
+								path: 'workspace';
+							},
+							{
+								kind: 'account';
+								type: 'publicKey';
+								account: 'User';
+								path: 'user';
+							}
+						];
+					};
+				}
+			];
+			args: [];
+		},
+		{
 			name: 'deleteInstruction';
 			accounts: [
 				{
@@ -5259,8 +5330,12 @@ export type Bulldozer = {
 						type: 'string';
 					},
 					{
-						name: 'body';
-						type: 'string';
+						name: 'chunks';
+						type: {
+							vec: {
+								defined: 'InstructionChunk';
+							};
+						};
 					},
 					{
 						name: 'createdAt';
@@ -5399,6 +5474,22 @@ export type Bulldozer = {
 					{
 						name: 'derivation';
 						type: 'u8';
+					}
+				];
+			};
+		},
+		{
+			name: 'InstructionChunk';
+			type: {
+				kind: 'struct';
+				fields: [
+					{
+						name: 'position';
+						type: 'u8';
+					},
+					{
+						name: 'data';
+						type: 'string';
 					}
 				];
 			};
@@ -5560,6 +5651,10 @@ export type Bulldozer = {
 			type: {
 				kind: 'struct';
 				fields: [
+					{
+						name: 'chunk';
+						type: 'u8';
+					},
 					{
 						name: 'body';
 						type: 'string';
@@ -8528,6 +8623,77 @@ export const IDL: Bulldozer = {
 					},
 				},
 			],
+		},
+		{
+			name: 'clearInstructionBody',
+			accounts: [
+				{
+					name: 'authority',
+					isMut: false,
+					isSigner: true,
+				},
+				{
+					name: 'workspace',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'application',
+					isMut: false,
+					isSigner: false,
+				},
+				{
+					name: 'instruction',
+					isMut: true,
+					isSigner: false,
+				},
+				{
+					name: 'user',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'user',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								path: 'authority',
+							},
+						],
+					},
+				},
+				{
+					name: 'collaborator',
+					isMut: false,
+					isSigner: false,
+					pda: {
+						seeds: [
+							{
+								kind: 'const',
+								type: 'string',
+								value: 'collaborator',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'Workspace',
+								path: 'workspace',
+							},
+							{
+								kind: 'account',
+								type: 'publicKey',
+								account: 'User',
+								path: 'user',
+							},
+						],
+					},
+				},
+			],
+			args: [],
 		},
 		{
 			name: 'deleteInstruction',
@@ -11596,8 +11762,12 @@ export const IDL: Bulldozer = {
 						type: 'string',
 					},
 					{
-						name: 'body',
-						type: 'string',
+						name: 'chunks',
+						type: {
+							vec: {
+								defined: 'InstructionChunk',
+							},
+						},
 					},
 					{
 						name: 'createdAt',
@@ -11736,6 +11906,22 @@ export const IDL: Bulldozer = {
 					{
 						name: 'derivation',
 						type: 'u8',
+					},
+				],
+			},
+		},
+		{
+			name: 'InstructionChunk',
+			type: {
+				kind: 'struct',
+				fields: [
+					{
+						name: 'position',
+						type: 'u8',
+					},
+					{
+						name: 'data',
+						type: 'string',
 					},
 				],
 			},
@@ -11897,6 +12083,10 @@ export const IDL: Bulldozer = {
 			type: {
 				kind: 'struct',
 				fields: [
+					{
+						name: 'chunk',
+						type: 'u8',
+					},
 					{
 						name: 'body',
 						type: 'string',

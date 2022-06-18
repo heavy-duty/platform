@@ -21,10 +21,8 @@ import {
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
 import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
-import { InstructionBodyDto } from '@heavy-duty/bulldozer-devkit';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { WalletStore } from '@heavy-duty/wallet-adapter';
-import { distinctUntilChanged, map } from 'rxjs';
+import { distinctUntilChanged, map, take } from 'rxjs';
 import { ViewInstructionCodeEditorAccountsStore } from './view-instruction-code-editor-accounts.store';
 import { ViewInstructionCodeEditorArgumentsStore } from './view-instruction-code-editor-arguments.store';
 import { ViewInstructionCodeEditorClosesReferencesStore } from './view-instruction-code-editor-close-references.store';
@@ -99,7 +97,7 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 										instruction.workspaceId,
 										instruction.applicationId,
 										instruction.id,
-										{ body: instructionBody }
+										instructionBody
 									)
 								"
 							>
@@ -141,7 +139,10 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 	instructionBody: string | null = null;
 
 	readonly contextCode$ = this._viewInstructionCodeEditorStore.contextCode$;
-	readonly handleCode$ = this._viewInstructionCodeEditorStore.handleCode$;
+	readonly handleCode$ = this._viewInstructionCodeEditorStore.handleCode$.pipe(
+		isNotNullOrUndefined,
+		take(1)
+	);
 	readonly instruction$ =
 		this._viewInstructionCodeEditorInstructionStore.instruction$;
 	readonly workspaceId$ = this._route.paramMap.pipe(
@@ -162,7 +163,6 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 
 	constructor(
 		private readonly _route: ActivatedRoute,
-		private readonly _walletStore: WalletStore,
 		private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
 		private readonly _notificationStore: NotificationStore,
 		private readonly _instructionApiService: InstructionApiService,
@@ -174,7 +174,8 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 		private readonly _viewInstructionCodeEditorCollectionsStore: ViewInstructionCodeEditorCollectionsStore,
 		private readonly _viewInstructionCodeEditorPayersReferencesStore: ViewInstructionCodeEditorPayersReferencesStore,
 		private readonly _viewInstructionCodeEditorCollectionsReferencesStore: ViewInstructionCodeEditorCollectionsReferencesStore,
-		private readonly _viewInstructionCodeEditorClosesReferencesStore: ViewInstructionCodeEditorClosesReferencesStore
+		private readonly _viewInstructionCodeEditorClosesReferencesStore: ViewInstructionCodeEditorClosesReferencesStore,
+		private readonly _instructionStore: InstructionStore
 	) {}
 
 	ngOnInit() {
@@ -204,43 +205,24 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 		);
 	}
 
-	onUpdateInstructionBody(
+	async onUpdateInstructionBody(
 		authority: string,
 		workspaceId: string,
 		applicationId: string,
 		instructionId: string,
-		instructionBodyDto: InstructionBodyDto
+		instructionBody: string
 	) {
-		this._instructionApiService
-			.updateBody({
-				authority,
-				workspaceId,
-				applicationId,
-				instructionId,
-				instructionBodyDto,
-			})
-			.subscribe({
-				next: ({ transactionSignature, transaction }) => {
-					this._notificationStore.setEvent(
-						'Update instruction body request sent'
-					);
-					this._hdBroadcasterSocketStore.send(
-						JSON.stringify({
-							event: 'transaction',
-							data: {
-								transactionSignature,
-								transaction,
-								topicNames: [
-									`authority:${authority}`,
-									`instructions:${instructionId}`,
-								],
-							},
-						})
-					);
-				},
-				error: (error) => {
-					this._notificationStore.setError(error);
-				},
-			});
+		const success = await this._instructionApiService.updateBody({
+			authority,
+			workspaceId,
+			applicationId,
+			instructionId,
+			body: instructionBody,
+		});
+
+		if (success) {
+			this._notificationStore.setEvent('Update instruction body request sent');
+			this._instructionStore.reload();
+		}
 	}
 }

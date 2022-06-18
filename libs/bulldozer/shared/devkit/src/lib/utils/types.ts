@@ -173,6 +173,7 @@ export interface Instruction {
 	workspace: string;
 	application: string;
 	body: string;
+	chunks: { position: number; data: string }[];
 }
 
 export interface InstructionArgument {
