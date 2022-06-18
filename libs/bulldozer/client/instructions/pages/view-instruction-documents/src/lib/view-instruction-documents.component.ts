@@ -897,9 +897,6 @@ export class ViewInstructionDocumentsComponent implements OnInit {
 	) {}
 
 	ngOnInit() {
-		this._viewInstructionDocumentsAccountConstraintsStore.accounts$.subscribe(
-			(a) => console.log(a)
-		);
 		this._viewInstructionDocumentsAccountsStore.setInstructionId(
 			this.instructionId$
 		);

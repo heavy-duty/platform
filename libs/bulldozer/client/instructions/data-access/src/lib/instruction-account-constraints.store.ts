@@ -92,7 +92,10 @@ export class InstructionAccountConstraintsStore extends ComponentStore<ViewModel
 									),
 								});
 							},
-							(error) => this._notificationStore.setError(error)
+							(error) => {
+								console.log('im erroring out');
+								this._notificationStore.setError(error);
+							}
 						)
 					);
 			})
@@ -116,6 +119,8 @@ export class InstructionAccountConstraintsStore extends ComponentStore<ViewModel
 
 					return EMPTY;
 				}
+
+				console.log(instructionAccountConstraintIds.toArray());
 
 				return this._instructionAccountConstraintApiService
 					.findByIds(instructionAccountConstraintIds.toArray())
