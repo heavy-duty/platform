@@ -8,27 +8,41 @@ import {
 	getInstructionArguments,
 	getInstructionRelations,
 } from '../state';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	BulldozerLogger,
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+} from '../utils';
 
 @Command({
 	name: 'generate-instruction',
 	description: 'Generate the source code for an instruction',
-	arguments: '<instruction-id> <out-file>',
+	arguments: '<instruction-id> <out-file> <plain>',
 	argsDescription: {
 		'instruction-id':
 			'(public key) The instruction id which you want to select',
 		'out-file': 'Path to generate the rust code',
+		plain: 'Return value as string through stdout',
 	},
 })
 export class GenerateInstructionCommand implements CommandRunner {
 	async run(params: string[]) {
+		const [instructionId, outFile, isPlain] = params;
+		const logger = new BulldozerLogger();
+		const showHumanLogs = isPlain === 'undefined' ? true : !JSON.parse(isPlain);
+		const showPlainLogs = isPlain === 'undefined' ? false : JSON.parse(isPlain);
+		const shouldWriteFile = outFile !== 'undefined';
+
 		try {
-			const [instructionId, outFile] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting instruction data: ${instructionId}`);
+			logger.intro({ showLogs: showHumanLogs });
+			logger.log(`Getting instruction data: ${instructionId}`, {
+				showLogs: showHumanLogs,
+			});
 
 			const instruction = await getInstruction(
 				program,
@@ -39,35 +53,29 @@ export class GenerateInstructionCommand implements CommandRunner {
 				throw new Error('Instruction not found');
 			}
 
-			const instructionArguments =
-				instruction.quantityOfArguments > 0
-					? await getInstructionArguments(program, {
-							instruction: instruction.publicKey.toBase58(),
-					  })
-					: [];
-
-			const instructionAccounts =
-				instruction.quantityOfAccounts > 0
-					? await getInstructionAccounts(program, {
-							instruction: instruction.publicKey.toBase58(),
-					  })
-					: [];
-
-			const instructionRelations = await getInstructionRelations(program, {
-				instruction: instruction.publicKey.toBase58(),
-			});
-
-			writeFile(
-				outFile,
-				InstructionCodeGenerator.generate(
-					instruction,
-					instructionArguments,
-					instructionAccounts,
-					instructionRelations
-				)
+			const instructionCode = InstructionCodeGenerator.generate(
+				instruction,
+				await getInstructionArguments(program, {
+					instruction: instruction.publicKey.toBase58(),
+				}),
+				await getInstructionAccounts(program, {
+					instruction: instruction.publicKey.toBase58(),
+				}),
+				await getInstructionRelations(program, {
+					instruction: instruction.publicKey.toBase58(),
+				})
 			);
+
+			if (shouldWriteFile) {
+				writeFile(outFile, instructionCode);
+			}
+
+			// Plain stdout
+			logger.log(JSON.stringify(instructionCode), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
-			log(error);
+			logger.log(error);
 		}
 	}
 }
