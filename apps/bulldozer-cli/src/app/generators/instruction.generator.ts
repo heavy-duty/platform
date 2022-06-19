@@ -81,6 +81,7 @@ export class InstructionCodeGenerator {
 					instructionAccount.derivation.seedPaths.length === 0
 						? null
 						: instructionAccount.derivation,
+				tokenData: instructionAccount.tokenData,
 				relations: instructionRelations
 					.filter((instructionRelation) =>
 						instructionRelation.from.publicKey.equals(

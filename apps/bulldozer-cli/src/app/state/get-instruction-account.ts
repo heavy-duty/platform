@@ -24,6 +24,7 @@ export interface InstructionAccount {
 	payer: Option<InstructionAccount>;
 	collection: Option<Collection>;
 	derivation: Option<InstructionAccountDerivationDecode>;
+	tokenData: Option<InstructionAccountTokenData>;
 	space: Option<number>;
 	uncheckedExplanation: string;
 	constrains: Option<InstructionAccountConstrain>[];
@@ -37,6 +38,11 @@ export interface InstructionAccountConstrain {
 		name: string;
 		body: string;
 	};
+}
+
+export interface InstructionAccountTokenData {
+	mint: string;
+	authority: string;
 }
 
 export interface InstructionAccountDerivation {
@@ -178,6 +184,23 @@ export const getInstructionAccount = async (
 			seedPaths,
 		};
 
+	const token: InstructionAccountTokenData = {
+		mint: '',
+		authority: '',
+	};
+
+	if (kindName === 'token') {
+		token.mint = (
+			await program.account.instructionAccount.fetch(instructionAccount.mint)
+		).name;
+
+		token.authority = (
+			await program.account.instructionAccount.fetch(
+				instructionAccount.tokenAuthority
+			)
+		).name;
+	}
+
 	return {
 		publicKey: instructionAccountPublicKey,
 		name: instructionAccount.name,
@@ -208,6 +231,7 @@ export const getInstructionAccount = async (
 		uncheckedExplanation: instructionAccount.uncheckedExplanation,
 		constrains: accountConstraints.length !== 0 ? accountConstraints : null,
 		derivation: instructionAccountDerivationDecode,
+		tokenData: token,
 		collection:
 			instructionAccountCollection !== null
 				? await getCollection(program, instructionAccountCollection)

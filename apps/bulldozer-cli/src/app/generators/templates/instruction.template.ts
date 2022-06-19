@@ -114,8 +114,8 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{{this.name}}} = {{{this.body}}},
     {{/each}}
     {{/if}}
-    token::mint = mint_offered,
-    token::authority = trade,
+    token::mint = {{this.tokenData.mint}},
+    token::authority = {{this.tokenData.authority}},
   )]
   pub {{this.name.snakeCase}}: Box<Account<'info, TokenAccount>>,
   {{/case}}
