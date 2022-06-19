@@ -1,22 +1,24 @@
-/**
- * This is not a production server yet!
- * This is only a minimal backend to get started.
- */
-
+#!/usr/bin/env node
+import { config } from 'dotenv';
 import { CommandFactory } from 'nest-commander';
 import { AppModule } from './app/app.module';
+import { DrillLogger, isValidEnvironment } from './app/utils';
 
 async function bootstrap() {
-  // const app = await NestFactory.create(AppModule);
-  // const globalPrefix = 'api';
-  // app.setGlobalPrefix(globalPrefix);
-  // const port = process.env.PORT || 3333;
-  // await app.listen(port);
-  // Logger.log(
-  //   `🚀 Application is running on: http://localhost:${port}/${globalPrefix}`
-  // );
+	config();
+	const logger = new DrillLogger();
+	logger.introMessage();
 
-  await CommandFactory.run(AppModule, ['warn', 'error']);
+	// run some validations before start
+	if (!isValidEnvironment()) {
+		logger.warn(
+			'Some environment vars are missing. Please check this before and run the command again.'
+		);
+
+		return;
+	}
+
+	await CommandFactory.run(AppModule, ['warn', 'error']);
 }
 
 bootstrap();

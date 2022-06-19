@@ -28,6 +28,8 @@ export class BulldozerLogger implements LoggerService {
 				})
 			)
 		);
+		console.log('');
+		console.log('');
 	}
 }
 
