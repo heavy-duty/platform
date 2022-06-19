@@ -1,3 +1,4 @@
+import { Program } from '@heavy-duty/anchor';
 import { PublicKey } from '@solana/web3.js';
 import { mkdir, writeFile } from 'fs/promises';
 import { Command, CommandRunner } from 'nest-commander';
@@ -18,8 +19,10 @@ import {
 	getInstructionArguments,
 	getInstructionRelations,
 	getInstructions,
+	Instruction,
 } from '../state';
 import {
+	Bulldozer,
 	BulldozerLogger,
 	getProgram,
 	getProvider,
@@ -39,6 +42,37 @@ import {
 	},
 })
 export class GenerateApplicationCommand implements CommandRunner {
+	private async getAppDependencies(
+		program: Program<Bulldozer>,
+		instructions: Instruction[]
+	): Promise<string[]> {
+		const dependencies = [];
+		const isSplTokenDependencyNeeded = (
+			await Promise.all(
+				instructions.map(async (instruction) =>
+					instruction.quantityOfAccounts > 0
+						? (
+								await getInstructionAccounts(program, {
+									instruction: instruction.publicKey.toBase58(),
+								})
+						  ).some(
+								(account) => account.kind.id === 3 || account.kind.id === 4
+						  )
+						: false
+				)
+			)
+		).some((elem) => elem === true);
+
+		// we always add anchor lang
+		dependencies.push(`anchor-lang = "0.24.2"`);
+
+		// if needed, we add the spl token dependency
+		if (isSplTokenDependencyNeeded) {
+			dependencies.push(`anchor-spl = "0.24.2"`);
+		}
+		return dependencies;
+	}
+
 	async run(params: string[]) {
 		const [applicationId, outDir, programId, isPlain] = params;
 		const logger = new BulldozerLogger();
@@ -129,6 +163,8 @@ export class GenerateApplicationCommand implements CommandRunner {
 				)
 			);
 
+			const dependencies = await this.getAppDependencies(program, instructions);
+
 			if (shouldWriteFile) {
 				// create a folder with the application name in snake case
 				await mkdir(`${outDir}/${formatName(application.name).snakeCase}`);
@@ -136,7 +172,7 @@ export class GenerateApplicationCommand implements CommandRunner {
 				// create Cargo.toml file
 				await writeFile(
 					`${outDir}/${formatName(application.name).snakeCase}/Cargo.toml`,
-					ApplicationCargoGenerator.generate(application, [])
+					ApplicationCargoGenerator.generate(application, dependencies)
 				);
 
 				// create Xargo.toml file
@@ -179,6 +215,11 @@ export class GenerateApplicationCommand implements CommandRunner {
 							code
 						)
 					)
+				);
+
+				// create instructions folder
+				await mkdir(
+					`${outDir}/${formatName(application.name).snakeCase}/src/instructions`
 				);
 
 				// generate instructions/mod.rs file
