@@ -7,29 +7,35 @@ const chalk = require('chalk');
 const orange = chalk.hex('#FFA500');
 
 export class BulldozerLogger implements LoggerService {
-	log(message: any, ...optionalParams: any[]) {
-		console.log(chalk.blueBright(message));
+	log(message: string, config: { showLogs: boolean } = { showLogs: true }) {
+		if (config.showLogs) {
+			console.log(chalk.blueBright(message));
+		}
 	}
 
-	error(message: any, ...optionalParams: any[]) {
-		console.log(chalk.redBright(message));
+	error(message: string, config: { showLogs: boolean } = { showLogs: true }) {
+		if (config.showLogs) {
+			console.log(chalk.redBright(message));
+		}
 	}
 
-	warn(message: any, ...optionalParams: any[]) {
-		console.log(chalk.yellowBright(message));
+	warn(message: string, config: { showLogs: boolean } = { showLogs: true }) {
+		if (config.showLogs) {
+			console.log(chalk.yellowBright(message));
+		}
 	}
 
-	introMessage() {
-		console.log(
-			orange(
-				figlet.textSync('Bulldozer', {
-					font: 'Graffiti',
-					horizontalLayout: 'full',
-				})
-			)
-		);
-		console.log('');
-		console.log('');
+	introMessage(config: { showLogs: boolean } = { showLogs: true }) {
+		if (config.showLogs) {
+			console.log(
+				orange(
+					figlet.textSync('Bulldozer', {
+						font: 'Graffiti',
+						horizontalLayout: 'full',
+					})
+				)
+			);
+		}
 	}
 }
 

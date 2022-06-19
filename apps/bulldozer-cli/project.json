@@ -127,7 +127,7 @@
 				"commands": [
 					"rm -rf dist/apps/bulldozer-cli/",
 					"ncc build apps/bulldozer-cli/src/main.ts --license licenses.txt --minify --out dist/apps/bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId}"
+					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
