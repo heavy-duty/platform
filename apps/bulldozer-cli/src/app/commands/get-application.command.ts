@@ -1,22 +1,36 @@
 import { PublicKey } from '@solana/web3.js';
 import { Command, CommandRunner } from 'nest-commander';
 import { getApplication } from '../state';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	BulldozerLogger,
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+} from '../utils';
 
 @Command({
 	name: 'get-application',
 	description: 'Get everything about a given application',
-	arguments: '<application-id>',
+	arguments: '<application-id> <plain>',
 })
 export class GetApplicationCommand implements CommandRunner {
 	async run(params: string[]) {
+		const [applicationId, isPlain] = params;
+		const logger = new BulldozerLogger();
+		const showHumanLogs = isPlain === 'undefined' ? true : !JSON.parse(isPlain);
+		const showPlainLogs = isPlain === 'undefined' ? false : JSON.parse(isPlain);
+
 		try {
-			const [applicationId] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting application data: ${applicationId}`);
+			logger.intro({
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Getting application data: ${applicationId}`, {
+				showLogs: showHumanLogs,
+			});
 
 			const application = await getApplication(
 				program,
@@ -24,21 +38,40 @@ export class GetApplicationCommand implements CommandRunner {
 			);
 
 			if (application === null) {
-				log('Application does not exist.');
+				logger.log('Application does not exist.', { showLogs: showHumanLogs });
 				return;
 			}
 
-			log(`Application "${application.name}"`);
-			log(`Public Key: ${application.publicKey.toBase58()}`);
-			log(`Authority: ${application.authority.toBase58()}`);
-			log(`Workspace: ${application.workspace.toBase58()}`);
-			log(`Created At: ${application.createdAt}`);
-			log(`Updated At: ${application.updatedAt}`);
-			log(
-				`Stats: ${application.quantityOfCollections} collection(s) and ${application.quantityOfInstructions} instruction(s).`
+			// Human-readable logs
+			logger.log(`Application "${application.name}"`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Public Key: ${application.publicKey.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Authority: ${application.authority.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Workspace: ${application.workspace.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Created At: ${application.createdAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Updated At: ${application.updatedAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(
+				`Stats: ${application.quantityOfCollections} collection(s) and ${application.quantityOfInstructions} instruction(s).`,
+				{ showLogs: showHumanLogs }
 			);
+
+			// Plain stdout
+			logger.log(JSON.stringify(application), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
-			console.error(error);
+			logger.error(error);
 		}
 	}
 }

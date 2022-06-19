@@ -7,7 +7,6 @@ import { BulldozerLogger, isValidEnvironment } from './app/utils';
 async function bootstrap() {
 	config();
 	const logger = new BulldozerLogger();
-	logger.introMessage();
 
 	// run some validations before start
 	if (!isValidEnvironment()) {

@@ -19,7 +19,7 @@ export class DrillLogger implements LoggerService {
 		console.log(chalk.yellowBright(message));
 	}
 
-	introMessage() {
+	intro() {
 		console.log(
 			orange(
 				figlet.textSync('Drill', {

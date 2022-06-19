@@ -7,7 +7,7 @@ import { DrillLogger, isValidEnvironment } from './app/utils';
 async function bootstrap() {
 	config();
 	const logger = new DrillLogger();
-	logger.introMessage();
+	logger.intro();
 
 	// run some validations before start
 	if (!isValidEnvironment()) {

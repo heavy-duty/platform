@@ -25,7 +25,7 @@ export class BulldozerLogger implements LoggerService {
 		}
 	}
 
-	introMessage(config: { showLogs: boolean } = { showLogs: true }) {
+	intro(config: { showLogs: boolean } = { showLogs: true }) {
 		if (config.showLogs) {
 			console.log(
 				orange(

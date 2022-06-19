@@ -25,7 +25,7 @@ export class GetWorkspaceCommand implements CommandRunner {
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			logger.introMessage({
+			logger.intro({
 				showLogs: showHumanLogs,
 			});
 			logger.log(`Getting workspace data: ${workspaceId}`, {
@@ -65,18 +65,9 @@ export class GetWorkspaceCommand implements CommandRunner {
 			);
 
 			// Plain stdout
-			logger.log(
-				JSON.stringify({
-					id: workspace.publicKey.toBase58(),
-					name: workspace.name,
-					authority: workspace.authority.toBase58(),
-					createdAt: workspace.createdAt,
-					updatedAt: workspace.updatedAt,
-				}),
-				{
-					showLogs: showPlainLogs,
-				}
-			);
+			logger.log(JSON.stringify(workspace), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
 			logger.error(error);
 		}
