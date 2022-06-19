@@ -1,4 +1,7 @@
 export const instructionTemplate = `use anchor_lang::prelude::*;
+{{#if tokenProgram}}
+use anchor_spl::token::*;
+{{/if}}
 {{#eq collections.length 1}}
 use crate::collections::{{collections.[0].pascalCase}};
 {{/eq}}
