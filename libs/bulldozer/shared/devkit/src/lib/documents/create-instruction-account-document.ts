@@ -52,6 +52,16 @@ export const createInstructionAccountDocument = (
 				BULLDOZER_PROGRAM_ID
 			);
 
+		const instructionAccountDerivationPublicKey =
+			await PublicKey.createProgramAddress(
+				[
+					Buffer.from('instruction_account_derivation', 'utf8'),
+					new PublicKey(publicKey).toBuffer(),
+					Buffer.from([decodedAccount.bumps.derivation]),
+				],
+				BULLDOZER_PROGRAM_ID
+			);
+
 		return {
 			id: publicKey,
 			metadata: account,
@@ -69,6 +79,10 @@ export const createInstructionAccountDocument = (
 				close: instructionAccountClosePublicKey.toBase58(),
 				collection: instructionAccountCollectionPublicKey.toBase58(),
 				payer: instructionAccountPayerPublicKey.toBase58(),
+				derivation: instructionAccountDerivationPublicKey.toBase58(),
+				uncheckedExplanation: decodedAccount.uncheckedExplanation,
+				tokenAuthority: decodedAccount.tokenAuthority?.toBase58() ?? null,
+				mint: decodedAccount.mint?.toBase58() ?? null,
 			},
 			createdAt: decodedAccount.createdAt,
 			updatedAt: decodedAccount.updatedAt,

@@ -62,7 +62,7 @@ import { interval, map, startWith } from 'rxjs';
 				</button>
 			</ng-container>
 
-			<mat-menu #menu="matMenu" class="bg-bp-wood bg-bd-brown">
+			<mat-menu #menu="matMenu" class="bg-bp-wood bg-bp-brown">
 				<div class="w-80 h-auto px-4 py-2 flex flex-col gap-2 ">
 					<header class="py-2">
 						<h1 class="m-0 text-lg text-center font-bold">Instructions</h1>

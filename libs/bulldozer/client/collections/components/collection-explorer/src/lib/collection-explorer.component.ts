@@ -107,7 +107,7 @@ import { CollectionItemView } from './types';
 							</button>
 							<mat-menu
 								#collectionOptionsMenu="matMenu"
-								class="bg-bp-wood bg-bd-brown"
+								class="bg-bp-wood bg-bp-brown"
 							>
 								<button
 									[collection]="collection"

@@ -104,4 +104,8 @@ pub enum ErrorCode {
   ArithmeticError,
   #[msg("Unauthorized Withdraw")]
   UnauthorizedWithdraw,
+  #[msg("Collection attribute does not belong to application")]
+  CollectionAttributeDoesNotBelongToApplication,
+  #[msg("Missing unchecked explanation")]
+  MissingUncheckedExplanation,
 }

@@ -16,6 +16,9 @@
 		"allowSyntheticDefaultImports": true,
 		"baseUrl": ".",
 		"paths": {
+			"@bulldozer-client/add-instruction-account": [
+				"libs/bulldozer/client/instructions/modals/add-instruction-account/src/index.ts"
+			],
 			"@bulldozer-client/add-workspace": [
 				"libs/bulldozer/client/workspaces/modals/add-workspace/src/index.ts"
 			],
@@ -97,17 +100,32 @@
 			"@bulldozer-client/edit-instruction": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction/src/index.ts"
 			],
+			"@bulldozer-client/edit-instruction-account-constraint": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-account-constraint/src/index.ts"
+			],
 			"@bulldozer-client/edit-instruction-argument": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-argument/src/index.ts"
 			],
 			"@bulldozer-client/edit-instruction-document": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-document/src/index.ts"
 			],
+			"@bulldozer-client/edit-instruction-document-derivation": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation/src/index.ts"
+			],
+			"@bulldozer-client/edit-instruction-mint": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-mint/src/index.ts"
+			],
 			"@bulldozer-client/edit-instruction-relation": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-relation/src/index.ts"
 			],
 			"@bulldozer-client/edit-instruction-signer": [
 				"libs/bulldozer/client/instructions/modals/edit-instruction-signer/src/index.ts"
+			],
+			"@bulldozer-client/edit-instruction-token": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-token/src/index.ts"
+			],
+			"@bulldozer-client/edit-instruction-unchecked": [
+				"libs/bulldozer/client/instructions/modals/edit-instruction-unchecked/src/index.ts"
 			],
 			"@bulldozer-client/edit-user": [
 				"libs/bulldozer/client/users/modals/edit-user/src/index.ts"

@@ -7,6 +7,7 @@ import {
 	OnInit,
 } from '@angular/core';
 import {
+	FormControl,
 	UntypedFormControl,
 	UntypedFormGroup,
 	Validators,
@@ -15,7 +16,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import {} from '@bulldozer-client/instructions-data-access';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
-import { InstructionAccountDto } from '@heavy-duty/bulldozer-devkit';
+import { InstructionAccountModel } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';
 import { Subject, takeUntil } from 'rxjs';
 import { Collection, InstructionAccount } from './types';
@@ -169,6 +170,31 @@ import { Collection, InstructionAccount } from './types';
 			</div>
 		</form>
 	`,
+	styles: [
+		`
+			.cdk-drag-preview {
+				box-sizing: border-box;
+				border-radius: 4px;
+				box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+					0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+			}
+
+			.cdk-drag-animating {
+				transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+			}
+
+			.seeds.cdk-drop-list-dragging .seed:not(.cdk-drag-placeholder) {
+				transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+			}
+
+			.seed-placeholder {
+				background: #ccc;
+				border: dotted 3px #999;
+				min-height: 60px;
+				transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+			}
+		`,
+	],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
@@ -176,6 +202,7 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 	private readonly _destroy = new Subject();
 	readonly destroy$ = this._destroy.asObservable();
 	readonly form: UntypedFormGroup;
+	readonly searchAccountControl = new FormControl();
 	submitted = false;
 
 	get nameControl() {
@@ -199,10 +226,13 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 
 	constructor(
 		private readonly _matSnackBar: MatSnackBar,
-		private readonly _matDialogRef: MatDialogRef<EditInstructionDocumentComponent>,
+		private readonly _matDialogRef: MatDialogRef<
+			EditInstructionDocumentComponent,
+			InstructionAccountModel
+		>,
 		@Inject(MAT_DIALOG_DATA)
 		public data?: {
-			document?: InstructionAccountDto;
+			document?: InstructionAccountModel;
 			collections: List<Collection>;
 			accounts: List<InstructionAccount>;
 		}
@@ -266,6 +296,9 @@ export class EditInstructionDocumentComponent implements OnInit, OnDestroy {
 					this.modifierControl.value === 0 ? this.payerControl.value : null,
 				close:
 					this.modifierControl.value === 1 ? this.closeControl.value : null,
+				uncheckedExplanation: null,
+				mint: null,
+				tokenAuthority: null,
 			});
 		} else {
 			this._matSnackBar.openFromComponent(SnackBarComponent, {

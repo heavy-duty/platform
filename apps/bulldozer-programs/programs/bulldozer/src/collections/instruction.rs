@@ -34,13 +34,19 @@ impl InstructionStats {
   }
 }
 
+#[derive(AnchorDeserialize, AnchorSerialize, Clone)]
+pub struct InstructionChunk {
+  pub position: u8,
+  pub data: String,
+}
+
 #[account]
 pub struct Instruction {
   pub authority: Pubkey,
   pub workspace: Pubkey,
   pub application: Pubkey,
   pub name: String,
-  pub body: String,
+  pub chunks: Vec<InstructionChunk>,
   pub created_at: i64,
   pub updated_at: i64,
   pub instruction_stats_bump: u8,
@@ -59,16 +65,33 @@ impl Instruction {
     self.workspace = workspace;
     self.application = application;
     self.name = name;
-    self.body = "".to_string();
+
+    let mut chunks = Vec::new();
+
+    chunks.push(InstructionChunk {
+      position: 0,
+      data: "".to_string(),
+    });
+    chunks.push(InstructionChunk {
+      position: 1,
+      data: "".to_string(),
+    });
+    chunks.push(InstructionChunk {
+      position: 2,
+      data: "".to_string(),
+    });
+    chunks.push(InstructionChunk {
+      position: 3,
+      data: "".to_string(),
+    });
+
+    self.chunks = chunks;
+
     self.instruction_stats_bump = instruction_stats_bump;
   }
 
   pub fn rename(&mut self, name: String) -> () {
     self.name = name;
-  }
-
-  pub fn change_body(&mut self, body: String) -> () {
-    self.body = body;
   }
 
   pub fn initialize_timestamp(&mut self) -> Result<()> {
@@ -84,8 +107,8 @@ impl Instruction {
 
   pub fn space() -> usize {
     // discriminator + authority + workspace + application
-    // name (size 32 + 4 ?) + body
+    // name (size 32 + 4 ?) + body (4 chunks of 1 u8 and a 500 length string)
     // created at + updated at
-    8 + 32 + 32 + 32 + 33 + 2000 + 8 + 8
+    8 + 32 + 32 + 32 + 33 + 4 * (1 + 504) + 8 + 8
   }
 }

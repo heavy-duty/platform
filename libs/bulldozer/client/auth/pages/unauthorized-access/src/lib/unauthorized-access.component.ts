@@ -28,12 +28,12 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 								height="144"
 							/>
 						</figure>
-						<p class="mb-1 bd-font text-base">BULLDOZER</p>
+						<p class="mb-1 bp-font text-base">BULLDOZER</p>
 					</div>
 				</div>
 				<div class="flex-grow w-full flex justify-center items-center">
 					<div class="content w-96 -mt-28">
-						<h1 class="bd-font ">WELCOME</h1>
+						<h1 class="bp-font ">WELCOME</h1>
 						<p>
 							Bulldozer is a open source low code platform to build Solana
 							programs. It gives developers the ability to manage their
@@ -46,8 +46,8 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 									target="_blank"
 								>
 									<img
-										src="assets/images/social/github.png"
 										class="w-8 h-8"
+										src="assets/images/social/github.png"
 										alt="Github button"
 										width="32"
 										height="32"
@@ -57,8 +57,8 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 							<figure class="mr-4">
 								<a href="https://discord.gg/Ej47EUAj4u" target="_blank">
 									<img
-										src="assets/images/social/discord.png"
 										class="w-8 h-8"
+										src="assets/images/social/discord.png"
 										alt="Discord button"
 										width="32"
 										height="32"
@@ -68,8 +68,8 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 							<figure class="mr-4">
 								<a href="https://twitter.com/HeavyDutyBuild" target="_blank">
 									<img
-										src="assets/images/social/twitter.png"
 										class="w-8 h-8"
+										src="assets/images/social/twitter.png"
 										alt="Twitter button"
 										width="32"
 										height="32"
@@ -78,13 +78,13 @@ import { filter, Subject, takeUntil, withLatestFrom } from 'rxjs';
 							</figure>
 						</div>
 						<div
-							class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
 							*hdWalletAdapter="
 								let wallet = wallet;
 								let wallets = wallets;
 								let publicKey = publicKey;
 								let selectWallet = selectWallet
 							"
+							class="py-4 px-7 w-48 h-16 flex justify-center items-center m-auto bd-bg-metal-2 shadow relative"
 						>
 							<hd-wallet-modal-button class="flex-1">
 								<ng-container #children> Start Building </ng-container>

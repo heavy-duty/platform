@@ -47,7 +47,10 @@ export const getInstruction = async (
 	return {
 		publicKey: instructionPublicKey,
 		name: instruction.name,
-		body: instruction.body,
+		body: (instruction.chunks as { data: string }[]).reduce(
+			(body, chunk) => body + chunk.data,
+			''
+		),
 		authority: instruction.authority,
 		workspace: instruction.workspace,
 		application: instruction.application,

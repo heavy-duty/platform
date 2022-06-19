@@ -2,7 +2,7 @@ use crate::collections::{
   Collaborator, Instruction, InstructionAccount, InstructionAccountClose, InstructionAccountPayer,
   User, Workspace,
 };
-use crate::enums::{AccountModifiers, CollaboratorStatus};
+use crate::enums::{AccountKinds, AccountModifiers, CollaboratorStatus};
 use crate::errors::ErrorCode;
 use anchor_lang::prelude::*;
 
@@ -11,6 +11,7 @@ pub struct UpdateInstructionAccountArguments {
   pub name: String,
   pub modifier: Option<u8>,
   pub space: Option<u16>,
+  pub unchecked_explanation: Option<String>,
 }
 
 #[derive(Accounts)]
@@ -66,9 +67,21 @@ pub struct UpdateInstructionAccount<'info> {
   pub account_close: Box<Account<'info, InstructionAccountClose>>,
 }
 
-pub fn validate(arguments: &UpdateInstructionAccountArguments) -> Result<bool> {
-  match (arguments.modifier, arguments.space) {
-    (Some(0), None) => Err(error!(ErrorCode::MissingSpace)),
+pub fn validate(
+  ctx: &Context<UpdateInstructionAccount>,
+  arguments: &UpdateInstructionAccountArguments,
+) -> Result<bool> {
+  match (
+    ctx.accounts.account.kind.clone(),
+    arguments.modifier,
+    arguments.space,
+    arguments.unchecked_explanation.clone(),
+  ) {
+    (AccountKinds::Document { id: 0 }, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (AccountKinds::Unchecked { id: 2 }, Some(0), None, _) => Err(error!(ErrorCode::MissingSpace)),
+    (AccountKinds::Unchecked { id: 2 }, _, _, None) => {
+      Err(error!(ErrorCode::MissingUncheckedExplanation))
+    }
     _ => Ok(true),
   }
 }
@@ -79,6 +92,7 @@ pub fn handle(
 ) -> Result<()> {
   msg!("Update instruction account");
   ctx.accounts.account.rename(arguments.name);
+  ctx.accounts.account.unchecked_explanation = arguments.unchecked_explanation;
   ctx
     .accounts
     .account
@@ -93,5 +107,12 @@ pub fn handle(
     (_, Some(1)) => {}
     _ => ctx.accounts.account_close.set(None),
   };
+  match (ctx.accounts.account.kind.clone(), arguments.modifier) {
+    (AccountKinds::Token { id: 4 }, Some(0)) => {}
+    _ => {
+      ctx.accounts.account.set_mint(None);
+      ctx.accounts.account.set_token_authority(None)
+    }
+  }
   Ok(())
 }

@@ -17,8 +17,8 @@ module.exports = {
 				success: 'var(--success-color)',
 				warning: 'var(--warning-color)',
 				error: 'var(--error-color)',
-				'bd-black': '#242424',
-				'bd-brown': {
+				'bp-black': '#242424',
+				'bp-brown': {
 					light: '#825941',
 					DEFAULT: '#583b2a',
 					dark: '#302118',

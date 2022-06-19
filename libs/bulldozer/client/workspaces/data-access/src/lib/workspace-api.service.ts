@@ -102,7 +102,6 @@ export class WorkspaceApiService {
 		workspaceKeypair: Keypair,
 		params: Omit<CreateWorkspaceParams, 'workspaceId'>
 	) {
-		console.log(params.authority);
 		return this._hdSolanaApiService.createTransaction(params.authority).pipe(
 			addInstructionToTransaction(
 				this._hdSolanaConfigStore.apiEndpoint$.pipe(
@@ -121,7 +120,6 @@ export class WorkspaceApiService {
 			),
 			partiallySignTransaction(workspaceKeypair),
 			concatMap((transaction) => {
-				console.log(transaction);
 				return this._hdSolanaApiService.sendTransaction(transaction).pipe(
 					map((transactionSignature) => ({
 						transactionSignature,

@@ -164,6 +164,10 @@ pub mod bulldozer {
     instructions::update_instruction_body::handle(ctx, arguments)
   }
 
+  pub fn clear_instruction_body(ctx: Context<ClearInstructionBody>) -> Result<()> {
+    instructions::clear_instruction_body::handle(ctx)
+  }
+
   pub fn delete_instruction(ctx: Context<DeleteInstruction>) -> Result<()> {
     instructions::delete_instruction::handle(ctx)
   }
@@ -196,7 +200,7 @@ pub mod bulldozer {
     instructions::create_instruction_account::handle(ctx, arguments)
   }
 
-  #[access_control(instructions::update_instruction_account::validate(&arguments))]
+  #[access_control(instructions::update_instruction_account::validate(&ctx, &arguments))]
   pub fn update_instruction_account(
     ctx: Context<UpdateInstructionAccount>,
     arguments: UpdateInstructionAccountArguments,
@@ -225,8 +229,54 @@ pub mod bulldozer {
     instructions::set_instruction_account_payer::handle(ctx)
   }
 
+  pub fn set_instruction_account_derivation(
+    ctx: Context<SetInstructionAccountDerivation>,
+    arguments: SetInstructionAccountDerivationArguments,
+  ) -> Result<()> {
+    instructions::set_instruction_account_derivation::handle(ctx, arguments)
+  }
+
+  pub fn set_token_cofiguration(ctx: Context<SetTokenConfiguration>) -> Result<()> {
+    instructions::set_token_cofiguration::handle(ctx)
+  }
+
+  pub fn add_seed_to_derivation(ctx: Context<AddSeedToDerivation>) -> Result<()> {
+    instructions::add_seed_to_derivation::handle(ctx)
+  }
+
+  pub fn set_bump_to_derivation(ctx: Context<SetBumpToDerivation>) -> Result<()> {
+    instructions::set_bump_to_derivation::handle(ctx)
+  }
+
+  pub fn clear_instruction_account_derivation(
+    ctx: Context<ClearInstructionAccountDerivation>,
+  ) -> Result<()> {
+    instructions::clear_instruction_account_derivation::handle(ctx)
+  }
+
   pub fn delete_instruction_account(ctx: Context<DeleteInstructionAccount>) -> Result<()> {
     instructions::delete_instruction_account::handle(ctx)
+  }
+
+  #[access_control(instructions::create_instruction_account_constraint::validate(&ctx))]
+  pub fn create_instruction_account_constraint(
+    ctx: Context<CreateInstructionAccountConstraint>,
+    arguments: CreateInstructionAccountConstraintArguments,
+  ) -> Result<()> {
+    instructions::create_instruction_account_constraint::handle(ctx, arguments)
+  }
+
+  pub fn update_instruction_account_constraint(
+    ctx: Context<UpdateInstructionAccountConstraint>,
+    arguments: UpdateInstructionAccountConstraintArguments,
+  ) -> Result<()> {
+    instructions::update_instruction_account_constraint::handle(ctx, arguments)
+  }
+
+  pub fn delete_instruction_account_constraint(
+    ctx: Context<DeleteInstructionAccountConstraint>,
+  ) -> Result<()> {
+    instructions::delete_instruction_account_constraint::handle(ctx)
   }
 
   #[access_control(instructions::create_instruction_relation::validate(&ctx))]

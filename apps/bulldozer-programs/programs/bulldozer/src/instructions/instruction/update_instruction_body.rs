@@ -5,6 +5,7 @@ use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateInstructionBodyArguments {
+  pub chunk: u8,
   pub body: String,
 }
 
@@ -48,7 +49,9 @@ pub fn handle(
   arguments: UpdateInstructionBodyArguments,
 ) -> Result<()> {
   msg!("Update instruction body");
-  ctx.accounts.instruction.change_body(arguments.body);
-  ctx.accounts.instruction.bump_timestamp()?;
+
+  let mut chunk = &mut ctx.accounts.instruction.chunks[arguments.chunk as usize];
+  chunk.data = arguments.body;
+
   Ok(())
 }

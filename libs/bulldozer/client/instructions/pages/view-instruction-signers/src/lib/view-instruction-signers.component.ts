@@ -149,7 +149,10 @@ import { ViewInstructionSignersStore } from './view-instruction-signers.store';
 									payer: null,
 									collection: null,
 									modifier: signer.modifier?.id ?? null,
-									close: null
+									close: null,
+									uncheckedExplanation: null,
+									mint: null,
+									tokenAuthority: null
 								}"
 								[disabled]="signer | bdItemChanging"
 								(editInstructionSigner)="

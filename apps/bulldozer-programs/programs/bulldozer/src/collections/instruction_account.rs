@@ -74,11 +74,50 @@ impl InstructionAccountClose {
 }
 
 #[derive(AnchorSerialize, AnchorDeserialize, Clone)]
+pub struct Path {
+  pub reference: Pubkey,
+  pub path: Pubkey,
+}
+
+#[account]
+pub struct InstructionAccountDerivation {
+  pub name: Option<String>,
+  pub bump_path: Option<Path>,
+  pub seed_paths: Vec<Pubkey>,
+}
+
+impl InstructionAccountDerivation {
+  pub fn set(&mut self, name: Option<String>) -> () {
+    self.name = name;
+  }
+
+  pub fn add_seed(&mut self, reference: Pubkey) -> () {
+    self.seed_paths.push(reference)
+  }
+
+  pub fn set_bump(&mut self, reference: Pubkey, path: Pubkey) -> () {
+    self.bump_path = Some(Path { reference, path })
+  }
+
+  pub fn clear(&mut self) -> () {
+    self.name = None;
+    self.seed_paths = Vec::new();
+    self.bump_path = None
+  }
+
+  pub fn space() -> usize {
+    // discriminator + name + bump path + seed paths
+    8 + 37 + 65 + 32 * 4
+  }
+}
+
+#[derive(AnchorSerialize, AnchorDeserialize, Clone)]
 pub struct InstructionAccountBumps {
   pub stats: u8,
   pub collection: u8,
   pub payer: u8,
   pub close: u8,
+  pub derivation: u8,
 }
 
 #[account]
@@ -91,6 +130,9 @@ pub struct InstructionAccount {
   pub kind: AccountKinds,
   pub modifier: Option<AccountModifiers>,
   pub space: Option<u16>,
+  pub unchecked_explanation: Option<String>,
+  pub mint: Option<Pubkey>,
+  pub token_authority: Option<Pubkey>,
   pub created_at: i64,
   pub updated_at: i64,
   pub bumps: InstructionAccountBumps,
@@ -107,6 +149,9 @@ impl InstructionAccount {
     kind: AccountKinds,
     modifier: Option<AccountModifiers>,
     space: Option<u16>,
+    unchecked_explanation: Option<String>,
+    mint: Option<Pubkey>,
+    token_authority: Option<Pubkey>,
     bumps: InstructionAccountBumps,
   ) -> () {
     self.authority = authority;
@@ -117,11 +162,22 @@ impl InstructionAccount {
     self.kind = kind;
     self.modifier = modifier;
     self.space = space;
+    self.unchecked_explanation = unchecked_explanation;
+    self.mint = mint;
+    self.token_authority = token_authority;
     self.bumps = bumps;
   }
 
   pub fn rename(&mut self, name: String) -> () {
     self.name = name;
+  }
+
+  pub fn set_mint(&mut self, mint: Option<Pubkey>) -> () {
+    self.mint = mint;
+  }
+
+  pub fn set_token_authority(&mut self, token_authority: Option<Pubkey>) -> () {
+    self.token_authority = token_authority;
   }
 
   pub fn set_modifier(&mut self, modifier: Option<AccountModifiers>) -> () {
@@ -147,7 +203,8 @@ impl InstructionAccount {
     // discriminator + authority + workspace + application
     // instruction + name (size 32 + 4 ?) + kind + modifier
     // payer + close + space + stats bump + collection bump
-    // payer bump + created at + updated at
-    8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 3 + 1 + 1 + 1 + 8 + 8
+    // payer bump + created at + updated at + uncheckex exp
+    // mint + token authority
+    8 + 32 + 32 + 32 + 32 + 36 + 2 + 2 + 33 + 33 + 3 + 1 + 1 + 1 + 8 + 8 + 132 + 33 + 33
   }
 }
