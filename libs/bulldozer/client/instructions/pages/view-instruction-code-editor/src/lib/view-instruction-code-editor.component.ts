@@ -5,33 +5,15 @@ import {
 	OnInit,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CollectionsStore } from '@bulldozer-client/collections-data-access';
 import {
-	InstructionAccountClosesStore,
-	InstructionAccountCollectionsStore,
-	InstructionAccountPayersStore,
-	InstructionAccountQueryStore,
-	InstructionAccountsStore,
 	InstructionApiService,
-	InstructionArgumentQueryStore,
-	InstructionArgumentsStore,
-	InstructionRelationQueryStore,
-	InstructionRelationsStore,
 	InstructionStore,
 } from '@bulldozer-client/instructions-data-access';
 import { NotificationStore } from '@bulldozer-client/notifications-data-access';
-import { HdBroadcasterSocketStore } from '@heavy-duty/broadcaster';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
 import { distinctUntilChanged, map, take } from 'rxjs';
-import { ViewInstructionCodeEditorAccountsStore } from './view-instruction-code-editor-accounts.store';
-import { ViewInstructionCodeEditorArgumentsStore } from './view-instruction-code-editor-arguments.store';
-import { ViewInstructionCodeEditorClosesReferencesStore } from './view-instruction-code-editor-close-references.store';
-import { ViewInstructionCodeEditorCollectionsReferencesStore } from './view-instruction-code-editor-collections-references.store';
-import { ViewInstructionCodeEditorCollectionsStore } from './view-instruction-code-editor-collections.store';
 import { ViewInstructionCodeEditorInstructionStore } from './view-instruction-code-editor-instruction.store';
-import { ViewInstructionCodeEditorPayersReferencesStore } from './view-instruction-code-editor-payers-references.store';
-import { ViewInstructionCodeEditorRelationsStore } from './view-instruction-code-editor-relations.store';
-import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.store';
+import { ViewInstructionCodeStore } from './view-instruction-code.store';
 
 @Component({
 	selector: 'bd-view-instruction-code-editor',
@@ -112,49 +94,22 @@ import { ViewInstructionCodeEditorStore } from './view-instruction-code-editor.s
 	styles: [],
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	providers: [
-		InstructionAccountPayersStore,
-		InstructionAccountClosesStore,
-		InstructionAccountCollectionsStore,
 		InstructionStore,
-		InstructionArgumentsStore,
-		InstructionArgumentQueryStore,
-		InstructionAccountsStore,
-		InstructionAccountQueryStore,
-		InstructionRelationsStore,
-		InstructionRelationQueryStore,
-		CollectionsStore,
-		ViewInstructionCodeEditorStore,
 		ViewInstructionCodeEditorInstructionStore,
-		ViewInstructionCodeEditorAccountsStore,
-		ViewInstructionCodeEditorRelationsStore,
-		ViewInstructionCodeEditorCollectionsStore,
-		ViewInstructionCodeEditorPayersReferencesStore,
-		ViewInstructionCodeEditorCollectionsReferencesStore,
-		ViewInstructionCodeEditorClosesReferencesStore,
-		ViewInstructionCodeEditorArgumentsStore,
+		ViewInstructionCodeStore,
 	],
 })
 export class ViewInstructionCodeEditorComponent implements OnInit {
 	@HostBinding('class') class = 'flex flex-col p-8 pt-5 h-full';
 	instructionBody: string | null = null;
 
-	readonly contextCode$ = this._viewInstructionCodeEditorStore.contextCode$;
-	readonly handleCode$ = this._viewInstructionCodeEditorStore.handleCode$.pipe(
+	readonly contextCode$ = this._viewInstructionCodeStore.code$;
+	readonly handleCode$ = this._viewInstructionCodeStore.handleCode$.pipe(
 		isNotNullOrUndefined,
 		take(1)
 	);
 	readonly instruction$ =
 		this._viewInstructionCodeEditorInstructionStore.instruction$;
-	readonly workspaceId$ = this._route.paramMap.pipe(
-		map((paramMap) => paramMap.get('workspaceId')),
-		isNotNullOrUndefined,
-		distinctUntilChanged()
-	);
-	readonly applicationId$ = this._route.paramMap.pipe(
-		map((paramMap) => paramMap.get('applicationId')),
-		isNotNullOrUndefined,
-		distinctUntilChanged()
-	);
 	readonly instructionId$ = this._route.paramMap.pipe(
 		map((paramMap) => paramMap.get('instructionId')),
 		isNotNullOrUndefined,
@@ -163,44 +118,15 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 
 	constructor(
 		private readonly _route: ActivatedRoute,
-		private readonly _hdBroadcasterSocketStore: HdBroadcasterSocketStore,
 		private readonly _notificationStore: NotificationStore,
 		private readonly _instructionApiService: InstructionApiService,
-		private readonly _viewInstructionCodeEditorStore: ViewInstructionCodeEditorStore,
-		private readonly _viewInstructionCodeEditorInstructionStore: ViewInstructionCodeEditorInstructionStore,
-		private readonly _viewInstructionCodeEditorArgumentsStore: ViewInstructionCodeEditorArgumentsStore,
-		private readonly _viewInstructionCodeEditorAccountsStore: ViewInstructionCodeEditorAccountsStore,
-		private readonly _viewInstructionCodeEditorRelationsStore: ViewInstructionCodeEditorRelationsStore,
-		private readonly _viewInstructionCodeEditorCollectionsStore: ViewInstructionCodeEditorCollectionsStore,
-		private readonly _viewInstructionCodeEditorPayersReferencesStore: ViewInstructionCodeEditorPayersReferencesStore,
-		private readonly _viewInstructionCodeEditorCollectionsReferencesStore: ViewInstructionCodeEditorCollectionsReferencesStore,
-		private readonly _viewInstructionCodeEditorClosesReferencesStore: ViewInstructionCodeEditorClosesReferencesStore,
-		private readonly _instructionStore: InstructionStore
+		private readonly _viewInstructionCodeStore: ViewInstructionCodeStore,
+		private readonly _viewInstructionCodeEditorInstructionStore: ViewInstructionCodeEditorInstructionStore
 	) {}
 
 	ngOnInit() {
-		this._viewInstructionCodeEditorAccountsStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorRelationsStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorPayersReferencesStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorCollectionsReferencesStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorClosesReferencesStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorCollectionsStore.setApplicationId(
-			this.applicationId$
-		);
+		this._viewInstructionCodeStore.setInstructionId(this.instructionId$);
 		this._viewInstructionCodeEditorInstructionStore.setInstructionId(
-			this.instructionId$
-		);
-		this._viewInstructionCodeEditorArgumentsStore.setInstructionId(
 			this.instructionId$
 		);
 	}
@@ -222,7 +148,7 @@ export class ViewInstructionCodeEditorComponent implements OnInit {
 
 		if (success) {
 			this._notificationStore.setEvent('Update instruction body request sent');
-			this._instructionStore.reload();
+			this._viewInstructionCodeStore.reload();
 		}
 	}
 }

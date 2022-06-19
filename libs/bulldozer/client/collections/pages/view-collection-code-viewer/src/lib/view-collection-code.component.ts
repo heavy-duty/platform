@@ -1,13 +1,6 @@
 import { Component, HostBinding, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {
-	CollectionAttributesStore,
-	CollectionStore,
-} from '@bulldozer-client/collections-data-access';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { distinctUntilChanged, map } from 'rxjs';
-import { ViewCollectionCodeAttributesStore } from './view-collection-code-attributes.store';
-import { ViewCollectionCodeCollectionStore } from './view-collection-code-collection.store';
+import { map } from 'rxjs';
 import { ViewCollectionCodeStore } from './view-collection-code.store';
 
 @Component({
@@ -61,33 +54,21 @@ import { ViewCollectionCodeStore } from './view-collection-code.store';
 		</main>
 	`,
 	styles: [],
-	providers: [
-		CollectionStore,
-		CollectionAttributesStore,
-		ViewCollectionCodeStore,
-		ViewCollectionCodeCollectionStore,
-		ViewCollectionCodeAttributesStore,
-	],
+	providers: [ViewCollectionCodeStore],
 })
 export class ViewCollectionCodeComponent implements OnInit {
 	@HostBinding('class') class = 'flex flex-col p-8 pt-5 h-full';
 
 	readonly code$ = this._viewCollectionCodeStore.code$;
-	readonly collectionId$ = this._route.paramMap.pipe(
-		map((paramMap) => paramMap.get('collectionId')),
-		isNotNullOrUndefined,
-		distinctUntilChanged()
-	);
 
 	constructor(
 		private readonly _route: ActivatedRoute,
-		private readonly _viewCollectionCodeStore: ViewCollectionCodeStore,
-		private readonly _viewCollectionCodeAttributesStore: ViewCollectionCodeAttributesStore,
-		private readonly _viewCollectionCodeCollectionStore: ViewCollectionCodeCollectionStore
+		private readonly _viewCollectionCodeStore: ViewCollectionCodeStore
 	) {}
 
 	ngOnInit() {
-		this._viewCollectionCodeAttributesStore.setCollectionId(this.collectionId$);
-		this._viewCollectionCodeCollectionStore.setCollectionId(this.collectionId$);
+		this._viewCollectionCodeStore.setCollectionId(
+			this._route.paramMap.pipe(map((paramMap) => paramMap.get('collectionId')))
+		);
 	}
 }

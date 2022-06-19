@@ -1,52 +1,58 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { generateCollectionCode2 } from '@heavy-duty/generator';
-import { isNotNullOrUndefined } from '@heavy-duty/rxjs';
-import { ComponentStore } from '@ngrx/component-store';
-import { List } from 'immutable';
-import { CollectionAttributeItemView, CollectionItemView } from './types';
-import { ViewCollectionCodeAttributesStore } from './view-collection-code-attributes.store';
-import { ViewCollectionCodeCollectionStore } from './view-collection-code-collection.store';
+import { ComponentStore, tapResponse } from '@ngrx/component-store';
+import { EMPTY, switchMap } from 'rxjs';
 
 interface ViewModel {
-  code: string | null;
+	collectionId: string | null;
+	code: string | null;
+	error: unknown;
+	loading: boolean | null;
 }
 
 const initialState: ViewModel = {
-  code: null,
+	collectionId: null,
+	code: null,
+	error: null,
+	loading: null,
 };
 
 @Injectable()
 export class ViewCollectionCodeStore extends ComponentStore<ViewModel> {
-  readonly code$ = this.select(({ code }) => code);
+	readonly code$ = this.select(({ code }) => code);
+	readonly collectionId$ = this.select(({ collectionId }) => collectionId);
 
-  constructor(
-    private readonly _viewCollectionCodeCollectionStore: ViewCollectionCodeCollectionStore,
-    private readonly _viewCollectionCodeAttributesStore: ViewCollectionCodeAttributesStore
-  ) {
-    super(initialState);
+	constructor(private readonly _httpClient: HttpClient) {
+		super(initialState);
 
-    this._loadCode(
-      this.select(
-        this._viewCollectionCodeCollectionStore.collection$.pipe(
-          isNotNullOrUndefined
-        ),
-        this._viewCollectionCodeAttributesStore.collectionAttributes$.pipe(
-          isNotNullOrUndefined
-        ),
-        (collection, collectionAttributes) => ({
-          collection: collection ?? null,
-          collectionAttributes: collectionAttributes,
-        }),
-        { debounce: true }
-      )
-    );
-  }
+		this._loadCode(this.collectionId$);
+	}
 
-  private readonly _loadCode = this.updater<{
-    collection: CollectionItemView;
-    collectionAttributes: List<CollectionAttributeItemView>;
-  }>((state, { collection, collectionAttributes }) => ({
-    ...state,
-    code: generateCollectionCode2(collection, collectionAttributes),
-  }));
+	readonly setCollectionId = this.updater<string | null>(
+		(state, collectionId) => ({
+			...state,
+			collectionId,
+		})
+	);
+
+	readonly _loadCode = this.effect<string | null>(
+		switchMap((collectionId) => {
+			if (collectionId === null) {
+				return EMPTY;
+			}
+
+			this.patchState({ loading: true });
+
+			return this._httpClient
+				.get<{ result: string }>(
+					`http://localhost:3334/api/get-collection-code/${collectionId}`
+				)
+				.pipe(
+					tapResponse(
+						(data) => this.patchState({ code: data.result, loading: false }),
+						(error) => this.patchState({ error, loading: false })
+					)
+				);
+		})
+	);
 }
