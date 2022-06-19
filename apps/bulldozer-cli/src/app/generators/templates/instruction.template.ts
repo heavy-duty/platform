@@ -76,7 +76,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{/case}}
   {{#case '2'}}
   /// CHECK: {{this.uncheckedExplanation}}
-  pub {{this.name.snakeCase}}: UncheckedAccount<'info>
+  pub {{this.name.snakeCase}}: UncheckedAccount<'info>,
   {{/case}}
   {{#case '3'}}
   {{#if this.constrains }}
