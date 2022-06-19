@@ -46,6 +46,18 @@
 				"jestConfig": "apps/drill-github-app/jest.config.ts",
 				"passWithNoTests": true
 			}
+		},
+		"deploy": {
+			"executor": "@nrwl/workspace:run-commands",
+			"options": {
+				"commands": [
+					"rm -rf dist/apps/drill-github-app/",
+					"ncc build apps/drill-github-app/src/main.ts --license licenses.txt --minify --out dist/apps/drill-github-app",
+					"vercel deploy --prod dist/apps/drill-github-app"
+				],
+				"parallel": false,
+				"envFile": "apps/drill-github-app/.env"
+			}
 		}
 	},
 	"tags": []

@@ -18,7 +18,6 @@ export const getBountyEnabledCommentBody = (
 	board: BoardMessageData,
 	bounty: BountyMessageData,
 	githubRepository: string,
-	explorerUrl: string,
 	boardPublicKeyUrl: string,
 	boardAuthorityUrl: string,
 	bountyPublicKeyUrl: string,
@@ -28,7 +27,7 @@ export const getBountyEnabledCommentBody = (
 	const _initMessage = `
 # 💰 Drill Bounty Program 💰
 
-Drill was configured successfully, this issue has an active bounty. [Inspect the transaction](${explorerUrl}) in the Solana Explorer. Below you'll find more details about the Bounty you just created. If you want to get more info about this tool, please read our official doc [here](https://heavyduty.builders/)
+Drill was configured successfully, this issue has an active bounty. Below you'll find more details about the Bounty you just created. If you want to get more info about this tool, please read our official doc [here](https://heavyduty.builders/)
 `;
 
 	const _boardInfo = `
@@ -38,7 +37,7 @@ All about your board.
 
 🔢 **ID**: ${board.id}.  
 🔑 **Public Key**: [${board.publicKey}](${boardPublicKeyUrl})  
-⏱️ **Lock Time (ms)**:${board.lockTime}  
+⏱️ **Lock Time (in seconds)**:${board.lockTime}  
 🔒 **Auhtority**:[${board.authority}](${boardAuthorityUrl})
 `;
 
