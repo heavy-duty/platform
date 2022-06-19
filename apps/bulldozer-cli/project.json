@@ -82,7 +82,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId} {args.outFile}"
+					"node dist/apps/bulldozer-cli/main.js generate-instruction {args.instructionId} {args.outFile} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -93,7 +93,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js generate-application {args.applicationId} {args.outDir} {args.programId}"
+					"node dist/apps/bulldozer-cli/main.js generate-application {args.applicationId} {args.outDir} {args.programId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -127,7 +127,7 @@
 				"commands": [
 					"rm -rf dist/apps/bulldozer-cli/",
 					"ncc build apps/bulldozer-cli/src/main.ts --license licenses.txt --minify --out dist/apps/bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId}"
+					"node dist/apps/bulldozer-cli/main.js get-workspace {args.workspaceId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -138,7 +138,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-application {args.applicationId}"
+					"node dist/apps/bulldozer-cli/main.js get-application {args.applicationId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -149,7 +149,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-collection {args.collectionId}"
+					"node dist/apps/bulldozer-cli/main.js get-collection {args.collectionId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -160,7 +160,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-collection-attribute {args.collectionAttributeId}"
+					"node dist/apps/bulldozer-cli/main.js get-collection-attribute {args.collectionAttributeId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -171,7 +171,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-instruction {args.instructionId}"
+					"node dist/apps/bulldozer-cli/main.js get-instruction {args.instructionId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -182,7 +182,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-instruction-argument {args.instructionArgumentId}"
+					"node dist/apps/bulldozer-cli/main.js get-instruction-argument {args.instructionArgumentId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -193,7 +193,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-instruction-account {args.instructionAccountId}"
+					"node dist/apps/bulldozer-cli/main.js get-instruction-account {args.instructionAccountId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"
@@ -204,7 +204,7 @@
 			"options": {
 				"commands": [
 					"nx build bulldozer-cli",
-					"node dist/apps/bulldozer-cli/main.js get-instruction-relation {args.fromId} {args.toId}"
+					"node dist/apps/bulldozer-cli/main.js get-instruction-relation {args.instructionRelationId} {args.plain}"
 				],
 				"parallel": false,
 				"envFile": "apps/bulldozer-cli/.env"

@@ -9,6 +9,7 @@
 		"broadcaster-data-access": "libs/broadcaster/data-access",
 		"broadcaster-ui-cdk": "libs/broadcaster/ui/cdk",
 		"broadcaster-ui-material": "libs/broadcaster/ui/material",
+		"bulldozer-api": "apps/bulldozer-api",
 		"bulldozer-cli": "apps/bulldozer-cli",
 		"bulldozer-client": "apps/bulldozer-client",
 		"bulldozer-client-applications-components-application-explorer": "libs/bulldozer/client/applications/components/application-explorer",

@@ -6,7 +6,7 @@ import { GenerateCollectionCommand } from './commands/generate-collection.comman
 import { GenerateInstructionCommand } from './commands/generate-instruction.command';
 import { GenerateWorkspaceCommand } from './commands/generate-workspace.command';
 import { GetApplicationCommand } from './commands/get-application.command';
-import { GetCollectionAttributeCommand } from './commands/get-collection-attributes.command';
+import { GetCollectionAttributeCommand } from './commands/get-collection-attribute.command';
 import { GetCollectionCommand } from './commands/get-collection.command';
 import { GetInstructionAccountCommand } from './commands/get-instruction-account.command';
 import { GetInstructionArgumentCommand } from './commands/get-instruction-argument.command';

@@ -1,22 +1,39 @@
 import { PublicKey } from '@solana/web3.js';
 import { Command, CommandRunner } from 'nest-commander';
 import { getInstructionRelation } from '../state';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	BulldozerLogger,
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+} from '../utils';
 
 @Command({
 	name: 'get-instruction-relation',
 	description: 'Get everything about a given instruction relation',
-	arguments: '<instruction-relation-id>',
+	arguments: '<instruction-relation-id> <plain>',
 })
 export class GetInstructionRelationCommand implements CommandRunner {
 	async run(params: string[]) {
+		const [instructionRelationId, isPlain] = params;
+		const logger = new BulldozerLogger();
+		const showHumanLogs = isPlain === 'undefined' ? true : !JSON.parse(isPlain);
+		const showPlainLogs = isPlain === 'undefined' ? false : JSON.parse(isPlain);
+
 		try {
-			const [instructionRelationId] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting instruction relation data: ${instructionRelationId}`);
+			logger.intro({
+				showLogs: showHumanLogs,
+			});
+			logger.log(
+				`Getting instruction relation data: ${instructionRelationId}`,
+				{
+					showLogs: showHumanLogs,
+				}
+			);
 
 			const instructionRelation = await getInstructionRelation(
 				program,
@@ -24,38 +41,67 @@ export class GetInstructionRelationCommand implements CommandRunner {
 			);
 
 			if (instructionRelation === null) {
-				log('Instruction Relation does not exist.');
+				logger.log('Instruction Relation does not exist.', {
+					showLogs: showHumanLogs,
+				});
 				return;
 			}
 
-			log(`Instruction Relation "${instructionRelationId}"`);
-			log(`Public Key: ${instructionRelation.publicKey.toBase58()}`);
-			log(`Authority: ${instructionRelation.authority.toBase58()}`);
-			log(`Workspace: ${instructionRelation.workspace.toBase58()}`);
-			log(`Application: ${instructionRelation.application.toBase58()}`);
-			log(`Instruction: ${instructionRelation.instruction.toBase58()}`);
-			log(
+			logger.log(`Instruction Relation "${instructionRelationId}"`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Public Key: ${instructionRelation.publicKey.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Authority: ${instructionRelation.authority.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Workspace: ${instructionRelation.workspace.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Application: ${instructionRelation.application.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Instruction: ${instructionRelation.instruction.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(
 				`From: ${
 					instructionRelation.from !== null
 						? `${
 								instructionRelation.from.name
 						  } (${instructionRelation.from.publicKey.toBase58()})`
 						: null
-				}`
+				}`,
+				{
+					showLogs: showHumanLogs,
+				}
 			);
-			log(
+			logger.log(
 				`To: ${
 					instructionRelation.to !== null
 						? `${
 								instructionRelation.to.name
 						  } (${instructionRelation.to.publicKey.toBase58()})`
 						: null
-				}`
+				}`,
+				{
+					showLogs: showHumanLogs,
+				}
 			);
-			log(`Created At: ${instructionRelation.createdAt}`);
-			log(`Updated At: ${instructionRelation.updatedAt}`);
+			logger.log(`Created At: ${instructionRelation.createdAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Updated At: ${instructionRelation.updatedAt}`, {
+				showLogs: showHumanLogs,
+			});
+
+			// Plain output
+			logger.log(JSON.stringify(instructionRelation), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
-			console.error(error);
+			logger.error(error);
 		}
 	}
 }

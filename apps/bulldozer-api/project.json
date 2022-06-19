@@ -1,0 +1,53 @@
+{
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"sourceRoot": "apps/bulldozer-api/src",
+	"projectType": "application",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/node:webpack",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/bulldozer-api",
+				"main": "apps/bulldozer-api/src/main.ts",
+				"tsConfig": "apps/bulldozer-api/tsconfig.app.json",
+				"assets": ["apps/bulldozer-api/src/assets"],
+				"envFile": "apps/bulldozer-api/.env"
+			},
+			"configurations": {
+				"production": {
+					"optimization": true,
+					"extractLicenses": true,
+					"inspect": false,
+					"fileReplacements": [
+						{
+							"replace": "apps/bulldozer-api/src/environments/environment.ts",
+							"with": "apps/bulldozer-api/src/environments/environment.prod.ts"
+						}
+					]
+				}
+			}
+		},
+		"serve": {
+			"executor": "@nrwl/node:node",
+			"options": {
+				"buildTarget": "bulldozer-api:build"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"outputs": ["{options.outputFile}"],
+			"options": {
+				"lintFilePatterns": ["apps/bulldozer-api/**/*.ts"]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["coverage/apps/bulldozer-api"],
+			"options": {
+				"jestConfig": "apps/bulldozer-api/jest.config.ts",
+				"passWithNoTests": true
+			}
+		}
+	},
+	"tags": []
+}

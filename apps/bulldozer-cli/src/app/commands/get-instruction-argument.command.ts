@@ -1,22 +1,39 @@
 import { PublicKey } from '@solana/web3.js';
 import { Command, CommandRunner } from 'nest-commander';
 import { getInstructionArgument } from '../state';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	BulldozerLogger,
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+} from '../utils';
 
 @Command({
 	name: 'get-instruction-argument',
 	description: 'Get everything about a given instruction argument',
-	arguments: '<instruction-argument-id>',
+	arguments: '<instruction-argument-id> <plain>',
 })
 export class GetInstructionArgumentCommand implements CommandRunner {
 	async run(params: string[]) {
+		const [instructionArgumentId, isPlain] = params;
+		const logger = new BulldozerLogger();
+		const showHumanLogs = isPlain === 'undefined' ? true : !JSON.parse(isPlain);
+		const showPlainLogs = isPlain === 'undefined' ? false : JSON.parse(isPlain);
+
 		try {
-			const [instructionArgumentId] = params;
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting instruction argument data: ${instructionArgumentId}`);
+			logger.intro({
+				showLogs: showHumanLogs,
+			});
+			logger.log(
+				`Getting instruction argument data: ${instructionArgumentId}`,
+				{
+					showLogs: showHumanLogs,
+				}
+			);
 
 			const instructionArgument = await getInstructionArgument(
 				program,
@@ -24,28 +41,56 @@ export class GetInstructionArgumentCommand implements CommandRunner {
 			);
 
 			if (instructionArgument === null) {
-				log('Instruction Argument does not exist.');
+				logger.log('Instruction Argument does not exist.', {
+					showLogs: showHumanLogs,
+				});
 				return;
 			}
 
-			log(`Instruction Argument "${instructionArgument.name}"`);
-			log(`Public Key: ${instructionArgument.publicKey.toBase58()}`);
-			log(`Authority: ${instructionArgument.authority.toBase58()}`);
-			log(`Workspace: ${instructionArgument.workspace.toBase58()}`);
-			log(`Application: ${instructionArgument.application.toBase58()}`);
-			log(`Instruction: ${instructionArgument.instruction.toBase58()}`);
-			log(`Kind: ${JSON.stringify(instructionArgument.kind)}`);
-			log(
+			logger.log(`Instruction Argument "${instructionArgument.name}"`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Public Key: ${instructionArgument.publicKey.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Authority: ${instructionArgument.authority.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Workspace: ${instructionArgument.workspace.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Application: ${instructionArgument.application.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Instruction: ${instructionArgument.instruction.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Kind: ${JSON.stringify(instructionArgument.kind)}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(
 				`Modifier: ${
 					instructionArgument.modifier !== null
 						? JSON.stringify(instructionArgument.modifier)
 						: null
-				}`
+				}`,
+				{
+					showLogs: showHumanLogs,
+				}
 			);
-			log(`Created At: ${instructionArgument.createdAt}`);
-			log(`Updated At: ${instructionArgument.updatedAt}`);
+			logger.log(`Created At: ${instructionArgument.createdAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Updated At: ${instructionArgument.updatedAt}`, {
+				showLogs: showHumanLogs,
+			});
+
+			// Plain output
+			logger.log(JSON.stringify(instructionArgument), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
-			console.error(error);
+			logger.error(error);
 		}
 	}
 }

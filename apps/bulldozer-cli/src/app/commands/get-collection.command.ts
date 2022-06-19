@@ -1,26 +1,39 @@
 import { PublicKey } from '@solana/web3.js';
 import { Command, CommandRunner } from 'nest-commander';
 import { getCollection } from '../state';
-import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
+import {
+	BulldozerLogger,
+	getProgram,
+	getProvider,
+	getSolanaConfig,
+} from '../utils';
 
 @Command({
 	name: 'get-collection',
 	description: 'Get everything about a given collection',
-	arguments: '<collection-id>',
+	arguments: '<collection-id> <plain>',
 	argsDescription: {
 		'collection-id': '(public key) The collection id which you want to get',
 	},
 })
 export class GetCollectionCommand implements CommandRunner {
 	async run(params: string[]) {
-		try {
-			const [collectionId] = params;
+		const [collectionId, isPlain] = params;
+		const logger = new BulldozerLogger();
+		const showHumanLogs = isPlain === 'undefined' ? true : !JSON.parse(isPlain);
+		const showPlainLogs = isPlain === 'undefined' ? false : JSON.parse(isPlain);
 
+		try {
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
 
-			log(`Getting collection data: ${collectionId}`);
+			logger.intro({
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Getting collection data: ${collectionId}`, {
+				showLogs: showHumanLogs,
+			});
 
 			const collection = await getCollection(
 				program,
@@ -28,18 +41,40 @@ export class GetCollectionCommand implements CommandRunner {
 			);
 
 			if (collection === null) {
-				log(`Collection not found`);
+				logger.log(`Collection not found`, { showLogs: showHumanLogs });
 				return;
 			}
 
-			log(`Collection "${collection.name}"`);
-			log(`Public Key: ${collection.publicKey.toBase58()}`);
-			log(`Authority: ${collection.authority.toBase58()}`);
-			log(`Workspace: ${collection.workspace.toBase58()}`);
-			log(`Application: ${collection.application.toBase58()}`);
-			log(`Created At: ${collection.createdAt}`);
-			log(`Updated At: ${collection.updatedAt}`);
-			log(`Stats: ${collection.quantityOfAttributes} attribute(s).`);
+			// Human-readable output
+			logger.log(`Collection "${collection.name}"`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Public Key: ${collection.publicKey.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Authority: ${collection.authority.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Workspace: ${collection.workspace.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Application: ${collection.application.toBase58()}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Created At: ${collection.createdAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Updated At: ${collection.updatedAt}`, {
+				showLogs: showHumanLogs,
+			});
+			logger.log(`Stats: ${collection.quantityOfAttributes} attribute(s).`, {
+				showLogs: showHumanLogs,
+			});
+
+			// Plain output
+			logger.log(JSON.stringify(collection), {
+				showLogs: showPlainLogs,
+			});
 		} catch (error) {
 			console.error(error);
 		}
