@@ -41,6 +41,21 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#if this.close}}
     close = {{this.close.snakeCase}},
     {{/if}}
+    {{#if this.derivation}}
+    {{#if this.derivation.name}}
+    seed=[
+      b"{{this.derivation.name}}"
+      {{#each this.this.derivation.seedPaths}}
+      {{this}}.key().as_ref(),
+      {{/each}}
+    ]    
+    {{/if}}
+    {{#if this.derivation.bumpPath.reference}}
+    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}}
+    {{else}}
+    bump
+    {{/if}}
+    {{/if}}
     {{#each this.relations}}
     has_one = {{this.snakeCase}},
     {{/each}}
@@ -53,11 +68,26 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   #[account({{this.modifier.name}})]
   {{/if}}
   pub {{this.name.snakeCase}}: Signer<'info>,
-  {{/case}}{{/switch}}{{/each~}}
-  {{#if initializesAccount ~}}
+  {{/case}}
+  {{#case '2'}}
+  /// CHECK: {{this.uncheckedExplanation}}
+  pub {{this.name.snakeCase}}: UncheckedAccount<'info>
+  {{/case}}
+  {{/switch}}
+  {{/each~}}
+  {{#switch tokenProgram}}
+  {{#case '1'}}
+  pub rent: Sysvar<'info, Rent>,
+  pub token_program: Program<'info, Token>,
+  {{/case}}
+  {{#case '2'}}
+  pub token_program: Program<'info, Token>,
+  {{/case}}
+  {{/switch}}
+  {{#if initializesAccount}}
   pub system_program: Program<'info, System>,
   {{else}}
-  {{/if }}
+  {{/if}}
 }
 
 {{#if instruction.body}}
