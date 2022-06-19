@@ -46,17 +46,17 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{/if}}
     {{#if this.derivation}}
     {{#if this.derivation.name}}
-    seed=[
+    seeds=[
       b"{{this.derivation.name}}"
       {{#each this.derivation.seedPaths}}
       {{this}}.key().as_ref(),
       {{/each}}
-    ]    
+    ],    
     {{/if}}
     {{#if this.derivation.bumpPath.reference}}
-    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}}
+    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}},
     {{else}}
-    bump
+    bump,
     {{/if}}
     {{/if}}
     {{#if this.constrains }}
@@ -99,17 +99,17 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{/if}}
     {{#if this.derivation}}
     {{#if this.derivation.name}}
-    seed=[
+    seeds=[
       b"{{this.derivation.name}}"
       {{#each this.this.derivation.seedPaths}}
       {{this}}.key().as_ref(),
       {{/each}}
-    ]    
+    ],
     {{/if}}
     {{#if this.derivation.bumpPath.reference}}
-    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}}
+    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}},
     {{else}}
-    bump
+    bump,
     {{/if}}
     {{/if}}
     {{#if this.constrains }}
