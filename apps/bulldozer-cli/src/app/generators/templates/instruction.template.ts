@@ -47,7 +47,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#if this.derivation}}
     {{#if this.derivation.name}}
     seeds=[
-      b"{{this.derivation.name}}"
+      b"{{this.derivation.name}}",
       {{#each this.derivation.seedPaths}}
       {{this}}.key().as_ref(),
       {{/each}}
@@ -100,7 +100,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#if this.derivation}}
     {{#if this.derivation.name}}
     seeds=[
-      b"{{this.derivation.name}}"
+      b"{{this.derivation.name}}",
       {{#each this.this.derivation.seedPaths}}
       {{this}}.key().as_ref(),
       {{/each}}
