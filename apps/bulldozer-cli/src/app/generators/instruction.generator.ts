@@ -37,13 +37,6 @@ export class InstructionCodeGenerator {
 		instructionRelations: InstructionRelation[]
 	) {
 		registerHandleBarsHelpers();
-		console.log(
-			'===>',
-			instructionAccounts
-				.map((instructionAccount) => instructionAccount.constrains)
-				.filter((inst) => inst !== null)
-				.map((inst) => inst.map((e) => e.account.name + ' = ' + e.account.body))
-		);
 
 		const template = Handlebars.compile(instructionTemplate);
 		return template({

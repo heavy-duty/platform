@@ -56,6 +56,11 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     bump
     {{/if}}
     {{/if}}
+    {{#if this.constrains }}
+    {{#each this.constrains}}
+    {{{this.name}}} = {{{this.body}}},
+    {{/each}}
+    {{/if}}
     {{#each this.relations}}
     has_one = {{this.snakeCase}},
     {{/each}}
@@ -77,7 +82,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{#if this.constrains }}
   #[account(
     {{#each this.constrains}}
-      {{this.name}} = {{this.body}},
+    {{{this.name}}} = {{{this.body}}},
     {{/each}}
   )]
   {{/if}}
@@ -103,6 +108,11 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{else}}
     bump
     {{/if}}
+    {{/if}}
+    {{#if this.constrains }}
+    {{#each this.constrains}}
+    {{{this.name}}} = {{{this.body}}},
+    {{/each}}
     {{/if}}
     token::mint = mint_offered,
     token::authority = trade,

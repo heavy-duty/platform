@@ -136,7 +136,7 @@ export class GenerateApplicationCommand implements CommandRunner {
 				// create Cargo.toml file
 				await writeFile(
 					`${outDir}/${formatName(application.name).snakeCase}/Cargo.toml`,
-					ApplicationCargoGenerator.generate(application)
+					ApplicationCargoGenerator.generate(application, [])
 				);
 
 				// create Xargo.toml file
