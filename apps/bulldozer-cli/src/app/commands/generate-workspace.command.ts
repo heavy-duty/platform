@@ -1,6 +1,6 @@
 import { Keypair, PublicKey } from '@solana/web3.js';
 import { mkdir, writeFile } from 'fs/promises';
-import { Command, CommandRunner } from 'nest-commander';
+import { Command, CommandRunner, Option } from 'nest-commander';
 import {
 	ApplicationTestGenerator,
 	WorkspaceAnchorGenerator,
@@ -11,14 +11,18 @@ import {
 } from '../generators';
 import { formatName } from '../generators/utils';
 import { WorkspaceTsconfigGenerator } from '../generators/workspace-tsconfig.generator';
-import { getApplications, getWorkspace } from '../state';
+import { getApplication, getApplications, getWorkspace } from '../state';
 import { getProgram, getProvider, getSolanaConfig, log } from '../utils';
 import { GenerateApplicationCommand } from './generate-application.command';
+
+export interface GenerateWorkspace {
+	singleApp?: PublicKey;
+}
 
 @Command({
 	name: 'generate-workspace',
 	description:
-		'Generate the source code for all the Apps in a Workspace. You need to pass only one argument to specify the workspace id in which you have the app you want to generate the source code.',
+		'Generate the source code for all the Apps in a Workspace. You need to pass two arguments, one to specify the workspace id and the out directory to generate the source code.',
 	arguments: '<workspace-id> <out-dir>',
 	argsDescription: {
 		'workspace-id': '(public key) The workspace id which you want to select',
@@ -30,13 +34,13 @@ export class GenerateWorkspaceCommand implements CommandRunner {
 		private readonly _generateApplicationCommand: GenerateApplicationCommand
 	) {}
 
-	async run(params: string[]) {
+	async run(params: string[], options?: GenerateWorkspace) {
 		try {
 			const [workspaceId, outDir] = params;
+
 			const config = await getSolanaConfig();
 			const provider = await getProvider(config);
 			const program = getProgram(provider);
-
 			log(`Getting workspace data: ${workspaceId}`);
 
 			const workspace = await getWorkspace(program, new PublicKey(workspaceId));
@@ -45,12 +49,41 @@ export class GenerateWorkspaceCommand implements CommandRunner {
 				throw new Error('Workspace not found');
 			}
 
-			const workspaceApplications =
-				workspace.quantityOfApplications > 0
-					? await getApplications(program, {
-							workspace: workspace.publicKey.toBase58(),
-					  })
-					: [];
+			let workspaceApplications;
+
+			if (options && options.singleApp) {
+				workspaceApplications = await getApplication(
+					program,
+					options.singleApp
+				);
+				log(
+					`-> Single app option detected, the workspace would include only the app: ${options.singleApp}`
+				);
+
+				workspaceApplications = [workspaceApplications];
+			} else {
+				workspaceApplications =
+					workspace.quantityOfApplications > 0
+						? await getApplications(program, {
+								workspace: workspace.publicKey.toBase58(),
+						  })
+						: [];
+			}
+
+			log('');
+
+			if (!workspaceApplications) {
+				if (options.singleApp) {
+					throw new Error(
+						`Single Application ${options.singleApp.toBase58()} not found. Please be sure the Application Id is correct.`
+					);
+				} else {
+					throw new Error(
+						'Applications not found. Please be sure the Workspace you want to generate has at least one App.'
+					);
+				}
+			}
+
 			const applicationsProgramKeypairs = workspaceApplications.map(() =>
 				Keypair.generate()
 			);
@@ -138,8 +171,23 @@ export class GenerateWorkspaceCommand implements CommandRunner {
 					)
 				)
 			);
-		} catch (error) {
-			log(error);
+			log('');
+			log(`Workspace generate successfully. Output directory: ${outDir}`);
+			log('');
+		} catch (e) {
+			log('');
+			log('An error occurred while generating the workspace, try again.');
+			log('');
+			log(e);
+			process.exit(-1);
 		}
+	}
+
+	@Option({
+		flags: '--single-app <app-id>',
+		description: 'Generate a specific app of a given workspace.',
+	})
+	parseWorkspaceId(workspaceId: string): PublicKey {
+		return new PublicKey(workspaceId);
 	}
 }
