@@ -37,6 +37,13 @@ export class InstructionCodeGenerator {
 		instructionRelations: InstructionRelation[]
 	) {
 		registerHandleBarsHelpers();
+		console.log(
+			'===>',
+			instructionAccounts
+				.map((instructionAccount) => instructionAccount.constrains)
+				.filter((inst) => inst !== null)
+				.map((inst) => inst.map((e) => e.account.name + ' = ' + e.account.body))
+		);
 
 		const template = Handlebars.compile(instructionTemplate);
 		return template({
@@ -72,6 +79,9 @@ export class InstructionCodeGenerator {
 					? formatName(instructionAccount.close.name)
 					: null,
 				space: instructionAccount.space,
+				constrains: instructionAccount.constrains
+					? instructionAccount.constrains.map((inst) => inst.account)
+					: null,
 				derivation:
 					instructionAccount.derivation.bumpPath === null &&
 					instructionAccount.derivation.name === null &&
@@ -97,12 +107,12 @@ export class InstructionCodeGenerator {
 				(instructionAccount) => instructionAccount.modifier?.id === 0
 			),
 			tokenProgram: instructionAccounts.some((instructionAccount) =>
-				instructionAccount.modifier?.id === 3 ||
-				instructionAccount.modifier?.id === 4
-					? instructionAccount.modifier.name === 'init'
+				instructionAccount.kind.id === 3 || instructionAccount.kind.id === 4
+					? instructionAccount.modifier &&
+					  instructionAccount.modifier.name === 'init'
 						? '1'
 						: '2'
-					: -1
+					: 0
 			),
 		});
 	}

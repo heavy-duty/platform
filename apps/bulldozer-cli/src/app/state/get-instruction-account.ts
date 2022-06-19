@@ -26,8 +26,17 @@ export interface InstructionAccount {
 	derivation: Option<InstructionAccountDerivationDecode>;
 	space: Option<number>;
 	uncheckedExplanation: string;
+	constrains: Option<InstructionAccountConstrain>[];
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+export interface InstructionAccountConstrain {
+	publicKey: PublicKey;
+	account: {
+		name: string;
+		body: string;
+	};
 }
 
 export interface InstructionAccountDerivation {
@@ -107,6 +116,16 @@ export const getInstructionAccount = async (
 			instructionAccountPayerPublicKey
 		);
 
+	const accountConstraints: InstructionAccountConstrain[] =
+		await program.account.instructionAccountConstraint.all([
+			{
+				memcmp: {
+					bytes: instructionAccountPublicKey.toBase58(),
+					offset: 136,
+				},
+			},
+		]);
+
 	const instructionAccountDerivationPublicKey =
 		await PublicKey.createProgramAddress(
 			[
@@ -121,7 +140,7 @@ export const getInstructionAccount = async (
 		await program.account.instructionAccountDerivation.fetch(
 			instructionAccountDerivationPublicKey
 		);
-	// move
+
 	let bumpRef, bumpPath, seedPaths;
 
 	if (instructionAccountDerivation.bumpPath) {
@@ -187,6 +206,7 @@ export const getInstructionAccount = async (
 				? await getInstructionAccount(program, instructionAccountPayer)
 				: null,
 		uncheckedExplanation: instructionAccount.uncheckedExplanation,
+		constrains: accountConstraints.length !== 0 ? accountConstraints : null,
 		derivation: instructionAccountDerivationDecode,
 		collection:
 			instructionAccountCollection !== null

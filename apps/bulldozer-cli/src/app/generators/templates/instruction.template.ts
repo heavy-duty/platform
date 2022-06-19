@@ -45,7 +45,7 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{#if this.derivation.name}}
     seed=[
       b"{{this.derivation.name}}"
-      {{#each this.this.derivation.seedPaths}}
+      {{#each this.derivation.seedPaths}}
       {{this}}.key().as_ref(),
       {{/each}}
     ]    
@@ -72,6 +72,42 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{#case '2'}}
   /// CHECK: {{this.uncheckedExplanation}}
   pub {{this.name.snakeCase}}: UncheckedAccount<'info>
+  {{/case}}
+  {{#case '3'}}
+  {{#if this.constrains }}
+  #[account(
+    {{#each this.constrains}}
+      {{this.name}} = {{this.body}},
+    {{/each}}
+  )]
+  {{/if}}
+  pub {{this.name.snakeCase}}: Box<Account<'info, Mint>>,
+  {{/case}}
+  {{#case '4'}}
+  #[account(
+    {{this.modifier.name}},
+    {{#if this.payer}}
+    payer = {{this.payer.snakeCase}},
+    {{/if}}
+    {{#if this.derivation}}
+    {{#if this.derivation.name}}
+    seed=[
+      b"{{this.derivation.name}}"
+      {{#each this.this.derivation.seedPaths}}
+      {{this}}.key().as_ref(),
+      {{/each}}
+    ]    
+    {{/if}}
+    {{#if this.derivation.bumpPath.reference}}
+    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}}
+    {{else}}
+    bump
+    {{/if}}
+    {{/if}}
+    token::mint = mint_offered,
+    token::authority = trade,
+  )]
+  pub {{this.name.snakeCase}}: Box<Account<'info, TokenAccount>>,
   {{/case}}
   {{/switch}}
   {{/each~}}
