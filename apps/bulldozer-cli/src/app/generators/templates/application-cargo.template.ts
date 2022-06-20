@@ -18,6 +18,10 @@ default = []
 [profile.release]
 overflow-checks = true
 
+{{#if dependencies}}
 [dependencies]
-anchor-lang = "0.24.2"
+{{#each dependencies}}
+{{{this}}}
+{{/each}}
+{{/if}}
 `;

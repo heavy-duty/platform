@@ -59,6 +59,7 @@ export class InstructionCodeGenerator {
 			instructionAccounts: instructionAccounts.map((instructionAccount) => ({
 				name: formatName(instructionAccount.name),
 				kind: instructionAccount.kind,
+				uncheckedExplanation: instructionAccount.uncheckedExplanation,
 				modifier: instructionAccount.modifier,
 				collection: instructionAccount.collection
 					? formatName(instructionAccount.collection.name)
@@ -71,6 +72,16 @@ export class InstructionCodeGenerator {
 					? formatName(instructionAccount.close.name)
 					: null,
 				space: instructionAccount.space,
+				constrains: instructionAccount.constrains
+					? instructionAccount.constrains.map((inst) => inst.account)
+					: null,
+				derivation:
+					instructionAccount.derivation.bumpPath === null &&
+					instructionAccount.derivation.name === null &&
+					instructionAccount.derivation.seedPaths.length === 0
+						? null
+						: instructionAccount.derivation,
+				tokenData: instructionAccount.tokenData,
 				relations: instructionRelations
 					.filter((instructionRelation) =>
 						instructionRelation.from.publicKey.equals(
@@ -88,6 +99,14 @@ export class InstructionCodeGenerator {
 				),
 			initializesAccount: instructionAccounts.some(
 				(instructionAccount) => instructionAccount.modifier?.id === 0
+			),
+			tokenProgram: instructionAccounts.some((instructionAccount) =>
+				instructionAccount.kind.id === 3 || instructionAccount.kind.id === 4
+					? instructionAccount.modifier &&
+					  instructionAccount.modifier.name === 'init'
+						? '1'
+						: '2'
+					: 0
 			),
 		});
 	}

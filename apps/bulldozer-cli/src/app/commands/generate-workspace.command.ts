@@ -100,6 +100,7 @@ export class GenerateWorkspaceCommand implements CommandRunner {
 						application.publicKey.toBase58(),
 						`${outDir}/${formatName(workspace.name).snakeCase}/programs`,
 						applicationsProgramKeypairs[index].publicKey.toBase58(),
+						'undefined',
 					])
 				)
 			);
