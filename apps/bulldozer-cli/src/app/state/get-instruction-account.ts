@@ -24,7 +24,8 @@ export interface InstructionAccount {
 	payer: Option<InstructionAccount>;
 	collection: Option<Collection>;
 	derivation: Option<InstructionAccountDerivationDecode>;
-	tokenData: Option<InstructionAccountTokenData>;
+	mint: Option<string>;
+	tokenAuthority: Option<string>;
 	space: Option<number>;
 	uncheckedExplanation: string;
 	constrains: Option<InstructionAccountConstrain>[];
@@ -38,11 +39,6 @@ export interface InstructionAccountConstrain {
 		name: string;
 		body: string;
 	};
-}
-
-export interface InstructionAccountTokenData {
-	mint: string;
-	authority: string;
 }
 
 export interface InstructionAccountDerivation {
@@ -147,10 +143,12 @@ export const getInstructionAccount = async (
 			instructionAccountDerivationPublicKey
 		);
 
-	let bumpRef, bumpPath, seedPaths;
+	let seedPaths: string[] = [];
+	let bumpReference: Option<string> = null;
+	let bumpPath: Option<string> = null;
 
 	if (instructionAccountDerivation.bumpPath) {
-		bumpRef = (
+		bumpReference = (
 			await program.account.instructionAccount.fetch(
 				instructionAccountDerivation.bumpPath.reference
 			)
@@ -177,24 +175,29 @@ export const getInstructionAccount = async (
 	const instructionAccountDerivationDecode: InstructionAccountDerivationDecode =
 		{
 			name: instructionAccountDerivation.name,
-			bumpPath: {
-				reference: bumpRef,
-				path: bumpPath,
-			},
+			bumpPath:
+				instructionAccountDerivation.bumpPath !== null
+					? {
+							reference: bumpReference,
+							path: bumpPath,
+					  }
+					: null,
 			seedPaths,
 		};
 
-	const token: InstructionAccountTokenData = {
-		mint: '',
-		authority: '',
-	};
+	let mint: Option<string> = null;
+	let tokenAuthority: Option<string> = null;
 
-	if (kindName === 'token') {
-		token.mint = (
+	if (
+		instructionAccount.kind[kindName].id === 4 &&
+		instructionAccount.modifier &&
+		instructionAccount.modifier[modifierName].id === 0
+	) {
+		mint = (
 			await program.account.instructionAccount.fetch(instructionAccount.mint)
 		).name;
 
-		token.authority = (
+		tokenAuthority = (
 			await program.account.instructionAccount.fetch(
 				instructionAccount.tokenAuthority
 			)
@@ -231,7 +234,8 @@ export const getInstructionAccount = async (
 		uncheckedExplanation: instructionAccount.uncheckedExplanation,
 		constrains: accountConstraints.length !== 0 ? accountConstraints : null,
 		derivation: instructionAccountDerivationDecode,
-		tokenData: token,
+		mint,
+		tokenAuthority,
 		collection:
 			instructionAccountCollection !== null
 				? await getCollection(program, instructionAccountCollection)
