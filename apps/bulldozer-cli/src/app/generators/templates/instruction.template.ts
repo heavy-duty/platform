@@ -27,8 +27,8 @@ pub struct {{instruction.name.pascalCase}}Arguments {
 {{/if}}
 pub struct {{instruction.name.pascalCase}}<'info>{
   {{#each instructionAccounts ~}}
-  {{#switch this.kind.id}}
-  {{#case '0'}}
+  {{#switch this.kind.id}} 
+  {{#case 0}}
   {{#if this.modifier.name }}
   #[account(
     {{this.modifier.name}},
@@ -45,16 +45,14 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     close = {{this.close.snakeCase}},
     {{/if}}
     {{#if this.derivation}}
-    {{#if this.derivation.name}}
     seeds=[
-      b"{{this.derivation.name}}",
+      b"{{this.derivation.name.snakeCase}}".as_ref(),
       {{#each this.derivation.seedPaths}}
-      {{this}}.key().as_ref(),
+      {{this.snakeCase}}.key().as_ref(),
       {{/each}}
-    ],    
-    {{/if}}
-    {{#if this.derivation.bumpPath.reference}}
-    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}},
+    ],
+    {{#if this.derivation.bumpPath}}
+    bump={{this.derivation.bumpPath.reference.snakeCase}}.{{this.derivation.bumpPath.path.snakeCase}},
     {{else}}
     bump,
     {{/if}}
@@ -69,19 +67,19 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{/each}}
   )]
   {{/if}}
-  pub {{this.name.snakeCase}}: Box<Account<'info,{{this.collection.pascalCase}}>>,
+  pub {{this.name.snakeCase}}: Box<Account<'info, {{this.collection.pascalCase}}>>,
   {{/case}}
-  {{#case '1'}}
+  {{#case 1}}
   {{#if this.modifier.name }}
   #[account({{this.modifier.name}})]
   {{/if}}
   pub {{this.name.snakeCase}}: Signer<'info>,
   {{/case}}
-  {{#case '2'}}
+  {{#case 2}}
   /// CHECK: {{this.uncheckedExplanation}}
   pub {{this.name.snakeCase}}: UncheckedAccount<'info>,
   {{/case}}
-  {{#case '3'}}
+  {{#case 3}}
   {{#if this.constrains }}
   #[account(
     {{#each this.constrains}}
@@ -91,23 +89,21 @@ pub struct {{instruction.name.pascalCase}}<'info>{
   {{/if}}
   pub {{this.name.snakeCase}}: Box<Account<'info, Mint>>,
   {{/case}}
-  {{#case '4'}}
+  {{#case 4}}
   #[account(
     {{this.modifier.name}},
     {{#if this.payer}}
     payer = {{this.payer.snakeCase}},
     {{/if}}
     {{#if this.derivation}}
-    {{#if this.derivation.name}}
     seeds=[
-      b"{{this.derivation.name}}",
-      {{#each this.this.derivation.seedPaths}}
-      {{this}}.key().as_ref(),
+      b"{{this.derivation.name.snakeCase}}".as_ref(),
+      {{#each this.derivation.seedPaths}}
+      {{this.snakeCase}}.key().as_ref(),
       {{/each}}
     ],
-    {{/if}}
-    {{#if this.derivation.bumpPath.reference}}
-    bump={{this.derivation.bumpPath.reference}}.{{this.derivation.bumpPath.path}},
+    {{#if this.derivation.bumpPath}}
+    bump={{this.derivation.bumpPath.reference.snakeCase}}.{{this.derivation.bumpPath.snakeCase}},
     {{else}}
     bump,
     {{/if}}
@@ -117,26 +113,16 @@ pub struct {{instruction.name.pascalCase}}<'info>{
     {{{this.name}}} = {{{this.body}}},
     {{/each}}
     {{/if}}
-    token::mint = {{this.tokenData.mint}},
-    token::authority = {{this.tokenData.authority}},
+    token::mint = {{this.mint.snakeCase}},
+    token::authority = {{this.tokenAuthority.snakeCase}},
   )]
   pub {{this.name.snakeCase}}: Box<Account<'info, TokenAccount>>,
   {{/case}}
   {{/switch}}
   {{/each~}}
-  {{#switch tokenProgram}}
-  {{#case '1'}}
-  pub rent: Sysvar<'info, Rent>,
-  pub token_program: Program<'info, Token>,
-  {{/case}}
-  {{#case '2'}}
-  pub token_program: Program<'info, Token>,
-  {{/case}}
-  {{/switch}}
-  {{#if initializesAccount}}
-  pub system_program: Program<'info, System>,
-  {{else}}
-  {{/if}}
+  {{#if tokenProgram}}pub token_program: Program<'info, Token>,{{/if}}
+  {{#if rent}}pub rent: Sysvar<'info, Rent>,{{/if}}
+  {{#if initializesAccount}}pub system_program: Program<'info, System>,{{/if}}
 }
 
 {{#if instruction.body}}

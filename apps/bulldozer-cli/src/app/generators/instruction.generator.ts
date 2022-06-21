@@ -80,8 +80,31 @@ export class InstructionCodeGenerator {
 					instructionAccount.derivation.name === null &&
 					instructionAccount.derivation.seedPaths.length === 0
 						? null
-						: instructionAccount.derivation,
-				tokenData: instructionAccount.tokenData,
+						: {
+								name: formatName(instructionAccount.derivation.name),
+								bumpPath:
+									instructionAccount.derivation.bumpPath !== null
+										? {
+												reference: formatName(
+													instructionAccount.derivation.bumpPath.reference
+												),
+												path: formatName(
+													instructionAccount.derivation.bumpPath.path
+												),
+										  }
+										: null,
+								seedPaths: instructionAccount.derivation.seedPaths.map(
+									(seedPath) => formatName(seedPath)
+								),
+						  },
+				mint:
+					instructionAccount.mint !== null
+						? formatName(instructionAccount.mint)
+						: null,
+				tokenAuthority:
+					instructionAccount.tokenAuthority !== null
+						? formatName(instructionAccount.tokenAuthority)
+						: null,
 				relations: instructionRelations
 					.filter((instructionRelation) =>
 						instructionRelation.from.publicKey.equals(
@@ -92,21 +115,32 @@ export class InstructionCodeGenerator {
 						formatName(instructionRelation.to.name)
 					),
 			})),
-			collections: instructionAccounts
-				.filter((instructionAccount) => instructionAccount.collection !== null)
-				.map((instructionAccount) =>
-					formatName(instructionAccount.collection.name)
+			collections: [
+				...new Set(
+					instructionAccounts
+						.filter(
+							(instructionAccount) => instructionAccount.collection !== null
+						)
+						.map((instructionAccount) => instructionAccount.collection.name)
 				),
+			].map((collectionName) => formatName(collectionName)),
 			initializesAccount: instructionAccounts.some(
 				(instructionAccount) => instructionAccount.modifier?.id === 0
 			),
-			tokenProgram: instructionAccounts.some((instructionAccount) =>
-				instructionAccount.kind.id === 3 || instructionAccount.kind.id === 4
-					? instructionAccount.modifier &&
-					  instructionAccount.modifier.name === 'init'
-						? '1'
-						: '2'
-					: 0
+			tokenProgram: instructionAccounts.some(
+				(instructionAccount) =>
+					(instructionAccount.kind.id === 3 ||
+						instructionAccount.kind.id === 4) &&
+					instructionAccount.modifier &&
+					(instructionAccount.modifier.id === 0 ||
+						instructionAccount.modifier.id === 1)
+			),
+			rent: instructionAccounts.some(
+				(instructionAccount) =>
+					(instructionAccount.kind.id === 3 ||
+						instructionAccount.kind.id === 4) &&
+					instructionAccount.modifier &&
+					instructionAccount.modifier.id === 0
 			),
 		});
 	}
