@@ -1,18 +1,18 @@
 # Angular Solana Wallet Adapter
 
-This is the solana wallet adapter library for Angular
+This is the solana wallet adapter library for Angular.
 
 ## Pre-requisites
+
 ```
-"@angular/core": "13.2.2",
-"@heavy-duty/rxjs": "0.1.0",
+"@angular/core": "14.0.3",
+"@ngrx/component-store": "14.0.0",
+"@solana/web3.js": "1.44.2",
 "rxjs": "7.5.2",
-"@ngrx/component-store": "13.0.2",
-"@solana/web3.js": "1.36.0",
 "@solana/wallet-adapter-base": "0.9.5"
-"@heavy-duty/wallet-adapter": "0.2.2"
 "@solana/wallet-adapter-wallets": "0.15.5",
-"@angular-builders/custom-webpack": "^13.1.0",
+"@heavy-duty/wallet-adapter": "0.3.2"
+"@angular-builders/custom-webpack": "14.0.0",
 ```
 
 ## Installation
@@ -35,20 +35,19 @@ $ npm install --save @heavy-duty/wallet-adapter
 
 ```js
 module.exports = (config) => {
-  config.resolve.fallback = {
-    path: false,
-    fs: false,
-    os: false,
-    crypto: false,
-    process: false,
-    util: false,
-    assert: false,
-    stream: false,
-  };
+	config.resolve.fallback = {
+		path: false,
+		fs: false,
+		os: false,
+		crypto: false,
+		process: false,
+		util: false,
+		assert: false,
+		stream: false,
+	};
 
-  return config;
+	return config;
 };
-
 ```
 
 ### Update `angular.json`
@@ -89,7 +88,7 @@ module.exports = (config) => {
 "architect": {
 	...
 	"serve": {
-	 	"builder": "@angular-builders/custom-webpack:dev-server",	
+	 	"builder": "@angular-builders/custom-webpack:dev-server",
 	 	...
  	},
  	...
@@ -105,17 +104,15 @@ import 'zone.js'; // Included with Angular CLI.
 (window as any).global = window;
 (window as any).global.Buffer = Buffer;
 (window as any).process = {
-  version: '',
-  node: false,
-  env: false,
+	version: '',
+	node: false,
+	env: false,
 };
 ```
-
 
 ## Usage
 
 ### Add wallet adapter module in `app.module.ts`
-
 
 ```ts
 @NgModule({
@@ -141,33 +138,33 @@ import 'zone.js'; // Included with Angular CLI.
 import { Component } from '@angular/core';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
 import {
-  PhantomWalletAdapter,
-  SlopeWalletAdapter,
-  SolflareWalletAdapter,
-  SolongWalletAdapter,
+	PhantomWalletAdapter,
+	SlopeWalletAdapter,
+	SolflareWalletAdapter,
+	SolongWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+	selector: 'app-root',
+	templateUrl: './app.component.html',
+	styleUrls: ['./app.component.css'],
 })
 export class AppComponent {
-  title = '';
-  constructor(
-    private readonly _hdConnectionStore: ConnectionStore,
-    private readonly _hdWalletStore: WalletStore,
-  ) {}
+	title = '';
+	constructor(
+		private readonly _hdConnectionStore: ConnectionStore,
+		private readonly _hdWalletStore: WalletStore
+	) {}
 
-  ngOnInit() {
-    this._hdConnectionStore.setEndpoint('https://api.devnet.solana.com');
-    this._hdWalletStore.setAdapters([
-      new PhantomWalletAdapter(),
-      new SlopeWalletAdapter(),
-      new SolflareWalletAdapter(),
-      new SolongWalletAdapter(),
-    ]);
-  }
+	ngOnInit() {
+		this._hdConnectionStore.setEndpoint('https://api.devnet.solana.com');
+		this._hdWalletStore.setAdapters([
+			new PhantomWalletAdapter(),
+			new SlopeWalletAdapter(),
+			new SolflareWalletAdapter(),
+			new SolongWalletAdapter(),
+		]);
+	}
 }
 ```
 
@@ -180,13 +177,13 @@ export class AppComponent {
 	<select
 		[ngModel]="walletName$ | async"
 		(ngModelChange)="onSelectWallet($event)"
-		>
+	>
 		<option [ngValue]="null">Not selected</option>
 		<option
-		  *ngFor="let wallet of wallets$ | async"
-		  [ngValue]="wallet.adapter.name"
+			*ngFor="let wallet of wallets$ | async"
+			[ngValue]="wallet.adapter.name"
 		>
-	  {{ wallet.adapter.name }} ({{ wallet.readyState }})
+			{{ wallet.adapter.name }} ({{ wallet.readyState }})
 		</option>
 	</select>
 
@@ -198,36 +195,37 @@ export class AppComponent {
 ```
 
 **In example.ts**
+
 ```ts
-import { Component, OnInit } from '@angular/core'
-import { WalletName } from '@solana/wallet-adapter-base'
-import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter'
-import { map } from 'rxjs'
+import { Component, OnInit } from '@angular/core';
+import { WalletName } from '@solana/wallet-adapter-base';
+import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';
+import { map } from 'rxjs';
 
 @Component({
-  selector: 'example',
-  templateUrl: './example.html',
-  styleUrls: ['./example.css']
+	selector: 'example',
+	templateUrl: './example.html',
+	styleUrls: ['./example.css'],
 })
 export class ExampleComponent implements OnInit {
-  readonly wallets$ = this._walletStore.wallets$;
-  readonly wallet$ = this._walletStore.wallet$;
-  readonly walletName$ = this.wallet$.pipe(
-    map((wallet) => wallet?.adapter.name || null)
-  );
+	readonly wallets$ = this._walletStore.wallets$;
+	readonly wallet$ = this._walletStore.wallet$;
+	readonly walletName$ = this.wallet$.pipe(
+		map((wallet) => wallet?.adapter.name || null)
+	);
 
-  constructor(
-    private readonly _connectionStore: ConnectionStore,
-    private readonly _walletStore: WalletStore) { }
+	constructor(
+		private readonly _connectionStore: ConnectionStore,
+		private readonly _walletStore: WalletStore
+	) {}
 
-  ngOnInit(): void { }
+	ngOnInit(): void {}
 
-  onSelectWallet(walletName: WalletName) {
-    this._walletStore.selectWallet(walletName);
-  }
+	onSelectWallet(walletName: WalletName) {
+		this._walletStore.selectWallet(walletName);
+	}
 }
 ```
-
 
 ## More Examples
 
