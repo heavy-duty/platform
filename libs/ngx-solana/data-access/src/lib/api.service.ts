@@ -235,7 +235,6 @@ export class HdSolanaApiService {
 						[
 							pubkeys,
 							{
-								encoding: config?.encoding ?? 'base64',
 								commitment: config?.commitment ?? 'confirmed',
 							},
 						],
