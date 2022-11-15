@@ -7,7 +7,7 @@ import {
 	WorkspaceCargoGenerator,
 	WorkspaceGitignoreGenerator,
 	WorkspacePackagejsonGenerator,
-	WorkspaceReadmeGenerator,
+	WorkspaceReadmeGenerator
 } from '../generators';
 import { formatName } from '../generators/utils';
 import { WorkspaceTsconfigGenerator } from '../generators/workspace-tsconfig.generator';
@@ -29,10 +29,12 @@ export interface GenerateWorkspace {
 		'out-dir': '(path) The path where the workspace will be generated',
 	},
 })
-export class GenerateWorkspaceCommand implements CommandRunner {
+export class GenerateWorkspaceCommand extends CommandRunner {
 	constructor(
 		private readonly _generateApplicationCommand: GenerateApplicationCommand
-	) {}
+	) {
+		super();
+	}
 
 	async run(params: string[], options?: GenerateWorkspace) {
 		try {

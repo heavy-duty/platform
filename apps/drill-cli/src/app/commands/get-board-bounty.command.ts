@@ -5,7 +5,7 @@ import {
 	getProvider,
 	getSolanaConfig,
 	log,
-	processError,
+	processError
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Get board bounty',
 	arguments: '<github-repository> <issue-number>',
 })
-export class GetBoardBountyCommand implements CommandRunner {
+export class GetBoardBountyCommand extends CommandRunner {
 	async run(params: string[]) {
 		try {
 			const [owner, repoName] = params[0].split('/');

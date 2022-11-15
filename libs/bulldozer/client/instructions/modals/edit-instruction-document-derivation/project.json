@@ -1,4 +1,5 @@
 {
+	"name": "bulldozer-client-instructions-modals-edit-instruction-document-derivation",
 	"projectType": "library",
 	"sourceRoot": "libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation/src",
 	"prefix": "bd",
@@ -6,7 +7,7 @@
 		"test": {
 			"executor": "@nrwl/jest:jest",
 			"outputs": [
-				"coverage/libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation"
+				"{workspaceRoot}/coverage/libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation"
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-document-derivation/jest.config.ts",

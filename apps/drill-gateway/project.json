@@ -1,15 +1,18 @@
 {
+	"name": "drill-gateway",
 	"sourceRoot": "apps/drill-gateway/src",
 	"projectType": "application",
 	"targets": {
 		"build": {
-			"executor": "@nrwl/node:webpack",
+			"executor": "@nrwl/webpack:webpack",
 			"outputs": ["{options.outputPath}"],
 			"options": {
 				"outputPath": "dist/apps/drill-gateway",
 				"main": "apps/drill-gateway/src/main.ts",
 				"tsConfig": "apps/drill-gateway/tsconfig.app.json",
-				"assets": ["apps/drill-gateway/src/assets"]
+				"assets": ["apps/drill-gateway/src/assets"],
+				"target": "node",
+				"compiler": "tsc"
 			},
 			"configurations": {
 				"production": {
@@ -40,14 +43,14 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/apps/drill-gateway"],
+			"outputs": ["{workspaceRoot}/coverage/apps/drill-gateway"],
 			"options": {
 				"jestConfig": "apps/drill-gateway/jest.config.ts",
 				"passWithNoTests": true
 			}
 		},
 		"deploy": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"rm -rf dist/apps/drill-gateway",

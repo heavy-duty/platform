@@ -1,11 +1,12 @@
 {
+	"name": "wallet-adapter-ui-blueprint",
 	"projectType": "library",
 	"sourceRoot": "libs/wallet-adapter/ui/blueprint/src",
 	"prefix": "hd",
 	"targets": {
 		"build": {
 			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/wallet-adapter/ui/blueprint"],
+			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/ui/blueprint"],
 			"options": {
 				"project": "libs/wallet-adapter/ui/blueprint/ng-package.json",
 				"tailwindConfig": "libs/wallet-adapter/ui/blueprint/tailwind.config.js"
@@ -22,7 +23,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/wallet-adapter/ui/blueprint"],
+			"outputs": ["{workspaceRoot}/coverage/libs/wallet-adapter/ui/blueprint"],
 			"options": {
 				"jestConfig": "libs/wallet-adapter/ui/blueprint/jest.config.ts",
 				"passWithNoTests": true

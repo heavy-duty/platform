@@ -7,11 +7,11 @@ import {
 	getProgram,
 	getProvider,
 	getSolanaConfig,
-	log,
+	log
 } from '../utils';
 import {
 	GenerateWorkspace,
-	GenerateWorkspaceCommand,
+	GenerateWorkspaceCommand
 } from './generate-workspace.command';
 
 @Command({
@@ -25,10 +25,12 @@ import {
 			'(path) The path where the workspace will be generated and deployed',
 	},
 })
-export class DeployWorkspaceCommand implements CommandRunner {
+export class DeployWorkspaceCommand extends CommandRunner {
 	constructor(
 		private readonly _generateWorkspaceCommand: GenerateWorkspaceCommand
-	) {}
+	) {
+		super();
+	}
 
 	async run(params: string[], options?: GenerateWorkspace) {
 		try {

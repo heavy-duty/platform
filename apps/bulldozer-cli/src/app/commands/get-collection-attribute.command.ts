@@ -5,7 +5,7 @@ import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Get everything about a given collection attribute',
 	arguments: '<collection-attribute-id> <plain>',
 })
-export class GetCollectionAttributeCommand implements CommandRunner {
+export class GetCollectionAttributeCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [collectionAttributeId, isPlain] = params;
 		const logger = new BulldozerLogger();

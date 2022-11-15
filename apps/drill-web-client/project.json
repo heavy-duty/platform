@@ -1,4 +1,5 @@
 {
+  "name": "drill-web-client",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/drill-web-client/src",
@@ -63,7 +64,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-server",
+      "executor": "@nrwl/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "drill-web-client:build:production"
@@ -92,7 +93,7 @@
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/apps/drill-web-client"
+        "{workspaceRoot}/coverage/apps/drill-web-client"
       ],
       "options": {
         "jestConfig": "apps/drill-web-client/jest.config.ts",
