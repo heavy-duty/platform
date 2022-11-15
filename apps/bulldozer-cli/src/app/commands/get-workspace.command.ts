@@ -5,7 +5,7 @@ import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Get everything about a given workspace',
 	arguments: '<workspace-id> <plain>',
 })
-export class GetWorkspaceCommand implements CommandRunner {
+export class GetWorkspaceCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [workspaceId, isPlain] = params;
 		const logger = new BulldozerLogger();

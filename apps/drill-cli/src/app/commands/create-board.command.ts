@@ -5,7 +5,7 @@ import {
 	getProvider,
 	getSolanaConfig,
 	log,
-	processError,
+	processError
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Create a new board',
 	arguments: '<username/repo> <lock-time> <accepted-mint>',
 })
-export class CreateBoardCommand implements CommandRunner {
+export class CreateBoardCommand extends CommandRunner {
 	async run(params: string[]) {
 		try {
 			const [owner, repoName] = params[0].split('/');

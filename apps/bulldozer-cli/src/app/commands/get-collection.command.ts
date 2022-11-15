@@ -5,7 +5,7 @@ import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -16,7 +16,7 @@ import {
 		'collection-id': '(public key) The collection id which you want to get',
 	},
 })
-export class GetCollectionCommand implements CommandRunner {
+export class GetCollectionCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [collectionId, isPlain] = params;
 		const logger = new BulldozerLogger();

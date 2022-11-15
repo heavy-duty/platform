@@ -8,7 +8,7 @@ import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -21,7 +21,7 @@ import {
 		plain: 'Return value as string through stdout',
 	},
 })
-export class GenerateCollectionCommand implements CommandRunner {
+export class GenerateCollectionCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [collectionId, outFile, isPlain] = params;
 		const logger = new BulldozerLogger();

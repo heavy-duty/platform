@@ -5,7 +5,7 @@ import {
 	getProvider,
 	getSolanaConfig,
 	log,
-	processError,
+	processError
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Set a new board authority',
 	arguments: '<username/repo> <pubkey-new-authority>',
 })
-export class SetBoardAuthorityCommand implements CommandRunner {
+export class SetBoardAuthorityCommand extends CommandRunner {
 	async run(params: string[]) {
 		try {
 			const [owner, repoName] = params[0].split('/');

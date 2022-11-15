@@ -5,7 +5,7 @@ import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Get everything about a given instruction',
 	arguments: '<instruction-id> <plain>',
 })
-export class GetInstructionCommand implements CommandRunner {
+export class GetInstructionCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [instructionId, isPlain] = params;
 		const logger = new BulldozerLogger();

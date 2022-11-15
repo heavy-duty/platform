@@ -6,13 +6,13 @@ import {
 	getInstruction,
 	getInstructionAccounts,
 	getInstructionArguments,
-	getInstructionRelations,
+	getInstructionRelations
 } from '../state';
 import {
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -26,7 +26,7 @@ import {
 		plain: 'Return value as string through stdout',
 	},
 })
-export class GenerateInstructionCommand implements CommandRunner {
+export class GenerateInstructionCommand extends CommandRunner {
 	async run(params: string[]) {
 		const [instructionId, outFile, isPlain] = params;
 		const logger = new BulldozerLogger();

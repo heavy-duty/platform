@@ -7,7 +7,7 @@ import {
 	ApplicationCodeGenerator,
 	ApplicationImportsGenerator,
 	ApplicationXargoGenerator,
-	InstructionCodeGenerator,
+	InstructionCodeGenerator
 } from '../generators';
 import { CollectionCodeGenerator } from '../generators/collection.generator';
 import { formatName } from '../generators/utils';
@@ -19,14 +19,14 @@ import {
 	getInstructionArguments,
 	getInstructionRelations,
 	getInstructions,
-	Instruction,
+	Instruction
 } from '../state';
 import {
 	Bulldozer,
 	BulldozerLogger,
 	getProgram,
 	getProvider,
-	getSolanaConfig,
+	getSolanaConfig
 } from '../utils';
 
 @Command({
@@ -41,7 +41,7 @@ import {
 		plain: 'Return value as string through stdout',
 	},
 })
-export class GenerateApplicationCommand implements CommandRunner {
+export class GenerateApplicationCommand extends CommandRunner {
 	private async getAppDependencies(
 		program: Program<Bulldozer>,
 		instructions: Instruction[]

@@ -31,8 +31,8 @@
     "@nestjs/websockets": "9.2.0",
     "@ngrx/component": "14.3.2",
     "@ngrx/component-store": "14.3.2",
-    "@ngx-formly/core": "^5.12.4",
-    "@ngx-formly/material": "^5.12.4",
+    "@ngx-formly/core": "^6.0.2",
+    "@ngx-formly/material": "^6.0.2",
     "@nrwl/angular": "15.0.13",
     "@octokit/rest": "^18.12.0",
     "@solana/buffer-layout": "4.0.0",
@@ -60,6 +60,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "~7.5.0",
     "tslib": "^2.0.0",
+    "tweetnacl": "^1.0.3",
     "uuid": "^8.3.2",
     "xstate": "^4.32.1",
     "zone.js": "0.11.4"

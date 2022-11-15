@@ -5,7 +5,7 @@ import {
 	getProvider,
 	getSolanaConfig,
 	log,
-	processError,
+	processError
 } from '../utils';
 
 @Command({
@@ -13,7 +13,7 @@ import {
 	description: 'Get board info',
 	arguments: '<username/repo>',
 })
-export class GetBoardCommand implements CommandRunner {
+export class GetBoardCommand extends CommandRunner {
 	async run(params: string[]) {
 		try {
 			const [owner, repoName] = params[0].split('/');
