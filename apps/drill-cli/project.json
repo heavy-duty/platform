@@ -1,16 +1,18 @@
 {
-	"root": "apps/drill-cli",
+	"name": "drill-cli",
 	"sourceRoot": "apps/drill-cli/src",
 	"projectType": "application",
 	"targets": {
 		"build": {
-			"executor": "@nrwl/node:webpack",
+			"executor": "@nrwl/webpack:webpack",
 			"outputs": ["{options.outputPath}"],
 			"options": {
 				"outputPath": "dist/apps/drill-cli",
 				"main": "apps/drill-cli/src/main.ts",
 				"tsConfig": "apps/drill-cli/tsconfig.app.json",
-				"assets": ["apps/drill-cli/src/assets"]
+				"assets": ["apps/drill-cli/src/assets"],
+				"target": "node",
+				"compiler": "tsc"
 			},
 			"configurations": {
 				"production": {
@@ -42,14 +44,14 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/apps/drill-cli"],
+			"outputs": ["{workspaceRoot}/coverage/apps/drill-cli"],
 			"options": {
-				"jestConfig": "apps/drill-cli/jest.config.js",
+				"jestConfig": "apps/drill-cli/jest.config.ts",
 				"passWithNoTests": true
 			}
 		},
 		"create-board": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"nx build drill-cli",
@@ -60,7 +62,7 @@
 			}
 		},
 		"get-board": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"nx build drill-cli",
@@ -71,7 +73,7 @@
 			}
 		},
 		"get-bounty": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"nx build drill-cli",
@@ -82,7 +84,7 @@
 			}
 		},
 		"set-board-authority": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"nx build drill-cli",
@@ -93,7 +95,7 @@
 			}
 		},
 		"publish-npm": {
-			"executor": "@nrwl/workspace:run-commands",
+			"executor": "nx:run-commands",
 			"options": {
 				"commands": [
 					"rm -rf dist/apps/drill-cli/",

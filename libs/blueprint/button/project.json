@@ -1,11 +1,12 @@
 {
+	"name": "blueprint-button",
 	"projectType": "library",
 	"sourceRoot": "libs/blueprint/button/src",
 	"prefix": "bp",
 	"targets": {
 		"build": {
 			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/blueprint/button"],
+			"outputs": ["{workspaceRoot}/dist/libs/blueprint/button"],
 			"options": {
 				"project": "libs/blueprint/button/ng-package.json",
 				"tailwindConfig": "libs/blueprint/button/tailwind.config.js"
@@ -22,7 +23,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/blueprint/button"],
+			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/button"],
 			"options": {
 				"jestConfig": "libs/blueprint/button/jest.config.ts",
 				"passWithNoTests": true

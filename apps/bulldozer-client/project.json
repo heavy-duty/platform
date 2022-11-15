@@ -1,4 +1,5 @@
 {
+  "name": "bulldozer-client",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "sourceRoot": "apps/bulldozer-client/src",
@@ -71,7 +72,7 @@
       "defaultConfiguration": "production"
     },
     "serve": {
-      "executor": "@nrwl/angular:webpack-server",
+      "executor": "@nrwl/angular:webpack-dev-server",
       "configurations": {
         "production": {
           "browserTarget": "bulldozer-client:build:production"
@@ -100,7 +101,7 @@
     "test": {
       "executor": "@nrwl/jest:jest",
       "outputs": [
-        "coverage/apps/bulldozer-client"
+        "{workspaceRoot}/coverage/apps/bulldozer-client"
       ],
       "options": {
         "jestConfig": "apps/bulldozer-client/jest.config.ts",

@@ -1,11 +1,12 @@
 {
+	"name": "blueprint-snack-bar",
 	"projectType": "library",
 	"sourceRoot": "libs/blueprint/snack-bar/src",
 	"prefix": "bp",
 	"targets": {
 		"build": {
 			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/blueprint/snack-bar"],
+			"outputs": ["{workspaceRoot}/dist/libs/blueprint/snack-bar"],
 			"options": {
 				"project": "libs/blueprint/snack-bar/ng-package.json",
 				"tailwindConfig": "libs/blueprint/snack-bar/tailwind.config.js"
@@ -22,7 +23,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/blueprint/snack-bar"],
+			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/snack-bar"],
 			"options": {
 				"jestConfig": "libs/blueprint/snack-bar/jest.config.ts",
 				"passWithNoTests": true

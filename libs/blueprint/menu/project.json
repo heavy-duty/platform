@@ -1,11 +1,12 @@
 {
+	"name": "blueprint-menu",
 	"projectType": "library",
 	"sourceRoot": "libs/blueprint/menu/src",
 	"prefix": "bp",
 	"targets": {
 		"build": {
 			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/blueprint/menu"],
+			"outputs": ["{workspaceRoot}/dist/libs/blueprint/menu"],
 			"options": {
 				"project": "libs/blueprint/menu/ng-package.json",
 				"tailwindConfig": "libs/blueprint/menu/tailwind.config.js"
@@ -22,7 +23,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/blueprint/menu"],
+			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/menu"],
 			"options": {
 				"jestConfig": "libs/blueprint/menu/jest.config.ts",
 				"passWithNoTests": true

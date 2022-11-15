@@ -1,46 +1,43 @@
 {
-  "$schema": "../../../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
-  "sourceRoot": "libs/ngx-solana/ui/cdk/src",
-  "prefix": "hd",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:package",
-      "outputs": [
-        "dist/libs/ngx-solana/ui/cdk"
-      ],
-      "options": {
-        "project": "libs/ngx-solana/ui/cdk/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.prod.json"
-        },
-        "development": {
-          "tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/ngx-solana/ui/cdk"
-      ],
-      "options": {
-        "jestConfig": "libs/ngx-solana/ui/cdk/jest.config.ts",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/ngx-solana/ui/cdk/src/**/*.ts",
-          "libs/ngx-solana/ui/cdk/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"name": "ngx-solana-ui-cdk",
+	"$schema": "../../../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "library",
+	"sourceRoot": "libs/ngx-solana/ui/cdk/src",
+	"prefix": "hd",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:package",
+			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/ui/cdk"],
+			"options": {
+				"project": "libs/ngx-solana/ui/cdk/ng-package.json"
+			},
+			"configurations": {
+				"production": {
+					"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.prod.json"
+				},
+				"development": {
+					"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.json"
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["{workspaceRoot}/coverage/libs/ngx-solana/ui/cdk"],
+			"options": {
+				"jestConfig": "libs/ngx-solana/ui/cdk/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/ngx-solana/ui/cdk/src/**/*.ts",
+					"libs/ngx-solana/ui/cdk/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

@@ -1,28 +1,29 @@
 {
-  "$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
-  "sourceRoot": "libs/bulldozer/client/collections/modals/edit-collection/src",
-  "prefix": "bd",
-  "targets": {
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "coverage/libs/bulldozer/client/collections/modals/edit-collection"
-      ],
-      "options": {
-        "jestConfig": "libs/bulldozer/client/collections/modals/edit-collection/jest.config.ts",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/bulldozer/client/collections/modals/edit-collection/src/**/*.ts",
-          "libs/bulldozer/client/collections/modals/edit-collection/src/**/*.html"
-        ]
-      }
-    }
-  },
-  "tags": []
+	"name": "bulldozer-client-collections-modals-edit-collection",
+	"$schema": "../../../../../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "library",
+	"sourceRoot": "libs/bulldozer/client/collections/modals/edit-collection/src",
+	"prefix": "bd",
+	"targets": {
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": [
+				"{workspaceRoot}/coverage/libs/bulldozer/client/collections/modals/edit-collection"
+			],
+			"options": {
+				"jestConfig": "libs/bulldozer/client/collections/modals/edit-collection/jest.config.ts",
+				"passWithNoTests": true
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"libs/bulldozer/client/collections/modals/edit-collection/src/**/*.ts",
+					"libs/bulldozer/client/collections/modals/edit-collection/src/**/*.html"
+				]
+			}
+		}
+	},
+	"tags": []
 }

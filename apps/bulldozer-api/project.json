@@ -1,17 +1,20 @@
 {
+	"name": "bulldozer-api",
 	"$schema": "../../node_modules/nx/schemas/project-schema.json",
 	"sourceRoot": "apps/bulldozer-api/src",
 	"projectType": "application",
 	"targets": {
 		"build": {
-			"executor": "@nrwl/node:webpack",
+			"executor": "@nrwl/webpack:webpack",
 			"outputs": ["{options.outputPath}"],
 			"options": {
 				"outputPath": "dist/apps/bulldozer-api",
 				"main": "apps/bulldozer-api/src/main.ts",
 				"tsConfig": "apps/bulldozer-api/tsconfig.app.json",
 				"assets": ["apps/bulldozer-api/src/assets"],
-				"envFile": "apps/bulldozer-api/.env"
+				"envFile": "apps/bulldozer-api/.env",
+				"target": "node",
+				"compiler": "tsc"
 			},
 			"configurations": {
 				"production": {
@@ -42,7 +45,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/apps/bulldozer-api"],
+			"outputs": ["{workspaceRoot}/coverage/apps/bulldozer-api"],
 			"options": {
 				"jestConfig": "apps/bulldozer-api/jest.config.ts",
 				"passWithNoTests": true

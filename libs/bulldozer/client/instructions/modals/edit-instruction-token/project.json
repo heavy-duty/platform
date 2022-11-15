@@ -1,4 +1,5 @@
 {
+	"name": "bulldozer-client-instructions-modals-edit-instruction-token",
 	"projectType": "library",
 	"sourceRoot": "libs/bulldozer/client/instructions/modals/edit-instruction-token/src",
 	"prefix": "bd",
@@ -6,7 +7,7 @@
 		"test": {
 			"executor": "@nrwl/jest:jest",
 			"outputs": [
-				"coverage/libs/bulldozer/client/instructions/modals/edit-instruction-token"
+				"{workspaceRoot}/coverage/libs/bulldozer/client/instructions/modals/edit-instruction-token"
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-token/jest.config.ts",

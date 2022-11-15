@@ -1,11 +1,12 @@
 {
+	"name": "blueprint-card",
 	"projectType": "library",
 	"sourceRoot": "libs/blueprint/card/src",
 	"prefix": "bp",
 	"targets": {
 		"build": {
 			"executor": "@nrwl/angular:package",
-			"outputs": ["dist/libs/blueprint/card"],
+			"outputs": ["{workspaceRoot}/dist/libs/blueprint/card"],
 			"options": {
 				"project": "libs/blueprint/card/ng-package.json",
 				"tailwindConfig": "libs/blueprint/card/tailwind.config.js"
@@ -22,7 +23,7 @@
 		},
 		"test": {
 			"executor": "@nrwl/jest:jest",
-			"outputs": ["coverage/libs/blueprint/card"],
+			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/card"],
 			"options": {
 				"jestConfig": "libs/blueprint/card/jest.config.ts",
 				"passWithNoTests": true
