@@ -5,7 +5,7 @@ import {
 	Input,
 	Output,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import {} from '@bulldozer-client/instructions-data-access';
 import { InstructionRelationDto } from '@heavy-duty/bulldozer-devkit';
 import { List } from 'immutable';

@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/components/code-editor/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shared/components/code-editor/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

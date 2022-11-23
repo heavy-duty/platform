@@ -9,7 +9,8 @@
 			"executor": "@nrwl/angular:package",
 			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/ui/cdk"],
 			"options": {
-				"project": "libs/ngx-solana/ui/cdk/ng-package.json"
+				"project": "libs/ngx-solana/ui/cdk/ng-package.json",
+				"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/ngx-solana/ui/cdk"],
 			"options": {
 				"jestConfig": "libs/ngx-solana/ui/cdk/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.spec.json"
 			}
 		},
 		"lint": {

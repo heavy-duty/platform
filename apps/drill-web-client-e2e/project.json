@@ -8,7 +8,8 @@
 			"executor": "@nrwl/cypress:cypress",
 			"options": {
 				"cypressConfig": "apps/drill-web-client-e2e/cypress.json",
-				"devServerTarget": "drill-web-client:serve:development"
+				"devServerTarget": "drill-web-client:serve:development",
+				"tsConfig": "apps/drill-web-client-e2e/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

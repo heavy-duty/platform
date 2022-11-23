@@ -8,7 +8,7 @@ import {
 	ValidatorFn,
 	Validators,
 } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatLegacyDialogRef as MatDialogRef, MAT_LEGACY_DIALOG_DATA as MAT_DIALOG_DATA } from '@angular/material/legacy-dialog';
 import { Account } from '@solana/spl-token';
 import { PublicKey } from '@solana/web3.js';
 import { map, Observable } from 'rxjs';

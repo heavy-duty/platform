@@ -6,7 +6,7 @@ import {
 	Output,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatLegacyProgressSpinnerModule as MatProgressSpinnerModule } from '@angular/material/legacy-progress-spinner';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { ReactiveComponentModule } from '@ngrx/component';
 import { filter } from 'rxjs';

@@ -12,7 +12,8 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/pipes/item-updating/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/bulldozer/client/shared/pipes/item-updating/tsconfig.json"
 			}
 		},
 		"lint": {

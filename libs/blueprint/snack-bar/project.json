@@ -9,7 +9,8 @@
 			"outputs": ["{workspaceRoot}/dist/libs/blueprint/snack-bar"],
 			"options": {
 				"project": "libs/blueprint/snack-bar/ng-package.json",
-				"tailwindConfig": "libs/blueprint/snack-bar/tailwind.config.js"
+				"tailwindConfig": "libs/blueprint/snack-bar/tailwind.config.js",
+				"tsConfig": "libs/blueprint/snack-bar/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/snack-bar"],
 			"options": {
 				"jestConfig": "libs/blueprint/snack-bar/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/blueprint/snack-bar/tsconfig.spec.json"
 			}
 		},
 		"lint": {

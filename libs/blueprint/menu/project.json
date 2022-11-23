@@ -9,7 +9,8 @@
 			"outputs": ["{workspaceRoot}/dist/libs/blueprint/menu"],
 			"options": {
 				"project": "libs/blueprint/menu/ng-package.json",
-				"tailwindConfig": "libs/blueprint/menu/tailwind.config.js"
+				"tailwindConfig": "libs/blueprint/menu/tailwind.config.js",
+				"tsConfig": "libs/blueprint/menu/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/blueprint/menu"],
 			"options": {
 				"jestConfig": "libs/blueprint/menu/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/blueprint/menu/tsconfig.spec.json"
 			}
 		},
 		"lint": {

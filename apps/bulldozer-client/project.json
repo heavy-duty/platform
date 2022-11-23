@@ -1,113 +1,110 @@
 {
-  "name": "bulldozer-client",
-  "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "application",
-  "sourceRoot": "apps/bulldozer-client/src",
-  "prefix": "bd",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:webpack-browser",
-      "outputs": [
-        "{options.outputPath}"
-      ],
-      "options": {
-        "outputPath": "dist/apps/bulldozer-client",
-        "index": "apps/bulldozer-client/src/index.html",
-        "main": "apps/bulldozer-client/src/main.ts",
-        "polyfills": "apps/bulldozer-client/src/polyfills.ts",
-        "tsConfig": "apps/bulldozer-client/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
-        "assets": [
-          "apps/bulldozer-client/src/favicon.ico",
-          "apps/bulldozer-client/src/assets",
-          "apps/bulldozer-client/src/robots.txt",
-          {
-            "glob": "**/*",
-            "input": "node_modules/monaco-editor",
-            "output": "assets/monaco-editor"
-          }
-        ],
-        "styles": [
-          "apps/bulldozer-client/src/styles.scss",
-          "libs/wallet-adapter/ui/material/src/style.css",
-          "libs/ngx-solana/ui/material/src/style.css"
-        ],
-        "scripts": [],
-        "customWebpackConfig": {
-          "path": "apps/bulldozer-client/webpack.config.js"
-        },
-        "buildLibsFromSource": false
-      },
-      "configurations": {
-        "production": {
-          "budgets": [
-            {
-              "type": "initial",
-              "maximumWarning": "500kb",
-              "maximumError": "2mb"
-            },
-            {
-              "type": "anyComponentStyle",
-              "maximumWarning": "2kb",
-              "maximumError": "4kb"
-            }
-          ],
-          "fileReplacements": [
-            {
-              "replace": "apps/bulldozer-client/src/environments/environment.ts",
-              "with": "apps/bulldozer-client/src/environments/environment.prod.ts"
-            }
-          ],
-          "outputHashing": "all"
-        },
-        "development": {
-          "buildOptimizer": false,
-          "optimization": false,
-          "vendorChunk": true,
-          "extractLicenses": false,
-          "sourceMap": true,
-          "namedChunks": true
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "serve": {
-      "executor": "@nrwl/angular:webpack-dev-server",
-      "configurations": {
-        "production": {
-          "browserTarget": "bulldozer-client:build:production"
-        },
-        "development": {
-          "browserTarget": "bulldozer-client:build:development"
-        }
-      },
-      "defaultConfiguration": "development"
-    },
-    "extract-i18n": {
-      "executor": "@angular-devkit/build-angular:extract-i18n",
-      "options": {
-        "browserTarget": "bulldozer-client:build"
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "apps/bulldozer-client/src/**/*.ts",
-          "apps/bulldozer-client/src/**/*.html"
-        ]
-      }
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": [
-        "{workspaceRoot}/coverage/apps/bulldozer-client"
-      ],
-      "options": {
-        "jestConfig": "apps/bulldozer-client/jest.config.ts",
-        "passWithNoTests": true
-      }
-    }
-  },
-  "tags": []
+	"name": "bulldozer-client",
+	"$schema": "../../node_modules/nx/schemas/project-schema.json",
+	"projectType": "application",
+	"sourceRoot": "apps/bulldozer-client/src",
+	"prefix": "bd",
+	"targets": {
+		"build": {
+			"executor": "@nrwl/angular:webpack-browser",
+			"outputs": ["{options.outputPath}"],
+			"options": {
+				"outputPath": "dist/apps/bulldozer-client",
+				"index": "apps/bulldozer-client/src/index.html",
+				"main": "apps/bulldozer-client/src/main.ts",
+				"polyfills": "apps/bulldozer-client/src/polyfills.ts",
+				"tsConfig": "apps/bulldozer-client/tsconfig.app.json",
+				"inlineStyleLanguage": "scss",
+				"assets": [
+					"apps/bulldozer-client/src/favicon.ico",
+					"apps/bulldozer-client/src/assets",
+					"apps/bulldozer-client/src/robots.txt",
+					{
+						"glob": "**/*",
+						"input": "node_modules/monaco-editor",
+						"output": "assets/monaco-editor"
+					}
+				],
+				"styles": [
+					"apps/bulldozer-client/src/styles.scss",
+					"libs/wallet-adapter/ui/material/src/style.css",
+					"libs/ngx-solana/ui/material/src/style.css"
+				],
+				"scripts": [],
+				"customWebpackConfig": {
+					"path": "apps/bulldozer-client/webpack.config.js"
+				},
+				"buildLibsFromSource": false
+			},
+			"configurations": {
+				"production": {
+					"budgets": [
+						{
+							"type": "initial",
+							"maximumWarning": "500kb",
+							"maximumError": "2mb"
+						},
+						{
+							"type": "anyComponentStyle",
+							"maximumWarning": "2kb",
+							"maximumError": "4kb"
+						}
+					],
+					"fileReplacements": [
+						{
+							"replace": "apps/bulldozer-client/src/environments/environment.ts",
+							"with": "apps/bulldozer-client/src/environments/environment.prod.ts"
+						}
+					],
+					"outputHashing": "all"
+				},
+				"development": {
+					"buildOptimizer": false,
+					"optimization": false,
+					"vendorChunk": true,
+					"extractLicenses": false,
+					"sourceMap": true,
+					"namedChunks": true
+				}
+			},
+			"defaultConfiguration": "production"
+		},
+		"serve": {
+			"executor": "@nrwl/angular:webpack-dev-server",
+			"configurations": {
+				"production": {
+					"browserTarget": "bulldozer-client:build:production"
+				},
+				"development": {
+					"browserTarget": "bulldozer-client:build:development"
+				}
+			},
+			"defaultConfiguration": "development"
+		},
+		"extract-i18n": {
+			"executor": "@angular-devkit/build-angular:extract-i18n",
+			"options": {
+				"browserTarget": "bulldozer-client:build"
+			}
+		},
+		"lint": {
+			"executor": "@nrwl/linter:eslint",
+			"options": {
+				"lintFilePatterns": [
+					"apps/bulldozer-client/src/**/*.ts",
+					"apps/bulldozer-client/src/**/*.html"
+				]
+			}
+		},
+		"test": {
+			"executor": "@nrwl/jest:jest",
+			"outputs": ["{workspaceRoot}/coverage/apps/bulldozer-client"],
+			"options": {
+				"jestConfig": "apps/bulldozer-client/jest.config.ts",
+				"passWithNoTests": true,
+				"tsConfig": "apps/bulldozer-client/tsconfig.spec.json"
+			}
+		}
+	},
+	"tags": []
 }

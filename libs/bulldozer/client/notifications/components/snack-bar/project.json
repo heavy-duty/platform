@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/notifications/components/snack-bar/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/notifications/components/snack-bar/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

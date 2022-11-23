@@ -5,7 +5,7 @@ import {
 	Input,
 	Output,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { HttpEndpoint } from '@heavy-duty/ngx-solana';
 import { WebSocketEndpoint } from '@heavy-duty/ngx-websocket';
 import { HdEditEndpointsComponent } from './edit-endpoints-modal.component';

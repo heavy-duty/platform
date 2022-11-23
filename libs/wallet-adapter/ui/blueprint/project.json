@@ -9,7 +9,8 @@
 			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/ui/blueprint"],
 			"options": {
 				"project": "libs/wallet-adapter/ui/blueprint/ng-package.json",
-				"tailwindConfig": "libs/wallet-adapter/ui/blueprint/tailwind.config.js"
+				"tailwindConfig": "libs/wallet-adapter/ui/blueprint/tailwind.config.js",
+				"tsConfig": "libs/wallet-adapter/ui/blueprint/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/wallet-adapter/ui/blueprint"],
 			"options": {
 				"jestConfig": "libs/wallet-adapter/ui/blueprint/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/wallet-adapter/ui/blueprint/tsconfig.spec.json"
 			}
 		},
 		"lint": {

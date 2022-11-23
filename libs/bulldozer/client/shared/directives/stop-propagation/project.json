@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/directives/stop-propagation/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shared/directives/stop-propagation/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

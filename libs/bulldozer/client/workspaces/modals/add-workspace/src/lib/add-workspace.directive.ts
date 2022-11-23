@@ -1,5 +1,5 @@
 import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { EditWorkspaceComponent } from '@bulldozer-client/edit-workspace';
 import { ImportWorkspaceComponent } from '@bulldozer-client/import-workspace';
 import { WorkspaceDto } from '@heavy-duty/bulldozer-devkit';

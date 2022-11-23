@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/instructions/pages/view-instruction-signers/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/instructions/pages/view-instruction-signers/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

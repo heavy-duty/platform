@@ -7,7 +7,8 @@
 			"executor": "@danmt/nx-anchor:build",
 			"options": {
 				"projectPath": "apps/drill-programs",
-				"monitor": true
+				"monitor": true,
+				"tsConfig": "apps/drill-programs/tsconfig.json"
 			}
 		},
 		"test": {

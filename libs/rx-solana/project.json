@@ -26,7 +26,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/rx-solana"],
 			"options": {
 				"jestConfig": "libs/rx-solana/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/rx-solana/tsconfig.spec.json"
 			}
 		}
 	},

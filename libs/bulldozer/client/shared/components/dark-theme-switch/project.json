@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/components/dark-theme-switch/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shared/components/dark-theme-switch/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

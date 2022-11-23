@@ -10,6 +10,7 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/bulldozer/client/shell"],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shell/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shell/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

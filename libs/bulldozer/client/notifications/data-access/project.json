@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/notifications/data-access/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/notifications/data-access/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

@@ -10,7 +10,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/heavy-duty/ui/progress-ping"],
 			"options": {
 				"jestConfig": "libs/heavy-duty/ui/progress-ping/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/heavy-duty/ui/progress-ping/tsconfig.json"
 			}
 		},
 		"lint": {

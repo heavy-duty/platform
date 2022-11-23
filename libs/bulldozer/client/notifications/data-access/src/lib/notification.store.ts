@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatLegacySnackBar as MatSnackBar } from '@angular/material/legacy-snack-bar';
 import { SnackBarComponent } from '@bulldozer-client/notification-snack-bar';
 import { AnchorError, ProgramError } from '@heavy-duty/anchor';
 import { isNotNullOrUndefined } from '@heavy-duty/rxjs';

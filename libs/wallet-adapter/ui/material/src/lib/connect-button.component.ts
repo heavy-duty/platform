@@ -6,7 +6,7 @@ import {
 	ElementRef,
 	Input,
 } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
+import { MatLegacyButtonModule as MatButtonModule } from '@angular/material/legacy-button';
 import { Wallet } from '@heavy-duty/wallet-adapter';
 import {
 	HdWalletAdapterDirective,

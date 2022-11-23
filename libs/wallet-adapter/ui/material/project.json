@@ -9,7 +9,8 @@
 			"executor": "@nrwl/angular:package",
 			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/ui/material"],
 			"options": {
-				"project": "libs/wallet-adapter/ui/material/ng-package.json"
+				"project": "libs/wallet-adapter/ui/material/ng-package.json",
+				"tsConfig": "libs/wallet-adapter/ui/material/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/wallet-adapter/ui/material"],
 			"options": {
 				"jestConfig": "libs/wallet-adapter/ui/material/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/wallet-adapter/ui/material/tsconfig.spec.json"
 			}
 		},
 		"lint": {

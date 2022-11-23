@@ -7,7 +7,7 @@ import {
 	ViewChild,
 } from '@angular/core';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatLegacySnackBarModule as MatSnackBarModule } from '@angular/material/legacy-snack-bar';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { BlueprintSnackBarService } from '@heavy-duty/blueprint-snack-bar';
 import { ConnectionStore, WalletStore } from '@heavy-duty/wallet-adapter';

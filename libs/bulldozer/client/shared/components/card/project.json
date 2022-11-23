@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/components/card/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shared/components/card/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

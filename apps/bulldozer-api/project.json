@@ -48,7 +48,8 @@
 			"outputs": ["{workspaceRoot}/coverage/apps/bulldozer-api"],
 			"options": {
 				"jestConfig": "apps/bulldozer-api/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "apps/bulldozer-api/tsconfig.spec.json"
 			}
 		}
 	},

@@ -5,7 +5,7 @@ import {
 	Input,
 	Output,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { InstructionAccountConstraintModel } from '@heavy-duty/bulldozer-devkit';
 import { EditInstructionAccountConstraintComponent } from './edit-instruction-account-constraint.component';
 

@@ -12,7 +12,8 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/bulldozer/client/workspaces/pages/view-workspace-collaborators/tsconfig.json"
 			}
 		},
 		"lint": {

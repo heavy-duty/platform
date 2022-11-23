@@ -244,7 +244,8 @@
 			"outputs": ["{workspaceRoot}/coverage/apps/bulldozer-cli"],
 			"options": {
 				"jestConfig": "apps/bulldozer-cli/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "apps/bulldozer-cli/tsconfig.spec.json"
 			}
 		}
 	},

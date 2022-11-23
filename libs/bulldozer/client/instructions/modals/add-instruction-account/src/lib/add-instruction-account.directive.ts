@@ -5,7 +5,7 @@ import {
 	Input,
 	Output,
 } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { EditInstructionDocumentComponent } from '@bulldozer-client/edit-instruction-document';
 import { EditInstructionMintComponent } from '@bulldozer-client/edit-instruction-mint';
 import { EditInstructionTokenComponent } from '@bulldozer-client/edit-instruction-token';

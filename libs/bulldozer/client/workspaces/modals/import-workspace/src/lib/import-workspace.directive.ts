@@ -1,5 +1,5 @@
 import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { ImportWorkspaceComponent } from './import-workspace.component';
 
 @Directive({ selector: '[bdImportWorkspace]' })

@@ -12,6 +12,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/shared/pipes/obscure-address/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/shared/pipes/obscure-address/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

@@ -5,9 +5,9 @@ import {
 	inject,
 } from '@angular/core';
 import {
-	MatSnackBarModule,
-	MAT_SNACK_BAR_DATA,
-} from '@angular/material/snack-bar';
+	MatLegacySnackBarModule as MatSnackBarModule,
+	MAT_LEGACY_SNACK_BAR_DATA as MAT_SNACK_BAR_DATA,
+} from '@angular/material/legacy-snack-bar';
 import { BlueprintSnackBarPoleComponent } from './snack-bar-pole.component';
 
 export interface SnackBarData {

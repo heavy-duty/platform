@@ -9,7 +9,8 @@
 			"executor": "@nrwl/angular:package",
 			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/data-access"],
 			"options": {
-				"project": "libs/ngx-solana/data-access/ng-package.json"
+				"project": "libs/ngx-solana/data-access/ng-package.json",
+				"tsConfig": "libs/ngx-solana/data-access/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/ngx-solana/data-access"],
 			"options": {
 				"jestConfig": "libs/ngx-solana/data-access/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/ngx-solana/data-access/tsconfig.spec.json"
 			}
 		},
 		"lint": {

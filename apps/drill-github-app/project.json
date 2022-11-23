@@ -47,7 +47,8 @@
 			"outputs": ["{workspaceRoot}/coverage/apps/drill-github-app"],
 			"options": {
 				"jestConfig": "apps/drill-github-app/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "apps/drill-github-app/tsconfig.spec.json"
 			}
 		},
 		"deploy": {

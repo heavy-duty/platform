@@ -26,7 +26,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/ngx-websocket"],
 			"options": {
 				"jestConfig": "libs/ngx-websocket/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/ngx-websocket/tsconfig.spec.json"
 			}
 		}
 	},

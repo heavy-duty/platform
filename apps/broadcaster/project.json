@@ -47,7 +47,8 @@
 			"outputs": ["{workspaceRoot}/coverage/apps/broadcaster"],
 			"options": {
 				"jestConfig": "apps/broadcaster/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "apps/broadcaster/tsconfig.spec.json"
 			}
 		}
 	},

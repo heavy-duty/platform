@@ -8,7 +8,8 @@
 			"executor": "@nrwl/cypress:cypress",
 			"options": {
 				"cypressConfig": "apps/crane-web-client-e2e/cypress.json",
-				"devServerTarget": "crane-web-client:serve:development"
+				"devServerTarget": "crane-web-client:serve:development",
+				"tsConfig": "apps/crane-web-client-e2e/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

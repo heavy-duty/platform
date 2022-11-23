@@ -8,7 +8,7 @@ import {
 	Output,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MAT_LEGACY_FORM_FIELD_DEFAULT_OPTIONS as MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/legacy-form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { BlueprintScrewCardComponent } from '@heavy-duty/blueprint-card';
 import { WalletStore } from '@heavy-duty/wallet-adapter';

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
-import { MatTabsModule } from '@angular/material/tabs';
+import { MatLegacyTabsModule as MatTabsModule } from '@angular/material/legacy-tabs';
 import { ApplicationTabModule } from '@bulldozer-client/application-tab';
 import { StopPropagationModule } from '@bulldozer-client/stop-propagation';
 import { ViewCollectionTabModule } from '@bulldozer-client/view-collection';

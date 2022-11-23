@@ -26,7 +26,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/rxjs"],
 			"options": {
 				"jestConfig": "libs/rxjs/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/rxjs/tsconfig.spec.json"
 			}
 		}
 	},

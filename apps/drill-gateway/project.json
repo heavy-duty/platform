@@ -46,7 +46,8 @@
 			"outputs": ["{workspaceRoot}/coverage/apps/drill-gateway"],
 			"options": {
 				"jestConfig": "apps/drill-gateway/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "apps/drill-gateway/tsconfig.spec.json"
 			}
 		},
 		"deploy": {

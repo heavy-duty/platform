@@ -7,7 +7,8 @@
 			"executor": "@danmt/nx-anchor:build",
 			"options": {
 				"projectPath": "apps/bulldozer-programs",
-				"monitor": true
+				"monitor": true,
+				"tsConfig": "apps/bulldozer-programs/tsconfig.json"
 			}
 		},
 		"test": {

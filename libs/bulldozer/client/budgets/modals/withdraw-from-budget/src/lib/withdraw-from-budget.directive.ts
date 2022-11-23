@@ -1,5 +1,5 @@
 import { Directive, EventEmitter, HostListener, Output } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
+import { MatLegacyDialog as MatDialog } from '@angular/material/legacy-dialog';
 import { BN } from '@heavy-duty/anchor';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
 import { WithdrawFromBudgetComponent } from './withdraw-from-budget.component';

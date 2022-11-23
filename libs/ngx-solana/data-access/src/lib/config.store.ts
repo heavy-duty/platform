@@ -40,7 +40,7 @@ const defaultNetworkConfigs: NetworkConfig[] = [
   },
 ];
 
-const defaultSelectedNetwork = 'localhost';
+const defaultSelectedNetwork = 'devnet';
 
 interface ViewModel {
   configs: NetworkConfig[] | null;

@@ -9,7 +9,8 @@
 			"executor": "@nrwl/angular:package",
 			"outputs": ["{workspaceRoot}/dist/libs/broadcaster/ui/material"],
 			"options": {
-				"project": "libs/broadcaster/ui/material/ng-package.json"
+				"project": "libs/broadcaster/ui/material/ng-package.json",
+				"tsConfig": "libs/broadcaster/ui/material/tsconfig.lib.json"
 			},
 			"configurations": {
 				"production": {
@@ -26,7 +27,8 @@
 			"outputs": ["{workspaceRoot}/coverage/libs/broadcaster/ui/material"],
 			"options": {
 				"jestConfig": "libs/broadcaster/ui/material/jest.config.ts",
-				"passWithNoTests": true
+				"passWithNoTests": true,
+				"tsConfig": "libs/broadcaster/ui/material/tsconfig.spec.json"
 			}
 		},
 		"lint": {
