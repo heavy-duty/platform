@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/data-access"],
 			"options": {
 				"project": "libs/wallet-adapter/data-access/ng-package.json",
-				"tsConfig": "libs/wallet-adapter/data-access/tsconfig.lib.json"
+				"tsConfig": "libs/wallet-adapter/data-access/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/ui/cdk"],
 			"options": {
 				"project": "libs/wallet-adapter/ui/cdk/ng-package.json",
-				"tsConfig": "libs/wallet-adapter/ui/cdk/tsconfig.lib.json"
+				"tsConfig": "libs/wallet-adapter/ui/cdk/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

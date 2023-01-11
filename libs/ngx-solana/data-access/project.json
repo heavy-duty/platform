@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/data-access"],
 			"options": {
 				"project": "libs/ngx-solana/data-access/ng-package.json",
-				"tsConfig": "libs/ngx-solana/data-access/tsconfig.lib.json"
+				"tsConfig": "libs/ngx-solana/data-access/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

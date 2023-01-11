@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/ui/material"],
 			"options": {
 				"project": "libs/ngx-solana/ui/material/ng-package.json",
-				"tsConfig": "libs/ngx-solana/ui/material/tsconfig.lib.json"
+				"tsConfig": "libs/ngx-solana/ui/material/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

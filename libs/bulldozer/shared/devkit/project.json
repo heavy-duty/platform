@@ -10,7 +10,7 @@
 			"options": {
 				"outputPath": "dist/libs/bulldozer/shared/devkit",
 				"main": "libs/bulldozer/shared/devkit/src/index.ts",
-				"tsConfig": "libs/bulldozer/shared/devkit/tsconfig.lib.json",
+				"tsConfig": "libs/bulldozer/shared/devkit/tsconfig.json",
 				"assets": ["libs/bulldozer/shared/devkit/*.md"]
 			},
 			"dependsOn": [

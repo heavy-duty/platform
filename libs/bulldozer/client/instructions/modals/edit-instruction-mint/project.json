@@ -11,6 +11,7 @@
 			],
 			"options": {
 				"jestConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-mint/jest.config.ts",
+				"tsConfig": "libs/bulldozer/client/instructions/modals/edit-instruction-mint/tsconfig.json",
 				"passWithNoTests": true
 			}
 		},

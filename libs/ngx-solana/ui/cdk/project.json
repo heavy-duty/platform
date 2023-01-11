@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/ngx-solana/ui/cdk"],
 			"options": {
 				"project": "libs/ngx-solana/ui/cdk/ng-package.json",
-				"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.lib.json"
+				"tsConfig": "libs/ngx-solana/ui/cdk/tsconfig.json"
 			},
 			"configurations": {
 				"production": {

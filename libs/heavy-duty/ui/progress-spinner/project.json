@@ -13,7 +13,7 @@
 			"options": {
 				"jestConfig": "libs/heavy-duty/ui/progress-spinner/jest.config.ts",
 				"passWithNoTests": true,
-				"tsConfig": "libs/heavy-duty/ui/progress-spinner/tsconfig.spec.json"
+				"tsConfig": "libs/heavy-duty/ui/progress-spinner/tsconfig.json"
 			}
 		},
 		"lint": {

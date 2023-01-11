@@ -10,7 +10,7 @@
 			"outputs": ["{workspaceRoot}/dist/libs/wallet-adapter/ui/material"],
 			"options": {
 				"project": "libs/wallet-adapter/ui/material/ng-package.json",
-				"tsConfig": "libs/wallet-adapter/ui/material/tsconfig.lib.json"
+				"tsConfig": "libs/wallet-adapter/ui/material/tsconfig.json"
 			},
 			"configurations": {
 				"production": {
