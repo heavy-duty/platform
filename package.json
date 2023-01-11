@@ -35,11 +35,11 @@
     "@ngx-formly/material": "^6.0.2",
     "@nrwl/angular": "15.4.5",
     "@octokit/rest": "^18.12.0",
-    "@solana/buffer-layout": "4.0.0",
-    "@solana/spl-token": "0.2.0",
-    "@solana/wallet-adapter-base": "^0.9.18",
-    "@solana/wallet-adapter-wallets": "^0.19.5",
-    "@solana/web3.js": "^1.66.2",
+    "@solana/buffer-layout": "^4.0.1",
+    "@solana/spl-token": "^0.3.7",
+    "@solana/wallet-adapter-base": "^0.9.20",
+    "@solana/wallet-adapter-wallets": "^0.19.10",
+    "@solana/web3.js": "^1.73.0",
     "bs58": "^5.0.0",
     "case": "^1.6.3",
     "chalk": "^4.1.2",
@@ -138,4 +138,3 @@
     ]
   }
 }
-
